@@ -1,4 +1,9 @@
 *.pyc
 .idea/
 *.iml
-
+build/*
+# Ignore all libs except the Makefiles to fetch them with
+lib/java/*
+!lib/java/Makefile
+lib/python/*
+!lib/python/Makefile
