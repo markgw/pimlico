@@ -31,9 +31,22 @@ tabulate.py :
 	mv tabulate-0.7.3/tabulate.py .
 	rmdir tabulate-0.7.3
 
+progressbar :
+	$(FETCH_STDOUT) https://github.com/WoLpH/python-progressbar/archive/v2.6.2.tar.gz >progressbar.tar.gz
+	tar xzf progressbar.tar.gz python-progressbar-2.6.2/progressbar
+	mv python-progressbar-2.6.2/progressbar .
+	rm -rf progressbar.tar.gz python-progressbar-2.6.2
+
 ###############
 gensim :
 	$(FETCH) https://pypi.python.org/packages/source/g/gensim/gensim-0.12.3.tar.gz
 	tar -zxf gensim-0.12.3.tar.gz gensim-0.12.3/gensim
 	mv gensim-0.12.3/gensim . && rm gensim-0.12.3.tar.gz
 	rm -rf gensim-0.12.3
+
+bs4 :
+	$(FETCH) http://www.crummy.com/software/BeautifulSoup/bs4/download/4.3/beautifulsoup4-4.3.2.tar.gz
+	tar -xzf beautifulsoup4-4.3.2.tar.gz beautifulsoup4-4.3.2/bs4/
+	mv beautifulsoup4-4.3.2/bs4 .
+	rmdir beautifulsoup4-4.3.2
+	rm beautifulsoup4-4.3.2.tar.gz

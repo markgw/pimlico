@@ -1,4 +1,4 @@
-from pimlico.core.module import BaseModuleInfo
+from pimlico.core.modules.base import BaseModuleInfo
 
 
 class ModuleInfo(BaseModuleInfo):

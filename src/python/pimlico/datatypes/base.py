@@ -52,6 +52,7 @@ class PimlicoDatatypeWriter(object):
 class IterableDocumentCorpus(PimlicoDatatype):
     """
     Superclass of all datatypes which represent a dataset that can be iterated over document by document.
+    The actual type of the data depends on the subclass: it could be, e.g. coref output, etc.
 
     At creation time, length should be provided in the metadata, denoting how many documents are in the dataset.
 
