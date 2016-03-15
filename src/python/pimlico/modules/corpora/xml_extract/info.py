@@ -56,6 +56,15 @@ class XmlDocumentIterator(IterableDocumentCorpus):
                 doc_text = doc_node.text
                 yield doc_name, doc_text
 
+    def check_runtime_dependencies(self):
+        missing_dependencies = []
+        try:
+            import bs4
+        except ImportError:
+            missing_dependencies.append(("BeautifulSoup", "install in Python lib dir using make"))
+        missing_dependencies.extend(super(XmlDocumentIterator, self).check_runtime_dependencies())
+        return missing_dependencies
+
 
 class ModuleInfo(InputModuleInfo):
     module_type_name = "xml_extract"
@@ -74,9 +83,20 @@ class ModuleInfo(InputModuleInfo):
             "default": "id",
         })
     ]
+    # Module needs to be executed to count documents
+    module_executable = True
 
     def instantiate_output_datatype(self, output_name, output_datatype):
         # Datatype is always XmlDocumentIterator
         return output_datatype(self.options["path"],
                                self.options["document_node_type"],
                                self.options["document_name_attr"])
+
+    def check_runtime_dependencies(self):
+        missing_dependencies = []
+        try:
+            import bs4
+        except ImportError:
+            missing_dependencies.append(("BeautifulSoup", self.module_name, "install in Python lib dir using make"))
+        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
+        return missing_dependencies

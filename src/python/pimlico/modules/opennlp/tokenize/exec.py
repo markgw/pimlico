@@ -1,6 +1,6 @@
-from pimlico.core.modules.base import BaseModuleExecutor
+from pimlico.core.modules.map import DocumentMapModuleExecutor
 
 
-class ModuleExecutor(BaseModuleExecutor):
+class ModuleExecutor(DocumentMapModuleExecutor):
     # TODO
     pass

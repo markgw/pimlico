@@ -40,7 +40,7 @@ def process_module_options(opt_def, opt_dict, module_type_name):
     options = {}
     for name, value in opt_dict.items():
         if name not in opt_def:
-            raise ModuleOptionParseError("invalid option for %s module: '%s'" % name)
+            raise ModuleOptionParseError("invalid option for %s module: '%s'" % (module_type_name, name))
         # Postprocess the option value
         opt_config = opt_def[name]
         if "type" in opt_config:

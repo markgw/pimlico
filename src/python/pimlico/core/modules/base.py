@@ -34,6 +34,10 @@ class BaseModuleInfo(object):
     module_inputs = []
     # Specifies a list of (name, datatype class) pairs
     module_outputs = []
+    # Whether the module should be executed
+    # Typically True for almost all modules, except input modules (though some of them may also require execution) and
+    #  filters
+    module_executable = True
 
     def __init__(self, module_name, pipeline, inputs={}, options={}):
         self.inputs = inputs
@@ -162,6 +166,35 @@ class BaseModuleInfo(object):
         output_name, datatype = self.get_output_datatype(output_name=output_name)
         return self.instantiate_output_datatype(output_name, datatype)
 
+    def get_input_module_connection(self, input_name=None):
+        """
+        Get the ModuleInfo instance and output name for the output that connects up with a named input (or the
+        first input) on this module instance. Used by get_input() -- most of the time you probably want to
+        use that to get the instantiated datatype for an input.
+        """
+        if input_name is None:
+            if len(self.module_inputs) == 0:
+                raise PipelineStructureError("module '%s' doesn't have any inputs. Tried to get the first input" %
+                                             self.module_name)
+            input_name = self.module_inputs[0][0]
+        if input_name not in self.inputs:
+            raise PipelineStructureError("module '%s' doesn't have an input '%s'" % (self.module_name, input_name))
+        previous_module_name, output_name = self.inputs[input_name]
+        # Try getting hold of the module that we need the output of
+        previous_module = self.pipeline[previous_module_name]
+        return previous_module, output_name
+
+    def get_input(self, input_name=None):
+        """
+        Get a datatype instance corresponding to one of the inputs to the module.
+        Looks up the corresponding output from another module and uses that module's metadata to
+        get that output's instance.
+        If an input name is not given, the first input is returned.
+
+        """
+        previous_module, output_name = self.get_input_module_connection(input_name)
+        return previous_module.get_output(output_name)
+
     @classmethod
     def is_input(cls):
         from pimlico.core.modules.inputs import InputModuleInfo
@@ -181,16 +214,51 @@ class BaseModuleInfo(object):
             # Check the type of each input in turn
             input_type_requirement = module_inputs[input_name]
             # Load the dependent module
-            dep_module = self.pipeline.load_module_info(dep_module_name)
+            dep_module = self.pipeline[dep_module_name]
             # Try to load the named output (or the default, if no name was given)
             output_name, dep_module_output = dep_module.get_output_datatype(output_name=output)
             # Check that the provided output type is a subclass of (or equal to) the required input type
             if not issubclass(dep_module_output, input_type_requirement):
-                raise PipelineStructureError("module %s's %s-input is required to be of %s type (or a descendent), "
-                                             "but module %s's %s-output provides %s" % (
-                    self.module_name, input_name, input_type_requirement.__name__,
-                    dep_module_name, output_name, dep_module_output.__name__
-                ))
+                raise PipelineStructureError(
+                    "module %s's %s-input is required to be of %s type (or a descendent), but module %s's "
+                    "%s-output provides %s" % (
+                        self.module_name, input_name, input_type_requirement.__name__,
+                        dep_module_name, output_name, dep_module_output.__name__
+                    ))
+
+    def check_runtime_dependencies(self):
+        """
+        Check that all software required to execute this module is installed and locatable. This is
+        separate to metadata config checks, so that you don't need to satisfy the dependencies for
+        all modules in order to be able to run one of them. You might, for example, want to run different
+        modules on different machines. This is called when a module is about to be executed.
+        
+        Returns a list of triples: (dependency short name, module name, description/error message)
+        
+        Take care when overriding this that you don't put any import statements at the top of the Python 
+        module that will make loading the ModuleInfo itself dependent on runtime dependencies.  
+        You'll want to run import checks by putting import statements within this method.
+        
+        You should also call the super method for checking previous modules' dependencies.
+
+        """
+        missing_dependencies = []
+        # Instantiate any input datatypes this module will need
+        for input_name in self.inputs.keys():
+            input_datatype = self.get_input(input_name)
+            # Check the datatype's dependencies
+            missing_dependencies.extend([
+                (name, "%s input %s datatype" % (self.module_name, input_name), desc)
+                for (name, desc) in input_datatype.check_runtime_dependencies()
+            ])
+
+        # Check the dependencies of any previous modules that are not executable: their dependencies 
+        # also need to be satisfied when this one is run
+        for dep_module_name in self.dependencies:
+            dep_module = self.pipeline[dep_module_name]
+            if not dep_module.module_executable:
+                missing_dependencies.extend(dep_module.check_runtime_dependencies())
+        return missing_dependencies
 
 
 class BaseModuleExecutor(object):
@@ -233,14 +301,13 @@ def load_module_executor(path):
     :param path: path to Python package containing the module
     :return: class
     """
-    from pimlico.core.modules.inputs import InputModuleInfo
-
     # First import the metadata class
     module_info = load_module_info(path)
     # Check this isn't an input module: they shouldn't be executed
-    if module_info.is_input():
-        raise ModuleExecutorLoadError("%s module type is an input type, so can't be executed: execute the next module "
-                                      "in the pipeline" % module_info.module_type_name)
+    if module_info.module_executable:
+        raise ModuleExecutorLoadError("%s module type is not an executable module. It can't be (and doesn't need "
+                                      "to be) executed: execute the next module in the pipeline" %
+                                      module_info.module_type_name)
 
     executor_path = "%s.exec" % path
     try:

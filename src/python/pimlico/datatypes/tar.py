@@ -1,3 +1,4 @@
+import StringIO
 import os
 import random
 import shutil
@@ -70,8 +71,8 @@ class TarredCorpus(IterableDocumentCorpus):
 
 
 class TarredCorpusWriter(IterableDocumentCorpusWriter):
-    def __init__(self, *args, **kwargs):
-        super(TarredCorpusWriter, self).__init__(*args, **kwargs)
+    def __init__(self, base_dir):
+        super(TarredCorpusWriter, self).__init__(base_dir)
         self.current_archive_name = None
         self.current_archive_tar = None
         self.doc_count = 0
@@ -85,11 +86,21 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
             self.current_archive_name = archive_name
             self.current_archive_tar = tarfile.TarFile(os.path.join(self.data_dir, "%s.tar" % archive_name),
                                                        mode="w")
-            # TODO Finish writing
+
+        # Keep a count of how many we've added so we can write metadata
+        self.doc_count += 1
+
+        # Add a new document to archive
+        data_file = StringIO.StringIO(data)
+        info = tarfile.TarInfo(name=doc_name)
+        info.size = len(data_file.buf)
+        self.current_archive_tar.addfile(info, data_file)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.current_archive_tar is not None:
             self.current_archive_tar.close()
+        self.metadata["length"] = self.doc_count
+        super(TarredCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
 
 
 class AlignedTarredCorpora(object):
@@ -108,7 +119,7 @@ class AlignedTarredCorpora(object):
             raise CorpusAlignmentError("not all corpora have the same tarballs in them, cannot align: %s" %
                                        ", ".join(self.data_dirs))
 
-    def __iter__(self):
+    def __iter__(self, archives=False):
         # Prepare a temporary directory to extract everything to
         tmp_dir = mkdtemp()
         try:
@@ -137,11 +148,17 @@ class AlignedTarredCorpora(object):
                     for tarball, tarinfo in zip(corpus_tars, tarinfos):
                         documents.append(tarball.extractfile(tarinfo).read())
 
-                    # Just a single file
-                    yield filename, documents
+                    # Yield a single file from each corpus
+                    if archives:
+                        yield tarball_filename, filename, documents
+                    else:
+                        yield filename, documents
         finally:
             # Remove the temp dir
             shutil.rmtree(tmp_dir)
+
+    def archive_iter(self):
+        return self.__iter__(archives=True)
 
     def __len__(self):
         return len(self.corpora[0])

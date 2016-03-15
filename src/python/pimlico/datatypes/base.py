@@ -29,6 +29,16 @@ class PimlicoDatatype(object):
         with open(os.path.join(self.base_dir, "corpus_metadata"), "r") as f:
             self.metadata = pickle.load(f)
 
+    def check_runtime_dependencies(self):
+        """
+        Like the similarly named method on executors, this check dependencies for using the datatype.
+        It's not called when checking basic config, but only when the datatype is needed.
+
+        Returns a list of pairs: (dependency short name, description/error message)
+
+        """
+        return []
+
 
 class PimlicoDatatypeWriter(object):
     """
@@ -79,35 +89,6 @@ class IterableDocumentCorpusWriter(PimlicoDatatypeWriter):
         # Check the length has been set
         if "length" not in self.metadata:
             raise DatatypeWriteError("writer for IterableDocumentCorpus must set a 'length' value in the metadata")
-
-
-# def get_datatype(path):
-#     """
-#     Load a Pimlico datatype class by name or path. Certain standard datatypes have short names,
-#     to save having to specify a full Python path to their classes, making it easier to use them
-#     in config files. The given path is first checked to see if it is one of these names.
-#
-#     Otherwise it is assumed to be a Python path to a class. This allows you to define custom datatypes
-#     as necessary, for example for an individual pipeline. Make sure than the relevant package can be
-#     found by Python when the pipeline is loaded and the datatype will be imported.
-#
-#     :param path: short name or full Python path for datatype
-#     :return: datatype class
-#
-#     """
-#     from . import NAMED_DATATYPES
-#     if path in NAMED_DATATYPES:
-#         path = NAMED_DATATYPES[path]
-#     elif "." not in path:
-#         raise DatatypeLoadError("could not load datatype '%s': short name is not defined" % path)
-#
-#     # Try importing the datatype path
-#     module_path, __, class_name = path.rpartition(".")
-#     try:
-#         mod = import_module(module_path)
-#         return getattr(mod, class_name)
-#     except ImportError, e:
-#         raise DatatypeLoadError("could not load datatype '%s': import of class path failed (%s)" % (path, e))
 
 
 class DatatypeLoadError(Exception):

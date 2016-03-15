@@ -1,7 +1,8 @@
 """
 Reading of various types of config files, in particular a pipeline config.
 """
-from ConfigParser import SafeConfigParser
+import ConfigParser
+from ConfigParser import SafeConfigParser, RawConfigParser
 from cStringIO import StringIO
 import os
 
@@ -19,6 +20,12 @@ class PipelineConfig(object):
         if "name" not in self.pipeline_config:
             raise PipelineConfigParseError("pipeline name must be specified as 'name' attribute in pipeline section")
         self.name = self.pipeline_config["name"]
+        # Check that this pipeline is compatible with the Pimlico version being used
+        if "release" not in self.pipeline_config:
+            raise PipelineConfigParseError("Pimlico release version must be specified as 'release' attribute in "
+                                           "pipeline section")
+        check_release(self.pipeline_config["release"])
+
         self.long_term_store = self.local_config["long_term_store"]
         self.short_term_store = self.local_config["short_term_store"]
 
@@ -90,39 +97,51 @@ class PipelineConfig(object):
             if attr not in local_config_data:
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
 
-        # TODO Perform pre-processing of config file to replace variables, includes, etc
+        # TODO Perform pre-processing of config file to replace includes, etc
         with open(filename, "r") as f:
             # ConfigParser can read directly from a file, but we need to pre-process the text
             config_text = f.read()
         text_buffer = StringIO(config_text)
 
         # Parse the config file text
-        config_parser = SafeConfigParser()
-        config_parser.readfp(text_buffer)
+        config_parser = RawConfigParser()
+        try:
+            config_parser.readfp(text_buffer)
 
-        # Check for the special overall pipeline config section "pipeline"
-        if not config_parser.has_section("pipeline"):
-            raise PipelineConfigParseError("no 'pipeline' section found in config: must be supplied to give basic "
-                                           "pipeline configuration")
-        pipeline_config = dict(config_parser.items("pipeline"))
+            # Check for the special overall pipeline config section "pipeline"
+            if not config_parser.has_section("pipeline"):
+                raise PipelineConfigParseError("no 'pipeline' section found in config: must be supplied to give basic "
+                                               "pipeline configuration")
+            pipeline_config = dict(config_parser.items("pipeline"))
 
-        # All other sections of the config describe a module instance
-        # Don't do anything to the options just yet: they will be parsed and checked when the module info is created
-        raw_module_options = dict([
-            (section, dict(config_parser.items(section)))
-            for section in config_parser.sections() if section != "pipeline"
-        ])
+            # Also check for a "vars" section, which allows variables to be defined and substituted into other sections
+            if config_parser.has_section("vars"):
+                vars = dict(config_parser.items("vars"))
+            else:
+                vars = {}
+
+            # All other sections of the config describe a module instance
+            # Don't do anything to the options just yet: they will be parsed and checked when the module info is created
+            raw_module_options = dict([
+                (section,
+                 # Perform our own version of interpolation here,
+                 # just substituting values from the vars section into others
+                 dict([(key, var_substitute(val, vars)) for (key, val) in config_parser.items(section)]))
+                for section in config_parser.sections() if section not in ("pipeline", "vars")
+            ])
+        except ConfigParser.Error, e:
+            raise PipelineConfigParseError("could not parse config file. %s" % e)
         # Do no further checking or processing at this stage: just keep raw dictionaries for the time being
         return PipelineConfig(pipeline_config, local_config_data, raw_module_options, filename=filename)
 
-        # module_types = []
-        # for name, opts in raw_module_options:
-        #     if "type" not in opts:
-        #         raise PipelineConfigParseError("module '%s' has no 'type' attribute" % name)
-        #     module_types.append(opts.pop("type"))
-        #
-        # # Load a ModuleInfo class to get metadata for each module defined
-        # module_classes = [load_module_info(module_type) for module_type in module_types]
+
+def var_substitute(option_val, vars):
+    try:
+        return option_val % vars
+    except KeyError, e:
+        raise PipelineConfigParseError("error making substitutions in %s: var %s not specified" % (option_val, e))
+    except BaseException, e:
+        raise PipelineConfigParseError("error (%s) making substitutions in %s: %s" % (type(e).__name__, option_val, e))
 
 
 class PipelineConfigParseError(Exception):
@@ -156,3 +175,43 @@ def check_for_cycles(pipeline):
             # Found a cycle
             raise PipelineStructureError("the pipeline turned into a loop! Module %s was found among its own "
                                          "transitive dependencies" % module)
+
+
+def check_release(release_str):
+    from pimlico import __version__
+    current_major_release, __, current_minor_release = __version__.partition(".")
+    given_major_release, __, given_minor_release = release_str.partition(".")
+    current_major_release, given_major_release = int(current_major_release), int(given_major_release)
+
+    if current_major_release < given_major_release:
+        raise PipelineStructureError("config file was written for a later version of Pimlico than the one you're "
+                                     "running. You need to update Pimlico (or check out a later release), as there "
+                                     "could be backwards-incompatible changes between major versions. Running version "
+                                     "%s, required version %s" % (__version__, release_str))
+    elif current_major_release > given_major_release:
+        raise PipelineStructureError("config file was written for an earlier version of Pimlico than the one you're "
+                                     "running. You need to check out an earlier release, as the behaviour of Pimlico "
+                                     "could be very different to when the config file was written. Running version "
+                                     "%s, required version %s" % (__version__, release_str))
+    # Right major version
+    # Check we're not running an earlier minor version
+    remaining_current = current_minor_release
+    remaining_given = given_minor_release
+    while len(remaining_given):
+        if len(remaining_current) == 0:
+            # Given version has the same prefix, but specifies more subversions, so is a later release
+            raise PipelineStructureError("config file was written for a later (minor) version of Pimlico than the "
+                                         "one you're running. You need to use >= v%s to run this config "
+                                         "file (and not > %s). Currently using %s" %
+                                         (release_str, given_major_release, __version__))
+        current_part, __, remaining_current = remaining_current.partition(".")
+        given_part, __, remaining_given = remaining_given.partition(".")
+        if int(current_part) > int(given_part):
+            # Using a higher minor version than required: stop checking
+            break
+        elif int(current_part) < int(given_part):
+            raise PipelineStructureError("config file was written for a later (minor) version of Pimlico than the "
+                                         "one you're running. You need to use >= v%s to run this config "
+                                         "file (and not > %s). Currently using %s" %
+                                         (release_str, given_major_release, __version__))
+        # Otherwise using same version at this level: go down to next level and check

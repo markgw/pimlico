@@ -6,6 +6,9 @@ from pimlico.core.modules.base import ModuleInfoLoadError
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load a Pimlico pipeline from config files and check it over")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
+    parser.add_argument("--runtime", help="Check runtime dependencies for all modules. By default, these are not "
+                                          "check as you might be happy with them not all being satisfied at once",
+                        action="store_true")
     opts = parser.parse_args()
 
     # Read in the pipeline config from the given file
@@ -19,7 +22,7 @@ if __name__ == "__main__":
     # This makes sure none of the modules have trouble loading
     for name in pipeline.modules:
         try:
-            pipeline.load_module_info(name)
+            pipeline[name]
         except ModuleInfoLoadError, e:
             print "Error loading module %s: %s" % (name, e)
             sys.exit(1)
@@ -42,4 +45,18 @@ if __name__ == "__main__":
     except PipelineStructureError, e:
         print "Input typechecking failed: %s" % e
         sys.exit(1)
+
+    if opts.runtime:
+        # Also do all runtime checks
+        missing_dependencies = []
+        for module_name in pipeline.modules:
+            missing_dependencies.extend(pipeline[module_name].check_runtime_dependencies())
+
+        if len(missing_dependencies):
+            print "Runtime dependencies not satisfied:\n%s" % (
+                "\n".join("%s for %s (%s)" % (name, module, desc) for (name, module, desc) in missing_dependencies)
+            )
+        else:
+            print "Runtime dependencies all satisfied"
+
     print "All inputs pass type checks"
