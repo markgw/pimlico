@@ -10,7 +10,9 @@ REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
 
 
 class PipelineConfig(object):
-    def __init__(self, pipeline_config, local_config, raw_module_configs, filename=None):
+    def __init__(self, pipeline_config, local_config, raw_module_configs, module_order, filename=None):
+        # Stores the module names in the order they were specified in the config file
+        self.module_order = module_order
         self.local_config = local_config
         self.raw_module_configs = raw_module_configs
         self.pipeline_config = pipeline_config
@@ -30,10 +32,11 @@ class PipelineConfig(object):
         self.short_term_store = self.local_config["short_term_store"]
 
         self._module_info_cache = {}
+        self._module_schedule = None
 
     @property
     def modules(self):
-        return self.raw_module_configs.keys()
+        return self.module_order
 
     def __getitem__(self, item):
         return self.load_module_info(item)
@@ -49,6 +52,8 @@ class PipelineConfig(object):
         # Cache the module info object so we can easily do repreated lookups without worrying about wasting time
         if module_name not in self._module_info_cache:
             from pimlico.core.modules.base import load_module_info
+            from pimlico.core.modules.inputs import input_module_factory
+            from pimlico.datatypes.base import load_datatype, DatatypeLoadError
 
             if module_name not in self.raw_module_configs:
                 raise PipelineStructureError("undefined module '%s'" % module_name)
@@ -57,7 +62,14 @@ class PipelineConfig(object):
             # Load the module info class for the declared type of the module in the config
             if "type" not in module_config:
                 raise PipelineConfigParseError("module %s does not specify a type" % module_name)
-            module_info_class = load_module_info(module_config["type"])
+            try:
+                # First see if this is a datatype
+                datatype_class = load_datatype(module_config["type"])
+                # Get an input module info class for this datatype
+                module_info_class = input_module_factory(datatype_class)
+            except DatatypeLoadError:
+                # Not a datatype
+                module_info_class = load_module_info(module_config["type"])
 
             # Pass in all other options to the info constructor
             options_dict = dict(module_config)
@@ -65,8 +77,36 @@ class PipelineConfig(object):
 
             # Instantiate the module info
             self._module_info_cache[module_name] = \
-                module_info_class(module_name, self, inputs=inputs, options=options_dict)
+                module_info_class(module_name, self, inputs=inputs, options=options)
         return self._module_info_cache[module_name]
+
+    def get_module_schedule(self):
+        """
+        Work out the order in which modules should be executed. This is an ordering that respects
+        dependencies, so that modules are executed after their dependencies, but otherwise follows the
+        order in which modules were specified in the config.
+
+        :return: list of module names
+        """
+        module_schedule = list(self.module_order)
+        # Go through modules, looking for ordering constraints
+        for module_name in self.modules:
+            module = self[module_name]
+
+            if not module.module_executable:
+                # This module doesn't need to be executed: leave out
+                module_schedule.remove(module_name)
+            else:
+                for dep_module_name in module.dependencies:
+                    # Module dependency must be executed first
+                    if dep_module_name in module_schedule and \
+                                    module_schedule.index(module_name) < module_schedule.index(dep_module_name):
+                        # These are in the wrong order
+                        # Move dependency to just before dependent module
+                        module_schedule.remove(dep_module_name)
+                        module_schedule.insert(module_schedule.index(module_name), dep_module_name)
+        # Provided there are no cycling dependencies, this ordering now respects the dependencies
+        return module_schedule
 
     @staticmethod
     def load(filename, local_config=None):
@@ -120,6 +160,8 @@ class PipelineConfig(object):
             else:
                 vars = {}
 
+            module_order = [section for section in config_parser.sections() if section not in ("pipeline", "vars")]
+
             # All other sections of the config describe a module instance
             # Don't do anything to the options just yet: they will be parsed and checked when the module info is created
             raw_module_options = dict([
@@ -127,12 +169,12 @@ class PipelineConfig(object):
                  # Perform our own version of interpolation here,
                  # just substituting values from the vars section into others
                  dict([(key, var_substitute(val, vars)) for (key, val) in config_parser.items(section)]))
-                for section in config_parser.sections() if section not in ("pipeline", "vars")
+                for section in module_order
             ])
         except ConfigParser.Error, e:
             raise PipelineConfigParseError("could not parse config file. %s" % e)
         # Do no further checking or processing at this stage: just keep raw dictionaries for the time being
-        return PipelineConfig(pipeline_config, local_config_data, raw_module_options, filename=filename)
+        return PipelineConfig(pipeline_config, local_config_data, raw_module_options, module_order, filename=filename)
 
 
 def var_substitute(option_val, vars):

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="pimlico" default="all">
+<project name="pimlico" default="compile.module.pimlico_core">
   <!-- TODO Make different build modules for each of the tool wrappers, so we can compile them one by one -->
   <property file="pimlico.properties"/>
   <!-- Uncomment the following property if no tests compilation is needed -->
@@ -81,21 +81,60 @@
   <property name="project.jdk.home" value="${jdk.home.1.7}"/>
   <property name="project.jdk.bin" value="${jdk.bin.1.7}"/>
   <property name="project.jdk.classpath" value="jdk.classpath.1.7"/>
-  
-  
+
+  <dirname property="module.pimlico.basedir" file="${ant.file.pimlico}"/>
+  <property name="pimlico.output.dir" value="${module.pimlico.basedir}/build"/>
+
+  <property name="module.jdk.home.pimlico" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.pimlico" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.pimlico" value="${project.jdk.classpath}"/>
+  <property name="compiler.args.pimlico" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
+
+
+  <!-- Basic property configuration that most modules will share, but can override/modify -->
+  <path id="pimlico.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+
+  <path id="pimlico.module.production.classpath">
+    <path refid="${module.jdk.classpath.pimlico}"/>
+  </path>
+
+  <path id="pimlico.runtime.production.module.classpath">
+    <pathelement location="${pimlico.output.dir}"/>
+  </path>
+
+  <path id="pimlico.module.classpath">
+    <path refid="${module.jdk.classpath.pimlico}"/>
+    <pathelement location="${pimlico.output.dir}"/>
+  </path>
+
+  <path id="pimlico.runtime.module.classpath">
+    <pathelement location="${pimlico.output.dir}"/>
+  </path>
+
+  <path id="pimlico.module.sourcepath">
+    <dirset dir="${module.pimlico.basedir}">
+      <include name="src/java"/>
+    </dirset>
+  </path>
+
+
   <!-- Global Libraries -->
 
   <!-- Modules -->
-  
-  <import file="${basedir}/module_pimlico.xml"/>
-  
+  <!-- Here we include the build targets for different components -->
+  <import file="${basedir}/ant/module_pimlico.xml"/>
+  <import file="${basedir}/ant/module_opennlp.xml"/>
+
+
   <target name="init" description="Build initialization">
     <!-- Perform any build initialization in this target -->
   </target>
   
-  <target name="clean" depends="clean.module.pimlico" description="cleanup all"/>
+  <target name="clean" depends="clean.module.pimlico_core" description="cleanup all"/>
   
-  <target name="build.modules" depends="init, clean, compile.module.pimlico" description="build all modules"/>
+  <target name="build.modules" depends="init, clean, compile.module.pimlico_core" description="build all modules"/>
   
   <target name="all" depends="build.modules" description="build all"/>
 </project>

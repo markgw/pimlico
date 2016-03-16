@@ -10,17 +10,11 @@ else
 endif
 
 
-all :
-	$(MAKE) opennlp
-	$(MAKE) stanford-parser
-	$(MAKE) guava.jar
-	$(MAKE) stanford-tagger
-	$(MAKE) argparse4j.jar
-
 ########## OPEN NLP ##############
 opennlp : opennlp-maxent-3.0.3.jar opennlp-tools-1.5.3.jar opennlp-uima-1.5.3.jar jwnl-1.3.3.jar
 	# Clear up downloaded archive
 	rm -f apache-opennlp-1.5.3-bin.tar.gz
+	$(MAKE) argparse4j.jar
 
 opennlp-maxent-3.0.3.jar : 
 	$(MAKE) apache-opennlp-1.5.3-bin.tar.gz

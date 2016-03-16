@@ -38,6 +38,8 @@ class BaseModuleInfo(object):
     # Typically True for almost all modules, except input modules (though some of them may also require execution) and
     #  filters
     module_executable = True
+    # If specified, this ModuleExecutor class will be used instead of looking one up in the exec Python module
+    module_executor_override = None
 
     def __init__(self, module_name, pipeline, inputs={}, options={}):
         self.inputs = inputs
@@ -45,8 +47,52 @@ class BaseModuleInfo(object):
         self.module_name = module_name
         self.pipeline = pipeline
 
+        self._metadata = None
+
     def __repr__(self):
         return "%s(%s)" % (self.module_type_name, self.module_name)
+
+    @property
+    def metadata_filename(self):
+        return os.path.join(self.get_output_dir(), "metadata")
+
+    def get_metadata(self):
+        if self._metadata is None:
+            # Try loading metadata
+            self._metadata = {}
+            if os.path.exists(self.metadata_filename):
+                with open(self.metadata_filename, "r") as f:
+                    for line in f:
+                        if line:
+                            attr, __, val = line.partition(": ")
+                            self._metadata[attr.strip().lower()] = val.strip()
+        return self._metadata
+
+    def set_metadata_value(self, attr, val):
+        # Make sure we've got an output directory to output the metadata to
+        if not os.path.exists(self.get_output_dir()):
+            os.makedirs(self.get_output_dir())
+        # Load the existing metadata
+        metadata = self.get_metadata()
+        # Add our new value to it
+        metadata[attr.strip().lower()] = val.strip()
+        # Write the whole thing out to the file
+        with open(self.metadata_filename, "w") as f:
+            for attr, val in metadata.items():
+                f.write("%s: %s\n" % (attr, val))
+
+    def __get_status(self):
+        # Check the metadata for current module status
+        return self.get_metadata().get("status", "UNEXECUTED")
+
+    def __set_status(self, status):
+        self.set_metadata_value("status", status)
+
+    status = property(__get_status, __set_status)
+
+    @property
+    def input_names(self):
+        return [name for name, __ in self.module_inputs]
 
     @classmethod
     def process_module_options(cls, opt_dict):
@@ -195,6 +241,15 @@ class BaseModuleInfo(object):
         previous_module, output_name = self.get_input_module_connection(input_name)
         return previous_module.get_output(output_name)
 
+    def input_ready(self, input_name=None):
+        previous_module, output_name = self.get_input_module_connection(input_name)
+        if not previous_module.module_executable:
+            # If the previous module isn't executable, this input is ready whenever all of its inputs are ready
+            return all(previous_module.input_ready(previous_input) for previous_input in previous_module.input_names)
+        else:
+            # Otherwise, we just check whether the datatype is ready to go
+            return previous_module.get_output(output_name).data_ready()
+
     @classmethod
     def is_input(cls):
         from pimlico.core.modules.inputs import InputModuleInfo
@@ -267,6 +322,9 @@ class BaseModuleExecutor(object):
     do the work of executing the module on given inputs, writing to given output locations.
 
     """
+    def __init__(self, log):
+        self.log = log
+
     def execute(self, module_instance_info):
         raise NotImplementedError
 
@@ -293,7 +351,7 @@ class DependencyError(Exception):
     pass
 
 
-def load_module_executor(path):
+def load_module_executor(path_or_info):
     """
     Utility for loading the executor class for a module from its full path.
     Just a wrapper around an import, with some error checking.
@@ -301,22 +359,40 @@ def load_module_executor(path):
     :param path: path to Python package containing the module
     :return: class
     """
-    # First import the metadata class
-    module_info = load_module_info(path)
+    if isinstance(path_or_info, basestring):
+        # First import the metadata class
+        module_info = load_module_info(path_or_info)
+    else:
+        module_info = path_or_info
+
     # Check this isn't an input module: they shouldn't be executed
-    if module_info.module_executable:
+    if not module_info.module_executable:
         raise ModuleExecutorLoadError("%s module type is not an executable module. It can't be (and doesn't need "
                                       "to be) executed: execute the next module in the pipeline" %
                                       module_info.module_type_name)
+    # Check whether the module provides a special executor before trying to load one in the standard way
+    if module_info.module_executor_override is not None:
+        return module_info.module_executor_override
+    else:
+        if isinstance(path_or_info, basestring):
+            executor_path = "%s.exec" % path_or_info
 
-    executor_path = "%s.exec" % path
-    try:
-        mod = import_module(executor_path)
-    except ImportError:
-        raise ModuleInfoLoadError("module %s could not be loaded, could not import path %s" % (path, executor_path))
-    if not hasattr(mod, "ModuleExecutor"):
-        raise ModuleExecutorLoadError("could not load class %s.ModuleExecutor" % executor_path)
-    return mod.ModuleExecutor
+            try:
+                mod = import_module(executor_path)
+            except ImportError:
+                raise ModuleInfoLoadError("module %s could not be loaded, could not import path %s" %
+                                          (path_or_info, executor_path))
+        else:
+            # We were given a module info instance: work out where it lives and get the executor relatively
+            try:
+                mod = import_module("..exec", module_info.__module__)
+            except ImportError:
+                raise ModuleInfoLoadError("module %s could not be loaded, could not import ..exec from ModuleInfo's "
+                                          "module, %s" %
+                                          (path_or_info, module_info.__module__))
+        if not hasattr(mod, "ModuleExecutor"):
+            raise ModuleExecutorLoadError("could not load class %s.ModuleExecutor" % mod.__name__)
+        return mod.ModuleExecutor
 
 
 def load_module_info(path):

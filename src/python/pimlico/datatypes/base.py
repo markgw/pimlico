@@ -20,14 +20,35 @@ class PimlicoDatatype(object):
     The abstract superclass of all datatypes. Provides basic functionality for identifying where
     data should be stored and such.
 
-    """
-    def __init__(self, base_dir):
-        self.base_dir = base_dir
-        self.data_dir = os.path.join(self.base_dir, "data")
+    Datatypes are used to specify the routines for reading the output from modules. They're also
+    used to specify how to read pipeline inputs. Most datatypes that have data simply read it in
+    when required. Some (in particular those use as inputs) need a preparation phase to be run,
+    where the raw data itself isn't sufficient to implement the reading interfaces required. In this
+    case, they should override prepare_data().
 
-        # Load dictionary of metadata
-        with open(os.path.join(self.base_dir, "corpus_metadata"), "r") as f:
-            self.metadata = pickle.load(f)
+    Datatypes may require/allow options to be set when they're used to read pipeline inputs. These
+    are specified, in the same way as module options, by input_module_options on the datatype class.
+
+    """
+    datatype_name = "base_datatype"
+    requires_data_preparation = False
+    input_module_options = []
+
+    def __init__(self, base_dir, **kwargs):
+        self.base_dir = base_dir
+        self.data_dir = os.path.join(self.base_dir, "data") if base_dir is not None else None
+        self._metadata = None
+
+        for attr, val in kwargs.items():
+            setattr(self, attr, val)
+
+    @property
+    def metadata(self):
+        if self._metadata is None:
+            # Load dictionary of metadata
+            with open(os.path.join(self.base_dir, "corpus_metadata"), "r") as f:
+                self._metadata = pickle.load(f)
+        return self._metadata
 
     def check_runtime_dependencies(self):
         """
@@ -38,6 +59,24 @@ class PimlicoDatatype(object):
 
         """
         return []
+
+    def prepare_data(self, log):
+        return
+
+    @classmethod
+    def create_from_options(cls, base_dir, options={}):
+        return cls(base_dir, **options)
+
+    def data_ready(self):
+        """
+        Check whether the data corresponding to this datatype instance exists and is ready to be read.
+
+        Default implementation just checks whether the data dir exists. Subclasses might want to add their own
+        checks, or even override this, if the data dir isn't needed.
+
+        """
+        # If data_dir is None, the datatype doesn't need it
+        return self.data_dir is None or os.path.exists(self.data_dir)
 
 
 class PimlicoDatatypeWriter(object):
@@ -53,6 +92,7 @@ class PimlicoDatatypeWriter(object):
     def __enter__(self):
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         with open(os.path.join(self.base_dir, "corpus_metadata"), "w") as f:
@@ -67,6 +107,8 @@ class IterableDocumentCorpus(PimlicoDatatype):
     At creation time, length should be provided in the metadata, denoting how many documents are in the dataset.
 
     """
+    datatype_name = "iterable_corpus"
+
     def __init__(self, *args, **kwargs):
         super(IterableDocumentCorpus, self).__init__(*args, **kwargs)
 
@@ -97,3 +139,24 @@ class DatatypeLoadError(Exception):
 
 class DatatypeWriteError(Exception):
     pass
+
+
+def load_datatype(path):
+    """
+    Try loading a datatype class for a given path. Raises a DatatypeLoadError if it's not a valid
+    datatype path.
+
+    """
+    mod_path, __, cls_name = path.rpartition(".")
+    try:
+        mod = import_module(mod_path)
+    except ImportError:
+        raise DatatypeLoadError("could not load module %s" % mod_path)
+
+    if not hasattr(mod, cls_name):
+        raise DatatypeLoadError("could not load datatype class %s in module %s" % (cls_name, mod_path))
+    cls = getattr(mod, cls_name)
+
+    if not issubclass(cls, PimlicoDatatype):
+        raise DatatypeLoadError("%s is not a Pimlico datatype" % path)
+    return cls

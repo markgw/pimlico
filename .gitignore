@@ -7,3 +7,6 @@ lib/java/*
 !lib/java/Makefile
 lib/python/*
 !lib/python/Makefile
+models/*
+!models/Makefile
+

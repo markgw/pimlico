@@ -27,13 +27,13 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def process_document(self, filename, *docs):
         raise NotImplementedError
 
-    def preprocess(self):
+    def preprocess(self, info):
         """
         Allows subclasses to define a set-up procedure to be called before corpus processing begins.
         """
         pass
 
-    def postprocess(self):
+    def postprocess(self, info):
         """
         Allows subclasses to define a finishing procedure to be called after corpus processing if finished.
         """
@@ -45,15 +45,16 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         input_iterator = AlignedTarredCorpora(module_instance_info.inputs)
 
         # Call the set-up routine, if one's been defined
-        self.preprocess()
+        self.preprocess(module_instance_info)
 
-        # Prepare a corpus writer for the output
-        with TarredCorpusWriter(module_instance_info.get_output_dir()) as writer:
-            for archive, filename, docs in input_iterator.archive_iter():
-                # Get the subclass to process the doc
-                result = self.process_document(filename, *docs)
-                # Write the result to the output corpus
-                writer.add_document(archive, filename, result)
-
-        # Call the finishing-off routine, if one's been defined
-        self.postprocess()
+        try:
+            # Prepare a corpus writer for the output
+            with TarredCorpusWriter(module_instance_info.get_output_dir()) as writer:
+                for archive, filename, docs in input_iterator.archive_iter():
+                    # Get the subclass to process the doc
+                    result = self.process_document(filename, *docs)
+                    # Write the result to the output corpus
+                    writer.add_document(archive, filename, result)
+        finally:
+            # Call the finishing-off routine, if one's been defined
+            self.postprocess(module_instance_info)

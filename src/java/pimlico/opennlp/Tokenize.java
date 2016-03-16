@@ -11,9 +11,12 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.PlainTextByLineStream;
+import pimlico.core.StreamCommunicationPacketReader;
+import pimlico.core.StreamCommunicationPacketWriter;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tokenization and sentence detection on a stream.
@@ -22,8 +25,7 @@ public class Tokenize {
     public static void main(String[] args) {
         ArgumentParser argParser = ArgumentParsers.newArgumentParser("Tokenize");
         argParser.description("Run the OpenNLP tokenizer and sentence detector, potentially taking many inputs from " +
-                "stdin and outputting to different files. By default, outputs to stdout. On receiving an input paragraph " +
-                "'%% OUTPUT: <filename>', starts sending output to <filename>");
+                "stdin and outputting to different files. Outputs to stdout");
         argParser.addArgument("sent-model").help("Sentence detection model");
         argParser.addArgument("tok-model").help("Tokenization model");
         argParser.addArgument("--progress").help("Output this string (without a linebreak, unless given) to stderr " +
@@ -49,46 +51,41 @@ public class Tokenize {
 
         // Get input from stdin
         ObjectStream<String> paraStream =
-                new TrimmedParagraphStream(new PlainTextByLineStream(new InputStreamReader(System.in)));
+                new TrimmedParagraphStream(new StreamCommunicationPacketReader(new InputStreamReader(System.in)));
 
-        // Start by outputting to stdout
-        BufferedWriter outFile = new BufferedWriter(new OutputStreamWriter(System.out));
+        // Outputting to stdout
+        StreamCommunicationPacketWriter outStream = new StreamCommunicationPacketWriter(
+                new BufferedWriter(new OutputStreamWriter(System.out))
+        );
         StringBuffer sb;
         Joiner whitespaceJoiner = Joiner.on(' ');
+        Joiner lineJoiner = Joiner.on('\n');
         try {
             try {
                 String par;
                 while ((par = paraStream.read()) != null) {
-                    // Check for an '%% OUTPUT:' line, to change the output file
-                    if (par.startsWith("%% OUTPUT:")) {
-                        String newOutFilename = par.substring(10).trim();
-                        // Close the old output file
-                        outFile.close();
-                        // Open a new one in its place
-                        outFile = new BufferedWriter(new FileWriter(newOutFilename));
-
-                        // Output the progress string
-                        if (progress != null)
-                            System.err.print(progress);
-                    } else if (par.length() == 0) {
+                    if (par.length() == 0) {
                         // Empty input gives empty output
-                        outFile.write("\n");
+                        outStream.write("");
                     } else {
                         // Process the paragraph
                         // Sentence detection
                         String[] sents = sentenceDetector.sentDetect(par);
 
                         // Tokenization
+                        List<String> tokenizedSents = new ArrayList<String>();
                         for (String sentence : sents) {
                             String[] tokens = tokenizer.tokenize(sentence);
                             // Output the space-separated tokens
-                            outFile.write(whitespaceJoiner.join(tokens) + "\n");
+                            tokenizedSents.add(whitespaceJoiner.join(tokens));
                         }
+                        // Sent the final text to the stream
+                        outStream.write(lineJoiner.join(tokenizedSents));
                     }
                 }
             } finally {
                 // Close the last opened file at the end
-                outFile.close();
+                outStream.close();
             }
         } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());

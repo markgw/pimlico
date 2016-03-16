@@ -9,6 +9,8 @@ from pimlico.datatypes.base import IterableDocumentCorpusWriter
 
 
 class TarredCorpus(IterableDocumentCorpus):
+    datatype_name = "tar"
+
     def __init__(self, base_dir):
         super(TarredCorpus, self).__init__(base_dir)
         self.tar_filenames = [f for f in
@@ -68,6 +70,11 @@ class TarredCorpus(IterableDocumentCorpus):
             filenames = tarball.getnames()
             for filename in filenames:
                 yield tar_name, filename
+
+    def data_ready(self):
+        # Run the superclass check -- that the data dir exists
+        # Also check that we've got at least one tarball in the data dir
+        return super(TarredCorpus, self).data_ready() and len(self.tar_filenames) > 0
 
 
 class TarredCorpusWriter(IterableDocumentCorpusWriter):

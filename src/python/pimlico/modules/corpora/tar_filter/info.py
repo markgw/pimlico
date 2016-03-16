@@ -14,18 +14,9 @@ class TarredCorpusFilter(TarredCorpus):
     def __init__(self, input_datatype, archive_size, archive_basename="archive"):
         IterableDocumentCorpus.__init__(self, None)
 
-        # Work out now what the archive names are going to look like and how many there will be
+        self.archive_basename = archive_basename
         self.input_datatype = input_datatype
         self.archive_size = archive_size
-        total_archives = len(self) / archive_size
-
-        # Work out how many digits to pad the archive numbers with in the filenames
-        digits = len("%d" % (total_archives-1))
-        # Prepare a formatter for archive numbers
-        archive_name_format = "%s-%%%sd" % (archive_basename, "0" * digits)
-        # TODO Check these do the right thing
-        self.tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
-        self.tar_filenames = ["%s.tar" % tarball for tarball in self.tarballs]
 
     def __len__(self):
         return len(self.input_datatype)
@@ -38,6 +29,17 @@ class TarredCorpusFilter(TarredCorpus):
             yield doc_name, doc
 
     def archive_iter(self, subsample=None, start=0):
+        # Work out now what the archive names are going to look like and how many there will be
+        total_archives = len(self) / self.archive_size
+
+        # Work out how many digits to pad the archive numbers with in the filenames
+        digits = len("%d" % (total_archives-1))
+        # Prepare a formatter for archive numbers
+        archive_name_format = "%s-%%%sd" % (self.archive_basename, "0" * digits)
+
+        # TODO Check this does the right thing
+        tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
+
         current_archive = 0
         current_archive_count = 0
 
@@ -55,13 +57,18 @@ class TarredCorpusFilter(TarredCorpus):
                 current_archive += 1
                 current_archive_count = 0
 
-            yield self.tarballs[current_archive], doc_name, doc
+            yield tarballs[current_archive], doc_name, doc
 
     def list_archive_iter(self):
         # Since we're not extracting the data here, we can't make things any faster in the case where the document
         #  itself isn't needed. Implement this for compatibility with TarredCorpus
         for tar_name, doc_name, doc in self.archive_iter():
             yield tar_name, doc_name
+
+    def data_ready(self):
+        # Always assume the data's ready
+        # Ideally this shouldn't get called anyway to work out whether a module's input is ready
+        return True
 
 
 class ModuleInfo(BaseModuleInfo):
@@ -79,6 +86,7 @@ class ModuleInfo(BaseModuleInfo):
             "default": "archive",
         }),
     ]
+    module_executable = False
 
     def instantiate_output_datatype(self, output_name, output_datatype):
         if output_name == "documents":
