@@ -5,6 +5,7 @@ tar but as a filter, grouping files on the fly and passing them through with an 
 """
 import random
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.core.modules.execute import ModuleNotReadyError
 from pimlico.datatypes.base import IterableDocumentCorpus
 from pimlico.datatypes.tar import TarredCorpus
 
@@ -18,6 +19,8 @@ class TarredCorpusFilter(TarredCorpus):
         self.input_datatype = input_datatype
         self.archive_size = archive_size
 
+        self._tarballs = None
+
     def __len__(self):
         return len(self.input_datatype)
 
@@ -28,17 +31,27 @@ class TarredCorpusFilter(TarredCorpus):
         for __, doc_name, doc in self.archive_iter():
             yield doc_name, doc
 
+    @property
+    def tarballs(self):
+        if not self.data_ready():
+            raise ModuleNotReadyError("cannot work out the tarball names for a tarred corpus filter until its input "
+                                      "data is ready")
+
+        if self._tarballs is None:
+            # Work out now what the archive names are going to look like and how many there will be
+            total_archives = len(self) / self.archive_size
+
+            # Work out how many digits to pad the archive numbers with in the filenames
+            digits = len("%d" % (total_archives-1))
+            # Prepare a formatter for archive numbers
+            archive_name_format = "%s-%%%sd" % (self.archive_basename, "0" * digits)
+
+            # TODO Check this does the right thing
+            self._tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
+        return self._tarballs
+
     def archive_iter(self, subsample=None, start=0):
-        # Work out now what the archive names are going to look like and how many there will be
-        total_archives = len(self) / self.archive_size
-
-        # Work out how many digits to pad the archive numbers with in the filenames
-        digits = len("%d" % (total_archives-1))
-        # Prepare a formatter for archive numbers
-        archive_name_format = "%s-%%%sd" % (self.archive_basename, "0" * digits)
-
-        # TODO Check this does the right thing
-        tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
+        tarballs = self.tarballs
 
         current_archive = 0
         current_archive_count = 0
@@ -66,9 +79,7 @@ class TarredCorpusFilter(TarredCorpus):
             yield tar_name, doc_name
 
     def data_ready(self):
-        # Always assume the data's ready
-        # Ideally this shouldn't get called anyway to work out whether a module's input is ready
-        return True
+        return self.input_datatype.data_ready()
 
 
 class ModuleInfo(BaseModuleInfo):

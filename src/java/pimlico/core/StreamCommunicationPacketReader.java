@@ -23,6 +23,7 @@ public class StreamCommunicationPacketReader implements ObjectStream<String> {
         char[] cbuf = new char[16];
         int read = 0;
         // Keep reading until we've got 16 chars
+        // TODO Debug this
         while (read < 16)
             read += in.read(cbuf, read, 16-read);
         int dataLength = Integer.parseInt(new String(Arrays.copyOfRange(cbuf, 7, 13)));

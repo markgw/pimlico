@@ -15,6 +15,7 @@ import pimlico.core.StreamCommunicationPacketReader;
 import pimlico.core.StreamCommunicationPacketWriter;
 
 import java.io.*;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,10 +27,8 @@ public class Tokenize {
         ArgumentParser argParser = ArgumentParsers.newArgumentParser("Tokenize");
         argParser.description("Run the OpenNLP tokenizer and sentence detector, potentially taking many inputs from " +
                 "stdin and outputting to different files. Outputs to stdout");
-        argParser.addArgument("sent-model").help("Sentence detection model");
-        argParser.addArgument("tok-model").help("Tokenization model");
-        argParser.addArgument("--progress").help("Output this string (without a linebreak, unless given) to stderr " +
-                "between each processed file");
+        argParser.addArgument("sent_model").help("Sentence detection model").required(true);
+        argParser.addArgument("tok_model").help("Tokenization model").required(true);
 
         Namespace opts = null;
         try {
@@ -39,9 +38,8 @@ public class Tokenize {
             System.exit(1);
         }
 
-        String sentModelFilename = opts.getString("sent-model");
-        String tokModelFilename = opts.getString("tok-model");
-        String progress = opts.getString("progress");
+        String sentModelFilename = opts.getString("sent_model");
+        String tokModelFilename = opts.getString("tok_model");
 
         // Load models
         SentenceModel sentenceModel = new SentenceModelLoader().load(new File(sentModelFilename));

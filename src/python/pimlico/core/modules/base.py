@@ -54,7 +54,7 @@ class BaseModuleInfo(object):
 
     @property
     def metadata_filename(self):
-        return os.path.join(self.get_output_dir(), "metadata")
+        return os.path.join(self.get_module_output_dir(), "metadata")
 
     def get_metadata(self):
         if self._metadata is None:
@@ -70,8 +70,8 @@ class BaseModuleInfo(object):
 
     def set_metadata_value(self, attr, val):
         # Make sure we've got an output directory to output the metadata to
-        if not os.path.exists(self.get_output_dir()):
-            os.makedirs(self.get_output_dir())
+        if not os.path.exists(self.get_module_output_dir()):
+            os.makedirs(self.get_module_output_dir())
         # Load the existing metadata
         metadata = self.get_metadata()
         # Add our new value to it
@@ -93,6 +93,10 @@ class BaseModuleInfo(object):
     @property
     def input_names(self):
         return [name for name, __ in self.module_inputs]
+
+    @property
+    def output_names(self):
+        return [name for name, __ in self.module_outputs]
 
     @classmethod
     def process_module_options(cls, opt_dict):
@@ -177,8 +181,11 @@ class BaseModuleInfo(object):
         options = cls.process_module_options(options)
         return inputs, options
 
-    def get_output_dir(self):
+    def get_module_output_dir(self):
         return os.path.join(self.pipeline.short_term_store, self.module_name)
+
+    def get_output_dir(self, output_name):
+        return os.path.join(self.get_module_output_dir(), output_name)
 
     def get_output_datatype(self, output_name=None):
         if len(self.module_outputs) == 0:
@@ -202,7 +209,7 @@ class BaseModuleInfo(object):
         particular outputs' datatypes.
 
         """
-        return output_datatype(os.path.join(self.get_output_dir(), output_name))
+        return output_datatype(self.get_output_dir(output_name))
 
     def get_output(self, output_name=None):
         """

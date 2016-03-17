@@ -26,6 +26,10 @@ class XmlDocumentIterator(IterableDocumentCorpus):
         ("document_name_attr", {
             "help": "Attribute of document nodes to get document name from (default: 'id')",
             "default": "id",
+        }),
+        ("truncate", {
+            "help": "Stop reading once we've got this number of documents",
+            "type": int,
         })
     ]
 
@@ -46,25 +50,33 @@ class XmlDocumentIterator(IterableDocumentCorpus):
                 for filename in filenames
             ]
 
-        for dirname, filename in files:
-            if filename.endswith(".gz"):
-                # Permit gzip files by opening them using the gzip library
-                with gzip.open(os.path.join(dirname, filename), "r") as f:
-                    data = f.read()
-            else:
-                with open(os.path.join(dirname, filename), "r") as f:
-                    data = f.read()
+        n_docs = 0
+        try:
+            for dirname, filename in files:
+                if filename.endswith(".gz"):
+                    # Permit gzip files by opening them using the gzip library
+                    with gzip.open(os.path.join(dirname, filename), "r") as f:
+                        data = f.read()
+                else:
+                    with open(os.path.join(dirname, filename), "r") as f:
+                        data = f.read()
 
-            # Read the XML using Beautiful Soup, so we can handle messy XML in a tolerant fashion
-            soup = BeautifulSoup(data)
+                # Read the XML using Beautiful Soup, so we can handle messy XML in a tolerant fashion
+                soup = BeautifulSoup(data)
 
-            # Look for the type of XML node that documents are stored in
-            for doc_node in soup.find_all(self.document_node_type):
-                # The node should supply us with the document name, using the attribute name specified
-                doc_name = doc_node.get(self.document_name_attr)
-                # Pull the text out of the document node
-                doc_text = doc_node.text
-                yield doc_name, doc_text
+                # Look for the type of XML node that documents are stored in
+                for doc_node in soup.find_all(self.document_node_type):
+                    # The node should supply us with the document name, using the attribute name specified
+                    doc_name = doc_node.get(self.document_name_attr)
+                    # Pull the text out of the document node
+                    doc_text = doc_node.text
+                    yield doc_name, doc_text
+
+                    n_docs += 1
+                    if self.truncate is not None and n_docs >= self.truncate:
+                        raise TruncateNow()
+        except TruncateNow:
+            pass
 
     def check_runtime_dependencies(self):
         missing_dependencies = []
@@ -94,8 +106,16 @@ class XmlDocumentIterator(IterableDocumentCorpus):
         log.info("Counting docs in %s files" % len(files))
 
         num_docs = 0
-        pbar = get_progress_bar(len(files), title="Counting documents")
-        for dirname, filename in pbar(files):
+        if self.truncate is not None:
+            # Truncating, so update pbar with num docs and stop after we've got enough
+            pbar = get_progress_bar(self.truncate, title="Counting documents")
+            it = files
+        else:
+            # Otherwise, don't know how many docs there are (that's the whole point) so count input files
+            pbar = get_progress_bar(len(files), title="Counting documents")
+            it = pbar(files)
+
+        for dirname, filename in it:
             if filename.endswith(".gz"):
                 # Permit gzip files by opening them using the gzip library
                 with gzip.open(os.path.join(dirname, filename), "r") as f:
@@ -109,6 +129,14 @@ class XmlDocumentIterator(IterableDocumentCorpus):
             # Look for the type of XML node that documents are stored in and count them
             num_docs += len(soup.find_all(self.document_node_type))
 
+            if self.truncate is not None:
+                if num_docs >= self.truncate:
+                    # We've got at least as many docs as requested, so we'll stop after that number when iterating
+                    num_docs = self.truncate
+                    break
+                else:
+                    pbar.update(num_docs)
+
         log.info("Counted %d docs" % num_docs)
         with PimlicoDatatypeWriter(self.base_dir) as datatype:
             datatype.metadata["length"] = num_docs
@@ -118,3 +146,7 @@ class XmlDocumentIterator(IterableDocumentCorpus):
         return super(XmlDocumentIterator, self).data_ready() and \
                os.path.exists(self.path) and \
                "length" in self.metadata
+
+
+class TruncateNow(StopIteration):
+    pass

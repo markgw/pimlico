@@ -1,8 +1,9 @@
 import os
-from pimlico import MODEL_DIR
+
 from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.tar import TarredCorpus
 
 
@@ -24,33 +25,22 @@ class ModuleInfo(DocumentMapModuleInfo):
 
     def __init__(self, *args, **kwargs):
         super(ModuleInfo, self).__init__(*args, **kwargs)
-
         # Postprocess model options
-        if not os.path.isabs(self.options["sentence_model"]):
-            # Assumed to be in model dir
-            self.sentence_model_path = os.path.join(MODEL_DIR, "opennlp", self.options["sentence_model"])
-        else:
-            self.sentence_model_path = self.options["sentence_model"]
-
-        if not os.path.isabs(self.options["token_model"]):
-            self.token_model_path = os.path.join(MODEL_DIR, "opennlp", self.options["token_model"])
-        else:
-            self.token_model_path = self.options["token_model"]
+        self.sentence_model_path = abs_path_or_model_dir_path(self.options["sentence_model"], "opennlp")
+        self.token_model_path = abs_path_or_model_dir_path(self.options["token_model"], "opennlp")
 
     def check_runtime_dependencies(self):
         missing_dependencies = []
 
+        # We need Py4j to call the tokenizer
+        try:
+            import py4j
+        except ImportError:
+            missing_dependencies.append(("Py4J", self.module_name, "Install in lib/python/ dir using 'make py4j'"))
+
         # Check whether the OpenNLP tokenizer is available
         try:
-            class_name = "opennlp.tools.tokenize.Tokenizer"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("OpenNLP tokenizer", self.module_name,
-                                             "Couldn't load %s. Use make to fetch OpenNLP libraries" % class_name))
-
-            # Check our wrapper is available
-            class_name = "pimlico.opennlp.Tokenize"
+            class_name = "pimlico.opennlp.TokenizerGateway"
             try:
                 check_java_dependency(class_name)
             except DependencyError:

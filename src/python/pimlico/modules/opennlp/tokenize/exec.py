@@ -1,6 +1,5 @@
-from pimlico.core.external.java import start_java_process
+from pimlico.core.external.java import Py4JInterface
 from pimlico.core.modules.map import DocumentMapModuleExecutor
-from pimlico.utils.communicate import StreamCommunicationPacket
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
@@ -11,9 +10,11 @@ class ModuleExecutor(DocumentMapModuleExecutor):
 
     def process_document(self, filename, doc):
         # Run tokenization
-        return self.tokenizer.tokenize(doc)
+        tokenized_sents = self.tokenizer.tokenize(doc)
+        # Output one sentence per line
+        return u"".join("%s\n" % sent for sent in tokenized_sents)
 
-    def postprocess(self, info):
+    def postprocess(self, info, error=False):
         self.tokenizer.stop()
         self.tokenizer = None
 
@@ -23,28 +24,27 @@ class StreamTokenizer(object):
         self.token_model_path = token_model_path
         self.sentence_model_path = sentence_model_path
 
-        self.process = None
+        self.interface = None
 
     def tokenize(self, document):
-        packet = StreamCommunicationPacket(document)
-        # Send this to the Java process
-        self.process.stdin.write(packet.encode())
-        # Receive the response, blocking until it's ready
-        return StreamCommunicationPacket.read(self.process.stdout)
+        return list(self.interface.gateway.entry_point.tokenize(document))
 
     def start(self):
-        # Start a tokenizer process running in the background
-        self.process = start_java_process("pimlico.opennlp.Tokenize",
-                                          [self.sentence_model_path, self.token_model_path])
+        # Start a tokenizer process running in the background via Py4J
+        self.interface = Py4JInterface("pimlico.opennlp.TokenizerGateway",
+                                       gateway_args=[self.sentence_model_path, self.token_model_path])
+        self.interface.start()
 
     def stop(self):
-        # Close stdin, which should issue an EOF to the Java input stream
-        self.process.stdin.close()
-        # Wait until the process terminates
-        self.process.wait()
+        self.interface.stop()
 
     def __enter__(self):
         self.start()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop()
+
+
+class TokenizerProcessError(Exception):
+    pass

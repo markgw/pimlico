@@ -1,5 +1,6 @@
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor
 from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora, TarredCorpusWriter
+from pimlico.utils.progress import get_progress_bar
 
 
 class DocumentMapModuleInfo(BaseModuleInfo):
@@ -33,7 +34,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         """
         pass
 
-    def postprocess(self, info):
+    def postprocess(self, info, error=False):
         """
         Allows subclasses to define a finishing procedure to be called after corpus processing if finished.
         """
@@ -42,19 +43,29 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def execute(self, module_instance_info):
         # We may have multiple inputs, which should be aligned tarred corpora
         # If there's only one, this also works
-        input_iterator = AlignedTarredCorpora(module_instance_info.inputs)
+        input_iterator = AlignedTarredCorpora([module_instance_info.get_input(input_name)
+                                               for input_name in module_instance_info.input_names])
 
         # Call the set-up routine, if one's been defined
+        self.log.info("Preparing document map execution for %s documents" % len(input_iterator))
         self.preprocess(module_instance_info)
 
+        pbar = get_progress_bar(len(input_iterator),
+                                title="%s map" % module_instance_info.module_type_name.replace("_", " ").capitalize())
+        complete = False
         try:
             # Prepare a corpus writer for the output
-            with TarredCorpusWriter(module_instance_info.get_output_dir()) as writer:
-                for archive, filename, docs in input_iterator.archive_iter():
+            with TarredCorpusWriter(module_instance_info.get_output_dir("documents")) as writer:
+                for archive, filename, docs in pbar(input_iterator.archive_iter()):
                     # Get the subclass to process the doc
                     result = self.process_document(filename, *docs)
                     # Write the result to the output corpus
                     writer.add_document(archive, filename, result)
+            complete = True
         finally:
             # Call the finishing-off routine, if one's been defined
+            if complete:
+                self.log.info("Document mapping complete. Finishing off")
+            else:
+                self.log.info("Document mapping failed. Finishing off")
             self.postprocess(module_instance_info)

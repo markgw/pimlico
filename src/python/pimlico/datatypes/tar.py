@@ -1,9 +1,11 @@
 import StringIO
+from itertools import izip
 import os
 import random
 import shutil
 import tarfile
 from tempfile import mkdtemp
+
 from .base import IterableDocumentCorpus
 from pimlico.datatypes.base import IterableDocumentCorpusWriter
 
@@ -19,7 +21,7 @@ class TarredCorpus(IterableDocumentCorpus):
                               if f.endswith(".tar.gz") or f.endswith(".tar")]
         self.tar_filenames.sort()
 
-        self.tarballs = [os.path.basename(f) for f in self.tar_filenames]
+        self.tarballs = [os.path.splitext(os.path.basename(f))[0] for f in self.tar_filenames]
 
     def extract_file(self, archive_name, filename):
         """
@@ -118,54 +120,31 @@ class AlignedTarredCorpora(object):
 
     """
     def __init__(self, corpora):
+        if len(corpora) == 0:
+            raise CorpusAlignmentError("corpus aligner must have at least one corpus, got zero")
+
         self.corpora = corpora
-        self.data_dirs = [corpus.data_dir for corpus in corpora]
         self.tarballs = self.corpora[0].tarballs
         # Check that the corpora have the same tarballs in them
         if not all(c.tarballs == self.tarballs for c in self.corpora):
-            raise CorpusAlignmentError("not all corpora have the same tarballs in them, cannot align: %s" %
-                                       ", ".join(self.data_dirs))
+            raise CorpusAlignmentError("not all corpora have the same tarballs in them, cannot align")
 
-    def __iter__(self, archives=False):
-        # Prepare a temporary directory to extract everything to
-        tmp_dir = mkdtemp()
-        try:
-            # We know that each corpus has the same tarballs
-            for tarball_filename in self.tarballs:
-                # Don't extract the tar files: just iterate over them
-                corpus_tars = [
-                    tarfile.open(os.path.join(corpus.data_dir, tarball_filename), 'r') for corpus in self.corpora
-                ]
-
-                # Iterate over the untarred files: we assume all the files in the first corpus are also available
-                # in the others
-                for tarinfos in zip(*corpus_tars):
-                    filename = tarinfos[0].name
-                    if tarinfos[0].isdir():
-                        # If this is a directory, we don't extract it: its files will show up as separate tarinfos
-                        continue
-
-                    if not all(tarinfo.name == filename for tarinfo in tarinfos):
-                        raise IOError("filenames in tarballs (%s in %s) do not correspond: %s" %
-                                      (tarball_filename,
-                                       ", ".join(corpus.data_dir for corpus in self.corpora),
-                                       ", ".join(tarinfo.name for tarinfo in tarinfos)))
-
-                    documents = []
-                    for tarball, tarinfo in zip(corpus_tars, tarinfos):
-                        documents.append(tarball.extractfile(tarinfo).read())
-
-                    # Yield a single file from each corpus
-                    if archives:
-                        yield tarball_filename, filename, documents
-                    else:
-                        yield filename, documents
-        finally:
-            # Remove the temp dir
-            shutil.rmtree(tmp_dir)
+    def __iter__(self):
+        for archive, filename, docs in self.archive_iter():
+            yield filename, docs
 
     def archive_iter(self):
-        return self.__iter__(archives=True)
+        # Iterate over all tarred corpora at once
+        for corpus_items in izip(*[corpus.archive_iter() for corpus in self.corpora]):
+            # Check we've got the same archive and doc name combination from every corpus
+            if not all(corpus_item[0] == corpus_items[0][0] for corpus_item in corpus_items[1:]) or \
+                    not all(corpus_item[1] == corpus_items[0][1] for corpus_item in corpus_items[1:]):
+                raise CorpusAlignmentError(
+                    "filenames in tarred corpora do not correspond: %s" %
+                    ", ".join(["(%s/%s)" % (corpus_item[0], corpus_item[1]) for corpus_item in corpus_items])
+                )
+
+            yield corpus_items[0][0], corpus_items[0][1], [corpus_item[2] for corpus_item in corpus_items]
 
     def __len__(self):
         return len(self.corpora[0])

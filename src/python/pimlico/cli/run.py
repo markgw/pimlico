@@ -20,17 +20,20 @@ def schedule_cmd(pipeline, opts):
 
 def run_cmd(pipeline, opts):
     try:
-        execute_module(pipeline, opts.module_name)
+        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=opts.debug)
     except ModuleExecutionError, e:
         print >>sys.stderr, "Error executing module '%s': %s" % (opts.module_name, e)
     except KeyboardInterrupt:
         print >>sys.stderr, "Exiting before execution completed due to user interrupt"
-        raise
+        # Raise the exception so we see the full stack trace
+        if opts.debug:
+            raise
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
+    parser.add_argument("--debug", help="Output verbose debugging info", action="store_true")
     subparsers = parser.add_subparsers(help="Select a sub-command")
 
     check = subparsers.add_parser("check",
@@ -47,6 +50,8 @@ if __name__ == "__main__":
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")
     run.set_defaults(func=run_cmd)
     run.add_argument("module_name", help="The name of the module to run")
+    run.add_argument("--force-rerun", "-f", action="store_true",
+                     help="Force running the module, even if it's already been run to completion")
 
     opts = parser.parse_args()
 

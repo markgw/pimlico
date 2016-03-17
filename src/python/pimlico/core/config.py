@@ -28,8 +28,8 @@ class PipelineConfig(object):
                                            "pipeline section")
         check_release(self.pipeline_config["release"])
 
-        self.long_term_store = self.local_config["long_term_store"]
-        self.short_term_store = self.local_config["short_term_store"]
+        self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name)
+        self.short_term_store = os.path.join(self.local_config["short_term_store"], self.name)
 
         self._module_info_cache = {}
         self._module_schedule = None

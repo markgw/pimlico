@@ -38,6 +38,11 @@ progressbar :
 	rm -rf progressbar.tar.gz python-progressbar-2.6.2
 
 ###############
+py4j :
+	$(FETCH) https://pypi.python.org/packages/source/p/py4j/py4j-0.9.2.tar.gz
+	tar -xzf py4j-0.9.2.tar.gz py4j-0.9.2/src/py4j
+	mv py4j-0.9.2/src/py4j . && rm -r py4j-0.9.2 && rm py4j-0.9.2.tar.gz
+
 gensim :
 	$(FETCH) https://pypi.python.org/packages/source/g/gensim/gensim-0.12.3.tar.gz
 	tar -zxf gensim-0.12.3.tar.gz gensim-0.12.3/gensim

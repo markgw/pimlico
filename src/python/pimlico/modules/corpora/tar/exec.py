@@ -13,6 +13,6 @@ class ModuleExecutor(BaseModuleExecutor):
         )
         
         # Create a writer to do the writing to disk
-        with TarredCorpusWriter(module_instance_info.get_output_dir()) as writer:
+        with TarredCorpusWriter(module_instance_info.get_module_output_dir()) as writer:
             for archive_name, doc_name, doc in filter_datatype.archive_iter():
                 writer.add_document(archive_name, doc_name, doc)

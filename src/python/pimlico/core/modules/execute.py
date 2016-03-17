@@ -1,10 +1,12 @@
+import os
+import shutil
 from pimlico.core.modules.base import DependencyError, load_module_executor
 from pimlico.utils.logging import get_console_logger
 
 
-def execute_module(pipeline, module_name, force_rerun=False):
+def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     # Prepare a logger
-    log = get_console_logger("Pimlico")
+    log = get_console_logger("Pimlico", debug=debug)
 
     # Load the module instance
     module = pipeline[module_name]
@@ -30,6 +32,9 @@ def execute_module(pipeline, module_name, force_rerun=False):
     if module.status == "COMPLETE":
         if force_rerun:
             log.info("module '%s' already fully run, but forcing rerun" % module_name)
+            # If rerunning, delete the old data first so we make a fresh start
+            if os.path.exists(module.get_module_output_dir()):
+                shutil.rmtree(module.get_module_output_dir())
         else:
             raise ModuleAlreadyCompletedError("module '%s' has already been run to completion. Use --force-rerun if "
                                               "you want to run it again and overwrite the output" % module_name)
@@ -45,6 +50,12 @@ def execute_module(pipeline, module_name, force_rerun=False):
 
     # Update the module status so we know it's been completed
     module.status = "COMPLETE"
+
+    # Tell the user where we put the output
+    for output_name in module.output_names:
+        output = module.get_output(output_name)
+        if output.base_dir is not None:
+            log.info("Output '%s' in %s" % (output_name, output.base_dir))
 
 
 class ModuleExecutionError(Exception):

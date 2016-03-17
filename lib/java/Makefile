@@ -50,6 +50,15 @@ apache-opennlp-1.5.3-bin.tar.gz :
 argparse4j.jar :
 	$(FETCH_STDOUT) http://sourceforge.net/projects/argparse4j/files/latest/download?source=files >argparse4j.jar
 
+########## Py4j ##############
+py4j : py4j0.9.2.jar
+
+py4j0.9.2.jar :
+	$(FETCH) https://pypi.python.org/packages/source/p/py4j/py4j-0.9.2.tar.gz
+	tar -zxf py4j-0.9.2.tar.gz py4j-0.9.2/py4j-java/py4j0.9.2.jar
+	mv py4j-0.9.2/py4j-java/py4j0.9.2.jar . && rm -r py4j-0.9.2/
+	rm py4j-0.9.2.tar.gz
+
 ###################################
 	
 stanford-parser :

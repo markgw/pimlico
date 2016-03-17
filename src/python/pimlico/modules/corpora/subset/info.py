@@ -36,10 +36,12 @@ class ModuleInfo(BaseModuleInfo):
         ("size", {
             "help": "Number of documents to include",
             "required": True,
+            "type": int,
         }),
         ("offset", {
             "help": "Number of documents to skip at the beginning of the corpus (default: 0, start at beginning)",
             "default": 0,
+            "type": int,
         }),
     ]
     module_executable = False
