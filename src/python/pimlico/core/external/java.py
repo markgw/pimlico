@@ -1,12 +1,8 @@
-import Queue
-from collections import deque
-import os
 import time
 from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR
 from pimlico.core.modules.base import DependencyError
-from py4j.java_gateway import JavaGateway, GatewayParameters, OutputConsumer, ProcessConsumer
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, JAVA_BUILD_DIR])
 
@@ -83,6 +79,8 @@ class Py4JInterface(object):
         Likewise with python_port and a --python-port option.
 
         """
+        from py4j.java_gateway import JavaGateway, GatewayParameters
+
         args = list(self.gateway_args)
         gateway_kwargs = {}
 
@@ -117,6 +115,8 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     """
     Our own more flexble version of Py4J's launch_gateway.
     """
+    from py4j.java_gateway import OutputConsumer, ProcessConsumer
+
     # Launch the server in a subprocess.
     command = ["java", "-classpath", CLASSPATH] + javaopts + [gateway_class] + args
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=PIPE)

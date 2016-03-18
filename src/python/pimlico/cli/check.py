@@ -2,6 +2,7 @@ import sys
 
 from pimlico.core.config import check_for_cycles, PipelineStructureError
 from pimlico.core.modules.base import ModuleInfoLoadError
+from pimlico.utils.format import multiline_tablate
 
 
 def check_cmd(pipeline, opts):
@@ -46,8 +47,8 @@ def check_cmd(pipeline, opts):
             missing_dependencies.extend(pipeline[module_name].check_runtime_dependencies())
 
         if len(missing_dependencies):
-            print "Runtime dependencies not satisfied:\n%s" % (
-                "\n".join("- %s for '%s' (%s)" % (name, module, desc) for (name, module, desc) in missing_dependencies)
-            )
+            print "\nRuntime dependencies not satisfied:\n%s" % \
+                  multiline_tablate(missing_dependencies, [30, 30, 150],
+                                    tablefmt="orgtbl", headers=["Dependency", "Module", "Description"])
         else:
-            print "Runtime dependencies all satisfied"
+            print "\nRuntime dependencies all satisfied"

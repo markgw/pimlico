@@ -10,8 +10,13 @@ else
 endif
 
 
+########## Meta targets ##########
+# These are collections of targets for whole modules, including all the dependencies for the module
+opennlp : opennlp-all py4j argparse4j guava
+
+
 ########## OPEN NLP ##############
-opennlp : opennlp-maxent-3.0.3.jar opennlp-tools-1.5.3.jar opennlp-uima-1.5.3.jar jwnl-1.3.3.jar
+opennlp-all : opennlp-maxent-3.0.3.jar opennlp-tools-1.5.3.jar opennlp-uima-1.5.3.jar jwnl-1.3.3.jar
 	# Clear up downloaded archive
 	rm -f apache-opennlp-1.5.3-bin.tar.gz
 	$(MAKE) argparse4j.jar
@@ -47,6 +52,10 @@ apache-opennlp-1.5.3-bin.tar.gz :
 	# Fetch OpenNlp archive
 	$(FETCH) http://apache.mesi.com.ar//opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-bin.tar.gz
 
+##############################
+
+argparse4j : argparse4j.jar
+
 argparse4j.jar :
 	$(FETCH_STDOUT) http://sourceforge.net/projects/argparse4j/files/latest/download?source=files >argparse4j.jar
 
@@ -80,6 +89,8 @@ stanford-postagger-2014-01-04.zip :
 	$(FETCH) http://nlp.stanford.edu/downloads/stanford-postagger-2014-01-04.zip
 	
 ####################################
+
+guava : guava.jar
 
 guava.jar :
 	@echo "Fetching Guava"

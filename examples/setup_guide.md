@@ -138,12 +138,10 @@ Beautiful Soup.
 Simple as that.
 
 OpenNLP is a little trickier. To make things simple, we just get all the OpenNLP tools at once. There are also a 
-couple of other libraries required to run the OpenNLP wrappers and we get them in the same way.
+couple of other libraries required to run the OpenNLP wrappers. The `opennlp` make target gets all of these at once.
 
     cd ~/myproject/pimlico/lib/java
     make opennlp
-    make py4j
-    make argparse4j.jar
 
 At the moment, it's also necessary to build the Java wrappers around OpenNLP that are provided as part of Pimlico. For 
 this, you'll need a Java compiler installed on your system.
