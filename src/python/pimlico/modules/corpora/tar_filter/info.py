@@ -46,7 +46,6 @@ class TarredCorpusFilter(TarredCorpus):
             # Prepare a formatter for archive numbers
             archive_name_format = "%s-%%%sd" % (self.archive_basename, "0" * digits)
 
-            # TODO Check this does the right thing
             self._tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
         return self._tarballs
 

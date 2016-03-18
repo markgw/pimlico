@@ -5,11 +5,37 @@ import ConfigParser
 from ConfigParser import SafeConfigParser, RawConfigParser
 from cStringIO import StringIO
 import os
+import sys
 
 REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
 
 
 class PipelineConfig(object):
+    """
+    Main configuration for a pipeline, usually read in from a config file.
+
+    Each section, except for the special ones below, defines a module in the pipeline. Some of these can
+    be executed, others act as filters on the outputs of other modules, or input readers.
+
+    Special sections
+    ================
+    - vars:
+        May contain any variable definitions, to be used later on in the pipeline. Further down, expressions like
+        `%(varname)s` will be expanded into the value assigned to `varname` in the vars section.
+    - pipeline:
+        Main pipeline-wide configuration. The following options are required for every pipeline:
+        - name: a single-word name for the pipeline, used to determine where files are stored
+        - release: the release of Pimlico for which the config file was written. It is considered compatible with
+            later minor versions of the same major release, but not with later major releases. Typically, a user
+            receiving the pipeline config will get hold of an appropriate version of the Pimlico codebase to run it
+            with.
+        Other optional settings:
+        - python_path: a path or paths, relative to the directory containing the config file, in which Python
+            modules/packages used by the pipeline can be found. Typically, a config file is distributed with a
+            directory of Python code providing extra modules, datatypes, etc. Multiple paths are separated by `:`s
+
+
+    """
     def __init__(self, pipeline_config, local_config, raw_module_configs, module_order, filename=None):
         # Stores the module names in the order they were specified in the config file
         self.module_order = module_order
@@ -30,6 +56,15 @@ class PipelineConfig(object):
 
         self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name)
         self.short_term_store = os.path.join(self.local_config["short_term_store"], self.name)
+
+        # Get paths to add to the python path for the pipeline
+        # Used so that a project can specify custom module types and other python code outside the pimlico source tree
+        if "python_path" in self.pipeline_config:
+            # Paths should all be specified relative to the config file's directory
+            additional_paths = [self.path_relative_to_config(path) for path in
+                                self.pipeline_config["python_path"].split(":") if path]
+            # Add these paths for the python path, so later code will be able to import things from them
+            sys.path.extend(additional_paths)
 
         self._module_info_cache = {}
         self._module_schedule = None
@@ -107,6 +142,17 @@ class PipelineConfig(object):
                         module_schedule.insert(module_schedule.index(module_name), dep_module_name)
         # Provided there are no cycling dependencies, this ordering now respects the dependencies
         return module_schedule
+
+    def path_relative_to_config(self, path):
+        """
+        Get an absolute path to a file/directory that's been specified relative to a config
+        file (usually within the config file).
+
+        :param path: relative path
+        :return: absolute path
+        """
+        config_dir = os.path.dirname(os.path.abspath(self.filename))
+        return os.path.abspath(os.path.join(config_dir, path))
 
     @staticmethod
     def load(filename, local_config=None):
