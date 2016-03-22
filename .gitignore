@@ -9,4 +9,4 @@ lib/python/*
 !lib/python/Makefile
 models/*
 !models/Makefile
-
+docs/_build/*
