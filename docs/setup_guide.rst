@@ -1,4 +1,5 @@
-# Setting up a new project using Pimlico
+Setting up a new project using Pimlico
+======================================
 
 _Pimlico v0.1_
 

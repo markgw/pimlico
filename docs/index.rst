@@ -6,6 +6,8 @@
 Welcome to Pimlico's documentation!
 ===================================
 
+Pimlico is a new project, so there isn't much documentation yet. I'll be documenting things as I develop them.
+
 Contents:
 
 .. toctree::
