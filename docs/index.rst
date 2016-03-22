@@ -14,6 +14,9 @@ Contents:
    :maxdepth: 2
 
 
+Guides
+======
+* :ref:`setup_guide`
 
 Indices and tables
 ==================
