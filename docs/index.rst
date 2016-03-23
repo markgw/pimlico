@@ -27,7 +27,7 @@ pipeline and checking that everything's executed in the right order.
      adding these more of less as I need them and am keen to accept contributions 
      of wrappers if you develop them for your own pipelines
    - there are some key features missing, which I'll add as time goes on. 
-     See :doc:`wishlist <my wishlist>` for things that I'm currently planning to 
+     See :doc:`my wishlist <wishlist>` for things that I'm currently planning to 
      add.
 
 Contents:
