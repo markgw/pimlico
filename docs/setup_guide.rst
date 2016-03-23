@@ -1,14 +1,16 @@
-Setting up a new project using Pimlico
-======================================
+==========================================
+  Setting up a new project using Pimlico
+==========================================
 
-_Pimlico v0.1_
+*Pimlico v0.1*
 
 You've decided to use Pimlico to implement a data processing pipeline. So, where do you start? This guide steps 
 through the basic setup of your project. You don't have to do everything exactly as suggested here, but this is a 
 good starting point and follows Pimlico's recommended practices. It starts by stepping through the setup for a very 
 basic pipeline.
 
-## Getting Pimlico
+Getting Pimlico
+===============
 You'll want to use the latest release of Pimlico. Check the website to find out what that is and download the 
 codebase as a tarball.
 
@@ -28,7 +30,8 @@ module types you're using.
     cd pimlico/lib/python
     make core
 
-## System-wide configuration
+System-wide configuration
+=========================
 Pimlico needs you to have specified certain parameters regarding your local system. In particular, it needs to 
 know where to put output files as it executes. These settings are given in a config file in your home directory and 
 apply to all Pimlico pipelines you run. Note that Pimlico will make sure that different pipelines don't interfere 
@@ -49,7 +52,8 @@ Create a file `~/.pimlico` that looks like this:
 
 Remember, these paths are not specific to a pipeline: all pipelines will use different subdirectories of these ones.
 
-## Creating a config file
+Creating a config file
+======================
 In the simplest case, the only thing left to do is to write a config file for your pipeline and run it! Let's make 
 a simple one as an example.
 
@@ -71,7 +75,8 @@ version (the first digit). Otherwise, there are likely to be backwards incompati
 need to either get an older version of Pimlico, or update your config file, ensuring it plays nicely with the later 
 Pimlico version.
 
-### Getting input
+Getting input
+-------------
 Now we add our first module to the pipeline. This reads input from XML files and iterates of `<doc>` tags to get 
 documents. This is how the Gigaword corpus is stored, so if you have Gigaword, just set the path to point to it.
 
@@ -86,7 +91,8 @@ following option:
 
     truncate=1000
 
-### Grouping files
+Grouping files
+--------------
 The standard approach to storing data between modules in Pimlico is to group them together into batches of documents, 
 storing each batch in a tar archive, containing a file for every document. This works nicely with large corpora, 
 where having every document as a separate file would cause filesystem difficulties and having all documents in the 
@@ -100,7 +106,8 @@ align the datasets they produce.
     type=pimlico.modules.corpora.tar_filter
     input=input-text
 
-### Doing something: tokenization
+Doing something: tokenization
+-----------------------------
 Now, at last, we get to some actual linguistic processing, albeit somewhat uninteresting. Many NLP tools assume that 
 their input has been divided into sentences and tokenized. The OpenNLP-based tokenization module does both of these 
 things at once, calling OpenNLP tools.
@@ -112,7 +119,8 @@ the module.
     type=pimlico.modules.opennlp.tokenize
     input=tar-grouper
 
-### Doing something more interesting: POS tagging
+Doing something more interesting: POS tagging
+---------------------------------------------
 Many NLP tools rely on part-of-speech (POS) tagging. Again, we use OpenNLP to do this, and a standard Pimlico module 
 wraps the OpenNLP tool.
 
@@ -120,7 +128,8 @@ wraps the OpenNLP tool.
     type=pimlico.modules.opennlp.pos
     input=tokenize
 
-## Running Pimlico
+Running Pimlico
+===============
 Now we've got our basic config file ready to go. It's a simple linear pipeline that goes like this:
 
     read input docs -> group into batches -> tokenize -> POS tag
@@ -129,7 +138,8 @@ Before we can run it, there's one thing missing. Three of these modules have the
 to get hold of the libraries they use. The input reader uses the Beautiful Soup python library and the tokenization 
 and POS tagging modules use OpenNLP.
 
-### Fetching dependencies
+Fetching dependencies
+---------------------
 All the standard modules provide easy ways to get hold of their dependencies via makefiles for GNU Make. Let's get 
 Beautiful Soup.
 
@@ -160,7 +170,8 @@ Note that the modules we're using default to these standard, pre-trained models,
 use. However, if you want to use different models, e.g. for other languages or domains, you can specify them using 
 extra options in the module definition in your config file.
 
-### Checking everything's dandy
+Checking everything's dandy
+---------------------------
 We now run some checks over the pipeline to make sure that our config file is valid and we've got Pimlico basically 
 ready to run.
 
@@ -179,8 +190,10 @@ we can run further checks on the *runtime* dependencies of all our modules.
 
 If that works as well, we're able to start running modules.
 
-## Running the pipeline
-### What modules to run?
+Running the pipeline
+====================
+What modules to run?
+--------------------
 Pimlico can now suggest an order in which to run your modules. In our case, this is pretty obvious, seeing as our 
 pipeline is entirely linear &ndash; it's clear which ones need to be run before others.
 
@@ -197,14 +210,16 @@ reads the data out of a corpus on disk, there's not quite enough information in 
 module to collect a little bit of data from an initial pass over the corpus. Some input modules will need this, others 
 not. In this case, all we're lacking is a count of the total number of documents in the corpus.
 
-### Running the modules
+Running the modules
+-------------------
 The modules can be run using the `run` command and specifying the module by name. We do this manually for each module. 
 
     ./pimlico.sh ../../pipeline.conf run input-text
     ./pimlico.sh ../../pipeline.conf run tokenize
     ./pimlico.sh ../../pipeline.conf run pos-tag
 
-## Adding custom modules
+Adding custom modules
+=====================
 Most likely, for your project you need to do some processing not covered by the built-in Pimlico modules. As this 
 point, you can start implementing your own modules, which you can distribute along with the config file so that 
 people can replicate what you did.
