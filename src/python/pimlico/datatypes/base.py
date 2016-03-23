@@ -157,6 +157,10 @@ def load_datatype(path):
         raise DatatypeLoadError("could not load datatype class %s in module %s" % (cls_name, mod_path))
     cls = getattr(mod, cls_name)
 
+    if type(cls) is not type(object):
+        raise DatatypeLoadError("tried to load datatype %s.%s, but result was not a class, it was a %s" %
+                                (mod, cls_name, type(cls).__name__))
+
     if not issubclass(cls, PimlicoDatatype):
         raise DatatypeLoadError("%s is not a Pimlico datatype" % path)
     return cls

@@ -43,8 +43,9 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def execute(self, module_instance_info):
         # We may have multiple inputs, which should be aligned tarred corpora
         # If there's only one, this also works
-        input_iterator = AlignedTarredCorpora([module_instance_info.get_input(input_name)
-                                               for input_name in module_instance_info.input_names])
+        self.input_corpora = [module_instance_info.get_input(input_name)
+                              for input_name in module_instance_info.input_names]
+        input_iterator = AlignedTarredCorpora(self.input_corpora)
 
         # Call the set-up routine, if one's been defined
         self.log.info("Preparing document map execution for %s documents" % len(input_iterator))
