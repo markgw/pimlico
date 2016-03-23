@@ -8,6 +8,7 @@ to run on large datasets (corpora). It provides a wrappers around many
 existing, widely used NLP (Natural Language Processing) tools. 
 It makes it easy to write large, potentially complex pipelines 
 with the following key goals:
+
 * to provide **clear documentation** of what has been done;
 * to make it easy to **incorporate standard NLP tasks**,
 * and to extend the code with **non-standard tasks, specific to a pipeline**;
@@ -21,6 +22,7 @@ pipeline and checking that everything's executed in the right order.
    I'll be documenting things as I develop them.
    
    The basic framework is up and running, but:
+   
    - it doesn't yet include wrappers for many standard NLP tools: I'll be 
      adding these more of less as I need them and am keen to accept contributions 
      of wrappers if you develop them for your own pipelines
