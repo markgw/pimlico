@@ -1,8 +1,12 @@
+import os
 import time
 from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
+import fcntl
+import sys
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR
 from pimlico.core.modules.base import DependencyError
+from pimlico.utils.communicate import timeout_process
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, JAVA_BUILD_DIR])
 
@@ -61,11 +65,24 @@ def check_java():
 
 
 class Py4JInterface(object):
-    def __init__(self, gateway_class, port=None, python_port=None, gateway_args=[]):
+    def __init__(self, gateway_class, port=None, python_port=None, gateway_args=[], pipeline=None):
+        """
+        If pipeline is given, configuration is looked for there. If found, this overrides config given
+        in other kwargs.
+
+        """
         self.python_port = python_port
         self.gateway_args = gateway_args
         self.gateway_class = gateway_class
         self.port = port
+
+        # Look for config in the pipeline
+        start_port = pipeline.local_config.get("py4j_port", None)
+        if start_port is not None:
+            # Config gives just a single port number
+            # If it's given, use the following port for the other direction of communication
+            self.port = int(start_port)
+            self.python_port = int(start_port) + 1
 
         self.process = None
         self.gateway = None
@@ -122,9 +139,22 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
     # Determine which port the server started on (needed to support ephemeral ports)
-    # NB: had an odd problem where the server had an error (socket already in use), but didn't exit, so this hangs
-    # TODO Look into this at some point
-    output = proc.stdout.readline()
+    # Don't hang on an error running the gateway launcher
+    try:
+        with timeout_process(proc, 1.0):
+            output = proc.stdout.readline()
+    except Exception, e:
+        # Try reading stderr to see if there's any info there
+        error_output = proc.stderr.read().strip("\n ")
+        raise JavaProcessError("error reading first line from gateway process: %s. Error output: %s" %
+                               (e, error_output))
+    # Check whether there was an error reported
+    output = output.strip("\n ")
+    if output == "ERROR":
+        # Read error output from stderr
+        error_output = proc.stderr.read().strip("\n ")
+        raise JavaProcessError("Py4J gateway had an error starting up: %s" % error_output)
+
     try:
         port_used = int(output)
     except ValueError:

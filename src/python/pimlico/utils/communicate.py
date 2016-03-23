@@ -1,3 +1,25 @@
+from contextlib import contextmanager
+from threading import Timer
+
+
+@contextmanager
+def timeout_process(proc, timeout):
+    """
+    Context manager for use in a `with` statement. If the with block hasn't completed after the given number
+    of seconds, the process is killed.
+
+    :param proc: process to kill if timeout is reached before end of block
+    :return:
+    """
+    timer = Timer(timeout, proc.kill)
+    # Set a timer going
+    timer.start()
+    # Continue executing the with block
+    try:
+        yield timer
+    finally:
+        # Cancel the timer now, if it's still running
+        timer.cancel()
 
 
 class StreamCommunicationPacket(object):

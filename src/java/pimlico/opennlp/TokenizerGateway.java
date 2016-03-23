@@ -10,7 +10,7 @@ import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
-import py4j.GatewayServer;
+import pimlico.core.Py4JGatewayStarter;
 
 import java.io.File;
 
@@ -58,9 +58,9 @@ public class TokenizerGateway {
         argParser.description("Run the OpenNLP tokenizer and sentence detector, providing access to it via Py4J");
         argParser.addArgument("sent_model").help("Sentence detection model");
         argParser.addArgument("tok_model").help("Tokenization model");
-        argParser.addArgument("--port").type(Integer.class).help("Specify a port for gateway server to run on");
+        argParser.addArgument("--port").type(Integer.class).help("Specify a port for gateway server to run on").setDefault(0);
         argParser.addArgument("--python-port").type(Integer.class).help("Specify a port for gateway server to use " +
-                "to response to Python");
+                "to response to Python").setDefault(0);
 
         Namespace opts = null;
         try {
@@ -76,12 +76,6 @@ public class TokenizerGateway {
         // Load the gateway instance
         TokenizerGateway entryPoint = new TokenizerGateway(sentModelFilename, tokModelFilename);
         // Create a gateway server, using this as an entry point
-        GatewayServer gatewayServer;
-        if (opts.getInt("port") != null)
-            gatewayServer = new GatewayServer(entryPoint, opts.getInt("port"));
-        else
-            gatewayServer = new GatewayServer(entryPoint);
-        // Set the server running
-        gatewayServer.start();
+        Py4JGatewayStarter.startGateway(entryPoint, opts.getInt("port"), opts.getInt("python_port"));
     }
 }

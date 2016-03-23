@@ -1,15 +1,17 @@
-from pimlico.core.external.java import Py4JInterface
+from pimlico.core.external.java import Py4JInterface, JavaProcessError
+from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import DocumentMapModuleExecutor
 from py4j.java_collections import ListConverter
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
     def preprocess(self, info):
-        start_port = info.pipeline.local_config.get("py4j_start_port", None)
-        start_port = int(start_port) if start_port is not None else None
         # Start a tokenizer process
-        self.tagger = StreamTagger(info.model_path, start_port=start_port)
-        self.tagger.start()
+        self.tagger = StreamTagger(info.model_path, pipeline=info.pipeline)
+        try:
+            self.tagger.start()
+        except JavaProcessError, e:
+            raise ModuleExecutionError("error starting tokenizer process: %s" % e)
 
     def process_document(self, filename, doc):
         sentences = doc.splitlines()
@@ -29,8 +31,8 @@ class ModuleExecutor(DocumentMapModuleExecutor):
 
 
 class StreamTagger(object):
-    def __init__(self, model_path, start_port=None):
-        self.start_port = start_port
+    def __init__(self, model_path, pipeline=None):
+        self.pipeline = pipeline
         self.model_path = model_path
         self.interface = None
 
@@ -39,14 +41,9 @@ class StreamTagger(object):
         return list(self.interface.gateway.entry_point.posTag(sentence_list))
 
     def start(self):
-        if self.start_port is None:
-            python_port = None
-        else:
-            python_port = self.start_port + 1
-
         # Start a tokenizer process running in the background via Py4J
         self.interface = Py4JInterface("pimlico.opennlp.PosTaggerGateway", gateway_args=[self.model_path],
-                                       port=self.start_port, python_port=python_port)
+                                       pipeline=self.pipeline)
         self.interface.start()
 
     def stop(self):

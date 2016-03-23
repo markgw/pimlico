@@ -33,7 +33,7 @@ def run_cmd(pipeline, opts):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
-    parser.add_argument("--debug", help="Output verbose debugging info", action="store_true")
+    parser.add_argument("--debug", "-d", help="Output verbose debugging info", action="store_true")
     subparsers = parser.add_subparsers(help="Select a sub-command")
 
     check = subparsers.add_parser("check",
