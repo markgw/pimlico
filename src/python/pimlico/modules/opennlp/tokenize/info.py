@@ -4,12 +4,14 @@ from pimlico.core.external.java import check_java_dependency, DependencyCheckerE
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
+from .datatypes import TokenizedCorpus
 from pimlico.datatypes.tar import TarredCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_tokenizer"
     module_inputs = [("text", TarredCorpus)]
+    module_outputs = [("documents", TokenizedCorpus)]
     module_options = {
         "sentence_model": {
             "help": "Sentence segmentation model. Specify a full path, or just a filename. If a filename is given "

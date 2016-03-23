@@ -13,7 +13,11 @@ from pimlico.datatypes.base import IterableDocumentCorpusWriter
 class TarredCorpus(IterableDocumentCorpus):
     datatype_name = "tar"
 
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, raw_data=False):
+        """
+        If raw_data=True, post-processing of documents (as defined by subclasses) is not applied. Each
+        document's text is just returned as read in from the file.
+        """
         super(TarredCorpus, self).__init__(base_dir)
         self.tar_filenames = [f for f in
                               [os.path.join(root, filename) for root, dirs, files in os.walk(self.data_dir)
@@ -22,6 +26,7 @@ class TarredCorpus(IterableDocumentCorpus):
         self.tar_filenames.sort()
 
         self.tarballs = [os.path.splitext(os.path.basename(f))[0] for f in self.tar_filenames]
+        self.raw_data = raw_data
 
     def extract_file(self, archive_name, filename):
         """
@@ -59,12 +64,26 @@ class TarredCorpus(IterableDocumentCorpus):
                         # Read in the data
                         with open(os.path.join(tmp_dir, filename), "r") as f:
                             document = f.read()
+                        # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
+                        if not self.raw_data:
+                            document = self.process_document(document)
                         yield tar_name, filename, document
                         # Remove the file once we're done with it (when we request another)
                         os.remove(os.path.join(tmp_dir, filename))
         finally:
             # Remove the temp dir
             shutil.rmtree(tmp_dir)
+
+    def process_document(self, data):
+        """
+        Process the data read in for a single document. Allows easy implementation of datatypes using
+        TarredCorpus to do all the archive handling, etc, just specifying a particular way of handling
+        the data within documents.
+
+        By default, just returns the data string.
+
+        """
+        return data
 
     def list_archive_iter(self):
         for tar_name, tarball_filename in zip(self.tarballs, self.tar_filenames):
