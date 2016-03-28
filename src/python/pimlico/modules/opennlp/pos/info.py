@@ -4,14 +4,14 @@ from pimlico.core.external.java import check_java_dependency, DependencyCheckerE
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, add_annotation_field
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
-from .datatypes import PosTaggedCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_pos_tagger"
-    module_inputs = [("text", TokenizedCorpus)]
-    module_outputs = [("documents", PosTaggedCorpus)]
+    module_inputs = [("text", (TokenizedCorpus, WordAnnotationCorpus))]
+    module_outputs = [("documents", add_annotation_field("text", "pos"))]
     module_options = {
         "model": {
             "help": "POS tagger model, full path or filename. If a filename is given, it is expected to be in the "

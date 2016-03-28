@@ -22,7 +22,7 @@ class PimlicoDatatype(object):
 
     Datatypes are used to specify the routines for reading the output from modules. They're also
     used to specify how to read pipeline inputs. Most datatypes that have data simply read it in
-    when required. Some (in particular those use as inputs) need a preparation phase to be run,
+    when required. Some (in particular those used as inputs) need a preparation phase to be run,
     where the raw data itself isn't sufficient to implement the reading interfaces required. In this
     case, they should override prepare_data().
 

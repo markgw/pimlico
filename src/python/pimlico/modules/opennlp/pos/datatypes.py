@@ -1,20 +1,17 @@
-from pimlico.datatypes.tar import TarredCorpus
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
 
 
-class PosTaggedCorpus(TarredCorpus):
+class PosTaggedCorpus(WordAnnotationCorpus):
     """
     Specialized datatype for a tarred corpus that's had POS tagging applied.
 
-    Each document is a list of sentences. Each sentence is a list of words. Each word is a list of
-    pairs (word, POS tag).
+    Each document is a list of sentences. Each sentence is a list of words. Each word is a dict including the
+    word and its POS tag.
 
     """
-    def process_document(self, data):
-        return [
-            [_word_tag_pair(word) for word in sentence.split(" ")] for sentence in data.split("\n")
-        ]
+    annotation_fields = ["word", "pos"]
 
 
-def _word_tag_pair(text):
-    word, __, tag = text.rpartition("|")
-    return word, tag
+class PosTaggedCorpusWriter(SimpleWordAnnotationCorpusWriter):
+    def __init__(self, base_dir):
+        super(PosTaggedCorpusWriter, self).__init__(base_dir, ["word", "pos"])

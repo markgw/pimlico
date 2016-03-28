@@ -3,6 +3,10 @@ package pimlico.core;
 import py4j.GatewayServer;
 import py4j.Py4JNetworkException;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.BindException;
 import java.util.List;
 
@@ -47,6 +51,14 @@ public class Py4JGatewayStarter {
             System.out.println("" + listening_port);
             System.out.flush();
         } catch (RuntimeException e) {
+            // Write the full stack trace out to a file to help identify what went wrong
+            try {
+                PrintStream ps = new PrintStream(new File(System.getProperty("user.home") + "/py4jgateway.log"));
+                e.printStackTrace(ps);
+                ps.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             // If we have any errors starting the server, output them on stderr
             System.err.println("Error starting server: " + e);
             // Also output a line to stdout, so the caller isn't left hanging waiting for something

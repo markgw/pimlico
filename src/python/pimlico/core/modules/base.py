@@ -19,6 +19,7 @@ is loaded.
 """
 from importlib import import_module
 import os
+from types import FunctionType
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
@@ -201,6 +202,10 @@ class BaseModuleInfo(object):
                 raise PipelineStructureError("%s module does not have an output named '%s'. Available outputs: %s" %
                                              (self.module_type_name, output_name, ", ".join(outputs.keys())))
             datatype = outputs[output_name]
+        # The datatype might be a dynamic type -- a function that we call to get the type
+        if type(datatype) is FunctionType:
+            # Call the function to build the datatype
+            datatype = datatype(self)
         return output_name, datatype
 
     def instantiate_output_datatype(self, output_name, output_datatype):
@@ -236,6 +241,15 @@ class BaseModuleInfo(object):
         # Try getting hold of the module that we need the output of
         previous_module = self.pipeline[previous_module_name]
         return previous_module, output_name
+
+    def get_input_datatype(self, input_name=None):
+        """
+        Get a datatype class corresponding to one of the inputs to the module.
+        If an input name is not given, the first input is returned.
+
+        """
+        previous_module, output_name = self.get_input_module_connection(input_name)
+        return previous_module.get_output_datatype(output_name)
 
     def get_input(self, input_name=None):
         """
@@ -274,17 +288,20 @@ class BaseModuleInfo(object):
         module_inputs = dict(self.module_inputs)
         for input_name, (dep_module_name, output) in self.inputs.items():
             # Check the type of each input in turn
-            input_type_requirement = module_inputs[input_name]
+            input_type_requirements = module_inputs[input_name]
+            # Input types may be tuples, to allow multiple types
+            if type(input_type_requirements) is not tuple:
+                input_type_requirements = (input_type_requirements,)
             # Load the dependent module
             dep_module = self.pipeline[dep_module_name]
             # Try to load the named output (or the default, if no name was given)
             output_name, dep_module_output = dep_module.get_output_datatype(output_name=output)
             # Check that the provided output type is a subclass of (or equal to) the required input type
-            if not issubclass(dep_module_output, input_type_requirement):
+            if not issubclass(dep_module_output, input_type_requirements):
                 raise PipelineStructureError(
                     "module %s's %s-input is required to be of %s type (or a descendent), but module %s's "
                     "%s-output provides %s" % (
-                        self.module_name, input_name, input_type_requirement.__name__,
+                        self.module_name, input_name, "/".join(t.__name__ for t in input_type_requirements),
                         dep_module_name, output_name, dep_module_output.__name__
                     ))
 

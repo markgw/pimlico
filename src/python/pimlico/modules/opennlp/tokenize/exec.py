@@ -17,7 +17,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         # Run tokenization
         tokenized_sents = self.tokenizer.tokenize(doc)
         # Output one sentence per line
-        return u"".join("%s\n" % sent for sent in tokenized_sents)
+        return u"\n".join(tokenized_sents)
 
     def postprocess(self, info, error=False):
         self.tokenizer.stop()

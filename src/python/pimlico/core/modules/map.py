@@ -28,6 +28,15 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def process_document(self, filename, *docs):
         raise NotImplementedError
 
+    def get_writer(self, info):
+        """
+        Get the writer instance that will be given processed documents to write. Should return
+        a subclass of TarredCorpusWriter. The default implementation instantiates a plain
+        TarredCorpusWriter.
+
+        """
+        return TarredCorpusWriter(info.get_output_dir("documents"))
+
     def preprocess(self, info):
         """
         Allows subclasses to define a set-up procedure to be called before corpus processing begins.
@@ -56,7 +65,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         complete = False
         try:
             # Prepare a corpus writer for the output
-            with TarredCorpusWriter(module_instance_info.get_output_dir("documents")) as writer:
+            with self.get_writer(module_instance_info) as writer:
                 for archive, filename, docs in pbar(input_iterator.archive_iter()):
                     # Get the subclass to process the doc
                     result = self.process_document(filename, *docs)

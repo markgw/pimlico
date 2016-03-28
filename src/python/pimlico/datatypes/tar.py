@@ -12,6 +12,8 @@ from pimlico.datatypes.base import IterableDocumentCorpusWriter
 
 class TarredCorpus(IterableDocumentCorpus):
     datatype_name = "tar"
+    # This may be overridden by subclasses to provide filters for documents applied before main doc processing
+    document_preprocessors = []
 
     def __init__(self, base_dir, raw_data=False):
         """
@@ -63,7 +65,7 @@ class TarredCorpus(IterableDocumentCorpus):
                         filename = tarinfo.name
                         # Read in the data
                         with open(os.path.join(tmp_dir, filename), "r") as f:
-                            document = f.read()
+                            document = f.read().decode("utf-8")
                         # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
                         if not self.raw_data:
                             document = self.process_document(document)
@@ -119,7 +121,7 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
         self.doc_count += 1
 
         # Add a new document to archive
-        data_file = StringIO.StringIO(data)
+        data_file = StringIO.StringIO(data.encode("utf-8"))
         info = tarfile.TarInfo(name=doc_name)
         info.size = len(data_file.buf)
         self.current_archive_tar.addfile(info, data_file)

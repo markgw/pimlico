@@ -1,6 +1,8 @@
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import DocumentMapModuleExecutor
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus
+from pimlico.modules.opennlp.pos.datatypes import PosTaggedCorpusWriter
 from py4j.java_collections import ListConverter
 
 
@@ -11,19 +13,27 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         try:
             self.tagger.start()
         except JavaProcessError, e:
-            raise ModuleExecutionError("error starting tokenizer process: %s" % e)
+            raise ModuleExecutionError("error starting tagger process: %s" % e)
+
+        # Check that the input provides us with words
+        if isinstance(self.input_corpora[0], WordAnnotationCorpus):
+            available_fields = self.input_corpora[0].read_annotation_fields()
+            if "word" not in available_fields:
+                raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
+
+    def get_writer(self, info):
+        return PosTaggedCorpusWriter(info.get_output_dir("documents"))
 
     def process_document(self, filename, doc):
-        sentences = doc.splitlines()
+        # Input is a list of tokenized sentences
         # Run POS tagging
-        tags = self.tagger.tag(sentences)
-        # Put the POS tags together with the words, as it makes them easier to use
-        tagged_sents = [
-            u" ".join([u"%s|%s" % (word, tag) for (word, tag) in zip(sentence_words.split(), sentence_tags.split())])
-            for (sentence_words, sentence_tags) in zip(sentences, tags)
+        tags = self.tagger.tag([" ".join(sentence) for sentence in doc])
+        # Put the POS tags together with the words
+        # The writer will format them to look like word|POS
+        return [
+            zip(sentence_words, sentence_tags.split())
+            for (sentence_words, sentence_tags) in zip(doc, tags)
         ]
-        # Output one sentence per line
-        return u"".join("%s\n" % sent for sent in tagged_sents)
 
     def postprocess(self, info, error=False):
         self.tagger.stop()
