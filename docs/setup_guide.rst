@@ -72,6 +72,7 @@ We're going to create the file `~/myproject/pipeline.conf`. Start by writing a `
 basic pipeline setup.
 
 .. code-block:: ini
+
     [pipeline]
     name=myproject
     release=0.1
@@ -95,6 +96,7 @@ documents. This is how the Gigaword corpus is stored, so if you have Gigaword, j
 **TODO: add an example that everyone can run** 
 
 .. code-block:: ini
+
     [input-text]
     type=pimlico.datatypes.XmlDocumentIterator
     path=/path/to/data/dir
@@ -103,6 +105,7 @@ Perhaps your corpus is very large and you'd rather try out your pipeline on a sm
 following option:
 
 .. code-block:: ini
+
     truncate=1000
 
 .. note::
@@ -121,6 +124,7 @@ documents together and subsequent modules will all use the same grouping to stor
 align the datasets they produce.
 
 .. code-block:: ini
+
     [tar-grouper]
     type=pimlico.modules.corpora.tar_filter
     input=input-text
@@ -135,6 +139,7 @@ Notice that the output from the previous module feeds into the input for this on
 the module.
 
 .. code-block:: ini
+
     [tokenize]
     type=pimlico.modules.opennlp.tokenize
     input=tar-grouper
@@ -145,6 +150,7 @@ Many NLP tools rely on part-of-speech (POS) tagging. Again, we use OpenNLP, and 
 wraps the OpenNLP tool.
 
 .. code-block:: ini
+
     [pos-tag]
     type=pimlico.modules.opennlp.pos
     input=tokenize
@@ -165,6 +171,7 @@ All the standard modules provide easy ways to get hold of their dependencies via
 Beautiful Soup.
 
 .. code-block:: bash
+
     cd ~/myproject/pimlico/lib/python
     make bs4
 
@@ -174,6 +181,7 @@ OpenNLP is a little trickier. To make things simple, we just get all the OpenNLP
 run the OpenNLP wrappers at once. The `opennlp` make target gets all of these at once.
 
 .. code-block:: bash
+
     cd ~/myproject/pimlico/lib/java
     make opennlp
 
@@ -181,6 +189,7 @@ At the moment, it's also necessary to build the Java wrappers around OpenNLP tha
 this, you'll need a Java compiler installed on your system.
 
 .. code-block:: bash
+
     cd ~/myproject/pimlico
     ant opennlp
 
@@ -192,6 +201,7 @@ There's one more thing to do: the tools we're using
 require statistical models. We can simply download the pre-trained English models from the OpenNLP website.
 
 .. code-block:: bash
+
     cd ~/myproject/pimlico/models
     make opennlp
 
@@ -205,6 +215,7 @@ We now run some checks over the pipeline to make sure that our config file is va
 ready to run.
 
 .. code-block:: bash
+
     cd ~/myproject/
     ./pimlico/bin/pimlico pipeline.conf check
 
@@ -217,6 +228,7 @@ such that in no one of them do all modules have all of their dependencies. For u
 we can run further checks on the *runtime* dependencies of all our modules.
 
 .. code-block:: bash
+
     ./pimlico/bin/pimlico pipeline.conf check --runtime
 
 If that works as well, we're able to start running modules.
@@ -229,6 +241,7 @@ Pimlico can now suggest an order in which to run your modules. In our case, this
 pipeline is entirely linear &ndash; it's clear which ones need to be run before others.
 
 .. code-block:: bash
+
     ./pimlico/bin/pimlico pipeline.conf schedule
 
 The output also tells you the current status of each module. At the moment, all the modules are `UNSTARTED`.
@@ -247,6 +260,7 @@ Running the modules
 The modules can be run using the `run` command and specifying the module by name. We do this manually for each module. 
 
 .. code-block:: bash
+
     ./pimlico/bin/pimlico.sh pipeline.conf run input-text
     ./pimlico/bin/pimlico.sh pipeline.conf run tokenize
     ./pimlico/bin/pimlico.sh pipeline.conf run pos-tag
@@ -260,6 +274,7 @@ people can replicate what you did.
 First, let's create a directory where our custom source code will live.
 
 .. code-block:: bash
+
     cd ~/myproject
     mkdir -p src/python
 
@@ -270,6 +285,7 @@ the config file, so it's easy to distribute the two together.
 Add this option to the `[pipeline]` section in the config file:
 
 .. code-block:: ini
+
     python_path=src/python
 
 Now you can create Python modules or packages in `src/python`, following the same conventions as the built-in modules 
