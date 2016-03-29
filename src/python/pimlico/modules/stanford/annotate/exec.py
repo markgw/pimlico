@@ -1,39 +1,25 @@
-import os
-from pimlico import JAVA_LIB_DIR
-from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import DocumentMapModuleExecutor
-from stanford_corenlp_pywrapper import CoreNLP
-from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
+from pimlico.modules.stanford import CoreNLPProcessingError
+from pimlico.modules.stanford.wrapper import CoreNLP
 
 
 def _word_annotation_preproc(doc):
-    return "\n".join(
-        " ".join(word["word"] for word in sentence)
-        for sentence in doc
-    )
+    return "\n".join(" ".join(word["word"] for word in sentence) for sentence in doc)
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
     def get_writer(self, info):
-        output_datatype = info.get_output("documents")
-        return SimpleWordAnnotationCorpusWriter(info.get_output_dir("documents"),
-                                                output_datatype.read_annotation_fields())
+        output_name, output_datatype = info.get_output_datatype("documents")
+        return SimpleWordAnnotationCorpusWriter(info.get_output_dir("documents"), output_datatype.annotation_fields)
 
     def preprocess(self, info):
         annotators = []
-        if type(self.input_corpora[0]) is TarredCorpus:
+        if not isinstance(self.input_corpora[0], (WordAnnotationCorpus, TokenizedCorpus)):
             # Data not already run through a tokenizer: include tokenization and sentence splitting
             annotators.extend(["tokenize", "ssplit"])
         annotators.extend(info.options["annotators"].split(","))
-
-        # Prepare a CoreNLP background process to do the processing
-        self.corenlp = CoreNLP(
-            configdict={"annotators": annotators},
-            output_types=[annotators],
-            corenlp_jars=[os.path.join(JAVA_LIB_DIR, "*")]
-        )
 
         # By default, for a TarredCorpus or TokenizedCorpus, just pass in the document text
         self._doc_preproc = lambda doc: doc
@@ -44,15 +30,38 @@ class ModuleExecutor(DocumentMapModuleExecutor):
             # For a word annotation corpus, we need to pull out the words
             self._doc_preproc = _word_annotation_preproc
 
+        # Prepare the list of attributes to extract from the output and send to the writer
+        output_name, output_datatype = info.get_output_datatype("documents")
+        self.output_fields = output_datatype.annotation_fields
+
+        # Prepare a CoreNLP background process to do the processing
+        self.corenlp = CoreNLP(info.pipeline)
+        self.corenlp.start()
+        self.log.info("CoreNLP server started on %s" % self.corenlp.server_url)
+        self.properties = {
+            "annotators": ",".join(annotators),
+            "outputFormat": "json",
+        }
+
     def process_document(self, archive, filename, doc):
         doc = self._doc_preproc(doc)
-        # Call CoreNLP on the doc
-        # TODO Not working -- not sure why
-        json_result = self.corenlp.parse_doc(doc.encode("utf-8"))
-        print json_result
-        # TODO Do something with the result
-        # Output one sentence per line
-        #return u"\n".join(tokenized_sents)
+
+        if doc.strip():
+            # Call CoreNLP on the doc
+            try:
+                json_result = self.corenlp.annotate(doc.encode("utf-8"), self.properties)
+            except CoreNLPProcessingError, e:
+                # TODO: do something other than re-raise
+                raise
+
+            return [
+                [
+                    [word_data[field_name] for field_name in self.output_fields]
+                    for word_data in sentence["tokens"]
+                ] for sentence in json_result["sentences"]
+            ]
+        else:
+            return []
 
     def postprocess(self, info, error=False):
-        pass
+        self.corenlp.shutdown()

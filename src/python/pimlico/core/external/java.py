@@ -1,12 +1,10 @@
-import os
 import time
 from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
 
-from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR, PIMLICO_ROOT
-
+from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR
+from pimlico.core.logs import get_log_file
 from pimlico.core.modules.base import DependencyError
 from pimlico.utils.communicate import timeout_process
-
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, JAVA_BUILD_DIR])
 
@@ -18,10 +16,12 @@ def call_java(class_name, args=[]):
     return stdout_data, stderr_data, process.returncode
 
 
-def start_java_process(class_name, args=[], wait=0.1):
+def start_java_process(class_name, args=[], java_args=[], wait=0.1):
     # May in future want to allow the path to the java executable to be specified in local config
-    cmd = ["java", "-cp", CLASSPATH, class_name] + args
+    cmd = ["java", "-cp", CLASSPATH] + java_args + [class_name] + args
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
+    # Attach the command to the Popen object so it's easy to read what was run for debugging
+    process.command_run = " ".join(cmd)
 
     # Wait a mo for it to get started
     time.sleep(wait)
@@ -48,7 +48,8 @@ def check_java_dependency(class_name):
 
     out, err, code = call_java("pimlico.core.DependencyChecker", [class_name])
     if code != 0:
-        raise DependencyError("could not load Java class %s. Have you compiled the relevant Java module?" % class_name)
+        raise DependencyError("could not load Java class %s. Have you compiled the relevant Java module?" % class_name,
+                              stderr=err, stdout=out)
 
 
 def check_java():
@@ -189,7 +190,7 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
 
 
 def output_p4j_error_info(command, returncode, stdout, stderr):
-    file_path = os.path.abspath(os.path.join(PIMLICO_ROOT, "py4j.err"))
+    file_path = get_log_file("py4j")
     with open(file_path, "w") as f:
         print >>f, "Command:"
         print >>f, " ".join(command)

@@ -10,3 +10,4 @@ lib/python/*
 models/*
 !models/Makefile
 docs/_build/*
+log/

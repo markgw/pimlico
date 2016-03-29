@@ -372,7 +372,10 @@ class DependencyError(Exception):
     make target in the lib directory.
 
     """
-    pass
+    def __init__(self, message, stderr=None, stdout=None):
+        super(DependencyError, self).__init__(message)
+        self.stdout = stdout
+        self.stderr = stderr
 
 
 def load_module_executor(path_or_info):

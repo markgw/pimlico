@@ -1,9 +1,8 @@
-from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
-from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
+from pimlico.modules.stanford.dependencies import check_corenlp_dependencies
 
 
 def annotation_fields_from_options(module_info):
@@ -57,26 +56,7 @@ class ModuleInfo(DocumentMapModuleInfo):
         #self.token_model_path = abs_path_or_model_dir_path(self.options["token_model"], "opennlp")
 
     def check_runtime_dependencies(self):
-        missing_dependencies = []
-        # We need the CoreNLP python wrapper available
-        try:
-            import stanford_corenlp_pywrapper
-        except ImportError:
-            missing_dependencies.append(("CoreNLP wrapper", self.module_name,
-                                         "Install in lib/python/ dir using 'make corenlp'"))
-
-        # Check whether the OpenNLP tokenizer is available
-        try:
-            class_name = "edu.stanford.nlp.pipeline.StanfordCoreNLP"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("CoreNLP", self.module_name,
-                                             "Couldn't load %s. Install Stanford CoreNLP in lib/java/ dir using "
-                                             "'make corenlp'" % class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
-
+        missing_dependencies = check_corenlp_dependencies(self.module_name)
         # TODO Check models are available here, when you've added the model path option
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies
