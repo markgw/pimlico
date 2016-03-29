@@ -1,8 +1,7 @@
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import DocumentMapModuleExecutor
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus
-from pimlico.modules.opennlp.pos.datatypes import PosTaggedCorpusWriter
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
 from py4j.java_collections import ListConverter
 
 
@@ -22,9 +21,12 @@ class ModuleExecutor(DocumentMapModuleExecutor):
                 raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
 
     def get_writer(self, info):
-        return PosTaggedCorpusWriter(info.get_output_dir("documents"))
+        return SimpleWordAnnotationCorpusWriter(
+            info.get_output_dir("documents"),
+            self.input_corpora[0].read_annotation_fields() + ["pos"]
+        )
 
-    def process_document(self, filename, doc):
+    def process_document(self, archive, filename, doc):
         # Input is a list of tokenized sentences
         # Run POS tagging
         tags = self.tagger.tag([" ".join(sentence) for sentence in doc])

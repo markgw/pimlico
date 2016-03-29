@@ -1,3 +1,4 @@
+import os
 import re
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import DocumentMapModuleExecutor
@@ -58,9 +59,9 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         self.log.info("Matching regex %s" % regex.replace("\n", "\\n"))
 
         self.match_count = 0
-        self.matched_docs = 0
+        self.matched_docs = []
 
-    def process_document(self, filename, doc):
+    def process_document(self, archive, filename, doc):
         # Add word boundaries either side of the doc text so we match at the beginning and end
         doc = "%s%s%s" % (self.word_boundary, doc, self.word_boundary)
         # Search using the pre-prepared regex
@@ -74,11 +75,16 @@ class ModuleExecutor(DocumentMapModuleExecutor):
 
         self.match_count += matched
         if matched:
-            self.matched_docs += 1
+            self.matched_docs.append((archive, filename))
         return "\n".join(output_lines)
 
     def postprocess(self, info, error=False):
-        self.log.info("Regex matched a total of %d times in %d documents" % (self.match_count, self.matched_docs))
+        self.log.info("Regex matched a total of %d times in %d documents" % (self.match_count, len(self.matched_docs)))
+        match_filename = os.path.join(info.get_output_dir("documents"), "matched_docs.txt")
+        self.log.info("Outputing matched doc list to %s" % match_filename)
+        # Output a list of the non-empty files
+        with open(match_filename, "w") as f:
+            f.write("\n".join("%s/%s" % (archive, filename) for (archive, filename) in self.matched_docs))
 
 
 def build_re(word_format, match_field, match_expr, group_suffix, nonwords):

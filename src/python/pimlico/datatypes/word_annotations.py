@@ -79,7 +79,7 @@ class WordAnnotationCorpus(TarredCorpus):
             self._word_re = re.compile(word_re)
         return self._word_re
 
-    def parse_annotations(self, doc):
+    def process_document(self, doc):
         sentences = []
         while len(doc):
             # Find the next sentence boundary
@@ -102,8 +102,6 @@ class WordAnnotationCorpus(TarredCorpus):
                                            (words[word_dicts.index(None)], self.word_re.pattern))
             sentences.append(word_dicts)
         return sentences
-
-    document_preprocessors = [parse_annotations]
 
     def data_ready(self):
         if not super(WordAnnotationCorpus, self).data_ready():
@@ -165,7 +163,7 @@ class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
         super(SimpleWordAnnotationCorpusWriter, self).add_document(archive_name, doc_name, doc_string)
 
 
-def add_annotation_field(input_name, add_fields):
+def AddAnnotationField(input_name, add_fields):
     """
     Dynamic type constructor that can be used in place of a module's output type. When called
     (when the output type is needed), dynamically creates a new type that is a WordAnnotationCorpus
@@ -199,6 +197,11 @@ def add_annotation_field(input_name, add_fields):
                                           "since the input type, %s, doesn't explicitly declare its annotation fields" %
                                           (input_name, input_datatype.__name__))
             base_annotation_fields = input_datatype.annotation_fields
+
+        for field in add_fields:
+            if field in base_annotation_fields:
+                raise ModuleInfoLoadError("trying to add a field '%s' to data that already has a field with "
+                                          "that name" % field)
 
         class ExtendedWordAnnotationCorpus(WordAnnotationCorpus):
             annotation_fields = base_annotation_fields + add_fields

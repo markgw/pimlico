@@ -8,6 +8,10 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     # Prepare a logger
     log = get_console_logger("Pimlico", debug=debug)
 
+    pipeline_name = "'%s'" % pipeline.name if pipeline.variant == "main" else \
+        "'%s' (variant '%s')" % (pipeline.name, pipeline.variant)
+    log.info("Loaded pipeline %s" % pipeline_name)
+
     # Load the module instance
     module = pipeline[module_name]
     log.info("Checking module config")

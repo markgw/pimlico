@@ -30,10 +30,19 @@ def run_cmd(pipeline, opts):
             raise
 
 
+def list_variants(pipeline, opts):
+    # Main is the default pipeline config and is always available (but not included in this list)
+    variants = ["main"] + pipeline.available_variants
+    print "Available pipeline variants: %s" % ", ".join(variants)
+    print "Select one using the --variant option"
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
     parser.add_argument("--debug", "-d", help="Output verbose debugging info", action="store_true")
+    parser.add_argument("--variant", "-v", help="Load a particular variant of a pipeline. For a list of available "
+                                                "variants, use the 'variants' command", default="main")
     subparsers = parser.add_subparsers(help="Select a sub-command")
 
     check = subparsers.add_parser("check",
@@ -53,11 +62,14 @@ if __name__ == "__main__":
     run.add_argument("--force-rerun", "-f", action="store_true",
                      help="Force running the module, even if it's already been run to completion")
 
+    variants = subparsers.add_parser("variants", help="List the available variants of a pipeline config")
+    variants.set_defaults(func=list_variants)
+
     opts = parser.parse_args()
 
     # Read in the pipeline config from the given file
     try:
-        pipeline = PipelineConfig.load(opts.pipeline_config)
+        pipeline = PipelineConfig.load(opts.pipeline_config, variant=opts.variant)
     except PipelineConfigParseError, e:
         print >>sys.stderr, "Error reading pipeline config: %s" % e
         sys.exit(1)

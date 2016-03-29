@@ -19,6 +19,7 @@ class PipelineConfig(object):
 
     Special sections
     ================
+
     - vars:
         May contain any variable definitions, to be used later on in the pipeline. Further down, expressions like
         `%(varname)s` will be expanded into the value assigned to `varname` in the vars section.
@@ -34,9 +35,28 @@ class PipelineConfig(object):
             modules/packages used by the pipeline can be found. Typically, a config file is distributed with a
             directory of Python code providing extra modules, datatypes, etc. Multiple paths are separated by `:`s
 
+    Directives
+    ==========
+    Certain special directives are processed when reading config files. They are lines that begin with "%%", followed
+    by the directive name and any arguments.
+
+    - `variant`:
+        Allows a line to be included only when loading a particular variant of a pipeline. The variant name is
+        specified as part of the directive in the form: `variant:variant_name`. You may include the line in more
+        than one variant by specifying multiple names, separated by commas (and no spaces). You can use the default
+        variant "main", so that the line will be left out of other variants. The rest of the line, after the directive
+        and variant name(s) is the content that will be included in those variants.
+    - `novariant`:
+        A line to be included only when not loading a variant of the pipeline. Equivalent to `variant:main`.
+    - `include`:
+        Include the entire contents of another file. The filename, specified relative to the config file in which the
+        directive is found, is given after a space.
 
     """
-    def __init__(self, pipeline_config, local_config, raw_module_configs, module_order, filename=None):
+    def __init__(self, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
+                 variant="main", available_variants=[]):
+        self.available_variants = available_variants
+        self.variant = variant
         # Stores the module names in the order they were specified in the config file
         self.module_order = module_order
         self.local_config = local_config
@@ -54,8 +74,8 @@ class PipelineConfig(object):
                                            "pipeline section")
         check_release(self.pipeline_config["release"])
 
-        self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name)
-        self.short_term_store = os.path.join(self.local_config["short_term_store"], self.name)
+        self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name, self.variant)
+        self.short_term_store = os.path.join(self.local_config["short_term_store"], self.name, self.variant)
 
         # Get paths to add to the python path for the pipeline
         # Used so that a project can specify custom module types and other python code outside the pimlico source tree
@@ -155,7 +175,7 @@ class PipelineConfig(object):
         return os.path.abspath(os.path.join(config_dir, path))
 
     @staticmethod
-    def load(filename, local_config=None):
+    def load(filename, local_config=None, variant="main"):
         if local_config is None:
             # Use the default locations for local config file
             # May want to add other locations here...
@@ -183,10 +203,12 @@ class PipelineConfig(object):
             if attr not in local_config_data:
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
 
-        # TODO Perform pre-processing of config file to replace includes, etc
-        with open(filename, "r") as f:
-            # ConfigParser can read directly from a file, but we need to pre-process the text
-            config_text = f.read()
+        # Perform pre-processing of config file to replace includes, etc
+        config_text, available_variants = preprocess_config_file(os.path.abspath(filename), variant=variant)
+        # If we were asked to load a particular variant, check it's in the list of available variants
+        if variant is not None and variant != "main" and variant not in available_variants:
+            raise PipelineConfigParseError("could not load pipeline variant '%s': it is not declared anywhere in the "
+                                           "config file")
         text_buffer = StringIO(config_text)
 
         # Parse the config file text
@@ -220,7 +242,8 @@ class PipelineConfig(object):
         except ConfigParser.Error, e:
             raise PipelineConfigParseError("could not parse config file. %s" % e)
         # Do no further checking or processing at this stage: just keep raw dictionaries for the time being
-        return PipelineConfig(pipeline_config, local_config_data, raw_module_options, module_order, filename=filename)
+        return PipelineConfig(pipeline_config, local_config_data, raw_module_options, module_order,
+                              filename=filename, variant=variant, available_variants=list(sorted(available_variants)))
 
 
 def var_substitute(option_val, vars):
@@ -238,6 +261,41 @@ class PipelineConfigParseError(Exception):
 
 class PipelineStructureError(Exception):
     pass
+
+
+def preprocess_config_file(filename, variant="main"):
+    # Read in the file
+    config_lines = []
+    available_variants = set([])
+    with open(filename, "r") as f:
+        # ConfigParser can read directly from a file, but we need to pre-process the text
+        for line in f:
+            if line.startswith("%% "):
+                # Directive: process this now
+                directive, __, rest = line[3:].partition(" ")
+                if directive.lower() == "novariant":
+                    # Include this line only if loading the main variant
+                    if variant == "main":
+                        config_lines.append(rest.lstrip())
+                elif directive.lower().startswith("variant:"):
+                    variant_cond = directive[8:]
+                    # Line conditional on a specific variant: include only if we're loading that variant
+                    if variant_cond == variant:
+                        config_lines.append(rest.lstrip())
+                    # Keep a list of all available variants
+                    available_variants.add(variant_cond)
+                elif directive == "include":
+                    # Include another file, given relative to this one
+                    include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), rest.strip("\n ")))
+                    # Run preprocessing over that file too, so we can have embedded includes, etc
+                    incl_text, incl_variants = preprocess_config_file(include_filename, variant=variant)
+                    config_lines.append(incl_text)
+                    available_variants.update(incl_variants)
+                else:
+                    raise PipelineConfigParseError("unknown directive '%s' used in config file" % directive)
+            else:
+                config_lines.append(line)
+    return "".join(config_lines), available_variants
 
 
 def check_for_cycles(pipeline):

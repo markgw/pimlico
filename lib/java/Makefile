@@ -70,25 +70,15 @@ py4j0.9.2.jar :
 
 ###################################
 	
-stanford-parser :
-	$(MAKE) stanford-parser-full-2014-01-04.zip
-	unzip stanford-parser-full-2014-01-04.zip
-	mv stanford-parser-full-2014-01-04/ stanford-parser
-	rm stanford-parser-full-2014-01-04.zip
+corenlp : stanford-corenlp-3.6.0.jar
 
-stanford-parser-full-2014-01-04.zip :
-	$(FETCH) http://nlp.stanford.edu/software/stanford-parser-full-2014-01-04.zip
+stanford-corenlp-3.6.0.jar :
+	$(FETCH) http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip
+	unzip stanford-corenlp-full-2015-12-09.zip
+	mv stanford-corenlp-full-2015-12-09/*.jar .
+	rm -rf stanford-corenlp-full-2015-12-09 stanford-corenlp-full-2015-12-09.zip
 
-stanford-tagger : 
-	$(MAKE) stanford-postagger-2014-01-04.zip
-	unzip stanford-postagger-2014-01-04.zip
-	mv stanford-postagger-2014-01-04 stanford-tagger
-	rm stanford-postagger-2014-01-04.zip
-
-stanford-postagger-2014-01-04.zip :
-	$(FETCH) http://nlp.stanford.edu/downloads/stanford-postagger-2014-01-04.zip
-	
-####################################
+##################################
 
 guava : guava.jar
 

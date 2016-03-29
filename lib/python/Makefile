@@ -55,3 +55,13 @@ bs4 :
 	mv beautifulsoup4-4.3.2/bs4 .
 	rmdir beautifulsoup4-4.3.2
 	rm beautifulsoup4-4.3.2.tar.gz
+
+################
+corenlp : stanford_corenlp_pywrapper
+
+stanford_corenlp_pywrapper :
+	$(FETCH) https://github.com/brendano/stanford_corenlp_pywrapper/archive/master.zip
+	unzip master.zip
+	mv stanford_corenlp_pywrapper-master/stanford_corenlp_pywrapper .
+	rm -rf stanford_corenlp_pywrapper-master master.zip
+	# Installed Python wrapper: remember to install the Java libraries as well!

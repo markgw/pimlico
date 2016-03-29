@@ -13,7 +13,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         except JavaProcessError, e:
             raise ModuleExecutionError("error starting tokenizer process: %s" % e)
 
-    def process_document(self, filename, doc):
+    def process_document(self, archive, filename, doc):
         # Run tokenization
         tokenized_sents = self.tokenizer.tokenize(doc)
         # Output one sentence per line

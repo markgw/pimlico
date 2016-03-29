@@ -6,6 +6,10 @@ from pimlico.utils.format import multiline_tablate
 
 
 def check_cmd(pipeline, opts):
+    # Output what variants are available and say which we're checking
+    print "Available pipeline variants: %s" % ", ".join(["main"] + pipeline.available_variants)
+    print "Checking variant '%s'\n" % pipeline.variant
+
     # Load all the modules' metadata
     # This makes sure none of the modules have trouble loading
     for name in pipeline.modules:
@@ -48,7 +52,7 @@ def check_cmd(pipeline, opts):
 
         if len(missing_dependencies):
             print "\nRuntime dependencies not satisfied:\n%s" % \
-                  multiline_tablate(missing_dependencies, [30, 30, 150],
+                  multiline_tablate(missing_dependencies, [30, 30, 60],
                                     tablefmt="orgtbl", headers=["Dependency", "Module", "Description"])
         else:
             print "\nRuntime dependencies all satisfied"

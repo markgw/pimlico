@@ -68,7 +68,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
             with self.get_writer(module_instance_info) as writer:
                 for archive, filename, docs in pbar(input_iterator.archive_iter()):
                     # Get the subclass to process the doc
-                    result = self.process_document(filename, *docs)
+                    result = self.process_document(archive, filename, *docs)
                     # Write the result to the output corpus
                     writer.add_document(archive, filename, result)
             complete = True

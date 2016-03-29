@@ -1,12 +1,12 @@
 import os
 import time
 from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
-import fcntl
-import sys
 
-from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR
+from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR, PIMLICO_ROOT
+
 from pimlico.core.modules.base import DependencyError
 from pimlico.utils.communicate import timeout_process
+
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, JAVA_BUILD_DIR])
 
@@ -140,14 +140,23 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
 
     # Determine which port the server started on (needed to support ephemeral ports)
     # Don't hang on an error running the gateway launcher
+    output = None
     try:
-        with timeout_process(proc, 1.0):
+        with timeout_process(proc, 3.0):
             output = proc.stdout.readline()
     except Exception, e:
         # Try reading stderr to see if there's any info there
         error_output = proc.stderr.read().strip("\n ")
-        raise JavaProcessError("error reading first line from gateway process: %s. Error output: %s" %
-                               (e, error_output))
+        err_path = output_p4j_error_info(command, "?", "could not read", error_output)
+
+        raise JavaProcessError("error reading first line from gateway process: %s. Error output: %s (see %s for "
+                               "more details)" % (e, error_output, err_path))
+
+    if output is None:
+        error_output = proc.stderr.read().strip("\n ")
+        err_path = output_p4j_error_info(command, "(timed out)", "", error_output)
+        raise JavaProcessError("timed out starting gateway server (for details see %s)" % err_path)
+
     # Check whether there was an error reported
     output = output.strip("\n ")
     if output == "ERROR":
@@ -159,11 +168,16 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
         port_used = int(output)
     except ValueError:
         returncode = proc.poll()
+
+        stderr_output = proc.stderr.read().strip("\n ")
+        err_path = output_p4j_error_info(command, returncode, output, stderr_output)
+
         if returncode is not None:
-            raise JavaProcessError("Py4J server process returned with return code %s: %s" % (returncode,
-                                                                                             proc.stderr.read()))
+            raise JavaProcessError("Py4J server process returned with return code %s: %s (see %s for details)" %
+                                   (returncode, stderr_output, err_path))
         else:
-            raise JavaProcessError("invalid output from Py4J server when started: '%s'" % output)
+            raise JavaProcessError("invalid output from Py4J server when started: '%s' (see %s for details)" %
+                                   (output, err_path))
 
     # Start consumer threads so process does not deadlock/hangs
     OutputConsumer(redirect_stdout, proc.stdout, daemon=daemonize_redirect).start()
@@ -173,6 +187,18 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
 
     return port_used, proc
 
+
+def output_p4j_error_info(command, returncode, stdout, stderr):
+    file_path = os.path.abspath(os.path.join(PIMLICO_ROOT, "py4j.err"))
+    with open(file_path, "w") as f:
+        print >>f, "Command:"
+        print >>f, " ".join(command)
+        print >>f, "Return code: %s" % returncode
+        print >>f, "Read from stdout:"
+        print >>f, stdout
+        print >>f, "Read from stderr:"
+        print >>f, stderr
+    return file_path
 
 
 class DependencyCheckerError(Exception):

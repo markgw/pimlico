@@ -11,6 +11,10 @@ class InputModuleInfo(BaseModuleInfo):
     Base class for input modules. These don't get executed in general, they just provide a way to iterate over
     input data.
 
+    You probably don't want to subclass this. It's usually simplest to define a datatype for reading the input
+    data and then just specify its class as the module's type. This results in a subclass of this module info
+    being created dynamically to read that data.
+
     Note that module_executable is typically set to False and the base class does this. However, some input
     modules need to be executed before the input is usable, for example to collect stats about the input
     data.
