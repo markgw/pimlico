@@ -18,6 +18,7 @@ You'll want to use the latest release of Pimlico. Check the website and download
 Create a new directory to put your project in and extract the codebase into
 a directory `pimlico` within the project directory. Let's say we're using `~/myproject/`.
 
+.. code-block:: bash
     mkdir ~/myproject
     cd ~/myproject
     mv /path/to/downloaded/tarball.tar.gz .
@@ -28,6 +29,7 @@ Depending on what you want to do with Pimlico, you'll
 also need to fetch dependencies. Let's start by getting the basic dependencies that will be needed regardless of what
 module types you use.
 
+.. code-block:: bash
     cd pimlico/lib/python
     make core
 
@@ -52,6 +54,7 @@ backed up, so you don't lose your valuable output.
 
 Create a file `~/.pimlico` that looks like this:
 
+.. code-block:: ini
     long_term_store=/path/to/long-term/store
     short_term_store=/path/to/short-term/store
 
@@ -65,6 +68,7 @@ a simple one as an example.
 We're going to create the file `~/myproject/pipeline.conf`. Start by writing a `pipeline` section to give the
 basic pipeline setup.
 
+.. code-block:: ini
     [pipeline]
     name=myproject
     release=0.1
@@ -87,6 +91,7 @@ documents. This is how the Gigaword corpus is stored, so if you have Gigaword, j
 
 **TODO: add an example that everyone can run** 
 
+.. code-block:: ini
     [input-text]
     type=pimlico.datatypes.XmlDocumentIterator
     path=/path/to/data/dir
@@ -94,6 +99,7 @@ documents. This is how the Gigaword corpus is stored, so if you have Gigaword, j
 Perhaps your corpus is very large and you'd rather try out your pipeline on a small subset. In that case, add the 
 following option:
 
+.. code-block:: ini
     truncate=1000
 
 .. note::
@@ -111,6 +117,7 @@ We can do the grouping on the fly as we read data from the input corpus. The `ta
 documents together and subsequent modules will all use the same grouping to store their output, making it easy to 
 align the datasets they produce.
 
+.. code-block:: ini
     [tar-grouper]
     type=pimlico.modules.corpora.tar_filter
     input=input-text
@@ -124,6 +131,7 @@ things at once, calling OpenNLP tools.
 Notice that the output from the previous module feeds into the input for this one, which we specify simply by naming 
 the module.
 
+.. code-block:: ini
     [tokenize]
     type=pimlico.modules.opennlp.tokenize
     input=tar-grouper
@@ -133,6 +141,7 @@ Doing something more interesting: POS tagging
 Many NLP tools rely on part-of-speech (POS) tagging. Again, we use OpenNLP, and a standard Pimlico module
 wraps the OpenNLP tool.
 
+.. code-block:: ini
     [pos-tag]
     type=pimlico.modules.opennlp.pos
     input=tokenize
@@ -152,6 +161,7 @@ Fetching dependencies
 All the standard modules provide easy ways to get hold of their dependencies via makefiles for GNU Make. Let's get 
 Beautiful Soup.
 
+.. code-block:: bash
     cd ~/myproject/pimlico/lib/python
     make bs4
 
@@ -160,12 +170,14 @@ Simple as that.
 OpenNLP is a little trickier. To make things simple, we just get all the OpenNLP tools and libraries required to
 run the OpenNLP wrappers at once. The `opennlp` make target gets all of these at once.
 
+.. code-block:: bash
     cd ~/myproject/pimlico/lib/java
     make opennlp
 
 At the moment, it's also necessary to build the Java wrappers around OpenNLP that are provided as part of Pimlico. For 
 this, you'll need a Java compiler installed on your system.
 
+.. code-block:: bash
     cd ~/myproject/pimlico
     ant opennlp
 
@@ -176,6 +188,7 @@ this, you'll need a Java compiler installed on your system.
 There's one more thing to do: the tools we're using
 require statistical models. We can simply download the pre-trained English models from the OpenNLP website.
 
+.. code-block:: bash
     cd ~/myproject/pimlico/models
     make opennlp
 
@@ -188,6 +201,7 @@ Checking everything's dandy
 We now run some checks over the pipeline to make sure that our config file is valid and we've got Pimlico basically 
 ready to run.
 
+.. code-block:: bash
     cd ~/myproject/
     ./pimlico/bin/pimlico pipeline.conf check
 
@@ -199,6 +213,7 @@ each module. This is intentional: in some setups, we might run different modules
 such that in no one of them do all modules have all of their dependencies. For us, however, this isn't the case, so 
 we can run further checks on the *runtime* dependencies of all our modules.
 
+.. code-block:: bash
     ./pimlico/bin/pimlico pipeline.conf check --runtime
 
 If that works as well, we're able to start running modules.
@@ -210,6 +225,7 @@ What modules to run?
 Pimlico can now suggest an order in which to run your modules. In our case, this is pretty obvious, seeing as our 
 pipeline is entirely linear &ndash; it's clear which ones need to be run before others.
 
+.. code-block:: bash
     ./pimlico/bin/pimlico pipeline.conf schedule
 
 The output also tells you the current status of each module. At the moment, all the modules are `UNSTARTED`.
@@ -227,6 +243,7 @@ Running the modules
 -------------------
 The modules can be run using the `run` command and specifying the module by name. We do this manually for each module. 
 
+.. code-block:: bash
     ./pimlico/bin/pimlico.sh pipeline.conf run input-text
     ./pimlico/bin/pimlico.sh pipeline.conf run tokenize
     ./pimlico/bin/pimlico.sh pipeline.conf run pos-tag
@@ -239,6 +256,7 @@ people can replicate what you did.
 
 First, let's create a directory where our custom source code will live.
 
+.. code-block:: bash
     cd ~/myproject
     mkdir -p src/python
 
@@ -248,6 +266,7 @@ the config file, so it's easy to distribute the two together.
 
 Add this option to the `[pipeline]` section in the config file:
 
+.. code-block:: ini
     python_path=src/python
 
 Now you can create Python modules or packages in `src/python`, following the same conventions as the built-in modules 
