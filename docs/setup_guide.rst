@@ -19,6 +19,7 @@ Create a new directory to put your project in and extract the codebase into
 a directory `pimlico` within the project directory. Let's say we're using `~/myproject/`.
 
 .. code-block:: bash
+
     mkdir ~/myproject
     cd ~/myproject
     mv /path/to/downloaded/tarball.tar.gz .
@@ -30,6 +31,7 @@ also need to fetch dependencies. Let's start by getting the basic dependencies t
 module types you use.
 
 .. code-block:: bash
+
     cd pimlico/lib/python
     make core
 
@@ -55,6 +57,7 @@ backed up, so you don't lose your valuable output.
 Create a file `~/.pimlico` that looks like this:
 
 .. code-block:: ini
+
     long_term_store=/path/to/long-term/store
     short_term_store=/path/to/short-term/store
 
