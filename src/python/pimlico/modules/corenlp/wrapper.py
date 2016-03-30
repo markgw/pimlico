@@ -6,15 +6,15 @@ NB: This module imports some of the Stanford modules' dependencies. Don't import
 Client-side code based on Smitha Milli's CoreNLP client: https://github.com/smilli/py-corenlp.
 
 """
-import warnings
 import json
+import warnings
 
+import requests
 from pimlico.core.external.java import start_java_process
 from pimlico.core.logs import get_log_file
-from pimlico.modules.stanford import CoreNLPClientError, CoreNLPProcessingError
+from pimlico.modules.corenlp import CoreNLPClientError, CoreNLPProcessingError
 from pimlico.utils.communicate import timeout_process
 from pimlico.utils.pipes import OutputQueue
-import requests
 
 
 class CoreNLP(object):
@@ -75,13 +75,17 @@ class CoreNLP(object):
             warnings.warn("Had to kill CoreNLP server, as it was taking too long to shut down")
 
     def annotate(self, text, properties=None):
+        if not text.strip():
+            # No input text: don't pass into the CoreNLP server, as it gets thrown off by this
+            return {"sentences": []}
+
         if properties is None:
             params = {}
         else:
             params = {"properties": str(properties)}
 
         try:
-            r = requests.get(self.server_url, params=params, data=text, timeout=3.)
+            r = requests.get(self.server_url, params=params, data=text, timeout=10.)
         except requests.exceptions.ConnectionError:
             raise CoreNLPClientError("Did not get a response from CoreNLP server at %s. Server must be started "
                                      "before calling annotate()" % self.server_url)

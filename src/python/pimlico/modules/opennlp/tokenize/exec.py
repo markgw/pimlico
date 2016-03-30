@@ -4,10 +4,10 @@ from pimlico.core.modules.map import DocumentMapModuleExecutor
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
-    def preprocess(self, info):
+    def preprocess(self):
         # Start a tokenizer process
-        self.tokenizer = StreamTokenizer(info.sentence_model_path, info.token_model_path,
-                                         pipeline=info.pipeline)
+        self.tokenizer = StreamTokenizer(self.info.sentence_model_path, self.info.token_model_path,
+                                         pipeline=self.info.pipeline)
         try:
             self.tokenizer.start()
         except JavaProcessError, e:
@@ -19,7 +19,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         # Output one sentence per line
         return u"\n".join(tokenized_sents)
 
-    def postprocess(self, info, error=False):
+    def postprocess(self, error=False):
         self.tokenizer.stop()
         self.tokenizer = None
 

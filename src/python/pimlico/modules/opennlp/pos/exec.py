@@ -6,9 +6,9 @@ from py4j.java_collections import ListConverter
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
-    def preprocess(self, info):
+    def preprocess(self):
         # Start a tokenizer process
-        self.tagger = StreamTagger(info.model_path, pipeline=info.pipeline)
+        self.tagger = StreamTagger(self.info.model_path, pipeline=self.info.pipeline)
         try:
             self.tagger.start()
         except JavaProcessError, e:
@@ -20,9 +20,9 @@ class ModuleExecutor(DocumentMapModuleExecutor):
             if "word" not in available_fields:
                 raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
 
-    def get_writer(self, info):
+    def get_writer(self, output_name):
         return SimpleWordAnnotationCorpusWriter(
-            info.get_output_dir("documents"),
+            self.info.get_output_dir(output_name),
             self.input_corpora[0].read_annotation_fields() + ["pos"]
         )
 
@@ -37,7 +37,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
             for (sentence_words, sentence_tags) in zip(doc, tags)
         ]
 
-    def postprocess(self, info, error=False):
+    def postprocess(self, error=False):
         self.tagger.stop()
         self.tagger = None
 

@@ -5,7 +5,7 @@ from pimlico.core.modules.map import DocumentMapModuleExecutor
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
-    def preprocess(self, info):
+    def preprocess(self):
         # Turn off document processing on the input iterator
         # This means we'll just get raw text for each document
         self.input_corpora[0].raw_input = True
@@ -13,7 +13,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         # Now we're able to check what fields will actually be returned by the input datatype
         # Check we've got all the ones used by the expression
         available_fields = self.input_corpora[0].read_annotation_fields()
-        unknown_fields = info.required_fields - set(available_fields)
+        unknown_fields = self.info.required_fields - set(available_fields)
         if unknown_fields:
             if self.input_corpora[0].annotation_fields is None:
                 extra_mess = ". This would not have been caught by pre-execution checks, since the input datatype's " \
@@ -39,7 +39,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         self.capture_fields = []
 
         for word_num, (match_field_name, target, prefix, var_name, extract_field_name) \
-                in enumerate(info.deconstructed_expression):
+                in enumerate(self.info.deconstructed_expression):
             # Build a regex component that matches the required field to the target value
             if prefix:
                 # Allow more chars after the target
@@ -78,9 +78,9 @@ class ModuleExecutor(DocumentMapModuleExecutor):
             self.matched_docs.append((archive, filename))
         return "\n".join(output_lines)
 
-    def postprocess(self, info, error=False):
+    def postprocess(self, error=False):
         self.log.info("Regex matched a total of %d times in %d documents" % (self.match_count, len(self.matched_docs)))
-        match_filename = os.path.join(info.get_output_dir("documents"), "matched_docs.txt")
+        match_filename = os.path.join(self.info.get_output_dir("documents"), "matched_docs.txt")
         self.log.info("Outputing matched doc list to %s" % match_filename)
         # Output a list of the non-empty files
         with open(match_filename, "w") as f:

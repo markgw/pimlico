@@ -141,12 +141,12 @@ class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
 
     """
 
-    def __init__(self, base_dir, field_names, field_sep="|"):
+    def __init__(self, base_dir, field_names, field_sep=u"|"):
         self.field_names = field_names
         self.field_sep = field_sep
         # Prepare a word format that includes the given field names
-        word_format = field_sep.join("{%s}" % field for field in field_names)
-        super(SimpleWordAnnotationCorpusWriter, self).__init__("\n", " ", word_format, " \n%s" % field_sep, base_dir)
+        word_format = field_sep.join(u"{%s}" % field for field in field_names)
+        super(SimpleWordAnnotationCorpusWriter, self).__init__(u"\n", u" ", word_format, u" \n%s" % field_sep, base_dir)
 
     def add_document(self, archive_name, doc_name, data):
         """
@@ -158,8 +158,11 @@ class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
         :param doc_name: document being added
         :param data: sentence data in the form described above
         """
-        doc_string = \
-            "\n".join(" ".join(self.field_sep.join(word_fields) for word_fields in sentence) for sentence in data)
+        if data is None:
+            doc_string = u""
+        else:
+            doc_string = \
+                u"\n".join(u" ".join(self.field_sep.join(word_fields) for word_fields in sentence) for sentence in data)
         super(SimpleWordAnnotationCorpusWriter, self).add_document(archive_name, doc_name, doc_string)
 
 

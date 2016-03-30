@@ -108,6 +108,10 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
         self.doc_count = 0
 
     def add_document(self, archive_name, doc_name, data):
+        # For an empty result, signified by None, output an empty file
+        if data is None:
+            data = u""
+
         if archive_name != self.current_archive_name:
             # Starting a new archive
             if self.current_archive_tar is not None:

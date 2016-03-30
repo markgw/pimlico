@@ -16,6 +16,7 @@ def schedule_cmd(pipeline, opts):
         # Check status of each input datatypes
         for input_name in module.input_names:
             print "       input %s: %s" % (input_name, "ready" if module.input_ready(input_name) else "not ready")
+        print "       outputs: %s" % ", ".join(module.output_names)
 
 
 def run_cmd(pipeline, opts):

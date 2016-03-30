@@ -17,8 +17,8 @@ worrying about incurring the associated costs (and dependencies) every time a pi
 is loaded.
 
 """
-from importlib import import_module
 import os
+from importlib import import_module
 from types import FunctionType
 
 from pimlico.core.config import PipelineStructureError
@@ -33,8 +33,11 @@ class BaseModuleInfo(object):
     module_type_name = NotImplemented
     module_options = []
     module_inputs = []
-    # Specifies a list of (name, datatype class) pairs
+    # Specifies a list of (name, datatype class) pairs for outputs that are always written
     module_outputs = []
+    # Specifies a list of (name, datatype class) pairs for outputs that are written only if they're specified
+    #  in the "output" option or used by another module
+    module_optional_outputs = []
     # Whether the module should be executed
     # Typically True for almost all modules, except input modules (though some of them may also require execution) and
     #  filters
@@ -42,11 +45,34 @@ class BaseModuleInfo(object):
     # If specified, this ModuleExecutor class will be used instead of looking one up in the exec Python module
     module_executor_override = None
 
-    def __init__(self, module_name, pipeline, inputs={}, options={}):
+    def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[]):
         self.inputs = inputs
         self.options = options
         self.module_name = module_name
         self.pipeline = pipeline
+
+        self.default_output_name = (self.module_outputs+self.module_optional_outputs)[0][0]
+
+        # Work out what outputs this module will make available
+        if len(self.module_outputs + self.module_optional_outputs) == 0:
+            # Need at least one output
+            if len(self.module_optional_outputs):
+                raise PipelineStructureError(
+                    "module %s has no outputs. Select at least one optional output from [%s] using the 'output' option"
+                    % (self.module_name, ", ".join(name for name, dt in self.module_optional_outputs))
+                )
+            else:
+                raise PipelineStructureError("module %s defines no outputs" % self.module_name)
+        # The basic outputs are always available
+        self.available_outputs = list(self.module_outputs)
+        # Others may be requested in the config, given to us in optional_outputs
+        # Also include those that are used as inputs to other modules
+        used_output_names = self.pipeline.used_outputs.get(self.module_name, [])
+        # Replace None with the default output name (which could be an optional output if no non-optional are defined)
+        used_output_names = set([name if name is not None else self.default_output_name for name in used_output_names])
+        # Include all of these outputs in the final output list
+        self.available_outputs.extend((name, dt) for (name, dt) in self.module_optional_outputs
+                                      if name in set(optional_outputs)|used_output_names)
 
         self._metadata = None
 
@@ -97,7 +123,7 @@ class BaseModuleInfo(object):
 
     @property
     def output_names(self):
-        return [name for name, __ in self.module_outputs]
+        return [name for name, __ in self.available_outputs]
 
     @classmethod
     def process_module_options(cls, opt_dict):
@@ -167,6 +193,19 @@ class BaseModuleInfo(object):
 
         return inputs
 
+    @staticmethod
+    def get_extra_outputs_from_options(options):
+        """
+        Normally, which optional outputs get produced by a module depend on the 'output' option given in the
+        config file, plus any outputs that get used by subsequent modules. By overriding this method, module
+        types can add extra outputs into the list of those to be included, conditional on other options.
+
+        E.g. the corenlp module include the 'annotations' output if annotators are specified, so that the
+        user doesn't need to give both options.
+
+        """
+        return []
+
     @classmethod
     def process_config(cls, config_dict, module_name=None):
         """
@@ -176,11 +215,18 @@ class BaseModuleInfo(object):
         options = dict(config_dict)
         # Remove the "type" option if it's still in there
         options.pop("type", None)
+        # Pull out the output option if it's there, to specify optional outputs
+        output_opt = options.pop("output", "")
+        outputs = output_opt.split(",") if output_opt else []
         # Pull out the input options and match them up with inputs
         inputs = cls.extract_input_options(options, module_name=module_name)
         # Process the rest of the values as module options
         options = cls.process_module_options(options)
-        return inputs, options
+
+        # Get additional outputs to be included on the basis of the options, according to module type's own logic
+        outputs = set(outputs) | set(cls.get_extra_outputs_from_options(options))
+
+        return inputs, outputs, options
 
     def get_module_output_dir(self):
         return os.path.join(self.pipeline.short_term_store, self.module_name)
@@ -189,19 +235,18 @@ class BaseModuleInfo(object):
         return os.path.join(self.get_module_output_dir(), output_name)
 
     def get_output_datatype(self, output_name=None):
-        if len(self.module_outputs) == 0:
-            raise PipelineStructureError("%s module has no outputs" % self.module_type_name)
-        elif output_name is None:
+        if output_name is None:
             # Get the default output
             # Often there'll be only one output, so a name needn't be specified
             # If there are multiple, the first is the default
-            output_name, datatype = self.module_outputs[0]
-        else:
-            outputs = dict(self.module_outputs)
-            if output_name not in outputs:
-                raise PipelineStructureError("%s module does not have an output named '%s'. Available outputs: %s" %
-                                             (self.module_type_name, output_name, ", ".join(outputs.keys())))
-            datatype = outputs[output_name]
+            output_name = self.default_output_name
+
+        outputs = dict(self.available_outputs)
+        if output_name not in outputs:
+            raise PipelineStructureError("%s module does not have an output named '%s'. Available outputs: %s" %
+                                         (self.module_type_name, output_name, ", ".join(self.output_names)))
+        datatype = outputs[output_name]
+
         # The datatype might be a dynamic type -- a function that we call to get the type
         if type(datatype) is FunctionType:
             # Call the function to build the datatype
@@ -346,10 +391,11 @@ class BaseModuleExecutor(object):
     do the work of executing the module on given inputs, writing to given output locations.
 
     """
-    def __init__(self, log):
+    def __init__(self, log, module_instance_info):
         self.log = log
+        self.info = module_instance_info
 
-    def execute(self, module_instance_info):
+    def execute(self):
         raise NotImplementedError
 
 

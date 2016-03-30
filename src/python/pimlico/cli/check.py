@@ -1,24 +1,16 @@
 import sys
 
 from pimlico.core.config import check_for_cycles, PipelineStructureError
-from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.utils.format import multiline_tablate
 
 
 def check_cmd(pipeline, opts):
+    # Metadata has already been loaded if we've got this far
+    print "All module metadata loaded successfully"
+
     # Output what variants are available and say which we're checking
     print "Available pipeline variants: %s" % ", ".join(["main"] + pipeline.available_variants)
     print "Checking variant '%s'\n" % pipeline.variant
-
-    # Load all the modules' metadata
-    # This makes sure none of the modules have trouble loading
-    for name in pipeline.modules:
-        try:
-            pipeline[name]
-        except ModuleInfoLoadError, e:
-            print "Error loading module %s: %s" % (name, e)
-            sys.exit(1)
-    print "All module metadata loaded successfully"
 
     # Check the pipeline for cycles
     # This will raise an exception if a cycle is found

@@ -2,10 +2,11 @@
 Reading of various types of config files, in particular a pipeline config.
 """
 import ConfigParser
-from ConfigParser import SafeConfigParser, RawConfigParser
-from cStringIO import StringIO
 import os
+from ConfigParser import SafeConfigParser, RawConfigParser
+
 import sys
+from cStringIO import StringIO
 
 REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
 
@@ -74,8 +75,11 @@ class PipelineConfig(object):
                                            "pipeline section")
         check_release(self.pipeline_config["release"])
 
+        # Certain standard system-wide settings, loaded from the local config
         self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name, self.variant)
         self.short_term_store = os.path.join(self.local_config["short_term_store"], self.name, self.variant)
+        # Number of processes to use for anything that supports multiprocessing
+        self.processes = int(self.local_config.get("processes", 1))
 
         # Get paths to add to the python path for the pipeline
         # Used so that a project can specify custom module types and other python code outside the pimlico source tree
@@ -86,8 +90,29 @@ class PipelineConfig(object):
             # Add these paths for the python path, so later code will be able to import things from them
             sys.path.extend(additional_paths)
 
+        # Some modules need to know which of their (potential) outputs get used by other models when they're loaded
+        # Since many modules need to load those they're dependent on while loading, this becomes cyclic!
+        # Build a list of used outputs, before loading any modules
+        self.used_outputs = {}
+        for module_name in module_order:
+            # Do minimal processing to get input connections: more thorough checks are done during instantiation
+            for opt_name, opt_value in raw_module_configs[module_name].items():
+                if opt_name == "input" or opt_name.startswith("input_"):
+                    if "." in opt_value:
+                        # Module name + output name
+                        input_module, __, input_module_output = opt_value.partition(".")
+                    else:
+                        # Module name, with default output
+                        input_module = opt_value
+                        input_module_output = None
+                    self.used_outputs.setdefault(input_module, set([])).add(input_module_output)
+
         self._module_info_cache = {}
         self._module_schedule = None
+
+        # Now that we've got the pipeline instance prepared, load all the module info instances, so they've cached
+        for module_name in module_order:
+            self.load_module_info(module_name)
 
     @property
     def modules(self):
@@ -128,11 +153,11 @@ class PipelineConfig(object):
 
             # Pass in all other options to the info constructor
             options_dict = dict(module_config)
-            inputs, options = module_info_class.process_config(options_dict)
+            inputs, optional_outputs, options = module_info_class.process_config(options_dict)
 
             # Instantiate the module info
             self._module_info_cache[module_name] = \
-                module_info_class(module_name, self, inputs=inputs, options=options)
+                module_info_class(module_name, self, inputs=inputs, options=options, optional_outputs=optional_outputs)
         return self._module_info_cache[module_name]
 
     def get_module_schedule(self):
@@ -176,6 +201,9 @@ class PipelineConfig(object):
 
     @staticmethod
     def load(filename, local_config=None, variant="main"):
+        if variant is None:
+            variant = "main"
+
         if local_config is None:
             # Use the default locations for local config file
             # May want to add other locations here...
@@ -206,7 +234,7 @@ class PipelineConfig(object):
         # Perform pre-processing of config file to replace includes, etc
         config_text, available_variants = preprocess_config_file(os.path.abspath(filename), variant=variant)
         # If we were asked to load a particular variant, check it's in the list of available variants
-        if variant is not None and variant != "main" and variant not in available_variants:
+        if variant != "main" and variant not in available_variants:
             raise PipelineConfigParseError("could not load pipeline variant '%s': it is not declared anywhere in the "
                                            "config file")
         text_buffer = StringIO(config_text)
@@ -241,6 +269,7 @@ class PipelineConfig(object):
             ])
         except ConfigParser.Error, e:
             raise PipelineConfigParseError("could not parse config file. %s" % e)
+
         # Do no further checking or processing at this stage: just keep raw dictionaries for the time being
         return PipelineConfig(pipeline_config, local_config_data, raw_module_options, module_order,
                               filename=filename, variant=variant, available_variants=list(sorted(available_variants)))

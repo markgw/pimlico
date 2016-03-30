@@ -1,8 +1,9 @@
 from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.datatypes.parse import ConstituencyParseTreeCorpus
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
-from pimlico.modules.stanford.dependencies import check_corenlp_dependencies
+from .deps import check_corenlp_dependencies
 
 
 def annotation_fields_from_options(module_info):
@@ -37,9 +38,15 @@ def annotation_fields_from_options(module_info):
 
 
 class ModuleInfo(DocumentMapModuleInfo):
-    module_type_name = "corenlp_annotator"
+    module_type_name = "corenlp"
     module_inputs = [("documents", (WordAnnotationCorpus, TokenizedCorpus, TarredCorpus))]
-    module_outputs = [("documents", annotation_fields_from_options)]
+    # No non-optional outputs
+    module_outputs = []
+    module_optional_outputs = [
+        # The default output: annotated words
+        ("annotations", annotation_fields_from_options),
+        ("parse", ConstituencyParseTreeCorpus),
+    ]
     module_options = {
         "annotators": {
             "help": "Comma-separated list of word annotations to add, from CoreNLP's annotators. Choose from: "
@@ -60,3 +67,9 @@ class ModuleInfo(DocumentMapModuleInfo):
         # TODO Check models are available here, when you've added the model path option
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies
+
+    @staticmethod
+    def get_extra_outputs_from_options(options):
+        # If the 'annotators' option is given, produce annotations output
+        if options["annotators"].strip():
+            return ["annotations"]

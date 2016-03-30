@@ -44,9 +44,9 @@ def input_module_factory(datatype):
     if datatype.requires_data_preparation:
         # This module needs to be executed
         class DataPreparationExecutor(BaseModuleExecutor):
-            def execute(self, module_instance_info):
+            def execute(self):
                 # Get the datatype instance
-                datatype_instance = module_instance_info.get_output("data")
+                datatype_instance = self.info.get_output("data")
                 # Run the special data preparation method
                 datatype_instance.prepare_data(self.log)
 
