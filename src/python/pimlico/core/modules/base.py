@@ -259,7 +259,7 @@ class BaseModuleInfo(object):
         particular outputs' datatypes.
 
         """
-        return output_datatype(self.get_output_dir(output_name))
+        return output_datatype(self.get_output_dir(output_name), self.pipeline)
 
     def get_output(self, output_name=None):
         """

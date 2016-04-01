@@ -34,7 +34,8 @@ class PimlicoDatatype(object):
     requires_data_preparation = False
     input_module_options = []
 
-    def __init__(self, base_dir, **kwargs):
+    def __init__(self, base_dir, pipeline, **kwargs):
+        self.pipeline = pipeline
         self.base_dir = base_dir
         self.data_dir = os.path.join(self.base_dir, "data") if base_dir is not None else None
         self._metadata = None
@@ -64,8 +65,8 @@ class PimlicoDatatype(object):
         return
 
     @classmethod
-    def create_from_options(cls, base_dir, options={}):
-        return cls(base_dir, **options)
+    def create_from_options(cls, base_dir, pipeline, options={}):
+        return cls(base_dir, pipeline, **options)
 
     def data_ready(self):
         """
@@ -131,6 +132,47 @@ class IterableDocumentCorpusWriter(PimlicoDatatypeWriter):
         # Check the length has been set
         if "length" not in self.metadata:
             raise DatatypeWriteError("writer for IterableDocumentCorpus must set a 'length' value in the metadata")
+
+
+class InvalidDocument(object):
+    """
+    Widely used in Pimlico to represent an empty document that is empty not because the original input document
+    was empty, but because a module along the way had an error processing it. Document readers/writers should
+    generally be robust to this and simply pass through the whole thing where possible, so that it's always
+    possible to work out, where one of these pops up, where the error occurred.
+
+    """
+    def __init__(self, module_name, error_info=None):
+        self.error_info = error_info
+        self.module_name = module_name
+
+    def __unicode__(self):
+        return u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\nFull error details:\n%s" % \
+               (self.module_name, self.error_info or "")
+
+    def __str__(self):
+        return unicode(self).encode("ascii", "ignore")
+
+    @staticmethod
+    def load(text):
+        if not text.startswith("***** EMPTY DOCUMENT *****"):
+            raise ValueError("tried to read empty document text from invalid text: %s" % text)
+        text = text.partition("\n")[2]
+        module_line, __, text = text.partition("\n\n")
+        module_name = module_line.partition(": ")[2]
+        error_info = text.partition("\n")[2]
+        return InvalidDocument(module_name, error_info)
+
+    @staticmethod
+    def invalid_document_or_text(text):
+        """
+        If the text represents an invalid document, parse it and return an InvalidDocument object.
+        Otherwise, return the text as is.
+        """
+        if text.startswith("***** EMPTY DOCUMENT *****"):
+            return InvalidDocument.load(text)
+        else:
+            return text
 
 
 class DatatypeLoadError(Exception):

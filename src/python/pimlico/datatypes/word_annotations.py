@@ -1,8 +1,8 @@
 from operator import itemgetter
 import re
 
-from pimlico.datatypes.base import DatatypeLoadError
-from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
+from pimlico.datatypes.base import DatatypeLoadError, InvalidDocument
+from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 
 
@@ -12,8 +12,8 @@ class WordAnnotationCorpus(TarredCorpus):
     #  which fields will be in it
     annotation_fields = None
 
-    def __init__(self, base_dir):
-        super(WordAnnotationCorpus, self).__init__(base_dir)
+    def __init__(self, base_dir, pipeline):
+        super(WordAnnotationCorpus, self).__init__(base_dir, pipeline)
         self._sentence_boundary_re = None
         self._word_re = None
         self._word_boundary = None
@@ -125,8 +125,8 @@ class WordAnnotationCorpusWriter(TarredCorpusWriter):
 
     """
 
-    def __init__(self, sentence_boundary, word_boundary, word_format, nonword_chars, base_dir):
-        super(WordAnnotationCorpusWriter, self).__init__(base_dir)
+    def __init__(self, sentence_boundary, word_boundary, word_format, nonword_chars, base_dir, **kwargs):
+        super(WordAnnotationCorpusWriter, self).__init__(base_dir, **kwargs)
         self.metadata["sentence_boundary"] = sentence_boundary.replace("\n", "\\n")
         self.metadata["word_boundary"] = word_boundary.replace("\n", "\\n")
         self.metadata["word_format"] = word_format.replace("\n", "\\n")
@@ -141,13 +141,15 @@ class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
 
     """
 
-    def __init__(self, base_dir, field_names, field_sep=u"|"):
+    def __init__(self, base_dir, field_names, field_sep=u"|", **kwargs):
         self.field_names = field_names
         self.field_sep = field_sep
         # Prepare a word format that includes the given field names
         word_format = field_sep.join(u"{%s}" % field for field in field_names)
-        super(SimpleWordAnnotationCorpusWriter, self).__init__(u"\n", u" ", word_format, u" \n%s" % field_sep, base_dir)
+        super(SimpleWordAnnotationCorpusWriter, self).__init__(u"\n", u" ", word_format, u" \n%s" % field_sep,
+                                                               base_dir, **kwargs)
 
+    @pass_up_invalid
     def add_document(self, archive_name, doc_name, data):
         """
         Takes data in the form of a list of sentences, where each is a list of words, where each
@@ -158,12 +160,9 @@ class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
         :param doc_name: document being added
         :param data: sentence data in the form described above
         """
-        if data is None:
-            doc_string = u""
-        else:
-            doc_string = \
-                u"\n".join(u" ".join(self.field_sep.join(word_fields) for word_fields in sentence) for sentence in data)
-        super(SimpleWordAnnotationCorpusWriter, self).add_document(archive_name, doc_name, doc_string)
+        data = \
+            u"\n".join(u" ".join(self.field_sep.join(word_fields) for word_fields in sentence) for sentence in data)
+        super(SimpleWordAnnotationCorpusWriter, self).add_document(archive_name, doc_name, data)
 
 
 def AddAnnotationField(input_name, add_fields):

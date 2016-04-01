@@ -1,6 +1,6 @@
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.core.modules.map import DocumentMapModuleExecutor
+from pimlico.core.modules.map import DocumentMapModuleExecutor, skip_invalid
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
 from py4j.java_collections import ListConverter
 
@@ -26,6 +26,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
             self.input_corpora[0].read_annotation_fields() + ["pos"]
         )
 
+    @skip_invalid
     def process_document(self, archive, filename, doc):
         # Input is a list of tokenized sentences
         # Run POS tagging

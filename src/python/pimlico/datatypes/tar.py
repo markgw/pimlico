@@ -1,13 +1,15 @@
 import StringIO
-from itertools import izip
 import os
 import random
 import shutil
 import tarfile
 from tempfile import mkdtemp
 
+import zlib
+from itertools import izip
+
+from pimlico.datatypes.base import IterableDocumentCorpusWriter, InvalidDocument
 from .base import IterableDocumentCorpus
-from pimlico.datatypes.base import IterableDocumentCorpusWriter
 
 
 class TarredCorpus(IterableDocumentCorpus):
@@ -15,12 +17,12 @@ class TarredCorpus(IterableDocumentCorpus):
     # This may be overridden by subclasses to provide filters for documents applied before main doc processing
     document_preprocessors = []
 
-    def __init__(self, base_dir, raw_data=False):
+    def __init__(self, base_dir, pipeline, raw_data=False):
         """
         If raw_data=True, post-processing of documents (as defined by subclasses) is not applied. Each
         document's text is just returned as read in from the file.
         """
-        super(TarredCorpus, self).__init__(base_dir)
+        super(TarredCorpus, self).__init__(base_dir, pipeline)
         self.tar_filenames = [f for f in
                               [os.path.join(root, filename) for root, dirs, files in os.walk(self.data_dir)
                                for filename in files]
@@ -45,6 +47,7 @@ class TarredCorpus(IterableDocumentCorpus):
             yield doc_name, doc
 
     def archive_iter(self, subsample=None, start=0):
+        gzip = self.metadata.get("gzip", False)
         # Prepare a temporary directory to extract everything to
         tmp_dir = mkdtemp()
         file_num = -1
@@ -65,9 +68,15 @@ class TarredCorpus(IterableDocumentCorpus):
                         filename = tarinfo.name
                         # Read in the data
                         with open(os.path.join(tmp_dir, filename), "r") as f:
-                            document = f.read().decode("utf-8")
+                            document = f.read()
+                        if gzip:
+                            # Data was compressed with zlib while storing: decompress now
+                            document = zlib.decompress(document)
+                        document = document.decode("utf-8")
+                        # Catch invalid documents
+                        document = InvalidDocument.invalid_document_or_text(document)
                         # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
-                        if not self.raw_data:
+                        if not self.raw_data and type(document) is not InvalidDocument:
                             document = self.process_document(document)
                         yield tar_name, filename, document
                         # Remove the file once we're done with it (when we request another)
@@ -101,15 +110,27 @@ class TarredCorpus(IterableDocumentCorpus):
 
 
 class TarredCorpusWriter(IterableDocumentCorpusWriter):
-    def __init__(self, base_dir):
+    """
+    If gzip=True, each document is gzipped before adding it to the archive. Not the same as creating a tarball,
+    since the docs are gzipped *before* adding them, not the whole archive together, but it means we can easily
+    iterate over the documents, unzipping them as required.
+
+    """
+    def __init__(self, base_dir, gzip=False):
         super(TarredCorpusWriter, self).__init__(base_dir)
         self.current_archive_name = None
         self.current_archive_tar = None
         self.doc_count = 0
+        self.gzip = gzip
+        # Set "gzip" in the metadata, so we know to unzip when reading
+        self.metadata["gzip"] = gzip
 
     def add_document(self, archive_name, doc_name, data):
-        # For an empty result, signified by None, output an empty file
-        if data is None:
+        if type(data) is InvalidDocument:
+            # For an invalid result, signified by the special type, output the error info for later stages
+            data = unicode(data)
+        elif data is None:
+            # For an empty result, signified by None, output an empty file
             data = u""
 
         if archive_name != self.current_archive_name:
@@ -125,7 +146,10 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
         self.doc_count += 1
 
         # Add a new document to archive
-        data_file = StringIO.StringIO(data.encode("utf-8"))
+        data = data.encode("utf-8")
+        if self.gzip:
+            data = zlib.compress(data, 9)
+        data_file = StringIO.StringIO(data)
         info = tarfile.TarInfo(name=doc_name)
         info.size = len(data_file.buf)
         self.current_archive_tar.addfile(info, data_file)
@@ -135,6 +159,22 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
             self.current_archive_tar.close()
         self.metadata["length"] = self.doc_count
         super(TarredCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
+
+
+def pass_up_invalid(fn):
+    """
+    Decorator for add_document() methods of TarredCorpusWriter subclasses that detects invalid documents and calls
+    the superclass add_document() on them, skipping any subclass-specific processing. Does the same where the data
+    is None.
+
+    """
+    def _fn(self, archive_name, doc_name, data):
+        if type(data) is InvalidDocument or data is None:
+            # Don't do subclass's processing
+            return TarredCorpusWriter.add_document(self, archive_name, doc_name, data)
+        else:
+            return fn(self, archive_name, doc_name, data)
+    return _fn
 
 
 class AlignedTarredCorpora(object):

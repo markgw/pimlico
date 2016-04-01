@@ -1,5 +1,8 @@
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.parse import ConstituencyParseTreeCorpus
+from pimlico.core.modules.options import choose_from_list, str_to_bool
+from pimlico.datatypes.coref import CorefCorpus
+from pimlico.datatypes.jsondoc import JsonDocumentCorpus
+from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, DependencyParseCorpus
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
@@ -9,17 +12,11 @@ from .deps import check_corenlp_dependencies
 def annotation_fields_from_options(module_info):
     from pimlico.core.modules.base import ModuleInfoLoadError
 
-    # Look at the options to see what annotations are going to be added
-    add_fields = module_info.options["annotators"].split(",")
-    for field in add_fields:
-        if field not in ["pos", "ner", "lemma"]:
-            raise ModuleInfoLoadError("invalid annotator '%s': choose from pos, ner, lemma" % field)
-
     input_datatype = module_info.get_input_datatype("documents")[1]
     # Allow the special case where the input datatype is a tokenized corpus
     # Pretend it's an annotated corpus with no annotations, just words
     if issubclass(input_datatype, (TokenizedCorpus, TarredCorpus)):
-        base_annotation_fields = ["word"]
+        base_annotation_fields = []
     else:
         if not issubclass(input_datatype, WordAnnotationCorpus):
             raise ModuleInfoLoadError("cannot construct a dynamic word annotation corpus type, since input we're "
@@ -30,6 +27,19 @@ def annotation_fields_from_options(module_info):
                                       "since the input type, %s, doesn't explicitly declare its annotation fields" %
                                       input_datatype.__name__)
         base_annotation_fields = input_datatype.annotation_fields
+
+    # Look at the options to see what annotations are going to be added
+    add_fields = module_info.options["annotators"].split(",") if module_info.options["annotators"] else []
+    for field in add_fields:
+        if field not in ["pos", "ner", "lemma", "word"]:
+            raise ModuleInfoLoadError("invalid annotator '%s': choose from pos, ner, lemma" % field)
+        if field in base_annotation_fields:
+            raise ModuleInfoLoadError("annotation '%s' is already available in the input, but CoreNLP annotator "
+                                      "was asked to add it" % field)
+
+    if "word" not in base_annotation_fields + add_fields:
+        # Output annotations should always include the word, which is always available
+        add_fields.insert(0, "word")
 
     class ExtendedWordAnnotationCorpus(WordAnnotationCorpus):
         annotation_fields = base_annotation_fields + add_fields
@@ -45,13 +55,45 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_optional_outputs = [
         # The default output: annotated words
         ("annotations", annotation_fields_from_options),
+        # Constituency parses
         ("parse", ConstituencyParseTreeCorpus),
+        # Dependency parses extracted from constituency parses
+        ("parse-deps", DependencyParseCorpus),
+        # Dependency parses from dependency parser
+        ("dep-parse", DependencyParseCorpus),
+        # Full raw JSON output from the CoreNLP server
+        ("raw", JsonDocumentCorpus),
+        # Coreference resolution
+        ("coref", CorefCorpus),
     ]
     module_options = {
         "annotators": {
             "help": "Comma-separated list of word annotations to add, from CoreNLP's annotators. Choose from: "
-                    "pos, lemma, ner",
-            "default": "pos",
+                    "word, pos, lemma, ner",
+            "default": "",
+        },
+        "dep_type": {
+            "help": "Type of dependency parse to output, when outputting dependency parses, either from a constituency "
+                    "parse or direct dependency parse. Choose from the three types allowed by CoreNLP: "
+                    "'basic', 'collapsed' or 'collapsed-ccprocessed'",
+            "default": "collapsed-ccprocessed",
+            "type": choose_from_list(["basic", "collapsed", "collapsed-ccprocessed"]),
+        },
+        "timeout": {
+            "help": "Timeout for the CoreNLP server, which is applied to every job (document). Number of seconds. "
+                    "By default, we use the server's default timeout (15 secs), but you may want to increase this "
+                    "for more intensive tasks, like coref",
+            "type": float,
+        },
+        "gzip": {
+            "help": "If True, each output, except annotations, for each document is gzipped. This can help reduce the "
+                    "storage occupied by e.g. parser or coref output. Default: False",
+            "type": str_to_bool,
+        },
+        "readable": {
+            "help": "If True, JSON outputs are formatted in a readable fashion, pretty printed. Otherwise, they're "
+                    "as compact as possible. Default: False",
+            "type": str_to_bool,
         },
         # TODO Add an option to specify model path, for non-standard (e.g. non-English) models
     }
@@ -73,3 +115,5 @@ class ModuleInfo(DocumentMapModuleInfo):
         # If the 'annotators' option is given, produce annotations output
         if options["annotators"].strip():
             return ["annotations"]
+        else:
+            return []

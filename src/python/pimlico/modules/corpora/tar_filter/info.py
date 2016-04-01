@@ -12,8 +12,8 @@ from pimlico.datatypes.tar import TarredCorpus
 
 # Subclass TarredCorpus so that inputs expecting one can accept this
 class TarredCorpusFilter(TarredCorpus):
-    def __init__(self, input_datatype, archive_size, archive_basename="archive"):
-        IterableDocumentCorpus.__init__(self, None)
+    def __init__(self, pipeline, input_datatype, archive_size, archive_basename="archive"):
+        IterableDocumentCorpus.__init__(self, None, pipeline)
 
         self.archive_basename = archive_basename
         self.input_datatype = input_datatype
@@ -100,7 +100,7 @@ class ModuleInfo(BaseModuleInfo):
 
     def instantiate_output_datatype(self, output_name, output_datatype):
         if output_name == "documents":
-            return TarredCorpusFilter(self.get_input("documents"), self.options["archive_size"],
+            return TarredCorpusFilter(self.pipeline, self.get_input("documents"), self.options["archive_size"],
                                       archive_basename=self.options["archive_basename"])
         else:
             return super(ModuleInfo, self).instantiate_output_datatype(output_name, output_datatype)

@@ -11,8 +11,8 @@ from pimlico.datatypes.base import IterableDocumentCorpus
 
 
 class CorpusSubsetFilter(IterableDocumentCorpus):
-    def __init__(self, input_datatype, size, offset=0):
-        IterableDocumentCorpus.__init__(self, None)
+    def __init__(self, pipeline, input_datatype, size, offset=0):
+        IterableDocumentCorpus.__init__(self, None, pipeline)
 
         self.offset = offset
         self.input_datatype = input_datatype
@@ -48,6 +48,7 @@ class ModuleInfo(BaseModuleInfo):
 
     def instantiate_output_datatype(self, output_name, output_datatype):
         if output_name == "documents":
-            return CorpusSubsetFilter(self.get_input("documents"), self.options["size"], offset=self.options["offset"])
+            return CorpusSubsetFilter(self.get_input("documents"), self.pipeline,
+                                      self.options["size"], offset=self.options["offset"])
         else:
             return super(ModuleInfo, self).instantiate_output_datatype(output_name, output_datatype)

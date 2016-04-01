@@ -13,5 +13,5 @@ class PosTaggedCorpus(WordAnnotationCorpus):
 
 
 class PosTaggedCorpusWriter(SimpleWordAnnotationCorpusWriter):
-    def __init__(self, base_dir):
-        super(PosTaggedCorpusWriter, self).__init__(base_dir, ["word", "pos"])
+    def __init__(self, base_dir, **kwargs):
+        super(PosTaggedCorpusWriter, self).__init__(base_dir, ["word", "pos"], **kwargs)

@@ -1,7 +1,7 @@
 import os
 import re
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.core.modules.map import DocumentMapModuleExecutor
+from pimlico.core.modules.map import DocumentMapModuleExecutor, skip_invalid
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
@@ -61,6 +61,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         self.match_count = 0
         self.matched_docs = []
 
+    @skip_invalid
     def process_document(self, archive, filename, doc):
         # Add word boundaries either side of the doc text so we match at the beginning and end
         doc = "%s%s%s" % (self.word_boundary, doc, self.word_boundary)

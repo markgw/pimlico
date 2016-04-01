@@ -1,6 +1,6 @@
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.core.modules.map import DocumentMapModuleExecutor
+from pimlico.core.modules.map import DocumentMapModuleExecutor, skip_invalid
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
@@ -13,6 +13,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         except JavaProcessError, e:
             raise ModuleExecutionError("error starting tokenizer process: %s" % e)
 
+    @skip_invalid
     def process_document(self, archive, filename, doc):
         # Run tokenization
         tokenized_sents = self.tokenizer.tokenize(doc)

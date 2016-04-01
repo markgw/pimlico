@@ -1,5 +1,8 @@
+from traceback import format_exc
+
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor
-from pimlico.core.modules.execute import ModuleExecutionError
+from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
+from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora, TarredCorpusWriter
 from pimlico.utils.core import multiwith
 from pimlico.utils.progress import get_progress_bar
@@ -27,7 +30,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     for each individual document.
 
     """
-    def process_document(self, filename, *docs):
+    def process_document(self, archive, filename, *docs):
         raise NotImplementedError
 
     def get_writer(self, output_name):
@@ -68,15 +71,24 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         pbar = get_progress_bar(len(input_iterator),
                                 title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
         complete = False
+        invalid_inputs = 0
+        invalid_outputs = 0
         try:
             # Prepare a corpus writer for the output
             with multiwith(*self.get_writers()) as writers:
                 for archive, filename, docs in pbar(input_iterator.archive_iter()):
+                    # Useful to know in output
+                    if any(type(d) is InvalidDocument for d in docs):
+                        invalid_inputs += 1
+
                     # Get the subclass to process the doc
                     results = self.process_document(archive, filename, *docs)
 
-                    # If the processor only produces a single result and there's only one output, that's fine
-                    if type(results) is not tuple:
+                    if type(results) is InvalidDocument:
+                        # Just got a single invalid document out: write it out to every output
+                        results = [results] * len(writers)
+                    elif type(results) is not tuple:
+                        # If the processor only produces a single result and there's only one output, that's fine
                         results = (results,)
                     if len(results) != len(writers):
                         raise ModuleExecutionError(
@@ -86,15 +98,57 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                             )
                         )
 
+                    # Just for the record (useful output)
+                    if any(type(r) is InvalidDocument for r in results):
+                        invalid_outputs += 1
+
                     # Write the result to the output corpora
                     for result, writer in zip(results, writers):
                         writer.add_document(archive, filename, result)
 
             complete = True
+            self.log.info("Input contained %d invalid documents, output contained %d" %
+                          (invalid_inputs, invalid_outputs))
         finally:
             # Call the finishing-off routine, if one's been defined
             if complete:
                 self.log.info("Document mapping complete. Finishing off")
             else:
                 self.log.info("Document mapping failed. Finishing off")
-            self.postprocess()
+            self.postprocess(error=not complete)
+
+
+def skip_invalid(fn):
+    """
+    Decorator to apply to process_document() methods where you want to skip doing any processing if any of the
+    input documents are invalid and just pass through the error information.
+
+    """
+    def _fn(self, archive, filename, *docs):
+        invalid = [doc for doc in docs if type(doc) is InvalidDocument]
+        if len(invalid):
+            # If there's more than one InvalidDocument among the inputs, just return the first one
+            return invalid[0]
+        else:
+            return fn(self, archive, filename, *docs)
+    return _fn
+
+
+def invalid_doc_on_error(fn):
+    """
+    Decorator to apply to process_document() methods that causes all exceptions to be caught and an InvalidDocument
+    to be returned as the result, instead of letting the error propagate up and call a halt to the whole corpus
+    processing.
+
+    """
+    def _fn(self, *args, **kwargs):
+        try:
+            return fn(self, *args, **kwargs)
+        except StopProcessing:
+            # Processing was cancelled, killed or otherwise called to a halt
+            # Don't report this as an error processing a doc, but raise it
+            raise
+        except Exception, e:
+            # Error while processing the document: output an invalid document, with some error information
+            return InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))
+    return _fn

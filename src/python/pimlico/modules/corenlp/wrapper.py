@@ -7,23 +7,31 @@ Client-side code based on Smitha Milli's CoreNLP client: https://github.com/smil
 
 """
 import json
+import threading
 import warnings
 
 import requests
 from pimlico.core.external.java import start_java_process
 from pimlico.core.logs import get_log_file
+from pimlico.core.modules.execute import StopProcessing
 from pimlico.modules.corenlp import CoreNLPClientError, CoreNLPProcessingError
 from pimlico.utils.communicate import timeout_process
 from pimlico.utils.pipes import OutputQueue
 
 
 class CoreNLP(object):
-    def __init__(self, pipeline):
+    def __init__(self, pipeline, timeout=None):
+        self.timeout = timeout
         self.port = int(pipeline.local_config.get("corenlp_port", 9000))
         self.proc = None
 
         self.server_url = "http://localhost:%d" % self.port
         self._server_cmd = None
+
+        # Flag tells us whether the server has been deliberately killed
+        # When a client (which might be in a thread) finds the server's disappeared, it can respond in the knowledge
+        #  that the server was killed by another thread (e.g. main) and didn't just have an error
+        self.server_killed = threading.Event()
 
     def __enter__(self):
         self.start()
@@ -34,9 +42,13 @@ class CoreNLP(object):
 
     def start(self):
         # Start server
+        args = ["-port", "%d" % self.port]
+        if self.timeout is not None:
+            # Override the server's default timeout
+            args.extend(["-timeout", "%d" % int(self.timeout*1000)])
         # Wait a moment and check that it's started up
         self.proc = start_java_process("edu.stanford.nlp.pipeline.StanfordCoreNLPServer",
-                                       args=["-port", "%d" % self.port],
+                                       args=args,
                                        java_args=["-mx4g"], wait=0.4)
         # Put queues around the outputs, so we can read without blocking
         self.stdout_queue = OutputQueue(self.proc.stdout)
@@ -48,6 +60,8 @@ class CoreNLP(object):
         """
         Sends the stop signal to the server. Doesn't wait for it to stop.
         """
+        # Set our own flag so everyone knows that if the server disappears it's because we killed it
+        self.server_killed.set()
         # Read the shutdown key that should have been stored when the server started
         with open("/tmp/corenlp.shutdown", "r") as f:
             shutdown_key = f.read()
@@ -85,10 +99,14 @@ class CoreNLP(object):
             params = {"properties": str(properties)}
 
         try:
-            r = requests.get(self.server_url, params=params, data=text, timeout=10.)
-        except requests.exceptions.ConnectionError:
-            raise CoreNLPClientError("Did not get a response from CoreNLP server at %s. Server must be started "
-                                     "before calling annotate()" % self.server_url)
+            r = requests.get(self.server_url, params=params, data=text)
+        except requests.exceptions.ConnectionError, e:
+            if self.server_killed.is_set():
+                # Raise a special exception, since we know the server was taken down deliberately
+                raise StopProcessing("CoreNLP server was killed")
+            else:
+                raise CoreNLPClientError("Did not get a response from CoreNLP server at %s. Server must be started "
+                                         "before calling annotate()" % self.server_url)
 
         if r.status_code != 200:
             # Not a happy server
