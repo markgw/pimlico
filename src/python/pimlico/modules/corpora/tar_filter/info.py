@@ -49,16 +49,29 @@ class TarredCorpusFilter(TarredCorpus):
             self._tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
         return self._tarballs
 
-    def archive_iter(self, subsample=None, start=0):
+    def archive_iter(self, subsample=None, start_after=None):
         tarballs = self.tarballs
 
         current_archive = 0
         current_archive_count = 0
 
+        if start_after is None:
+            # Don't wait to start
+            started = True
+        else:
+            # Start after we've skipped this number of docs or hit this (archive, doc name)
+            started = False
+
         for file_num, (doc_name, doc) in enumerate(self.input_datatype):
             # Allow the first portion of the corpus to be skipped
-            if file_num < start:
+            if not started:
+                if (type(start_after) is int and file_num == start_after) or \
+                        (start_after == (tarballs[current_archive], doc_name)):
+                    # We've hit the condition for starting
+                    # Skip this doc and start on the next
+                    started = True
                 continue
+
             # If subsampling, decide whether to extract this file
             if subsample is not None and random.random() > subsample:
                 # Reject this file

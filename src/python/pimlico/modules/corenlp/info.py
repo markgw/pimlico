@@ -115,23 +115,23 @@ class ModuleInfo(DocumentMapModuleInfo):
         else:
             return []
 
-    def get_writer(self, output_name):
+    def get_writer(self, output_name, append=False):
         output_dir = self.get_output_dir(output_name)
         gzip = self.options["gzip"]
         readable = self.options["readable"]
         if output_name == "annotations":
             output_name, output_datatype = self.get_output_datatype(output_name)
-            return SimpleWordAnnotationCorpusWriter(output_dir, output_datatype.annotation_fields)
+            return SimpleWordAnnotationCorpusWriter(output_dir, output_datatype.annotation_fields, append=append)
         elif output_name == "parse":
             # Just write out parse trees as they come from the parser
-            return ConstituencyParseTreeCorpusWriter(output_dir, gzip=gzip)
+            return ConstituencyParseTreeCorpusWriter(output_dir, gzip=gzip, append=append)
         elif output_name == "parse-deps":
-            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable)
+            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         elif output_name == "dep-parse":
-            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable)
+            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         elif output_name == "raw":
-            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable)
+            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         elif output_name == "coref":
-            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable)
+            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         else:
             raise ValueError("unknown output '%s'" % output_name)

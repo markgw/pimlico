@@ -25,5 +25,5 @@ class ModuleInfo(DocumentMapModuleInfo):
         },
     }
 
-    def get_writer(self, output_name):
-        return TermFeatureListCorpusWriter(self.get_output_dir(output_name))
+    def get_writer(self, output_name, append=False):
+        return TermFeatureListCorpusWriter(self.get_output_dir(output_name), append=append)

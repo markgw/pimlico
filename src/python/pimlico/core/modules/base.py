@@ -96,13 +96,16 @@ class BaseModuleInfo(object):
         return self._metadata
 
     def set_metadata_value(self, attr, val):
+        self.set_metadata_values({attr: val})
+
+    def set_metadata_values(self, val_dict):
         # Make sure we've got an output directory to output the metadata to
         if not os.path.exists(self.get_module_output_dir()):
             os.makedirs(self.get_module_output_dir())
         # Load the existing metadata
         metadata = self.get_metadata()
-        # Add our new value to it
-        metadata[attr.strip().lower()] = val.strip()
+        # Add our new values to it
+        metadata.update(val_dict)
         # Write the whole thing out to the file
         with open(self.metadata_filename, "w") as f:
             for attr, val in metadata.items():

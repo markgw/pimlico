@@ -33,8 +33,8 @@ class KeyValueListCorpus(TarredCorpus):
 
 
 class KeyValueListCorpusWriter(TarredCorpusWriter):
-    def __init__(self, base_dir, separator=" ", fv_separator="="):
-        super(KeyValueListCorpusWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, separator=" ", fv_separator="=", **kwargs):
+        super(KeyValueListCorpusWriter, self).__init__(base_dir, **kwargs)
         self.fv_separator = fv_separator
         self.separator = separator
         # Put the separators in the metadata, so we know how to read the data in again
@@ -93,8 +93,8 @@ class TermFeatureListCorpus(KeyValueListCorpus):
 
 
 class TermFeatureListCorpusWriter(KeyValueListCorpusWriter):
-    def __init__(self, base_dir):
-        super(TermFeatureListCorpusWriter, self).__init__(base_dir, separator=" ", fv_separator="=")
+    def __init__(self, base_dir, **kwargs):
+        super(TermFeatureListCorpusWriter, self).__init__(base_dir, separator=" ", fv_separator="=", **kwargs)
 
     @pass_up_invalid
     def document_to_raw_data(self, doc):

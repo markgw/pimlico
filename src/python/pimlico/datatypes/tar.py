@@ -46,26 +46,42 @@ class TarredCorpus(IterableDocumentCorpus):
         for __, doc_name, doc in self.archive_iter():
             yield doc_name, doc
 
-    def archive_iter(self, subsample=None, start=0):
+    def archive_iter(self, subsample=None, start_after=None):
         gzip = self.metadata.get("gzip", False)
         # Prepare a temporary directory to extract everything to
         tmp_dir = mkdtemp()
+
         file_num = -1
+        if start_after is None:
+            # Don't wait to start
+            started = True
+        else:
+            # Start after we've skipped this number of docs or hit this (archive, doc name)
+            started = False
+
         try:
             for tar_name, tarball_filename in zip(self.tarballs, self.tar_filenames):
                 # Extract the tarball to the temp dir
                 with tarfile.open(tarball_filename, 'r') as tarball:
                     for tarinfo in tarball:
                         file_num += 1
+                        filename = tarinfo.name
+
                         # Allow the first portion of the corpus to be skipped
-                        if file_num < start:
+                        if not started:
+                            if (type(start_after) is int and file_num == start_after) or \
+                                    (start_after == (tar_name, filename)):
+                                # We've hit the condition for starting
+                                # Skip this doc and start on the next
+                                started = True
                             continue
+
                         # If subsampling, decide whether to extract this file
                         if subsample is not None and random.random() > subsample:
                             # Reject this file
                             continue
+
                         tarball.extract(tarinfo, tmp_dir)
-                        filename = tarinfo.name
                         # Read in the data
                         with open(os.path.join(tmp_dir, filename), "r") as f:
                             document = f.read()
@@ -122,8 +138,9 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
     and reading them in again.
 
     """
-    def __init__(self, base_dir, gzip=False):
+    def __init__(self, base_dir, gzip=False, append=False):
         super(TarredCorpusWriter, self).__init__(base_dir)
+        self.append = append
         self.current_archive_name = None
         self.current_archive_tar = None
         self.doc_count = 0
@@ -151,8 +168,9 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
                 # Close the old one
                 self.current_archive_tar.close()
             self.current_archive_name = archive_name
-            self.current_archive_tar = tarfile.TarFile(os.path.join(self.data_dir, "%s.tar" % archive_name),
-                                                       mode="w")
+            tar_filename = os.path.join(self.data_dir, "%s.tar" % archive_name)
+            # If we're appending a corpus and the archive already exists, append to it
+            self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w")
 
         # Keep a count of how many we've added so we can write metadata
         self.doc_count += 1
@@ -219,9 +237,10 @@ class AlignedTarredCorpora(object):
         for archive, filename, docs in self.archive_iter():
             yield filename, docs
 
-    def archive_iter(self):
+    def archive_iter(self, subsample=None, start_after=None):
         # Iterate over all tarred corpora at once
-        for corpus_items in izip(*[corpus.archive_iter() for corpus in self.corpora]):
+        for corpus_items in izip(
+                *[corpus.archive_iter(subsample=None, start_after=start_after) for corpus in self.corpora]):
             # Check we've got the same archive and doc name combination from every corpus
             if not all(corpus_item[0] == corpus_items[0][0] for corpus_item in corpus_items[1:]) or \
                     not all(corpus_item[1] == corpus_items[0][1] for corpus_item in corpus_items[1:]):
@@ -229,6 +248,10 @@ class AlignedTarredCorpora(object):
                     "filenames in tarred corpora do not correspond: %s" %
                     ", ".join(["(%s/%s)" % (corpus_item[0], corpus_item[1]) for corpus_item in corpus_items])
                 )
+
+            # If subsampling, decide whether to yield this file
+            if subsample is not None and random.random() > subsample:
+                continue
 
             yield corpus_items[0][0], corpus_items[0][1], [corpus_item[2] for corpus_item in corpus_items]
 

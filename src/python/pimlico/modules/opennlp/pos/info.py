@@ -55,8 +55,9 @@ class ModuleInfo(DocumentMapModuleInfo):
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies
 
-    def get_writer(self, output_name):
+    def get_writer(self, output_name, append=False):
         return SimpleWordAnnotationCorpusWriter(
             self.get_output_dir(output_name),
-            self.get_output("documents").annotation_fields
+            self.get_output("documents").annotation_fields,
+            append=append
         )

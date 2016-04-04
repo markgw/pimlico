@@ -3,7 +3,6 @@ from pimlico.core.modules.base import load_module_executor, BaseModuleInfo
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora
-from pimlico.utils.logging import get_console_logger
 
 
 class DocumentMapOutputTypeWrapper(object):
@@ -38,7 +37,7 @@ class DocumentMapOutputTypeWrapper(object):
         for __, doc_name, doc in self.archive_iter():
             yield doc_name, doc
 
-    def archive_iter(self, subsample=None, start=0):
+    def archive_iter(self, subsample=None, start_after=None):
         """
         Provides an iterator just like TarredCorpus, but instead of iterating over data read from disk,
         gets it on the fly from the input datatype.
@@ -66,7 +65,8 @@ class DocumentMapOutputTypeWrapper(object):
             executor.preprocess()
 
             try:
-                for archive, filename, docs in input_iterator.archive_iter():
+                for archive, filename, docs in \
+                        input_iterator.archive_iter(subsample=subsample, start_after=start_after):
                     # Useful to know in output
                     if any(type(d) is InvalidDocument for d in docs):
                         invalid_inputs += 1

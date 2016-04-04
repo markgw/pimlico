@@ -23,17 +23,17 @@ class DocumentMapModuleInfo(BaseModuleInfo):
     # Most subclasses will want to override this to give a more specific datatype for the output
     module_outputs = [("documents", TarredCorpus)]
 
-    def get_writer(self, output_name):
+    def get_writer(self, output_name, append=False):
         """
         Get the writer instance that will be given processed documents to write. Should return
         a subclass of TarredCorpusWriter. The default implementation instantiates a plain
         TarredCorpusWriter.
 
         """
-        return TarredCorpusWriter(self.get_output_dir(output_name))
+        return TarredCorpusWriter(self.get_output_dir(output_name), append=append)
 
-    def get_writers(self):
-        return tuple(self.get_writer(name) for name in self.output_names)
+    def get_writers(self, append=False):
+        return tuple(self.get_writer(name, append=append) for name in self.output_names)
 
 
 class DocumentMapModuleExecutor(BaseModuleExecutor):
@@ -71,15 +71,27 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         self.log.info("Preparing document map execution for %s documents" % len(self.input_iterator))
         self.preprocess()
 
-        pbar = get_progress_bar(len(self.input_iterator),
-                                title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
         complete = False
         invalid_inputs = 0
         invalid_outputs = 0
+        docs_completed = 0
+
+        # Check the metadata to see whether we've already partially completed this
+        if self.info.status == "PARTIALLY_PROCESSED":
+            docs_completed = self.info.get_metadata()["docs_completed"]
+            start_after = self.info.get_metadata()["last_doc_completed"]
+            self.log.info("Module has been partially executed already; picking up where we left off, after "
+                          "doc %s/%s (skipping %d docs)" % (start_after[0], start_after[1], docs_completed))
+        else:
+            start_after = None
+
+        pbar = get_progress_bar(len(self.input_iterator) - docs_completed,
+                                title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
+
         try:
             # Prepare a corpus writer for the output
-            with multiwith(*self.info.get_writers()) as writers:
-                for archive, filename, docs in pbar(self.input_iterator.archive_iter()):
+            with multiwith(*self.info.get_writers(append=start_after is not None)) as writers:
+                for archive, filename, docs in pbar(self.input_iterator.archive_iter(start_after=start_after)):
                     # Useful to know in output
                     if any(type(d) is InvalidDocument for d in docs):
                         invalid_inputs += 1
@@ -109,6 +121,13 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                     for result, writer in zip(results, writers):
                         writer.add_document(archive, filename, result)
 
+                    # Update the module's metadata to say that we've completed this document
+                    docs_completed += 1
+                    self.info.set_metadata_values({
+                        "status": "PARTIALLY_PROCESSED",
+                        "last_doc_completed": (archive, filename),
+                        "docs_completed": docs_completed,
+                    })
             complete = True
             self.log.info("Input contained %d invalid documents, output contained %d" %
                           (invalid_inputs, invalid_outputs))
