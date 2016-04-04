@@ -1,10 +1,11 @@
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool
 from pimlico.datatypes.coref import CorefCorpus
-from pimlico.datatypes.jsondoc import JsonDocumentCorpus
-from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, DependencyParseCorpus
+from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
+from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, DependencyParseCorpus, \
+    ConstituencyParseTreeCorpusWriter, DependencyParseCorpusWriter
 from pimlico.datatypes.tar import TarredCorpus
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 from .deps import check_corenlp_dependencies
 
@@ -113,3 +114,24 @@ class ModuleInfo(DocumentMapModuleInfo):
             return ["annotations"]
         else:
             return []
+
+    def get_writer(self, output_name):
+        output_dir = self.get_output_dir(output_name)
+        gzip = self.options["gzip"]
+        readable = self.options["readable"]
+        if output_name == "annotations":
+            output_name, output_datatype = self.get_output_datatype(output_name)
+            return SimpleWordAnnotationCorpusWriter(output_dir, output_datatype.annotation_fields)
+        elif output_name == "parse":
+            # Just write out parse trees as they come from the parser
+            return ConstituencyParseTreeCorpusWriter(output_dir, gzip=gzip)
+        elif output_name == "parse-deps":
+            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable)
+        elif output_name == "dep-parse":
+            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable)
+        elif output_name == "raw":
+            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable)
+        elif output_name == "coref":
+            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable)
+        else:
+            raise ValueError("unknown output '%s'" % output_name)

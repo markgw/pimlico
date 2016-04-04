@@ -5,10 +5,8 @@ from traceback import format_exc
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, DocumentProcessorPool, ProcessOutput
 from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.jsondoc import JsonDocumentCorpusWriter
-from pimlico.datatypes.parse import ConstituencyParseTreeCorpusWriter, StanfordDependencyParse, \
-    DependencyParseCorpusWriter
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
+from pimlico.datatypes.parse import StanfordDependencyParse
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 from pimlico.modules.corenlp import CoreNLPProcessingError
 from pimlico.modules.corenlp.wrapper import CoreNLP
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
@@ -45,27 +43,6 @@ class CoreNLPPool(DocumentProcessorPool):
 
 
 class ModuleExecutor(DocumentMapModuleParallelExecutor):
-    def get_writer(self, output_name):
-        output_dir = self.info.get_output_dir(output_name)
-        gzip = self.info.options["gzip"]
-        readable = self.info.options["readable"]
-        if output_name == "annotations":
-            output_name, output_datatype = self.info.get_output_datatype(output_name)
-            return SimpleWordAnnotationCorpusWriter(output_dir, output_datatype.annotation_fields)
-        elif output_name == "parse":
-            # Just write out parse trees as they come from the parser
-            return ConstituencyParseTreeCorpusWriter(output_dir, gzip=gzip)
-        elif output_name == "parse-deps":
-            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable)
-        elif output_name == "dep-parse":
-            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable)
-        elif output_name == "raw":
-            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable)
-        elif output_name == "coref":
-            return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable)
-        else:
-            raise ValueError("unknown output '%s'" % output_name)
-
     def preprocess(self):
         annotators = []
         # TODO Work out how to pass in annotations already done if they're given

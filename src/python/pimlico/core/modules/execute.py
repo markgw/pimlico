@@ -52,7 +52,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     executer = load_module_executor(module)
     # Give the module an initial in-progress status
     module.status = "STARTED"
-    executer(log, module).execute()
+    executer(module).execute()
 
     # Update the module status so we know it's been completed
     module.status = "COMPLETE"

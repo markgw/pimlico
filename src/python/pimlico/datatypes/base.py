@@ -89,13 +89,17 @@ class PimlicoDatatypeWriter(object):
         self.base_dir = base_dir
         self.data_dir = os.path.join(self.base_dir, "data")
         self.metadata = {}
-
-    def __enter__(self):
+        # Make sure the necessary directories exist
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
+
+    def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.write_metadata()
+
+    def write_metadata(self):
         with open(os.path.join(self.base_dir, "corpus_metadata"), "w") as f:
             pickle.dump(self.metadata, f, -1)
 

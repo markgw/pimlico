@@ -26,10 +26,9 @@ class ConstituencyParseTreeCorpus(TarredCorpus):
 
 class ConstituencyParseTreeCorpusWriter(TarredCorpusWriter):
     @pass_up_invalid
-    def add_document(self, archive_name, doc_name, data):
+    def document_to_raw_data(self, doc):
         # Put a blank line between every parse
-        data = "\n\n".join(data)
-        super(ConstituencyParseTreeCorpusWriter, self).add_document(archive_name, doc_name, data)
+        return "\n\n".join(doc)
 
 
 class DependencyParseCorpus(JsonDocumentCorpus):
@@ -50,10 +49,11 @@ class DependencyParseCorpus(JsonDocumentCorpus):
 
 class DependencyParseCorpusWriter(JsonDocumentCorpusWriter):
     @pass_up_invalid
-    def add_document(self, archive_name, doc_name, data):
+    def document_to_raw_data(self, doc):
         # Data should be a list of StanfordDependencyParses, one for each sentence
-        data = [parse.to_json_list() for parse in data]
-        super(DependencyParseCorpusWriter, self).add_document(archive_name, doc_name, data)
+        return super(DependencyParseCorpusWriter, self).document_to_raw_data(
+            [parse.to_json_list() for parse in doc]
+        )
 
 
 class StanfordDependencyParse(object):

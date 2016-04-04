@@ -4,7 +4,8 @@ from pimlico.core.external.java import check_java_dependency, DependencyCheckerE
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, AddAnnotationField
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, AddAnnotationField, \
+    SimpleWordAnnotationCorpusWriter
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 
 
@@ -53,3 +54,9 @@ class ModuleInfo(DocumentMapModuleInfo):
 
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies
+
+    def get_writer(self, output_name):
+        return SimpleWordAnnotationCorpusWriter(
+            self.get_output_dir(output_name),
+            self.get_output("documents").annotation_fields
+        )

@@ -21,11 +21,10 @@ class CorefCorpus(TarredCorpus):
 
 class CorefCorpusWriter(TarredCorpusWriter):
     @pass_up_invalid
-    def add_document(self, archive_name, doc_name, data):
-        data = json.dumps(dict(
-            (entity.id, [m.to_json_dict() for m in entity.mentions]) for entity in data
+    def document_to_raw_data(self, doc):
+        return json.dumps(dict(
+            (entity.id, [m.to_json_dict() for m in entity.mentions]) for entity in doc
         ))
-        super(CorefCorpusWriter, self).add_document(archive_name, doc_name, data)
 
 
 class Entity(object):

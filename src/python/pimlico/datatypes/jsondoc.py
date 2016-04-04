@@ -23,11 +23,10 @@ class JsonDocumentCorpusWriter(TarredCorpusWriter):
         self.readable = readable
 
     @pass_up_invalid
-    def add_document(self, archive_name, doc_name, data):
+    def document_to_raw_data(self, doc):
         # Data should be a JSON object or other object serializable by the json package
         if self.readable:
-            data = json.dumps(data, indent=4)
+            return json.dumps(doc, indent=4)
         else:
             # More compact representation, not very readable
-            data = json.dumps(data, indent=None, separators=(",", ":"))
-        super(JsonDocumentCorpusWriter, self).add_document(archive_name, doc_name, data)
+            return json.dumps(doc, indent=None, separators=(",", ":"))

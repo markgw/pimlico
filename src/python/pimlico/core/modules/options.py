@@ -27,6 +27,23 @@ def choose_from_list(options, name=None):
     return _fn
 
 
+def comma_separated_list(item_type=str):
+    """
+    Option processor type that accepts comma-separated lists of strings. Each value is then parsed according to the
+    given item_type (default: string).
+
+    """
+    def _fn(string):
+        return [
+            item_type(val.strip()) for val in string.split(",")
+        ]
+    return _fn
+
+
+# For convenience, name the common case where the values are not parsed at all
+comma_separated_strings = comma_separated_list()
+
+
 def process_module_options(opt_def, opt_dict, module_type_name):
     """
     Utility for processing runtime module options. Called from module base class.

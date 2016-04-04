@@ -1,58 +1,29 @@
-import random
-
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.features import TermFeatureListCorpus, KeyValueListCorpus
-from pimlico.datatypes.tar import TarredCorpus
-
-
-# Subclass TermFeatureListCorpus so that inputs expecting one can accept this
-# TODO There should be a better superclass for doc-doc filters like this
-class TermFeatureListCorpusFilter(TermFeatureListCorpus):
-    def __init__(self, input_datatype, pipeline, **kwargs):
-        TarredCorpus.__init__(self, None, pipeline, **kwargs)
-        self.input_datatype = input_datatype
-
-    def __len__(self):
-        return len(self.input_datatype)
-
-    def archive_iter(self, subsample=None, start=0):
-        # TODO Implement this, which does the key
-        tarballs = self.tarballs
-
-        current_archive = 0
-        current_archive_count = 0
-
-        for file_num, (doc_name, doc) in enumerate(self.input_datatype):
-            # Allow the first portion of the corpus to be skipped
-            if file_num < start:
-                continue
-            # If subsampling, decide whether to extract this file
-            if subsample is not None and random.random() > subsample:
-                # Reject this file
-                continue
-
-            # Check whether we've put enough files in the current archive to move onto the next
-            if current_archive_count == self.archive_size:
-                current_archive += 1
-                current_archive_count = 0
-
-            yield tarballs[current_archive], doc_name, doc
-
-    def data_ready(self):
-        return self.input_datatype.data_ready()
+from pimlico.core.modules.options import comma_separated_strings, str_to_bool
+from pimlico.datatypes.features import TermFeatureListCorpus, KeyValueListCorpus, TermFeatureListCorpusWriter
 
 
 class ModuleInfo(DocumentMapModuleInfo):
-    module_type_name = "term_feature_list_filter"
+    module_type_name = "term_feature_list"
     module_inputs = [("key_values", KeyValueListCorpus)]
-    module_outputs = [("term_features", TermFeatureListCorpusFilter)]
-    module_options = [
-        # TODO Add some options
-    ]
-    module_executable = False
+    module_outputs = [("term_features", TermFeatureListCorpus)]
+    module_options = {
+        "term_keys": {
+            "help": "Name of keys (feature names in the input) which denote terms. The first one found in the keys "
+                    "of a particular data point will be used as the term for that data point. Any other matches will "
+                    "be removed before using the remaining keys as the data point's features. Default: just 'term'",
+            "type": comma_separated_strings,
+            "default": ["term"],
+        },
+        "include_feature_keys": {
+            "help": "If True, include the key together with the value from the input key-value pairs as feature "
+                    "names in the output. Otherwise, just use the value. E.g. for input [prop=wordy, poss=my], "
+                    "if True we get features [prop_wordy, poss_my] (both with count 1); if False we get just "
+                    "[wordy, my]. Default: False",
+            "type": str_to_bool,
+            "default": False,
+        },
+    }
 
-    def instantiate_output_datatype(self, output_name, output_datatype):
-        if output_name == "term_features":
-            return TermFeatureListCorpusFilter(self.pipeline, self.get_input("key_values"))
-        else:
-            return super(ModuleInfo, self).instantiate_output_datatype(output_name, output_datatype)
+    def get_writer(self, output_name):
+        return TermFeatureListCorpusWriter(self.get_output_dir(output_name))

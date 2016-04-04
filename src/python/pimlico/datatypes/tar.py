@@ -115,6 +115,12 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
     since the docs are gzipped *before* adding them, not the whole archive together, but it means we can easily
     iterate over the documents, unzipping them as required.
 
+    A subtlety of TarredCorpusWriter and its subclasses is that, as soon as the writer has been initialized,
+    it must be legitimate to initialize a datatype to read the corpus. Naturally, at this point there will
+    be no documents in the corpus, but it allows us to do document processing on the fly by initializing
+    writers and readers to be sure the pre/post-processing is identical to if we were writing the docs to disk
+    and reading them in again.
+
     """
     def __init__(self, base_dir, gzip=False):
         super(TarredCorpusWriter, self).__init__(base_dir)
@@ -124,8 +130,14 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
         self.gzip = gzip
         # Set "gzip" in the metadata, so we know to unzip when reading
         self.metadata["gzip"] = gzip
+        self.metadata["length"] = 0
+
+        # Write out the metadata, so we're in a fit state to open a reader
+        self.write_metadata()
 
     def add_document(self, archive_name, doc_name, data):
+        data = self.document_to_raw_data(data)
+
         if type(data) is InvalidDocument:
             # For an invalid result, signified by the special type, output the error info for later stages
             data = unicode(data)
@@ -154,6 +166,15 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
         info.size = len(data_file.buf)
         self.current_archive_tar.addfile(info, data_file)
 
+    def document_to_raw_data(self, doc):
+        """
+        Overridden by subclasses to provide the mapping from the structured data supplied to the writer to
+        the actual raw string to be written to disk. Override this instead of add_document(), so that filters
+        can do the mapping on the fly without writing the output to disk.
+
+        """
+        return doc
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.current_archive_tar is not None:
             self.current_archive_tar.close()
@@ -163,17 +184,17 @@ class TarredCorpusWriter(IterableDocumentCorpusWriter):
 
 def pass_up_invalid(fn):
     """
-    Decorator for add_document() methods of TarredCorpusWriter subclasses that detects invalid documents and calls
-    the superclass add_document() on them, skipping any subclass-specific processing. Does the same where the data
+    Decorator for document_to_raw_data() methods of TarredCorpusWriter subclasses that detects invalid documents and
+    calls simply returns them, skipping any subclass-specific processing. Does the same where the data
     is None.
 
     """
-    def _fn(self, archive_name, doc_name, data):
+    def _fn(self, data):
         if type(data) is InvalidDocument or data is None:
             # Don't do subclass's processing
-            return TarredCorpusWriter.add_document(self, archive_name, doc_name, data)
+            return data
         else:
-            return fn(self, archive_name, doc_name, data)
+            return fn(self, data)
     return _fn
 
 

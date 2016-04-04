@@ -23,16 +23,6 @@ class DocumentMapModuleInfo(BaseModuleInfo):
     # Most subclasses will want to override this to give a more specific datatype for the output
     module_outputs = [("documents", TarredCorpus)]
 
-
-class DocumentMapModuleExecutor(BaseModuleExecutor):
-    """
-    Base class for executors for document map modules. Subclasses should provide the behaviour
-    for each individual document.
-
-    """
-    def process_document(self, archive, filename, *docs):
-        raise NotImplementedError
-
     def get_writer(self, output_name):
         """
         Get the writer instance that will be given processed documents to write. Should return
@@ -40,10 +30,29 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         TarredCorpusWriter.
 
         """
-        return TarredCorpusWriter(self.info.get_output_dir(output_name))
+        return TarredCorpusWriter(self.get_output_dir(output_name))
 
     def get_writers(self):
-        return tuple(self.get_writer(name) for name in self.info.output_names)
+        return tuple(self.get_writer(name) for name in self.output_names)
+
+
+class DocumentMapModuleExecutor(BaseModuleExecutor):
+    """
+    Base class for executors for document map modules. Subclasses should provide the behaviour
+    for each individual document.
+
+    """
+    def __init__(self, module_instance_info):
+        super(DocumentMapModuleExecutor, self).__init__(module_instance_info)
+
+        # We may have multiple inputs, which should be aligned tarred corpora
+        # If there's only one, this also works
+        self.input_corpora = [self.info.get_input(input_name)
+                              for input_name in self.info.input_names]
+        self.input_iterator = AlignedTarredCorpora(self.input_corpora)
+
+    def process_document(self, archive, filename, *docs):
+        raise NotImplementedError
 
     def preprocess(self):
         """
@@ -58,25 +67,19 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         pass
 
     def execute(self):
-        # We may have multiple inputs, which should be aligned tarred corpora
-        # If there's only one, this also works
-        self.input_corpora = [self.info.get_input(input_name)
-                              for input_name in self.info.input_names]
-        input_iterator = AlignedTarredCorpora(self.input_corpora)
-
         # Call the set-up routine, if one's been defined
-        self.log.info("Preparing document map execution for %s documents" % len(input_iterator))
+        self.log.info("Preparing document map execution for %s documents" % len(self.input_iterator))
         self.preprocess()
 
-        pbar = get_progress_bar(len(input_iterator),
+        pbar = get_progress_bar(len(self.input_iterator),
                                 title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
         complete = False
         invalid_inputs = 0
         invalid_outputs = 0
         try:
             # Prepare a corpus writer for the output
-            with multiwith(*self.get_writers()) as writers:
-                for archive, filename, docs in pbar(input_iterator.archive_iter()):
+            with multiwith(*self.info.get_writers()) as writers:
+                for archive, filename, docs in pbar(self.input_iterator.archive_iter()):
                     # Useful to know in output
                     if any(type(d) is InvalidDocument for d in docs):
                         invalid_inputs += 1

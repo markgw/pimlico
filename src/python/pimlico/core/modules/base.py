@@ -391,9 +391,9 @@ class BaseModuleExecutor(object):
     do the work of executing the module on given inputs, writing to given output locations.
 
     """
-    def __init__(self, log, module_instance_info):
-        self.log = log
+    def __init__(self, module_instance_info):
         self.info = module_instance_info
+        self.log = module_instance_info.pipeline.log
 
     def execute(self):
         raise NotImplementedError

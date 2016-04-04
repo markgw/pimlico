@@ -11,6 +11,8 @@ import threading
 import warnings
 
 import requests
+import time
+
 from pimlico.core.external.java import start_java_process
 from pimlico.core.logs import get_log_file
 from pimlico.core.modules.execute import StopProcessing
@@ -54,7 +56,14 @@ class CoreNLP(object):
         self.stdout_queue = OutputQueue(self.proc.stdout)
         self.stderr_queue = OutputQueue(self.proc.stderr)
         # Check that the server's responding
-        self.ping()
+        # If it responds straight away, great; otherwise retry a few times
+        for i in range(10):
+            try:
+                self.ping()
+            except CoreNLPClientError:
+                time.sleep(0.1)
+            else:
+                break
 
     def send_shutdown(self):
         """

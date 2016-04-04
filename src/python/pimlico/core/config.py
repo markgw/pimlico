@@ -8,6 +8,9 @@ from ConfigParser import SafeConfigParser, RawConfigParser
 import sys
 from cStringIO import StringIO
 
+from pimlico.core.modules.options import str_to_bool
+from pimlico.utils.logging import get_console_logger
+
 REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
 
 
@@ -55,7 +58,11 @@ class PipelineConfig(object):
 
     """
     def __init__(self, name, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
-                 variant="main", available_variants=[]):
+                 variant="main", available_variants=[], log=None):
+        if log is None:
+            log = get_console_logger("Pimlico")
+        self.log = log
+
         self.available_variants = available_variants
         self.variant = variant
         # Stores the module names in the order they were specified in the config file
@@ -121,6 +128,8 @@ class PipelineConfig(object):
             from pimlico.core.modules.base import load_module_info
             from pimlico.core.modules.inputs import input_module_factory
             from pimlico.datatypes.base import load_datatype, DatatypeLoadError
+            from pimlico.core.modules.map import DocumentMapModuleInfo
+            from pimlico.core.modules.map.filter import wrap_module_info_as_filter
 
             if module_name not in self.raw_module_configs:
                 raise PipelineStructureError("undefined module '%s'" % module_name)
@@ -138,13 +147,25 @@ class PipelineConfig(object):
                 # Not a datatype
                 module_info_class = load_module_info(module_config["type"])
 
+            # Allow document map types to be used as filters simply by specifying filter=T
+            filter_type = str_to_bool(module_config.pop("filter", ""))
+
             # Pass in all other options to the info constructor
             options_dict = dict(module_config)
             inputs, optional_outputs, options = module_info_class.process_config(options_dict)
 
             # Instantiate the module info
-            self._module_info_cache[module_name] = \
+            module_info = \
                 module_info_class(module_name, self, inputs=inputs, options=options, optional_outputs=optional_outputs)
+
+            # If we're loading as a filter, wrap the module info
+            if filter_type:
+                if not issubclass(module_info_class, DocumentMapModuleInfo):
+                    raise PipelineStructureError("only document map module types can be treated as filters. Got option "
+                                                 "filter=True for module %s" % module_name)
+                module_info = wrap_module_info_as_filter(module_info)
+
+            self._module_info_cache[module_name] = module_info
         return self._module_info_cache[module_name]
 
     def get_module_schedule(self):

@@ -40,12 +40,13 @@ class KeyValueListCorpusWriter(TarredCorpusWriter):
         # Put the separators in the metadata, so we know how to read the data in again
         self.metadata["separator"] = separator
         self.metadata["fv_separator"] = fv_separator
+        self.write_metadata()
 
     @pass_up_invalid
-    def add_document(self, archive_name, doc_name, data):
+    def document_to_raw_data(self, doc):
         # Input should be a list of data points, where each is a list of feature-value pairs
         # One data point per line
-        data = "\n".join([
+        return "\n".join([
             # Fv pairs are separated by separator
             self.separator.join([
                 # Make sure they don't include the separator
@@ -59,9 +60,8 @@ class KeyValueListCorpusWriter(TarredCorpusWriter):
                         escape_sep(self.fv_separator, "FVSEP", feature_value)
                     )
                 ) for (feature_name, feature_value) in data_point
-            ]) for data_point in data
+            ]) for data_point in doc
         ])
-        super(KeyValueListCorpusWriter, self).add_document(archive_name, doc_name, data)
 
 
 class TermFeatureListCorpus(KeyValueListCorpus):
@@ -93,17 +93,18 @@ class TermFeatureListCorpus(KeyValueListCorpus):
 
 
 class TermFeatureListCorpusWriter(KeyValueListCorpusWriter):
-    def __init__(self, base_dir, separator=" ", fv_separator="="):
+    def __init__(self, base_dir):
         super(TermFeatureListCorpusWriter, self).__init__(base_dir, separator=" ", fv_separator="=")
 
     @pass_up_invalid
-    def add_document(self, archive_name, doc_name, data):
+    def document_to_raw_data(self, doc):
         # Input should be a list of data points, where each is a (term, feature count) pair
+        #  and each feature count is a dictionary mapping feature names to counts
         data = [
             [("term", term)] + [(feature, str(count)) for (feature, count) in feature_counts.items()]
-            for (term, feature_counts) in data
+            for (term, feature_counts) in doc
         ]
-        super(TermFeatureListCorpusWriter, self).add_document(archive_name, doc_name, data)
+        return super(TermFeatureListCorpusWriter, self).document_to_raw_data(data)
 
 
 def escape_sep(sep, sep_type, text):

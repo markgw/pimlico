@@ -1,16 +1,11 @@
 import os
 import re
+
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import DocumentMapModuleExecutor, skip_invalid
-from pimlico.datatypes.features import KeyValueListCorpusWriter
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
-    def get_writer(self, output_name):
-        base_dir = self.info.get_output_dir(output_name)
-        if output_name == "documents":
-            return KeyValueListCorpusWriter(base_dir)
-
     def preprocess(self):
         # Turn off document processing on the input iterator
         # This means we'll just get raw text for each document
@@ -87,11 +82,12 @@ class ModuleExecutor(DocumentMapModuleExecutor):
 
     def postprocess(self, error=False):
         self.log.info("Regex matched a total of %d times in %d documents" % (self.match_count, len(self.matched_docs)))
-        match_filename = os.path.join(self.info.get_output_dir("documents"), "matched_docs.txt")
-        self.log.info("Outputing matched doc list to %s" % match_filename)
-        # Output a list of the non-empty files
-        with open(match_filename, "w") as f:
-            f.write("\n".join("%s/%s" % (archive, filename) for (archive, filename) in self.matched_docs))
+        if not error:
+            match_filename = os.path.join(self.info.get_output_dir("documents"), "matched_docs.txt")
+            self.log.info("Outputing matched doc list to %s" % match_filename)
+            # Output a list of the non-empty files
+            with open(match_filename, "w") as f:
+                f.write("\n".join("%s/%s" % (archive, filename) for (archive, filename) in self.matched_docs))
 
 
 def build_re(word_format, match_field, match_expr, group_suffix, nonwords):

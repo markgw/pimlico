@@ -125,7 +125,6 @@ class XmlDocumentIterator(IterableDocumentCorpus):
 
 
 def count_files_parallel(filenames, truncate, document_node_type, processes):
-    num_docs = 0
     if truncate is not None:
         # Truncating, so update pbar with num docs and stop after we've got enough
         pbar = get_progress_bar(truncate, title="Counting documents")
@@ -159,11 +158,12 @@ def count_files_parallel(filenames, truncate, document_node_type, processes):
                 count += new_count
 
                 if truncate is not None:
-                    if num_docs >= truncate:
+                    if count >= truncate:
                         # We've got at least as many docs as requested, so we'll stop after that number when iterating
                         pbar.finish()
                         # Stop all workers
                         pool.terminate()
+                        pbar.finish()
                         return truncate
                     else:
                         pbar.update(count)

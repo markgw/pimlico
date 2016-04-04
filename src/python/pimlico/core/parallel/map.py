@@ -82,15 +82,9 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             # Not multiprocessing: just use the single-core version
             super(DocumentMapModuleExecutor, self).execute()
         else:
-            # We may have multiple inputs, which should be aligned tarred corpora
-            # If there's only one, this also works
-            self.input_corpora = [self.info.get_input(input_name)
-                                  for input_name in self.info.input_names]
-            input_iterator = AlignedTarredCorpora(self.input_corpora)
-
             # Call the set-up routine, if one's been defined
             self.log.info("Preparing parallel document map execution for %d documents with %d processes" %
-                          (len(input_iterator), processes))
+                          (len(self.input_iterator), processes))
             self.preprocess_parallel()
 
             # Start up a pool
@@ -98,7 +92,7 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             output_queue = pool.queue
             self.log.info("Process pool created for processing %d documents in parallel" % processes)
 
-            pbar = get_progress_bar(len(input_iterator),
+            pbar = get_progress_bar(len(self.input_iterator),
                                     title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
             complete = False
             docs_processing = []
@@ -106,9 +100,9 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             docs_complete = 0
             try:
                 # Prepare a corpus writer for the output
-                with multiwith(*self.get_writers()) as writers:
+                with multiwith(*self.info.get_writers()) as writers:
                     # Inputs will be taken from this as they're needed
-                    input_iter = iter(input_iterator.archive_iter())
+                    input_iter = iter(self.input_iterator.archive_iter())
                     # Push the first inputs into the pool
                     for archive, filename, docs in islice(input_iter, processes):
                         pool.process_document(archive, filename, *docs)

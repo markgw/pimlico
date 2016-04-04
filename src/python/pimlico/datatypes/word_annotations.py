@@ -131,6 +131,7 @@ class WordAnnotationCorpusWriter(TarredCorpusWriter):
         self.metadata["word_boundary"] = word_boundary.replace("\n", "\\n")
         self.metadata["word_format"] = word_format.replace("\n", "\\n")
         self.metadata["nonword_chars"] = nonword_chars.replace("\n", "\\n")
+        self.write_metadata()
 
 
 class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
@@ -150,19 +151,15 @@ class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
                                                                base_dir, **kwargs)
 
     @pass_up_invalid
-    def add_document(self, archive_name, doc_name, data):
+    def document_to_raw_data(self, doc):
         """
         Takes data in the form of a list of sentences, where each is a list of words, where each
         is a list of values for each field (in the same order in which the field names were given).
         Encodes it in a format that can be read by a WordAnnotationCorpus.
 
-        :param archive_name: current archive
-        :param doc_name: document being added
         :param data: sentence data in the form described above
         """
-        data = \
-            u"\n".join(u" ".join(self.field_sep.join(word_fields) for word_fields in sentence) for sentence in data)
-        super(SimpleWordAnnotationCorpusWriter, self).add_document(archive_name, doc_name, data)
+        return u"\n".join(u" ".join(self.field_sep.join(word_fields) for word_fields in sentence) for sentence in doc)
 
 
 def AddAnnotationField(input_name, add_fields):

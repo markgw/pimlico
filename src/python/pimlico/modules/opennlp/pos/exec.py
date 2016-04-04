@@ -20,12 +20,6 @@ class ModuleExecutor(DocumentMapModuleExecutor):
             if "word" not in available_fields:
                 raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
 
-    def get_writer(self, output_name):
-        return SimpleWordAnnotationCorpusWriter(
-            self.info.get_output_dir(output_name),
-            self.input_corpora[0].read_annotation_fields() + ["pos"]
-        )
-
     @skip_invalid
     def process_document(self, archive, filename, doc):
         # Input is a list of tokenized sentences

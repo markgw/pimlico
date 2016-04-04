@@ -2,7 +2,7 @@ import re
 
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.features import KeyValueListCorpus
+from pimlico.datatypes.features import KeyValueListCorpus, KeyValueListCorpusWriter
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 
@@ -54,6 +54,11 @@ class ModuleInfo(DocumentMapModuleInfo):
         if not any(x[3] is not None and x[4] is not None for x in self.deconstructed_expression):
             raise ModuleInfoLoadError("expression '%s' does not include any variable extractions, so no data would "
                                       "be output by running this" % self.options["expr"])
+
+    def get_writer(self, output_name):
+        base_dir = self.get_output_dir(output_name)
+        if output_name == "documents":
+            return KeyValueListCorpusWriter(base_dir)
 
 
 def deconstruct_expression(expression):
