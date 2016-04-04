@@ -9,7 +9,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
     def preprocess(self):
         # Turn off document processing on the input iterator
         # This means we'll just get raw text for each document
-        self.input_corpora[0].raw_input = True
+        self.input_corpora[0].raw_data = True
 
         # Now we're able to check what fields will actually be returned by the input datatype
         # Check we've got all the ones used by the expression
@@ -34,30 +34,37 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         self.word_boundary = self.input_corpora[0].metadata["word_boundary"].replace("\\n", "\n")
 
         # Process the expression into a regex that we'll match against the text
-        regex_words = []
         word_format = self.input_corpora[0].metadata["word_format"].replace("\\n", "\n")
         nonwords = self.input_corpora[0].metadata["nonword_chars"].replace("\\n", "\n")
         self.capture_fields = []
 
-        for word_num, (match_field_name, target, prefix, var_name, extract_field_name) \
-                in enumerate(self.info.deconstructed_expression):
-            # Build a regex component that matches the required field to the target value
-            if prefix:
-                # Allow more chars after the target
-                target = r"%s.*?" % target
-            regex_words.append(build_re(word_format, match_field_name, target, "%d" % word_num, nonwords))
+        self.regexes = []
+        word_num = -1
+        for deconstructed_expression in self.info.deconstructed_expressions:
+            regex_words = []
+            regex_fields = []
+            for word_num, (match_field_name, target, prefix, var_name, extract_field_name) \
+                    in enumerate(deconstructed_expression, start=word_num+1):
+                # Build a regex component that matches the required field to the target value
+                if prefix:
+                    # Allow more chars after the target
+                    target = r"%s[^%s]*?" % (target, nonwords)
+                regex_words.append(build_re(word_format, match_field_name, target, "%d" % word_num, nonwords))
 
-            if var_name is not None and extract_field_name is not None:
-                # A particular field of this word will be extracted to go in the output
-                self.capture_fields.append((var_name, "%s%s" % (extract_field_name, word_num)))
+                if var_name is not None and extract_field_name is not None:
+                    # A particular field of this word will be extracted to go in the output
+                    regex_fields.append((var_name, "%s%s" % (extract_field_name, word_num)))
 
-        regex = "%s%s%s" % (self.word_boundary, self.word_boundary.join(regex_words), self.word_boundary)
+            regex = "%s%s%s" % (self.word_boundary, self.word_boundary.join(regex_words), self.word_boundary)
+            self.capture_fields.append(regex_fields)
 
-        try:
-            self.regex = re.compile(regex)
-        except Exception, e:
-            raise ModuleExecutionError("could not compile regex: %s. %s" % (regex, e))
-        self.log.info("Matching regex %s" % regex.replace("\n", "\\n"))
+            try:
+                self.regexes.append(re.compile(regex))
+            except Exception, e:
+                raise ModuleExecutionError("could not compile regex: %s. %s" % (regex, e))
+
+        for regex in self.regexes:
+            self.log.info("Matching regex %s" % regex.pattern.replace("\n", "\\n"))
 
         self.match_count = 0
         self.matched_docs = []
@@ -66,14 +73,16 @@ class ModuleExecutor(DocumentMapModuleExecutor):
     def process_document(self, archive, filename, doc):
         # Add word boundaries either side of the doc text so we match at the beginning and end
         doc = "%s%s%s" % (self.word_boundary, doc, self.word_boundary)
-        # Search using the pre-prepared regex
-        output_lines = []
         matched = 0
-        for match in self.regex.finditer(doc):
-            matched += 1
-            # For each match of the regex, add a line to the output document
-            match_dict = match.groupdict()
-            output_lines.append([(var, match_dict[group]) for (var, group) in self.capture_fields])
+        output_lines = []
+
+        for regex, capture_fields in zip(self.regexes, self.capture_fields):
+            # Search using the pre-prepared regex
+            for match in regex.finditer(doc):
+                matched += 1
+                # For each match of the regex, add a line to the output document
+                match_dict = match.groupdict()
+                output_lines.append([(var, match_dict[group]) for (var, group) in capture_fields])
 
         self.match_count += matched
         if matched:

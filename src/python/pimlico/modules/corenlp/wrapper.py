@@ -7,6 +7,7 @@ Client-side code based on Smitha Milli's CoreNLP client: https://github.com/smil
 
 """
 import json
+import os
 import threading
 import warnings
 
@@ -29,6 +30,7 @@ class CoreNLP(object):
 
         self.server_url = "http://localhost:%d" % self.port
         self._server_cmd = None
+        self._shutdown_key = None
 
         # Flag tells us whether the server has been deliberately killed
         # When a client (which might be in a thread) finds the server's disappeared, it can respond in the knowledge
@@ -64,6 +66,14 @@ class CoreNLP(object):
                 time.sleep(0.1)
             else:
                 break
+        # Read shutdown key straight away, as the temporary file where it was written might not exist when we need it
+        shutdown_key_filename = "/tmp/corenlp.shutdown"
+        if not os.path.exists(shutdown_key_filename):
+            warnings.warn("CoreNLP server started up ok, but hasn't output its shutdown key to a file, so we won't be "
+                          "able to shut it down gracefully")
+        else:
+            with open(shutdown_key_filename, "r") as f:
+                self._shutdown_key = f.read()
 
     def send_shutdown(self):
         """
@@ -71,10 +81,9 @@ class CoreNLP(object):
         """
         # Set our own flag so everyone knows that if the server disappears it's because we killed it
         self.server_killed.set()
-        # Read the shutdown key that should have been stored when the server started
-        with open("/tmp/corenlp.shutdown", "r") as f:
-            shutdown_key = f.read()
-        requests.get("%s/shutdown" % self.server_url, {"key": shutdown_key})
+        # If we were able to read the shutdown key when we started the server, we can tell it to shut down
+        if self._shutdown_key is not None:
+            requests.get("%s/shutdown" % self.server_url, {"key": self._shutdown_key})
 
     def shutdown(self):
         try:
@@ -82,6 +91,14 @@ class CoreNLP(object):
         except CoreNLPClientError:
             # Server's not running -- no need to shut down
             return
+
+        if self._shutdown_key is None:
+            # We have no shutdown key, so we can't shut down nicely
+            # Just kill the process
+            self.server_killed.set()
+            self.proc.kill()
+            return
+
         try:
             # Send stop signal to server
             self.send_shutdown()

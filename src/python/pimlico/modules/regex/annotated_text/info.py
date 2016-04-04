@@ -23,7 +23,8 @@ class ModuleInfo(DocumentMapModuleInfo):
                     "specifying x=f:y, where f is the field name to be extracted. "
                     "E.g. 'what a=lemma:pos[NN*] lemma[come] with b=pos[NN*]' matches phrases like 'what meals come "
                     "with fries', producing 'a=meal' and 'b=fries'. Both pos and lemma need to be fields in the "
-                    "dataset'",
+                    "dataset'. If you give multiple whole expressions separated by |s, matches will be collected "
+                    "from all of them",
             "required": True,
         },
     }
@@ -33,9 +34,12 @@ class ModuleInfo(DocumentMapModuleInfo):
 
         # Break down the expression, but don't yet produce a regex, since we don't necessarily know what fields
         #  are available or where they are in the input
-        self.deconstructed_expression = deconstruct_expression(self.options["expr"])
+        self.deconstructed_expressions = deconstruct_expression(self.options["expr"])
         self.required_fields = set(
-            sum(([x[0], x[4]] for x in self.deconstructed_expression), [])
+            sum(
+                (sum(([x[0], x[4]] for x in expr), []) for expr in self.deconstructed_expressions),
+                []
+            )
         ) - {None}
 
         input_datatype = self.get_input_datatype()[1]
@@ -51,7 +55,7 @@ class ModuleInfo(DocumentMapModuleInfo):
                         ", ".join("'%s'" % f for f in unknown_fields), ", ".join(input_datatype.annotation_fields)
                     )
                 )
-        if not any(x[3] is not None and x[4] is not None for x in self.deconstructed_expression):
+        if not any(x[3] is not None and x[4] is not None for expr in self.deconstructed_expressions for x in expr):
             raise ModuleInfoLoadError("expression '%s' does not include any variable extractions, so no data would "
                                       "be output by running this" % self.options["expr"])
 
@@ -61,7 +65,7 @@ class ModuleInfo(DocumentMapModuleInfo):
             return KeyValueListCorpusWriter(base_dir, append=append)
 
 
-def deconstruct_expression(expression):
+def deconstruct_expression(expressions):
     """
     Pull an expression apart. This is used to check that an expression is syntactically
     correct and also to parse it into a regex (which is only done at execution time).
@@ -69,37 +73,45 @@ def deconstruct_expression(expression):
     :param expression: expr option from the config
     :return:
     """
-    split_tokens = []
-    for token in expression.split():
-        extract_field_name = None
-        var_name = None
+    split_expressions = []
+    for expression in expressions.split("|"):
+        expression = expression.strip()
+        split_tokens = []
+        for token in expression.split():
+            extract_field_name = None
+            var_name = None
 
-        if "=" in token:
-            # This is a variable assignment
-            var_name, __, token = token.partition("=")
-            # Expression may start with a field name specifier
-            if ":" in token:
-                extract_field_name, __, token = token.partition(":")
+            if "=" in token:
+                # This is a variable assignment
+                var_name, __, token = token.partition("=")
+                # Expression may start with a field name specifier
+                if ":" in token:
+                    extract_field_name, __, token = token.partition(":")
+                else:
+                    # Default field name to extract
+                    extract_field_name = "word"
+
+            # Rest of the token is a matching expression
+            if "[" in token:
+                # Specifies field name to match
+                match_field_name, __, token = token.partition("[")
+                # Remove the closing ]
+                token = token[:-1]
             else:
-                # Default field name to extract
-                extract_field_name = "word"
+                # By default, match the 'word' field
+                match_field_name = "word"
 
-        # Rest of the token is a matching expression
-        if "[" in token:
-            # Specifies field name to match
-            match_field_name, __, token = token.partition("[")
-            # Remove the closing ]
-            token = token[:-1]
-        else:
-            # By default, match the 'word' field
-            match_field_name = "word"
+            # Check if it's a prefix
+            if token == "*" or token == "":
+                # Complete wildcard: no constraints
+                prefix = True
+                token = ""
+            elif token.endswith("*"):
+                prefix = True
+                token = token[:-1]
+            else:
+                prefix = False
 
-        # Check if it's a prefix
-        if token.endswith("*"):
-            prefix = True
-            token = token[:-1]
-        else:
-            prefix = False
-
-        split_tokens.append((match_field_name, token, prefix, var_name, extract_field_name))
-    return split_tokens
+            split_tokens.append((match_field_name, token, prefix, var_name, extract_field_name))
+        split_expressions.append(split_tokens)
+    return split_expressions
