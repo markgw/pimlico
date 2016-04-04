@@ -1,5 +1,7 @@
 import argparse
 import sys
+from operator import itemgetter
+
 from pimlico.cli.check import check_cmd
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
@@ -44,6 +46,10 @@ if __name__ == "__main__":
     parser.add_argument("--debug", "-d", help="Output verbose debugging info", action="store_true")
     parser.add_argument("--variant", "-v", help="Load a particular variant of a pipeline. For a list of available "
                                                 "variants, use the 'variants' command", default="main")
+    parser.add_argument("--override-local-config", "--olc",
+                        help="Override a parameter set in the local config files (usually ~/.pimlico.conf). For just "
+                             "this execution. Specify as param=value. Use this option multiple times to override "
+                             "more than one parameter", action="append")
     subparsers = parser.add_subparsers(help="Select a sub-command")
 
     check = subparsers.add_parser("check",
@@ -68,9 +74,17 @@ if __name__ == "__main__":
 
     opts = parser.parse_args()
 
+    if opts.override_local_config is not None:
+        override_local = dict(
+            itemgetter(0, 2)(param.partition("=")) for param in opts.override_local_config
+        )
+    else:
+        override_local = {}
+
     # Read in the pipeline config from the given file
     try:
-        pipeline = PipelineConfig.load(opts.pipeline_config, variant=opts.variant)
+        pipeline = PipelineConfig.load(opts.pipeline_config, variant=opts.variant,
+                                       override_local_config=override_local)
     except PipelineConfigParseError, e:
         print >>sys.stderr, "Error reading pipeline config: %s" % e
         sys.exit(1)

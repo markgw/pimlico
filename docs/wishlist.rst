@@ -23,5 +23,11 @@ Things I plan to add to Pimlico:
 
 - Bundle Pimlico Java code as jars, so user doesn't need to compile. Dead easy - just add jar target to ant
   builds and check in resulting jars
+- Reconsider TarredCorpus as the common dataset format. There's no obvious advantage over just grouping documents
+  in directories, which has the advantage of allowing freer parallelization. However, this might run into filesystem
+  trouble where there's a very large number of docs in a corpus (many inodes in subdirectories)
+- Or consider parallelizing at the archive level: allow TarredCorpus to iterate over specific archives, then send
+  each archive off to be processed in parallel, meaning we can write files linearly within an archive, but have many
+  (roughly equally sized) archives going at once
 
 *I'll add to this list as I think of things...*

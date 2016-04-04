@@ -2,9 +2,15 @@ import os
 import re
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import DocumentMapModuleExecutor, skip_invalid
+from pimlico.datatypes.features import KeyValueListCorpusWriter
 
 
 class ModuleExecutor(DocumentMapModuleExecutor):
+    def get_writer(self, output_name):
+        base_dir = self.info.get_output_dir(output_name)
+        if output_name == "documents":
+            return KeyValueListCorpusWriter(base_dir)
+
     def preprocess(self):
         # Turn off document processing on the input iterator
         # This means we'll just get raw text for each document
@@ -72,12 +78,12 @@ class ModuleExecutor(DocumentMapModuleExecutor):
             matched += 1
             # For each match of the regex, add a line to the output document
             match_dict = match.groupdict()
-            output_lines.append(" ".join("%s=%s" % (var, match_dict[group]) for (var, group) in self.capture_fields))
+            output_lines.append([(var, match_dict[group]) for (var, group) in self.capture_fields])
 
         self.match_count += matched
         if matched:
             self.matched_docs.append((archive, filename))
-        return "\n".join(output_lines)
+        return output_lines
 
     def postprocess(self, error=False):
         self.log.info("Regex matched a total of %d times in %d documents" % (self.match_count, len(self.matched_docs)))

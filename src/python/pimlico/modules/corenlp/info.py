@@ -13,20 +13,16 @@ def annotation_fields_from_options(module_info):
     from pimlico.core.modules.base import ModuleInfoLoadError
 
     input_datatype = module_info.get_input_datatype("documents")[1]
-    # Allow the special case where the input datatype is a tokenized corpus
-    # Pretend it's an annotated corpus with no annotations, just words
-    if issubclass(input_datatype, (TokenizedCorpus, TarredCorpus)):
-        base_annotation_fields = []
-    else:
-        if not issubclass(input_datatype, WordAnnotationCorpus):
-            raise ModuleInfoLoadError("cannot construct a dynamic word annotation corpus type, since input we're "
-                                      "extending isn't a word annotation corpus. Input is a %s" %
-                                      input_datatype.__name__)
+    if issubclass(input_datatype, WordAnnotationCorpus):
         if input_datatype.annotation_fields is None:
             raise ModuleInfoLoadError("cannot construct a word annotation corpus type by adding fields to input, "
                                       "since the input type, %s, doesn't explicitly declare its annotation fields" %
                                       input_datatype.__name__)
         base_annotation_fields = input_datatype.annotation_fields
+    else:
+        # Allow the special case where the input datatype is a tokenized corpus
+        # Pretend it's an annotated corpus with no annotations, just words
+        base_annotation_fields = []
 
     # Look at the options to see what annotations are going to be added
     add_fields = module_info.options["annotators"].split(",") if module_info.options["annotators"] else []

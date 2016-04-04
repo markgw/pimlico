@@ -108,6 +108,9 @@ class ModuleExecutor(DocumentMapModuleParallelExecutor):
         self.corenlp.start()
         self.log.info("CoreNLP server started on %s" % self.corenlp.server_url)
         self.log.info("Calling CoreNLP with annotators: %s" % ", ".join(annotators))
+        self.log.info("Annotations that will be available on the output: %s" % ", ".join(
+            self.info.get_output_datatype("annotations")[1].annotation_fields
+        ))
         self.properties = {
             "annotators": ",".join(annotators),
             "outputFormat": "json",

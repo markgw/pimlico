@@ -2,14 +2,15 @@ import re
 
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.datatypes.features import KeyValueListCorpus
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
-    module_type_name = "pos_text_matcher"
+    module_type_name = "annotated_text_matcher"
     module_inputs = [("documents", WordAnnotationCorpus)]
-    module_outputs = [("documents", TarredCorpus)]
+    module_outputs = [("documents", KeyValueListCorpus)]
     module_options = {
         "expr": {
             "help": "An expression to determine what to search for in sentences. Consists of a sequence of tokens, "

@@ -6,6 +6,7 @@ Depends on BeautifulSoup (see "bs4" target in lib dir Makefile).
 """
 import gzip
 import os
+import traceback
 from multiprocessing import Pool, Queue
 
 import time
@@ -179,6 +180,13 @@ def count_files_parallel(filenames, truncate, document_node_type, processes):
 
 
 def count_files_process(filename, document_node_type):
+    # BS can go very slowly if it tries to use chardet to detect input encoding
+    # Remove chardet and cchardet from the Python modules, so that import fails and it doesn't try to use them
+    # This prevents it getting stuck on reading long input files
+    import sys
+    sys.modules["cchardet"] = None
+    sys.modules["chardet"] = None
+    # Now we can import BS
     from bs4 import BeautifulSoup
 
     if filename.endswith(".gz"):

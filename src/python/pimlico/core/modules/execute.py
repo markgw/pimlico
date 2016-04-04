@@ -13,6 +13,8 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     log.info("Loaded pipeline %s" % pipeline_name)
 
     # Load the module instance
+    if module_name not in pipeline.modules:
+        raise ModuleExecutionError("%s pipeline doesn't have a module called '%s'" % (pipeline.name, module_name))
     module = pipeline[module_name]
     log.info("Checking module config")
     # Run basic checks on the config for this module

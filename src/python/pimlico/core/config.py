@@ -54,7 +54,7 @@ class PipelineConfig(object):
         directive is found, is given after a space.
 
     """
-    def __init__(self, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
+    def __init__(self, name, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
                  variant="main", available_variants=[]):
         self.available_variants = available_variants
         self.variant = variant
@@ -64,16 +64,7 @@ class PipelineConfig(object):
         self.raw_module_configs = raw_module_configs
         self.pipeline_config = pipeline_config
         self.filename = filename
-
-        # Process configs to get out the core things we need
-        if "name" not in self.pipeline_config:
-            raise PipelineConfigParseError("pipeline name must be specified as 'name' attribute in pipeline section")
-        self.name = self.pipeline_config["name"]
-        # Check that this pipeline is compatible with the Pimlico version being used
-        if "release" not in self.pipeline_config:
-            raise PipelineConfigParseError("Pimlico release version must be specified as 'release' attribute in "
-                                           "pipeline section")
-        check_release(self.pipeline_config["release"])
+        self.name = name
 
         # Certain standard system-wide settings, loaded from the local config
         self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name, self.variant)
@@ -109,10 +100,6 @@ class PipelineConfig(object):
 
         self._module_info_cache = {}
         self._module_schedule = None
-
-        # Now that we've got the pipeline instance prepared, load all the module info instances, so they've cached
-        for module_name in module_order:
-            self.load_module_info(module_name)
 
     @property
     def modules(self):
@@ -200,7 +187,9 @@ class PipelineConfig(object):
         return os.path.abspath(os.path.join(config_dir, path))
 
     @staticmethod
-    def load(filename, local_config=None, variant="main"):
+    def load(filename, local_config=None, variant="main", override_local_config={}):
+        from pimlico.core.modules.base import ModuleInfoLoadError
+
         if variant is None:
             variant = "main"
 
@@ -226,6 +215,8 @@ class PipelineConfig(object):
         local_config_parser = SafeConfigParser()
         local_config_parser.readfp(local_text_buffer)
         local_config_data = dict(local_config_parser.items("main"))
+        # Allow parameters to be overridden on the command line
+        local_config_data.update(override_local_config)
 
         for attr in REQUIRED_LOCAL_CONFIG:
             if attr not in local_config_data:
@@ -270,9 +261,31 @@ class PipelineConfig(object):
         except ConfigParser.Error, e:
             raise PipelineConfigParseError("could not parse config file. %s" % e)
 
+        # Process configs to get out the core things we need
+        if "name" not in pipeline_config:
+            raise PipelineConfigParseError("pipeline name must be specified as 'name' attribute in pipeline section")
+        name = pipeline_config["name"]
+
+        # Check that this pipeline is compatible with the Pimlico version being used
+        if "release" not in pipeline_config:
+            raise PipelineConfigParseError("Pimlico release version must be specified as 'release' attribute in "
+                                           "pipeline section")
+        check_release(pipeline_config["release"])
+
         # Do no further checking or processing at this stage: just keep raw dictionaries for the time being
-        return PipelineConfig(pipeline_config, local_config_data, raw_module_options, module_order,
-                              filename=filename, variant=variant, available_variants=list(sorted(available_variants)))
+        pipeline = PipelineConfig(
+            name, pipeline_config, local_config_data, raw_module_options, module_order,
+            filename=filename, variant=variant, available_variants=list(sorted(available_variants))
+        )
+
+        # Now that we've got the pipeline instance prepared, load all the module info instances, so they've cached
+        for module_name in module_order:
+            try:
+                pipeline.load_module_info(module_name)
+            except ModuleInfoLoadError, e:
+                raise PipelineConfigParseError("error loading module metadata for module '%s': %s" % (module_name, e))
+
+        return pipeline
 
 
 def var_substitute(option_val, vars):
