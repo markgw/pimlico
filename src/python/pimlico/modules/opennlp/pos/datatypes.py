@@ -9,6 +9,8 @@ class PosTaggedCorpus(WordAnnotationCorpus):
     word and its POS tag.
 
     """
+    datatype_name = "pos"
+
     annotation_fields = ["word", "pos"]
 
 

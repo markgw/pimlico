@@ -66,6 +66,26 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         """
         pass
 
+    def retrieve_processing_status(self):
+        # Check the metadata to see whether we've already partially completed this
+        if self.info.status == "PARTIALLY_PROCESSED":
+            docs_completed = int(self.info.get_metadata()["docs_completed"])
+            first_archive, __, first_filename = self.info.get_metadata()["last_doc_completed"].partition("/")
+            start_after = (first_archive, first_filename)
+            self.log.info("Module has been partially executed already; picking up where we left off, after "
+                          "doc %s/%s (skipping %d docs)" % (start_after[0], start_after[1], docs_completed))
+        else:
+            docs_completed = 0
+            start_after = None
+        return docs_completed, start_after
+
+    def update_processing_status(self, docs_completed, archive_name, filename):
+        self.info.set_metadata_values({
+            "status": "PARTIALLY_PROCESSED",
+            "last_doc_completed": "%s/%s" % (archive_name, filename),
+            "docs_completed": str(docs_completed),
+        })
+
     def execute(self):
         # Call the set-up routine, if one's been defined
         self.log.info("Preparing document map execution for %s documents" % len(self.input_iterator))
@@ -74,16 +94,8 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         complete = False
         invalid_inputs = 0
         invalid_outputs = 0
-        docs_completed = 0
 
-        # Check the metadata to see whether we've already partially completed this
-        if self.info.status == "PARTIALLY_PROCESSED":
-            docs_completed = self.info.get_metadata()["docs_completed"]
-            start_after = self.info.get_metadata()["last_doc_completed"]
-            self.log.info("Module has been partially executed already; picking up where we left off, after "
-                          "doc %s/%s (skipping %d docs)" % (start_after[0], start_after[1], docs_completed))
-        else:
-            start_after = None
+        docs_completed, start_after = self.retrieve_processing_status()
 
         pbar = get_progress_bar(len(self.input_iterator) - docs_completed,
                                 title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
@@ -123,11 +135,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
                     # Update the module's metadata to say that we've completed this document
                     docs_completed += 1
-                    self.info.set_metadata_values({
-                        "status": "PARTIALLY_PROCESSED",
-                        "last_doc_completed": (archive, filename),
-                        "docs_completed": docs_completed,
-                    })
+                    self.update_processing_status(docs_completed, archive, filename)
             complete = True
             self.log.info("Input contained %d invalid documents, output contained %d" %
                           (invalid_inputs, invalid_outputs))
@@ -136,14 +144,21 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
             if complete:
                 self.log.info("Document mapping complete. Finishing off")
             else:
-                self.log.info("Document mapping failed. Finishing off")
+                self.log.info("Document mapping failed")
             self.postprocess(error=not complete)
+
+            if not complete and self.info.status == "PARTIALLY_PROCESSED":
+                self.log.info("Processed documents recorded: restart processing where you left off by calling run "
+                              "again once you've fixed the problem")
 
 
 def skip_invalid(fn):
     """
-    Decorator to apply to process_document() methods where you want to skip doing any processing if any of the
-    input documents are invalid and just pass through the error information.
+    Decorator to apply to document map executor process_document() methods where you want to skip doing any
+    processing if any of the input documents are invalid and just pass through the error information.
+
+    Be careful not to confuse this with the process_document() methods on datatypes. You don't need a decorator
+    on them to skip invalid documents, as it's not called on them anyway.
 
     """
     def _fn(self, archive, filename, *docs):
@@ -172,5 +187,11 @@ def invalid_doc_on_error(fn):
             raise
         except Exception, e:
             # Error while processing the document: output an invalid document, with some error information
-            return InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))
+            if isinstance(self, TarredCorpus):
+                # Decorator wrapped a process_document() method on a datatype
+                # Instead of the module name, output the datatype name and its base dir
+                return InvalidDocument("datatype:%s[%s]" % (self.datatype_name, self.base_dir),
+                                       "%s\n%s" % (e, format_exc()))
+            else:
+                return InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))
     return _fn

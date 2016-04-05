@@ -10,6 +10,8 @@ class TokenizedCorpus(TarredCorpus):
     Each document is a list of sentences. Each sentence is a list of words.
 
     """
+    datatype_name = "tokenized"
+
     def process_document(self, data):
         return [
             sentence.split(" ") for sentence in data.split("\n")

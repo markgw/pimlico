@@ -1,16 +1,17 @@
 from operator import itemgetter
 
-from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
+from pimlico.core.modules.map import invalid_doc_on_error
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 
 class KeyValueListCorpus(TarredCorpus):
+    datatype_name = "key_value_lists"
+
     def __init__(self, base_dir, pipeline):
         super(KeyValueListCorpus, self).__init__(base_dir, pipeline)
         self.separator = self.metadata.get("separator", " ")
         self.fv_separator = self.metadata.get("fv_separator", "=")
 
-    @skip_invalid
     def process_document(self, data):
         # Read a set of feature-value pairs from each line
         data_points = []
@@ -22,7 +23,7 @@ class KeyValueListCorpus(TarredCorpus):
                 # Now we've split on sep, unescape any instances that were escaped
                 fvs = [unescape_sep(self.separator, "ITEMSEP", fv) for fv in fvs]
                 # Split each one into a feature-value pair
-                fvs = [itemgetter(0, 2)(fv.split(self.fv_separator)) for fv in fvs]
+                fvs = [itemgetter(0, 2)(fv.partition(self.fv_separator)) for fv in fvs]
                 # Unescape the fv sep within feature names and feature values
                 fvs = [
                     (unescape_sep(self.fv_separator, "FVSEP", fv[0]), unescape_sep(self.fv_separator, "FVSEP", fv[1]))
@@ -70,10 +71,11 @@ class TermFeatureListCorpus(KeyValueListCorpus):
     feature types are counts of the occurrence of a particular feature with this term in each data point.
 
     """
+    datatype_name = "term_feature_lists"
+
     def __init__(self, base_dir, pipeline):
         super(TermFeatureListCorpus, self).__init__(base_dir, pipeline)
 
-    @skip_invalid
     @invalid_doc_on_error
     def process_document(self, data):
         data = super(TermFeatureListCorpus, self).process_document(data)

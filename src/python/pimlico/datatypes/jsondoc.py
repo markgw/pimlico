@@ -7,6 +7,7 @@ class JsonDocumentCorpus(TarredCorpus):
     Very simple document corpus in which each document is a JSON object.
 
     """
+    datatype_name = "json"
 
     def process_document(self, data):
         data = json.loads(data)

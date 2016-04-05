@@ -15,6 +15,8 @@ class ConstituencyParseTreeCorpus(TarredCorpus):
     texts of each tree. In future, they will be better represented.
 
     """
+    datatype_name = "parse_trees"
+
     @skip_invalid
     def process_document(self, data):
         if data.strip():
@@ -37,6 +39,8 @@ class DependencyParseCorpus(JsonDocumentCorpus):
     texts of each tree. In future, they will be better represented.
 
     """
+    datatype_name = "dependency_parses"
+
     @skip_invalid
     def process_document(self, data):
         data = super(DependencyParseCorpus, self).process_document(data)

@@ -7,6 +7,7 @@ from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 
 
 class WordAnnotationCorpus(TarredCorpus):
+    datatype_name = "word_annotations"
     # Subclasses may provide a list of the fields included for each word
     # Doing so allows an extra level of type checking, since datatype users know before the dataset is available
     #  which fields will be in it
@@ -203,6 +204,7 @@ def AddAnnotationField(input_name, add_fields):
                                           "that name" % field)
 
         class ExtendedWordAnnotationCorpus(WordAnnotationCorpus):
+            datatype_name = "%s+%s" % (input_datatype.datatype_name, "+".join(add_fields))
             annotation_fields = base_annotation_fields + add_fields
 
         return ExtendedWordAnnotationCorpus

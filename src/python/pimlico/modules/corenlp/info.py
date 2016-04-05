@@ -39,6 +39,7 @@ def annotation_fields_from_options(module_info):
         add_fields.insert(0, "word")
 
     class ExtendedWordAnnotationCorpus(WordAnnotationCorpus):
+        datatype_name = "%s+%s" % (input_datatype.datatype_name, "+".join(add_fields))
         annotation_fields = base_annotation_fields + add_fields
 
     return ExtendedWordAnnotationCorpus

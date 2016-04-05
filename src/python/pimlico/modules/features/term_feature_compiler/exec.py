@@ -22,3 +22,4 @@ class ModuleExecutor(DocumentMapModuleExecutor):
                 features = [value for (key, value) in data_point if key not in term_keys]
             feature_counts = dict(Counter(features))
             output_data_points.append((term, feature_counts))
+        return output_data_points

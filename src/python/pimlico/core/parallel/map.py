@@ -92,17 +92,19 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             output_queue = pool.queue
             self.log.info("Process pool created for processing %d documents in parallel" % processes)
 
-            pbar = get_progress_bar(len(self.input_iterator),
-                                    title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
             complete = False
             docs_processing = []
             result_buffer = {}
-            docs_complete = 0
+
+            docs_completed, start_after = self.retrieve_processing_status()
+
+            pbar = get_progress_bar(len(self.input_iterator) - docs_completed,
+                                    title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
             try:
                 # Prepare a corpus writer for the output
-                with multiwith(*self.info.get_writers()) as writers:
+                with multiwith(*self.info.get_writers(append=start_after is not None)) as writers:
                     # Inputs will be taken from this as they're needed
-                    input_iter = iter(self.input_iterator.archive_iter())
+                    input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
                     # Push the first inputs into the pool
                     for archive, filename, docs in islice(input_iter, processes):
                         pool.process_document(archive, filename, *docs)
@@ -112,8 +114,6 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
                     # Look for the first document coming off the queue
                     while len(docs_processing):
                         result = output_queue.get()
-                        docs_complete += 1
-                        pbar.update(docs_complete)
                         # We've got some result, but it might not be the one we're looking for
                         # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
                         result_buffer[(result.archive, result.filename)] = result.data
@@ -149,6 +149,11 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
                             for result, writer in zip(next_output, writers):
                                 writer.add_document(archive, filename, result)
 
+                            # Update the module's metadata to say that we've completed this document
+                            docs_completed += 1
+                            pbar.update(docs_completed)
+                            self.update_processing_status(docs_completed, archive, filename)
+
                 pbar.finish()
                 complete = True
             finally:
@@ -158,3 +163,7 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
                 else:
                     self.log.info("Document mapping failed. Finishing off")
                 self.postprocess_parallel(error=not complete)
+
+                if not complete and self.info.status == "PARTIALLY_PROCESSED":
+                    self.log.info("Processed documents recorded: restart processing where you left off by calling run "
+                                  "again once you've fixed the problem")

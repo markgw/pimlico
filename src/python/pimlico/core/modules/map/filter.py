@@ -91,7 +91,7 @@ class DocumentMapOutputTypeWrapper(object):
                         result = results[self.output_num]
 
                     # Just for the record (useful output)
-                    if any(type(r) is InvalidDocument for r in results):
+                    if type(result) is InvalidDocument:
                         invalid_outputs += 1
 
                     # Here the normal executor would write the outputs to disk

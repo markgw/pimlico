@@ -2,17 +2,18 @@
 This module implements the concept of Dictionary -- a mapping between words and
 their integer ids.
 
-The implementation is based on Gensim, because Gensim is wonderful.
-
-TODO This isn't finished yet. Not usable, I'll finish it soon.
+The implementation is based on Gensim, because Gensim is wonderful and there's no need to reinvent the wheel.
+We don't use Gensim's data structure directly, because it's unnecessary to depend on the whole of Gensim just
+for one data structure.
 
 """
-
+import os
 from collections import defaultdict
 import itertools
 from itertools import izip
+import cPickle as pickle
 
-from pimlico.datatypes.base import PimlicoDatatype
+from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
 
 
 class Dictionary(PimlicoDatatype):
@@ -22,6 +23,48 @@ class Dictionary(PimlicoDatatype):
     """
     def __init__(self, base_dir, pipeline, **kwargs):
         super(Dictionary, self).__init__(base_dir, pipeline, **kwargs)
+
+    def get_data(self):
+        with open(os.path.join(self.data_dir, "dictionary"), "r") as f:
+            return pickle.load(f)
+
+    def data_ready(self):
+        return super(Dictionary, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "dictionary"))
+
+
+class DictionaryWriter(PimlicoDatatypeWriter):
+    def __init__(self, base_dir):
+        super(DictionaryWriter, self).__init__(base_dir)
+        self.data = DictionaryData()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super(DictionaryWriter, self).__exit__(exc_type, exc_val, exc_tb)
+        with open(os.path.join(self.data_dir, "dictionary"), "w") as f:
+            pickle.dump(self.data, f, -1)
+
+    def add_documents(self, documents, prune_at=2000000):
+        self.data.add_documents(documents, prune_at=prune_at)
+
+    def filter(self, threshold=None, no_above=None, limit=None):
+        if threshold is None:
+            threshold = 0
+        if no_above is None:
+            no_above = 1.
+        self.data.filter_extremes(no_below=threshold, no_above=no_above, keep_n=limit)
+
+
+class DictionaryData(object):
+    """
+    Dictionary encapsulates the mapping between normalized words and their integer ids.
+    This is taken almost directly from Gensim.
+
+    TODO: Provide a mapping to Gensim's actual Dictionary type for modules that use Gensim.
+
+    """
+    def __init__(self):
         self.token2id = {}  # token -> tokenId
         self.id2token = {}  # reverse mapping for token2id; only formed on request, to save memory
         self.dfs = {}  # document frequencies: tokenId -> in how many documents this token appeared
@@ -60,17 +103,12 @@ class Dictionary(PimlicoDatatype):
         total number of unique words <= `prune_at`. This is to save memory on very
         large inputs. To disable this pruning, set `prune_at=None`.
 
-        >>> print(Dictionary(["máma mele maso".split(), "ema má máma".split()]))
-        Dictionary(5 unique tokens)
-
         """
         for docno, document in enumerate(documents):
-            # log progress & run a regular check for pruning, once every 10k docs
-            if docno % 10000 == 0:
-                if prune_at is not None and len(self) > prune_at:
-                    self.filter_extremes(no_below=0, no_above=1.0, keep_n=prune_at)
-
-            # update Dictionary with the document
+            # Run a regular check for pruning, once every 10k docs
+            if docno % 10000 == 0 and prune_at is not None and len(self) > prune_at:
+                self.filter_extremes(no_below=0, no_above=1.0, keep_n=prune_at)
+            # Update dictionary with the document
             self.doc2bow(document, allow_update=True)  # ignore the result, here we only care about updating token ids
 
     def doc2bow(self, document, allow_update=False, return_missing=False):
@@ -127,28 +165,23 @@ class Dictionary(PimlicoDatatype):
         """
         Filter out tokens that appear in
 
-        1. less than `no_below` documents (absolute number) or
-        2. more than `no_above` documents (fraction of total corpus size, *not*
-           absolute number).
-        3. after (1) and (2), keep only the first `keep_n` most frequent tokens (or
-           keep all if `None`).
+        1. fewer than `no_below` documents (absolute number) or
+        2. more than `no_above` documents (fraction of total corpus size, *not* absolute number).
+        3. after (1) and (2), keep only the first `keep_n` most frequent tokens (or keep all if `None`).
 
         After the pruning, shrink resulting gaps in word ids.
 
-        **Note**: Due to the gap shrinking, the same word may have a different
-        word id before and after the call to this function!
+        **Note**: Due to the gap shrinking, the same word may have a different word id before and after the call
+        to this function!
+
         """
         no_above_abs = int(no_above * self.num_docs)  # convert fractional threshold to absolute threshold
 
         # determine which tokens to keep
-        good_ids = (
-            v for v in self.token2id.itervalues()
-            if no_below <= self.dfs.get(v, 0) <= no_above_abs)
+        good_ids = (v for v in self.token2id.itervalues() if no_below <= self.dfs.get(v, 0) <= no_above_abs)
         good_ids = sorted(good_ids, key=self.dfs.get, reverse=True)
         if keep_n is not None:
             good_ids = good_ids[:keep_n]
-        bad_words = [(self[id], self.dfs.get(id, 0)) for id in set(self).difference(good_ids)]
-
         # do the actual filtering, then rebuild dictionary to remove gaps in ids
         self.filter_tokens(good_ids=good_ids)
 
@@ -192,48 +225,3 @@ class Dictionary(PimlicoDatatype):
         self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.iteritems())
         self.id2token = {}
         self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.iteritems())
-
-    def save_as_text(self, fname, sort_by_word=True):
-        """
-        TODO Use this in writer, doesn't need to be here.
-
-        Save this Dictionary to a text file, in format:
-        `id[TAB]word_utf8[TAB]document frequency[NEWLINE]`. Sorted by word,
-        or by decreasing word frequency.
-
-        Note: text format should be use for corpus inspection. Use `save`/`load`
-        to store in binary format (pickle) for improved performance.
-        """
-        with utils.smart_open(fname, 'wb') as fout:
-            if sort_by_word:
-                for token, tokenid in sorted(self.token2id.iteritems()):
-                    line = "%i\t%s\t%i\n" % (tokenid, token, self.dfs.get(tokenid, 0))
-                    fout.write(utils.to_utf8(line))
-            else:
-                for tokenid, freq in sorted(self.dfs.iteritems(), key=lambda item: -item[1]):
-                    line = "%i\t%s\t%i\n" % (tokenid, self[tokenid], freq)
-                    fout.write(utils.to_utf8(line))
-
-    @staticmethod
-    def load_from_text(fname):
-        """
-        # TODO Incorporate this into loading code
-
-        Load a previously stored Dictionary from a text file.
-        Mirror function to `save_as_text`.
-        """
-        result = Dictionary()
-        with utils.smart_open(fname) as f:
-            for lineno, line in enumerate(f):
-                line = utils.to_unicode(line)
-                try:
-                    wordid, word, docfreq = line[:-1].split('\t')
-                except Exception:
-                    raise ValueError("invalid line in dictionary file %s: %s"
-                                     % (fname, line.strip()))
-                wordid = int(wordid)
-                if word in result.token2id:
-                    raise KeyError('token %s is defined as ID %d and as ID %d' % (word, wordid, result.token2id[word]))
-                result.token2id[word] = wordid
-                result.dfs[wordid] = int(docfreq)
-        return result

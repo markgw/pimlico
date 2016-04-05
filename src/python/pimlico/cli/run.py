@@ -1,4 +1,7 @@
 import argparse
+import os
+import shutil
+
 import sys
 from operator import itemgetter
 
@@ -31,6 +34,13 @@ def run_cmd(pipeline, opts):
         # Raise the exception so we see the full stack trace
         if opts.debug:
             raise
+
+
+def reset_module(pipeline, opts):
+    print "Resetting execution state of module %s" % opts.module_name
+    module = pipeline[opts.module_name]
+    if os.path.exists(module.get_module_output_dir()):
+        shutil.rmtree(module.get_module_output_dir())
 
 
 def list_variants(pipeline, opts):
@@ -71,6 +81,11 @@ if __name__ == "__main__":
 
     variants = subparsers.add_parser("variants", help="List the available variants of a pipeline config")
     variants.set_defaults(func=list_variants)
+
+    reset = subparsers.add_parser("reset",
+                                  help="Delete any output from the given module and restore it to unexecuted state")
+    reset.set_defaults(func=reset_module)
+    reset.add_argument("module_name", help="The name of the module to reset")
 
     opts = parser.parse_args()
 

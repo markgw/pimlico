@@ -46,9 +46,14 @@ class PimlicoDatatype(object):
     @property
     def metadata(self):
         if self._metadata is None:
-            # Load dictionary of metadata
-            with open(os.path.join(self.base_dir, "corpus_metadata"), "r") as f:
-                self._metadata = pickle.load(f)
+            metadata_path = os.path.join(self.base_dir, "corpus_metadata")
+            if os.path.exists(metadata_path):
+                # Load dictionary of metadata
+                with open(metadata_path, "r") as f:
+                    self._metadata = pickle.load(f)
+            else:
+                # No metadata written: data may not have been written yet
+                self._metadata = {}
         return self._metadata
 
     def check_runtime_dependencies(self):

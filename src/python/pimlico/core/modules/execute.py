@@ -41,17 +41,20 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
             # If rerunning, delete the old data first so we make a fresh start
             if os.path.exists(module.get_module_output_dir()):
                 shutil.rmtree(module.get_module_output_dir())
+            module.status = "STARTED"
         else:
             raise ModuleAlreadyCompletedError("module '%s' has already been run to completion. Use --force-rerun if "
                                               "you want to run it again and overwrite the output" % module_name)
-    elif module.status != "UNEXECUTED":
-        log.warn("module '%s' has been partially completed before and left with status '%s'. Starting execution again" %
+    elif module.status == "UNEXECUTED":
+        # Not done anything on this yet
+        module.status = "STARTED"
+    else:
+        log.warn("module '%s' has been partially completed before and left with status '%s'. Starting executor" %
                  (module_name, module.status))
 
     # Get hold of an executor for this module
     executer = load_module_executor(module)
     # Give the module an initial in-progress status
-    module.status = "STARTED"
     executer(module).execute()
 
     # Update the module status so we know it's been completed
