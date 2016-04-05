@@ -17,6 +17,7 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../src/python'))
+sys.path.insert(0, os.path.abspath('../lib/python'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -48,7 +49,8 @@ copyright = u'2016, Mark Granroth-Wilding'
 # built documents.
 #
 # The short X.Y version.
-version = '0'
+from pimlico import __version__ as pimlico_release
+version = pimlico_release
 # The full version, including alpha/beta/rc tags.
 release = '0.1'
 
