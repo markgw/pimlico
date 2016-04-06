@@ -8,13 +8,13 @@ each (apart from the last) contains the given number.
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import IterableDocumentCorpus
+from pimlico.datatypes.base import IterableCorpus
 from pimlico.datatypes.tar import TarredCorpus
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "tar"
-    module_inputs = [("documents", IterableDocumentCorpus)]
+    module_inputs = [("documents", IterableCorpus)]
     module_outputs = [("documents", TarredCorpus)]
     module_options = [
         ("archive_size", {

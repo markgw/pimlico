@@ -6,14 +6,14 @@ tar but as a filter, grouping files on the fly and passing them through with an 
 import random
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.execute import ModuleNotReadyError
-from pimlico.datatypes.base import IterableDocumentCorpus
+from pimlico.datatypes.base import IterableCorpus
 from pimlico.datatypes.tar import TarredCorpus
 
 
 # Subclass TarredCorpus so that inputs expecting one can accept this
 class TarredCorpusFilter(TarredCorpus):
     def __init__(self, pipeline, input_datatype, archive_size, archive_basename="archive"):
-        IterableDocumentCorpus.__init__(self, None, pipeline)
+        IterableCorpus.__init__(self, None, pipeline)
 
         self.archive_basename = archive_basename
         self.input_datatype = input_datatype
@@ -96,7 +96,7 @@ class TarredCorpusFilter(TarredCorpus):
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "tar_extract"
-    module_inputs = [("documents", IterableDocumentCorpus)]
+    module_inputs = [("documents", IterableCorpus)]
     module_outputs = [("documents", TarredCorpusFilter)]
     module_options = [
         ("archive_size", {

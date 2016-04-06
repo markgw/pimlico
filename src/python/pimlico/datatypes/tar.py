@@ -8,11 +8,11 @@ from tempfile import mkdtemp
 import zlib
 from itertools import izip
 
-from pimlico.datatypes.base import IterableDocumentCorpusWriter, InvalidDocument
-from .base import IterableDocumentCorpus
+from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument
+from .base import IterableCorpus
 
 
-class TarredCorpus(IterableDocumentCorpus):
+class TarredCorpus(IterableCorpus):
     datatype_name = "tar"
     # This may be overridden by subclasses to provide filters for documents applied before main doc processing
     document_preprocessors = []
@@ -125,7 +125,7 @@ class TarredCorpus(IterableDocumentCorpus):
         return super(TarredCorpus, self).data_ready() and len(self.tar_filenames) > 0
 
 
-class TarredCorpusWriter(IterableDocumentCorpusWriter):
+class TarredCorpusWriter(IterableCorpusWriter):
     """
     If gzip=True, each document is gzipped before adding it to the archive. Not the same as creating a tarball,
     since the docs are gzipped *before* adding them, not the whole archive together, but it means we can easily

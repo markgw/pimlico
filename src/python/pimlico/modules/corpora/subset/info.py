@@ -7,12 +7,12 @@ on the full corpus.
 from itertools import islice
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import IterableDocumentCorpus
+from pimlico.datatypes.base import IterableCorpus
 
 
-class CorpusSubsetFilter(IterableDocumentCorpus):
+class CorpusSubsetFilter(IterableCorpus):
     def __init__(self, pipeline, input_datatype, size, offset=0):
-        IterableDocumentCorpus.__init__(self, None, pipeline)
+        IterableCorpus.__init__(self, None, pipeline)
 
         self.offset = offset
         self.input_datatype = input_datatype
@@ -30,7 +30,7 @@ class CorpusSubsetFilter(IterableDocumentCorpus):
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "subset"
-    module_inputs = [("documents", IterableDocumentCorpus)]
+    module_inputs = [("documents", IterableCorpus)]
     module_outputs = [("documents", CorpusSubsetFilter)]
     module_options = [
         ("size", {

@@ -6,18 +6,15 @@ Depends on BeautifulSoup (see "bs4" target in lib dir Makefile).
 """
 import gzip
 import os
-import traceback
-from multiprocessing import Pool, Queue
+from multiprocessing import Pool
 
 import time
 
-from pimlico.core.modules.base import DependencyError
-from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.datatypes.base import IterableDocumentCorpus, PimlicoDatatypeWriter
+from pimlico.datatypes.base import IterableCorpus, PimlicoDatatypeWriter
 from pimlico.utils.progress import get_progress_bar
 
 
-class XmlDocumentIterator(IterableDocumentCorpus):
+class XmlDocumentIterator(IterableCorpus):
     requires_data_preparation = True
     input_module_options = [
         ("path", {
@@ -39,10 +36,7 @@ class XmlDocumentIterator(IterableDocumentCorpus):
     ]
 
     def __iter__(self):
-        try:
-            from bs4 import BeautifulSoup
-        except ImportError:
-            raise DependencyError("BeautifulSoup could not be found. Have you run the make target in the lib dir?")
+        from bs4 import BeautifulSoup
 
         if not os.path.isdir(self.path):
             # Just a single file

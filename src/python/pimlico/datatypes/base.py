@@ -109,9 +109,10 @@ class PimlicoDatatypeWriter(object):
             pickle.dump(self.metadata, f, -1)
 
 
-class IterableDocumentCorpus(PimlicoDatatype):
+class IterableCorpus(PimlicoDatatype):
     """
-    Superclass of all datatypes which represent a dataset that can be iterated over document by document.
+    Superclass of all datatypes which represent a dataset that can be iterated over document by document
+    (or datapoint by datapoint - what exactly we're iterating over may vary, though documents are most common).
     The actual type of the data depends on the subclass: it could be, e.g. coref output, etc.
 
     At creation time, length should be provided in the metadata, denoting how many documents are in the dataset.
@@ -120,7 +121,7 @@ class IterableDocumentCorpus(PimlicoDatatype):
     datatype_name = "iterable_corpus"
 
     def __init__(self, *args, **kwargs):
-        super(IterableDocumentCorpus, self).__init__(*args, **kwargs)
+        super(IterableCorpus, self).__init__(*args, **kwargs)
 
     def __iter__(self):
         """
@@ -135,9 +136,9 @@ class IterableDocumentCorpus(PimlicoDatatype):
         return self.metadata["length"]
 
 
-class IterableDocumentCorpusWriter(PimlicoDatatypeWriter):
+class IterableCorpusWriter(PimlicoDatatypeWriter):
     def __exit__(self, exc_type, exc_val, exc_tb):
-        super(IterableDocumentCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
+        super(IterableCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
         # Check the length has been set
         if "length" not in self.metadata:
             raise DatatypeWriteError("writer for IterableDocumentCorpus must set a 'length' value in the metadata")

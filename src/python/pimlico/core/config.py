@@ -141,11 +141,12 @@ class PipelineConfig(object):
             try:
                 # First see if this is a datatype
                 datatype_class = load_datatype(module_config["type"])
-                # Get an input module info class for this datatype
-                module_info_class = input_module_factory(datatype_class)
             except DatatypeLoadError:
                 # Not a datatype
                 module_info_class = load_module_info(module_config["type"])
+            else:
+                # Get an input module info class for this datatype
+                module_info_class = input_module_factory(datatype_class)
 
             # Allow document map types to be used as filters simply by specifying filter=T
             filter_type = str_to_bool(module_config.pop("filter", ""))
