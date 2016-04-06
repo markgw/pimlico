@@ -82,6 +82,7 @@ class TarredCorpusFilter(TarredCorpus):
                 current_archive += 1
                 current_archive_count = 0
 
+            current_archive_count += 1
             yield tarballs[current_archive], doc_name, doc
 
     def list_archive_iter(self):
