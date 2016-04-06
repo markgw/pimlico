@@ -277,7 +277,7 @@ def _read_binary_int(f, unpacker):
         raise StopIteration
     try:
         # Try decoding this as a single int
-        integer = unpacker.unpack(string)
+        integer = unpacker.unpack(string)[0]
     except struct.error, e:
         raise DatatypeLoadError("could not unpack integer data in file: corrupt data? %s" % e)
     return integer

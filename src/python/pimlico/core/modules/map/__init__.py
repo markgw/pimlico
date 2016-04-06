@@ -95,9 +95,10 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         invalid_inputs = 0
         invalid_outputs = 0
 
-        docs_completed, start_after = self.retrieve_processing_status()
+        docs_completed_now = 0
+        docs_completed_before, start_after = self.retrieve_processing_status()
 
-        pbar = get_progress_bar(len(self.input_iterator) - docs_completed,
+        pbar = get_progress_bar(len(self.input_iterator) - docs_completed_before,
                                 title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
 
         try:
@@ -134,8 +135,8 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                         writer.add_document(archive, filename, result)
 
                     # Update the module's metadata to say that we've completed this document
-                    docs_completed += 1
-                    self.update_processing_status(docs_completed, archive, filename)
+                    docs_completed_now += 1
+                    self.update_processing_status(docs_completed_before+docs_completed_now, archive, filename)
             complete = True
             self.log.info("Input contained %d invalid documents, output contained %d" %
                           (invalid_inputs, invalid_outputs))

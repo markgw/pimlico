@@ -96,9 +96,11 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             docs_processing = []
             result_buffer = {}
 
-            docs_completed, start_after = self.retrieve_processing_status()
+            docs_completed_now = 0
+            docs_completed_before, start_after = self.retrieve_processing_status()
 
-            pbar = get_progress_bar(len(self.input_iterator) - docs_completed,
+            self.log.info("Processing %d documents" % (len(self.input_iterator) - docs_completed_before))
+            pbar = get_progress_bar(len(self.input_iterator) - docs_completed_before,
                                     title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
             try:
                 # Prepare a corpus writer for the output
@@ -150,9 +152,9 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
                                 writer.add_document(archive, filename, result)
 
                             # Update the module's metadata to say that we've completed this document
-                            docs_completed += 1
-                            pbar.update(docs_completed)
-                            self.update_processing_status(docs_completed, archive, filename)
+                            docs_completed_now += 1
+                            pbar.update(docs_completed_now)
+                            self.update_processing_status(docs_completed_before+docs_completed_now, archive, filename)
 
                 pbar.finish()
                 complete = True
