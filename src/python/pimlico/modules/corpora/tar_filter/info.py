@@ -5,6 +5,8 @@ tar but as a filter, grouping files on the fly and passing them through with an 
 """
 import random
 
+import math
+
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.execute import ModuleNotReadyError
 from pimlico.datatypes.base import IterableCorpus
@@ -40,7 +42,7 @@ class TarredCorpusFilter(TarredCorpus):
 
         if self._tarballs is None:
             # Work out now what the archive names are going to look like and how many there will be
-            total_archives = len(self) / self.archive_size
+            total_archives = math.ceil(float(len(self)) / self.archive_size)
 
             # Work out how many digits to pad the archive numbers with in the filenames
             digits = len("%d" % (total_archives-1))
