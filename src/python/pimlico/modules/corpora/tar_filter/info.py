@@ -42,7 +42,7 @@ class TarredCorpusFilter(TarredCorpus):
 
         if self._tarballs is None:
             # Work out now what the archive names are going to look like and how many there will be
-            total_archives = math.ceil(float(len(self)) / self.archive_size)
+            total_archives = int(math.ceil(float(len(self)) / self.archive_size))
 
             # Work out how many digits to pad the archive numbers with in the filenames
             digits = len("%d" % (total_archives-1))

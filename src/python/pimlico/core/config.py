@@ -342,12 +342,12 @@ def preprocess_config_file(filename, variant="main"):
                     if variant == "main":
                         config_lines.append(rest.lstrip())
                 elif directive.lower().startswith("variant:"):
-                    variant_cond = directive[8:]
+                    variant_conds = directive[8:].strip().split(",")
                     # Line conditional on a specific variant: include only if we're loading that variant
-                    if variant_cond == variant:
+                    if variant in variant_conds:
                         config_lines.append(rest.lstrip())
                     # Keep a list of all available variants
-                    available_variants.add(variant_cond)
+                    available_variants.update(variant_conds)
                 elif directive == "include":
                     # Include another file, given relative to this one
                     include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), rest.strip("\n ")))
