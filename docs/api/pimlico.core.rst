@@ -1,0 +1,28 @@
+pimlico.core package
+====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    pimlico.core.external
+    pimlico.core.modules
+    pimlico.core.parallel
+
+Submodules
+----------
+
+.. toctree::
+
+   pimlico.core.config
+   pimlico.core.logs
+   pimlico.core.paths
+
+Module contents
+---------------
+
+.. automodule:: pimlico.core
+    :members:
+    :undoc-members:
+    :show-inheritance:

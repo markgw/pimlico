@@ -35,9 +35,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   core/intro
-   guides/intro
+   core/index
+   guides/index
    plans/wishlist
+   reference/index
 
 
 Indices and tables
