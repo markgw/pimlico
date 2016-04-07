@@ -170,7 +170,11 @@ class TarredCorpusWriter(IterableCorpusWriter):
             self.current_archive_name = archive_name
             tar_filename = os.path.join(self.data_dir, "%s.tar" % archive_name)
             # If we're appending a corpus and the archive already exists, append to it
-            self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w")
+            try:
+                self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w")
+            except tarfile.ReadError:
+                # Couldn't open the existing file to append to, write instead
+                self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
 
         # Keep a count of how many we've added so we can write metadata
         self.doc_count += 1
