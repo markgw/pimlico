@@ -51,26 +51,28 @@ class TarredCorpus(IterableCorpus):
         # Prepare a temporary directory to extract everything to
         tmp_dir = mkdtemp()
 
-        file_num = -1
         if start_after is None:
             # Don't wait to start
             started = True
         else:
-            # Start after we've skipped this number of docs or hit this (archive, doc name)
+            # Start after we've hit this (archive, doc name)
             started = False
 
         try:
             for tar_name, tarball_filename in zip(self.tarballs, self.tar_filenames):
+                # If we're waiting for a particular archive/file, we can skip archives until we're in the right one
+                if not started and start_after[0] != tar_name:
+                    continue
+
                 # Extract the tarball to the temp dir
                 with tarfile.open(tarball_filename, 'r') as tarball:
                     for tarinfo in tarball:
-                        file_num += 1
                         filename = tarinfo.name
 
                         # Allow the first portion of the corpus to be skipped
                         if not started:
-                            if (type(start_after) is int and file_num == start_after) or \
-                                    (start_after == (tar_name, filename)):
+                            # We know we're in the right archive now, skip until we get to the requested file
+                            if start_after[1] == filename:
                                 # We've hit the condition for starting
                                 # Skip this doc and start on the next
                                 started = True
@@ -97,6 +99,15 @@ class TarredCorpus(IterableCorpus):
                         yield tar_name, filename, document
                         # Remove the file once we're done with it (when we request another)
                         os.remove(os.path.join(tmp_dir, filename))
+
+                    # Catch the case where the archive/filename requested as a starting point wasn't found
+                    # We only get here with started=False when we're in the right archive and have got through the
+                    #  the whole thing without finding the requested filename
+                    if not started:
+                        raise TarredCorpusIterationError(
+                            "tried to start iteration over tarred corpus at document (%s, %s), but filename %s "
+                            "wasn't found in archive %s" % (start_after[0], start_after[1], start_after[1], tar_name)
+                        )
         finally:
             # Remove the temp dir
             shutil.rmtree(tmp_dir)
@@ -264,4 +275,8 @@ class AlignedTarredCorpora(object):
 
 
 class CorpusAlignmentError(Exception):
+    pass
+
+
+class TarredCorpusIterationError(Exception):
     pass

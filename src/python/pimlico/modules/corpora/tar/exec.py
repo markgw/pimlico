@@ -7,6 +7,7 @@ class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         # Most of what we need to do is implemented by the filter version of this module, so reuse that
         filter_datatype = TarredCorpusFilter(
+            self.info.pipeline,
             self.info.get_input("documents"),
             self.info.options["archive_size"],
             archive_basename=self.info.options["archive_basename"]

@@ -4,6 +4,7 @@ tar but as a filter, grouping files on the fly and passing them through with an 
 
 """
 import random
+
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.execute import ModuleNotReadyError
 from pimlico.datatypes.base import IterableCorpus
@@ -44,7 +45,7 @@ class TarredCorpusFilter(TarredCorpus):
             # Work out how many digits to pad the archive numbers with in the filenames
             digits = len("%d" % (total_archives-1))
             # Prepare a formatter for archive numbers
-            archive_name_format = "%s-%%%sd" % (self.archive_basename, "0" * digits)
+            archive_name_format = "%s-%%%sd" % (self.archive_basename, "0%d" % digits)
 
             self._tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
         return self._tarballs
@@ -59,16 +60,20 @@ class TarredCorpusFilter(TarredCorpus):
             # Don't wait to start
             started = True
         else:
-            # Start after we've skipped this number of docs or hit this (archive, doc name)
+            # Start after we've hit this (archive, doc name)
             started = False
 
-        for file_num, (doc_name, doc) in enumerate(self.input_datatype):
+        for doc_name, doc in self.input_datatype:
             current_archive_count += 1
+
+            # Check whether we've put enough files in the current archive to move onto the next
+            if current_archive_count == self.archive_size:
+                current_archive = min(len(tarballs), current_archive+1)
+                current_archive_count = 0
 
             # Allow the first portion of the corpus to be skipped
             if not started:
-                if (type(start_after) is int and file_num == start_after) or \
-                        (start_after == (tarballs[current_archive], doc_name)):
+                if start_after == (tarballs[current_archive], doc_name):
                     # We've hit the condition for starting
                     # Skip this doc and start on the next
                     started = True
@@ -78,11 +83,6 @@ class TarredCorpusFilter(TarredCorpus):
             if subsample is not None and random.random() > subsample:
                 # Reject this file
                 continue
-
-            # Check whether we've put enough files in the current archive to move onto the next
-            if current_archive_count == self.archive_size:
-                current_archive = min(len(tarballs), current_archive+1)
-                current_archive_count = 0
 
             yield tarballs[current_archive], doc_name, doc
 

@@ -10,9 +10,9 @@ from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
 
 
-def schedule_cmd(pipeline, opts):
+def status_cmd(pipeline, opts):
     # Try deriving a schedule
-    print "Module execution schedule"
+    print "Module execution schedule with statuses"
     for i, module_name in enumerate(pipeline.get_module_schedule(), start=1):
         module = pipeline[module_name]
         print " %d. %s" % (i, module_name)
@@ -70,8 +70,9 @@ if __name__ == "__main__":
                        help="Check runtime dependencies for all modules. By default, these are not check as you might "
                             "be happy with them not all being satisfied at once")
 
-    schedule = subparsers.add_parser("schedule", help="Output a module execution schedule for the pipeline")
-    schedule.set_defaults(func=schedule_cmd)
+    status = subparsers.add_parser("status", help="Output a module execution schedule for the pipeline and execution "
+                                                    "status for every module")
+    status.set_defaults(func=status_cmd)
 
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")
     run.set_defaults(func=run_cmd)
