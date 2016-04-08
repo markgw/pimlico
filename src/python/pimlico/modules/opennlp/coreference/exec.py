@@ -14,16 +14,17 @@ class ModuleExecutor(DocumentMapModuleExecutor):
         except JavaProcessError, e:
             raise ModuleExecutionError("error starting coref process: %s" % e)
 
+        # Don't parse the parse trees, since OpenNLP does that for us, straight from the text
+        self.input_corpora[0].raw_data = True
+
     @skip_invalid
     def process_document(self, archive, filename, doc):
-        # Input is a list of parse trees
+        # Input is a list of parse trees: split them up (into sentences)
+        tree_strings = doc.split("\n\n")
         # Run coref
-        tags = self.coref.coref_resolve([" ".join(sentence) for sentence in doc])
+        coref_output = self.coref.coref_resolve(tree_strings)
         # TODO Work out what to output
-        return [
-            zip(sentence_words, sentence_tags.split())
-            for (sentence_words, sentence_tags) in zip(doc, tags)
-        ]
+        return coref_output
 
     def postprocess(self, error=False):
         self.coref.stop()
@@ -37,13 +38,20 @@ class StreamResolver(object):
         self.interface = None
 
     def coref_resolve(self, sentences):
-        # TODO Do conversion
-        sentence_list = ListConverter().convert(sentences, self.interface.gateway._gateway_client)
-        return list(self.interface.gateway.entry_point.posTag(sentence_list))
+        # Use OpenNLP's tool to read the PTB trees into Parse data structures
+        parse_list = [
+            # TODO This isn't working yet
+            self.interface.gateway.opennlp.tools.parser.Parse.parseParse(tree)
+            for tree in sentences
+        ]
+        # Convert Python list to Java list
+        parse_list = ListConverter().convert(parse_list, self.interface.gateway._gateway_client)
+        # Resolve coreference
+        return list(self.interface.gateway.entry_point.resolveCoreference(parse_list))
 
     def start(self):
         # Start a tokenizer process running in the background via Py4J
-        self.interface = Py4JInterface("pimlico.opennlp.PosTaggerGateway", gateway_args=[self.model_path],
+        self.interface = Py4JInterface("pimlico.opennlp.CoreferenceResolverGateway", gateway_args=[self.model_path],
                                        pipeline=self.pipeline)
         self.interface.start()
 
@@ -56,7 +64,3 @@ class StreamResolver(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop()
-
-
-class PosTaggerProcessError(Exception):
-    pass
