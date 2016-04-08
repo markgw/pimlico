@@ -5,6 +5,7 @@ from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR
 from pimlico.core.logs import get_log_file
 from pimlico.core.modules.base import DependencyError
 from pimlico.utils.communicate import timeout_process
+from pimlico.utils.network import get_unused_local_port, get_unused_local_ports
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, JAVA_BUILD_DIR])
 
@@ -104,6 +105,7 @@ class Py4JInterface(object):
 
         if self.port is not None:
             args.extend(["--port", "%d" % self.port])
+
         if self.python_port is not None:
             args.extend(["--python-port", "%d" % self.python_port])
             gateway_kwargs["python_proxy_port"] = self.python_port
@@ -143,7 +145,7 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     # Don't hang on an error running the gateway launcher
     output = None
     try:
-        with timeout_process(proc, 3.0):
+        with timeout_process(proc, 10.0):
             output = proc.stdout.readline()
     except Exception, e:
         # Try reading stderr to see if there's any info there
@@ -153,7 +155,7 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
         raise JavaProcessError("error reading first line from gateway process: %s. Error output: %s (see %s for "
                                "more details)" % (e, error_output, err_path))
 
-    if output is None:
+    if output is None or proc.poll() == -9:
         error_output = proc.stderr.read().strip("\n ")
         err_path = output_p4j_error_info(command, "(timed out)", "", error_output)
         raise JavaProcessError("timed out starting gateway server (for details see %s)" % err_path)

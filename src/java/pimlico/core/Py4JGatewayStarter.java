@@ -21,14 +21,9 @@ public class Py4JGatewayStarter {
     public static void startGateway(Object entryPoint, int port, int pythonPort) {
         try {
             // Create a gateway server, using this as an entry point
-            GatewayServer gatewayServer;
-            if (port != 0) {
-                if (pythonPort == 0)
-                    pythonPort = port + 1;
-
-                gatewayServer = new GatewayServer(entryPoint, port, pythonPort, 0, 0, (List) null);
-            } else
-                gatewayServer = new GatewayServer(entryPoint);
+            // GatewayServer has a constructor with no ports, which sets them to defaults
+            // If ports aren't given, instead with set them to 0 to automatically allocated ports
+            GatewayServer gatewayServer = new GatewayServer(entryPoint, port, pythonPort, 0, 0, (List) null);
 
             try {
                 // Set the server running
