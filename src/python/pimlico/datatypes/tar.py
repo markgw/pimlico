@@ -4,6 +4,7 @@ import random
 import shutil
 import tarfile
 from tempfile import mkdtemp
+import cPickle as pickle
 
 import zlib
 from itertools import izip
@@ -158,7 +159,15 @@ class TarredCorpusWriter(IterableCorpusWriter):
         self.gzip = gzip
         # Set "gzip" in the metadata, so we know to unzip when reading
         self.metadata["gzip"] = gzip
+
         self.metadata["length"] = 0
+        if append:
+            # Try reading length so far if we're appending and some docs have already been written
+            # If no metadata has been written, we start from 0
+            metadata_path = os.path.join(self.base_dir, "corpus_metadata")
+            if os.path.exists(metadata_path):
+                with open(metadata_path, "r") as f:
+                    self.metadata["length"] = pickle.load(f).get("length", 0)
 
         # Write out the metadata, so we're in a fit state to open a reader
         self.write_metadata()
