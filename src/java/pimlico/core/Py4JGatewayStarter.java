@@ -4,7 +4,6 @@ import py4j.GatewayServer;
 import py4j.Py4JNetworkException;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.BindException;

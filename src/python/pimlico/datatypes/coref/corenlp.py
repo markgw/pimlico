@@ -10,7 +10,7 @@ from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_inva
 
 
 class CorefCorpus(TarredCorpus):
-    datatype_name = "coref"
+    datatype_name = "corenlp_coref"
 
     @skip_invalid
     def process_document(self, data):

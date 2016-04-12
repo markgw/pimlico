@@ -36,12 +36,6 @@ opennlp-uima-1.5.3.jar :
 	tar xzf apache-opennlp-1.5.3-bin.tar.gz apache-opennlp-1.5.3/lib/opennlp-uima-1.5.3.jar
 	mv apache-opennlp-1.5.3/lib/opennlp-uima-1.5.3.jar .
 	rm -rf apache-opennlp-1.5.3
-src/opennlp :
-	$(FETCH) http://apache.mirror.anlx.net//opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-src.tar.gz
-	tar xzf apache-opennlp-1.5.3-src.tar.gz apache-opennlp-1.5.3-src
-	mkdir -p src
-	mv apache-opennlp-1.5.3-src src/opennlp
-	rm apache-opennlp-1.5.3-src.tar.gz
 jwnl-1.3.3.jar : 
 	$(MAKE) apache-opennlp-1.5.3-bin.tar.gz
 	tar xzf apache-opennlp-1.5.3-bin.tar.gz apache-opennlp-1.5.3/lib/jwnl-1.3.3.jar
@@ -51,6 +45,15 @@ jwnl-1.3.3.jar :
 apache-opennlp-1.5.3-bin.tar.gz :
 	# Fetch OpenNlp archive
 	$(FETCH) http://apache.mesi.com.ar//opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-bin.tar.gz
+
+# Optionally, also fetch OpenNLP src files, useful for debugging wrappers, etc
+opennlp-src : src/opennlp
+src/opennlp :
+	$(FETCH) http://apache.mirror.anlx.net//opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-src.tar.gz
+	tar xzf apache-opennlp-1.5.3-src.tar.gz apache-opennlp-1.5.3-src
+	mkdir -p src
+	mv apache-opennlp-1.5.3-src src/opennlp
+	rm apache-opennlp-1.5.3-src.tar.gz
 
 ##############################
 

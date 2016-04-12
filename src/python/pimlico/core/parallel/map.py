@@ -80,7 +80,7 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
         processes = self.info.pipeline.processes
         if processes < 2:
             # Not multiprocessing: just use the single-core version
-            super(DocumentMapModuleExecutor, self).execute()
+            super(DocumentMapModuleParallelExecutor, self).execute()
         else:
             # Call the set-up routine, if one's been defined
             self.log.info("Preparing parallel document map execution for %d documents with %d processes" %
@@ -88,8 +88,8 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             self.preprocess_parallel()
 
             # Start up a pool
-            pool = self.create_pool(processes)
-            output_queue = pool.queue
+            self.pool = self.create_pool(processes)
+            output_queue = self.pool.queue
             self.log.info("Process pool created for processing %d documents in parallel" % processes)
 
             complete = False
@@ -109,7 +109,7 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
                     # Push the first inputs into the pool
                     for archive, filename, docs in islice(input_iter, processes):
-                        pool.process_document(archive, filename, *docs)
+                        self.pool.process_document(archive, filename, *docs)
                         # Keep track of the order we need the results in
                         docs_processing.append((archive, filename))
 
@@ -127,7 +127,7 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
                             # ones we've already sent
                             pass
                         else:
-                            pool.process_document(archive, filename, *docs)
+                            self.pool.process_document(archive, filename, *docs)
                             docs_processing.append((archive, filename))
 
                         # Write out as many as we can of the docs that have been sent and whose output is available

@@ -1,11 +1,16 @@
-import time
+import os
+from collections import deque
 from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
+
+import sys
+import time
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR
 from pimlico.core.logs import get_log_file
 from pimlico.core.modules.base import DependencyError
 from pimlico.utils.communicate import timeout_process
-from pimlico.utils.network import get_unused_local_port, get_unused_local_ports
+from py4j.compat import CompatThread, hasattr2, Queue
+from py4j.protocol import smart_decode
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, JAVA_BUILD_DIR])
 
@@ -67,12 +72,26 @@ def check_java():
 
 
 class Py4JInterface(object):
-    def __init__(self, gateway_class, port=None, python_port=None, gateway_args=[], pipeline=None):
+    def __init__(self, gateway_class, port=None, python_port=None, gateway_args=[], pipeline=None, print_stdout=True,
+                 print_stderr=True, env={}, system_properties={}, java_opts=[]):
         """
         If pipeline is given, configuration is looked for there. If found, this overrides config given
         in other kwargs.
 
+        If print_stdout=True (default), stdout from processes will be printed out to the console in addition to any
+        other processing that's done to it. Same with stderr.
+        By default, both are output to the console.
+
+        env adds extra variables to the environment for running the Java process.
+
+        system_properties adds Java system property settings to the Java command.
+
         """
+        self.java_opts = java_opts
+        self.system_properties = system_properties
+        self.env = env
+        self.print_stderr = print_stderr
+        self.print_stdout = print_stdout
         self.python_port = python_port
         self.gateway_args = gateway_args
         self.gateway_class = gateway_class
@@ -88,6 +107,9 @@ class Py4JInterface(object):
 
         self.process = None
         self.gateway = None
+        self._gateway_kwargs = None
+        self._port_used = None
+        self.clients = []
 
     def start(self):
         """
@@ -101,25 +123,55 @@ class Py4JInterface(object):
         from py4j.java_gateway import JavaGateway, GatewayParameters
 
         args = list(self.gateway_args)
-        gateway_kwargs = {}
+        self._gateway_kwargs = {}
 
         if self.port is not None:
             args.extend(["--port", "%d" % self.port])
 
         if self.python_port is not None:
             args.extend(["--python-port", "%d" % self.python_port])
-            gateway_kwargs["python_proxy_port"] = self.python_port
+            self._gateway_kwargs["python_proxy_port"] = self.python_port
 
-        port_used, self.process = launch_gateway(
-            self.gateway_class, args
+        # We could add other things as well here, like queues, to capture the output
+        redirect_stdout = []
+        if self.print_stdout:
+            redirect_stdout.append(sys.stdout)
+        redirect_stderr = []
+        if self.print_stderr:
+            redirect_stderr.append(sys.stderr)
+
+        # Allow Java system properties to be set on the command line
+        java_opts = list(self.java_opts)
+        for prop, val in self.system_properties.items():
+            java_opts.extend(["-D%s=%s" % (prop, val)])
+
+        self._port_used, self.process = launch_gateway(
+            self.gateway_class, args,
+            redirect_stdout=redirect_stdout, redirect_stderr=redirect_stderr,
+            env=self.env, javaopts=java_opts
         )
-        self.gateway = JavaGateway(gateway_parameters=GatewayParameters(port=port_used), **gateway_kwargs)
+        self.gateway = self.new_client()
+
+    def new_client(self):
+        from py4j.java_gateway import JavaGateway, GatewayParameters
+        client = no_retry_gateway(gateway_parameters=GatewayParameters(port=self._port_used), **self._gateway_kwargs)
+        self.clients.append(client)
+        return client
 
     def stop(self):
-        # Stop the client gateway
-        self.gateway.close()
+        # Stop the client gateway(s)
+        for client_gateway in self.clients:
+            client_gateway.close()
         # Stop the server process
-        self.process.terminate()
+        try:
+            self.process.terminate()
+        except OSError, e:
+            if e.errno == 3:
+                # No such process: process is already dead
+                pass
+            else:
+                # Raise other errors
+                raise
         self.process.wait()
 
     def __enter__(self):
@@ -130,16 +182,49 @@ class Py4JInterface(object):
         self.stop()
 
 
+def no_retry_gateway(**kwargs):
+    """
+    A wrapper around the constructor of JavaGateway that produces a version of it that doesn't retry on
+    errors. The default gateway keeps retying and outputting millions of errors if the server goes down,
+    which makes responding to interrupts horrible (as the server might die before the Python process gets
+    the interrupt).
+
+    TODO This isn't working: it just gets worse when I use my version!
+
+    """
+    from py4j.java_gateway import JavaGateway, GatewayClient
+
+    class NoRetryGatewayClient(GatewayClient):
+        def send_command(self, command, retry=True):
+            return super(NoRetryGatewayClient, self).send_command(command, retry=False)
+
+    # Start a JavaGateway as normal
+    gateway = JavaGateway(**kwargs)
+    # Replace the gateway client
+    #gateway_client = NoRetryGatewayClient(
+    #    address=gateway._gateway_client.address,
+    #    port=gateway._gateway_client.port,
+    #    auto_close=gateway._gateway_client.auto_close
+    #)
+    #gateway.set_gateway_client(gateway_client)
+    return gateway
+
+
 def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
-                   javaopts=[], redirect_stdout=None, redirect_stderr=None, daemonize_redirect=True):
+                   javaopts=[], redirect_stdout=None, redirect_stderr=None, daemonize_redirect=True,
+                   env={}):
     """
     Our own more flexble version of Py4J's launch_gateway.
     """
-    from py4j.java_gateway import OutputConsumer, ProcessConsumer
+    from py4j.java_gateway import ProcessConsumer
+
+    # Add custom environment variables to the ones we've already got
+    java_env = os.environ.copy()
+    java_env.update(env)
 
     # Launch the server in a subprocess.
     command = ["java", "-classpath", CLASSPATH] + javaopts + [gateway_class] + args
-    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=PIPE, env=java_env)
 
     # Determine which port the server started on (needed to support ephemeral ports)
     # Don't hang on an error running the gateway launcher
@@ -182,13 +267,51 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
             raise JavaProcessError("invalid output from Py4J server when started: '%s' (see %s for details)" %
                                    (output, err_path))
 
-    # Start consumer threads so process does not deadlock/hangs
+    # Start consumer threads so process does not deadlock/hang
     OutputConsumer(redirect_stdout, proc.stdout, daemon=daemonize_redirect).start()
     if redirect_stderr is not None:
         OutputConsumer(redirect_stderr, proc.stderr, daemon=daemonize_redirect).start()
     ProcessConsumer(proc, [redirect_stdout], daemon=daemonize_redirect).start()
 
     return port_used, proc
+
+
+class OutputConsumer(CompatThread):
+    """Thread that consumes output
+    Modification of Py4J's OutputConsumer to allow multiple redirects.
+    """
+
+    def __init__(self, redirects, stream, *args, **kwargs):
+        super(OutputConsumer, self).__init__(*args, **kwargs)
+        # Also allow the one-redirect case, just like Py4J's class
+        if not isinstance(redirects, list):
+            redirects = [redirects]
+        self.redirects = redirects
+        self.stream = stream
+
+        self.redirect_funcs = []
+        for redirect in redirects:
+            if isinstance(redirect, Queue):
+                self.redirect_funcs.append(self._pipe_queue)
+            if isinstance(redirect, deque):
+                self.redirect_funcs.append(self._pipe_deque)
+            if hasattr2(redirect, "write"):
+                self.redirect_funcs.append(self._pipe_fd)
+
+    def _pipe_queue(self, redirect, line):
+        redirect.put(line)
+
+    def _pipe_deque(self, redirect, line):
+        redirect.appendleft(line)
+
+    def _pipe_fd(self, redirect, line):
+        redirect.write(line)
+
+    def run(self):
+        lines_iterator = iter(self.stream.readline, b"")
+        for line in lines_iterator:
+            for redirect, fn in zip(self.redirects, self.redirect_funcs):
+                fn(redirect, smart_decode(line))
 
 
 def output_p4j_error_info(command, returncode, stdout, stderr):

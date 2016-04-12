@@ -1,12 +1,16 @@
 import os
 
+from pimlico import MODEL_DIR
 from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.coref import CorefCorpus, CorefCorpusWriter
+from pimlico.datatypes.coref.opennlp import CorefCorpus, CorefCorpusWriter
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus
+
+
+WORDNET_DIR = os.path.join(MODEL_DIR, "wordnet", "db-3.1")
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -57,6 +61,12 @@ class ModuleInfo(DocumentMapModuleInfo):
         if not os.path.exists(self.model_path):
             missing_dependencies.append(("OpenNLP coref model", self.module_name,
                                          "Path %s does not exist" % self.model_path))
+
+        # For coref, we also need WordNet dictionary files
+        if not os.path.exists(WORDNET_DIR):
+            missing_dependencies.append(("WordNet dictionaries", self.module_name,
+                                         "Download together with OpenNLP coref model using 'make opennlp' in model dir"
+                                         ))
 
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies

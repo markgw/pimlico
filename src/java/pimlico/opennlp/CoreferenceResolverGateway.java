@@ -35,6 +35,20 @@ public class CoreferenceResolverGateway {
         }
     }
 
+    /**
+     * Like resolveCoreference(), but accepts PTB-style parse trees for each sentence, which will be
+     * read into OpenNLP Parse objects, before handing over to resolveCoreference().
+     *
+     * @param sentences PTB-style parse trees as strings
+     * @return output of coref
+     */
+    public DiscourseEntity[] resolveCoreferenceFromTrees(List<String> sentences) {
+        List<Parse> parses = new ArrayList<Parse>();
+        for (String sentence : sentences)
+            parses.add(Parse.parseParse(sentence));
+        return resolveCoreference(parses);
+    }
+
     public DiscourseEntity[] resolveCoreference(List<Parse> sentences) {
         List<Mention> mentions = new ArrayList<Mention>();
 
@@ -52,6 +66,8 @@ public class CoreferenceResolverGateway {
             return corefLinker.getEntities(mentionArray);
         } catch (RuntimeException e) {
             // Sadly this happens occasionally: handle it nicely
+            System.out.println("Runtime exception getting entities: ");
+            e.printStackTrace();
             return new DiscourseEntity[0];
         }
     }

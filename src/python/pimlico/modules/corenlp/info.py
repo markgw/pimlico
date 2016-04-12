@@ -1,6 +1,6 @@
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool
-from pimlico.datatypes.coref import CorefCorpus
+from pimlico.datatypes.coref.corenlp import CorefCorpus
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, DependencyParseCorpus, \
     ConstituencyParseTreeCorpusWriter, DependencyParseCorpusWriter
