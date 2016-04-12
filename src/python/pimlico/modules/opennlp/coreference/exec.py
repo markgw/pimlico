@@ -1,6 +1,8 @@
 """
 TODO I've tried to parellelize this. It helps if the number of processes is low (e.g. 3), but for higher (e.g. 10)
-it gets horrible. Something's wrong. It could just be java consuming tonnes of memory.
+it doesn't go any faster. Needs some further investigation. Must be some overhead involved in having more processes
+that's bogging us down.
+
 """
 
 from Queue import Queue, Empty
@@ -37,7 +39,7 @@ def start_interface(info):
     interface = Py4JInterface(
         "pimlico.opennlp.CoreferenceResolverGateway", gateway_args=[info.model_path],
         pipeline=info.pipeline, system_properties={"WNSEARCHDIR": WORDNET_DIR},
-        java_opts=["-Xmx500M"]
+        java_opts=["-Xmx%s" % info.get_heap_memory_limit()]
     )
     try:
         interface.start()

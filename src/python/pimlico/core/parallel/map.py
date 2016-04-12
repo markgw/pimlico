@@ -108,7 +108,8 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
                     # Inputs will be taken from this as they're needed
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
                     # Push the first inputs into the pool
-                    for archive, filename, docs in islice(input_iter, processes):
+                    # Send the pool enough to occupy every process and keep one in reserve for each
+                    for archive, filename, docs in islice(input_iter, processes*2):
                         self.pool.process_document(archive, filename, *docs)
                         # Keep track of the order we need the results in
                         docs_processing.append((archive, filename))

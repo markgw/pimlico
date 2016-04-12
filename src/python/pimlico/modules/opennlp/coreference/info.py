@@ -14,6 +14,12 @@ WORDNET_DIR = os.path.join(MODEL_DIR, "wordnet", "db-3.1")
 
 
 class ModuleInfo(DocumentMapModuleInfo):
+    """
+    Use local config setting opennlp_memory to set the limit on Java heap memory for the OpenNLP processes. If
+    parallelizing, this limit is shared between the processes. That is, each OpenNLP worker will have a memory
+    limit of `opennlp_memory / processes`. That setting can use `g|G|m|M|k|K`, as in the Java setting.
+
+    """
     module_type_name = "opennlp_coref"
     module_inputs = [("parses", ConstituencyParseTreeCorpus)]
     module_outputs = [("coref", CorefCorpus)]
@@ -77,3 +83,36 @@ class ModuleInfo(DocumentMapModuleInfo):
             gzip=self.options["gzip"],
             append=append
         )
+
+    def get_heap_memory_limit(self):
+        """
+        Read in the local config setting opennlp_memory to compute the memory limit per process for Java
+        processes.
+
+        """
+        # Read in the local config setting
+        limit_string = self.pipeline.local_config.get("opennlp_memory", "5G").upper()
+        # Get the limit in bytes
+        if limit_string.endswith("K"):
+            limit = int(limit_string[:-1]) * 1e3
+        elif limit_string.endswith("M"):
+            limit = int(limit_string[:-1]) * 1e6
+        elif limit_string.endswith("G"):
+            limit = int(limit_string[:-1]) * 1e9
+        else:
+            limit = int(limit_string)
+        # Divide the allowed memory between the processes
+        process_limit = limit / self.pipeline.processes
+        # Convert back to a string for the Java option
+        # Use units, so debugging output is clearer if we ever need to output the java command
+        if process_limit >= 1e10:
+            # If the memory per process is over 10G, we can happily round to the nearest G
+            process_limit_string = "%dG" % int(process_limit / 1e9)
+        elif process_limit >= 1e7:
+            process_limit_string = "%dM" % int(process_limit / 1e6)
+        elif process_limit >= 1e4:
+            process_limit_string = "%dK" % int(process_limit / 1e3)
+        else:
+            # Just put the whole number
+            process_limit_string = "%d" % process_limit
+        return process_limit_string
