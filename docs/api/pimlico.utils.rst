@@ -10,7 +10,9 @@ Submodules
    pimlico.utils.core
    pimlico.utils.format
    pimlico.utils.logging
+   pimlico.utils.network
    pimlico.utils.pipes
+   pimlico.utils.pos
    pimlico.utils.progress
    pimlico.utils.timeout
 

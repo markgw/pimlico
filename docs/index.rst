@@ -23,12 +23,10 @@ pipeline and checking that everything's executed in the right order.
    
    The basic framework is up and running, but:
    
-   - it doesn't yet include wrappers for many standard NLP tools: I'll be 
-     adding these more of less as I need them and am keen to accept contributions 
-     of wrappers if you develop them for your own pipelines
-   - there are some key features missing, which I'll add as time goes on. 
-     See :doc:`my wishlist <plans/wishlist>` for things that I'm currently planning to
-     add.
+   - it only includes wrappers for a few standard NLP tools: I'll
+     add more as I need them. If you develop your own, let me know!
+   - there are some key features missing, which I'll add over time.
+     See :doc:`my wishlist <plans/wishlist>` for current plans.
 
 Contents:
 
@@ -37,8 +35,7 @@ Contents:
 
    core/index
    guides/index
-   plans/wishlist
-   reference/index
+   plans/index
 
 
 Indices and tables
@@ -47,4 +44,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

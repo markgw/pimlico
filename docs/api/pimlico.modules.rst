@@ -9,6 +9,7 @@ Subpackages
     pimlico.modules.corenlp
     pimlico.modules.corpora
     pimlico.modules.features
+    pimlico.modules.malt
     pimlico.modules.opennlp
     pimlico.modules.regex
 

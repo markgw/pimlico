@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     pimlico.modules.regex.annotated_text
-    pimlico.modules.regex.pos_text
 
 Module contents
 ---------------

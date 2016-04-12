@@ -250,3 +250,4 @@ texinfo_documents = [
 # -- Autosummary ----------------------
 import glob
 autosummary_generate = glob.glob("reference/*.rst")
+autodoc_member_order = 'groupwise'
