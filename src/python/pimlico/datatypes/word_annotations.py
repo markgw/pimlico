@@ -211,5 +211,20 @@ def AddAnnotationField(input_name, add_fields):
     return _builder
 
 
+def WordAnnotationCorpusWithFields(fields):
+    """
+    Dynamic (functional) type that can be used in place of a module's input type. When called, checks whether the
+    input module is a WordAnnotationCorpus (or subtype) and whether its fields include all of those required.
+
+    """
+    def _checker(supplied_type):
+        if not issubclass(supplied_type, WordAnnotationCorpus):
+            return False
+        if not all(field in supplied_type.annotation_fields for field in fields):
+            return False
+        return True
+    return _checker
+
+
 class AnnotationParseError(Exception):
     pass

@@ -97,3 +97,13 @@ maltparser-1.8.1.jar : log4j-1.2.17.jar liblinear-java-1.95.jar
 	mv maltparser-1.8.1/maltparser-1.8.1.jar .
 	rmdir maltparser-1.8.1
 	rm maltparser-1.8.1.tar.gz
+
+log4j-1.2.17.jar :
+	$(FETCH) http://www.us.apache.org/dist/logging/log4j/1.2.17/log4j-1.2.17.tar.gz
+	tar -xzf log4j-1.2.17.tar.gz apache-log4j-1.2.17/log4j-1.2.17.jar
+	mv apache-log4j-1.2.17/log4j-1.2.17.jar .
+	rmdir apache-log4j-1.2.17
+	rm log4j-1.2.17.tar.gz
+
+liblinear-java-1.95.jar :
+	$(FETCH) http://www.bwaldvogel.de/liblinear-java/liblinear-java-1.95.jar

@@ -345,7 +345,7 @@ class BaseModuleInfo(object):
             # Try to load the named output (or the default, if no name was given)
             output_name, dep_module_output = dep_module.get_output_datatype(output_name=output)
             # Check that the provided output type is a subclass of (or equal to) the required input type
-            if not issubclass(dep_module_output, input_type_requirements):
+            if not any(_compatible_input_type(intype, dep_module_output) for intype in input_type_requirements):
                 raise PipelineStructureError(
                     "module %s's %s-input is required to be of %s type (or a descendent), but module %s's "
                     "%s-output provides %s" % (
@@ -386,6 +386,15 @@ class BaseModuleInfo(object):
             if not dep_module.module_executable:
                 missing_dependencies.extend(dep_module.check_runtime_dependencies())
         return missing_dependencies
+
+
+def _compatible_input_type(type_requirement, supplied_type):
+    if type(type_requirement) is FunctionType:
+        # If the requirement is a function, we call it on the supplied type to check whether it's compatible
+        return type_requirement(supplied_type)
+    else:
+        # Otherwise, we just check whether the supplied type is a subclass of the requirement
+        return issubclass(supplied_type, type_requirement)
 
 
 class BaseModuleExecutor(object):

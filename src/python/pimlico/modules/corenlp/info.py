@@ -2,8 +2,8 @@ from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool
 from pimlico.datatypes.coref.corenlp import CorefCorpus
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
-from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, DependencyParseCorpus, \
-    ConstituencyParseTreeCorpusWriter, DependencyParseCorpusWriter
+from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
+from pimlico.datatypes.parse.dependency import StanfordDependencyParseCorpus, StanfordDependencyParseCorpusWriter
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
@@ -56,9 +56,9 @@ class ModuleInfo(DocumentMapModuleInfo):
         # Constituency parses
         ("parse", ConstituencyParseTreeCorpus),
         # Dependency parses extracted from constituency parses
-        ("parse-deps", DependencyParseCorpus),
+        ("parse-deps", StanfordDependencyParseCorpus),
         # Dependency parses from dependency parser
-        ("dep-parse", DependencyParseCorpus),
+        ("dep-parse", StanfordDependencyParseCorpus),
         # Full raw JSON output from the CoreNLP server
         ("raw", JsonDocumentCorpus),
         # Coreference resolution
@@ -127,9 +127,9 @@ class ModuleInfo(DocumentMapModuleInfo):
             # Just write out parse trees as they come from the parser
             return ConstituencyParseTreeCorpusWriter(output_dir, gzip=gzip, append=append)
         elif output_name == "parse-deps":
-            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
+            return StanfordDependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         elif output_name == "dep-parse":
-            return DependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
+            return StanfordDependencyParseCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         elif output_name == "raw":
             return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         elif output_name == "coref":

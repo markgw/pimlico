@@ -5,7 +5,7 @@ from traceback import format_exc
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, DocumentProcessorPool, ProcessOutput
 from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.parse import StanfordDependencyParse
+from pimlico.datatypes.parse.dependency import StanfordDependencyParse
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 from pimlico.modules.corenlp import CoreNLPProcessingError
 from pimlico.modules.corenlp.wrapper import CoreNLP
