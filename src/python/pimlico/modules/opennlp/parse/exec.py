@@ -1,3 +1,5 @@
+# TODO Deal with the fact that OpenNLP is outputting a line to the terminal for every unparseable sentence
+# Instead, it should quietly produce an InvalidDocument
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
