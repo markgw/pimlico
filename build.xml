@@ -126,6 +126,7 @@
   <!-- Here we include the build targets for different components -->
   <import file="${basedir}/ant/module_pimlico.xml"/>
   <import file="${basedir}/ant/module_opennlp.xml"/>
+  <import file="${basedir}/ant/module_malt.xml"/>
 
 
   <target name="init" description="Build initialization">

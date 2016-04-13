@@ -44,9 +44,22 @@ public class ParserGateway {
      * @return tokens of parsed data
      * @throws MaltChainedException
      */
-    public String[] parseFromCoNLL(String[] conllSentence) throws MaltChainedException {
+    public String[] parseFromCoNLL(List<String> conllSentence) throws MaltChainedException {
         // Parse the sentence
-        return model.parseTokens(conllSentence);
+        return model.parseTokens(conllSentence.toArray(new String[conllSentence.size()]));
+    }
+
+    /**
+     * @param conllSentences    sentences of tokens of input data
+     * @return tokens of parsed data
+     * @throws MaltChainedException
+     */
+    public List<String[]> parseDocFromCoNLL(List<List<String>> conllSentences) throws MaltChainedException {
+        List<String[]> result = new ArrayList<String[]>();
+        // Parse each sentence
+        for (List<String> conllSentence : conllSentences)
+            result.add(parseFromCoNLL(conllSentence));
+        return result;
     }
 
     public static void main(String[] args) {

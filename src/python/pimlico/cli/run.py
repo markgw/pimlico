@@ -56,10 +56,13 @@ if __name__ == "__main__":
     parser.add_argument("--debug", "-d", help="Output verbose debugging info", action="store_true")
     parser.add_argument("--variant", "-v", help="Load a particular variant of a pipeline. For a list of available "
                                                 "variants, use the 'variants' command", default="main")
-    parser.add_argument("--override-local-config", "--olc",
+    parser.add_argument("--override-local-config", "--local", "-l",
                         help="Override a parameter set in the local config files (usually ~/.pimlico.conf). For just "
                              "this execution. Specify as param=value. Use this option multiple times to override "
                              "more than one parameter", action="append")
+    parser.add_argument("--processes", "-p",
+                        help="Set the number of processes to use for this run, where parallelization is available. "
+                             "Overrides the local config setting. Equivalent to '-l processes=P'", type=int)
     subparsers = parser.add_subparsers(help="Select a sub-command")
 
     check = subparsers.add_parser("check",
@@ -96,6 +99,9 @@ if __name__ == "__main__":
         )
     else:
         override_local = {}
+    if opts.processes is not None:
+        # Override the processes local config setting
+        override_local["processes"] = opts.processes
 
     # Read in the pipeline config from the given file
     try:
