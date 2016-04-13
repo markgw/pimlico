@@ -23,20 +23,16 @@ class MaltWorkerThread(Thread):
         self.output_queue = output_queue
         self.input_queue = input_queue
         self.gateway = gateway
+        self.daemon = True
+        self.start()
 
     def run(self):
-        # Wait for an input from the queue
-        new_input = self.input_queue.get()
-        if new_input is None:
-            # No more inputs to come: time to shut down
-            return
-        else:
-            archive, filename, doc = new_input
-            result = process_document(archive, filename, doc, self.gateway)
+        while True:
+            # Wait for an input from the queue
+            archive, filename, docs = self.input_queue.get()
+            result = process_document(archive, filename, docs[0], self.gateway)
             # Put the result on the output queue
             self.output_queue.put((archive, filename, result))
-            # Indicate that we're done
-            self.input_queue.task_complete()
 
 
 class MaltPool(DocumentProcessorPool):
@@ -50,21 +46,10 @@ class MaltPool(DocumentProcessorPool):
     def __init__(self, executor, processes):
         super(MaltPool, self).__init__(processes)
         self.executor = executor
-        self.input_queue = Queue.Queue()
         # Create the number of workers we need to send requests to Malt and wait for results
         self.workers = [
-            MaltWorkerThread(self.executor.interface.gateway, self.input_queue, self.queue) for i in range(processes)
+            MaltWorkerThread(self.executor.interface.gateway, self.input_queue, self.output_queue) for i in range(processes)
         ]
-
-    @staticmethod
-    def create_queue():
-        # Don't need a multiprocessing queue, since we only use threading
-        return Queue.Queue()
-
-    @skip_invalid
-    def process_document(self, archive, filename, doc):
-        # Send the doc to the input queue to be picked up by one of the threads
-        self.input_queue.put((archive, filename, doc))
 
     def shutdown(self):
         # Clear the input queue, if there's anything waiting to be processed

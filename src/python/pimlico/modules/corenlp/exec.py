@@ -1,6 +1,8 @@
-import Queue
+from Queue import Empty
 from threading import Thread
 from traceback import format_exc
+
+import time
 
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, DocumentProcessorPool, ProcessOutput
@@ -10,6 +12,34 @@ from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 from pimlico.modules.corenlp import CoreNLPProcessingError
 from pimlico.modules.corenlp.wrapper import CoreNLP
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
+
+
+class CoreNLPWorker(Thread):
+    def __init__(self, input_queue, output_queue, executor):
+        super(CoreNLPWorker, self).__init__()
+        self.executor = executor
+        self.input_queue = input_queue
+        self.output_queue = output_queue
+        self.daemon = True
+        self.start()
+
+    def run(self):
+        while True:
+            try:
+                archive, filename, docs = self.input_queue.get_nowait()
+                try:
+                    # Call the usual processing function
+                    result = self.executor.process_document(archive, filename, docs[0])
+                    self.output_queue.put(ProcessOutput(archive, filename, result))
+                except Exception, e:
+                    self.output_queue.put(
+                        ProcessOutput(archive, filename,
+                                      InvalidDocument("corenlp_worker", "%s\n%s" % (e, format_exc())))
+                    )
+            except Empty:
+                # Don't worry if the queue is empty: just keep waiting for more until we're shut down
+                # Give it a moment to let something come in
+                time.sleep(0.01)
 
 
 class CoreNLPPool(DocumentProcessorPool):
@@ -22,24 +52,9 @@ class CoreNLPPool(DocumentProcessorPool):
     def __init__(self, executor, processes):
         super(CoreNLPPool, self).__init__(processes)
         self.executor = executor
-
-    @staticmethod
-    def create_queue():
-        # Don't need a multiprocessing queue, since we only use threading
-        return Queue.Queue()
-
-    def process_document(self, archive, filename, doc):
-        # The real work is done by the CoreNLP server, so we just make the call from within this thread
-        # The thread will spend most of its time just waiting for the result
-        def _doc_process_async():
-            # Call the usual processing function
-            result = self.executor.process_document(archive, filename, doc)
-            # Put the result onto the queue
-            self.queue.put(ProcessOutput(archive, filename, result))
-        t = Thread(target=_doc_process_async)
-        t.daemon = True
-        # Set the thread going and leave it to its own devices
-        t.start()
+        self.workers = [
+            CoreNLPWorker(self.input_queue, self.output_queue, self.executor) for i in range(processes)
+        ]
 
 
 class ModuleExecutor(DocumentMapModuleParallelExecutor):

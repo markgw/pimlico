@@ -120,8 +120,6 @@ class Py4JInterface(object):
         Likewise with python_port and a --python-port option.
 
         """
-        from py4j.java_gateway import JavaGateway, GatewayParameters
-
         args = list(self.gateway_args)
         self._gateway_kwargs = {}
 
@@ -162,6 +160,8 @@ class Py4JInterface(object):
         # Stop the client gateway(s)
         for client_gateway in self.clients:
             client_gateway.close()
+        self.gateway = None
+        self.clients = []
         # Stop the server process
         try:
             self.process.terminate()

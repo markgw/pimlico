@@ -49,6 +49,13 @@ public class CoreferenceResolverGateway {
         return resolveCoreference(parses);
     }
 
+    public DiscourseEntity[] resolveCoreferenceFromTreesStrings(String sentences) {
+        List<Parse> parses = new ArrayList<Parse>();
+        for (String sentence : sentences.split("\n\n"))
+            parses.add(Parse.parseParse(sentence));
+        return resolveCoreference(parses);
+    }
+
     public DiscourseEntity[] resolveCoreference(List<Parse> sentences) {
         List<Mention> mentions = new ArrayList<Mention>();
 

@@ -6,24 +6,22 @@ if [ -n "$GPU" ]; then
     export THEANO_FLAGS='device=gpu,floatX=float32'
 fi
 
-if [ -n "$PROFILER" ]; then
+if [ -n "$PROFILE" ]; then
     # Run the profiler instead of ordinary python
     # Allows you to profile any script by just putting:
-    #  PROFILER=1
+    #  PROFILE=1
     # in front of the command
-    profile_out=$DIR/../working/profile
+    profile_out=$(readlink -m $DIR/../log/profile)
     echo "Profiling, output to $profile_out" >&2
     if [ "$1" == "-m" ]; then
         shift
         # Try to convert to filename
-        echo "Cannot run profiler on module name: trying to convert to script name"
         script_name="$DIR/../src/python/${1//.//}.py"
-        echo "  Trying $script_name"
         # Replace arg 1
         set -- $script_name "${@:2}"
     fi
-    /usr/bin/env python $PYARGS -m cProfile -o $DIR/../working/profile $*
-elif [ -n "$MEMPROFILER" ]; then
+    /usr/bin/env python $PYARGS -m cProfile -o $profile_out $*
+elif [ -n "$MEMPROFILE" ]; then
     # Similar, does memory profiling
     echo "Memory profiling"
     /usr/bin/env python -m memory_profiler $*
