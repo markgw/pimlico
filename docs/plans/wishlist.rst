@@ -22,12 +22,6 @@ I'll add to this list as I think of things...
   - `Malt dependency parser <http://www.maltparser.org/>`_. I've partially wrapped this in Python before, so can probably reuse
     that. Faster alternative to CoreNLP dep parser (already wrapped)
 
-- Bundle Pimlico Java code as jars, so user doesn't need to compile. Dead easy - just add jar target to ant
-  builds and check in resulting jars
-
-  - Same for OpenNLP wrappers
-  - Same for CoreNLP wrappers
-
 - Consider parallelizing at the (tar) archive level: allow TarredCorpus to iterate over specific archives, then send
   each archive off to be processed in parallel, meaning we can write files linearly within an archive, but have many
   (roughly equally sized) archives going at once
