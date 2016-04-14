@@ -96,11 +96,12 @@ class WordAnnotationCorpus(TarredCorpus):
             # Split the sentence on word boundaries
             words = sentence_text.split(self.word_boundary)
             # Parse each word
-            word_dicts = [self.word_re.match(word).groupdict() for word in words]
+            matches = [self.word_re.match(word) for word in words]
             # Check that all the words matched the word re
-            if None in word_dicts:
+            if None in matches:
                 raise AnnotationParseError("word did not match regex for word format: %s. Matching using: %s" %
-                                           (words[word_dicts.index(None)], self.word_re.pattern))
+                                           (words[matches.index(None)], self.word_re.pattern))
+            word_dicts = [match.group_dict() for match in matches]
             sentences.append(word_dicts)
         return sentences
 

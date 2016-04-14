@@ -4,6 +4,8 @@ import random
 import shutil
 import tarfile
 from tempfile import mkdtemp
+from traceback import format_exc
+
 import cPickle as pickle
 
 import zlib
@@ -96,7 +98,12 @@ class TarredCorpus(IterableCorpus):
                         document = InvalidDocument.invalid_document_or_text(document)
                         # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
                         if not self.raw_data and type(document) is not InvalidDocument:
-                            document = self.process_document(document)
+                            try:
+                                document = self.process_document(document)
+                            except BaseException, e:
+                                # If there's any problem reading in the document, yield an invalid doc with the error
+                                document = InvalidDocument("datatype %s reader" % self.datatype_name,
+                                                           "%s: %s" % (e, format_exc()))
                         yield tar_name, filename, document
                         # Remove the file once we're done with it (when we request another)
                         os.remove(os.path.join(tmp_dir, filename))
