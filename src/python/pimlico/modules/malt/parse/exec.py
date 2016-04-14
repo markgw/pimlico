@@ -1,4 +1,3 @@
-import Queue
 from threading import Thread
 
 from pimlico.core.external.java import Py4JInterface
