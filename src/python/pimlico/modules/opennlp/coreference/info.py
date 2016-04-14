@@ -35,6 +35,10 @@ class ModuleInfo(DocumentMapModuleInfo):
                     "storage occupied by e.g. parser or coref output. Default: False",
             "type": str_to_bool,
         },
+        "readable": {
+            "help": "If True, pretty-print the JSON output, so it's human-readable. Default: False",
+            "type": str_to_bool,
+        },
         "timeout": {
             "help": "Timeout in seconds for each individual coref resolution task. If this is exceeded, an "
                     "InvalidDocument is returned for that document",
@@ -86,6 +90,7 @@ class ModuleInfo(DocumentMapModuleInfo):
         return CorefCorpusWriter(
             self.get_output_dir(output_name),
             gzip=self.options["gzip"],
+            readable=self.options["readable"],
             append=append
         )
 

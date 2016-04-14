@@ -1,9 +1,6 @@
-import re
-
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.features import KeyValueListCorpus, KeyValueListCorpusWriter
-from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 
 
