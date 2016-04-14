@@ -1,65 +1,42 @@
-from threading import Thread
-
-from pimlico.core.external.java import Py4JInterface
+from pimlico.core.external.java import Py4JInterface, gateway_client_to_running_server
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
-from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, DocumentProcessorPool
-from py4j.java_collections import ListConverter
+from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, MultiprocessingMapPool, \
+    MultiprocessingMapProcess
 
 
 def process_document(archive, filename, doc, gateway):
-    # Split up sentences
-    # TODO This isn't working: debug
-    sentences = [
-        "\n".split(sentence) for sentence in "\n\n".split(doc)
+    return [
+        [token.split("\t") for token in sentence]
+        for sentence in gateway.entry_point.parseDocFromCoNLLString(doc)
     ]
-    sentence_list = ListConverter().convert(sentences, gateway._gateway_client)
-    return list(gateway.entry_point.parseFromCoNLL(sentence_list))
 
 
-class MaltWorkerThread(Thread):
-    def __init__(self, gateway, input_queue, output_queue):
-        super(MaltWorkerThread, self).__init__()
-        self.output_queue = output_queue
-        self.input_queue = input_queue
-        self.gateway = gateway
-        self.daemon = True
-        self.start()
+class MaltWorkerProcess(MultiprocessingMapProcess):
+    def __init__(self, input_queue, output_queue, info, py4j_port):
+        self._gateway = None
+        self.py4j_port = py4j_port
+        super(MaltWorkerProcess, self).__init__(input_queue, output_queue, info)
 
-    def run(self):
-        while True:
-            # Wait for an input from the queue
-            archive, filename, docs = self.input_queue.get()
-            result = process_document(archive, filename, docs[0], self.gateway)
-            # Put the result on the output queue
-            self.output_queue.put((archive, filename, result))
+    def set_up(self):
+        self._gateway = gateway_client_to_running_server(self.py4j_port)
+
+    def process_document(self, archive, filename, *docs):
+        return process_document(archive, filename, docs[0], self._gateway)
+
+    def tear_down(self):
+        self._gateway.close()
 
 
-class MaltPool(DocumentProcessorPool):
+class MaltPool(MultiprocessingMapPool):
     """
     Simple pool for sending off multiple calls to the Py4J gateway at once. It doesn't use multiprocessing, since
     the Py4J gateway fires off multiple Java threads for multiple requests. It just uses threading to send non-blocking
     requests to the gateway.
 
     """
-    # TODO Parallel processing hangs at startup: debug
-    def __init__(self, executor, processes):
-        super(MaltPool, self).__init__(processes)
-        self.executor = executor
-        # Create the number of workers we need to send requests to Malt and wait for results
-        self.workers = [
-            MaltWorkerThread(self.executor.interface.gateway, self.input_queue, self.output_queue) for i in range(processes)
-        ]
-
-    def shutdown(self):
-        # Clear the input queue, if there's anything waiting to be processed
-        while not self.input_queue.empty():
-            self.input_queue.get_nowait()
-        # Put a None in the input queue for each thread to tell it to shut down
-        for i in range(len(self.workers)):
-            self.input_queue.put(None)
-        # Wait for all threads to finish
-        for worker in self.workers:
-            worker.join()
+    def start_worker(self):
+        return MaltWorkerProcess(self.input_queue, self.output_queue,
+                                 self.executor.info, self.executor.interface.port_used)
 
 
 class ModuleExecutor(DocumentMapModuleParallelExecutor):

@@ -110,8 +110,7 @@ class Py4JInterface(object):
 
         self.process = None
         self.gateway = None
-        self._gateway_kwargs = None
-        self._port_used = None
+        self.port_used = None
         self.clients = []
 
     def start(self):
@@ -124,14 +123,12 @@ class Py4JInterface(object):
 
         """
         args = list(self.gateway_args)
-        self._gateway_kwargs = {}
 
         if self.port is not None:
             args.extend(["--port", "%d" % self.port])
 
         if self.python_port is not None:
             args.extend(["--python-port", "%d" % self.python_port])
-            self._gateway_kwargs["python_proxy_port"] = self.python_port
 
         # We could add other things as well here, like queues, to capture the output
         redirect_stdout = [self.stdout_queue]
@@ -146,7 +143,7 @@ class Py4JInterface(object):
         for prop, val in self.system_properties.items():
             java_opts.extend(["-D%s=%s" % (prop, val)])
 
-        self._port_used, self.process = launch_gateway(
+        self.port_used, self.process = launch_gateway(
             self.gateway_class, args,
             redirect_stdout=redirect_stdout, redirect_stderr=redirect_stderr,
             env=self.env, javaopts=java_opts
@@ -154,8 +151,7 @@ class Py4JInterface(object):
         self.gateway = self.new_client()
 
     def new_client(self):
-        from py4j.java_gateway import GatewayParameters
-        client = no_retry_gateway(gateway_parameters=GatewayParameters(port=self._port_used), **self._gateway_kwargs)
+        client = gateway_client_to_running_server(self.port_used)
         self.clients.append(client)
         return client
 
@@ -211,6 +207,11 @@ def no_retry_gateway(**kwargs):
     #)
     #gateway.set_gateway_client(gateway_client)
     return gateway
+
+
+def gateway_client_to_running_server(port):
+    from py4j.java_gateway import GatewayParameters
+    return no_retry_gateway(gateway_parameters=GatewayParameters(port=port))
 
 
 def launch_gateway(gateway_class="py4j.GatewayServer", args=[],

@@ -62,6 +62,20 @@ public class ParserGateway {
         return result;
     }
 
+    /**
+     * Version of parse interface that takes a whole doc as input, with blank lines between sentences and one
+     * token per line.
+     */
+    public List<String[]> parseDocFromCoNLLString(String conllSentences) throws MaltChainedException {
+        List<String[]> result = new ArrayList<String[]>();
+        // Parse each sentence, separated by blank lines
+        for (String conllSentence : conllSentences.split("\n\n")) {
+            // Split up the lines (tokens) of the sentence
+            result.add(parseFromCoNLL(Arrays.asList(conllSentence.split("\n"))));
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
         ArgumentParser argParser = ArgumentParsers.newArgumentParser("Malt parser");
         argParser.description("Run the Malt parser, providing access to it via Py4J");
