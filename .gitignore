@@ -1,7 +1,8 @@
 *.pyc
 .idea/
 *.iml
-build/*
+# Ignore built classes, but include the jar files produced by Ant, which are included ready-compiled with Pimlico
+build/classes/
 # Ignore all libs except the Makefiles to fetch them with
 lib/java/*
 !lib/java/Makefile

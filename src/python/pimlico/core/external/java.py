@@ -5,14 +5,14 @@ from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
 import sys
 import time
 
-from pimlico import JAVA_LIB_DIR, JAVA_BUILD_DIR
+from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.logs import get_log_file
 from pimlico.core.modules.base import DependencyError
 from pimlico.utils.communicate import timeout_process
 from py4j.compat import CompatThread, hasattr2, Queue
 from py4j.protocol import smart_decode
 
-CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, JAVA_BUILD_DIR])
+CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, "%s/*" % JAVA_BUILD_JAR_DIR])
 
 
 def call_java(class_name, args=[]):
@@ -49,8 +49,8 @@ def check_java_dependency(class_name):
     # First check that the dependency checker itself can be loaded
     out, err, code = call_java("pimlico.core.DependencyChecker")
     if code != 0:
-        raise DependencyCheckerError("could not load Java dependency checker. Have you compiled the Pimlico java core? "
-                                     "%s" % (err or ""))
+        raise DependencyCheckerError(
+            "could not load Java dependency checker. Have you compiled the Pimlico java core? %s" % (err or ""))
 
     out, err, code = call_java("pimlico.core.DependencyChecker", [class_name])
     if code != 0:
@@ -97,6 +97,9 @@ class Py4JInterface(object):
         self.gateway_class = gateway_class
         self.port = port
 
+        self.stderr_queue = Queue()
+        self.stdout_queue = Queue()
+
         # Look for config in the pipeline
         start_port = pipeline.local_config.get("py4j_port", None)
         if start_port is not None:
@@ -131,10 +134,10 @@ class Py4JInterface(object):
             self._gateway_kwargs["python_proxy_port"] = self.python_port
 
         # We could add other things as well here, like queues, to capture the output
-        redirect_stdout = []
+        redirect_stdout = [self.stdout_queue]
         if self.print_stdout:
             redirect_stdout.append(sys.stdout)
-        redirect_stderr = []
+        redirect_stderr = [self.stderr_queue]
         if self.print_stderr:
             redirect_stderr.append(sys.stderr)
 
@@ -151,7 +154,7 @@ class Py4JInterface(object):
         self.gateway = self.new_client()
 
     def new_client(self):
-        from py4j.java_gateway import JavaGateway, GatewayParameters
+        from py4j.java_gateway import GatewayParameters
         client = no_retry_gateway(gateway_parameters=GatewayParameters(port=self._port_used), **self._gateway_kwargs)
         self.clients.append(client)
         return client
@@ -266,6 +269,11 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
         else:
             raise JavaProcessError("invalid output from Py4J server when started: '%s' (see %s for details)" %
                                    (output, err_path))
+
+    if redirect_stdout is None:
+        redirect_stdout = []
+    if redirect_stderr is None:
+        redirect_stderr = []
 
     # Start consumer threads so process does not deadlock/hang
     OutputConsumer(redirect_stdout, proc.stdout, daemon=daemonize_redirect).start()

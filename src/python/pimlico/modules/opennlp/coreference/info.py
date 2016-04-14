@@ -35,6 +35,11 @@ class ModuleInfo(DocumentMapModuleInfo):
                     "storage occupied by e.g. parser or coref output. Default: False",
             "type": str_to_bool,
         },
+        "timeout": {
+            "help": "Timeout in seconds for each individual coref resolution task. If this is exceeded, an "
+                    "InvalidDocument is returned for that document",
+            "type": int,
+        }
     }
 
     def __init__(self, *args, **kwargs):

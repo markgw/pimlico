@@ -1,5 +1,3 @@
-# TODO Deal with the fact that OpenNLP is outputting a line to the terminal for every unparseable sentence
-# Instead, it should quietly produce an InvalidDocument
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
@@ -26,8 +24,11 @@ def start_interface(info):
 
     """
     # Start a parser process running in the background via Py4J
-    interface = Py4JInterface("pimlico.opennlp.ParserGateway", gateway_args=[info.model_path],
-                                   pipeline=info.pipeline)
+    interface = Py4JInterface(
+        "pimlico.opennlp.ParserGateway", gateway_args=[info.model_path], pipeline=info.pipeline,
+        # Parser tool outputs warnings to stderr if parsing fails: we really don't need to know about every problem
+        print_stderr=False, print_stdout=False
+    )
     try:
         interface.start()
     except JavaProcessError, e:

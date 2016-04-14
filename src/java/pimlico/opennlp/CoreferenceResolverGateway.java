@@ -18,14 +18,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * Wrapper around OpenNLP's coreference resolution tool to provide access to it via Py4J for Pimlico module.
  */
 public class CoreferenceResolverGateway {
     private Linker corefLinker;
+    private Integer timeout;
 
-    public CoreferenceResolverGateway(File modelsDir) throws ModelLoadError {
+    public CoreferenceResolverGateway(File modelsDir, Integer timeout) throws ModelLoadError {
         // Load a coref model
         try {
             //corefLinker = new DefaultLinker(modelsDir.getAbsolutePath(), LinkerMode.TEST);
@@ -33,6 +35,7 @@ public class CoreferenceResolverGateway {
         } catch (IOException e) {
             throw new ModelLoadError("could not load coref model: " + e.getMessage());
         }
+        this.timeout = timeout;
     }
 
     /**
@@ -46,14 +49,50 @@ public class CoreferenceResolverGateway {
         List<Parse> parses = new ArrayList<Parse>();
         for (String sentence : sentences)
             parses.add(Parse.parseParse(sentence));
-        return resolveCoreference(parses);
+        return resolveCoreferenceWithTimeout(parses);
     }
 
     public DiscourseEntity[] resolveCoreferenceFromTreesStrings(String sentences) {
         List<Parse> parses = new ArrayList<Parse>();
         for (String sentence : sentences.split("\n\n"))
             parses.add(Parse.parseParse(sentence));
-        return resolveCoreference(parses);
+        return resolveCoreferenceWithTimeout(parses);
+    }
+
+    public DiscourseEntity[] resolveCoreferenceWithTimeout(List<Parse> sentences) {
+        if (timeout == null) {
+            return resolveCoreference(sentences);
+        } else {
+            CorefThread runner = new CorefThread(this, sentences);
+
+            // Start up an executor service, which allows us to put a timeout on the execution
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future future = executor.submit(runner);
+            // This does not cancel the already-scheduled task.
+            executor.shutdown();
+
+            try {
+                future.get(timeout, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                System.out.println("Coref interrupted");
+                e.printStackTrace();
+                return null;
+            } catch (TimeoutException e) {
+                // Execution timed out, so no results to give
+                System.out.println("Execution timed out after " + timeout + " secs");
+                return null;
+            } catch (ExecutionException e) {
+                // Some other problem during execution
+                System.out.println("Error running coref");
+                e.printStackTrace();
+                return null;
+            } finally {
+                // If the executor's still going (i.e. get timed out), stop it
+                if (!executor.isTerminated())
+                    executor.shutdownNow();
+            }
+            return runner.result;
+        }
     }
 
     public DiscourseEntity[] resolveCoreference(List<Parse> sentences) {
@@ -75,7 +114,7 @@ public class CoreferenceResolverGateway {
             // Sadly this happens occasionally: handle it nicely
             System.out.println("Runtime exception getting entities: ");
             e.printStackTrace();
-            return new DiscourseEntity[0];
+            return null;
         }
     }
 
@@ -109,6 +148,21 @@ public class CoreferenceResolverGateway {
         }
     }
 
+    private static class CorefThread extends Thread {
+        private final CoreferenceResolverGateway gateway;
+        private final List<Parse> sentences;
+        private DiscourseEntity[] result;
+
+        public CorefThread(CoreferenceResolverGateway gateway, List<Parse> sentences) {
+            this.gateway = gateway;
+            this.sentences = sentences;
+        }
+
+        public void run() {
+            result = gateway.resolveCoreference(sentences);
+        }
+    }
+
     public static void main(String[] args) {
         ArgumentParser argParser = ArgumentParsers.newArgumentParser("Coreference");
         argParser.description("Run the OpenNLP coreference resolver, providing access to it via Py4J");
@@ -116,6 +170,8 @@ public class CoreferenceResolverGateway {
         argParser.addArgument("--port").type(Integer.class).help("Specify a port for gateway server to run on").setDefault(0);
         argParser.addArgument("--python-port").type(Integer.class).help("Specify a port for gateway server to use " +
                 "to response to Python").setDefault(0);
+        argParser.addArgument("--timeout").type(Integer.class).help("Timeout in seconds for each individual " +
+                "coreference resolution task. If the timeout is exceeded, a null result is returned");
 
         Namespace opts = null;
         try {
@@ -130,7 +186,7 @@ public class CoreferenceResolverGateway {
         // Load the gateway instance
         CoreferenceResolverGateway entryPoint = null;
         try {
-            entryPoint = new CoreferenceResolverGateway(new File(corefModelDir));
+            entryPoint = new CoreferenceResolverGateway(new File(corefModelDir), opts.getInt("timeout"));
         } catch (ModelLoadError modelLoadError) {
             modelLoadError.printStackTrace();
             System.exit(1);
