@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="malt">
   <target name="compile.module.malt" description="Compile module Pimlico-Malt; production classes">
-    <mkdir dir="${pimlico.output.dir}"/>
-    <javac destdir="${pimlico.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pimlico}/javac" includeantruntime="false">
+    <mkdir dir="${pimlico.class.dir}"/>
+    <javac destdir="${pimlico.class.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pimlico}/javac" includeantruntime="false">
       <compilerarg line="${compiler.args.pimlico}"/>
       <bootclasspath refid="pimlico.module.bootclasspath"/>
       <classpath refid="pimlico.module.production.classpath"/>
@@ -12,8 +12,15 @@
   </target>
 
   <target name="clean.module.malt" description="cleanup module">
-    <delete dir="${pimlico.output.dir}/pimlico/malt"/>
+    <delete dir="${pimlico.class.dir}/pimlico/malt"/>
   </target>
 
-  <target name="malt" depends="compile.module.malt" description="Malt wrapper compile"/>
+  <target name="jar.module.malt" depends="compile.module.malt">
+    <mkdir dir="${pimlico.jar.dir}"/>
+    <jar destfile = "${pimlico.jar.dir}/malt.jar"
+         basedir = "${pimlico.class.dir}"
+         includes = "pimlico/malt/**/*.class"/>
+  </target>
+
+  <target name="malt" depends="jar.module.malt" description="Malt wrapper compile"/>
 </project>

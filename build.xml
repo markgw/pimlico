@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="pimlico" default="compile.module.pimlico_core">
+<project name="pimlico" default="pimlico_core">
   <!-- TODO Make different build modules for each of the tool wrappers, so we can compile them one by one -->
   <property file="pimlico.properties"/>
   <!-- Uncomment the following property if no tests compilation is needed -->
@@ -84,6 +84,8 @@
 
   <dirname property="module.pimlico.basedir" file="${ant.file.pimlico}"/>
   <property name="pimlico.output.dir" value="${module.pimlico.basedir}/build"/>
+  <property name="pimlico.class.dir" value="${pimlico.output.dir}/classes"/>
+  <property name="pimlico.jar.dir" value="${pimlico.output.dir}/jar"/>
 
   <property name="module.jdk.home.pimlico" value="${project.jdk.home}"/>
   <property name="module.jdk.bin.pimlico" value="${project.jdk.bin}"/>
@@ -135,7 +137,7 @@
   
   <target name="clean" depends="clean.module.pimlico_core" description="cleanup all"/>
   
-  <target name="build.modules" depends="init, clean, compile.module.pimlico_core" description="build all modules"/>
+  <target name="build.modules" depends="init, clean, pimlico_core" description="build all modules"/>
   
   <target name="all" depends="build.modules" description="build all"/>
 </project>
