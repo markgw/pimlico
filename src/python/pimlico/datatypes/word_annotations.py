@@ -101,7 +101,7 @@ class WordAnnotationCorpus(TarredCorpus):
             if None in matches:
                 raise AnnotationParseError("word did not match regex for word format: %s. Matching using: %s" %
                                            (words[matches.index(None)], self.word_re.pattern))
-            word_dicts = [match.group_dict() for match in matches]
+            word_dicts = [match.groupdict() for match in matches]
             sentences.append(word_dicts)
         return sentences
 

@@ -14,7 +14,7 @@ class ModuleInfo(BaseModuleInfo):
         },
         "term_max_prop": {
             "help": "Include terms that occur in max this proportion of documents",
-            "type": int,
+            "type": float,
         },
         "term_limit": {
             "help": "Limit vocab size to this number of most common entries (after other filters)",
@@ -26,7 +26,7 @@ class ModuleInfo(BaseModuleInfo):
         },
         "feature_max_prop": {
             "help": "Include features that occur in max this proportion of documents",
-            "type": int,
+            "type": float,
         },
         "feature_limit": {
             "help": "Limit vocab size to this number of most common entries (after other filters)",

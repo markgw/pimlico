@@ -26,3 +26,7 @@ I'll add to this list as I think of things...
   each archive off to be processed in parallel, meaning we can write files linearly within an archive, but have many
   (roughly equally sized) archives going at once
 - Output pipeline graph visualizations: :doc:`drawing`
+- Parallelization should only be allowed for the actual module being executed, never for filter modules. If filters
+  parallelize, we end up with more processes than we asked for!
+- Something odd's going on with restarting halfway through when there's a filter module. The final modules doesn't
+  seem to recognize that it's restarting, while the filter module finishes before the final module does...

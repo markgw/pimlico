@@ -81,19 +81,33 @@ def _noneus(field):
 
 
 class CoNLLDependencyParseCorpus(WordAnnotationCorpus):
+    """
+    10-field CoNLL dependency parse format (conllx) -- i.e. post parsing.
+
+    Fields are:
+      id (int), word form, lemma, coarse POS, POS, features, head (int), dep relation, phead (int), pdeprel
+
+    The last two are usually not used.
+
+    """
     datatype_name = "conll_dependency_parses"
 
-    @skip_invalid
     def process_document(self, data):
         data = super(CoNLLDependencyParseCorpus, self).process_document(data)
         return [
             [
-                [
-                    # ID,          word,     lemma,             cpostag,  postag,   feats,
-                    int(token[0]), token[1], _usnone(token[2]), token[3], token[4], _usnone(token[5]),
-                    # head,                 deprel,             phead,                 pdeprel
-                    _usnone(token[6], int), _usnone(token[7]), _usnone(token[8], int), _usnone(token[9])
-                ] for token in sentence
+                {
+                    "id": int(token["id"]),
+                    "word": token["word"],
+                    "lemma": _usnone(token["lemma"]),
+                    "cpostag": token["cpostag"],
+                    "postag": token["postag"],
+                    "feats": _usnone(token["feats"]),
+                    "head": _usnone(token["head"], int),
+                    "deprel": _usnone(token["deprel"]),
+                    "phead": _usnone(token["phead"], int),
+                    "pdeprel": _usnone(token["pdeprel"])
+                } for token in sentence
             ] for sentence in data
         ]
 
@@ -137,15 +151,18 @@ class CoNLLDependencyParseInputCorpus(WordAnnotationCorpus):
     """
     datatype_name = "conll_dependency_parse_inputs"
 
-    @skip_invalid
     def process_document(self, data):
         data = super(CoNLLDependencyParseInputCorpus, self).process_document(data)
         return [
             [
-                [
-                    # ID,          word,     lemma,             cpostag,  postag,   feats,
-                    int(token[0]), token[1], _usnone(token[2]), token[3], token[4], _usnone(token[5]),
-                ] for token in sentence
+                {
+                    "id": int(token["id"]),
+                    "word": token["word"],
+                    "lemma": _usnone(token["lemma"]),
+                    "cpostag": token["cpostag"],
+                    "postag": token["postag"],
+                    "feats": _usnone(token["feats"]),
+                } for token in sentence
             ] for sentence in data
         ]
 
