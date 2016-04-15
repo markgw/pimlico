@@ -56,10 +56,8 @@ class ModuleInfo(DocumentMapModuleInfo):
             raise ModuleInfoLoadError("expression '%s' does not include any variable extractions, so no data would "
                                       "be output by running this" % self.options["expr"])
 
-    def get_writer(self, output_name, append=False):
-        base_dir = self.get_output_dir(output_name)
-        if output_name == "documents":
-            return KeyValueListCorpusWriter(base_dir, append=append)
+    def get_writer(self, output_name, output_dir, append=False):
+        return KeyValueListCorpusWriter(output_dir, append=append)
 
 
 def deconstruct_expression(expressions):

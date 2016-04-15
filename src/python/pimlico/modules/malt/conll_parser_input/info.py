@@ -21,5 +21,5 @@ class ModuleInfo(DocumentMapModuleInfo):
     def check_runtime_dependencies(self):
         return []
 
-    def get_writer(self, output_name, append=False):
-        return CoNLLDependencyParseInputCorpusWriter(self.get_output_dir(output_name))
+    def get_writer(self, output_name, output_dir, append=False):
+        return CoNLLDependencyParseInputCorpusWriter(output_dir, append=append)

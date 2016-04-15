@@ -86,9 +86,9 @@ class ModuleInfo(DocumentMapModuleInfo):
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies
 
-    def get_writer(self, output_name, append=False):
+    def get_writer(self, output_name, output_dir, append=False):
         return CorefCorpusWriter(
-            self.get_output_dir(output_name),
+            output_dir,
             gzip=self.options["gzip"],
             readable=self.options["readable"],
             append=append

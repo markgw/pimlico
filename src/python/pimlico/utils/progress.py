@@ -1,5 +1,7 @@
+import warnings
+
 from itertools import islice
-from progressbar import Percentage, Bar, RotatingMarker, ETA, ProgressBar, Counter
+from progressbar import Percentage, Bar, RotatingMarker, ETA, ProgressBar, Counter, UnknownLength
 
 
 def get_progress_bar(maxval, counter=False, title=None, start=True):
@@ -7,6 +9,8 @@ def get_progress_bar(maxval, counter=False, title=None, start=True):
     Simple utility to build a standard progress bar, so I don't have to think about
     this each time I need one.
     Starts the progress bar immediately.
+
+    start is no longer used, included only for backwards compatibility.
 
     """
     widgets = []
@@ -16,10 +20,30 @@ def get_progress_bar(maxval, counter=False, title=None, start=True):
     if counter:
         widgets.extend([' (', Counter(), ')'])
     widgets.extend([' ', ETA()])
-    pbar = ProgressBar(widgets=widgets, maxval=maxval)
-    if start:
-        pbar.start()
+    pbar = SafeProgressBar(widgets=widgets, maxval=maxval)
     return pbar
+
+
+class SafeProgressBar(ProgressBar):
+    """
+    Override basic progress bar to wrap update() method with a couple of extra features.
+
+    1. You don't need to call start() -- it will be called when the first update is received. This is good for
+       processes that have a bit of a start-up lag, or where starting to iterate might generate some other output.
+    2. An error is not raised if you update with a value higher than maxval. It's the most annoying thing ever if
+       you run a long process and the whole thing fails near the end because you slightly miscalculated maxval.
+
+    """
+    def update(self, value=None):
+        if self.start_time is None:
+            self.start()
+
+        if value is not None and value is not UnknownLength and \
+                self.maxval is not UnknownLength and not 0 <= value <= self.maxval:
+            # Catch out-of-range updates and don't let progress bar raise an exception
+            warnings.warn("Progress bar received update out of range (max=%s)" % self.maxval)
+        else:
+            super(SafeProgressBar, self).update(value)
 
 
 def slice_progress(iterable, num_items, title=None):

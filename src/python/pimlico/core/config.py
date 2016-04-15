@@ -309,6 +309,41 @@ class PipelineConfig(object):
 
         return pipeline
 
+    def find_data_path(self, path, default=None):
+        """
+        Given a path to a data dir/file relative to a data store, tries taking it relative to various store base
+        dirs. If it exists in a store, that absolute path is returned. If it exists in no store, return None.
+
+        The stores searched are the long-term store and the short-term store, though in the future more valid data
+        storage locations may be added.
+
+        :param path: path to data, relative to store base
+        :param default: usually, return None if no data is found. If default="short", return path relative to
+         short-term store in this case. If default="long", long-term store.
+        :return: absolute path to data, or None if not found in any store
+        """
+        try:
+            return self.find_all_data_paths(path).next()
+        except StopIteration:
+            if default == "short":
+                return os.path.join(self.short_term_store, path)
+            elif default == "long":
+                return os.path.join(self.long_term_store, path)
+            else:
+                return None
+
+    def find_all_data_paths(self, path):
+        # If the path is already an absolute path, don't search for the data
+        # Just return it if it exists
+        if os.path.isabs(path):
+            if os.path.exists(path):
+                yield path
+            return
+
+        for store_base in [self.short_term_store, self.long_term_store]:
+            if os.path.exists(os.path.join(store_base, path)):
+                yield os.path.join(store_base, path)
+
 
 def var_substitute(option_val, vars):
     try:

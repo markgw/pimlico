@@ -36,6 +36,5 @@ class ModuleInfo(DocumentMapModuleInfo):
         self.include_tag_prefixes = [pos[:-1] for pos in self.options["term_pos"] if pos.endswith("*")]
         self.filter_pos = len(self.include_tag_prefixes + self.include_tags) > 0
 
-    def get_writer(self, output_name, append=False):
-        base_dir = self.get_output_dir(output_name)
-        return TermFeatureListCorpusWriter(base_dir, append=append)
+    def get_writer(self, output_name, output_dir, append=False):
+        return TermFeatureListCorpusWriter(output_dir, append=append)

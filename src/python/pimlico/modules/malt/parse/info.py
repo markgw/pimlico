@@ -51,5 +51,5 @@ class ModuleInfo(DocumentMapModuleInfo):
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies
 
-    def get_writer(self, output_name, append=False):
-        return CoNLLDependencyParseCorpusWriter(self.get_output_dir(output_name))
+    def get_writer(self, output_name, output_dir, append=False):
+        return CoNLLDependencyParseCorpusWriter(output_dir, append=append)

@@ -37,7 +37,9 @@ class PimlicoDatatype(object):
     def __init__(self, base_dir, pipeline, **kwargs):
         self.pipeline = pipeline
         self.base_dir = base_dir
-        self.data_dir = os.path.join(self.base_dir, "data") if base_dir is not None else None
+        # Search for an absolute path to the base dir that exists
+        self.absolute_base_dir = pipeline.find_data_path(base_dir)
+        self.data_dir = os.path.join(self.absolute_base_dir, "data") if self.absolute_base_dir is not None else None
         self._metadata = None
 
         for attr, val in kwargs.items():
@@ -46,7 +48,7 @@ class PimlicoDatatype(object):
     @property
     def metadata(self):
         if self._metadata is None:
-            metadata_path = os.path.join(self.base_dir, "corpus_metadata")
+            metadata_path = os.path.join(self.absolute_base_dir, "corpus_metadata")
             if os.path.exists(metadata_path):
                 # Load dictionary of metadata
                 with open(metadata_path, "r") as f:
@@ -66,7 +68,7 @@ class PimlicoDatatype(object):
         """
         return []
 
-    def prepare_data(self, log):
+    def prepare_data(self, output_dir, log):
         return
 
     @classmethod
@@ -82,7 +84,8 @@ class PimlicoDatatype(object):
 
         """
         # If data_dir is None, the datatype doesn't need it
-        return self.data_dir is None or os.path.exists(self.data_dir)
+        # data_dir is None unless the data dir has been located
+        return self.base_dir is None or self.data_dir is not None
 
 
 class PimlicoDatatypeWriter(object):

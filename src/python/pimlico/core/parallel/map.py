@@ -123,13 +123,11 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             super(DocumentMapModuleParallelExecutor, self).execute()
         else:
             # Call the set-up routine, if one's been defined
-            self.log.info("Preparing parallel document map execution for %d documents with %d processes" %
-                          (len(self.input_iterator), processes))
+            self.log.info("Preparing parallel document map execution with %d processes" % processes)
             self.preprocess_parallel()
 
             # Start up a pool
             self.pool = self.create_pool(processes)
-            self.log.info("Process pool created for processing %d documents in parallel" % processes)
 
             complete = False
             result_buffer = {}
@@ -137,7 +135,6 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
             docs_completed_now = 0
             docs_completed_before, start_after = self.retrieve_processing_status()
 
-            self.log.info("Processing %d documents" % (len(self.input_iterator) - docs_completed_before))
             pbar = get_progress_bar(len(self.input_iterator) - docs_completed_before,
                                     title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
             try:
@@ -202,7 +199,8 @@ class DocumentMapModuleParallelExecutor(DocumentMapModuleExecutor):
 
                 if not complete and self.info.status == "PARTIALLY_PROCESSED":
                     self.log.info("Processed documents recorded: restart processing where you left off by calling run "
-                                  "again once you've fixed the problem")
+                                  "again once you've fixed the problem (%d docs processed in this run, %d processed in "
+                                  "total)" % (docs_completed_now, docs_completed_before+docs_completed_now))
 
 
 class MultiprocessingMapProcess(multiprocessing.Process):

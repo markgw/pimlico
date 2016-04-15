@@ -17,7 +17,9 @@ worrying about incurring the associated costs (and dependencies) every time a pi
 is loaded.
 
 """
+import json
 import os
+import shutil
 from importlib import import_module
 from types import FunctionType
 
@@ -81,7 +83,7 @@ class BaseModuleInfo(object):
 
     @property
     def metadata_filename(self):
-        return os.path.join(self.get_module_output_dir(), "metadata")
+        return os.path.join(self.pipeline.find_data_path(self.get_module_output_dir(), default="short"), "metadata")
 
     def get_metadata(self):
         if self._metadata is None:
@@ -89,10 +91,9 @@ class BaseModuleInfo(object):
             self._metadata = {}
             if os.path.exists(self.metadata_filename):
                 with open(self.metadata_filename, "r") as f:
-                    for line in f:
-                        if line:
-                            attr, __, val = line.partition(": ")
-                            self._metadata[attr.strip().lower()] = val.strip()
+                    data = f.read()
+                    if data.strip():
+                        self._metadata = json.loads(data)
         return self._metadata
 
     def set_metadata_value(self, attr, val):
@@ -100,16 +101,16 @@ class BaseModuleInfo(object):
 
     def set_metadata_values(self, val_dict):
         # Make sure we've got an output directory to output the metadata to
-        if not os.path.exists(self.get_module_output_dir()):
-            os.makedirs(self.get_module_output_dir())
+        # Always write to short-term store, don't search others
+        if not os.path.exists(self.get_module_output_dir(short_term_store=True)):
+            os.makedirs(self.get_module_output_dir(short_term_store=True))
         # Load the existing metadata
         metadata = self.get_metadata()
         # Add our new values to it
         metadata.update(val_dict)
         # Write the whole thing out to the file
-        with open(self.metadata_filename, "w") as f:
-            for attr, val in metadata.items():
-                f.write("%s: %s\n" % (attr, val))
+        with open(os.path.join(self.get_module_output_dir(short_term_store=True), "metadata"), "w") as f:
+            json.dump(metadata, f, indent=4)
 
     def __get_status(self):
         # Check the metadata for current module status
@@ -231,11 +232,23 @@ class BaseModuleInfo(object):
 
         return inputs, outputs, options
 
-    def get_module_output_dir(self):
-        return os.path.join(self.pipeline.short_term_store, self.module_name)
+    def get_module_output_dir(self, short_term_store=False):
+        """
+        Gets the path to the base output dir to be used by this module, relative to the storage base dir.
+        When outputting data, the storage base dir will always be the short term store path, but when looking
+        for the output data other base paths might be explored, including the long term store.
 
-    def get_output_dir(self, output_name):
-        return os.path.join(self.get_module_output_dir(), output_name)
+        :return: path, relative to store base path. Or, if short_term_store=True, absolute path to output dir
+        in short-term store (used for output)
+        """
+        relative_dir = self.module_name
+        if short_term_store:
+            return os.path.join(self.pipeline.short_term_store, relative_dir)
+        else:
+            return relative_dir
+
+    def get_output_dir(self, output_name, short_term_store=False):
+        return os.path.join(self.get_module_output_dir(short_term_store=short_term_store), output_name)
 
     def get_output_datatype(self, output_name=None):
         if output_name is None:
@@ -387,6 +400,14 @@ class BaseModuleInfo(object):
                 missing_dependencies.extend(dep_module.check_runtime_dependencies())
         return missing_dependencies
 
+    def reset_execution(self):
+        """
+        Remove all output data and metadata from this module to make a fresh start, as if it's never been executed.
+
+        """
+        for path in self.pipeline.find_all_data_paths(self.get_module_output_dir()):
+            shutil.rmtree(path)
+
 
 def _compatible_input_type(type_requirement, supplied_type):
     if type(type_requirement) is FunctionType:
@@ -405,7 +426,7 @@ class BaseModuleExecutor(object):
     """
     def __init__(self, module_instance_info):
         self.info = module_instance_info
-        self.log = module_instance_info.pipeline.log
+        self.log = module_instance_info.pipeline.log.getChild(module_instance_info.module_name)
 
     def execute(self):
         raise NotImplementedError

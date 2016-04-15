@@ -8,6 +8,7 @@ from operator import itemgetter
 from pimlico.cli.check import check_cmd
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
+from pimlico.utils.filesystem import copy_dir_with_progress
 
 
 def status_cmd(pipeline, opts):
@@ -45,8 +46,7 @@ def reset_module(pipeline, opts):
     for module_name in module_names:
         print "Resetting execution state of module %s" % module_name
         module = pipeline[module_name]
-        if os.path.exists(module.get_module_output_dir()):
-            shutil.rmtree(module.get_module_output_dir())
+        module.reset_execution()
 
 
 def list_variants(pipeline, opts):
@@ -54,6 +54,16 @@ def list_variants(pipeline, opts):
     variants = ["main"] + pipeline.available_variants
     print "Available pipeline variants: %s" % ", ".join(variants)
     print "Select one using the --variant option"
+
+
+def short_to_long(pipeline, opts):
+    module_name = opts.module_name
+    # Get the path within the stores
+    module_path = pipeline[module_name].get_module_output_dir()
+    # Work out where it lives in the short-term and long-term stores
+    short_term_dir = os.path.join(pipeline.short_term_store, module_path)
+    long_term_dir = os.path.join(pipeline.long_term_store, module_path)
+    copy_dir_with_progress(short_term_dir, long_term_dir)
 
 
 if __name__ == "__main__":
@@ -80,7 +90,7 @@ if __name__ == "__main__":
                             "be happy with them not all being satisfied at once")
 
     status = subparsers.add_parser("status", help="Output a module execution schedule for the pipeline and execution "
-                                                    "status for every module")
+                                                  "status for every module")
     status.set_defaults(func=status_cmd)
 
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")
@@ -97,6 +107,13 @@ if __name__ == "__main__":
     reset.set_defaults(func=reset_module)
     reset.add_argument("module_name", help="The name of the module to reset, or multiple separated by commas, or "
                                            "'all' to reset the whole pipeline")
+
+    reset = subparsers.add_parser("longstore",
+                                  help="Move a particular module's output from the short-term store to the long-term "
+                                       "store. It will still be found here by input readers. You might want to do "
+                                       "this if your long-term store is bigger, to keep down the short-term store size")
+    reset.set_defaults(func=short_to_long)
+    reset.add_argument("module_name", help="The name of the module whose output to move")
 
     opts = parser.parse_args()
 

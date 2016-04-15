@@ -22,7 +22,8 @@ class DocumentMapOutputTypeWrapper(object):
         self._input_iterator = None
         # To make sure we're ready to iterate over the input data and have all the metadata we need, we must
         #  actually create the output writer now
-        self.writer = self.wrapped_module_info.get_writer(self.output_name)
+        output_dir = self.wrapped_module_info.get_output_dir(self.output_name, short_term_store=True)
+        self.writer = self.wrapped_module_info.get_writer(self.output_name, output_dir)
 
         # Get hold of the outputs from the previous modules to iterate over them
         self.input_corpora = [self.wrapped_module_info.get_input(input_name)
@@ -60,8 +61,8 @@ class DocumentMapOutputTypeWrapper(object):
             dummy_reader = self.wrapped_module_info.get_output(self.output_name)
 
             # Call the set-up routine, if one's been defined
-            executor.log.info("Preparing document map execution for %s documents for filter module %s" %
-                              (len(input_iterator), self.wrapped_module_info.module_name))
+            executor.log.info("Preparing document map execution for filter module %s" %
+                              self.wrapped_module_info.module_name)
             executor.preprocess()
 
             try:

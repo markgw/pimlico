@@ -39,8 +39,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
         if force_rerun:
             log.info("module '%s' already fully run, but forcing rerun" % module_name)
             # If rerunning, delete the old data first so we make a fresh start
-            if os.path.exists(module.get_module_output_dir()):
-                shutil.rmtree(module.get_module_output_dir())
+            module.reset_execution()
             module.status = "STARTED"
         else:
             raise ModuleAlreadyCompletedError("module '%s' has already been run to completion. Use --force-rerun if "
@@ -64,7 +63,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     for output_name in module.output_names:
         output = module.get_output(output_name)
         if output.base_dir is not None:
-            log.info("Output '%s' in %s" % (output_name, output.base_dir))
+            log.info("Output '%s' in %s" % (output_name, os.path.join(pipeline.short_term_store, output.base_dir)))
 
 
 class ModuleExecutionError(Exception):

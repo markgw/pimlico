@@ -116,8 +116,7 @@ class ModuleInfo(DocumentMapModuleInfo):
         else:
             return []
 
-    def get_writer(self, output_name, append=False):
-        output_dir = self.get_output_dir(output_name)
+    def get_writer(self, output_name, output_dir, append=False):
         gzip = self.options["gzip"]
         readable = self.options["readable"]
         if output_name == "annotations":

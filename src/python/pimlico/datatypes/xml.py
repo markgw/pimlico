@@ -86,7 +86,7 @@ class XmlDocumentIterator(IterableCorpus):
         missing_dependencies.extend(super(XmlDocumentIterator, self).check_runtime_dependencies())
         return missing_dependencies
 
-    def prepare_data(self, log):
+    def prepare_data(self, output_dir, log):
         # Count the number of documents in the corpus
         # Iterate over the corpus in a similar way to the datatype that reads documents, but just count the DOC tags
 
@@ -108,7 +108,7 @@ class XmlDocumentIterator(IterableCorpus):
 
         num_docs = count_files_parallel(files, self.truncate, self.document_node_type, self.pipeline.processes)
         log.info("Counted %d docs" % num_docs)
-        with PimlicoDatatypeWriter(self.base_dir) as datatype:
+        with PimlicoDatatypeWriter(output_dir) as datatype:
             datatype.metadata["length"] = num_docs
 
     def data_ready(self):

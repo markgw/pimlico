@@ -23,17 +23,18 @@ class DocumentMapModuleInfo(BaseModuleInfo):
     # Most subclasses will want to override this to give a more specific datatype for the output
     module_outputs = [("documents", TarredCorpus)]
 
-    def get_writer(self, output_name, append=False):
+    def get_writer(self, output_name, output_dir, append=False):
         """
         Get the writer instance that will be given processed documents to write. Should return
         a subclass of TarredCorpusWriter. The default implementation instantiates a plain
         TarredCorpusWriter.
 
         """
-        return TarredCorpusWriter(self.get_output_dir(output_name), append=append)
+        return TarredCorpusWriter(output_dir, append=append)
 
     def get_writers(self, append=False):
-        return tuple(self.get_writer(name, append=append) for name in self.output_names)
+        return tuple(self.get_writer(name, self.get_output_dir(name, short_term_store=True), append=append)
+                     for name in self.output_names)
 
 
 class DocumentMapModuleExecutor(BaseModuleExecutor):
@@ -69,11 +70,14 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def retrieve_processing_status(self):
         # Check the metadata to see whether we've already partially completed this
         if self.info.status == "PARTIALLY_PROCESSED":
-            docs_completed = int(self.info.get_metadata()["docs_completed"])
+            docs_completed = self.info.get_metadata()["docs_completed"]
             first_archive, __, first_filename = self.info.get_metadata()["last_doc_completed"].partition("/")
             start_after = (first_archive, first_filename)
-            self.log.info("Module has been partially executed already; picking up where we left off, after "
-                          "doc %s/%s (skipping %d docs)" % (start_after[0], start_after[1], docs_completed))
+            self.log.info(
+                "Module has been partially executed already; picking up where we left off, after doc %s/%s "
+                "(skipping %d docs, %d to process)" %
+                (start_after[0], start_after[1], docs_completed, (len(self.input_iterator) - docs_completed))
+            )
         else:
             docs_completed = 0
             start_after = None
@@ -83,12 +87,12 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         self.info.set_metadata_values({
             "status": "PARTIALLY_PROCESSED",
             "last_doc_completed": "%s/%s" % (archive_name, filename),
-            "docs_completed": str(docs_completed),
+            "docs_completed": docs_completed,
         })
 
     def execute(self):
         # Call the set-up routine, if one's been defined
-        self.log.info("Preparing document map execution for %s documents" % len(self.input_iterator))
+        self.log.info("Preparing document map execution")
         self.preprocess()
 
         complete = False
@@ -150,7 +154,8 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
             if not complete and self.info.status == "PARTIALLY_PROCESSED":
                 self.log.info("Processed documents recorded: restart processing where you left off by calling run "
-                              "again once you've fixed the problem")
+                              "again once you've fixed the problem (%d docs processed in this run, %d processed in "
+                              "total)" % (docs_completed_now, docs_completed_before+docs_completed_now))
 
 
 def skip_invalid(fn):
