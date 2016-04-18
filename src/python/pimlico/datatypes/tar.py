@@ -1,4 +1,4 @@
-import StringIO
+from cStringIO import StringIO
 import os
 import random
 import shutil
@@ -100,7 +100,7 @@ class TarredCorpus(IterableCorpus):
                             if doc_name.endswith(".gz"):
                                 # If we used the .gz extension while writing the file, remove it to get the doc name
                                 doc_name = doc_name[:-3]
-                                with gzip.GzipFile(fileobj=StringIO.StringIO(document), mode="rb") as gzip_file:
+                                with gzip.GzipFile(fileobj=StringIO(document), mode="rb") as gzip_file:
                                     document = gzip_file.read()
                             else:
                                 # For backwards-compatibility, where gzip=True, but the gz extension wasn't used, we
@@ -221,7 +221,7 @@ class TarredCorpusWriter(IterableCorpusWriter):
 
         # Add a new document to archive
         data = data.encode("utf-8")
-        data_file = StringIO.StringIO()
+        data_file = StringIO()
         if self.gzip:
             # We used to just use zlib to compress, which works fine, but it's not easy to open the files manually
             # Using gzip (i.e. writing gzip headers) makes it easier to use the data outside Pimlico
@@ -231,7 +231,7 @@ class TarredCorpusWriter(IterableCorpusWriter):
             data_file.write(data)
         # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
         info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
-        info.size = len(data_file.buf)
+        info.size = len(data_file.getvalue())
         self.current_archive_tar.addfile(info, data_file)
 
     def document_to_raw_data(self, doc):
