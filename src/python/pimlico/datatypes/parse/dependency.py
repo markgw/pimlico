@@ -11,7 +11,7 @@ class StanfordDependencyParseCorpus(JsonDocumentCorpus):
 
     @skip_invalid
     def process_document(self, data):
-        data = super(CoNLLDependencyParseCorpus, self).process_document(data)
+        data = super(StanfordDependencyParseCorpus, self).process_document(data)
         if data.strip():
             # Read in the dep parse trees as JSON and return a dep parse data structure
             return [StanfordDependencyParse.from_json(sentence_json) for sentence_json in data]
@@ -23,7 +23,7 @@ class StanfordDependencyParseCorpusWriter(JsonDocumentCorpusWriter):
     @pass_up_invalid
     def document_to_raw_data(self, doc):
         # Data should be a list of StanfordDependencyParses, one for each sentence
-        return super(CoNLLDependencyParseInputCorpusWriter, self).document_to_raw_data(
+        return super(StanfordDependencyParseCorpusWriter, self).document_to_raw_data(
             [parse.to_json_list() for parse in doc]
         )
 

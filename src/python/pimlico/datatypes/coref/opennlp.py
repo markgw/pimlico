@@ -7,18 +7,17 @@ to the two (which for most purposes will be sufficient).
 
 """
 
-from pimlico.core.modules.map import skip_invalid
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
 from pimlico.datatypes.tar import pass_up_invalid
+from pimlico.utils.strings import truncate
 
 
 class CorefCorpus(JsonDocumentCorpus):
     datatype_name = "opennlp_coref"
 
-    @skip_invalid
     def process_document(self, data):
         data = super(CorefCorpus, self).process_document(data)
-        return [Entity.from_json(entity) for entity in data]
+        return list(sorted([Entity.from_json(entity) for entity in data], key=lambda e: e.id))
 
 
 class CorefCorpusWriter(JsonDocumentCorpusWriter):
@@ -67,6 +66,12 @@ class Entity(object):
             category=obj.getCategory(), gender=obj.getGender().toString(), gender_prob=obj.getGenderProbability(),
             number=obj.getNumber().toString(), number_prob=obj.getNumberProbability()
         )
+
+    def __unicode__(self):
+        return u"Entity-%s(%s)" % (self.id, "/".join(truncate(unicode(m), 15).strip() for m in self.mentions))
+
+    def __repr__(self):
+        return unicode(self).encode("ascii", "ignore")
 
 
 class Mention(object):
@@ -123,3 +128,6 @@ class Mention(object):
             obj.getGender().toString(), obj.getGenderProb(), obj.getNumber().toString(), obj.getNumberProb(),
             obj.getHeadSpan().getStart(), obj.getHeadSpan().getEnd(), obj.getNameType()
         )
+
+    def __unicode__(self):
+        return unicode(self.text)
