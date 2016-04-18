@@ -9,6 +9,7 @@ from traceback import format_exc
 import cPickle as pickle
 
 import zlib
+import gzip
 from itertools import izip
 
 from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument
@@ -53,7 +54,7 @@ class TarredCorpus(IterableCorpus):
             yield doc_name, doc
 
     def archive_iter(self, subsample=None, start_after=None):
-        gzip = self.metadata.get("gzip", False)
+        gzipped = self.metadata.get("gzip", False)
         # Prepare a temporary directory to extract everything to
         tmp_dir = mkdtemp()
 
@@ -95,12 +96,16 @@ class TarredCorpus(IterableCorpus):
                         # Read in the data
                         with open(os.path.join(tmp_dir, filename), "r") as f:
                             document = f.read()
-                        if gzip:
-                            # Data was compressed with zlib while storing: decompress now
-                            document = zlib.decompress(document)
-                            # If we used the .gz extension while writing the file, remove it to get the doc name
+                        if gzipped:
                             if doc_name.endswith(".gz"):
+                                # If we used the .gz extension while writing the file, remove it to get the doc name
                                 doc_name = doc_name[:-3]
+                                with gzip.GzipFile(fileobj=StringIO.StringIO(document), mode="rb") as gzip_file:
+                                    document = gzip_file.read()
+                            else:
+                                # For backwards-compatibility, where gzip=True, but the gz extension wasn't used, we
+                                #  just decompress with zlib, without trying to parse the gzip headers
+                                document = zlib.decompress(document)
                         document = document.decode("utf-8")
                         # Catch invalid documents
                         document = InvalidDocument.invalid_document_or_text(document)
@@ -216,9 +221,14 @@ class TarredCorpusWriter(IterableCorpusWriter):
 
         # Add a new document to archive
         data = data.encode("utf-8")
+        data_file = StringIO.StringIO()
         if self.gzip:
-            data = zlib.compress(data, 9)
-        data_file = StringIO.StringIO(data)
+            # We used to just use zlib to compress, which works fine, but it's not easy to open the files manually
+            # Using gzip (i.e. writing gzip headers) makes it easier to use the data outside Pimlico
+            with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=data_file) as gzip_file:
+                gzip_file.write(data)
+        else:
+            data_file.write(data)
         # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
         info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
         info.size = len(data_file.buf)
