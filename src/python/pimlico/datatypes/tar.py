@@ -221,17 +221,17 @@ class TarredCorpusWriter(IterableCorpusWriter):
 
         # Add a new document to archive
         data = data.encode("utf-8")
-        data_file = StringIO()
         if self.gzip:
             # We used to just use zlib to compress, which works fine, but it's not easy to open the files manually
             # Using gzip (i.e. writing gzip headers) makes it easier to use the data outside Pimlico
-            with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=data_file) as gzip_file:
+            gzip_io = StringIO()
+            with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=gzip_io) as gzip_file:
                 gzip_file.write(data)
-        else:
-            data_file.write(data)
+            data = gzip_io.getvalue()
+        data_file = StringIO(data)
         # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
         info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
-        info.size = len(data_file.getvalue())
+        info.size = len(data)
         self.current_archive_tar.addfile(info, data_file)
 
     def document_to_raw_data(self, doc):
