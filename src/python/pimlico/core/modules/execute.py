@@ -1,6 +1,7 @@
 import os
-import shutil
-from pimlico.core.modules.base import DependencyError, load_module_executor
+
+from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies
+from pimlico.core.modules.base import load_module_executor
 from pimlico.utils.logging import get_console_logger
 
 
@@ -17,15 +18,15 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
         raise ModuleExecutionError("%s pipeline doesn't have a module called '%s'" % (pipeline.name, module_name))
     module = pipeline[module_name]
     log.info("Checking module config")
-    # Run basic checks on the config for this module
-    module.typecheck_inputs()
+    # Run basic checks on the config for the whole pipeline
+    try:
+        check_pipeline(pipeline)
+    except PipelineCheckError, e:
+        raise ModuleExecutionError("error in pipeline config: %s" % e)
     # Run checks for runtime dependencies of this module
-    missing_dependencies = module.check_runtime_dependencies()
-    if len(missing_dependencies):
-        raise DependencyError("runtime dependencies not satisfied for executing module '%s':\n%s" % (
-            module_name,
-            "\n".join("%s for %s (%s)" % (name, module, desc) for (name, module, desc) in missing_dependencies)
-        ))
+    dep_checks_passed = print_missing_dependencies(pipeline, [module_name])
+    if not dep_checks_passed:
+        raise ModuleExecutionError("runtime dependencies not satisfied for executing module '%s'" % module_name)
 
     # Check that previous modules have been completed and input data is ready for us to use
     log.info("Checking inputs")

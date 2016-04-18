@@ -1,6 +1,5 @@
 import argparse
 import os
-import shutil
 
 import sys
 from operator import itemgetter
@@ -85,9 +84,9 @@ if __name__ == "__main__":
                                   help="Test a pipeline config to check that it can be parsed and is valid. It is "
                                        "recommended that you run this before attempting to execute any modules")
     check.set_defaults(func=check_cmd)
-    check.add_argument("--runtime", action="store_true",
-                       help="Check runtime dependencies for all modules. By default, these are not check as you might "
-                            "be happy with them not all being satisfied at once")
+    check.add_argument("modules", nargs="*",
+                       help="Check runtime dependencies for named modules. By default, these are not all checked, as "
+                            "you might be happy with them not all being satisfied at once")
 
     status = subparsers.add_parser("status", help="Output a module execution schedule for the pipeline and execution "
                                                   "status for every module")

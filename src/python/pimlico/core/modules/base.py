@@ -23,6 +23,8 @@ import shutil
 from importlib import import_module
 from types import FunctionType
 
+from operator import itemgetter
+
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
 
@@ -92,8 +94,14 @@ class BaseModuleInfo(object):
             if os.path.exists(self.metadata_filename):
                 with open(self.metadata_filename, "r") as f:
                     data = f.read()
-                    if data.strip():
-                        self._metadata = json.loads(data)
+                    if data.strip("\n "):
+                        try:
+                            self._metadata = json.loads(data)
+                        except ValueError:
+                            # Couldn't parse as JSON
+                            # Include the old attribute-value format for backwards compatibility
+                            # TODO Remove this later
+                            self._metadata = dict(itemgetter(0, 2)(line.partition(": ")) for line in data.splitlines())
         return self._metadata
 
     def set_metadata_value(self, attr, val):

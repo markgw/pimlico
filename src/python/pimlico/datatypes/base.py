@@ -38,7 +38,7 @@ class PimlicoDatatype(object):
         self.pipeline = pipeline
         self.base_dir = base_dir
         # Search for an absolute path to the base dir that exists
-        self.absolute_base_dir = pipeline.find_data_path(base_dir)
+        self.absolute_base_dir = pipeline.find_data_path(base_dir) if self.base_dir is not None else None
         self.data_dir = os.path.join(self.absolute_base_dir, "data") if self.absolute_base_dir is not None else None
         self._metadata = None
 

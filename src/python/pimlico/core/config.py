@@ -9,6 +9,7 @@ import sys
 from cStringIO import StringIO
 
 from pimlico.core.modules.options import str_to_bool
+from pimlico.utils.format import multiline_tablate
 from pimlico.utils.logging import get_console_logger
 
 REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
@@ -460,3 +461,55 @@ def check_release(release_str):
                                          "file (and not > %s). Currently using %s" %
                                          (release_str, given_major_release, __version__))
         # Otherwise using same version at this level: go down to next level and check
+
+
+def check_pipeline(pipeline):
+    """
+    Checks a pipeline over for metadata errors, cycles and other problems.
+    Called every time a module is to be run, to check the whole pipeline's metadata is in order.
+
+    """
+    # Basic metadata has already been loaded if we've got this far
+    # Check the pipeline for cycles: this will raise an exception if a cycle is found
+    try:
+        check_for_cycles(pipeline)
+    except PipelineStructureError, e:
+        raise PipelineCheckError(e, "cycle check failed")
+
+    # Check the types of all the output->input connections
+    try:
+        for module in pipeline.modules:
+            mod = pipeline[module]
+            mod.typecheck_inputs()
+    except PipelineStructureError, e:
+        raise PipelineCheckError(e, "Input typechecking failed: %s" % e)
+
+
+def print_missing_dependencies(pipeline, modules):
+    """
+    Check runtime dependencies for a subset of modules and output a table of missing dependencies.
+
+    :param pipeline:
+    :param modules: list of modules to check. If None, checks all modules
+    :return: True if no missing dependencies, False otherwise
+    """
+    if modules is None:
+        modules = pipeline.module_names
+    # Do runtime checks for the requested modules
+    missing_dependencies = []
+    for module_name in modules:
+        missing_dependencies.extend(pipeline[module_name].check_runtime_dependencies())
+
+    if len(missing_dependencies):
+        print "\nRuntime dependencies not satisfied:\n%s" % \
+              multiline_tablate(missing_dependencies, [30, 30, 60],
+                                tablefmt="orgtbl", headers=["Dependency", "Module", "Description"])
+        return False
+    else:
+        return True
+
+
+class PipelineCheckError(Exception):
+    def __init__(self, cause, *args, **kwargs):
+        super(PipelineCheckError, self).__init__(*args, **kwargs)
+        self.cause = cause
