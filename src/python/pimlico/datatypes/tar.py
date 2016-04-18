@@ -26,13 +26,16 @@ class TarredCorpus(IterableCorpus):
         document's text is just returned as read in from the file.
         """
         super(TarredCorpus, self).__init__(base_dir, pipeline)
-        self.tar_filenames = [f for f in
-                              [os.path.join(root, filename) for root, dirs, files in os.walk(self.data_dir)
-                               for filename in files]
-                              if f.endswith(".tar.gz") or f.endswith(".tar")]
-        self.tar_filenames.sort()
-
-        self.tarballs = [os.path.splitext(os.path.basename(f))[0] for f in self.tar_filenames]
+        if self.data_dir is not None:
+            self.tar_filenames = [f for f in
+                                  [os.path.join(root, filename) for root, dirs, files in os.walk(self.data_dir)
+                                   for filename in files]
+                                  if f.endswith(".tar.gz") or f.endswith(".tar")]
+            self.tar_filenames.sort()
+            self.tarballs = [os.path.splitext(os.path.basename(f))[0] for f in self.tar_filenames]
+        else:
+            self.tar_filenames = []
+            self.tarballs = []
         self.raw_data = raw_data
 
     def extract_file(self, archive_name, filename):
@@ -71,6 +74,8 @@ class TarredCorpus(IterableCorpus):
                 with tarfile.open(tarball_filename, 'r') as tarball:
                     for tarinfo in tarball:
                         filename = tarinfo.name
+                        # By default, doc name is just the same as filename
+                        doc_name = filename
 
                         # Allow the first portion of the corpus to be skipped
                         if not started:
@@ -93,6 +98,9 @@ class TarredCorpus(IterableCorpus):
                         if gzip:
                             # Data was compressed with zlib while storing: decompress now
                             document = zlib.decompress(document)
+                            # If we used the .gz extension while writing the file, remove it to get the doc name
+                            if doc_name.endswith(".gz"):
+                                doc_name = doc_name[:-3]
                         document = document.decode("utf-8")
                         # Catch invalid documents
                         document = InvalidDocument.invalid_document_or_text(document)
@@ -104,7 +112,7 @@ class TarredCorpus(IterableCorpus):
                                 # If there's any problem reading in the document, yield an invalid doc with the error
                                 document = InvalidDocument("datatype %s reader" % self.datatype_name,
                                                            "%s: %s" % (e, format_exc()))
-                        yield tar_name, filename, document
+                        yield tar_name, doc_name, document
                         # Remove the file once we're done with it (when we request another)
                         os.remove(os.path.join(tmp_dir, filename))
 
@@ -211,7 +219,8 @@ class TarredCorpusWriter(IterableCorpusWriter):
         if self.gzip:
             data = zlib.compress(data, 9)
         data_file = StringIO.StringIO(data)
-        info = tarfile.TarInfo(name=doc_name)
+        # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
+        info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
         info.size = len(data_file.buf)
         self.current_archive_tar.addfile(info, data_file)
 

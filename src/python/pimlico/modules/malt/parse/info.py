@@ -3,6 +3,7 @@ import os
 from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, CoNLLDependencyParseCorpus, \
     CoNLLDependencyParseCorpusWriter
@@ -19,6 +20,12 @@ class ModuleInfo(DocumentMapModuleInfo):
                     "models dir",
             "default": "engmalt.linear-1.7.mco",
         },
+        "no_gzip": {
+            "help": "By default, we gzip each document in the output data. If you don't do this, the output can get "
+                    "very large, since it's quite a verbose output format",
+            "type": str_to_bool,
+            "default": False,
+        }
     }
 
     def __init__(self, *args, **kwargs):
@@ -45,6 +52,15 @@ class ModuleInfo(DocumentMapModuleInfo):
                                              self.module_name,
                                              "Couldn't load %s. Build the Malt Java wrapper module provided with "
                                              "Pimlico ('ant malt')" % class_name))
+
+            class_name = "org.maltparser.concurrent.ConcurrentMaltParserService"
+            try:
+                check_java_dependency(class_name)
+            except DependencyError:
+                missing_dependencies.append(("Malt parser jar",
+                                             self.module_name,
+                                             "Couldn't load %s. Install Malt by running 'make malt' in Java lib dir" %
+                                             class_name))
         except DependencyCheckerError, e:
             missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
 
@@ -52,4 +68,4 @@ class ModuleInfo(DocumentMapModuleInfo):
         return missing_dependencies
 
     def get_writer(self, output_name, output_dir, append=False):
-        return CoNLLDependencyParseCorpusWriter(output_dir, append=append)
+        return CoNLLDependencyParseCorpusWriter(output_dir, append=append, gzip=not self.options["no_gzip"])
