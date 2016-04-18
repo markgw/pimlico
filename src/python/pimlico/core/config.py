@@ -7,6 +7,7 @@ from ConfigParser import SafeConfigParser, RawConfigParser
 
 import sys
 from cStringIO import StringIO
+from operator import itemgetter
 
 from pimlico.core.modules.options import str_to_bool
 from pimlico.utils.format import multiline_tablate
@@ -246,43 +247,33 @@ class PipelineConfig(object):
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
 
         # Perform pre-processing of config file to replace includes, etc
-        config_text, available_variants = preprocess_config_file(os.path.abspath(filename), variant=variant)
+        config_sections, available_variants, vars = preprocess_config_file(os.path.abspath(filename), variant=variant)
         # If we were asked to load a particular variant, check it's in the list of available variants
         if variant != "main" and variant not in available_variants:
             raise PipelineConfigParseError("could not load pipeline variant '%s': it is not declared anywhere in the "
                                            "config file")
-        text_buffer = StringIO(config_text)
+        config_section_dict = dict(config_sections)
 
-        # Parse the config file text
-        config_parser = RawConfigParser()
-        try:
-            config_parser.readfp(text_buffer)
+        # Check for the special overall pipeline config section "pipeline"
+        if "pipeline" not in config_section_dict:
+            raise PipelineConfigParseError("no 'pipeline' section found in config: must be supplied to give basic "
+                                           "pipeline configuration")
+        # Do variable interpolation in the pipeline config section as well as module configs
+        pipeline_config = dict([
+            (key, var_substitute(val, vars)) for (key, val) in config_section_dict["pipeline"].items()
+        ])
 
-            # Check for the special overall pipeline config section "pipeline"
-            if not config_parser.has_section("pipeline"):
-                raise PipelineConfigParseError("no 'pipeline' section found in config: must be supplied to give basic "
-                                               "pipeline configuration")
-            pipeline_config = dict(config_parser.items("pipeline"))
+        module_order = [section for section, config in config_sections if section != "pipeline"]
 
-            # Also check for a "vars" section, which allows variables to be defined and substituted into other sections
-            if config_parser.has_section("vars"):
-                vars = dict(config_parser.items("vars"))
-            else:
-                vars = {}
-
-            module_order = [section for section in config_parser.sections() if section not in ("pipeline", "vars")]
-
-            # All other sections of the config describe a module instance
-            # Don't do anything to the options just yet: they will be parsed and checked when the module info is created
-            raw_module_options = dict([
-                (section,
-                 # Perform our own version of interpolation here,
-                 # just substituting values from the vars section into others
-                 dict([(key, var_substitute(val, vars)) for (key, val) in config_parser.items(section)]))
-                for section in module_order
-            ])
-        except ConfigParser.Error, e:
-            raise PipelineConfigParseError("could not parse config file. %s" % e)
+        # All other sections of the config describe a module instance
+        # Don't do anything to the options just yet: they will be parsed and checked when the module info is created
+        raw_module_options = dict([
+            (
+                section,
+                # Perform our own version of interpolation here, substituting values from the vars section into others
+                dict([(key, var_substitute(val, vars)) for (key, val) in config_section_dict[section].items()])
+            ) for section in module_order
+        ])
 
         # Process configs to get out the core things we need
         if "name" not in pipeline_config:
@@ -367,6 +358,9 @@ def preprocess_config_file(filename, variant="main"):
     # Read in the file
     config_lines = []
     available_variants = set([])
+    sub_configs = []
+    sub_vars = []
+
     with open(filename, "r") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
         for line in f:
@@ -388,14 +382,48 @@ def preprocess_config_file(filename, variant="main"):
                     # Include another file, given relative to this one
                     include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), rest.strip("\n ")))
                     # Run preprocessing over that file too, so we can have embedded includes, etc
-                    incl_text, incl_variants = preprocess_config_file(include_filename, variant=variant)
-                    config_lines.append(incl_text)
+                    incl_config, incl_variants, incl_vars = preprocess_config_file(include_filename, variant=variant)
+                    # Save this subconfig and incorporate it later
+                    sub_configs.append((include_filename, incl_config))
+                    # Also save vars section, which may override variables that were defined earlier
+                    sub_vars.append(incl_vars)
                     available_variants.update(incl_variants)
                 else:
                     raise PipelineConfigParseError("unknown directive '%s' used in config file" % directive)
             else:
                 config_lines.append(line)
-    return "".join(config_lines), available_variants
+
+    # Parse the result as a config file
+    config_parser = RawConfigParser()
+    try:
+        config_parser.readfp(StringIO("\n".join(config_lines)))
+    except ConfigParser.Error, e:
+        raise PipelineConfigParseError("could not parse config file %s. %s" % (filename, e))
+
+    # If there's a "vars" section in this config file, remove it now and return it separately
+    if config_parser.has_section("vars"):
+        vars = dict(config_parser.items("vars"))
+    else:
+        vars = {}
+    # If there were "vars" sections in included configs, allow them to override vars in this one
+    for sub_var in sub_vars:
+        vars.update(sub_var)
+
+    config_sections = [
+        (section, dict(config_parser.items(section))) for section in config_parser.sections() if section != "vars"
+    ]
+    # Add in sections from the included configs
+    for subconfig_filename, subconfig in sub_configs:
+        # Check there's no overlap between the sections defined in the subconfig and those we already have
+        overlap_sections = set(map(itemgetter(0), config_sections)) & set(map(itemgetter(0), subconfig))
+        if overlap_sections:
+            raise PipelineStructureError("section '%s' defined in %s has already be defined in an including "
+                                         "config file" % (" + ".join(overlap_sections), subconfig_filename))
+        config_sections.extend(subconfig)
+
+    # Don't include "main" variant in available variants
+    available_variants.discard("main")
+    return config_sections, available_variants, vars
 
 
 def check_for_cycles(pipeline):

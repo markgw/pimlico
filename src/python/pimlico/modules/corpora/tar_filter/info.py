@@ -37,8 +37,7 @@ class TarredCorpusFilter(TarredCorpus):
     @property
     def tarballs(self):
         if not self.data_ready():
-            raise ModuleNotReadyError("cannot work out the tarball names for a tarred corpus filter until its input "
-                                      "data is ready")
+            return []
 
         if self._tarballs is None:
             # Work out now what the archive names are going to look like and how many there will be

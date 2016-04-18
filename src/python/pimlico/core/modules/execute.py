@@ -30,10 +30,10 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
 
     # Check that previous modules have been completed and input data is ready for us to use
     log.info("Checking inputs")
-    for input_name in module.input_names:
-        if not module.input_ready(input_name):
-            raise ModuleNotReadyError("cannot execute module '%s', since its input '%s' is not ready" %
-                                      (module_name, input_name))
+    missing_inputs = module.missing_data()
+    if missing_inputs:
+        raise ModuleNotReadyError("cannot execute module '%s', since its inputs are not all ready: %s" %
+                                  (module_name, ", ".join(missing_inputs)))
 
     # Check the status of the module, so we don't accidentally overwrite module output that's already complete
     if module.status == "COMPLETE":

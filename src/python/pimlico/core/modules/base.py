@@ -333,12 +333,25 @@ class BaseModuleInfo(object):
 
     def input_ready(self, input_name=None):
         previous_module, output_name = self.get_input_module_connection(input_name)
-        if not previous_module.module_executable:
-            # If the previous module isn't executable, this input is ready whenever all of its inputs are ready
-            return all(previous_module.input_ready(previous_input) for previous_input in previous_module.input_names)
-        else:
-            # Otherwise, we just check whether the datatype is ready to go
-            return previous_module.get_output(output_name).data_ready()
+        # Check whether the datatype is ready to go
+        return previous_module.get_output(output_name).data_ready()
+
+    def missing_data(self):
+        """
+        Check whether all the input data for this module is available. If not, return a list strings indicating
+        which outputs of which modules are not available. If it's all ready, returns an empty list.
+
+        """
+        missing = []
+        for input_name in self.input_names:
+            previous_module, output_name = self.get_input_module_connection(input_name)
+            if not previous_module.get_output(output_name).data_ready():
+                # If the previous module is a filter, it's more helpful to say exactly what data it's missing
+                if not previous_module.module_executable:
+                    missing.extend(previous_module.missing_data())
+                else:
+                    missing.append("%s output '%s'" % (previous_module.module_name, output_name))
+        return missing
 
     @classmethod
     def is_input(cls):
