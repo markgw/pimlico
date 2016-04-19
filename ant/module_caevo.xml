@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="caevo">
+  <target name="compile.module.caevo" description="Compile module Pimlico-Caevo; production classes">
+    <mkdir dir="${pimlico.class.dir}"/>
+    <javac destdir="${pimlico.class.dir}" verbose="true" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pimlico}/javac" includeantruntime="false">
+      <compilerarg line="${compiler.args.pimlico}"/>
+      <bootclasspath refid="pimlico.module.bootclasspath"/>
+      <classpath refid="pimlico.module.production.classpath"/>
+      <src refid="pimlico.module.sourcepath"/>
+      <include name="pimlico/caevo/**/*.java"/>
+    </javac>
+  </target>
+
+  <target name="clean.module.caevo" description="cleanup module">
+    <delete dir="${pimlico.class.dir}/pimlico/caevo"/>
+  </target>
+
+  <target name="jar.module.caevo" depends="compile.module.caevo">
+    <mkdir dir="${pimlico.jar.dir}"/>
+    <jar destfile = "${pimlico.jar.dir}/caevo.jar"
+         basedir = "${pimlico.class.dir}"
+         includes = "pimlico/caevo/**/*.class"/>
+  </target>
+
+  <target name="caevo" depends="jar.module.caevo" description="Caevo wrapper compile"/>
+</project>

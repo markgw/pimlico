@@ -107,3 +107,27 @@ log4j-1.2.17.jar :
 
 liblinear-java-1.95.jar :
 	$(FETCH) http://www.bwaldvogel.de/liblinear-java/liblinear-java-1.95.jar
+
+############ Caevo ############
+
+caevo : caevo.jar
+caevo.jar :
+	# Check we've got Maven
+	@if ! mvn -v >/dev/null; then echo "Caevo build requires Maven: please install"; exit 1; fi
+	$(MAKE) src/caevo
+	# Build Caevo using Maven
+	cd src/caevo && mvn compile
+	# Put the built classes in a Jar file
+	cd src/caevo/target/classes && jar cf caevo.jar *
+	mv src/caevo/target/classes/caevo.jar .
+	# Also grab Caevo's included libs (Jdom)
+	mv src/caevo/lib/* .
+	# Keep the source code for debugging purposes
+
+src/caevo :
+	# Fetch Caevo code
+	$(FETCH_STDOUT) https://github.com/nchambers/caevo/archive/8cfc810baff833063da9b423ef7a36983b3ab0e2.zip >caevo.zip
+	unzip caevo.zip
+	mkdir -p src
+	mv caevo-8cfc810baff833063da9b423ef7a36983b3ab0e2 src/caevo
+	rm caevo.zip
