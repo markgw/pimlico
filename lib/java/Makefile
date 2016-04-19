@@ -131,3 +131,15 @@ src/caevo :
 	mkdir -p src
 	mv caevo-8cfc810baff833063da9b423ef7a36983b3ab0e2 src/caevo
 	rm caevo.zip
+
+############ C&C parser, Java version #######
+candc.jar :
+	$(FETCH) https://www.cl.cam.ac.uk/~sc609/java-candc/java-candc-v0.95.tgz
+	mkdir -p candc
+	cd candc && mv ../java-candc-v0.95.tgz . && tar xzf java-candc-v0.95.tgz
+	rm candc/java-candc-v0.95.tgz
+	cd candc && ./compile
+	# Put the built classes in a Jar file
+	cd candc/bin && jar cf candc.jar *
+	mv candc/bin/candc.jar .
+	# Leave the unpacked archive here so we can find the models, grammar, etc
