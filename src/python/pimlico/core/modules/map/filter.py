@@ -114,6 +114,14 @@ class DocumentMapOutputTypeWrapper(object):
                 executor.log.info("[%s filter] Input contained %d invalid documents, output contained %d" %
                                   (self.wrapped_module_info.module_name, invalid_inputs, invalid_outputs))
 
+    def data_ready(self):
+        """
+        Ready to supply this data as soon as all the wrapper module's inputs are ready to produce their data.
+
+        """
+        return all(self.wrapped_module_info.get_input(input_name).data_ready()
+                   for input_name in self.wrapped_module_info.input_names)
+
 
 def _wrap_output(module_info_instance, inner_output_name):
     __, output_datatype = module_info_instance.get_output_datatype(inner_output_name)
