@@ -131,6 +131,7 @@
   <import file="${basedir}/ant/module_opennlp.xml"/>
   <import file="${basedir}/ant/module_malt.xml"/>
   <import file="${basedir}/ant/module_caevo.xml"/>
+  <import file="${basedir}/ant/module_candc.xml"/>
 
 
   <target name="init" description="Build initialization">

@@ -1,9 +1,11 @@
 import os
+from Queue import Empty
 from collections import deque
 from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
 
 import sys
 import time
+from cStringIO import StringIO
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.logs import get_log_file
@@ -113,7 +115,7 @@ class Py4JInterface(object):
         self.port_used = None
         self.clients = []
 
-    def start(self):
+    def start(self, timeout=10., port_output_prefix=None):
         """
         Start a Py4J gateway server in the background on the given port, which will then be used for
         communicating with the Java app.
@@ -146,7 +148,8 @@ class Py4JInterface(object):
         self.port_used, self.process = launch_gateway(
             self.gateway_class, args,
             redirect_stdout=redirect_stdout, redirect_stderr=redirect_stderr,
-            env=self.env, javaopts=java_opts
+            env=self.env, javaopts=java_opts,
+            startup_timeout=timeout, port_output_prefix=port_output_prefix
         )
         self.gateway = self.new_client()
 
@@ -216,7 +219,7 @@ def gateway_client_to_running_server(port):
 
 def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
                    javaopts=[], redirect_stdout=None, redirect_stderr=None, daemonize_redirect=True,
-                   env={}):
+                   env={}, port_output_prefix=None, startup_timeout=10.):
     """
     Our own more flexble version of Py4J's launch_gateway.
     """
@@ -230,30 +233,71 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     command = ["java", "-classpath", CLASSPATH] + javaopts + [gateway_class] + args
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=PIPE, env=java_env)
 
+    if redirect_stdout is None:
+        redirect_stdout = []
+    stdout_queue = Queue()
+    redirect_stdout.append(stdout_queue)
+
+    if redirect_stderr is None:
+        redirect_stderr = []
+    stderr_capture = StringIO()
+    redirect_stderr.append(stderr_capture)
+
+    def get_stderr():
+        try:
+            return stderr_capture.getvalue()
+        except Empty:
+            return ""
+
+    # Start consumer threads so process does not deadlock/hang
+    OutputConsumer(redirect_stdout, proc.stdout, daemon=daemonize_redirect).start()
+    if redirect_stderr is not None:
+        OutputConsumer(redirect_stderr, proc.stderr, daemon=daemonize_redirect).start()
+    ProcessConsumer(proc, [redirect_stdout], daemon=daemonize_redirect).start()
+
     # Determine which port the server started on (needed to support ephemeral ports)
     # Don't hang on an error running the gateway launcher
     output = None
+    start_time = time.time()
+    remaining_time = time.time() - start_time + startup_timeout
     try:
-        with timeout_process(proc, 10.0):
-            output = proc.stdout.readline()
+        while remaining_time > 0.:
+            # Get lines from stdout until the timeout is reached
+            output = stdout_queue.get(timeout=remaining_time)
+            if port_output_prefix is None or output.strip("\n ") == "ERROR":
+                # Don't look for a particular prefix, just use the first line we get, or if it's an error
+                # don't keep waiting
+                break
+            elif output.startswith(port_output_prefix):
+                # If the line doesn't begin with the right prefix, keep waiting
+                # If it does, strip the prefix, so that we get just the port number
+                output = output[len(port_output_prefix):]
+                break
+            remaining_time = time.time() - start_time + startup_timeout
+    except Empty:
+        # Timed out waiting for server to start
+        error_output = get_stderr()
+        err_path = output_p4j_error_info(command, "(timed out)", "", error_output)
+        try:
+            # Give up and kill the process, if it's still running
+            proc.terminate()
+        except OSError:
+            # Already terminated
+            pass
+        raise JavaProcessError("timed out starting gateway server (for details see %s)" % err_path)
     except Exception, e:
         # Try reading stderr to see if there's any info there
-        error_output = proc.stderr.read().strip("\n ")
+        error_output = get_stderr()
         err_path = output_p4j_error_info(command, "?", "could not read", error_output)
 
         raise JavaProcessError("error reading first line from gateway process: %s. Error output: %s (see %s for "
                                "more details)" % (e, error_output, err_path))
 
-    if output is None or proc.poll() == -9:
-        error_output = proc.stderr.read().strip("\n ")
-        err_path = output_p4j_error_info(command, "(timed out)", "", error_output)
-        raise JavaProcessError("timed out starting gateway server (for details see %s)" % err_path)
-
     # Check whether there was an error reported
     output = output.strip("\n ")
     if output == "ERROR":
         # Read error output from stderr
-        error_output = proc.stderr.read().strip("\n ")
+        error_output = get_stderr()
         raise JavaProcessError("Py4J gateway had an error starting up: %s" % error_output)
 
     try:
@@ -261,26 +305,15 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     except ValueError:
         returncode = proc.poll()
 
-        stderr_output = proc.stderr.read().strip("\n ")
+        stderr_output = get_stderr()
         err_path = output_p4j_error_info(command, returncode, output, stderr_output)
 
         if returncode is not None:
             raise JavaProcessError("Py4J server process returned with return code %s: %s (see %s for details)" %
                                    (returncode, stderr_output, err_path))
         else:
-            raise JavaProcessError("invalid output from Py4J server when started: '%s' (see %s for details)" %
-                                   (output, err_path))
-
-    if redirect_stdout is None:
-        redirect_stdout = []
-    if redirect_stderr is None:
-        redirect_stderr = []
-
-    # Start consumer threads so process does not deadlock/hang
-    OutputConsumer(redirect_stdout, proc.stdout, daemon=daemonize_redirect).start()
-    if redirect_stderr is not None:
-        OutputConsumer(redirect_stderr, proc.stderr, daemon=daemonize_redirect).start()
-    ProcessConsumer(proc, [redirect_stdout], daemon=daemonize_redirect).start()
+            raise JavaProcessError("invalid first line output from Py4J server when started: '%s' (see %s for details)"
+                                   % (output, err_path))
 
     return port_used, proc
 

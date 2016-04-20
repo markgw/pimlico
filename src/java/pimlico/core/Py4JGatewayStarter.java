@@ -17,7 +17,31 @@ public class Py4JGatewayStarter {
         Py4JGatewayStarter.startGateway(entryPoint, 0, 0);
     }
 
+    /**
+     * Standard gateway starter, using particular ports (or finding a free one) and just outputting the
+     * used port to stdout.
+     *
+     * @param entryPoint
+     * @param port
+     * @param pythonPort
+     */
     public static void startGateway(Object entryPoint, int port, int pythonPort) {
+        startGateway(entryPoint, port, pythonPort, null);
+    }
+
+    /**
+     * Additionally specifies a prefix to output in front of the used port. This means that in cases where
+     * the startup routine inevitably involves printing to stdout, so that we can't be sure the first output
+     * line is the used port, we can detect where the used port is output.
+     *
+     * @param entryPoint
+     * @param port
+     * @param pythonPort
+     * @param portOutputPrefix
+     */
+    public static void startGateway(Object entryPoint, int port, int pythonPort, String portOutputPrefix) {
+        if (portOutputPrefix == null) portOutputPrefix = "";
+
         try {
             // Create a gateway server, using this as an entry point
             // GatewayServer has a constructor with no ports, which sets them to defaults
@@ -42,7 +66,7 @@ public class Py4JGatewayStarter {
 
             // Output the port to stdout
             int listening_port = gatewayServer.getListeningPort();
-            System.out.println("" + listening_port);
+            System.out.println(portOutputPrefix + listening_port);
             System.out.flush();
         } catch (RuntimeException e) {
             // Write the full stack trace out to a file to help identify what went wrong
