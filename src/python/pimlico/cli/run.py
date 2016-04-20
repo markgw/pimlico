@@ -71,7 +71,6 @@ def short_to_long(pipeline, opts):
 
 def browse_cmd(pipeline, opts):
     from pimlico.datatypes.base import IterableCorpus
-    from .browse import browse_data
 
     module_name = opts.module_name
     output_name = opts.output_name
@@ -93,6 +92,7 @@ def browse_cmd(pipeline, opts):
         print "You need Urwid to run the browser: install by running 'make urwid' in the Python lib dir"
         sys.exit(1)
 
+    from .browse import browse_data
     browse_data(data)
 
 
