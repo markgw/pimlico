@@ -64,3 +64,11 @@ requests :
 	unzip master.zip
 	mv requests-master/requests .
 	rm -rf requests-master/ master.zip
+
+################
+urwid:
+	$(FETCH) https://pypi.python.org/packages/source/u/urwid/urwid-1.3.1.tar.gz
+	tar xzf urwid-1.3.1.tar.gz urwid-1.3.1/urwid
+	rm urwid-1.3.1.tar.gz
+	mv urwid-1.3.1/urwid .
+	rmdir urwid-1.3.1

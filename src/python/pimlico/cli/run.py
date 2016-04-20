@@ -11,8 +11,12 @@ from pimlico.utils.filesystem import copy_dir_with_progress
 
 
 def status_cmd(pipeline, opts):
+    # Main is the default pipeline config and is always available (but not included in this list)
+    variants = ["main"] + pipeline.available_variants
+    print "Available pipeline variants: %s" % ", ".join(variants)
+    print "Showing status for '%s' variant" % pipeline.variant
     # Try deriving a schedule
-    print "Module execution schedule with statuses"
+    print "\nModule execution schedule with statuses:"
     for i, module_name in enumerate(pipeline.get_module_schedule(), start=1):
         module = pipeline[module_name]
         print " %d. %s" % (i, module_name)
@@ -65,6 +69,33 @@ def short_to_long(pipeline, opts):
     copy_dir_with_progress(short_term_dir, long_term_dir)
 
 
+def browse_cmd(pipeline, opts):
+    from pimlico.datatypes.base import IterableCorpus
+    from .browse import browse_data
+
+    module_name = opts.module_name
+    output_name = opts.output_name
+    print "Loading %s of module '%s'" % \
+          ("default output" if output_name is None else "output '%s'" % output_name, module_name)
+    data = pipeline[module_name].get_output(output_name)
+    print "Datatype: %s" % data.datatype_name
+
+    # We can only browse tarred corpora document by document
+    if not isinstance(data, IterableCorpus):
+        print "%s is not a sub-type of iteratable corpus, so can't be browsed (datatype class is %s)" % \
+              (data.datatype_name, type(data).__name__)
+        sys.exit(1)
+
+    # Check we've got urwid installed
+    try:
+        import urwid
+    except ImportError:
+        print "You need Urwid to run the browser: install by running 'make urwid' in the Python lib dir"
+        sys.exit(1)
+
+    browse_data(data)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
@@ -113,6 +144,12 @@ if __name__ == "__main__":
                                        "this if your long-term store is bigger, to keep down the short-term store size")
     reset.set_defaults(func=short_to_long)
     reset.add_argument("module_name", help="The name of the module whose output to move")
+
+    run = subparsers.add_parser("browse", help="View the data output by a module")
+    run.set_defaults(func=browse_cmd)
+    run.add_argument("module_name", help="The name of the module whose output to look at")
+    run.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
+                                                    "load the default output")
 
     opts = parser.parse_args()
 

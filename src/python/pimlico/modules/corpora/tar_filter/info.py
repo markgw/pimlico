@@ -69,7 +69,7 @@ class TarredCorpusFilter(TarredCorpus):
 
             # Check whether we've put enough files in the current archive to move onto the next
             if current_archive_count == self.archive_size:
-                current_archive = min(len(tarballs), current_archive+1)
+                current_archive = min(len(tarballs)-1, current_archive+1)
                 current_archive_count = 0
 
             # Allow the first portion of the corpus to be skipped

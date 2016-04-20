@@ -48,10 +48,10 @@ class PimlicoDatatype(object):
     @property
     def metadata(self):
         if self._metadata is None:
-            metadata_path = os.path.join(self.absolute_base_dir, "corpus_metadata")
-            if os.path.exists(metadata_path):
+            if self.absolute_base_dir is not None and \
+                    os.path.exists(os.path.join(self.absolute_base_dir, "corpus_metadata")):
                 # Load dictionary of metadata
-                with open(metadata_path, "r") as f:
+                with open(os.path.join(self.absolute_base_dir, "corpus_metadata"), "r") as f:
                     self._metadata = pickle.load(f)
             else:
                 # No metadata written: data may not have been written yet
