@@ -14,7 +14,7 @@ class ModuleExecutor(BaseModuleExecutor):
         pbar = get_progress_bar(len(input_data), title="Mapping")
 
         # Prepare a writer for the output data
-        with IndexedTermFeatureListCorpusWriter(self.info.get_output_dir("data"), term_vocab, feature_vocab) as writer:
+        with IndexedTermFeatureListCorpusWriter(self.info.get_absolute_output_dir("data"), term_vocab, feature_vocab) as writer:
             # Input is given for every document in a corpus
             writer.add_data_points(
                 # Doc data consists of (term, feature count dict) pairs which we can pass straight to writer

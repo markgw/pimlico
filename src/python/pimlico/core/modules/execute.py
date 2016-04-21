@@ -52,6 +52,11 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
         log.warn("module '%s' has been partially completed before and left with status '%s'. Starting executor" %
                  (module_name, module.status))
 
+    # Tell the user where we put the output
+    for output_name in module.output_names:
+        output_dir = module.get_absolute_output_dir(output_name)
+        log.info("Outputting '%s' in %s" % (output_name, os.path.join(pipeline.short_term_store, output_dir)))
+
     # Get hold of an executor for this module
     executer = load_module_executor(module)
     # Give the module an initial in-progress status
@@ -59,12 +64,6 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
 
     # Update the module status so we know it's been completed
     module.status = "COMPLETE"
-
-    # Tell the user where we put the output
-    for output_name in module.output_names:
-        output = module.get_output(output_name)
-        if output.base_dir is not None:
-            log.info("Output '%s' in %s" % (output_name, os.path.join(pipeline.short_term_store, output.base_dir)))
 
 
 class ModuleExecutionError(Exception):

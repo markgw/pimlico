@@ -1,7 +1,10 @@
 """
 Tool for browsing datasets, reading from the data output by pipeline modules.
 """
+import sys
+
 import urwid
+from pimlico.datatypes.base import InvalidDocument
 
 PALETTE = [
     ('reversed', 'standout', ''),
@@ -17,6 +20,9 @@ PALETTE = [
 
 def browse_data(data):
     data.raw_data = True
+    if not data.data_ready():
+        print "Data not available from module output: perhaps it hasn't been run? (base dir: %s)" % data.base_dir
+        sys.exit(1)
 
     # Top of the screen
     doc_line = urwid.Text("")
@@ -45,7 +51,14 @@ def browse_data(data):
             footer_text.set_text("Reached end of corpus. Exiting")
             _exit()
         doc_line.set_text("%s  ---  Doc %d / %d" % (state.current_doc_name, state.doc_num+1, state.total_docs))
-        body_text.set_text(unicode(state.current_doc_data).encode("ascii", "replace").replace("\t", "    "))
+        if isinstance(state.current_doc_data, InvalidDocument):
+            body_text.set_text(
+                "== INVALID DOCUMENT ==\nInvalid output was produced by module '%s'.\n\nFull error info from %s:\n%s" %
+                (state.current_doc_data.module_name, state.current_doc_data.module_name,
+                 state.current_doc_data.error_info)
+            )
+        else:
+            body_text.set_text(unicode(state.current_doc_data).encode("ascii", "replace").replace("\t", "    "))
 
     def skip_docs(value_box, *args):
         skip = value_box.value()

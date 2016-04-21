@@ -33,7 +33,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         return TarredCorpusWriter(output_dir, append=append)
 
     def get_writers(self, append=False):
-        return tuple(self.get_writer(name, self.get_output_dir(name, short_term_store=True), append=append)
+        return tuple(self.get_writer(name, self.get_absolute_output_dir(name), append=append)
                      for name in self.output_names)
 
 

@@ -22,7 +22,7 @@ class DocumentMapOutputTypeWrapper(object):
         self._input_iterator = None
         # To make sure we're ready to iterate over the input data and have all the metadata we need, we must
         #  actually create the output writer now
-        output_dir = self.wrapped_module_info.get_output_dir(self.output_name, short_term_store=True)
+        output_dir = self.wrapped_module_info.get_absolute_output_dir(self.output_name)
         self.writer = self.wrapped_module_info.get_writer(self.output_name, output_dir)
 
         # Get hold of the outputs from the previous modules to iterate over them

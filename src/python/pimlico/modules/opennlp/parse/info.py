@@ -5,12 +5,13 @@ from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithFields
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_parser"
-    module_inputs = [("documents", TokenizedCorpus)]
+    module_inputs = [("documents", (TokenizedCorpus, WordAnnotationCorpusWithFields("word")))]
     module_outputs = [("parser", ConstituencyParseTreeCorpus)]
     module_options = {
         "model": {
@@ -23,6 +24,19 @@ class ModuleInfo(DocumentMapModuleInfo):
     def __init__(self, *args, **kwargs):
         super(ModuleInfo, self).__init__(*args, **kwargs)
         self.model_path = abs_path_or_model_dir_path(self.options["model"], "opennlp")
+        doc_input = self.get_input("documents")
+        if isinstance(doc_input, WordAnnotationCorpus):
+            # Input is coming from a word-annotation corpus -- pull out the words
+            self._preprocess_doc = self._preprocess_word_annotations
+        else:
+            # Don't do anything: we've got tokenized text already
+            self._preprocess_doc = lambda doc: doc
+
+    def _preprocess_word_annotations(self, doc):
+        """
+        Pull word fields out of word annotations, so it's just like a tokenized corpus.
+        """
+        return "\n".join(" ".join(token["word"] for token in sentence) for sentence in doc)
 
     def check_runtime_dependencies(self):
         missing_dependencies = []

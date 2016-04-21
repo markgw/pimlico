@@ -218,6 +218,8 @@ def WordAnnotationCorpusWithFields(fields):
     input module is a WordAnnotationCorpus (or subtype) and whether its fields include all of those required.
 
     """
+    if isinstance(fields, basestring):
+        fields = [fields]
     def _checker(supplied_type):
         if not issubclass(supplied_type, WordAnnotationCorpus):
             return False

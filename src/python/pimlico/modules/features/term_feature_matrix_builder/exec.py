@@ -22,6 +22,6 @@ class ModuleExecutor(BaseModuleExecutor):
 
         # Write out the matrix
         self.log.info("Built matrix: writing to disk")
-        with ScipySparseMatrixWriter(self.info.get_output_dir("matrix")) as writer:
+        with ScipySparseMatrixWriter(self.info.get_absolute_output_dir("matrix")) as writer:
             # Matrix will be converted to COO format before writing
             writer.set_matrix(matrix)

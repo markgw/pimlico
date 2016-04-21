@@ -3,6 +3,7 @@ from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.parallel.map import MultiprocessingMapProcess, MultiprocessingMapPool, \
     DocumentMapModuleParallelExecutor
+from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 from py4j.java_collections import ListConverter
 
 
@@ -32,7 +33,7 @@ def start_interface(info):
     try:
         interface.start()
     except JavaProcessError, e:
-        raise ModuleExecutionError("error starting coref process: %s" % e)
+        raise ModuleExecutionError("error starting parser process: %s" % e)
     return interface
 
 
@@ -49,7 +50,7 @@ class ParseProcess(MultiprocessingMapProcess):
         self.interface = start_interface(self.info)
 
     def process_document(self, archive, filename, *docs):
-        return process_document(docs[0], self.interface.gateway)
+        return process_document(self.info._preprocess_doc(docs[0]), self.interface.gateway)
 
     def tear_down(self):
         self.interface.stop()
@@ -66,18 +67,19 @@ class ParsePool(MultiprocessingMapPool):
 class ModuleExecutor(DocumentMapModuleParallelExecutor):
     def preprocess(self):
         self.interface = start_interface(self.info)
-        # Just get raw data from the input iterator, to skip splitting on spaces and then joining again
-        self.input_corpora[0].raw_data = True
+        if isinstance(self.input_corpora[0], TokenizedCorpus):
+            # Just get raw data from the input iterator, to skip splitting on spaces and then joining again
+            self.input_corpora[0].raw_data = True
 
     def preprocess_parallel(self):
         # Don't start a Py4J interface in the parallel case, as it's started within the workers
         self.interface = None
-        # Don't parse the parse trees, since OpenNLP does that for us, straight from the text
-        self.input_corpora[0].raw_data = True
+        if isinstance(self.input_corpora[0], TokenizedCorpus):
+            self.input_corpora[0].raw_data = True
 
     @skip_invalid
     def process_document(self, archive, filename, doc):
-        return process_document(doc, self.interface.gateway)
+        return process_document(self.info._preprocess_doc(doc), self.interface.gateway)
 
     def postprocess(self, error=False):
         self.interface.stop()

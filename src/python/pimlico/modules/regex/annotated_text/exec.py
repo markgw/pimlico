@@ -92,7 +92,7 @@ class ModuleExecutor(DocumentMapModuleExecutor):
     def postprocess(self, error=False):
         self.log.info("Regex matched a total of %d times in %d documents" % (self.match_count, len(self.matched_docs)))
         if not error:
-            match_filename = os.path.join(self.info.get_output_dir("documents"), "matched_docs.txt")
+            match_filename = os.path.join(self.info.get_absolute_output_dir("documents"), "matched_docs.txt")
             self.log.info("Outputing matched doc list to %s" % match_filename)
             # Output a list of the non-empty files
             with open(match_filename, "w") as f:

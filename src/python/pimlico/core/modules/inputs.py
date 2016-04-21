@@ -48,7 +48,7 @@ def input_module_factory(datatype):
                 # Get the datatype instance
                 datatype_instance = self.info.get_output("data")
                 # Run the special data preparation method
-                datatype_instance.prepare_data(self.info.get_output_dir("data", short_term_store=True), self.log)
+                datatype_instance.prepare_data(self.info.get_absolute_output_dir("data"), self.log)
 
         DatatypeInputModuleInfo.module_executable = True
         DatatypeInputModuleInfo.module_executor_override = DataPreparationExecutor

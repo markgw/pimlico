@@ -11,8 +11,8 @@ class ModuleExecutor(BaseModuleExecutor):
         pbar = get_progress_bar(len(input_docs), title="Counting")
 
         # Prepare dictionary writers for the term and feature vocabs
-        with DictionaryWriter(self.info.get_output_dir("term_vocab")) as term_vocab_writer:
-            with DictionaryWriter(self.info.get_output_dir("feature_vocab")) as feature_vocab_writer:
+        with DictionaryWriter(self.info.get_absolute_output_dir("term_vocab")) as term_vocab_writer:
+            with DictionaryWriter(self.info.get_absolute_output_dir("feature_vocab")) as feature_vocab_writer:
                 # Input is given for every document in a corpus
                 for doc_name, document in pbar(input_docs):
                     if not isinstance(document, InvalidDocument):
