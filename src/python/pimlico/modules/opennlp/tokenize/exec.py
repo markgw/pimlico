@@ -40,7 +40,7 @@ class StreamTokenizer(object):
         # Start a tokenizer process running in the background via Py4J
         self.interface = Py4JInterface("pimlico.opennlp.TokenizerGateway",
                                        gateway_args=[self.sentence_model_path, self.token_model_path],
-                                       pipeline=self.pipeline)
+                                       pipeline=self.pipeline, print_stderr=False, print_stdout=False)
         self.interface.start()
 
     def stop(self):

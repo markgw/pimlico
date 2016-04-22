@@ -1,14 +1,16 @@
 import Queue
-import multiprocessing
 import subprocess
-
 from cStringIO import StringIO
+from subprocess import PIPE
 
-from pimlico.core.external.java import Py4JInterface, OutputConsumer
+from pimlico.core.external.java import OutputConsumer
+from pimlico.core.logs import get_log_file
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, MultiprocessingMapPool, \
     MultiprocessingMapProcess
-from pimlico.utils.network import get_unused_local_port
+from pimlico.datatypes.base import InvalidDocument
+from pimlico.datatypes.parse.candc import CandcOutput
+from pimlico.utils.network import get_unused_local_ports
 
 
 class CandcWorkerProcess(MultiprocessingMapProcess):
@@ -18,10 +20,10 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
 
     """
     def __init__(self, input_queue, output_queue, info, port):
-        super(CandcWorkerProcess, self).__init__(input_queue, output_queue, info)
-
+        self._server_process = None
         self.host = "127.0.0.1"
         self.port = port
+        super(CandcWorkerProcess, self).__init__(input_queue, output_queue, info)
 
     def set_up(self):
         # Start up a Soap server in the background
@@ -32,92 +34,57 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
 
         # Set off a thread to collect output from stdout and stderr
         self.stdout_queue = Queue.Queue()
-        self.stdout_consumer = OutputConsumer(self.stdout_queue, self._server_process.stdout)
+        self.stdout_buffer = StringIO()
+        self.stdout_consumer = OutputConsumer([self.stdout_queue, self.stdout_buffer], self._server_process.stdout)
+        self.stdout_consumer.start()
         self.stderr_queue = Queue.Queue()
         self.stderr_buffer = StringIO()
         self.stderr_consumer = OutputConsumer([self.stderr_queue, self.stderr_buffer], self._server_process.stderr)
+        self.stderr_consumer.start()
 
         # The server outputs a line to stderr when it's ready, so we should wait for this before continuing
         try:
             err = self.stderr_queue.get(timeout=10.)
         except Queue.Empty:
-            raise CandCServerError("server startup timed out after 10 seconds")
+            err_path = output_candc_error_info(server_args, self._server_process.returncode,
+                                               self.stdout_buffer.getvalue(), self.stderr_buffer.getvalue())
+            raise CandCServerError("server startup timed out after 10 seconds. See %s for more details" % err_path)
 
         # Check that the server's running nicely
         if not err.startswith("waiting for connections"):
-            raise CandCServerError("server startup failed: %s" % self.stderr_buffer.getvalue())
+            err_path = output_candc_error_info(server_args, self._server_process.returncode,
+                                               self.stdout_buffer.getvalue(), self.stderr_buffer.getvalue())
+            raise CandCServerError("server startup failed: %s. See %s for more details" %
+                                   (self.stderr_buffer.getvalue(), err_path))
 
+    @skip_invalid
+    @invalid_doc_on_error
     def process_document(self, archive, filename, *docs):
-        # TODO
-        pass
+        # TODO Maybe split up into multiple requests if there's a problem with large docs
+        # Encode doc as utf-8 so it can be sent to the server
+        doc = docs[0].encode("utf-8")
+        stdout, stderr, returncode = self._run_client(doc)
+        self.clear_pipes()
+        if returncode != 0:
+            # Client call had a non-zero return code -- some kind of error
+            return InvalidDocument(
+                self.info.module_name,
+                "Non-zero return code from SOAP client: %s\n\nStdout:\n%s\n\nStderr:\n%s" %
+                (returncode, stdout, stderr)
+            )
+        else:
+            return CandcOutput(stdout.decode("utf-8"))
 
     def tear_down(self):
-        self._server_process.terminate()
-
-    @property
-    def server_name(self):
-        return "c&c/%s:%s" % (self.host, self.port)
-
-    def parse_lines(self, lines):
-        # TODO Use as model for parse_document
-        """
-        Run the Soap client to parse a list of sentences.
-
-        """
-        # Put the lines in a temporary file so we can pipe them to the client
-        with tempfile.NamedTemporaryFile(delete=True) as input_file:
-            # Write the data to the temporary file
-            input_file.write("".join("%s\n" % line for line in lines))
-            input_file.flush()
-            input_file.seek(0)
-            # Run the soap client to parse the lines
-            raw_output = self._run_client(self._host, self._port, input_file)
-        # Parse the output
-        return CandCOutput.read_output(raw_output)
-
-    def parse_file(self, filename, split=400):
-        # TODO Use as model for parse_document
-        """
-        Run the Soap client to parse all the sentences in a file.
-
-        If the file is more than C{split} lines long, breaks it into
-        multiple files and parses them separately (default 400). This
-        helps to avoid buffering problems, so is advisable. Set to 0
-        to do no splitting.
-
-        """
-        if split:
-            # Check file length
-            with open(filename, 'r') as input_file:
-                lines = len(list(input_file))
-
-            if lines > split:
-                raw_outputs = []
-                with open(filename, 'r') as input_file:
-                    # This file is too long: split it into multiple
-                    for part in range(int(math.ceil(float(lines) / split))):
-                        with tempfile.NamedTemporaryFile('w') as part_file:
-                            # Write this partition of the input into a temp file
-                            part_file.writelines(itertools.islice(input_file, split))
-                            part_file.seek(0)
-                            # Run the parser on this partial file
-                            raw_outputs.append(self._run_client(self._host, self._port, part_file))
-                            # This is critical! Otherwise the output pipes
-                            # get full while parsing long files
-                            self.clear_pipes()
-                # Combine the output from these parses
-                return CandCOutput.read_output("\n\n".join(raw_outputs))
-
-        with open(filename, 'r') as input_file:
-            # Run the soap client to parse the lines
-            raw_output = self._run_client(self._host, self._port, input_file)
-        # Parse the output
-        return CandCOutput.read_output(raw_output)
+        if self._server_process is not None:
+            self._server_process.terminate()
 
     def _run_client(self, input_data):
         # Run the soap client
-        client = subprocess.Popen([self.info.client_binary, "--url", "http://%s:%d" % (self.host, self.port)])
-        return client.communicate(input_data)
+        client_command = [self.info.client_binary, "--url", "http://%s:%d" % (self.host, self.port)]
+        client = subprocess.Popen(client_command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = client.communicate(input_data)
+        return stdout, stderr, client.returncode
 
     def clear_pipes(self):
         """
@@ -139,31 +106,38 @@ class CandcPool(MultiprocessingMapPool):
     Simple pool for sending off multiple calls to the Py4J gateway at once.
 
     """
+
+    def __init__(self, executor, processes):
+        # Generate enough ports for all the processes
+        self._ports = iter(get_unused_local_ports(processes))
+        super(CandcPool, self).__init__(executor, processes)
+
     def start_worker(self):
-        return CandcWorkerProcess(self.input_queue, self.output_queue,
-                                  self.executor.info, self.executor.interface.port_used)
+        return CandcWorkerProcess(self.input_queue, self.output_queue, self.executor.info, self._ports.next())
 
 
 class ModuleExecutor(DocumentMapModuleParallelExecutor):
     def preprocess(self):
         # Start up a single C&C background process
-        self.worker_input = multiprocessing.Queue()
-        self.worker_output = multiprocessing.Queue()
-        self.worker = CandcWorkerProcess(self.worker_input, self.worker_output, self.info, get_unused_local_port())
+        self.log.info("Starting single C&C background process")
+        self.single_pool = CandcPool(self, 1)
+        self.log.info("C&C process initialized")
+
+        self.input_corpora[0].raw_data = True
 
     def preprocess_parallel(self):
-        pass
+        self.input_corpora[0].raw_data = True
 
     def create_pool(self, processes):
         return CandcPool(self, processes)
 
-    @skip_invalid
-    @invalid_doc_on_error
-    def process_document(self, archive, filename, doc):
-        self.worker.process_document(archive, filename, doc)
+    def process_document(self, archive, filename, *docs):
+        self.single_pool.input_queue.put((archive, filename, docs))
+        # Wait for output
+        return self.single_pool.output_queue.get().data
 
     def postprocess(self, error=False):
-        self.worker.tear_down()
+        self.single_pool.shutdown()
 
     def postprocess_parallel(self, error=False):
         pass
@@ -173,33 +147,14 @@ class CandCServerError(Exception):
     pass
 
 
-class CandCOutput(object):
-    """
-    Simple wrapper around C&C's output string to pull out the different bits.
-
-    """
-    def __init__(self, lines):
-        self.data = "\n".join(lines)
-
-        ### Parse the parser output
-        # Pull out max 1 pos line -- marked by <c>
-        pos_lines = [line.partition("<c> ")[2] for line in lines if line.startswith("<c> ")]
-        self.pos = pos_lines[0] if len(pos_lines) else None
-        # Pull out all dependency lines -- those contained in ()s
-        self.dependencies = [line for line in lines if line.startswith("(") and line.endswith(")")]
-
-    def __str__(self):
-        dep_lines = "\n".join(self.dependencies)
-        pos_line = "\n<c> %s" % self.pos if self.pos else ""
-        return "%s%s" % (dep_lines, pos_line)
-
-    @staticmethod
-    def read_output(data):
-        # Split up the data on blank lines
-        outputs_lines = [o.split("\n") for o in data.split("\n\n")]
-        # Ignore blank lines and comment lines
-        outputs_lines = [[line for line in lines if line and not line.startswith("#")]
-                         for lines in outputs_lines]
-        outputs_lines = [ls for ls in outputs_lines if len(ls)]
-        # Parse each as an individual parser output
-        return [CandCOutput(output) for output in outputs_lines]
+def output_candc_error_info(command, returncode, stdout, stderr):
+    file_path = get_log_file("candc")
+    with open(file_path, "w") as f:
+        print >>f, "Command:"
+        print >>f, " ".join(command)
+        print >>f, "Return code: %s" % returncode
+        print >>f, "Read from stdout:"
+        print >>f, stdout
+        print >>f, "Read from stderr:"
+        print >>f, stderr
+    return file_path

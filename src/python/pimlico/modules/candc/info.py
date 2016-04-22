@@ -3,7 +3,7 @@ import os
 from pimlico import LIB_DIR
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
+from pimlico.datatypes.parse.candc import CandcOutputCorpusWriter, CandcOutputCorpus
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 
 
@@ -14,8 +14,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     """
     module_type_name = "candc"
     module_inputs = [("documents", TokenizedCorpus)]
-    # TODO Replace this with a more specific output type
-    module_outputs = [("parsed", TarredCorpus)]
+    module_outputs = [("parsed", CandcOutputCorpus)]
     module_options = {
         "model": {
             "help": "Absolute path to models directory or name of model set. If not an absolute path, assumed to be "
@@ -52,4 +51,4 @@ class ModuleInfo(DocumentMapModuleInfo):
         return missing_dependencies
 
     def get_writer(self, output_name, output_dir, append=False):
-        return TarredCorpusWriter(output_dir, append=append)
+        return CandcOutputCorpusWriter(output_dir, append=append)

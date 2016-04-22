@@ -217,6 +217,8 @@ class MultiprocessingMapProcess(multiprocessing.Process):
         self.output_queue = output_queue
         self.daemon = True
         self.stopped = multiprocessing.Event()
+        self.initialized = multiprocessing.Event()
+        self.uncaught_exception = multiprocessing.Queue(1)
 
         self.start()
 
@@ -238,27 +240,36 @@ class MultiprocessingMapProcess(multiprocessing.Process):
         pass
 
     def run(self):
-        # Start a Java process running in the background via Py4J: we'll send all our jobs to this
-        self.set_up()
         try:
-            while not self.stopped.is_set():
-                try:
-                    # Timeout and go round the loop again to check whether we're supposed to have stopped
-                    archive, filename, docs = self.input_queue.get(timeout=0.05)
+            # Run any startup routine that the subclass has defined
+            self.set_up()
+            # Notify waiting processes that we've finished initialization
+            self.initialized.set()
+            try:
+                while not self.stopped.is_set():
                     try:
-                        result = self.process_document(archive, filename, *docs)
-                    except Exception, e:
-                        self.output_queue.put(
-                            ProcessOutput(archive, filename, InvalidDocument(self.info.module_name,
-                                                                             "%s\n%s" % (e, format_exc())))
-                        )
-                    else:
-                        self.output_queue.put(ProcessOutput(archive, filename, result))
-                except Empty:
-                    # Don't worry if the queue is empty: just keep waiting for more until we're shut down
-                    pass
+                        # Timeout and go round the loop again to check whether we're supposed to have stopped
+                        archive, filename, docs = self.input_queue.get(timeout=0.05)
+                        try:
+                            result = self.process_document(archive, filename, *docs)
+                        except Exception, e:
+                            self.output_queue.put(
+                                ProcessOutput(archive, filename, InvalidDocument(self.info.module_name,
+                                                                                 "%s\n%s" % (e, format_exc())))
+                            )
+                        else:
+                            self.output_queue.put(ProcessOutput(archive, filename, result))
+                    except Empty:
+                        # Don't worry if the queue is empty: just keep waiting for more until we're shut down
+                        pass
+            finally:
+                self.tear_down()
+        except Exception, e:
+            # If there's any uncaught exception, make it available to the main process
+            self.uncaught_exception.put_nowait(e)
         finally:
-            self.tear_down()
+            # Even there was an error, set initialized so that the main process can wait on it
+            self.initialized.set()
 
 
 class MultiprocessingMapPool(DocumentProcessorPool):
@@ -272,6 +283,17 @@ class MultiprocessingMapPool(DocumentProcessorPool):
         super(MultiprocessingMapPool, self).__init__(processes)
         self.executor = executor
         self.workers = [self.start_worker() for i in range(processes)]
+        # Wait until all of the workers have completed their initialization
+        for worker in self.workers:
+            worker.initialized.wait()
+            # Check whether the worker had an error during initialization
+            try:
+                e = worker.uncaught_exception.get_nowait()
+            except Empty:
+                # No error
+                pass
+            else:
+                raise ProcessStartupError("error in worker process: %s" % e, cause=e)
 
     def start_worker(self):
         return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.executor.info)
@@ -295,3 +317,9 @@ class MultiprocessingMapPool(DocumentProcessorPool):
                 while not self.output_queue.empty():
                     self.output_queue.get_nowait()
                 worker.join(0.1)
+
+
+class ProcessStartupError(Exception):
+    def __init__(self, *args, **kwargs):
+        self.cause = kwargs.pop("cause", None)
+        super(ProcessStartupError, self).__init__(*args, **kwargs)
