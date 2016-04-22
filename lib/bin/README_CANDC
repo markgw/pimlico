@@ -1,0 +1,13 @@
+The C&C parser is freely available, but we can't download it automatically from within Pimlico, as you need to
+register on the website and use your authentication details to download it.
+
+Do the following to fetch the C&C parser.
+
+1. Go to
+     http://svn.ask.it.usyd.edu.au/trac/candc/wiki/Register
+   and register for a free account.
+2. Go to
+     http://svn.ask.it.usyd.edu.au/trac/candc/wiki/Download
+   and download an appropriate set of binaries for your system.
+3. Extract the bin/ directory from the archive and put it in this directory, naming it "candc".
+4. Follow the instructions in models/candc/README to get hold of pre-trained parsing models.

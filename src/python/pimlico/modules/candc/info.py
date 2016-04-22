@@ -1,19 +1,15 @@
 import os
 
-from pimlico import JAVA_LIB_DIR
-from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
-from pimlico.core.modules.base import DependencyError
+from pimlico import LIB_DIR
 from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
 from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     """
-    Incomplete wrapper around the Java C&C parser. Java C&C does not include a supertagger, so we're going to need
-    to supply a wrapper around a supertagger before we can use it.
-
-    We need also need to process the output from Java C&C once we're getting it.
+    Wrapper around the original C&C parser.
     
     """
     module_type_name = "candc"
@@ -21,58 +17,36 @@ class ModuleInfo(DocumentMapModuleInfo):
     # TODO Replace this with a more specific output type
     module_outputs = [("parsed", TarredCorpus)]
     module_options = {
-        "model_path": {
-            "help": "Filename of parsing model (weights file). Default: model provided with the parser",
-            "default": os.path.join(JAVA_LIB_DIR, "candc", "model", "weights"),
-        },
-        "grammar_dir": {
-            "help": "Path to CCG grammar dir. Default: grammar provided with the parser",
-            "default": os.path.join(JAVA_LIB_DIR, "candc", "grammar"),
-        },
-        "lexicon_path": {
-            "help": "Path to lexicon file. Default: lexicon file provided with the parser",
-            "default": os.path.join(JAVA_LIB_DIR, "candc", "words_feats", "wsj02-21.wordsPos"),
-        },
-        "features_path": {
-            "help": "Path to features file. Default: features file provided with the parser",
-            "default": os.path.join(JAVA_LIB_DIR, "candc", "words_feats", "wsj02-21.feats.all.lambda=5"),
-        },
-        "params_path": {
-            "help": "Path to params file to pass into the parser to override default parser settings. "
-                    "Default: no params file read, parser uses default setting",
+        "model": {
+            "help": "Absolute path to models directory or name of model set. If not an absolute path, assumed to be "
+                    "a subdirectory of the candcs models dir (see instructions in models/candc/README on how to fetch "
+                    "pre-trained models)",
+            "default": "ccgbank",
         },
     }
 
     def __init__(self, *args, **kwargs):
         super(ModuleInfo, self).__init__(*args, **kwargs)
-        # Postprocess model options
-        self.model_path = os.path.abspath(self.options["model_path"])
-        self.grammar_dir = os.path.abspath(self.options["grammar_dir"])
-        self.lexicon_path = os.path.abspath(self.options["lexicon_path"])
-        self.features_path = os.path.abspath(self.options["features_path"])
-        self.params_path = self.options["params_path"]
+        self.model_path = abs_path_or_model_dir_path(self.options["model"], "candc")
+        binary_dir = os.path.join(LIB_DIR, "bin", "candc")
+        self.server_binary = os.path.join(binary_dir, "soap_server")
+        self.client_binary = os.path.join(binary_dir, "soap_client")
 
     def check_runtime_dependencies(self):
         missing_dependencies = []
 
-        # Make sure the model files are available
-        for model_filename in [self.model_path, self.grammar_dir, self.lexicon_path, self.features_path]:
-            if not os.path.exists(model_filename):
-                missing_dependencies.append(
-                    ("C&C model file", self.module_name, "Parsing model file doesn't exist: %s" % model_filename)
-                )
+        # Check the parser binaries are available
+        for binary_path in [self.server_binary, self.client_binary]:
+            if not os.path.exists(binary_path):
+                missing_dependencies.append(("C&C parser", self.module_name,
+                                             "C&C parser binary %s not available. See lib/bin/README_CANDC for "
+                                             "instructions on installing the parser" % binary_path))
 
-        try:
-            class_name = "pimlico.candc.CandcGateway"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("C&C parser wrapper",
-                                             self.module_name,
-                                             "Couldn't load %s. Build the C&C Java wrapper module provided with "
-                                             "Pimlico ('ant candc')" % class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
+        # Make sure the model files are available
+        if not os.path.exists(self.model_path):
+            missing_dependencies.append(
+                ("C&C model dir", self.module_name, "Parsing model directory doesn't exist: %s" % self.model_path)
+            )
 
         missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
         return missing_dependencies

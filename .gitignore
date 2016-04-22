@@ -8,6 +8,8 @@ lib/java/*
 !lib/java/Makefile
 lib/python/*
 !lib/python/Makefile
+lib/bin/*
+!lib/bin/README*
 models/*
 !models/Makefile
 docs/_build/*
