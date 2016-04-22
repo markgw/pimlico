@@ -9,7 +9,7 @@ import sys
 from cStringIO import StringIO
 from operator import itemgetter
 
-from pimlico.core.modules.options import str_to_bool
+from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
 from pimlico.utils.format import multiline_tablate
 from pimlico.utils.logging import get_console_logger
 
@@ -155,7 +155,10 @@ class PipelineConfig(object):
 
             # Pass in all other options to the info constructor
             options_dict = dict(module_config)
-            inputs, optional_outputs, options = module_info_class.process_config(options_dict)
+            try:
+                inputs, optional_outputs, options = module_info_class.process_config(options_dict)
+            except ModuleOptionParseError, e:
+                raise PipelineConfigParseError("error in '%s' options: %s" % (module_name, e))
 
             # Instantiate the module info
             module_info = \

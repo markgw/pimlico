@@ -12,3 +12,4 @@ def check_sklearn_dependency(module_name):
         missing_dependencies.append(("scikit-learn", module_name, "Install Scikit-Learn systemwide. E.g. "
                                                                   "'apt-get install python-sklearn' or "
                                                                   "'pip install -U scikit-learn'"))
+    return missing_dependencies

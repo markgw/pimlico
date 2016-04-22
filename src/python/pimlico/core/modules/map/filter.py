@@ -20,10 +20,6 @@ class DocumentMapOutputTypeWrapper(object):
 
         self.output_num = [name for name, type in self.wrapped_module_info.available_outputs].index(self.output_name)
         self._input_iterator = None
-        # To make sure we're ready to iterate over the input data and have all the metadata we need, we must
-        #  actually create the output writer now
-        output_dir = self.wrapped_module_info.get_absolute_output_dir(self.output_name)
-        self.writer = self.wrapped_module_info.get_writer(self.output_name, output_dir)
 
         # Get hold of the outputs from the previous modules to iterate over them
         self.input_corpora = [self.wrapped_module_info.get_input(input_name)
@@ -44,6 +40,10 @@ class DocumentMapOutputTypeWrapper(object):
         gets it on the fly from the input datatype.
 
         """
+        # To make sure we're ready to iterate over the input data and have all the metadata we need, we must
+        #  actually create the output writer now
+        output_dir = self.wrapped_module_info.get_absolute_output_dir(self.output_name)
+
         # Load an executor for the module we're wrapping, so we can use some of its functionality
         executor_cls = load_module_executor(self.wrapped_module_info)
         executor = executor_cls(self.wrapped_module_info)
@@ -55,7 +55,7 @@ class DocumentMapOutputTypeWrapper(object):
         invalid_inputs = 0
         invalid_outputs = 0
         # Prepare a corpus writer for the output
-        with self.writer as writer:
+        with self.wrapped_module_info.get_writer(self.output_name, output_dir) as writer:
             # Now that we've created the writer, we should be able to initialize a corresponding reader
             # Of course, we can't read any documents from it, but we can use its postprocessing function
             dummy_reader = self.wrapped_module_info.get_output(self.output_name)

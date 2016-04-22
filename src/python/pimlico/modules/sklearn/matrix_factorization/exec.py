@@ -1,53 +1,44 @@
+from pimlico.core.config import PipelineConfigParseError
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.dictionary import DictionaryWriter
-from pimlico.utils.progress import get_progress_bar
+from pimlico.datatypes.arrays import NumpyArrayWriter
+from pimlico.modules.sklearn.matrix_factorization.info import SKLEARN_CLASSES
 
 
 class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
-        input_docs = self.info.get_input("term_features")
-        self.log.info("Building dictionaries from terms and features in %d docs" % len(input_docs))
-        pbar = get_progress_bar(len(input_docs), title="Counting")
+        input_matrix = self.info.get_input("matrix").array
+        self.log.info("Loaded input matrix: %s" % str(input_matrix.shape))
 
-        # Prepare dictionary writers for the term and feature vocabs
-        with DictionaryWriter(self.info.get_absolute_output_dir("term_vocab")) as term_vocab_writer:
-            with DictionaryWriter(self.info.get_absolute_output_dir("feature_vocab")) as feature_vocab_writer:
-                # Input is given for every document in a corpus
-                for doc_name, document in pbar(input_docs):
-                    if not isinstance(document, InvalidDocument):
-                        # Update the term vocab with all terms in this doc
-                        term_vocab_writer.add_documents([[term for (term, fcs) in document]])
-                        # Update the feature vocab with all features with non-zero counts
-                        feature_vocab_writer.add_documents([
-                            [feature for (t, feature_counts) in document
-                             for (feature, count) in feature_counts.items() if count > 0]
-                        ])
+        transform_type = self.info.options["class"]
+        # Check known properties of this type of transformation
+        transform_props = SKLEARN_CLASSES[transform_type]
+        # Check whether this type is able to accept sparse input
+        if transform_props["sparse"]:
+            # Convert to CSR, which is better for most purposes
+            input_matrix = input_matrix.tocsr()
+        else:
+            # We need to transform the matrix to a dense array
+            # This could cause problems with large matrices, in which case you need to use a different transform type
+            self.log.info("%s transformation requires dense input: converting matrix" % transform_type)
+            input_matrix = input_matrix.toarray()
 
-                # Filter the vocabs according to the options set
-                self.log.info("Built dictionaries (terms=%d, features=%d), applying filters" %
-                              (len(term_vocab_writer.data), len(feature_vocab_writer.data)))
+        # Try initializing the transformation
+        self.log.info(
+            "Initializing %s with options: %s" %
+            (transform_type, ", ".join("%s=%s" % (key, val) for (key, val) in self.info.init_kwargs.items()))
+        )
+        transform_cls = self.info.load_transformer_class()
+        try:
+            transformer = transform_cls(**self.info.init_kwargs)
+        except TypeError, e:
+            raise PipelineConfigParseError("invalid arguments to %s: %s" % (transform_type, e))
 
-                self.log.info("Feature vocab filters: %s" % ", ".join("%s=%s" % (k, v) for (k, v) in [
-                    ("threshold", self.info.options["feature_threshold"]),
-                    ("max proportion", self.info.options["feature_max_prop"]),
-                    ("limit", self.info.options["feature_limit"]),
-                ] if v is not None))
-                feature_vocab_writer.filter(
-                    self.info.options["feature_threshold"],
-                    self.info.options["feature_max_prop"],
-                    self.info.options["feature_limit"]
-                )
-                self.log.info("Outputting feature vocab (%d features)" % len(feature_vocab_writer.data))
+        # Apply transformation to the matrix
+        self.log.info("Fitting %s transformation on input matrix" % transform_type)
+        transformed_matrix = transformer.fit_transform(input_matrix)
+        self.log.info("Fitting complete: storing H and W matrices")
 
-            self.log.info("Term vocab filters: %s" % ", ".join("%s=%s" % (k, v) for (k, v) in [
-                ("threshold", self.info.options["term_threshold"]),
-                ("max proportion", self.info.options["term_max_prop"]),
-                ("limit", self.info.options["term_limit"]),
-            ] if v is not None))
-            term_vocab_writer.filter(
-                self.info.options["term_threshold"],
-                self.info.options["term_max_prop"],
-                self.info.options["term_limit"]
-            )
-            self.log.info("Outputting term vocab (%d terms)" % len(term_vocab_writer.data))
+        with NumpyArrayWriter(self.info.get_absolute_output_dir("w")) as w_writer:
+            w_writer.set_array(transformed_matrix)
+        with NumpyArrayWriter(self.info.get_absolute_output_dir("h")) as h_writer:
+            h_writer.set_array(transformer.components_)
