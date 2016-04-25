@@ -141,7 +141,7 @@ class BaseModuleInfo(object):
 
         """
         # Prepare a timestamp for the message
-        timestamp = "%Y-%m-%d %H:%M:%S".format(datetime.now())
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(self.execution_history_path, "a") as history:
             history.write("{timestamp} {message}\n".format(timestamp=timestamp, message=line))
         # Invalidate the cache
