@@ -68,11 +68,12 @@ Input {input_name}:
         else:
             # Input module
             input_info += "\n    Pipeline input"
-        # Get additional detailed information from the datatype instance
-        datatype_details = input_datatype.get_detailed_status()
-        if datatype_details:
-            # Indent the lines
-            input_info = "%s\n%s" % (input_info, "\n".join("    %s" % line for line in datatype_details))
+        if input_datatype.data_ready():
+            # Get additional detailed information from the datatype instance
+            datatype_details = input_datatype.get_detailed_status()
+            if datatype_details:
+                # Indent the lines
+                input_info = "%s\n%s" % (input_info, "\n".join("    %s" % line for line in datatype_details))
         input_infos.append(input_info)
 
     # Do the same thing for the outputs
