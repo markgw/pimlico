@@ -12,3 +12,15 @@ def multiline_tablate(table, widths, **kwargs):
         # Add a blank line
         table_split.append([""] * len(table_split[0]))
     return tabulate(table_split[:-1], **kwargs)
+
+
+def title_box(title_text):
+    """
+    Make a nice big pretty title surrounded by a box.
+    """
+    lines = title_text.splitlines()
+    content_width = max(len(line)+2 for line in lines)
+    top_border = "+" + "-" * content_width + "+"
+    # Centre each of the lines
+    lines = [("{:^%d}" % content_width).format(line) for line in lines]
+    return "\n".join([top_border] + ["|%s|" % line for line in lines] + [top_border])

@@ -5,27 +5,10 @@ import sys
 from operator import itemgetter
 
 from pimlico.cli.check import check_cmd
+from pimlico.cli.status import status_cmd
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
 from pimlico.utils.filesystem import copy_dir_with_progress
-
-
-def status_cmd(pipeline, opts):
-    # Main is the default pipeline config and is always available (but not included in this list)
-    variants = ["main"] + pipeline.available_variants
-    print "Available pipeline variants: %s" % ", ".join(variants)
-    print "Showing status for '%s' variant" % pipeline.variant
-    # Try deriving a schedule
-    print "\nModule execution schedule with statuses:"
-    for i, module_name in enumerate(pipeline.get_module_schedule(), start=1):
-        module = pipeline[module_name]
-        print " %d. %s" % (i, module_name)
-        # Check module status (has it been run?)
-        print "       status: %s" % module.status
-        # Check status of each input datatypes
-        for input_name in module.input_names:
-            print "       input %s: %s" % (input_name, "ready" if module.input_ready(input_name) else "not ready")
-        print "       outputs: %s" % ", ".join(module.output_names)
 
 
 def run_cmd(pipeline, opts):
@@ -121,6 +104,9 @@ if __name__ == "__main__":
 
     status = subparsers.add_parser("status", help="Output a module execution schedule for the pipeline and execution "
                                                   "status for every module")
+    status.add_argument("module_name", nargs="?",
+                        help="Optionally specify a module name. More detailed status information will be outut for "
+                             "this module")
     status.set_defaults(func=status_cmd)
 
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")

@@ -87,6 +87,16 @@ class PimlicoDatatype(object):
         # data_dir is None unless the data dir has been located
         return self.base_dir is None or self.data_dir is not None
 
+    def get_detailed_status(self):
+        """
+        Returns a list of strings, containing detailed information about the data.
+        Only called if data_ready() == True.
+
+        Subclasses may override this to supply useful (human-readable) information specific to the datatype.
+        They should called the super method.
+        """
+        return []
+
 
 class PimlicoDatatypeWriter(object):
     """
@@ -137,6 +147,11 @@ class IterableCorpus(PimlicoDatatype):
 
     def __len__(self):
         return self.metadata["length"]
+
+    def get_detailed_status(self):
+        return super(IterableCorpus, self).get_detailed_status() + [
+            "Length: %d" % len(self)
+        ]
 
 
 class IterableCorpusWriter(PimlicoDatatypeWriter):

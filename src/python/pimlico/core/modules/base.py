@@ -339,6 +339,9 @@ class BaseModuleInfo(object):
         # Check whether the datatype is ready to go
         return previous_module.get_output(output_name).data_ready()
 
+    def is_filter(self):
+        return not self.module_executable and len(self.module_inputs) > 0
+
     def missing_data(self):
         """
         Check whether all the input data for this module is available. If not, return a list strings indicating
@@ -350,7 +353,7 @@ class BaseModuleInfo(object):
             previous_module, output_name = self.get_input_module_connection(input_name)
             if not previous_module.get_output(output_name).data_ready():
                 # If the previous module is a filter, it's more helpful to say exactly what data it's missing
-                if not previous_module.module_executable:
+                if previous_module.is_filter():
                     missing.extend(previous_module.missing_data())
                 else:
                     missing.append("%s output '%s'" % (previous_module.module_name, output_name))
@@ -431,6 +434,16 @@ class BaseModuleInfo(object):
         """
         for path in self.pipeline.find_all_data_paths(self.get_module_output_dir()):
             shutil.rmtree(path)
+
+    def get_detailed_status(self):
+        """
+        Returns a list of strings, containing detailed information about the module's status that is specific to
+        the module type. This may include module-specific information about execution status, for example.
+
+        Subclasses may override this to supply useful (human-readable) information specific to the module type.
+        They should called the super method.
+        """
+        return []
 
 
 def _compatible_input_type(type_requirement, supplied_type):

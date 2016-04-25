@@ -36,6 +36,13 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         return tuple(self.get_writer(name, self.get_absolute_output_dir(name), append=append)
                      for name in self.output_names)
 
+    def get_detailed_status(self):
+        status_lines = super(DocumentMapModuleInfo, self).get_detailed_status()
+        if self.status == "PARTIALLY_PROCESSED":
+            status_lines.append("Processed %d documents" % self.get_metadata()["docs_completed"])
+            status_lines.append("Last doc completed: %s" % self.get_metadata()["last_doc_completed"])
+        return status_lines
+
 
 class DocumentMapModuleExecutor(BaseModuleExecutor):
     """
