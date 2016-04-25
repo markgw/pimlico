@@ -6,8 +6,10 @@ Submodules
 
 .. toctree::
 
+   pimlico.cli.browse
    pimlico.cli.check
    pimlico.cli.run
+   pimlico.cli.status
 
 Module contents
 ---------------

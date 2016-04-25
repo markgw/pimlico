@@ -6,6 +6,7 @@ Submodules
 
 .. toctree::
 
+   pimlico.datatypes.parse.candc
    pimlico.datatypes.parse.dependency
 
 Module contents

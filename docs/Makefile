@@ -8,6 +8,8 @@ PAPER         =
 BUILDDIR      = _build
 SPHINXAPI     = sphinx-apidoc
 APIDIR        = api
+# Exclude Pimlico modules from the API doc, since they need to be built in a special way
+MODULE_PATH   = pimlico/modules/
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -47,7 +49,7 @@ clean:
 
 api:
 	rm -rf $(APIDIR)
-	$(SPHINXAPI) -e -o $(APIDIR) ../src/python/
+	$(SPHINXAPI) -e -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH)
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
