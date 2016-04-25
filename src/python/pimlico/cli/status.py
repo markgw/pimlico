@@ -31,6 +31,10 @@ def status_cmd(pipeline, opts):
                 status, more_outputs = module_status(module)
                 # Output the module's detailed status
                 print status
+                if opts.history:
+                    # Also output full execution history
+                    print "\nFull execution history:"
+                    print module.execution_history
                 already_output.append(module_name)
                 # Allow this module to request that we output further modules
                 to_output.extend(more_outputs)
@@ -81,7 +85,7 @@ Input {input_name}:
     for output_name in module.output_names:
         output_datatype = module.get_output(output_name)
         corpus_dir = output_datatype.absolute_base_dir or "not available yet"
-        output_infos.append("""\
+        output_info = """\
 Output {output_name}:
     {status}
     Datatype: {output_datatype.datatype_name}
@@ -90,7 +94,14 @@ Output {output_name}:
             status="Data available" if output_datatype.data_ready() else "Data not available",
             output_datatype=output_datatype,
             corpus_dir=corpus_dir,
-        ))
+        )
+        if output_datatype.data_ready():
+            # Get additional detailed information from the datatype instance
+            datatype_details = output_datatype.get_detailed_status()
+            if datatype_details:
+                # Indent the lines
+                output_info = "%s\n%s" % (output_info, "\n".join("    %s" % line for line in datatype_details))
+        output_infos.append(output_info)
 
     # Get additional detailed information from the module instance
     module_details = module.get_detailed_status()

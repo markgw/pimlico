@@ -107,6 +107,9 @@ if __name__ == "__main__":
     status.add_argument("module_name", nargs="?",
                         help="Optionally specify a module name. More detailed status information will be outut for "
                              "this module")
+    status.add_argument("--history", "-i", action="store_true",
+                        help="When a module name is given, even more detailed output is given, including the full "
+                             "execution history of the module")
     status.set_defaults(func=status_cmd)
 
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")

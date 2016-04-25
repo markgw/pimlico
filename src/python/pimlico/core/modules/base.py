@@ -23,6 +23,7 @@ import shutil
 from importlib import import_module
 from types import FunctionType
 
+from datetime import datetime
 from operator import itemgetter
 
 from pimlico.core.config import PipelineStructureError
@@ -79,6 +80,7 @@ class BaseModuleInfo(object):
                                       if name in set(optional_outputs)|used_output_names)
 
         self._metadata = None
+        self._history = None
 
     def __repr__(self):
         return "%s(%s)" % (self.module_type_name, self.module_name)
@@ -128,6 +130,38 @@ class BaseModuleInfo(object):
         self.set_metadata_value("status", status)
 
     status = property(__get_status, __set_status)
+
+    @property
+    def execution_history_path(self):
+        return os.path.join(self.pipeline.find_data_path(self.get_module_output_dir(), default="short"), "history")
+
+    def add_execution_history_record(self, line):
+        """
+        Output a single line to the file that stores the history of module execution, so we can trace what we've done.
+
+        """
+        # Prepare a timestamp for the message
+        timestamp = "%Y-%m-%d %H:%M:%S".format(datetime.now())
+        with open(self.execution_history_path, "a") as history:
+            history.write("{timestamp} {message}\n".format(timestamp=timestamp, message=line))
+        # Invalidate the cache
+        self._history = None
+
+    @property
+    def execution_history(self):
+        """
+        Get the entire recorded execution history for this module. Returns an empty string if no history has
+        been recorded.
+
+        """
+        if self._history is None:
+            # Read history in from a file if one's available
+            if os.path.exists(self.execution_history_path):
+                with open(self.execution_history_path, "r") as history:
+                    self._history = history.read()
+            else:
+                self._history = ""
+        return self._history
 
     @property
     def input_names(self):

@@ -60,7 +60,7 @@ class PipelineConfig(object):
 
     """
     def __init__(self, name, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
-                 variant="main", available_variants=[], log=None):
+                 variant="main", available_variants=[], log=None, all_filenames=None):
         if log is None:
             log = get_console_logger("Pimlico")
         self.log = log
@@ -73,6 +73,7 @@ class PipelineConfig(object):
         self.raw_module_configs = raw_module_configs
         self.pipeline_config = pipeline_config
         self.filename = filename
+        self.all_filenames = all_filenames or [filename]
         self.name = name
 
         # Certain standard system-wide settings, loaded from the local config
@@ -250,7 +251,8 @@ class PipelineConfig(object):
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
 
         # Perform pre-processing of config file to replace includes, etc
-        config_sections, available_variants, vars = preprocess_config_file(os.path.abspath(filename), variant=variant)
+        config_sections, available_variants, vars, all_filenames = \
+            preprocess_config_file(os.path.abspath(filename), variant=variant)
         # If we were asked to load a particular variant, check it's in the list of available variants
         if variant != "main" and variant not in available_variants:
             raise PipelineConfigParseError("could not load pipeline variant '%s': it is not declared anywhere in the "
@@ -292,7 +294,8 @@ class PipelineConfig(object):
         # Do no further checking or processing at this stage: just keep raw dictionaries for the time being
         pipeline = PipelineConfig(
             name, pipeline_config, local_config_data, raw_module_options, module_order,
-            filename=filename, variant=variant, available_variants=list(sorted(available_variants))
+            filename=filename, variant=variant, available_variants=list(sorted(available_variants)),
+            all_filenames=all_filenames
         )
 
         # Now that we've got the pipeline instance prepared, load all the module info instances, so they've cached
@@ -363,6 +366,7 @@ def preprocess_config_file(filename, variant="main"):
     available_variants = set([])
     sub_configs = []
     sub_vars = []
+    all_filenames = [os.path.abspath(filename)]
 
     with open(filename, "r") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
@@ -385,7 +389,9 @@ def preprocess_config_file(filename, variant="main"):
                     # Include another file, given relative to this one
                     include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), rest.strip("\n ")))
                     # Run preprocessing over that file too, so we can have embedded includes, etc
-                    incl_config, incl_variants, incl_vars = preprocess_config_file(include_filename, variant=variant)
+                    incl_config, incl_variants, incl_vars, incl_filenames = \
+                        preprocess_config_file(include_filename, variant=variant)
+                    all_filenames.extend(incl_filenames)
                     # Save this subconfig and incorporate it later
                     sub_configs.append((include_filename, incl_config))
                     # Also save vars section, which may override variables that were defined earlier
@@ -426,7 +432,7 @@ def preprocess_config_file(filename, variant="main"):
 
     # Don't include "main" variant in available variants
     available_variants.discard("main")
-    return config_sections, available_variants, vars
+    return config_sections, available_variants, vars, all_filenames
 
 
 def check_for_cycles(pipeline):
