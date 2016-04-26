@@ -1,16 +1,17 @@
+"""
+Converts word-annotations to CoNLL format, ready for input into the Malt parser.
+Annotations must contain words and POS tags. If they contain lemmas, all the better; otherwise the word will
+be repeated as the lemma.
+
+"""
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, CoNLLDependencyParseInputCorpusWriter
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithFields
 
 
 class ModuleInfo(DocumentMapModuleInfo):
-    """
-    Converts word-annotations to CoNLL format, ready for input into the Malt parser.
-    Annotations must contain words and POS tags. If they contain lemmas, all the better; otherwise the word will
-    be repeated as the lemma.
-
-    """
     module_type_name = "conll_parser_input"
+    module_readable_name = "Annotated text to CoNLL dep parse input converter"
     module_inputs = [("annotations", WordAnnotationCorpusWithFields(["word", "pos"]))]
     module_outputs = [("conll_data", CoNLLDependencyParseInputCorpus)]
     module_options = {}

@@ -3,7 +3,7 @@ from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.parallel.map import MultiprocessingMapProcess, MultiprocessingMapPool, \
     DocumentMapModuleParallelExecutor
-from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
+from pimlico.datatypes.datatypes import TokenizedCorpus
 from py4j.java_collections import ListConverter
 
 

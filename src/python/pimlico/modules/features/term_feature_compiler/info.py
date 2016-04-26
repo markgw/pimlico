@@ -1,3 +1,9 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import comma_separated_strings, str_to_bool
 from pimlico.datatypes.features import TermFeatureListCorpus, KeyValueListCorpus, TermFeatureListCorpusWriter
@@ -5,6 +11,7 @@ from pimlico.datatypes.features import TermFeatureListCorpus, KeyValueListCorpus
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "term_feature_list"
+    module_readable_name = "Key-value to term-feature converter"
     module_inputs = [("key_values", KeyValueListCorpus)]
     module_outputs = [("term_features", TermFeatureListCorpus)]
     module_options = {

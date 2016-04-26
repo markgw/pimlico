@@ -10,8 +10,9 @@ as far as possible, these should be converted into standard datatypes, or at lea
 use standard idioms for iterating, etc, early in the pipeline.
 
 """
-from importlib import import_module
 import os
+from importlib import import_module
+
 import cPickle as pickle
 
 
@@ -96,6 +97,65 @@ class PimlicoDatatype(object):
         They should called the super method.
         """
         return []
+
+    @classmethod
+    def datatype_full_class_name(cls):
+        """
+        The fully qualified name of the class for this datatype, by which it is reference in config files.
+        Generally, datatypes don't need to override this, but type requirements that take the place of datatypes
+        for type checking need to provide it.
+
+        """
+        return "%s.%s" % (cls.__module__, cls.__name__)
+
+
+class DynamicOutputDatatype(object):
+    """
+    Types of module outputs may be specified as a subclass of :class:`.PimlicoDatatype`, or alternatively
+    as an instance of DynamicOutputType. In this case, get_datatype() is called when the output datatype is
+    needed, passing in the module info instance for the module, so that a specialized datatype can be
+    produced on the basis of options, input types, etc.
+
+    The dynamic type must provide certain pieces of information need to typechecking.
+
+    """
+    """
+    Must be provided by subclasses: can be a noncommittal string giving some idea of what types may be provided.
+    Used for documentation.
+    """
+    datatype_name = None
+
+    def get_datatype(self, module_info):
+        raise NotImplementedError
+
+    def get_base_datatype_class(self):
+        """
+        If it's possible to say before the instance of a ModuleInfo is available what base datatype will be
+        produced, implement this to return the class. By default, it return None.
+
+        If this information is available, it will be used in documentation.
+
+        """
+        return None
+
+
+class DynamicInputDatatypeRequirement(object):
+    """
+    Types of module inputs may be given as a subclass of :class:`.PimlicoDatatype`, a tuple of datatypes, or
+    an instance a DynamicInputDatatypeRequirement subclass. In this case, check_type(supplied_type) is called
+    during typechecking to check whether the type that we've got conforms to the input type requirements.
+
+    Additionally, if datatype_doc_info is provided, it is used to represent the input type constraints in
+    documentation.
+
+    """
+    """
+    To provide a helpful message for the documentation, either override this, or set it in the constructor.
+    """
+    datatype_doc_info = None
+
+    def check_type(self, supplied_type):
+        raise NotImplementedError
 
 
 class PimlicoDatatypeWriter(object):

@@ -1,9 +1,10 @@
-from operator import itemgetter
 import re
 
-from pimlico.datatypes.base import DatatypeLoadError, InvalidDocument
+from operator import itemgetter
+
+from pimlico.datatypes.base import DatatypeLoadError, DynamicOutputDatatype, DynamicInputDatatypeRequirement
+from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
-from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 
 
 class WordAnnotationCorpus(TarredCorpus):
@@ -164,69 +165,90 @@ class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
         return u"\n".join(u" ".join(self.field_sep.join(word_fields) for word_fields in sentence) for sentence in doc)
 
 
-def AddAnnotationField(input_name, add_fields):
-    """
-    Dynamic type constructor that can be used in place of a module's output type. When called
-    (when the output type is needed), dynamically creates a new type that is a WordAnnotationCorpus
-    with the same fields as the named input to the module, with the addition of one or more new ones.
-    Only works if the input datatype explicitly declares the fields it makes available.
+class AddAnnotationField(DynamicOutputDatatype):
+    def __init__(self, input_name, add_fields):
+        """
+        Dynamic type constructor that can be used in place of a module's output type. When called
+        (when the output type is needed), dynamically creates a new type that is a WordAnnotationCorpus
+        with the same fields as the named input to the module, with the addition of one or more new ones.
+        Only works if the input datatype explicitly declares the fields it makes available.
 
-    :param module_info: ModuleInfo instance
-    :param input_name: input to the module whose fields we extend
-    :param add_fields: field or fields to add, string names
-    :return: new datatype, subclass of WordAnnotationCorpus
-    """
-    # Make it easy to add just a single field, the most common case
-    if isinstance(add_fields, basestring):
-        add_fields = [add_fields]
+        :param input_name: input to the module whose fields we extend
+        :param add_fields: field or fields to add, string names
+        """
+        super(AddAnnotationField, self).__init__()
+        # Make it easy to add just a single field, the most common case
+        self.input_name = input_name
 
-    def _builder(module_info):
+        if isinstance(add_fields, basestring):
+            add_fields = [add_fields]
+        self.add_fields = add_fields
+        self.datatype_doc_info = ":class:WordAnnotationCorpus with %s" % ", ".join(add_fields)
+
+    def get_datatype(self, module_info):
         from pimlico.core.modules.base import ModuleInfoLoadError
 
-        input_datatype = module_info.get_input_datatype(input_name)[1]
+        input_datatype = module_info.get_input_datatype(self.input_name)[1]
         # Allow the special case where the input datatype is a tokenized corpus
         # Pretend it's an annotated corpus with no annotations, just words
         if issubclass(input_datatype, TokenizedCorpus):
             base_annotation_fields = ["word"]
+            new_datatype_name = "word_annotations_%s" % "+".join(self.add_fields)
         else:
             if not issubclass(input_datatype, WordAnnotationCorpus):
                 raise ModuleInfoLoadError("cannot construct a dynamic word annotation corpus type, since input we're "
                                           "extending isn't a word annotation corpus. Input '%s' is a %s" %
-                                          (input_name, input_datatype.__name__))
+                                          (self.input_name, input_datatype.__name__))
             if input_datatype.annotation_fields is None:
                 raise ModuleInfoLoadError("cannot construct a word annotation corpus type by adding fields to input '%s', "
                                           "since the input type, %s, doesn't explicitly declare its annotation fields" %
-                                          (input_name, input_datatype.__name__))
+                                          (self.input_name, input_datatype.__name__))
             base_annotation_fields = input_datatype.annotation_fields
+            new_datatype_name = "%s+%s" % (input_datatype.datatype_name, "+".join(self.add_fields))
 
-        for field in add_fields:
+        for field in self.add_fields:
             if field in base_annotation_fields:
                 raise ModuleInfoLoadError("trying to add a field '%s' to data that already has a field with "
                                           "that name" % field)
 
         class ExtendedWordAnnotationCorpus(WordAnnotationCorpus):
-            datatype_name = "%s+%s" % (input_datatype.datatype_name, "+".join(add_fields))
-            annotation_fields = base_annotation_fields + add_fields
+            datatype_name = new_datatype_name
+            annotation_fields = base_annotation_fields + self.add_fields
 
         return ExtendedWordAnnotationCorpus
-    return _builder
+
+    @classmethod
+    def get_base_datatype_class(self):
+        return WordAnnotationCorpus
 
 
-def WordAnnotationCorpusWithFields(fields):
+class WordAnnotationCorpusWithFields(DynamicInputDatatypeRequirement):
     """
-    Dynamic (functional) type that can be used in place of a module's input type. When called, checks whether the
+    Dynamic (functional) type that can be used in place of a module's input type. In typechecking, checks whether the
     input module is a WordAnnotationCorpus (or subtype) and whether its fields include all of those required.
 
     """
-    if isinstance(fields, basestring):
-        fields = [fields]
-    def _checker(supplied_type):
+    def __init__(self, required_fields):
+        super(WordAnnotationCorpusWithFields, self).__init__()
+
+        # Allow just a single field name to be given
+        if isinstance(required_fields, basestring):
+            required_fields = [required_fields]
+
+        self.required_fields = required_fields
+        # Make useful information available to the documentation builder for the module type
+        self.datatype_doc_info = \
+            ":class:`WordAnnotationCorpus <pimlico.datatypes.word_annotations.WordAnnotationCorpus>` " \
+            "with %s field%s" % (" and ".join(
+                "'%s'" % f for f in required_fields), "s" if len(required_fields) > 1 else ""
+            )
+
+    def check_type(self, supplied_type):
         if not issubclass(supplied_type, WordAnnotationCorpus):
             return False
-        if not all(field in supplied_type.annotation_fields for field in fields):
+        if not all(field in supplied_type.annotation_fields for field in self.required_fields):
             return False
         return True
-    return _checker
 
 
 class AnnotationParseError(Exception):

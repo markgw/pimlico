@@ -1,3 +1,9 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 import json
 
 from pimlico.core.config import PipelineConfigParseError
@@ -40,6 +46,7 @@ SKLEARN_CLASSES = {
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "sklearn_mat_fac"
+    module_readable_name = "Sklearn matrix factorization"
     module_inputs = [("matrix", ScipySparseMatrix)]
     module_outputs = [("w", NumpyArray), ("h", NumpyArray)]
     module_options = {

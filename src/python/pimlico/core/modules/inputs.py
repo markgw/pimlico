@@ -35,6 +35,7 @@ def input_module_factory(datatype):
     """
     class DatatypeInputModuleInfo(InputModuleInfo):
         module_type_name = "%s_input" % datatype.datatype_name
+        module_readable_name = "%s datatype input" % datatype.datatype_name
         module_outputs = [("data", datatype)]
         module_options = datatype.input_module_options
 

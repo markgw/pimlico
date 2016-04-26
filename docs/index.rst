@@ -36,6 +36,7 @@ Contents:
    core/index
    guides/index
    plans/index
+   modules/index
 
 
 Indices and tables

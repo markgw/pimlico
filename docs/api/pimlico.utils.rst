@@ -1,6 +1,13 @@
 pimlico.utils package
 =====================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pimlico.utils.docs
+
 Submodules
 ----------
 

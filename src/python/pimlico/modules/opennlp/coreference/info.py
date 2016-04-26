@@ -1,3 +1,9 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 import os
 
 from pimlico import MODEL_DIR
@@ -21,6 +27,7 @@ class ModuleInfo(DocumentMapModuleInfo):
 
     """
     module_type_name = "opennlp_coref"
+    module_readable_name = "OpenNLP coreference resolution"
     module_inputs = [("parses", ConstituencyParseTreeCorpus)]
     module_outputs = [("coref", CorefCorpus)]
     module_options = {

@@ -1,3 +1,9 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.arrays import ScipySparseMatrix
 from pimlico.datatypes.features import IndexedTermFeatureListCorpus
@@ -5,6 +11,7 @@ from pimlico.datatypes.features import IndexedTermFeatureListCorpus
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "term_feature_matrix_builder"
+    module_readable_name = "Term-feature matrix builder"
     module_inputs = [
         ("data", IndexedTermFeatureListCorpus)
     ]

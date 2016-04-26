@@ -1,3 +1,9 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool, comma_separated_strings
 from pimlico.datatypes.features import TermFeatureListCorpus, TermFeatureListCorpusWriter
@@ -6,6 +12,7 @@ from pimlico.datatypes.parse.dependency import CoNLLDependencyParseCorpus
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "embedding_dep_features"
+    module_readable_name = "Dependency feature extractor for embeddings"
     module_inputs = [("dependencies", CoNLLDependencyParseCorpus)]
     module_outputs = [("term_features", TermFeatureListCorpus)]
     module_options = {

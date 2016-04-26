@@ -1,15 +1,22 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 import os
 
 from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from .datatypes import TokenizedCorpus
+from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.tar import TarredCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_tokenizer"
+    module_readable_name = "OpenNLP tokenizer"
     module_inputs = [("text", TarredCorpus)]
     module_outputs = [("documents", TokenizedCorpus)]
     module_options = {

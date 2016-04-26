@@ -1,3 +1,9 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 import os
 
 from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
@@ -11,6 +17,7 @@ from pimlico.datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "malt"
+    module_readable_name = "Malt dependency parser"
     module_inputs = [("documents", CoNLLDependencyParseInputCorpus)]
     module_outputs = [("parsed", CoNLLDependencyParseCorpus)]
     module_options = {

@@ -6,10 +6,11 @@ the Pimlico codebase or a standalone module in your own codebase, or for a speci
 
 A Pimlico module is identified by the full Python-path to the Python package that contains it. This
 package should be laid out as follows:
- - The module's metadata is defined by a class in info.py called ModuleInfo, which should inherit from
-   BaseModuleInfo or one of its subclasses.
- - The module's functionality is provided by a class in exec.py called ModuleExecutor, which should inherit
-   from BaseModuleExecutor.
+
+- The module's metadata is defined by a class in info.py called ModuleInfo, which should inherit from
+  BaseModuleInfo or one of its subclasses.
+- The module's functionality is provided by a class in exec.py called ModuleExecutor, which should inherit
+  from BaseModuleExecutor.
 
 The exec Python module will not be imported until an instance of the module is to be run. This means that
 you can import dependencies and do any necessary initialization at the point where it's executed, without
@@ -28,6 +29,7 @@ from operator import itemgetter
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
+from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement
 
 
 class BaseModuleInfo(object):
@@ -35,19 +37,24 @@ class BaseModuleInfo(object):
     Abstract base class for all pipeline modules' metadata.
 
     """
-    module_type_name = NotImplemented
+    module_type_name = None
+    module_readable_name = None
     module_options = []
     module_inputs = []
-    # Specifies a list of (name, datatype class) pairs for outputs that are always written
+    """ Specifies a list of (name, datatype class) pairs for outputs that are always written """
     module_outputs = []
-    # Specifies a list of (name, datatype class) pairs for outputs that are written only if they're specified
-    #  in the "output" option or used by another module
+    """
+    Specifies a list of (name, datatype class) pairs for outputs that are written only if they're specified
+    in the "output" option or used by another module
+    """
     module_optional_outputs = []
-    # Whether the module should be executed
-    # Typically True for almost all modules, except input modules (though some of them may also require execution) and
-    #  filters
+    """
+    Whether the module should be executed
+    Typically True for almost all modules, except input modules (though some of them may also require execution) and
+    filters
+    """
     module_executable = True
-    # If specified, this ModuleExecutor class will be used instead of looking one up in the exec Python module
+    """ If specified, this ModuleExecutor class will be used instead of looking one up in the exec Python module """
     module_executor_override = None
 
     def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[]):
@@ -309,7 +316,7 @@ class BaseModuleInfo(object):
         datatype = outputs[output_name]
 
         # The datatype might be a dynamic type -- a function that we call to get the type
-        if type(datatype) is FunctionType:
+        if not isinstance(datatype, type) or not issubclass(datatype, PimlicoDatatype):
             # Call the function to build the datatype
             datatype = datatype(self)
         return output_name, datatype
@@ -373,8 +380,9 @@ class BaseModuleInfo(object):
         # Check whether the datatype is ready to go
         return previous_module.get_output(output_name).data_ready()
 
-    def is_filter(self):
-        return not self.module_executable and len(self.module_inputs) > 0
+    @classmethod
+    def is_filter(cls):
+        return not cls.module_executable and len(cls.module_inputs) > 0
 
     def missing_data(self):
         """
@@ -411,13 +419,42 @@ class BaseModuleInfo(object):
         for input_name, (dep_module_name, output) in self.inputs.items():
             # Check the type of each input in turn
             input_type_requirements = module_inputs[input_name]
+
             # Input types may be tuples, to allow multiple types
             if type(input_type_requirements) is not tuple:
                 input_type_requirements = (input_type_requirements,)
+            # Make sure the input type requirements are given in a suitable form
+            for intype in input_type_requirements:
+                if isinstance(intype, type) and not issubclass(intype, PimlicoDatatype):
+                    raise PipelineStructureError("invalid input datatype requirement for module '%s'. Each item must "
+                                                 "be either a PimlicoDatatype subclass or instance of a "
+                                                 "DynamicInputDatatypeRequirement subclass: got %s" %
+                                                 (self.module_name, intype.__name__))
+                elif not isinstance(intype, DynamicInputDatatypeRequirement):
+                    raise PipelineStructureError("invalid input datatype requirement for module '%s'. Each item must "
+                                                 "be either a PimlicoDatatype subclass or instance of a "
+                                                 "DynamicInputDatatypeRequirement subclass: got %s" %
+                                                 (self.module_name, type(intype).__name__))
+
             # Load the dependent module
             dep_module = self.pipeline[dep_module_name]
             # Try to load the named output (or the default, if no name was given)
             output_name, dep_module_output = dep_module.get_output_datatype(output_name=output)
+
+            # Check the output datatype is given in a suitable form
+            if not isinstance(dep_module_output, DynamicOutputDatatype) \
+                    and not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)):
+                if isinstance(dep_module_output, type):
+                    type_name = dep_module_output.__name__
+                else:
+                    type_name = "instance of %s" % type(dep_module_output).__name__
+                raise PipelineStructureError("invalid output datatype from module '%s'. Must be either "
+                                             "PimlicoDatatype subclass or an instance of a DynamicOutputDatatype "
+                                             "subclass: got %s" % (self.module_name, type_name))
+            elif isinstance(dep_module_output, DynamicOutputDatatype):
+                # Realize the dynamic datatype so get the actual datatype to be produced
+                dep_module_output = dep_module_output.get_datatype(self)
+
             # Check that the provided output type is a subclass of (or equal to) the required input type
             if not any(_compatible_input_type(intype, dep_module_output) for intype in input_type_requirements):
                 raise PipelineStructureError(
@@ -479,14 +516,24 @@ class BaseModuleInfo(object):
         """
         return []
 
+    @classmethod
+    def module_package_name(cls):
+        """
+        The package name for the module, which is used to identify it in config files. This is the
+        package containing the info.py in which the ModuleInfo is defined.
+
+        """
+        return cls.__module__.rpartition(".info")[0]
+
 
 def _compatible_input_type(type_requirement, supplied_type):
-    if type(type_requirement) is FunctionType:
-        # If the requirement is a function, we call it on the supplied type to check whether it's compatible
-        return type_requirement(supplied_type)
-    else:
-        # Otherwise, we just check whether the supplied type is a subclass of the requirement
+    if isinstance(type_requirement, type) and issubclass(type_requirement, PimlicoDatatype):
+        # If the type requirement is just a Pimlico datatype, we check whether the supplied type is a subclass of it
         return issubclass(supplied_type, type_requirement)
+    else:
+        # Otherwise it's expected to be an instance of a DynamicInputDatatypeRequirement subclass
+        # Call check_type() on the supplied type to check whether it's compatible
+        return type_requirement.check_type(supplied_type)
 
 
 class BaseModuleExecutor(object):

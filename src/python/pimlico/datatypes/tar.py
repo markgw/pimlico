@@ -169,25 +169,41 @@ class TarredCorpusWriter(IterableCorpusWriter):
     writers and readers to be sure the pre/post-processing is identical to if we were writing the docs to disk
     and reading them in again.
 
+    If append=True, existing archives and their files are not overwritten, the new files are just added to the end.
+    This is useful where we want to restart processing that was broken off in the middle. If trust_length=True,
+    when appending the initial length of the corpus is read from the metadata already written. Otherwise (default),
+    the number of docs already written is actually counted during initialization. This is sensible when the
+    previous writing process may have ended abruptly, so that the metadata is not reliable. If you know you can
+    trust the metadata, however, setting trust_length=True will speed things up.
+
     """
-    def __init__(self, base_dir, gzip=False, append=False):
+    def __init__(self, base_dir, gzip=False, append=False, trust_length=False):
         super(TarredCorpusWriter, self).__init__(base_dir)
         self.append = append
         self.current_archive_name = None
         self.current_archive_tar = None
-        self.doc_count = 0
         self.gzip = gzip
         # Set "gzip" in the metadata, so we know to unzip when reading
         self.metadata["gzip"] = gzip
 
         self.metadata["length"] = 0
         if append:
-            # Try reading length so far if we're appending and some docs have already been written
-            # If no metadata has been written, we start from 0
-            metadata_path = os.path.join(self.base_dir, "corpus_metadata")
-            if os.path.exists(metadata_path):
-                with open(metadata_path, "r") as f:
-                    self.metadata["length"] = pickle.load(f).get("length", 0)
+            if trust_length:
+                # Try reading length so far if we're appending and some docs have already been written
+                # If no metadata has been written, we start from 0
+                metadata_path = os.path.join(self.base_dir, "corpus_metadata")
+                if os.path.exists(metadata_path):
+                    with open(metadata_path, "r") as f:
+                        self.metadata["length"] = pickle.load(f).get("length", 0)
+            else:
+                # Can't rely on the metadata: count up docs in archive to get initial length
+                for root, dirs, files in os.walk(self.data_dir):
+                    for filename in files:
+                        tar_filename = os.path.join(root, filename)
+                        if tar_filename.endswith(".tar.gz") or tar_filename.endswith(".tar"):
+                            with tarfile.open(tar_filename, "r") as tarball:
+                                self.metadata["length"] += len(tarball.getmembers())
+        self.doc_count = self.metadata["length"]
 
         # Write out the metadata, so we're in a fit state to open a reader
         self.write_metadata()

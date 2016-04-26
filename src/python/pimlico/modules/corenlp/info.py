@@ -1,58 +1,91 @@
+"""
+Process documents one at a time with the `Stanford CoreNLP toolkit <http://stanfordnlp.github.io/CoreNLP/>`_.
+CoreNLP provides a large number of NLP tools, including a POS-tagger, various parsers, named-entity recognition
+and coreference resolution. Most of these tools can be run using this module.
+
+The module uses the CoreNLP server to accept many inputs without the overhead of loading models.
+If parallelizing, only a single CoreNLP server is run, since this is designed to set multiple Java threads running
+if it receives multiple queries at the same time. Multiple Python processes send queries to the server and
+process the output.
+
+The module has no non-optional outputs, since what sort of output is available depends on the options you pass in:
+that is, on which tools are run. Use the annotations option to choose which word annotations are added.
+Otherwise, simply select the outputs that you want and the necessary tools will be run in the CoreNLP pipeline
+to produce those outputs.
+
+Currently, the module only accepts tokenized input. If pre-POS-tagged input is given, for example, the POS
+tags won't be handed into CoreNLP. In the future, this will be implemented.
+
+We also don't currently provide a way of choosing models other than the standard, pre-trained English models.
+This is a small addition that will be implemented in the future.
+
+"""
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool
+from pimlico.datatypes.base import DynamicOutputDatatype
 from pimlico.datatypes.coref.corenlp import CorefCorpus
+from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
 from pimlico.datatypes.parse.dependency import StanfordDependencyParseCorpus, StanfordDependencyParseCorpusWriter
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
-from pimlico.modules.opennlp.tokenize.datatypes import TokenizedCorpus
 from .deps import check_corenlp_dependencies
 
 
-def annotation_fields_from_options(module_info):
-    from pimlico.core.modules.base import ModuleInfoLoadError
+class AnnotationFieldsFromOptions(DynamicOutputDatatype):
+    def get_datatype(self, module_info):
+        from pimlico.core.modules.base import ModuleInfoLoadError
 
-    input_datatype = module_info.get_input_datatype("documents")[1]
-    if issubclass(input_datatype, WordAnnotationCorpus):
-        if input_datatype.annotation_fields is None:
-            raise ModuleInfoLoadError("cannot construct a word annotation corpus type by adding fields to input, "
-                                      "since the input type, %s, doesn't explicitly declare its annotation fields" %
-                                      input_datatype.__name__)
-        base_annotation_fields = input_datatype.annotation_fields
-    else:
-        # Allow the special case where the input datatype is a tokenized corpus
-        # Pretend it's an annotated corpus with no annotations, just words
-        base_annotation_fields = []
+        input_datatype = module_info.get_input_datatype("documents")[1]
+        if issubclass(input_datatype, WordAnnotationCorpus):
+            if input_datatype.annotation_fields is None:
+                raise ModuleInfoLoadError("cannot construct a word annotation corpus type by adding fields to input, "
+                                          "since the input type, %s, doesn't explicitly declare its annotation fields" %
+                                          input_datatype.__name__)
+            base_annotation_fields = input_datatype.annotation_fields
+        else:
+            # Allow the special case where the input datatype is a tokenized corpus
+            # Pretend it's an annotated corpus with no annotations, just words
+            base_annotation_fields = []
 
-    # Look at the options to see what annotations are going to be added
-    add_fields = module_info.options["annotators"].split(",") if module_info.options["annotators"] else []
-    for field in add_fields:
-        if field not in ["pos", "ner", "lemma", "word"]:
-            raise ModuleInfoLoadError("invalid annotator '%s': choose from pos, ner, lemma" % field)
-        if field in base_annotation_fields:
-            raise ModuleInfoLoadError("annotation '%s' is already available in the input, but CoreNLP annotator "
-                                      "was asked to add it" % field)
+        # Look at the options to see what annotations are going to be added
+        add_fields = module_info.options["annotators"].split(",") if module_info.options["annotators"] else []
+        for field in add_fields:
+            if field not in ["pos", "ner", "lemma", "word"]:
+                raise ModuleInfoLoadError("invalid annotator '%s': choose from pos, ner, lemma" % field)
+            if field in base_annotation_fields:
+                raise ModuleInfoLoadError("annotation '%s' is already available in the input, but CoreNLP annotator "
+                                          "was asked to add it" % field)
 
-    if "word" not in base_annotation_fields + add_fields:
-        # Output annotations should always include the word, which is always available
-        add_fields.insert(0, "word")
+        if "word" not in base_annotation_fields + add_fields:
+            # Output annotations should always include the word, which is always available
+            add_fields.insert(0, "word")
 
-    class ExtendedWordAnnotationCorpus(WordAnnotationCorpus):
-        datatype_name = "%s+%s" % (input_datatype.datatype_name, "+".join(add_fields))
-        annotation_fields = base_annotation_fields + add_fields
+        if issubclass(input_datatype, WordAnnotationCorpus):
+            new_datatype_name = "word_annotations_%s" % "+".join(add_fields)
+        else:
+            new_datatype_name = "%s+%s" % (input_datatype.datatype_name, "+".join(add_fields))
 
-    return ExtendedWordAnnotationCorpus
+        class ExtendedWordAnnotationCorpus(WordAnnotationCorpus):
+            datatype_name = new_datatype_name
+            annotation_fields = base_annotation_fields + add_fields
+
+        return ExtendedWordAnnotationCorpus
+
+    def get_base_datatype_class(self):
+        return WordAnnotationCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "corenlp"
+    module_readable_name = "Stanford CoreNLP"
     module_inputs = [("documents", (WordAnnotationCorpus, TokenizedCorpus, TarredCorpus))]
     # No non-optional outputs
     module_outputs = []
     module_optional_outputs = [
         # The default output: annotated words
-        ("annotations", annotation_fields_from_options),
+        ("annotations", AnnotationFieldsFromOptions()),
         # Constituency parses
         ("parse", ConstituencyParseTreeCorpus),
         # Dependency parses extracted from constituency parses

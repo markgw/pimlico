@@ -1,4 +1,36 @@
+"""
+Utilities and type processors for module options.
 
+"""
+
+
+def opt_type_help(help_text):
+    """
+    Decorator to add help text to functions that are designed to be used as module option processors. The
+    help text will be used to describe the type in documentation.
+
+    """
+    def _wrap(fn):
+        fn.option_help_text = help_text
+        return fn
+    return _wrap
+
+
+def format_option_type(t):
+    if hasattr(t, "option_help_text"):
+        # Help text added by opt_type_help decorator
+        return t.option_help_text
+    elif t is str:
+        return "string"
+    elif t is int:
+        return "int"
+    elif t is float:
+        return "float"
+    else:
+        return str(t)
+
+
+@opt_type_help("bool")
 def str_to_bool(string):
     """
     Convert a string value to a boolean in a sensible way. Suitable for specifying booleans as options.
@@ -18,7 +50,14 @@ def choose_from_list(options, name=None):
 
     """
     name_text = " for option %s" % name if name is not None else ""
+    if len(options) == 0:
+        help_text = "(no valid values)"
+    elif len(options) == 1:
+        help_text = "'%s'" % options[0]
+    else:
+        help_text = "%s or '%s'" % (", ".join("'%s'" % o for o in options[:-1]), options[-1])
 
+    @opt_type_help(help_text)
     def _fn(string):
         if string not in options:
             raise ValueError("%s is not a valid value%s. Valid choices: %s" % (string, name_text, ", ".join(options)))
@@ -33,6 +72,7 @@ def comma_separated_list(item_type=str):
     given item_type (default: string).
 
     """
+    @opt_type_help("comma-separated list of %s" % format_option_type(item_type))
     def _fn(string):
         return [
             item_type(val.strip()) for val in string.split(",")

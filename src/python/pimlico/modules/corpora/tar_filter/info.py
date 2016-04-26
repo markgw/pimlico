@@ -1,5 +1,5 @@
 """
-Like tar, but doesn't write the archives to disk. Instead simulates the behaviour of
+Like :mod:`tar <pimlico.modules.corpora.tar>`, but doesn't write the archives to disk. Instead simulates the behaviour of
 tar but as a filter, grouping files on the fly and passing them through with an archive name
 
 """
@@ -98,20 +98,21 @@ class TarredCorpusFilter(TarredCorpus):
 
 
 class ModuleInfo(BaseModuleInfo):
-    module_type_name = "tar_extract"
+    module_type_name = "tar_filter"
+    module_readable_name = "Tar archive grouper (filter)"
     module_inputs = [("documents", IterableCorpus)]
     module_outputs = [("documents", TarredCorpusFilter)]
-    module_options = [
-        ("archive_size", {
+    module_options = {
+        "archive_size": {
             "help": "Number of documents to include in each archive (default: 1k)",
             "default": 1000,
-        }),
-        ("archive_basename", {
+        },
+        "archive_basename": {
             "help": "Base name to use for archive tar files. The archive number is appended to this. "
                     "(Default: 'archive')",
             "default": "archive",
-        }),
-    ]
+        },
+    }
     module_executable = False
 
     def instantiate_output_datatype(self, output_name, output_datatype):

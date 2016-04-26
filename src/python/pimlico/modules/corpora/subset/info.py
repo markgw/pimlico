@@ -30,20 +30,21 @@ class CorpusSubsetFilter(IterableCorpus):
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "subset"
+    module_readable_name = "Corpus subset"
     module_inputs = [("documents", IterableCorpus)]
     module_outputs = [("documents", CorpusSubsetFilter)]
-    module_options = [
-        ("size", {
+    module_options = {
+        "size": {
             "help": "Number of documents to include",
             "required": True,
             "type": int,
-        }),
-        ("offset", {
+        },
+        "offset": {
             "help": "Number of documents to skip at the beginning of the corpus (default: 0, start at beginning)",
             "default": 0,
             "type": int,
-        }),
-    ]
+        },
+    }
     module_executable = False
 
     def instantiate_output_datatype(self, output_name, output_datatype):

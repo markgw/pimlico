@@ -6,6 +6,9 @@ store many (potentially small) files without running into filesystem problems.
 The files are simply grouped linearly into a series of tar archives such that
 each (apart from the last) contains the given number.
 
+After grouping documents in this way, document map modules can be called on the corpus and the
+grouping will be preserved as the corpus passes through the pipeline.
+
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.base import IterableCorpus
@@ -14,16 +17,17 @@ from pimlico.datatypes.tar import TarredCorpus
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "tar"
+    module_readable_name = "Tar archive grouper"
     module_inputs = [("documents", IterableCorpus)]
     module_outputs = [("documents", TarredCorpus)]
-    module_options = [
-        ("archive_size", {
+    module_options = {
+        "archive_size": {
             "help": "Number of documents to include in each archive (default: 1k)",
             "default": 1000,
-        }),
-        ("archive_basename", {
+        },
+        "archive_basename": {
             "help": "Base name to use for archive tar files. The archive number is appended to this. "
                     "(Default: 'archive')",
             "default": "archive",
-        }),
-    ]
+        },
+    }

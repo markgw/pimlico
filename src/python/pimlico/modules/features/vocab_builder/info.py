@@ -1,3 +1,9 @@
+"""
+.. todo::
+
+   Document this module
+
+"""
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.dictionary import Dictionary
 from pimlico.datatypes.features import TermFeatureListCorpus
@@ -5,6 +11,7 @@ from pimlico.datatypes.features import TermFeatureListCorpus
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "term_feature_vocab_builder"
+    module_readable_name = "Term-feature corpus vocab builder"
     module_inputs = [("term_features", TermFeatureListCorpus)]
     module_outputs = [("term_vocab", Dictionary), ("feature_vocab", Dictionary)]
     module_options = {
