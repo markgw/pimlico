@@ -549,6 +549,9 @@ class BaseModuleExecutor(object):
     def __init__(self, module_instance_info):
         self.info = module_instance_info
         self.log = module_instance_info.pipeline.log.getChild(module_instance_info.module_name)
+        # Work out how many processes we should use
+        # Normally just comes from pipeline, but we don't parallelize filters
+        self.processes = module_instance_info.pipeline.processes if not module_instance_info.is_filter() else 1
 
     def execute(self):
         raise NotImplementedError

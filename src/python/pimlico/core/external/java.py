@@ -75,7 +75,7 @@ def check_java():
 
 class Py4JInterface(object):
     def __init__(self, gateway_class, port=None, python_port=None, gateway_args=[], pipeline=None, print_stdout=True,
-                 print_stderr=True, env={}, system_properties={}, java_opts=[]):
+                 print_stderr=True, env={}, system_properties={}, java_opts=[], timeout=10.):
         """
         If pipeline is given, configuration is looked for there. If found, this overrides config given
         in other kwargs.
@@ -98,24 +98,29 @@ class Py4JInterface(object):
         self.gateway_args = gateway_args
         self.gateway_class = gateway_class
         self.port = port
+        self.timeout = timeout
 
         self.stderr_queue = Queue()
         self.stdout_queue = Queue()
 
         # Look for config in the pipeline
-        start_port = pipeline.local_config.get("py4j_port", None)
-        if start_port is not None:
-            # Config gives just a single port number
-            # If it's given, use the following port for the other direction of communication
-            self.port = int(start_port)
-            self.python_port = int(start_port) + 1
+        if pipeline is not None:
+            start_port = pipeline.local_config.get("py4j_port", None)
+            if start_port is not None:
+                # Config gives just a single port number
+                # If it's given, use the following port for the other direction of communication
+                self.port = int(start_port)
+                self.python_port = int(start_port) + 1
+            if "py4j_timeout" in pipeline.local_config:
+                # Override the timeout given as an arg
+                self.timeout = float(pipeline.local_config["py4j_timeout"])
 
         self.process = None
         self.gateway = None
         self.port_used = None
         self.clients = []
 
-    def start(self, timeout=10., port_output_prefix=None):
+    def start(self, timeout=None, port_output_prefix=None):
         """
         Start a Py4J gateway server in the background on the given port, which will then be used for
         communicating with the Java app.
@@ -123,7 +128,12 @@ class Py4JInterface(object):
         If a port has been given, it is assumed that the gateway accepts a --port option.
         Likewise with python_port and a --python-port option.
 
+        If timeout is given, it overrides any timeout given in the constructor or specified in local config.
+
         """
+        if timeout is None:
+            # Use the default timeout specified on the instance
+            timeout = self.timeout
         args = list(self.gateway_args)
 
         if self.port is not None:

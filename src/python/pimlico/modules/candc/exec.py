@@ -1,13 +1,17 @@
+from __future__ import absolute_import
+
 import Queue
+import multiprocessing
 import subprocess
-from cStringIO import StringIO
+from Queue import Empty
 from subprocess import PIPE
+
+from cStringIO import StringIO
 
 from pimlico.core.external.java import OutputConsumer
 from pimlico.core.logs import get_log_file
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
-from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, MultiprocessingMapPool, \
-    MultiprocessingMapProcess
+from pimlico.core.modules.map.multiproc import MultiprocessingMapProcess, multiprocessing_executor_factory
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.parse.candc import CandcOutput
 from pimlico.utils.network import get_unused_local_ports
@@ -19,43 +23,15 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
     to that server.
 
     """
-    def __init__(self, input_queue, output_queue, info, port):
+    def __init__(self, input_queue, output_queue, executor):
         self._server_process = None
         self.host = "127.0.0.1"
-        self.port = port
-        super(CandcWorkerProcess, self).__init__(input_queue, output_queue, info)
-
-    def set_up(self):
-        # Start up a Soap server in the background
-        server_args = [self.info.server_binary, "--models", self.info.model_path,
-                       "--server", "%s:%d" % (self.host, self.port)]
-        self._server_process = subprocess.Popen(server_args,
-                                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        # Set off a thread to collect output from stdout and stderr
-        self.stdout_queue = Queue.Queue()
-        self.stdout_buffer = StringIO()
-        self.stdout_consumer = OutputConsumer([self.stdout_queue, self.stdout_buffer], self._server_process.stdout)
-        self.stdout_consumer.start()
-        self.stderr_queue = Queue.Queue()
-        self.stderr_buffer = StringIO()
-        self.stderr_consumer = OutputConsumer([self.stderr_queue, self.stderr_buffer], self._server_process.stderr)
-        self.stderr_consumer.start()
-
-        # The server outputs a line to stderr when it's ready, so we should wait for this before continuing
+        super(CandcWorkerProcess, self).__init__(input_queue, output_queue, executor)
+        # Get one of the ports that the executor lined up for us
         try:
-            err = self.stderr_queue.get(timeout=10.)
-        except Queue.Empty:
-            err_path = output_candc_error_info(server_args, self._server_process.returncode,
-                                               self.stdout_buffer.getvalue(), self.stderr_buffer.getvalue())
-            raise CandCServerError("server startup timed out after 10 seconds. See %s for more details" % err_path)
-
-        # Check that the server's running nicely
-        if not err.startswith("waiting for connections"):
-            err_path = output_candc_error_info(server_args, self._server_process.returncode,
-                                               self.stdout_buffer.getvalue(), self.stderr_buffer.getvalue())
-            raise CandCServerError("server startup failed: %s. See %s for more details" %
-                                   (self.stderr_buffer.getvalue(), err_path))
+            self.port = self.executor.ports.get_nowait()
+        except Empty:
+            raise CandCServerError("not enough ports for all the processes")
 
     @skip_invalid
     @invalid_doc_on_error
@@ -75,16 +51,48 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
         else:
             return CandcOutput(stdout.decode("utf-8"))
 
-    def tear_down(self):
-        if self._server_process is not None:
-            self._server_process.terminate()
-
     def _run_client(self, input_data):
         # Run the soap client
         client_command = [self.info.client_binary, "--url", "http://%s:%d" % (self.host, self.port)]
         client = subprocess.Popen(client_command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         stdout, stderr = client.communicate(input_data)
         return stdout, stderr, client.returncode
+
+    def set_up(worker):
+        # Start up a Soap server in the background
+        server_args = [worker.info.server_binary, "--models", worker.info.model_path,
+                       "--server", "%s:%d" % (worker.host, worker.port)]
+        worker._server_process = subprocess.Popen(server_args,
+                                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Set off a thread to collect output from stdout and stderr
+        worker.stdout_queue = Queue.Queue()
+        worker.stdout_buffer = StringIO()
+        worker.stdout_consumer = OutputConsumer([worker.stdout_queue, worker.stdout_buffer], worker._server_process.stdout)
+        worker.stdout_consumer.start()
+        worker.stderr_queue = Queue.Queue()
+        worker.stderr_buffer = StringIO()
+        worker.stderr_consumer = OutputConsumer([worker.stderr_queue, worker.stderr_buffer], worker._server_process.stderr)
+        worker.stderr_consumer.start()
+
+        # The server outputs a line to stderr when it's ready, so we should wait for this before continuing
+        try:
+            err = worker.stderr_queue.get(timeout=10.)
+        except Queue.Empty:
+            err_path = output_candc_error_info(server_args, worker._server_process.returncode,
+                                               worker.stdout_buffer.getvalue(), worker.stderr_buffer.getvalue())
+            raise CandCServerError("server startup timed out after 10 seconds. See %s for more details" % err_path)
+
+        # Check that the server's running nicely
+        if not err.startswith("waiting for connections"):
+            err_path = output_candc_error_info(server_args, worker._server_process.returncode,
+                                               worker.stdout_buffer.getvalue(), worker.stderr_buffer.getvalue())
+            raise CandCServerError("server startup failed: %s. See %s for more details" %
+                                   (worker.stderr_buffer.getvalue(), err_path))
+
+    def tear_down(self):
+        if self._server_process is not None:
+            self._server_process.terminate()
 
     def clear_pipes(self):
         """
@@ -101,46 +109,17 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
         return self._server_process.poll() is None
 
 
-class CandcPool(MultiprocessingMapPool):
-    """
-    Simple pool for sending off multiple calls to the Py4J gateway at once.
-
-    """
-
-    def __init__(self, executor, processes):
-        # Generate enough ports for all the processes
-        self._ports = iter(get_unused_local_ports(processes))
-        super(CandcPool, self).__init__(executor, processes)
-
-    def start_worker(self):
-        return CandcWorkerProcess(self.input_queue, self.output_queue, self.executor.info, self._ports.next())
+def preprocess(executor):
+    executor.input_corpora[0].raw_data = True
+    # Generate enough ports for all the processes
+    executor.ports = multiprocessing.Queue()
+    for port in get_unused_local_ports(executor.info.processes):
+        executor.ports.put(port)
 
 
-class ModuleExecutor(DocumentMapModuleParallelExecutor):
-    def preprocess(self):
-        # Start up a single C&C background process
-        self.log.info("Starting single C&C background process")
-        self.single_pool = CandcPool(self, 1)
-        self.log.info("C&C process initialized")
-
-        self.input_corpora[0].raw_data = True
-
-    def preprocess_parallel(self):
-        self.input_corpora[0].raw_data = True
-
-    def create_pool(self, processes):
-        return CandcPool(self, processes)
-
-    def process_document(self, archive, filename, *docs):
-        self.single_pool.input_queue.put((archive, filename, docs))
-        # Wait for output
-        return self.single_pool.output_queue.get().data
-
-    def postprocess(self, error=False):
-        self.single_pool.shutdown()
-
-    def postprocess_parallel(self, error=False):
-        pass
+ModuleExecutor = multiprocessing_executor_factory(
+    CandcWorkerProcess, preprocess_fn=preprocess
+)
 
 
 class CandCServerError(Exception):

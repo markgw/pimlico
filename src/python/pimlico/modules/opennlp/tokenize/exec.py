@@ -1,58 +1,40 @@
-from pimlico.core.external.java import Py4JInterface, JavaProcessError
-from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.core.modules.map import DocumentMapModuleExecutor, skip_invalid
+from pimlico.core.external.java import Py4JInterface, gateway_client_to_running_server
+from pimlico.core.modules.map import skip_invalid
+from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 
 
-class ModuleExecutor(DocumentMapModuleExecutor):
-    def preprocess(self):
-        # Start a tokenizer process
-        self.tokenizer = StreamTokenizer(self.info.sentence_model_path, self.info.token_model_path,
-                                         pipeline=self.info.pipeline)
-        try:
-            self.tokenizer.start()
-        except JavaProcessError, e:
-            raise ModuleExecutionError("error starting tokenizer process: %s" % e)
-
-    @skip_invalid
-    def process_document(self, archive, filename, doc):
-        # Run tokenization
-        tokenized_sents = self.tokenizer.tokenize(doc)
-        # Output one sentence per line
-        return u"\n".join(tokenized_sents)
-
-    def postprocess(self, error=False):
-        self.tokenizer.stop()
-        self.tokenizer = None
+@skip_invalid
+def process_document(worker, archive, filename, doc):
+    # Run tokenization
+    tokenized_sents = list(worker.gateway.entry_point.tokenize(doc))
+    # Output one sentence per line
+    return u"\n".join(tokenized_sents)
 
 
-class StreamTokenizer(object):
-    def __init__(self, sentence_model_path, token_model_path, pipeline=None):
-        self.pipeline = pipeline
-        self.token_model_path = token_model_path
-        self.sentence_model_path = sentence_model_path
-
-        self.interface = None
-
-    def tokenize(self, document):
-        return list(self.interface.gateway.entry_point.tokenize(document))
-
-    def start(self):
-        # Start a tokenizer process running in the background via Py4J
-        self.interface = Py4JInterface("pimlico.opennlp.TokenizerGateway",
-                                       gateway_args=[self.sentence_model_path, self.token_model_path],
-                                       pipeline=self.pipeline, print_stderr=False, print_stdout=False)
-        self.interface.start()
-
-    def stop(self):
-        self.interface.stop()
-
-    def __enter__(self):
-        self.start()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.stop()
+def preprocess(executor):
+    # Start a tokenizer process running in the background via Py4J
+    executor.interface = Py4JInterface("pimlico.opennlp.TokenizerGateway",
+                                       gateway_args=[executor.info.sentence_model_path, executor.info.token_model_path],
+                                       pipeline=executor.info.pipeline, print_stderr=False, print_stdout=False)
+    executor.interface.start()
+    executor.gateway_port = executor.interface.port_used
 
 
-class TokenizerProcessError(Exception):
-    pass
+def postprocess(executor, error=False):
+    executor.interface.stop()
+
+
+def worker_set_up(worker):
+    # Open a client gateway to the executor's py4j interface
+    worker.gateway = gateway_client_to_running_server(worker.executor.gateway_port)
+
+
+def worker_tear_down(worker):
+    worker.gateway.close()
+
+
+ModuleExecutor = multiprocessing_executor_factory(
+    process_document,
+    preprocess_fn=preprocess, postprocess_fn=postprocess,
+    worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down,
+)

@@ -1,3 +1,6 @@
+import threading
+from Queue import Queue
+from threading import Thread
 from traceback import format_exc
 
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor
@@ -47,7 +50,17 @@ class DocumentMapModuleInfo(BaseModuleInfo):
 class DocumentMapModuleExecutor(BaseModuleExecutor):
     """
     Base class for executors for document map modules. Subclasses should provide the behaviour
-    for each individual document.
+    for each individual document by defining a pool (and worker processes) to handle the documents as
+    they're fed into it.
+
+    Note that in most cases it won't be necessary to override the pool and worker base classes yourself.
+    Unless you need special behaviour, use the standard implementations and factory functions.
+
+    Although the pattern of execution for all document map modules is based on parallel processing (creating a pool,
+    spawning worker processes, etc), this doesn't mean that all such modules have to be parallelizable. If you
+    have no reason not to parallelize, it's recommended that you do (with single-process execution as a special
+    case). However, sometimes parallelizing isn't so simple: in these cases, consider using the tools in
+    :mod:.singleproc.
 
     """
     def __init__(self, module_instance_info):
@@ -58,9 +71,6 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         self.input_corpora = [self.info.get_input(input_name)
                               for input_name in self.info.input_names]
         self.input_iterator = AlignedTarredCorpora(self.input_corpora)
-
-    def process_document(self, archive, filename, *docs):
-        raise NotImplementedError
 
     def preprocess(self):
         """
@@ -73,6 +83,16 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         Allows subclasses to define a finishing procedure to be called after corpus processing if finished.
         """
         pass
+
+    def create_pool(self, processes):
+        """
+        Should return an instance of the pool to be used for document processing. Should generally be a
+        subclass of DocumentProcessorPool.
+
+        Always called after postprocess_parallel().
+
+        """
+        raise NotImplementedError
 
     def retrieve_processing_status(self):
         # Check the metadata to see whether we've already partially completed this
@@ -99,64 +119,85 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
     def execute(self):
         # Call the set-up routine, if one's been defined
-        self.log.info("Preparing document map execution")
+        self.log.info("Preparing parallel document map execution with %d processes" % self.processes)
         self.preprocess()
 
+        # Start up a pool
+        self.pool = self.create_pool(self.processes)
+
         complete = False
-        invalid_inputs = 0
-        invalid_outputs = 0
+        result_buffer = {}
 
         docs_completed_now = 0
         docs_completed_before, start_after = self.retrieve_processing_status()
+        total_to_process = len(self.input_iterator) - docs_completed_before
 
-        pbar = get_progress_bar(len(self.input_iterator) - docs_completed_before,
+        pbar = get_progress_bar(total_to_process,
                                 title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
-
         try:
             # Prepare a corpus writer for the output
             with multiwith(*self.info.get_writers(append=start_after is not None)) as writers:
-                for archive, filename, docs in pbar(self.input_iterator.archive_iter(start_after=start_after)):
-                    # Useful to know in output
-                    if any(type(d) is InvalidDocument for d in docs):
-                        invalid_inputs += 1
+                if total_to_process < 1:
+                    # No input documents, don't go any further
+                    # We've come in this far so that the writer gets created and finishing up is done:
+                    #  might need to finish writing metadata or suchlike if we failed last time once all docs were done
+                    self.log.info("No documents to process")
+                else:
+                    # Inputs will be taken from this as they're needed
+                    input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
+                    # Set a thread going to feed things onto the input queue
+                    input_feeder = InputQueueFeeder(self.pool.input_queue, input_iter)
 
-                    # Get the subclass to process the doc
-                    results = self.process_document(archive, filename, *docs)
+                    # Wait to make sure the input feeder's fed something into the input queue
+                    input_feeder.started.wait()
+                    # Check what document we're looking for next
+                    next_document = input_feeder.get_next_output_document()
 
-                    if type(results) is InvalidDocument:
-                        # Just got a single invalid document out: write it out to every output
-                        results = [results] * len(writers)
-                    elif type(results) is not tuple:
-                        # If the processor only produces a single result and there's only one output, that's fine
-                        results = (results,)
-                    if len(results) != len(writers):
-                        raise ModuleExecutionError(
-                            "%s executor's process_document() returned %d results for a document, but the module has "
-                            "%d outputs" % (
-                                type(self).__name__, len(results), len(writers)
-                            )
-                        )
+                    while next_document is not None:
+                        # Wait for a document coming off the output queue
+                        result = self.pool.output_queue.get()
+                        # We've got some result, but it might not be the one we're looking for
+                        # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
+                        result_buffer[(result.archive, result.filename)] = result.data
+                        pbar.update(docs_completed_now + len(result_buffer))
 
-                    # Just for the record (useful output)
-                    if any(type(r) is InvalidDocument for r in results):
-                        invalid_outputs += 1
+                        # Write out as many as we can of the docs that have been sent and whose output is available
+                        #  while maintaining the order they were put in in
+                        while next_document in result_buffer:
+                            archive, filename = next_document
+                            next_output = result_buffer.pop((archive, filename))
 
-                    # Write the result to the output corpora
-                    for result, writer in zip(results, writers):
-                        writer.add_document(archive, filename, result)
+                            # Next document processed: output the result precisely as in the single-core case
+                            if type(next_output) is InvalidDocument:
+                                # Just got a single invalid document out: write it out to every output
+                                next_output = [next_output] * len(writers)
+                            elif type(next_output) is not tuple:
+                                # If the processor produces a single result and there's only one output, fine
+                                next_output = (next_output,)
+                            if len(next_output) != len(writers):
+                                raise ModuleExecutionError(
+                                    "%s executor's process_document() returned %d results for a document, but the "
+                                    "module has %d outputs" % (type(self).__name__, len(next_output), len(writers))
+                                )
+                            # Write the result to the output corpora
+                            for result, writer in zip(next_output, writers):
+                                writer.add_document(archive, filename, result)
 
-                    # Update the module's metadata to say that we've completed this document
-                    docs_completed_now += 1
-                    self.update_processing_status(docs_completed_before+docs_completed_now, archive, filename)
+                            # Update the module's metadata to say that we've completed this document
+                            docs_completed_now += 1
+                            self.update_processing_status(docs_completed_before+docs_completed_now, archive, filename)
+
+                            # Check what document we're waiting for now
+                            next_document = input_feeder.get_next_output_document()
+
+            pbar.finish()
             complete = True
-            self.log.info("Input contained %d invalid documents, output contained %d" %
-                          (invalid_inputs, invalid_outputs))
         finally:
             # Call the finishing-off routine, if one's been defined
             if complete:
                 self.log.info("Document mapping complete. Finishing off")
             else:
-                self.log.info("Document mapping failed")
+                self.log.info("Document mapping failed. Finishing off")
             self.postprocess(error=not complete)
 
             if not complete and self.info.status == "PARTIALLY_PROCESSED":
@@ -208,3 +249,109 @@ def invalid_doc_on_error(fn):
             else:
                 return InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))
     return _fn
+
+
+class ProcessOutput(object):
+    """
+    Wrapper for all result data coming out from a worker.
+    """
+    def __init__(self, archive, filename, data):
+        self.data = data
+        self.filename = filename
+        self.archive = archive
+
+
+class InputQueueFeeder(Thread):
+    """
+    Background thread to read input documents from an iterator and feed them onto an input queue for worker
+    processes/threads.
+
+    """
+    def __init__(self, input_queue, iterator):
+        super(InputQueueFeeder, self).__init__()
+        self.daemon = True
+        self.iterator = iterator
+        self.input_queue = input_queue
+        self.docs_processing = Queue()
+        self.started = threading.Event()
+        self.finished = threading.Event()
+        self.start()
+
+    def no_more_outputs(self):
+        return self.finished.is_set() and self.docs_processing.empty()
+
+    def get_next_output_document(self):
+        if self.no_more_outputs():
+            # No more outputs ever expected to come out
+            return None
+        else:
+            # Possible that docs_processing is empty, if we're waiting for the feeder
+            # Wait until we know what the next document to come out is to be
+            return self.docs_processing.get()
+
+    def run(self):
+        # Keep feeding inputs onto the queue as long as we've got more
+        for archive, filename, docs in self.iterator:
+            # If the queue is full, this will block until there's room to put the next one on
+            self.input_queue.put((archive, filename, docs))
+            # Record that we've sent this one off, so we can write the results out in the right order
+            self.docs_processing.put((archive, filename))
+            # As soon as something's been fed, the output processor can get going
+            self.started.set()
+        # Just in case there aren't any inputs
+        self.started.set()
+        self.finished.set()
+
+
+class DocumentProcessorPool(object):
+    """
+    Base class for pools that provide an easy implementation of parallelization for document map modules.
+    Defines the core interface for pools.
+
+    If you're using multiprocessing, you'll want to use the multiprocessing-specific subclass.
+
+    """
+    def __init__(self, processes):
+        self.output_queue = self.create_output_queue()
+        self.input_queue = self.create_input_queue(2*processes)
+        self.processes = processes
+
+    @staticmethod
+    def create_output_queue():
+        """
+        May be overridden by subclasses to provide different implementations of a Queue. By default, uses the
+        multiprocessing queue type. Whatever is returned, it should implement the interface of Queue.Queue.
+
+        """
+        return Queue()
+
+    @staticmethod
+    def create_input_queue(size):
+        """
+        Like create_output_queue(), for accepting inputs.
+
+        """
+        return Queue(size)
+
+
+class DocumentMapProcessMixin(object):
+    """
+    Mixin/base class that should be implemented by all worker processes for document map pools.
+
+    """
+    def set_up(self):
+        """
+        Called when the process starts, before it starts accepting documents.
+
+        """
+        pass
+
+    def process_document(self, archive, filename, *docs):
+        raise NotImplementedError
+
+    def tear_down(self):
+        """
+        Called from within the process after processing is complete, before exiting.
+
+        """
+        pass

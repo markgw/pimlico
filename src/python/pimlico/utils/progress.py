@@ -37,6 +37,8 @@ class SafeProgressBar(ProgressBar):
     def update(self, value=None):
         if self.start_time is None:
             self.start()
+        if self.maxval == 0:
+            return
 
         if value is not None and value is not UnknownLength and \
                 self.maxval is not UnknownLength and not 0 <= value <= self.maxval:

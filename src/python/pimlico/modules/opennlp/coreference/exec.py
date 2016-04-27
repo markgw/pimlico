@@ -1,8 +1,7 @@
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
-from pimlico.core.parallel.map import DocumentMapModuleParallelExecutor, \
-    MultiprocessingMapProcess, MultiprocessingMapPool
+from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.coref.opennlp import Entity
 from pimlico.modules.opennlp.coreference.info import WORDNET_DIR
@@ -15,11 +14,13 @@ def _get_full_queue(q):
     return u"\n".join(output)
 
 
-def process_document(doc, interface):
+@skip_invalid
+def process_document(worker, archive, filename, doc):
     """
     Common document processing routine used by parallel and non-parallel versions.
 
     """
+    interface = worker.interface
     # Resolve coreference, passing in PTB parse trees as strings
     coref_output = interface.gateway.entry_point.resolveCoreferenceFromTreesStrings(doc)
     if coref_output is None:
@@ -60,64 +61,21 @@ def start_interface(info):
     return interface
 
 
-class CorefProcess(MultiprocessingMapProcess):
-    """
-    Each process starts up a separate JVM to make calls to the coref gateway.
-
-    This may seem an unnecessary use of memory, etc, since Py4J is thread-safe and manages connections so that
-    we can make multiple asynchronous calls to the same gateway. However, OpenNLP is not thread-safe, so things
-    grind to a halt if we do this.
-
-    """
-    def set_up(self):
-        self.interface = start_interface(self.info)
-
-    def process_document(self, archive, filename, *docs):
-        return process_document(docs[0], self.interface)
-
-    def tear_down(self):
-        self.interface.stop()
+def worker_set_up(worker):
+    worker.interface = start_interface(worker.info)
 
 
-class CorefPool(MultiprocessingMapPool):
-    """
-    Simple pool for sending off multiple calls to Py4J at once. We use multiprocessing, since there's some
-    postprocessing to be done for each doc after it comes back from Py4J, so if you just use threads they end
-    up getting in each others' way so that it doesn't go any faster than if you used far fewer (applies > ~3
-    threads).
-
-    """
-    PROCESS_TYPE = CorefProcess
+def worker_tear_down(worker):
+    worker.interface.stop()
 
 
-class ModuleExecutor(DocumentMapModuleParallelExecutor):
-    def preprocess_common(self):
-        if self.info.options["timeout"] is not None:
-            self.log.info("Allow up to %d seconds for each coref job" % self.info.options["timeout"])
-        # Don't parse the parse trees, since OpenNLP does that for us, straight from the text
-        self.input_corpora[0].raw_data = True
+def preprocess(executor):
+    if executor.info.options["timeout"] is not None:
+        executor.log.info("Allow up to %d seconds for each coref job" % executor.info.options["timeout"])
+    # Don't parse the parse trees, since OpenNLP does that for us, straight from the text
+    executor.input_corpora[0].raw_data = True
 
-    def preprocess(self):
-        self.preprocess_common()
-        # Start a Java process running in the background via Py4J
-        self.interface = start_interface(self.info)
 
-    def preprocess_parallel(self):
-        self.preprocess_common()
-        # Don't start a Py4J interface in the parallel case, as it's started within the workers
-        self.interface = None
-
-    @skip_invalid
-    def process_document(self, archive, filename, doc):
-        return process_document(doc, self.interface)
-
-    def postprocess(self, error=False):
-        self.interface.stop()
-        self.interface = None
-
-    def postprocess_parallel(self, error=False):
-        # Interface is shut down from worker processes in parallel case
-        self.pool.shutdown()
-
-    def create_pool(self, processes):
-        return CorefPool(self, processes)
+ModuleExecutor = multiprocessing_executor_factory(
+    process_document, preprocess_fn=preprocess, worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down
+)

@@ -1,68 +1,56 @@
-from pimlico.core.external.java import Py4JInterface, JavaProcessError
+from pimlico.core.external.java import Py4JInterface, gateway_client_to_running_server
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.core.modules.map import DocumentMapModuleExecutor, skip_invalid
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
+from pimlico.core.modules.map import skip_invalid
+from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus
 from py4j.java_collections import ListConverter
 
 
-class ModuleExecutor(DocumentMapModuleExecutor):
-    def preprocess(self):
-        # Start a tokenizer process
-        self.tagger = StreamTagger(self.info.model_path, pipeline=self.info.pipeline)
-        try:
-            self.tagger.start()
-        except JavaProcessError, e:
-            raise ModuleExecutionError("error starting tagger process: %s" % e)
-
-        # Check that the input provides us with words
-        if isinstance(self.input_corpora[0], WordAnnotationCorpus):
-            available_fields = self.input_corpora[0].read_annotation_fields()
-            if "word" not in available_fields:
-                raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
-
-    @skip_invalid
-    def process_document(self, archive, filename, doc):
-        # Input is a list of tokenized sentences
-        # Run POS tagging
-        tags = self.tagger.tag([" ".join(sentence) for sentence in doc])
-        # Put the POS tags together with the words
-        # The writer will format them to look like word|POS
-        return [
-            zip(sentence_words, sentence_tags.split())
-            for (sentence_words, sentence_tags) in zip(doc, tags)
-        ]
-
-    def postprocess(self, error=False):
-        self.tagger.stop()
-        self.tagger = None
+@skip_invalid
+def process_document(worker, archive, filename, doc):
+    # Input is a list of tokenized sentences
+    # Run POS tagging
+    sentence_list = ListConverter().convert(
+        [" ".join(sentence) for sentence in doc],
+        worker.gateway._gateway_client
+    )
+    tags = list(worker.gateway.entry_point.posTag(sentence_list))
+    # Put the POS tags together with the words
+    # The writer will format them to look like word|POS
+    return [
+        zip(sentence_words, sentence_tags.split())
+        for (sentence_words, sentence_tags) in zip(doc, tags)
+    ]
 
 
-class StreamTagger(object):
-    def __init__(self, model_path, pipeline=None):
-        self.pipeline = pipeline
-        self.model_path = model_path
-        self.interface = None
-
-    def tag(self, sentences):
-        sentence_list = ListConverter().convert(sentences, self.interface.gateway._gateway_client)
-        return list(self.interface.gateway.entry_point.posTag(sentence_list))
-
-    def start(self):
-        # Start a tokenizer process running in the background via Py4J
-        self.interface = Py4JInterface("pimlico.opennlp.PosTaggerGateway", gateway_args=[self.model_path],
-                                       pipeline=self.pipeline)
-        self.interface.start()
-
-    def stop(self):
-        self.interface.stop()
-
-    def __enter__(self):
-        self.start()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.stop()
+def preprocess(executor):
+    # Check that the input provides us with words
+    if isinstance(executor.input_corpora[0], WordAnnotationCorpus):
+        available_fields = executor.input_corpora[0].read_annotation_fields()
+        if "word" not in available_fields:
+            raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
+    # Start a tokenizer process running in the background via Py4J
+    executor.interface = Py4JInterface("pimlico.opennlp.PosTaggerGateway", gateway_args=[executor.info.model_path],
+                                       pipeline=executor.info.pipeline, print_stderr=False, print_stdout=False)
+    executor.interface.start()
+    executor.gateway_port = executor.interface.port_used
 
 
-class PosTaggerProcessError(Exception):
-    pass
+def postprocess(executor, error=False):
+    # Stop the Py4j process
+    executor.interface.stop()
+
+
+def worker_set_up(worker):
+    worker.gateway = gateway_client_to_running_server(worker.executor.gateway_port)
+
+
+def worker_tear_down(worker):
+    worker.gateway.close()
+
+
+ModuleExecutor = multiprocessing_executor_factory(
+    process_document,
+    preprocess_fn=preprocess, postprocess_fn=postprocess,
+    worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down
+)

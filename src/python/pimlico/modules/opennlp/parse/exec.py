@@ -1,22 +1,32 @@
+"""
+Each process starts up a separate JVM to make calls to the coref gateway.
+
+This may seem an unnecessary use of memory, etc, since Py4J is thread-safe and manages connections so that
+we can make multiple asynchronous calls to the same gateway. However, OpenNLP is not thread-safe, so things
+grind to a halt if we do this.
+
+"""
+from pimlico.datatypes.datatypes import TokenizedCorpus
+
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
-from pimlico.core.parallel.map import MultiprocessingMapProcess, MultiprocessingMapPool, \
-    DocumentMapModuleParallelExecutor
-from pimlico.datatypes.datatypes import TokenizedCorpus
+from pimlico.core.modules.map.multiproc import MultiprocessingMapProcess, MultiprocessingMapPool, \
+    DocumentMapModuleParallelExecutor, multiprocessing_executor_factory
 from py4j.java_collections import ListConverter
 
 
-def process_document(doc, gateway):
+def process_document(worker, archive, filename, doc):
     """
     Common document processing routine used by parallel and non-parallel versions.
 
     """
+    doc = worker.info._preprocess_doc(doc)
     # Input is a raw string: split on newlines to get tokenized sentences
     sentences = doc.splitlines()
-    sentence_list = ListConverter().convert(sentences, gateway._gateway_client)
+    sentence_list = ListConverter().convert(sentences, worker.interface.gateway._gateway_client)
     # Parse
-    return list(gateway.entry_point.parseTrees(sentence_list))
+    return list(worker.interface.gateway.entry_point.parseTrees(sentence_list))
 
 
 def start_interface(info):
@@ -37,56 +47,19 @@ def start_interface(info):
     return interface
 
 
-class ParseProcess(MultiprocessingMapProcess):
-    """
-    Each process starts up a separate JVM to make calls to the coref gateway.
-
-    This may seem an unnecessary use of memory, etc, since Py4J is thread-safe and manages connections so that
-    we can make multiple asynchronous calls to the same gateway. However, OpenNLP is not thread-safe, so things
-    grind to a halt if we do this.
-
-    """
-    def set_up(self):
-        self.interface = start_interface(self.info)
-
-    def process_document(self, archive, filename, *docs):
-        return process_document(self.info._preprocess_doc(docs[0]), self.interface.gateway)
-
-    def tear_down(self):
-        self.interface.stop()
+def worker_set_up(worker):
+    worker.interface = start_interface(worker.info)
 
 
-class ParsePool(MultiprocessingMapPool):
-    """
-    Simple pool for sending off multiple calls to Py4J at once.
-
-    """
-    PROCESS_TYPE = ParseProcess
+def worker_tear_down(worker):
+    worker.interface.stop()
 
 
-class ModuleExecutor(DocumentMapModuleParallelExecutor):
-    def preprocess(self):
-        self.interface = start_interface(self.info)
-        if isinstance(self.input_corpora[0], TokenizedCorpus):
-            # Just get raw data from the input iterator, to skip splitting on spaces and then joining again
-            self.input_corpora[0].raw_data = True
+def preprocess(executor):
+    if isinstance(executor.input_corpora[0], TokenizedCorpus):
+        executor.input_corpora[0].raw_data = True
 
-    def preprocess_parallel(self):
-        # Don't start a Py4J interface in the parallel case, as it's started within the workers
-        self.interface = None
-        if isinstance(self.input_corpora[0], TokenizedCorpus):
-            self.input_corpora[0].raw_data = True
 
-    @skip_invalid
-    def process_document(self, archive, filename, doc):
-        return process_document(self.info._preprocess_doc(doc), self.interface.gateway)
-
-    def postprocess(self, error=False):
-        self.interface.stop()
-
-    def postprocess_parallel(self, error=False):
-        # Interface is shut down from threads in parallel case
-        self.pool.shutdown()
-
-    def create_pool(self, processes):
-        return ParsePool(self, processes)
+ModuleExecutor = multiprocessing_executor_factory(
+    process_document, preprocess_fn=preprocess, worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down
+)
