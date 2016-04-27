@@ -1,5 +1,6 @@
 import argparse
 import os
+from traceback import print_exc, format_exception_only
 
 import sys
 from operator import itemgetter
@@ -7,19 +8,29 @@ from operator import itemgetter
 from pimlico.cli.check import check_cmd
 from pimlico.cli.status import status_cmd
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
+from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
 from pimlico.utils.filesystem import copy_dir_with_progress
 
 
 def run_cmd(pipeline, opts):
+    debug = opts.debug
     try:
-        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=opts.debug)
+        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=debug)
+    except ModuleInfoLoadError, e:
+        if debug:
+            print_exc()
+            if e.cause is not None:
+                print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
+        print >>sys.stderr, "Error loading module '%s': %s" % (opts.module_name, e)
     except ModuleExecutionError, e:
+        if debug:
+            print_exc()
         print >>sys.stderr, "Error executing module '%s': %s" % (opts.module_name, e)
     except KeyboardInterrupt:
         print >>sys.stderr, "Exiting before execution completed due to user interrupt"
         # Raise the exception so we see the full stack trace
-        if opts.debug:
+        if debug:
             raise
 
 

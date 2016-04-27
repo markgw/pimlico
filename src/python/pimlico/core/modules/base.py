@@ -315,10 +315,10 @@ class BaseModuleInfo(object):
                                          (self.module_type_name, output_name, ", ".join(self.output_names)))
         datatype = outputs[output_name]
 
-        # The datatype might be a dynamic type -- a function that we call to get the type
-        if not isinstance(datatype, type) or not issubclass(datatype, PimlicoDatatype):
-            # Call the function to build the datatype
-            datatype = datatype(self)
+        # The datatype might be a dynamic type -- with a function that we call to get the type
+        if isinstance(datatype, DynamicOutputDatatype):
+            # Call the get_datatype() method to build the actual datatype
+            datatype = datatype.get_datatype(self)
         return output_name, datatype
 
     def instantiate_output_datatype(self, output_name, output_datatype):
@@ -425,15 +425,19 @@ class BaseModuleInfo(object):
                 input_type_requirements = (input_type_requirements,)
             # Make sure the input type requirements are given in a suitable form
             for intype in input_type_requirements:
-                if isinstance(intype, type) and not issubclass(intype, PimlicoDatatype):
-                    raise PipelineStructureError("invalid input datatype requirement for module '%s'. Each item must "
-                                                 "be either a PimlicoDatatype subclass or instance of a "
-                                                 "DynamicInputDatatypeRequirement subclass: got %s" %
-                                                 (self.module_name, intype.__name__))
+                if isinstance(intype, type):
+                    # If the type requirement is a class, it must be a PimlicoDatatype to match against
+                    if not issubclass(intype, PimlicoDatatype):
+                        raise PipelineStructureError(
+                            "invalid input datatype requirement for module '%s'. Each item must be either a "
+                            "PimlicoDatatype subclass or instance of a DynamicInputDatatypeRequirement subclass: got "
+                            "'%s'" % (self.module_name, intype.__name__)
+                        )
                 elif not isinstance(intype, DynamicInputDatatypeRequirement):
+                    # Alternatively, it can be an instance of a dynamic datatype requirement
                     raise PipelineStructureError("invalid input datatype requirement for module '%s'. Each item must "
                                                  "be either a PimlicoDatatype subclass or instance of a "
-                                                 "DynamicInputDatatypeRequirement subclass: got %s" %
+                                                 "DynamicInputDatatypeRequirement subclass: got '%s'" %
                                                  (self.module_name, type(intype).__name__))
 
             # Load the dependent module
@@ -551,7 +555,9 @@ class BaseModuleExecutor(object):
 
 
 class ModuleInfoLoadError(Exception):
-    pass
+    def __init__(self, *args, **kwargs):
+        self.cause = kwargs.pop("cause", None)
+        super(ModuleInfoLoadError, self).__init__(*args, **kwargs)
 
 
 class ModuleExecutorLoadError(Exception):
@@ -603,17 +609,17 @@ def load_module_executor(path_or_info):
 
             try:
                 mod = import_module(executor_path)
-            except ImportError:
+            except ImportError, e:
                 raise ModuleInfoLoadError("module %s could not be loaded, could not import path %s" %
-                                          (path_or_info, executor_path))
+                                          (path_or_info, executor_path), cause=e)
         else:
             # We were given a module info instance: work out where it lives and get the executor relatively
             try:
                 mod = import_module("..exec", module_info.__module__)
-            except ImportError:
+            except ImportError, e:
                 raise ModuleInfoLoadError("module %s could not be loaded, could not import ..exec from ModuleInfo's "
                                           "module, %s" %
-                                          (path_or_info, module_info.__module__))
+                                          (path_or_info, module_info.__module__), cause=e)
         if not hasattr(mod, "ModuleExecutor"):
             raise ModuleExecutorLoadError("could not load class %s.ModuleExecutor" % mod.__name__)
         return mod.ModuleExecutor

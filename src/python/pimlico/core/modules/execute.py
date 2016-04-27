@@ -2,7 +2,7 @@ import os
 from tarfile import TarFile
 
 from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies
-from pimlico.core.modules.base import load_module_executor
+from pimlico.core.modules.base import load_module_executor, ModuleInfoLoadError
 from pimlico.utils.logging import get_console_logger
 
 
@@ -81,6 +81,9 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
         executer = load_module_executor(module)
         # Give the module an initial in-progress status
         executer(module).execute()
+    except ModuleInfoLoadError, e:
+        module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
+        raise
     except ModuleExecutionError, e:
         # If there's any error, note in the history that execution didn't complete
         module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
