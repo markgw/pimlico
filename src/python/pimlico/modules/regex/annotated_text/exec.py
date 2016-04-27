@@ -22,7 +22,6 @@ def build_re(word_format, match_field, match_expr, group_suffix, nonwords):
     return word_format
 
 
-
 def preprocess(executor):
     # Turn off document processing on the input iterator
     # This means we'll just get raw text for each document

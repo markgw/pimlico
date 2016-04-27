@@ -23,34 +23,24 @@ def process_document(worker, archive, filename, doc):
     ]
 
 
-def preprocess(executor):
+def worker_set_up(worker):
     # Check that the input provides us with words
-    if isinstance(executor.input_corpora[0], WordAnnotationCorpus):
-        available_fields = executor.input_corpora[0].read_annotation_fields()
+    if isinstance(worker.executor.input_corpora[0], WordAnnotationCorpus):
+        available_fields = worker.executor.input_corpora[0].read_annotation_fields()
         if "word" not in available_fields:
             raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
     # Start a tokenizer process running in the background via Py4J
-    executor.interface = Py4JInterface("pimlico.opennlp.PosTaggerGateway", gateway_args=[executor.info.model_path],
-                                       pipeline=executor.info.pipeline, print_stderr=False, print_stdout=False)
-    executor.interface.start()
-    executor.gateway_port = executor.interface.port_used
-
-
-def postprocess(executor, error=False):
-    # Stop the Py4j process
-    executor.interface.stop()
-
-
-def worker_set_up(worker):
-    worker.gateway = gateway_client_to_running_server(worker.executor.gateway_port)
+    worker.interface = Py4JInterface("pimlico.opennlp.PosTaggerGateway", gateway_args=[worker.info.model_path],
+                                     pipeline=worker.info.pipeline, print_stderr=False, print_stdout=False)
+    worker.interface.start()
+    worker.gateway = worker.interface.gateway
 
 
 def worker_tear_down(worker):
-    worker.gateway.close()
+    worker.interface.stop()
 
 
 ModuleExecutor = multiprocessing_executor_factory(
     process_document,
-    preprocess_fn=preprocess, postprocess_fn=postprocess,
     worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down
 )

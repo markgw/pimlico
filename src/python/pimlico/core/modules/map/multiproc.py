@@ -166,7 +166,7 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
         # Define a worker process type
         class FactoryMadeMapProcess(MultiprocessingMapProcess):
             def process_document(self, archive, filename, *docs):
-                process_document_fn(self, archive, filename, *docs)
+                return process_document_fn(self, archive, filename, *docs)
 
             def set_up(self):
                 if worker_set_up_fn is not None:
