@@ -91,7 +91,9 @@ Getting input
 Now we add our first module to the pipeline. This reads input from XML files and iterates of `<doc>` tags to get 
 documents. This is how the Gigaword corpus is stored, so if you have Gigaword, just set the path to point to it.
 
-**TODO: add an example that everyone can run** 
+.. todo::
+
+   Use a dataset that everyone can get to in the example
 
 .. code-block:: ini
 
@@ -108,7 +110,7 @@ following option:
 
 .. note::
    For a neat way to define a small test version of your pipeline and keep its output separate from the main
-   pipeline, see :doc:`variants`.
+   pipeline, see :doc:`/core/variants`.
 
 Grouping files
 --------------
@@ -183,18 +185,6 @@ run the OpenNLP wrappers at once. The `opennlp` make target gets all of these at
     cd ~/myproject/pimlico/lib/java
     make opennlp
 
-At the moment, it's also necessary to build the Java wrappers around OpenNLP that are provided as part of Pimlico. For 
-this, you'll need a Java compiler installed on your system.
-
-.. code-block:: bash
-
-    cd ~/myproject/pimlico
-    ant opennlp
-
-.. note::
-   In later versions of Pimlico, this Java building won't be necessary. I just haven't got round to bundling the
-   compiled wrapper library yet.
-
 There's one more thing to do: the tools we're using
 require statistical models. We can simply download the pre-trained English models from the OpenNLP website.
 
@@ -222,12 +212,13 @@ before going any further.
 
 So far, we've checked the basic Pimlico dependencies and the config file's validity, but not the dependencies of 
 each module. This is intentional: in some setups, we might run different modules on different machines or environments, 
-such that in no one of them do all modules have all of their dependencies. For us, however, this isn't the case, so 
-we can run further checks on the *runtime* dependencies of all our modules.
+such that in no one of them do all modules have all of their dependencies.
+
+You can run further checks on the *runtime* dependencies one module at a time:
 
 .. code-block:: bash
 
-    ./pimlico/bin/pimlico pipeline.conf check --runtime
+    ./pimlico/bin/pimlico pipeline.conf check tokenize
 
 If that works as well, we're able to start running modules.
 
@@ -240,9 +231,9 @@ pipeline is entirely linear &ndash; it's clear which ones need to be run before 
 
 .. code-block:: bash
 
-    ./pimlico/bin/pimlico pipeline.conf schedule
+    ./pimlico/bin/pimlico pipeline.conf status
 
-The output also tells you the current status of each module. At the moment, all the modules are `UNSTARTED`.
+The output also tells you the current status of each module. At the moment, all the modules are `UNEXECUTED`.
 
 You'll notice that the `tar-grouper` module doesn't feature in the list. This is because it's a filter &ndash; 
 it's run on the fly while reading output from the previous module (i.e. the input), so doesn't have anything to 
