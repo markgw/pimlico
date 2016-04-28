@@ -47,21 +47,21 @@ No non-optional outputs
 Optional
 --------
 
-+-------------+-----------------------------------------------------------------------------------------------------------+
-| Name        | Type(s)                                                                                                   |
-+=============+===========================================================================================================+
-| annotations | :class:`AnnotationFieldsFromOptions <pimlico.datatypes.word_annotations.WordAnnotationCorpus>`            |
-+-------------+-----------------------------------------------------------------------------------------------------------+
-| parse       | :class:`ConstituencyParseTreeCorpus <pimlico.datatypes.parse.ConstituencyParseTreeCorpus>`                |
-+-------------+-----------------------------------------------------------------------------------------------------------+
-| parse-deps  | :class:`StanfordDependencyParseCorpus <pimlico.datatypes.parse.dependency.StanfordDependencyParseCorpus>` |
-+-------------+-----------------------------------------------------------------------------------------------------------+
-| dep-parse   | :class:`StanfordDependencyParseCorpus <pimlico.datatypes.parse.dependency.StanfordDependencyParseCorpus>` |
-+-------------+-----------------------------------------------------------------------------------------------------------+
-| raw         | :class:`JsonDocumentCorpus <pimlico.datatypes.jsondoc.JsonDocumentCorpus>`                                |
-+-------------+-----------------------------------------------------------------------------------------------------------+
-| coref       | :class:`CorefCorpus <pimlico.datatypes.coref.corenlp.CorefCorpus>`                                        |
-+-------------+-----------------------------------------------------------------------------------------------------------+
++-------------+------------------------------------------------------------------------------------------------+
+| Name        | Type(s)                                                                                        |
++=============+================================================================================================+
+| annotations | :class:`AnnotationFieldsFromOptions <pimlico.datatypes.word_annotations.WordAnnotationCorpus>` |
++-------------+------------------------------------------------------------------------------------------------+
+| parse       | :class:`~pimlico.datatypes.parse.ConstituencyParseTreeCorpus`                                  |
++-------------+------------------------------------------------------------------------------------------------+
+| parse-deps  | :class:`~pimlico.datatypes.parse.dependency.StanfordDependencyParseCorpus`                     |
++-------------+------------------------------------------------------------------------------------------------+
+| dep-parse   | :class:`~pimlico.datatypes.parse.dependency.StanfordDependencyParseCorpus`                     |
++-------------+------------------------------------------------------------------------------------------------+
+| raw         | :class:`~pimlico.datatypes.jsondoc.JsonDocumentCorpus`                                         |
++-------------+------------------------------------------------------------------------------------------------+
+| coref       | :class:`~pimlico.datatypes.coref.corenlp.CorefCorpus`                                          |
++-------------+------------------------------------------------------------------------------------------------+
 
 Options
 =======

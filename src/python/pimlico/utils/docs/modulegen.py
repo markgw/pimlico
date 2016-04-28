@@ -169,12 +169,11 @@ def output_datatype_text(datatype):
             datatype_class_name = datatype_class.datatype_full_class_name()
         else:
             # Just link to the dynamic datatype class
-            print datatype, type(datatype)
             datatype_class_name = "%s.%s" % (type(datatype).__module__, type(datatype).__name__)
         datatype_name = datatype.datatype_name or type(datatype).__name__
         return ":class:`%s <%s>`" % (datatype_name, datatype_class_name)
     else:
-        return ":class:`%s <%s>`" % (datatype.__name__, datatype.datatype_full_class_name())
+        return ":class:`~%s`" % datatype.datatype_full_class_name()
 
 
 def generate_contents_page(modules, output_dir):

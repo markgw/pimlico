@@ -287,8 +287,8 @@ class BaseModuleInfo(object):
         When outputting data, the storage base dir will always be the short term store path, but when looking
         for the output data other base paths might be explored, including the long term store.
 
-        :return: path, relative to store base path. Or, if short_term_store=True, absolute path to output dir
-        in short-term store (used for output)
+        :param short_term_store: if True, return absolute path to output dir in short-term store (used for output)
+        :return: path, relative to store base path, or if short_term_store=True absolute path to output dir
         """
         relative_dir = self.module_name
         if short_term_store:

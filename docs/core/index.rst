@@ -10,3 +10,4 @@ A set of articles on the core aspects and features of Pimlico.
    config
    variants
    module_structure
+   dependencies

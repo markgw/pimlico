@@ -140,7 +140,7 @@ class WordAnnotationCorpusWriter(TarredCorpusWriter):
 class SimpleWordAnnotationCorpusWriter(WordAnnotationCorpusWriter):
     """
     Takes care of writing word annotations in a simple format, where each line contains a sentence, words
-    are separated by spaces and a series of annotation fields for each word are separated by |s (or a given
+    are separated by spaces and a series of annotation fields for each word are separated by \\|s (or a given
     separator). This corresponds to the standard tag format for C&C.
 
     """
