@@ -33,7 +33,7 @@ class PimlicoDatatype(object):
     """
     datatype_name = "base_datatype"
     requires_data_preparation = False
-    input_module_options = []
+    input_module_options = {}
 
     def __init__(self, base_dir, pipeline, **kwargs):
         self.pipeline = pipeline
@@ -43,8 +43,11 @@ class PimlicoDatatype(object):
         self.data_dir = os.path.join(self.absolute_base_dir, "data") if self.absolute_base_dir is not None else None
         self._metadata = None
 
+        # This attribute setting business is left here for backwards compatibility, but you should use the options
+        # dict by preference
         for attr, val in kwargs.items():
             setattr(self, attr, val)
+        self.options = kwargs
 
     @property
     def metadata(self):

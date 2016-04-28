@@ -39,7 +39,7 @@ class BaseModuleInfo(object):
     """
     module_type_name = None
     module_readable_name = None
-    module_options = []
+    module_options = {}
     module_inputs = []
     """ Specifies a list of (name, datatype class) pairs for outputs that are always written """
     module_outputs = []

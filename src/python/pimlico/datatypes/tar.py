@@ -232,9 +232,6 @@ class TarredCorpusWriter(IterableCorpusWriter):
                 # Couldn't open the existing file to append to, write instead
                 self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
 
-        # Keep a count of how many we've added so we can write metadata
-        self.doc_count += 1
-
         # Add a new document to archive
         data = data.encode("utf-8")
         if self.gzip:
@@ -249,6 +246,9 @@ class TarredCorpusWriter(IterableCorpusWriter):
         info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
         info.size = len(data)
         self.current_archive_tar.addfile(info, data_file)
+
+        # Keep a count of how many we've added so we can write metadata
+        self.doc_count += 1
 
     def document_to_raw_data(self, doc):
         """

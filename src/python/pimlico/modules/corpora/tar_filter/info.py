@@ -65,12 +65,16 @@ class TarredCorpusFilter(TarredCorpus):
             started = False
 
         for doc_name, doc in self.input_datatype:
-            current_archive_count += 1
-
             # Check whether we've put enough files in the current archive to move onto the next
             if current_archive_count == self.archive_size:
-                current_archive = min(len(tarballs)-1, current_archive+1)
-                current_archive_count = 0
+                current_archive += 1
+                if current_archive >= len(tarballs):
+                    raise ValueError("moved on to archive %d, but we've only prepared %d tarball names: inaccurate "
+                                     "count on the input datatype?" % (current_archive, len(tarballs)))
+                # We'll check this next time round the loop, after we've processed the current doc
+                current_archive_count = 1
+            else:
+                current_archive_count += 1
 
             # Allow the first portion of the corpus to be skipped
             if not started:
