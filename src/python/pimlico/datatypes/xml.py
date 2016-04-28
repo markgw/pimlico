@@ -81,7 +81,7 @@ class XmlDocumentIterator(IterableCorpus):
     def check_runtime_dependencies(self):
         missing_dependencies = []
         try:
-            import bs4
+            safe_import_bs4()
         except ImportError:
             missing_dependencies.append(("BeautifulSoup", "install in Python lib dir using make"))
         missing_dependencies.extend(super(XmlDocumentIterator, self).check_runtime_dependencies())
@@ -185,13 +185,7 @@ def count_files_process(filename, document_node_type, attr_constraints):
 def get_doc_nodes(filename, document_node_type, attr_constraints):
     if attr_constraints is None:
         attr_constraints = {}
-    # BS can go very slowly if it tries to use chardet to detect input encoding
-    # Remove chardet and cchardet from the Python modules, so that import fails and it doesn't try to use them
-    # This prevents it getting stuck on reading long input files
-    import sys
-    sys.modules["cchardet"] = None
-    sys.modules["chardet"] = None
-    # Now we can import BS
+    safe_import_bs4()
     from bs4 import BeautifulSoup
 
     if filename.endswith(".gz"):
@@ -206,6 +200,17 @@ def get_doc_nodes(filename, document_node_type, attr_constraints):
     soup = BeautifulSoup(data)
     # Look for the type of XML node that documents are stored in and count them
     return soup.find_all(document_node_type, attrs=attr_constraints)
+
+
+def safe_import_bs4():
+    # BS can go very slowly if it tries to use chardet to detect input encoding
+    # Remove chardet and cchardet from the Python modules, so that import fails and it doesn't try to use them
+    # This prevents it getting stuck on reading long input files
+    import sys
+    sys.modules["cchardet"] = None
+    sys.modules["chardet"] = None
+    # Now we can import BS
+    import bs4
 
 
 class TruncateNow(StopIteration):
