@@ -14,9 +14,15 @@ ifeq ($(OS), Darwin)
 	FETCH := curl -L -O
 	FETCH_STDOUT := curl -L
 else
-	# Linux, etc
-	FETCH := wget
-	FETCH_STDOUT := wget -O -
+    ifeq (, $(shell which wget))
+        # No wget available: fall back to using my python script
+        FETCH := python ../libutils/get.py
+        FETCH_STDOUT := python ../libutils/get_stdout.py
+    else
+        # Linux, etc
+        FETCH := wget
+        FETCH_STDOUT := wget -O -
+    endif
 endif
 
 ###############
