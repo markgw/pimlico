@@ -187,6 +187,8 @@ def generate_contents_page(modules, output_dir):
     with open(os.path.join(output_dir, "index.rst"), "w") as index_file:
         index_file.write("""\
 {title}
+.. py:module:: pimlico.modules
+
 .. toctree::
    :maxdepth: 1
 

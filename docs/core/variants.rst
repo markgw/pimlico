@@ -2,4 +2,7 @@
 Pipeline variants
 =================
 
-**Feature not documented yet**
+.. todo::
+
+   Document variants
+

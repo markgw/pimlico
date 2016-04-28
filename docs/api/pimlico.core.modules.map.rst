@@ -7,6 +7,9 @@ Submodules
 .. toctree::
 
    pimlico.core.modules.map.filter
+   pimlico.core.modules.map.multiproc
+   pimlico.core.modules.map.singleproc
+   pimlico.core.modules.map.threaded
 
 Module contents
 ---------------

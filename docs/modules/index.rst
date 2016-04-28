@@ -2,9 +2,12 @@ Core Pimlico modules
 ~~~~~~~~~~~~~~~~~~~~
 
 
+.. py:module:: pimlico.modules
+
 .. toctree::
    :maxdepth: 1
 
+   CAEVO event extractor <pimlico.modules.caevo>
    C&C parser <pimlico.modules.candc>
    Stanford CoreNLP <pimlico.modules.corenlp>
    Corpus subset <pimlico.modules.corpora.subset>

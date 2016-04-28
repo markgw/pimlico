@@ -8,7 +8,6 @@ Subpackages
 
     pimlico.core.external
     pimlico.core.modules
-    pimlico.core.parallel
 
 Submodules
 ----------

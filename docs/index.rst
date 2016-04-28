@@ -18,30 +18,23 @@ The toolkit takes care of managing data between the steps of a
 pipeline and checking that everything's executed in the right order.
 
 .. note::
-   *Pimlico is a new project*, so there isn't much documentation yet. 
-   I'll be documenting things as I develop them.
+   *Pimlico is a new project*, and documentation is taking shape, but still sparse.
    
-   The basic framework is up and running, but:
-   
-   - it only includes wrappers for a few standard NLP tools: I'll
-     add more as I need them. If you develop your own, let me know!
-   - there are some key features missing, which I'll add over time.
-     See :doc:`my wishlist <plans/wishlist>` for current plans.
+   There are some key features missing, which I'll add over time, and more NLP tools will gradually be added.
+   See :doc:`my wishlist <plans/wishlist>` for current plans.
 
-Contents:
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
 
-   core/index
    guides/index
-   plans/index
+   core/index
    modules/index
+   plans/index
 
-
-Indices and tables
-==================
 
 * :ref:`genindex`
-* :ref:`modindex`
+* :ref:`API docs <modindex>`
 * :ref:`search`

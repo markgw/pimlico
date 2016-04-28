@@ -2,7 +2,7 @@
 Future plans
 ============
 
-Various things I plan to add to Pimlico in the futures. For a summary, see `wishlist`.
+Various things I plan to add to Pimlico in the futures. For a summary, see `wishlist`_.
 
 .. toctree::
    :maxdepth: 2
@@ -11,3 +11,4 @@ Various things I plan to add to Pimlico in the futures. For a summary, see `wish
    berkeley
    candc
    cherry_picker
+   drawing

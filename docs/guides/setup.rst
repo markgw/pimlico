@@ -2,8 +2,6 @@
   Setting up a new project using Pimlico
 ==========================================
 
-*Pimlico v0.1*
-
 You've decided to use Pimlico to implement a data processing pipeline. So, where do you start?
 
 This guide steps
@@ -289,8 +287,11 @@ Add this option to the `[pipeline]` section in the config file:
     python_path=src/python
 
 Now you can create Python modules or packages in `src/python`, following the same conventions as the built-in modules 
-(see `pimlico/src/python/pimlico/modules/`) and overriding the standard base classes, as they do. (Details of how to 
-do this are outside the scope of this tutorial.)
+and overriding the standard base classes, as they do. The following articles tell you more about how to do this:
+
+ - :doc:`/guides/module`
+ - :doc:`/guides/map_module`
+ - :doc:`/core/module_structure`
 
 Your custom modules and datatypes can then simply be used in the
 config file as module types.
