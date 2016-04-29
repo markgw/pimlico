@@ -1,5 +1,5 @@
-Pimlico module: Corpus subset
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Corpus subset
+~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.subset
 

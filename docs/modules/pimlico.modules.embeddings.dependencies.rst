@@ -1,5 +1,5 @@
-Pimlico module: Dependency feature extractor for embeddings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Dependency feature extractor for embeddings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.dependencies
 

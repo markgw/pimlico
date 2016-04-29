@@ -1,5 +1,5 @@
-Pimlico module: CAEVO event extractor
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CAEVO event extractor
+~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.caevo
 

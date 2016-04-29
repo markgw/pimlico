@@ -1,5 +1,5 @@
-Pimlico module: Key-value to term-feature converter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Key-value to term-feature converter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.term_feature_compiler
 

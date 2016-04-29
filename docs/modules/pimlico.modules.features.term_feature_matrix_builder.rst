@@ -1,5 +1,5 @@
-Pimlico module: Term-feature matrix builder
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Term-feature matrix builder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.term_feature_matrix_builder
 

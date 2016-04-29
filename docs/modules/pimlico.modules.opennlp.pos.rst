@@ -1,5 +1,5 @@
-Pimlico module: OpenNLP POS-tagger
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OpenNLP POS-tagger
+~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.pos
 

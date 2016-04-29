@@ -18,32 +18,34 @@ REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
 
 class PipelineConfig(object):
     """
-    Main configuration for a pipeline, usually read in from a config file.
+    Main configuration for a pipeline, read in from a config file.
 
-    Each section, except for the special ones below, defines a module in the pipeline. Some of these can
+    Each section, except for `vars` and `pipeline`, defines a module instance in the pipeline. Some of these can
     be executed, others act as filters on the outputs of other modules, or input readers.
 
-    Special sections
-    ================
+    **Special sections:**
 
     - vars:
         May contain any variable definitions, to be used later on in the pipeline. Further down, expressions like
         `%(varname)s` will be expanded into the value assigned to `varname` in the vars section.
     - pipeline:
         Main pipeline-wide configuration. The following options are required for every pipeline:
-        - name: a single-word name for the pipeline, used to determine where files are stored
-        - release: the release of Pimlico for which the config file was written. It is considered compatible with
-            later minor versions of the same major release, but not with later major releases. Typically, a user
-            receiving the pipeline config will get hold of an appropriate version of the Pimlico codebase to run it
-            with.
-        Other optional settings:
-        - python_path: a path or paths, relative to the directory containing the config file, in which Python
-            modules/packages used by the pipeline can be found. Typically, a config file is distributed with a
-            directory of Python code providing extra modules, datatypes, etc. Multiple paths are separated by `:`s
 
-    Directives
-    ==========
-    Certain special directives are processed when reading config files. They are lines that begin with "%%", followed
+        * `name`: a single-word name for the pipeline, used to determine where files are stored
+        * `release`: the release of Pimlico for which the config file was written. It is considered compatible with
+          later minor versions of the same major release, but not with later major releases. Typically, a user
+          receiving the pipeline config will get hold of an appropriate version of the Pimlico codebase to run it
+          with.
+
+        Other optional settings:
+
+        * `python_path`: a path or paths, relative to the directory containing the config file, in which Python
+          modules/packages used by the pipeline can be found. Typically, a config file is distributed with a
+          directory of Python code providing extra modules, datatypes, etc. Multiple paths are separated by colons (:).
+
+    **Directives:**
+
+    Certain special directives are processed when reading config files. They are lines that begin with `%%`, followed
     by the directive name and any arguments.
 
     - `variant`:

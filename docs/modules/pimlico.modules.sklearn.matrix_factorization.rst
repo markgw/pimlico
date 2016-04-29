@@ -1,5 +1,5 @@
-Pimlico module: Sklearn matrix factorization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sklearn matrix factorization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.sklearn.matrix_factorization
 

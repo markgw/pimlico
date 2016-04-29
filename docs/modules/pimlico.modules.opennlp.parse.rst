@@ -1,5 +1,5 @@
-Pimlico module: OpenNLP constituency parser
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OpenNLP constituency parser
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.parse
 

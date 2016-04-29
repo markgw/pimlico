@@ -1,5 +1,5 @@
-Pimlico module: Annotated text to CoNLL dep parse input converter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Annotated text to CoNLL dep parse input converter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.malt.conll_parser_input
 

@@ -1,5 +1,5 @@
-Pimlico module: OpenNLP coreference resolution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OpenNLP coreference resolution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.coreference
 
@@ -12,9 +12,10 @@ Pimlico module: OpenNLP coreference resolution
 .. todo::
 
    Document this module
+
 Use local config setting opennlp_memory to set the limit on Java heap memory for the OpenNLP processes. If
 parallelizing, this limit is shared between the processes. That is, each OpenNLP worker will have a memory
-limit of `opennlp_memory / processes`. That setting can use `g|G|m|M|k|K`, as in the Java setting.
+limit of `opennlp_memory / processes`. That setting can use `g`, `G`, `m`, `M`, `k` and `K`, as in the Java setting.
 
 
 Inputs

@@ -1,5 +1,5 @@
-Pimlico module: Tar archive grouper
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tar archive grouper
+~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.tar
 

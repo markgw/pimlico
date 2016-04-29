@@ -1,5 +1,5 @@
-Pimlico module: OpenNLP tokenizer
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OpenNLP tokenizer
+~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.tokenize
 

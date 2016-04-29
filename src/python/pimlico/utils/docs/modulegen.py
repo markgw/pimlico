@@ -6,9 +6,8 @@ import argparse
 import os
 import warnings
 from importlib import import_module
-from pkgutil import walk_packages, iter_modules
-
-from sphinx import __display_version__
+from pkgutil import iter_modules
+from sphinx import __version__
 from sphinx.apidoc import format_heading
 
 import pimlico.modules
@@ -23,9 +22,7 @@ def generate_docs(output_dir):
     Generate RST docs for all core Pimlico modules and output to a directory.
 
     """
-    generated = generate_docs_for_pymod(pimlico.modules, output_dir)
-    # Build a contents page for the modules
-    generate_contents_page(generated, output_dir)
+    generate_docs_for_pymod(pimlico.modules, output_dir)
 
 
 def generate_docs_for_pymod(module, output_dir):
@@ -37,7 +34,7 @@ def generate_docs_for_pymod(module, output_dir):
     if "%s.info" % module_name in submodules and not submodules["%s.info" % module_name][1]:
         # This looks like a Pimlico module
         # Don't recurse to submodules, but trying building module docs for this one
-        return [generate_docs_for_pimlico_mod(module_name, output_dir)]
+        generate_docs_for_pimlico_mod(module_name, output_dir)
     else:
         # Not a Pimlico module: recurse into subpackages
         all_generated = []
@@ -45,9 +42,17 @@ def generate_docs_for_pymod(module, output_dir):
             if is_package:
                 # Import the module (package) so we can recurse on it
                 submod = importer.find_module(modname).load_module(modname)
-                generated = generate_docs_for_pymod(submod, output_dir)
-                all_generated.extend(generated)
-        return all_generated
+                generate_docs_for_pymod(submod, output_dir)
+                all_generated.append(submod.__name__)
+        # If the submodule has a docstring, it goes onto the index page
+        if module.__doc__ is not None and module.__doc__.strip("\n "):
+            # By convention, the first line is used as a title
+            module_title, __, module_doc = module.__doc__.lstrip("\n ").partition("\n")
+        else:
+            module_title = "Package %s" % module_name
+            module_doc = ""
+        # Generate an index for this submodule
+        generate_contents_page(all_generated, output_dir, module_name, module_title, module_doc)
 
 
 def generate_docs_for_pimlico_mod(module_path, output_dir):
@@ -101,18 +106,17 @@ def generate_docs_for_pimlico_mod(module_path, output_dir):
     filename = os.path.join(output_dir, "%s.rst" % module_path)
     with open(filename, "w") as output_file:
         # Make a page heading
-        output_file.write(format_heading(0, "Pimlico module: %s" %
-                                         (ModuleInfo.module_readable_name or ModuleInfo.module_type_name)))
+        output_file.write(format_heading(0, ModuleInfo.module_readable_name or ModuleInfo.module_type_name))
         # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
         output_file.write(".. py:module:: %s\n\n" % module_path)
         # Output a summary table of key information
         output_file.write("%s\n" % make_table(key_info))
         # Insert text from docstrings
         if info_doc is not None:
-            output_file.write(trim_docstring(info_doc) + "\n")
+            output_file.write(trim_docstring(info_doc) + "\n\n")
         if module_info_doc is not None:
-            output_file.write(trim_docstring(module_info_doc) + "\n")
-        output_file.write("\n\n")
+            output_file.write(trim_docstring(module_info_doc) + "\n\n")
+        output_file.write("\n")
         output_file.write("".join("%s\n\n" % para for para in additional_paras))
 
         # Output a table of inputs
@@ -176,25 +180,24 @@ def output_datatype_text(datatype):
         return ":class:`~%s`" % datatype.datatype_full_class_name()
 
 
-def generate_contents_page(modules, output_dir):
-    module_names = [
-        # If the module type defines a readable name, use that in the index
-        (module.module_readable_name or module.module_package_name().partition("pimlico.modules.")[2],
-         module.module_package_name())
-        for module in modules
-    ]
-    with open(os.path.join(output_dir, "index.rst"), "w") as index_file:
+def generate_contents_page(modules, output_dir, index_name, title, content):
+    with open(os.path.join(output_dir, "%s.rst" % index_name), "w") as index_file:
         index_file.write("""\
 {title}
-.. py:module:: pimlico.modules
+.. py:module:: {index_name}
+
+{content}
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+   :titlesonly:
 
    {list}
 """.format(
-            title=format_heading(0, "Core Pimlico modules"),
-            list="\n   ".join("{name} <{module}>".format(name=name, module=module_package) for (name, module_package) in module_names)
+            title=format_heading(0, title),
+            content=content,
+            list="\n   ".join(modules),
+            index_name=index_name,
         ))
 
 
@@ -205,7 +208,7 @@ if __name__ == "__main__":
 
     output_dir = os.path.abspath(opts.output_dir)
 
-    print "Sphinx %s" % __display_version__
+    print "Sphinx %s" % __version__
     print "Pimlico module doc generator"
     print "Outputting module docs to %s" % output_dir
 

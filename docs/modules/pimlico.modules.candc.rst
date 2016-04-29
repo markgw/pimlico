@@ -1,5 +1,5 @@
-Pimlico module: C&C parser
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+C&C parser
+~~~~~~~~~~
 
 .. py:module:: pimlico.modules.candc
 

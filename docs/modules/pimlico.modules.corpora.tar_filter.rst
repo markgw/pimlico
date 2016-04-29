@@ -1,5 +1,5 @@
-Pimlico module: Tar archive grouper (filter)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tar archive grouper (filter)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.tar_filter
 

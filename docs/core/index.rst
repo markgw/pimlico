@@ -1,6 +1,6 @@
-=================
-Core Pimlico docs
-=================
+=========
+Core docs
+=========
 
 A set of articles on the core aspects and features of Pimlico.
 

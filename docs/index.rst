@@ -31,7 +31,7 @@ Contents
 
    guides/index
    core/index
-   modules/index
+   modules/pimlico.modules
    plans/index
 
 

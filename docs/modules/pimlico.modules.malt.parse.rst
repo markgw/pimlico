@@ -1,5 +1,5 @@
-Pimlico module: Malt dependency parser
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Malt dependency parser
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.malt.parse
 
