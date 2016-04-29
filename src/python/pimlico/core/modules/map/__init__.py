@@ -1,5 +1,5 @@
 import threading
-from Queue import Queue
+from Queue import Queue, Empty
 from threading import Thread
 from traceback import format_exc
 
@@ -155,7 +155,23 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
                     while next_document is not None:
                         # Wait for a document coming off the output queue
-                        result = self.pool.output_queue.get()
+                        while True:
+                            try:
+                                # Wait a little bit to see if there's a result available
+                                result = self.pool.output_queue.get(timeout=0.2)
+                            except Empty:
+                                # Timed out: check there's not been an error in one of the processes
+                                try:
+                                    error = self.pool.exception_queue.get_nowait()
+                                except Empty:
+                                    # No error: just keep waiting
+                                    pass
+                                else:
+                                    # Got an error from a process: raise it
+                                    raise ModuleExecutionError("error in worker process: %s" % error, cause=error)
+                            else:
+                                # Got a result from a process
+                                break
                         # We've got some result, but it might not be the one we're looking for
                         # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
                         result_buffer[(result.archive, result.filename)] = result.data
@@ -312,26 +328,19 @@ class DocumentProcessorPool(object):
 
     """
     def __init__(self, processes):
-        self.output_queue = self.create_output_queue()
-        self.input_queue = self.create_input_queue(2*processes)
+        self.output_queue = self.create_queue()
+        self.input_queue = self.create_queue(2*processes)
+        self.exception_queue = self.create_queue()
         self.processes = processes
 
     @staticmethod
-    def create_output_queue():
+    def create_queue(maxsize=None):
         """
         May be overridden by subclasses to provide different implementations of a Queue. By default, uses the
         multiprocessing queue type. Whatever is returned, it should implement the interface of Queue.Queue.
 
         """
-        return Queue()
-
-    @staticmethod
-    def create_input_queue(size):
-        """
-        Like create_output_queue(), for accepting inputs.
-
-        """
-        return Queue(size)
+        return Queue(maxsize=maxsize)
 
 
 class DocumentMapProcessMixin(object):
@@ -339,6 +348,11 @@ class DocumentMapProcessMixin(object):
     Mixin/base class that should be implemented by all worker processes for document map pools.
 
     """
+    def __init__(self, input_queue, output_queue, exception_queue):
+        self.exception_queue = exception_queue
+        self.output_queue = output_queue
+        self.input_queue = input_queue
+
     def set_up(self):
         """
         Called when the process starts, before it starts accepting documents.

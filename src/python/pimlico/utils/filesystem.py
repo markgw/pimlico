@@ -55,6 +55,7 @@ def copy_dir_with_progress(source_dir, target_dir):
     copy_thread.start()
     # Monitor the filesize of the target while it's copying
     pbar = get_progress_bar(source_size, title="Copying")
+    # TODO Don't loop as fast as possible: wait a bit after each measurement
     while copy_thread.is_alive():
         # Measure the target size
         if os.path.exists(target_dir):

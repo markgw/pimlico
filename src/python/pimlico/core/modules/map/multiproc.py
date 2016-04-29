@@ -24,17 +24,14 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
     itself (like the CoreNLP module) there's no need for multiprocessing in the Python code.
 
     """
-    def __init__(self, input_queue, output_queue, executor):
+    def __init__(self, input_queue, output_queue, exception_queue, executor):
         multiprocessing.Process.__init__(self)
-        DocumentMapProcessMixin.__init__(self)
+        DocumentMapProcessMixin.__init__(self, input_queue, output_queue, exception_queue)
         self.executor = executor
         self.info = executor.info
-        self.input_queue = input_queue
-        self.output_queue = output_queue
         self.daemon = True
         self.stopped = multiprocessing.Event()
         self.initialized = multiprocessing.Event()
-        self.uncaught_exception = multiprocessing.Queue(1)
 
         self.start()
 
@@ -65,7 +62,7 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                 self.tear_down()
         except Exception, e:
             # If there's any uncaught exception, make it available to the main process
-            self.uncaught_exception.put_nowait(e)
+            self.exception_queue.put_nowait(e)
         finally:
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
@@ -87,7 +84,7 @@ class MultiprocessingMapPool(DocumentProcessorPool):
             worker.initialized.wait()
             # Check whether the worker had an error during initialization
             try:
-                e = worker.uncaught_exception.get_nowait()
+                e = worker.exception_queue.get_nowait()
             except Empty:
                 # No error
                 pass
@@ -95,15 +92,11 @@ class MultiprocessingMapPool(DocumentProcessorPool):
                 raise ProcessStartupError("error in worker process: %s" % e, cause=e)
 
     def start_worker(self):
-        return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.executor)
+        return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
 
     @staticmethod
-    def create_input_queue(size):
-        return multiprocessing.Queue(size)
-
-    @staticmethod
-    def create_output_queue():
-        return multiprocessing.Queue()
+    def create_queue(maxsize=None):
+        return multiprocessing.Queue(maxsize)
 
     def shutdown(self):
         # Tell all the threads to stop

@@ -97,7 +97,9 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
 
 
 class ModuleExecutionError(Exception):
-    pass
+    def __init__(self, *args, **kwargs):
+        self.cause = kwargs.pop("cause", None)
+        super(ModuleExecutionError, self).__init__(*args, **kwargs)
 
 
 class ModuleNotReadyError(ModuleExecutionError):

@@ -15,17 +15,14 @@ from pimlico.datatypes.base import InvalidDocument
 
 
 class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
-    def __init__(self, input_queue, output_queue, executor):
+    def __init__(self, input_queue, output_queue, exception_queue, executor):
         threading.Thread.__init__(self)
-        DocumentMapProcessMixin.__init__(self)
+        DocumentMapProcessMixin.__init__(self, input_queue, output_queue, exception_queue)
         self.executor = executor
         self.info = executor.info
-        self.input_queue = input_queue
-        self.output_queue = output_queue
         self.daemon = True
         self.stopped = threading.Event()
         self.initialized = threading.Event()
-        self.uncaught_exception = Queue(1)
 
         self.start()
 
@@ -56,7 +53,7 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
                 self.tear_down()
         except Exception, e:
             # If there's any uncaught exception, make it available to the main process
-            self.uncaught_exception.put_nowait(e)
+            self.exception_queue.put_nowait(e)
         finally:
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
@@ -74,7 +71,7 @@ class ThreadingMapPool(DocumentProcessorPool):
             worker.initialized.wait()
             # Check whether the worker had an error during initialization
             try:
-                e = worker.uncaught_exception.get_nowait()
+                e = worker.exception_queue.get_nowait()
             except Empty:
                 # No error
                 pass
@@ -82,15 +79,11 @@ class ThreadingMapPool(DocumentProcessorPool):
                 raise ThreadStartupError("error in worker process: %s" % e, cause=e)
 
     def start_worker(self):
-        return self.THREAD_TYPE(self.input_queue, self.output_queue, self.executor)
+        return self.THREAD_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
 
     @staticmethod
-    def create_input_queue(size):
-        return Queue(size)
-
-    @staticmethod
-    def create_output_queue():
-        return Queue()
+    def create_queue(maxsize=None):
+        return Queue(maxsize)
 
     def shutdown(self):
         # Tell all the threads to stop
