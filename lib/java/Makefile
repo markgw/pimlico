@@ -110,7 +110,7 @@ liblinear-java-1.95.jar :
 
 ############ Caevo ############
 
-caevo : caevo.jar
+caevo : caevo.jar corenlp
 caevo.jar :
 	# Check we've got Maven
 	@if ! mvn -v >/dev/null; then echo "Caevo build requires Maven: please install"; exit 1; fi
@@ -122,7 +122,13 @@ caevo.jar :
 	mv src/caevo/target/classes/caevo.jar .
 	# Also grab Caevo's included libs (Jdom)
 	mv src/caevo/lib/* .
+	# Put sieve configs in models dir
+	mkdir -p ../../models/caevo
+	cp src/caevo/*.sieves ../../models/caevo/
 	# Keep the source code for debugging purposes
+	# Also fetch the wordnet dictionaries, which Caevo always needs
+	$(FETCH) http://wordnetcode.princeton.edu/wn3.1.dict.tar.gz && mv wn3.1.dict.tar.gz ../../models/caevo && \
+	    cd ../../models/caevo && tar -zxf wn3.1.dict.tar.gz && rm wn3.1.dict.tar.gz
 
 src/caevo :
 	# Fetch Caevo code

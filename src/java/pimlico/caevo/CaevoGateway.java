@@ -2,8 +2,6 @@ package pimlico.caevo;
 
 import caevo.SieveDocument;
 import caevo.SieveDocuments;
-import caevo.TextEventClassifier;
-import caevo.TimexClassifier;
 import caevo.util.TreeOperator;
 import caevo.util.WordNet;
 import com.google.common.base.Joiner;
@@ -24,8 +22,6 @@ import java.util.List;
  * Based closely on Caevo's Main class.
  */
 public class CaevoGateway {
-    private TextEventClassifier eventClassifier;
-    private TimexClassifier timexClassifier;
     public static WordNet wordnet;
 
     boolean debug = true;
@@ -40,7 +36,7 @@ public class CaevoGateway {
         this(seivePath, true);
     }
 
-    public CaevoGateway(String seivePath, boolean debug) {
+    public CaevoGateway(String sievePath, boolean debug) {
         this.debug = debug;
         this.seivePath = seivePath;
 
@@ -48,6 +44,9 @@ public class CaevoGateway {
         tlp = new PennTreebankLanguagePack();
         gsf = tlp.grammaticalStructureFactory();
         tf = new LabeledScoredTreeFactory();
+
+        // The sieve list is loaded according to this system property: override it to set the file it will be loaded from
+        System.setProperty("sieves", sievePath);
 
         // Load a Caevo Main to do all the work
         main = new Main(new String[] {});
@@ -121,8 +120,8 @@ public class CaevoGateway {
     }
 
     public static void main(String[] args) {
-        ArgumentParser argParser = ArgumentParsers.newArgumentParser("Malt parser");
-        argParser.description("Run the Malt parser, providing access to it via Py4J");
+        ArgumentParser argParser = ArgumentParsers.newArgumentParser("CAEVO Py4J gateway");
+        argParser.description("Run CAEVO, providing access to it via Py4J");
         argParser.addArgument("seive_path").help("Path to the seive specification");
         argParser.addArgument("--port").type(Integer.class).help("Specify a port for gateway server to run on").setDefault(0);
         argParser.addArgument("--python-port").type(Integer.class).help("Specify a port for gateway server to use " +
@@ -140,7 +139,7 @@ public class CaevoGateway {
             // Load the gateway instance
             CaevoGateway entryPoint = new CaevoGateway(opts.getString("seive_path"));
             // Create a gateway server, using this as an entry point
-            Py4JGatewayStarter.startGateway(entryPoint, opts.getInt("port"), opts.getInt("python_port"));
+            Py4JGatewayStarter.startGateway(entryPoint, opts.getInt("port"), opts.getInt("python_port"), "PORT: ");
         } catch (Exception e) {
             System.err.println("Error starting up Caevo gateway");
             e.printStackTrace();

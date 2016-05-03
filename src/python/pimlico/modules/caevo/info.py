@@ -12,68 +12,84 @@ into Pimlico using Py4J.
 """
 import os
 
+from pimlico import MODEL_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.parse.dependency import CoNLLDependencyParseInputCorpus
+from pimlico.datatypes.parse import ConstituencyParseTreeCorpus
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "caevo"
     module_readable_name = "CAEVO event extractor"
-    module_inputs = [("documents", CoNLLDependencyParseInputCorpus)]
-    module_outputs = [("parsed", TarredCorpus)]
+    module_inputs = [("documents", ConstituencyParseTreeCorpus)]
+    module_outputs = [("events", TarredCorpus)]
     module_options = {
-        "model": {
-            "help": "Filename of parsing model, or path to the file. If just a filename, assumed to be Malt models "
-                    "dir (models/malt). Default: engmalt.linear-1.7.mco, which can be acquired by 'make malt' in the "
-                    "models dir",
-            "default": "engmalt.linear-1.7.mco",
+        "sieves": {
+            "help": "Filename of sieve list file, or path to the file. If just a filename, assumed to be in Caevo "
+                    "model dir (models/caevo). Default: default.sieves (supplied with Caevo)",
+            "default": "default.sieves",
         },
-        "no_gzip": {
-            "help": "By default, we gzip each document in the output data. If you don't do this, the output can get "
-                    "very large, since it's quite a verbose output format",
-            "type": str_to_bool,
-            "default": False,
-        }
     }
 
     def __init__(self, *args, **kwargs):
         super(ModuleInfo, self).__init__(*args, **kwargs)
         # Postprocess model option
-        self.model_path = abs_path_or_model_dir_path(self.options["model"], "malt")
+        self.sieves_path = abs_path_or_model_dir_path(self.options["sieves"], "caevo")
+        self.wordnet_dir = os.path.join(MODEL_DIR, "caevo", "dict")
+        self.template_jwnl_path = os.path.join(JAVA_BUILD_JAR_DIR, "caevo_jwnl_file_properties.xml")
 
     def check_runtime_dependencies(self):
         missing_dependencies = []
 
         # Make sure the model is available
-        if not os.path.exists(self.model_path):
+        if not os.path.exists(self.sieves_path):
             missing_dependencies.append(
-                ("Malt parser model", self.module_name, "Parsing model file doesn't exists: %s" % self.model_path)
+                ("Sieve list", self.module_name, "Sieve list file doesn't exists: %s" % self.sieves_path)
             )
+        if not os.path.isdir(self.wordnet_dir):
+            missing_dependencies.append(("Wordnet dictionaries", self.module_name,
+                                         "Wordnet dictionaries not downloaded. Should have been placed in %s by "
+                                         "running 'make caevo' in Java lib dir" % self.wordnet_dir))
 
-        # Check whether the OpenNLP POS tagger is available
         try:
-            class_name = "pimlico.malt.ParserGateway"
+            # Check for Caevo wrapper
+            class_name = "pimlico.caevo.CaevoGateway"
             try:
                 check_java_dependency(class_name)
             except DependencyError:
-                missing_dependencies.append(("Malt parser wrapper",
-                                             self.module_name,
-                                             "Couldn't load %s. Build the Malt Java wrapper module provided with "
-                                             "Pimlico ('ant malt')" % class_name))
+                missing_dependencies.append(("Caevo wrapper", self.module_name, "Couldn't load %s" % class_name))
 
-            class_name = "org.maltparser.concurrent.ConcurrentMaltParserService"
+            # Check for Caevo itself
+            class_name = "caevo.SieveDocument"
             try:
                 check_java_dependency(class_name)
             except DependencyError:
-                missing_dependencies.append(("Malt parser jar",
+                missing_dependencies.append(("Caevo jar",
                                              self.module_name,
-                                             "Couldn't load %s. Install Malt by running 'make malt' in Java lib dir" %
+                                             "Couldn't load %s. Install Caevo by running 'make caevo' in Java lib dir" %
                                              class_name))
+
+            # Also need CoreNLP
+            class_name = "edu.stanford.nlp.ling.CoreAnnotations"
+            try:
+                check_java_dependency(class_name)
+            except DependencyError:
+                missing_dependencies.append(("CoreNLP",
+                                             self.module_name,
+                                             "Couldn't load %s. Install Caevo by running 'make corenlp' in Java lib dir" %
+                                             class_name))
+            # Argparse4j
+            class_name = "net.sourceforge.argparse4j.ArgumentParsers"
+            try:
+                check_java_dependency(class_name)
+            except DependencyError:
+                missing_dependencies.append(("argparse4j",
+                                             self.module_name,
+                                             "Couldn't load %s. Install argparse4j by running 'make argparse4j' in "
+                                             "Java lib dir" % class_name))
         except DependencyCheckerError, e:
             missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
 
@@ -81,4 +97,4 @@ class ModuleInfo(DocumentMapModuleInfo):
         return missing_dependencies
 
     def get_writer(self, output_name, output_dir, append=False):
-        return TarredCorpusWriter(output_dir, append=append, gzip=not self.options["no_gzip"])
+        return TarredCorpusWriter(output_dir, append=append, gzip=True)
