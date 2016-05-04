@@ -75,7 +75,7 @@ def check_java():
 
 class Py4JInterface(object):
     def __init__(self, gateway_class, port=None, python_port=None, gateway_args=[], pipeline=None, print_stdout=True,
-                 print_stderr=True, env={}, system_properties={}, java_opts=[], timeout=10.):
+                 print_stderr=True, env={}, system_properties={}, java_opts=[], timeout=10., prefix_classpath=None):
         """
         If pipeline is given, configuration is looked for there. If found, this overrides config given
         in other kwargs.
@@ -89,6 +89,7 @@ class Py4JInterface(object):
         system_properties adds Java system property settings to the Java command.
 
         """
+        self.prefix_classpath = prefix_classpath
         self.java_opts = java_opts
         self.system_properties = system_properties
         self.env = env
@@ -159,7 +160,8 @@ class Py4JInterface(object):
             self.gateway_class, args,
             redirect_stdout=redirect_stdout, redirect_stderr=redirect_stderr,
             env=self.env, javaopts=java_opts,
-            startup_timeout=timeout, port_output_prefix=port_output_prefix
+            startup_timeout=timeout, port_output_prefix=port_output_prefix,
+            prefix_classpath=self.prefix_classpath,
         )
         self.gateway = self.new_client()
 
@@ -229,7 +231,7 @@ def gateway_client_to_running_server(port):
 
 def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
                    javaopts=[], redirect_stdout=None, redirect_stderr=None, daemonize_redirect=True,
-                   env={}, port_output_prefix=None, startup_timeout=10.):
+                   env={}, port_output_prefix=None, startup_timeout=10., prefix_classpath=None):
     """
     Our own more flexble version of Py4J's launch_gateway.
     """
@@ -239,8 +241,14 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     java_env = os.environ.copy()
     java_env.update(env)
 
+    # Allow extra things to be added to the start of the classpath
+    if prefix_classpath is not None:
+        classpath = ":".join(prefix_classpath.split(":") + CLASSPATH.split(":"))
+    else:
+        classpath = CLASSPATH
+
     # Launch the server in a subprocess.
-    command = ["java", "-classpath", CLASSPATH] + javaopts + [gateway_class] + args
+    command = ["java", "-classpath", classpath] + javaopts + [gateway_class] + args
     proc = Popen(command, stdout=PIPE, stdin=PIPE, stderr=PIPE, env=java_env)
 
     if redirect_stdout is None:

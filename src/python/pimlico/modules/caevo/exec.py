@@ -1,7 +1,8 @@
 import os
 import tempfile
 
-from pimlico.core.external.java import Py4JInterface, gateway_client_to_running_server
+from pimlico import JAVA_LIB_DIR
+from pimlico.core.external.java import Py4JInterface
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 from py4j.java_collections import ListConverter
@@ -14,12 +15,13 @@ def process_document(worker, archive, filename, doc):
     doc = [u" ".join(line for line in sentence.splitlines()) for sentence in doc]
     doc = [sent.encode("utf-8") for sent in doc]
     # Convert to a Java list
-    doc = ListConverter().convert(doc, worker._gateway._gateway_client)
-    # TODO Call is now working. Error in reading input strings -- version problem with CoreNLP?
-    return [
-        [token.split("\t") for token in sentence]
-        for sentence in worker._gateway.entry_point.markupParsedDocument(filename, doc)
-    ]
+    doc = ListConverter().convert(doc, worker.interface.gateway._gateway_client)
+    # Call Caevo
+    result = worker.interface.gateway.entry_point.markupParsedDocument(filename, doc)
+    # JDOM uses Windows-style double carriage returns
+    # Change to \ns, to be consistent with what we normally do
+    result = "\n".join(result.splitlines())
+    return result
 
 
 def preprocess(executor):
@@ -28,33 +30,29 @@ def preprocess(executor):
         with open(executor.info.template_jwnl_path, "r") as template_file:
             xml_file.write(template_file.read().replace("%%WORDNET_DIR%%", executor.info.wordnet_dir))
     executor.jwnl_path = xml_file.name
-    try:
-        # Initialize the Malt Py4J gateway
-        executor.interface = Py4JInterface("pimlico.caevo.CaevoGateway", gateway_args=[executor.info.sieves_path],
-                                           pipeline=executor.info.pipeline,
-                                           # Set the path to the wordnet dicts as an environment variable
-                                           env={"JWNL": executor.jwnl_path})
-        executor.interface.start(port_output_prefix="PORT: ")
-    except:
-        # If anything goes wrong, remove the temporary file
-        os.remove(executor.jwnl_path)
-        raise
 
 
 def postprocess(executor, error=False):
-    # Close down the Py4J gateway
-    executor.interface.stop()
     # Get rid of the temporary file we used to store wordnet settings
     os.remove(executor.jwnl_path)
 
 
 def worker_set_up(worker):
-    # Create a gateway to the single py4j server, which should already be running
-    worker._gateway = gateway_client_to_running_server(worker.executor.interface.port_used)
+    # Initialize the Malt Py4J gateway
+    worker.interface = Py4JInterface(
+        "pimlico.caevo.CaevoGateway", gateway_args=[worker.info.sieves_path],
+        pipeline=worker.info.pipeline,
+        # Set the path to the wordnet dicts as an environment variable
+        env={"JWNL": worker.executor.jwnl_path},
+        # Put the Caevo dependencies at front of classpath, to make sure they take precedence over other versions
+        prefix_classpath=os.path.join(JAVA_LIB_DIR, "caevo-1.1-jar-with-dependencies.jar")
+    )
+    worker.interface.start(port_output_prefix="PORT: ")
 
 
 def worker_tear_down(worker):
-    worker._gateway.close()
+    # Close down the Py4J gateway
+    worker.interface.stop()
 
 
 ModuleExecutor = multiprocessing_executor_factory(

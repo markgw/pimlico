@@ -49,10 +49,6 @@ class ModuleInfo(DocumentMapModuleInfo):
             missing_dependencies.append(
                 ("Sieve list", self.module_name, "Sieve list file doesn't exists: %s" % self.sieves_path)
             )
-        if not os.path.isdir(self.wordnet_dir):
-            missing_dependencies.append(("Wordnet dictionaries", self.module_name,
-                                         "Wordnet dictionaries not downloaded. Should have been placed in %s by "
-                                         "running 'make caevo' in Java lib dir" % self.wordnet_dir))
 
         try:
             # Check for Caevo wrapper
@@ -72,15 +68,6 @@ class ModuleInfo(DocumentMapModuleInfo):
                                              "Couldn't load %s. Install Caevo by running 'make caevo' in Java lib dir" %
                                              class_name))
 
-            # Also need CoreNLP
-            class_name = "edu.stanford.nlp.ling.CoreAnnotations"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("CoreNLP",
-                                             self.module_name,
-                                             "Couldn't load %s. Install Caevo by running 'make corenlp' in Java lib dir" %
-                                             class_name))
             # Argparse4j
             class_name = "net.sourceforge.argparse4j.ArgumentParsers"
             try:

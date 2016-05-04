@@ -110,25 +110,26 @@ liblinear-java-1.95.jar :
 
 ############ Caevo ############
 
-caevo : caevo.jar corenlp
-caevo.jar :
+caevo : caevo-1.1.jar
+caevo-1.1.jar :
 	# Check we've got Maven
 	@if ! mvn -v >/dev/null; then echo "Caevo build requires Maven: please install"; exit 1; fi
 	$(MAKE) src/caevo
+	# Get hold of the WordNet dictionaries
+	cd src/caevo && ./download-wordnet-dictionaries
 	# Build Caevo using Maven
 	cd src/caevo && mvn compile
-	# Put the built classes in a Jar file
-	cd src/caevo/target/classes && jar cf caevo.jar *
-	mv src/caevo/target/classes/caevo.jar .
-	# Also grab Caevo's included libs (Jdom)
-	mv src/caevo/lib/* .
+	# Package Caevo up, together with dependencies, in jar
+	cd src/caevo && JWNL=src/test/resources/jwnl_file_properties.xml mvn package assembly:single
+	# Put the jars in the lib dir, where Pimlico can find it
+	mv src/caevo/target/caevo-1.1-jar-with-dependencies.jar .
+	mv src/caevo/target/caevo-1.1.jar .
 	# Put sieve configs in models dir
 	mkdir -p ../../models/caevo
 	cp src/caevo/*.sieves ../../models/caevo/
-	# Keep the source code for debugging purposes
-	# Also fetch the wordnet dictionaries, which Caevo always needs
-	$(FETCH) http://wordnetcode.princeton.edu/wn3.1.dict.tar.gz && mv wn3.1.dict.tar.gz ../../models/caevo && \
-	    cd ../../models/caevo && tar -zxf wn3.1.dict.tar.gz && rm wn3.1.dict.tar.gz
+	# And wordnet files
+	cp -r src/caevo/src/test/resources/wordnet/dict ../../models/caevo
+	# Keep the source code for debugging purposes for now
 
 src/caevo :
 	# Fetch Caevo code

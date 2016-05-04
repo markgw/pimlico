@@ -12,6 +12,8 @@ import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import pimlico.core.Py4JGatewayStarter;
 
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ public class CaevoGateway {
     private final GrammaticalStructureFactory gsf;
     private final TreeFactory tf;
     private final Main main;
+    private final XMLOutputter xout;
 
     public CaevoGateway(String seivePath) {
         this(seivePath, true);
@@ -38,7 +41,7 @@ public class CaevoGateway {
 
     public CaevoGateway(String sievePath, boolean debug) {
         this.debug = debug;
-        this.seivePath = seivePath;
+        xout = new XMLOutputter(Format.getPrettyFormat());
 
         // Initialize the dependency rulebase.
         tlp = new PennTreebankLanguagePack();
@@ -62,7 +65,7 @@ public class CaevoGateway {
         main.markupAll(docs);
         main.runSieves(docs);
 
-        return docs.getDocuments().get(0).toXML().toString();
+        return xout.outputString(docs.getDocuments().get(0).toXML());
     }
 
     private SieveDocument lexParsedToDeps(String docName, List<String> stringParses) {
