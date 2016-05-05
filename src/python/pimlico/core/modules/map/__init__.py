@@ -162,13 +162,15 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                             except Empty:
                                 # Timed out: check there's not been an error in one of the processes
                                 try:
-                                    error = self.pool.exception_queue.get_nowait()
+                                    error = self.pool.exception_queue.get(timeout=0.2)
                                 except Empty:
                                     # No error: just keep waiting
                                     pass
                                 else:
                                     # Got an error from a process: raise it
                                     raise ModuleExecutionError("error in worker process: %s" % error, cause=error)
+                            except:
+                                raise
                             else:
                                 # Got a result from a process
                                 break

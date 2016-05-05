@@ -56,6 +56,7 @@ public class CaevoGateway {
     }
 
     public String markupParsedDocument(String docName, List<String> sentences) {
+        main.reset();
         // Read in trees and produce deps, adding all to the doc's annotations
         SieveDocument doc = lexParsedToDeps(docName, sentences);
         SieveDocuments docs = new SieveDocuments();
@@ -63,9 +64,13 @@ public class CaevoGateway {
 
         // Annotate events and timexes on the doc
         main.markupAll(docs);
-        main.runSieves(docs);
 
-        return xout.outputString(docs.getDocuments().get(0).toXML());
+        String result = xout.outputString(docs.getDocuments().get(0).toXML());
+
+        doc = null;
+        docs = null;
+        System.gc();
+        return result;
     }
 
     private SieveDocument lexParsedToDeps(String docName, List<String> stringParses) {

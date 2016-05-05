@@ -10,11 +10,9 @@ from __future__ import absolute_import
 
 import multiprocessing
 from Queue import Empty
-from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor
-from pimlico.datatypes.base import InvalidDocument
 
 
 class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin):
@@ -46,23 +44,20 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                     try:
                         # Timeout and go round the loop again to check whether we're supposed to have stopped
                         archive, filename, docs = self.input_queue.get(timeout=0.05)
-                        try:
-                            result = self.process_document(archive, filename, *docs)
-                        except Exception, e:
-                            self.output_queue.put(
-                                ProcessOutput(archive, filename, InvalidDocument(self.info.module_name,
-                                                                                 "%s\n%s" % (e, format_exc())))
-                            )
-                        else:
-                            self.output_queue.put(ProcessOutput(archive, filename, result))
                     except Empty:
                         # Don't worry if the queue is empty: just keep waiting for more until we're shut down
                         pass
+                    else:
+                        result = self.process_document(archive, filename, *docs)
+                        self.output_queue.put(ProcessOutput(archive, filename, result))
             finally:
-                self.tear_down()
+                try:
+                    self.tear_down()
+                except Exception, e:
+                    self.exception_queue.put(ProcessShutdownError("error in tear_down() call", cause=e), block=True)
         except Exception, e:
             # If there's any uncaught exception, make it available to the main process
-            self.exception_queue.put_nowait(e)
+            self.exception_queue.put(e, block=True)
         finally:
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
@@ -84,12 +79,12 @@ class MultiprocessingMapPool(DocumentProcessorPool):
             worker.initialized.wait()
             # Check whether the worker had an error during initialization
             try:
-                e = worker.exception_queue.get_nowait()
+                e = self.exception_queue.get_nowait()
             except Empty:
                 # No error
                 pass
             else:
-                raise ProcessStartupError("error in worker process: %s" % e, cause=e)
+                raise ProcessStartupError("error starting up worker process: %s" % e, cause=e)
 
     def start_worker(self):
         return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
@@ -195,3 +190,9 @@ class ProcessStartupError(Exception):
     def __init__(self, *args, **kwargs):
         self.cause = kwargs.pop("cause", None)
         super(ProcessStartupError, self).__init__(*args, **kwargs)
+
+
+class ProcessShutdownError(Exception):
+    def __init__(self, *args, **kwargs):
+        self.cause = kwargs.pop("cause", None)
+        super(ProcessShutdownError, self).__init__(*args, **kwargs)

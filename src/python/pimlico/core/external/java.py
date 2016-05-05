@@ -12,7 +12,7 @@ from pimlico.core.logs import get_log_file
 from pimlico.core.modules.base import DependencyError
 from pimlico.utils.communicate import timeout_process
 from py4j.compat import CompatThread, hasattr2, Queue
-from py4j.protocol import smart_decode
+from py4j.protocol import smart_decode, Py4JJavaError
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, "%s/*" % JAVA_BUILD_JAR_DIR])
 
@@ -187,6 +187,12 @@ class Py4JInterface(object):
                 # Raise other errors
                 raise
         self.process.wait()
+
+    def clear_output_queues(self):
+        while not self.stdout_queue.empty():
+            self.stdout_queue.get_nowait()
+        while not self.stderr_queue.empty():
+            self.stderr_queue.get_nowait()
 
     def __enter__(self):
         self.start()
@@ -385,6 +391,46 @@ def output_p4j_error_info(command, returncode, stdout, stderr):
         print >>f, "Read from stderr:"
         print >>f, stderr
     return file_path
+
+
+def make_py4j_errors_safe(fn):
+    """
+    Decorator for functions/methods that call Py4J. Py4J's exceptions include information that gets retrieved
+    from the Py4J server when they're displayed. This is a problem if the server is not longer running and
+    raises another exception, making the whole situation very confusing.
+
+    If you wrap your function with this, Py4JJavaErrors will be replaced by our own exception type Py4JSafeJavaError,
+    containing some of the information about the Java exception if possible.
+
+    """
+    def _wrapped_fn(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Py4JJavaError, e:
+            # Try getting the java exception and string repr, but don't throw everything in the air if we can't
+            try:
+                java_exception = str(e.java_exception)
+            except:
+                java_exception = None
+            try:
+                str_repr = str(e)
+            except:
+                str_repr = None
+            raise Py4JSafeJavaError(java_exception, str_repr)
+    return _wrapped_fn
+
+
+class Py4JSafeJavaError(Exception):
+    def __init__(self, java_exception=None, str=None):
+        super(Py4JSafeJavaError, self).__init__()
+        self.str = str
+        self.java_exception = java_exception
+
+    def __str__(self):
+        if self.str is not None:
+            return self.str
+        else:
+            return super(Py4JSafeJavaError, self).__str__()
 
 
 class DependencyCheckerError(Exception):

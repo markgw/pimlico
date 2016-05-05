@@ -2,14 +2,15 @@ import os
 import tempfile
 
 from pimlico import JAVA_LIB_DIR
-from pimlico.core.external.java import Py4JInterface
+from pimlico.core.external.java import Py4JInterface, make_py4j_errors_safe
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 from py4j.java_collections import ListConverter
 
 
 @skip_invalid
-@invalid_doc_on_error
+#@invalid_doc_on_error
+@make_py4j_errors_safe
 def process_document(worker, archive, filename, doc):
     # Reformat the docs so we have each parse tree on one line
     doc = [u" ".join(line for line in sentence.splitlines()) for sentence in doc]
@@ -21,6 +22,7 @@ def process_document(worker, archive, filename, doc):
     # JDOM uses Windows-style double carriage returns
     # Change to \ns, to be consistent with what we normally do
     result = "\n".join(result.splitlines())
+    worker.interface.clear_output_queues()
     return result
 
 
@@ -45,7 +47,8 @@ def worker_set_up(worker):
         # Set the path to the wordnet dicts as an environment variable
         env={"JWNL": worker.executor.jwnl_path},
         # Put the Caevo dependencies at front of classpath, to make sure they take precedence over other versions
-        prefix_classpath=os.path.join(JAVA_LIB_DIR, "caevo-1.1-jar-with-dependencies.jar")
+        prefix_classpath=os.path.join(JAVA_LIB_DIR, "caevo-1.1-jar-with-dependencies.jar"),
+        #print_stderr=False, print_stdout=False,
     )
     worker.interface.start(port_output_prefix="PORT: ")
 

@@ -116,7 +116,7 @@ caevo-1.1.jar :
 	@if ! mvn -v >/dev/null; then echo "Caevo build requires Maven: please install"; exit 1; fi
 	$(MAKE) src/caevo
 	# Get hold of the WordNet dictionaries
-	cd src/caevo && ./download-wordnet-dictionaries
+	if [ !-d src/caevo/src/test/resources/wordnet/dict ]; then cd src/caevo && ./download-wordnet-dictionaries; fi
 	# Build Caevo using Maven
 	cd src/caevo && mvn compile
 	# Package Caevo up, together with dependencies, in jar
@@ -128,7 +128,7 @@ caevo-1.1.jar :
 	mkdir -p ../../models/caevo
 	cp src/caevo/*.sieves ../../models/caevo/
 	# And wordnet files
-	cp -r src/caevo/src/test/resources/wordnet/dict ../../models/caevo
+	if [ ! -d ../../models/caevo/dict ]; then cp -r src/caevo/src/test/resources/wordnet/dict ../../models/caevo; fi
 	# Keep the source code for debugging purposes for now
 
 src/caevo :
@@ -138,6 +138,7 @@ src/caevo :
 	mkdir -p src
 	mv caevo-8cfc810baff833063da9b423ef7a36983b3ab0e2 src/caevo
 	rm caevo.zip
+
 
 ############ C&C parser, Java version #######
 candc.jar :
