@@ -4,6 +4,10 @@ import caevo.*;
 import caevo.sieves.Sieve;
 import caevo.tlink.TLink;
 import caevo.util.*;
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.trees.GrammaticalStructureFactory;
+import edu.stanford.nlp.trees.PennTreebankLanguagePack;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -27,25 +31,25 @@ public class Main {
 	String dctHeuristic = "none";
 	
 	// Which dataset do we load?
-  public static enum DatasetType { TRAIN, DEV, TEST, ALL };
-  DatasetType dataset = DatasetType.TRAIN;
-	
+  	public static enum DatasetType { TRAIN, DEV, TEST, ALL };
+  	DatasetType dataset = DatasetType.TRAIN;
+	public static final String serializedGrammar = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
+
 	// List the sieve class names in your desired order.
 	private String[] sieveClasses;
-    
+
+	private LexicalizedParser parser;
+	private GrammaticalStructureFactory gsf;
 	
 	/**
 	 * Constructor: give it the command-line arguments.
 	 */
 	public Main(String[] args) {
 		Properties cmdlineProps = StringUtils.argsToProperties(args);
-		String infopath = null;
-		
+
 		// Read the properties from disk at the location specified by -Dprops=XXXXX
 		try {
 			CaevoProperties.load();
-			// Look for a given pre-processed InfoFile
-			infopath = CaevoProperties.getString("Main.info", null);
 			// Overwrite these globals if they are in the properties file.
 			debug = CaevoProperties.getBoolean("Main.debug", debug);
 			useClosure = CaevoProperties.getBoolean("Main.closure", useClosure);
@@ -53,10 +57,6 @@ public class Main {
 			force24hrDCT = CaevoProperties.getBoolean("Main.force24hrdct", force24hrDCT);
 			dctHeuristic = CaevoProperties.getString("Main.dctHeuristic", dctHeuristic);
 		} catch (IOException e) { e.printStackTrace(); }
-        
-		// -info on the command line?
-		if( cmdlineProps.containsKey("info") )
-			infopath = cmdlineProps.getProperty("info");
 
 		// -set on the command line?
 		if( cmdlineProps.containsKey("set") ) {
@@ -88,11 +88,16 @@ public class Main {
 		// Load the sieve list.
 		sieveClasses = loadSieveList();
 
-		reset();
-	}
+		// Initialize the parser.
+		parser = Ling.createParser(serializedGrammar);
+		if( parser == null ) {
+			System.out.println("Failed to create parser from " + serializedGrammar);
+			System.exit(1);
+		}
+		TreebankLanguagePack tlp = new PennTreebankLanguagePack();
+		gsf = tlp.grammaticalStructureFactory();
 
-	public void reset() {
-		// Initialize the transitive closure code.
+		// Initialize the transitive closure code
 		try {
 			closure = new Closure();
 		} catch( IOException ex ) {
@@ -100,6 +105,11 @@ public class Main {
 			ex.printStackTrace();
 			System.exit(1);
 		}
+
+		reset();
+	}
+
+	public void reset() {
 	}
 
 
@@ -349,7 +359,20 @@ public class Main {
 		TimexClassifier timexClassifier = new TimexClassifier(info);
 		timexClassifier.markupTimex3();
 	}
-	
+
+	public SieveDocuments markupRawText(String filename, String text) {
+		SieveDocuments docs = new SieveDocuments();
+
+		// Parse the text
+		SieveDocument doc = Tempeval3Parser.parseText(filename, text, parser, gsf);
+		docs.addDocument(doc);
+
+		// Markup events, times, and tlinks.
+		markupAll(docs);
+
+		return docs;
+	}
+
 	public SieveDocuments getDataset(DatasetType type, SieveDocuments docs) {
 		SieveDocuments dataset;
 		if( type == DatasetType.TRAIN )

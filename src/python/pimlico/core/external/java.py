@@ -260,12 +260,10 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     if redirect_stdout is None:
         redirect_stdout = []
     stdout_queue = Queue()
-    redirect_stdout.append(stdout_queue)
 
     if redirect_stderr is None:
         redirect_stderr = []
     stderr_capture = StringIO()
-    redirect_stderr.append(stderr_capture)
 
     def get_stderr():
         try:
@@ -274,9 +272,12 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
             return ""
 
     # Start consumer threads so process does not deadlock/hang
-    OutputConsumer(redirect_stdout, proc.stdout, daemon=daemonize_redirect).start()
-    if redirect_stderr is not None:
-        OutputConsumer(redirect_stderr, proc.stderr, daemon=daemonize_redirect).start()
+    stdout_consumer = OutputConsumer(redirect_stdout, proc.stdout, daemon=daemonize_redirect,
+                                     temporary_redirects=[stdout_queue])
+    stderr_consumer = OutputConsumer(redirect_stderr, proc.stderr, daemon=daemonize_redirect,
+                                     temporary_redirects=[stderr_capture])
+    stdout_consumer.start()
+    stderr_consumer.start()
     ProcessConsumer(proc, [redirect_stdout], daemon=daemonize_redirect).start()
 
     # Determine which port the server started on (needed to support ephemeral ports)
@@ -339,7 +340,32 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
             raise JavaProcessError("invalid first line output from Py4J server when started: '%s' (see %s for details)"
                                    % (output, err_path))
 
+    # Stop the temporary redirects that were only going to capture startup output
+    stdout_consumer.remove_temporary_redirects()
+    stderr_consumer.remove_temporary_redirects()
+
     return port_used, proc
+
+
+def _pipe_queue(redirect, line):
+    redirect.put(line)
+
+
+def _pipe_deque(redirect, line):
+    redirect.appendleft(line)
+
+
+def _pipe_fd(redirect, line):
+    redirect.write(line)
+
+
+def get_redirect_func(redirect):
+    if isinstance(redirect, Queue):
+        return _pipe_queue
+    if isinstance(redirect, deque):
+        return _pipe_deque
+    if hasattr2(redirect, "write"):
+        return _pipe_fd
 
 
 class OutputConsumer(CompatThread):
@@ -348,6 +374,7 @@ class OutputConsumer(CompatThread):
     """
 
     def __init__(self, redirects, stream, *args, **kwargs):
+        self.temporary_redirects = kwargs.pop("temporary_redirects", [])
         super(OutputConsumer, self).__init__(*args, **kwargs)
         # Also allow the one-redirect case, just like Py4J's class
         if not isinstance(redirects, list):
@@ -355,28 +382,19 @@ class OutputConsumer(CompatThread):
         self.redirects = redirects
         self.stream = stream
 
-        self.redirect_funcs = []
-        for redirect in redirects:
-            if isinstance(redirect, Queue):
-                self.redirect_funcs.append(self._pipe_queue)
-            if isinstance(redirect, deque):
-                self.redirect_funcs.append(self._pipe_deque)
-            if hasattr2(redirect, "write"):
-                self.redirect_funcs.append(self._pipe_fd)
+        self.redirect_funcs = [get_redirect_func(redirect) for redirect in self.redirects]
+        self.temporary_redirect_funcs = [get_redirect_func(redirect) for redirect in self.temporary_redirects]
 
-    def _pipe_queue(self, redirect, line):
-        redirect.put(line)
-
-    def _pipe_deque(self, redirect, line):
-        redirect.appendleft(line)
-
-    def _pipe_fd(self, redirect, line):
-        redirect.write(line)
+    def remove_temporary_redirects(self):
+        self.temporary_redirects = []
+        self.temporary_redirect_funcs = []
 
     def run(self):
         lines_iterator = iter(self.stream.readline, b"")
         for line in lines_iterator:
             for redirect, fn in zip(self.redirects, self.redirect_funcs):
+                fn(redirect, smart_decode(line))
+            for redirect, fn in zip(self.temporary_redirects, self.temporary_redirect_funcs):
                 fn(redirect, smart_decode(line))
 
 

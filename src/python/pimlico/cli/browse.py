@@ -38,7 +38,7 @@ def browse_data(data):
 
     # Bottom: footer
     footer_text = urwid.Text("", align='right')
-    bottom_row = [urwid.Text("Navigation: up, down = scroll | n = next doc | s = skip docs | esc/q = exit"), footer_text]
+    bottom_row = [urwid.Text("Navigation: up, down = scroll | n/space = next doc | s = skip docs | esc/q = exit"), footer_text]
 
     # Management of current document, navigation
     corpus_state = CorpusState(data)
@@ -80,12 +80,12 @@ def browse_data(data):
             footer=urwid.Pile([urwid.Divider(), urwid.Columns(bottom_row)])
         )
     )
-    main = SkipPopupLauncher(main, "Skip docs", default=1, callback=skip_docs)
+    main = SkipPopupLauncher(main, "Skip docs", callback=skip_docs)
 
     def _keypress(key):
         if key == "esc" or key == "q":
             _exit()
-        elif key == "n" or key == "N":
+        elif key == "n" or key == "N" or key == " ":
             next_document(corpus_state)
         elif key == "s" or key == "S":
             main.open_pop_up()
@@ -123,7 +123,7 @@ class SkipDialog(urwid.WidgetWrap):
     """A dialog that appears with an int input """
     signals = ["close", "cancel"]
 
-    def __init__(self, text, default=0):
+    def __init__(self, text, default=None):
         close_button = urwid.Button("OK", lambda button: self._emit("close"))
         cancel_button = urwid.Button("Cancel", lambda button: self._emit("cancel"))
         buttons = [close_button, cancel_button]
@@ -151,7 +151,7 @@ class SkipDialog(urwid.WidgetWrap):
 
 
 class SkipPopupLauncher(urwid.PopUpLauncher):
-    def __init__(self, original_widget, text, default=0, callback=None):
+    def __init__(self, original_widget, text, default=None, callback=None):
         super(SkipPopupLauncher, self).__init__(original_widget)
         self.callback = callback
         self.text = text

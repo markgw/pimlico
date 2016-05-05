@@ -10,6 +10,7 @@ from __future__ import absolute_import
 
 import multiprocessing
 from Queue import Empty
+from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor
@@ -57,6 +58,8 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                     self.exception_queue.put(ProcessShutdownError("error in tear_down() call", cause=e), block=True)
         except Exception, e:
             # If there's any uncaught exception, make it available to the main process
+            # Include the formatted stack trace, since we can't get this later from the exception outside this process
+            e.traceback = format_exc()
             self.exception_queue.put(e, block=True)
         finally:
             # Even there was an error, set initialized so that the main process can wait on it

@@ -26,6 +26,9 @@ def run_cmd(pipeline, opts):
     except ModuleExecutionError, e:
         if debug:
             print_exc()
+            if e.debugging_info is not None:
+                # Extra debugging information was provided by the exception
+                print >>sys.stderr, e.debugging_info
         print >>sys.stderr, "Error executing module '%s': %s" % (opts.module_name, e)
     except KeyboardInterrupt:
         print >>sys.stderr, "Exiting before execution completed due to user interrupt"

@@ -99,6 +99,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
 class ModuleExecutionError(Exception):
     def __init__(self, *args, **kwargs):
         self.cause = kwargs.pop("cause", None)
+        self.debugging_info = kwargs.pop("debugging_info", None)
         super(ModuleExecutionError, self).__init__(*args, **kwargs)
 
 

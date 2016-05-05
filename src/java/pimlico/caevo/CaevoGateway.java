@@ -55,7 +55,16 @@ public class CaevoGateway {
         main = new Main(new String[] {});
     }
 
+    public String markupRawText(String docName, String docText) {
+        main.reset();
+        // Parse the text and mark it up with timexes, events and tlinks
+        SieveDocuments docs = main.markupRawText(docName, docText);
+        // Return the whole lot as XML
+        return xout.outputString(docs.getDocuments().get(0).toXML());
+    }
+
     public String markupParsedDocument(String docName, List<String> sentences) {
+        // TODO Remove this if we don't need it (probably)
         main.reset();
         // Read in trees and produce deps, adding all to the doc's annotations
         SieveDocument doc = lexParsedToDeps(docName, sentences);

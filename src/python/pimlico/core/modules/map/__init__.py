@@ -132,7 +132,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         docs_completed_before, start_after = self.retrieve_processing_status()
         total_to_process = len(self.input_iterator) - docs_completed_before
 
-        pbar = get_progress_bar(total_to_process,
+        pbar = get_progress_bar(total_to_process, counter=True,
                                 title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
         try:
             # Prepare a corpus writer for the output
@@ -162,13 +162,16 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                             except Empty:
                                 # Timed out: check there's not been an error in one of the processes
                                 try:
-                                    error = self.pool.exception_queue.get(timeout=0.2)
+                                    error = self.pool.exception_queue.get_nowait()
                                 except Empty:
                                     # No error: just keep waiting
                                     pass
                                 else:
                                     # Got an error from a process: raise it
-                                    raise ModuleExecutionError("error in worker process: %s" % error, cause=error)
+                                    # Sometimes, a traceback from within the process is included
+                                    debugging = error.traceback if hasattr(error, "traceback") else None
+                                    raise ModuleExecutionError("error in worker process: %s" % error,
+                                                               cause=error, debugging_info=debugging)
                             except:
                                 raise
                             else:
