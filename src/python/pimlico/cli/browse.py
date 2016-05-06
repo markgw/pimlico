@@ -18,8 +18,9 @@ PALETTE = [
 ]
 
 
-def browse_data(data):
-    data.raw_data = True
+def browse_data(data, parse=False):
+    if not parse:
+        data.raw_data = True
     if not data.data_ready():
         print "Data not available from module output: perhaps it hasn't been run? (base dir: %s)" % data.base_dir
         sys.exit(1)

@@ -90,7 +90,7 @@ def browse_cmd(pipeline, opts):
         sys.exit(1)
 
     from .browse import browse_data
-    browse_data(data)
+    browse_data(data, parse=opts.parse)
 
 
 if __name__ == "__main__":
@@ -153,6 +153,9 @@ if __name__ == "__main__":
     run.add_argument("module_name", help="The name of the module whose output to look at")
     run.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
                                                     "load the default output")
+    run.add_argument("--parse", "-p", action="store_true",
+                     help="Parse the data using the output datatype (i.e. don't just read the raw text) and output "
+                          "the result of applying str() to the parsed data structure")
 
     opts = parser.parse_args()
 

@@ -17,6 +17,7 @@ from pimlico.core.external.java import check_java_dependency, DependencyCheckerE
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
+from pimlico.datatypes.caevo import CaevoCorpus
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
 
 
@@ -24,7 +25,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "caevo"
     module_readable_name = "CAEVO event extractor"
     module_inputs = [("documents", TarredCorpus)]
-    module_outputs = [("events", TarredCorpus)]
+    module_outputs = [("events", CaevoCorpus)]
     module_options = {
         "sieves": {
             "help": "Filename of sieve list file, or path to the file. If just a filename, assumed to be in Caevo "
