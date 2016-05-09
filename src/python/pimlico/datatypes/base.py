@@ -16,6 +16,15 @@ from importlib import import_module
 import cPickle as pickle
 
 
+__all__ = [
+    "PimlicoDatatype", "PimlicoDatatypeWriter", "IterableCorpus", "IterableCorpusWriter",
+    "DynamicOutputDatatype", "DynamicInputDatatypeRequirement",
+    "InvalidDocument",
+    "DatatypeLoadError", "DatatypeWriteError",
+    "load_datatype"
+]
+
+
 class PimlicoDatatype(object):
     """
     The abstract superclass of all datatypes. Provides basic functionality for identifying where

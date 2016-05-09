@@ -4,9 +4,15 @@ import struct
 import cPickle as pickle
 from operator import itemgetter
 
-from pimlico.core.modules.map import invalid_doc_on_error
 from pimlico.datatypes.base import IterableCorpus, DatatypeLoadError, IterableCorpusWriter
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
+
+
+__all__ = [
+    "KeyValueListCorpus", "KeyValueListCorpusWriter",
+    "TermFeatureListCorpus", "TermFeatureListCorpusWriter",
+    "IndexedTermFeatureListCorpus", "IndexedTermFeatureListCorpusWriter"
+]
 
 
 class KeyValueListCorpus(TarredCorpus):
@@ -81,7 +87,6 @@ class TermFeatureListCorpus(KeyValueListCorpus):
     def __init__(self, base_dir, pipeline):
         super(TermFeatureListCorpus, self).__init__(base_dir, pipeline)
 
-    @invalid_doc_on_error
     def process_document(self, data):
         data = super(TermFeatureListCorpus, self).process_document(data)
 

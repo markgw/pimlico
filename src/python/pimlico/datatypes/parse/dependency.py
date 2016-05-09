@@ -1,15 +1,20 @@
 import json
 
-from pimlico.core.modules.map import skip_invalid
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
 from pimlico.datatypes.tar import pass_up_invalid
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWriter
 
 
+__all__ = [
+    "StanfordDependencyParseCorpus", "StanfordDependencyParseCorpusWriter",
+    "CoNLLDependencyParseCorpus", "CoNLLDependencyParseCorpusWriter",
+    "CoNLLDependencyParseInputCorpus", "CoNLLDependencyParseInputCorpusWriter",
+]
+
+
 class StanfordDependencyParseCorpus(JsonDocumentCorpus):
     datatype_name = "stanford_dependency_parses"
 
-    @skip_invalid
     def process_document(self, data):
         data = super(StanfordDependencyParseCorpus, self).process_document(data)
         if data.strip():

@@ -15,6 +15,9 @@ from pimlico.datatypes.base import IterableCorpus, PimlicoDatatypeWriter
 from pimlico.utils.progress import get_progress_bar
 
 
+__all__ = ["XmlDocumentIterator"]
+
+
 class XmlDocumentIterator(IterableCorpus):
     requires_data_preparation = True
     input_module_options = {

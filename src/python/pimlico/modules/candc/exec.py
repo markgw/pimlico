@@ -23,15 +23,15 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
     to that server.
 
     """
-    def __init__(self, input_queue, output_queue, executor):
+    def __init__(self, input_queue, output_queue, exception_queue, executor):
         self._server_process = None
         self.host = "127.0.0.1"
-        super(CandcWorkerProcess, self).__init__(input_queue, output_queue, executor)
         # Get one of the ports that the executor lined up for us
         try:
-            self.port = self.executor.ports.get_nowait()
+            self.port = executor.ports.get_nowait()
         except Empty:
             raise CandCServerError("not enough ports for all the processes")
+        super(CandcWorkerProcess, self).__init__(input_queue, output_queue, exception_queue, executor)
 
     @skip_invalid
     @invalid_doc_on_error
@@ -113,7 +113,7 @@ def preprocess(executor):
     executor.input_corpora[0].raw_data = True
     # Generate enough ports for all the processes
     executor.ports = multiprocessing.Queue()
-    for port in get_unused_local_ports(executor.info.processes):
+    for port in get_unused_local_ports(executor.processes):
         executor.ports.put(port)
 
 

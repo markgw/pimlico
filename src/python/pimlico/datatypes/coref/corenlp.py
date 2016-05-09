@@ -5,14 +5,12 @@ provided by that.
 """
 import json
 
-from pimlico.core.modules.map import skip_invalid
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 
 class CorefCorpus(TarredCorpus):
     datatype_name = "corenlp_coref"
 
-    @skip_invalid
     def process_document(self, data):
         if data.strip():
             return [Entity(eid, [Mention.from_json(m) for m in mentions])

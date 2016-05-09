@@ -16,6 +16,9 @@ import cPickle as pickle
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
 
 
+__all__ = ["Dictionary", "DictionaryWriter"]
+
+
 class Dictionary(PimlicoDatatype):
     """
     Dictionary encapsulates the mapping between normalized words and their integer ids.

@@ -7,6 +7,13 @@ from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 
+__all__ = [
+    "WordAnnotationCorpus", "WordAnnotationCorpusWriter", "SimpleWordAnnotationCorpusWriter",
+    "AddAnnotationField", "WordAnnotationCorpusWithFields",
+    "AnnotationParseError"
+]
+
+
 class WordAnnotationCorpus(TarredCorpus):
     datatype_name = "word_annotations"
     # Subclasses may provide a list of the fields included for each word

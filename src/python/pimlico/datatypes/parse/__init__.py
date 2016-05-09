@@ -4,6 +4,14 @@ TODO Parse tress are temporary implementations that don't actually parse the dat
 """
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
+from . import candc
+from .candc import *
+from . import dependency
+from .dependency import *
+
+
+__all__ = ["ConstituencyParseTreeCorpus", "ConstituencyParseTreeCorpusWriter"] + candc.__all__ + dependency.__all__
+
 
 class ConstituencyParseTreeCorpus(TarredCorpus):
     """

@@ -4,6 +4,9 @@ from pimlico.datatypes.tar import TarredCorpus
 from xml.etree import ElementTree as ET
 
 
+__all__ = ["CaevoCorpus"]
+
+
 TAG_PREFIX = "{http://chambers.com/corpusinfo}"
 
 def _tag(name):

@@ -1,13 +1,14 @@
 from cStringIO import StringIO
 
-from pimlico.core.modules.map import skip_invalid
 from pimlico.datatypes.tar import TarredCorpusWriter, pass_up_invalid, TarredCorpus
+
+
+__all__ = ["CandcOutputCorpus", "CandcOutputCorpusWriter"]
 
 
 class CandcOutputCorpus(TarredCorpus):
     datatype_name = "candc_output"
 
-    @skip_invalid
     def process_document(self, data):
         data = super(CandcOutputCorpus, self).process_document(data)
         return CandcOutput(data)

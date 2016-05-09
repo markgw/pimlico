@@ -7,6 +7,9 @@ import os
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
 
 
+__all__ = ["NumpyArray", "NumpyArrayWriter", "ScipySparseMatrix", "ScipySparseMatrixWriter"]
+
+
 class NumpyArray(PimlicoDatatype):
     def __init__(self, base_dir, pipeline, **kwargs):
         super(NumpyArray, self).__init__(base_dir, pipeline, **kwargs)

@@ -16,6 +16,12 @@ from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument
 from .base import IterableCorpus
 
 
+__all__ = [
+    "TarredCorpus", "TarredCorpusWriter", "AlignedTarredCorpora",
+    "CorpusAlignmentError", "TarredCorpusIterationError"
+]
+
+
 class TarredCorpus(IterableCorpus):
     datatype_name = "tar"
     # This may be overridden by subclasses to provide filters for documents applied before main doc processing

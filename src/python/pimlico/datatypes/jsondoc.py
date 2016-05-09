@@ -2,6 +2,9 @@ import json
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 
+__all__ = ["JsonDocumentCorpus", "JsonDocumentCorpusWriter"]
+
+
 class JsonDocumentCorpus(TarredCorpus):
     """
     Very simple document corpus in which each document is a JSON object.

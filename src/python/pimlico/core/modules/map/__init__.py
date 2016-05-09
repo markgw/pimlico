@@ -89,7 +89,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         Should return an instance of the pool to be used for document processing. Should generally be a
         subclass of DocumentProcessorPool.
 
-        Always called after postprocess_parallel().
+        Always called after preprocess().
 
         """
         raise NotImplementedError
