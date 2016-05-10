@@ -59,7 +59,13 @@ def browse_data(data, parse=False):
                  state.current_doc_data.error_info)
             )
         else:
-            body_text.set_text(unicode(state.current_doc_data).encode("ascii", "replace").replace("\t", "    "))
+            doc = state.current_doc_data
+            # Allow datatypes to provide a custom way to format the data, other than the __unicode__
+            if hasattr(doc, "browser_display"):
+                doc = doc.browser_display
+            else:
+                doc = unicode(doc)
+            body_text.set_text(doc.encode("ascii", "replace").replace("\t", "    "))
 
     def skip_docs(value_box, *args):
         skip = value_box.value()

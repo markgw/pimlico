@@ -36,7 +36,6 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
     @skip_invalid
     @invalid_doc_on_error
     def process_document(self, archive, filename, *docs):
-        # TODO Maybe split up into multiple requests if there's a problem with large docs
         # Encode doc as utf-8 so it can be sent to the server
         doc = docs[0].encode("utf-8")
         stdout, stderr, returncode = self._run_client(doc)

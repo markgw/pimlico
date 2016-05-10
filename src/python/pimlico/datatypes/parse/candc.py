@@ -139,7 +139,7 @@ class GrammaticalRelation(object):
         """
         Parse a GR from a single line of text
         """
-        tokens = line.strip("()\n ").split()
+        tokens = line.strip("()\n ").split(" ")
         dep_type = tokens[0]
         args = [GrammaticalRelation._split_lex(t) for t in tokens[1:]]
         return GrammaticalRelation(dep_type, args)
