@@ -12,6 +12,9 @@ def process_document(worker, archive, filename, doc):
         if output_name == "tokenized":
             # The Caevo tokenization output is stored as a list of triples, where the word is the middle item of each
             outputs.append([[token[1] for token in entry.tokens] for entry in doc.entries])
+        elif output_name == "parse":
+            # Caevo just stores the full parse tree as text
+            outputs.append([entry.parse or "()" for entry in doc.entries])
 
     return tuple(outputs)
 

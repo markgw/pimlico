@@ -6,13 +6,11 @@ we can make multiple asynchronous calls to the same gateway. However, OpenNLP is
 grind to a halt if we do this.
 
 """
-from pimlico.datatypes.datatypes import TokenizedCorpus
+from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
+from pimlico.datatypes import TokenizedCorpus
 
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.core.modules.map import skip_invalid
-from pimlico.core.modules.map.multiproc import MultiprocessingMapProcess, MultiprocessingMapPool, \
-    DocumentMapModuleParallelExecutor, multiprocessing_executor_factory
 from py4j.java_collections import ListConverter
 
 

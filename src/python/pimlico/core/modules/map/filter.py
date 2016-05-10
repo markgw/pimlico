@@ -122,7 +122,7 @@ class DocumentMapOutputTypeWrapper(object):
                         # Here the normal executor would write the outputs to disk
                         # Instead we simply yield the one we're interested in
                         # Use the writer to convert it from what it expects from the processing to raw text
-                        data = writer.document_to_raw_data(result.data[0])
+                        data = writer.document_to_raw_data(result.data[self.output_num])
                         if not self.raw_data:
                             # If not outputting raw data, now use the output datatype to convert back from raw text
                             # It may seem a waste of time to convert to and from text, but sometimes the conversions

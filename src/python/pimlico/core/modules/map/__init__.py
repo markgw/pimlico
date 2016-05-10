@@ -1,6 +1,7 @@
 import threading
 from Queue import Queue, Empty
 from threading import Thread
+from time import sleep
 from traceback import format_exc
 
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor
@@ -168,6 +169,10 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                                     pass
                                 else:
                                     # Got an error from a process: raise it
+                                    # First empty the exception queue, in case there were multiple errors
+                                    sleep(0.05)
+                                    while not self.pool.exception_queue.empty():
+                                        self.pool.exception_queue.get(timeout=0.1)
                                     # Sometimes, a traceback from within the process is included
                                     debugging = error.traceback if hasattr(error, "traceback") else None
                                     raise ModuleExecutionError("error in worker process: %s" % error,

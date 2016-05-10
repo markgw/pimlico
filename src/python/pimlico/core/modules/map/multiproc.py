@@ -100,13 +100,12 @@ class MultiprocessingMapPool(DocumentProcessorPool):
         # Tell all the threads to stop
         for worker in self.workers:
             worker.stopped.set()
-        for worker in self.workers:
-            # Wait until it's stopped
-            while worker.is_alive():
-                # Need to clear the output queue, or else the join hangs
-                while not self.output_queue.empty():
-                    self.output_queue.get_nowait()
-                worker.join(0.1)
+        # Need to clear the output queue to help with shutdown
+        while not self.output_queue.empty():
+            self.output_queue.get_nowait()
+        # Don't wait until the processes have actually stopped as some might not die until the exception queue
+        #  is emptied, but we don't want to do that yet
+        # They're all daemon processes anyway
 
 
 class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):

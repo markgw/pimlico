@@ -23,6 +23,7 @@ from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.datatypes import TokenizedCorpus, TokenizedCorpusWriter
 from pimlico.datatypes.caevo import CaevoCorpus
+from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -33,6 +34,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_outputs = []
     module_optional_outputs = [
         ("tokenized", TokenizedCorpus),
+        ("parse", ConstituencyParseTreeCorpus)
     ]
     module_options = {
         "gzip": {
@@ -45,3 +47,5 @@ class ModuleInfo(DocumentMapModuleInfo):
     def get_writer(self, output_name, output_dir, append=False):
         if output_name == "tokenized":
             return TokenizedCorpusWriter(output_dir, append=append, gzip=self.options["gzip"])
+        elif output_name == "parse":
+            return ConstituencyParseTreeCorpusWriter(output_dir, append=append, gzip=self.options["gzip"])
