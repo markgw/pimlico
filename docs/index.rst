@@ -5,7 +5,8 @@
 The **Pimlico Processing Toolkit** (PIpelined Modular LInguistic COrpus processing) 
 is a toolkit for building pipelines made up of linguistic processing tasks 
 to run on large datasets (corpora). It provides a wrappers around many 
-existing, widely used NLP (Natural Language Processing) tools. 
+existing, widely used NLP (Natural Language Processing) tools.
+
 It makes it easy to write large, potentially complex pipelines 
 with the following key goals:
 
@@ -16,6 +17,9 @@ with the following key goals:
 
 The toolkit takes care of managing data between the steps of a 
 pipeline and checking that everything's executed in the right order.
+
+The core toolkit is written in Python. Pimlico is open source, released under the GPLv3 license. It is
+available to download from `its Gitlab repository <https://gitlab.com/markgw/pimlico>`_.
 
 .. note::
    There are some key features missing, which I'll add over time, and more NLP tools will gradually be added.
