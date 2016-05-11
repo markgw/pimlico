@@ -15,10 +15,10 @@ Things I plan to add to Pimlico.
   - :doc:`Berkeley Parser <berkeley>` for fast constituency parsing
   - `Reconcile <https://www.cs.utah.edu/nlp/reconcile/>`_ coref. Seems to incorporate upstream NLP tasks. Would want
     to interface such that we can reuse output from other modules and just do coref.
-  - Caevo: :mod:`partially implemented <pimlico.modules.caevo>`
 
 - Output pipeline graph visualizations: :doc:`drawing`
-- Bug in counting of corpus size (off by one) when a map process restarts
+- Bug in counting of corpus size (off by one, sometimes) when a map process restarts
+- Start using `issue tracker <https://gitlab.com/markgw/pimlico/issues>`_ instead of this list
 
 Todos
 =====
