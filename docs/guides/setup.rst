@@ -11,27 +11,9 @@ basic pipeline.
 
 Getting Pimlico
 ===============
-You'll want to use the latest release of Pimlico. Check the website and download the codebase as a tarball.
-
-Create a new directory to put your project in and extract the codebase into
-a directory `pimlico` within the project directory. Let's say we're using `~/myproject/`.
-
-.. code-block:: bash
-
-    mkdir ~/myproject
-    cd ~/myproject
-    mv /path/to/downloaded/tarball.tar.gz .
-    tar -zxf tarball.tar.gz
-    rm tarball.tar.gz
-
-Depending on what you want to do with Pimlico, you'll
-also need to fetch dependencies. Let's start by getting the basic dependencies that will be needed regardless of what
-module types you use.
-
-.. code-block:: bash
-
-    cd pimlico/lib/python
-    make core
+You'll want to use the latest release of Pimlico.
+Create a new directory to put your project in and put the Pimlico codebase into
+a directory `pimlico` within the project directory, following the instructions on :doc:`/core/download`.
 
 System-wide configuration
 =========================

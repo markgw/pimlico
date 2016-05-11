@@ -18,8 +18,6 @@ The toolkit takes care of managing data between the steps of a
 pipeline and checking that everything's executed in the right order.
 
 .. note::
-   *Pimlico is a new project*, and documentation is taking shape, but still sparse.
-   
    There are some key features missing, which I'll add over time, and more NLP tools will gradually be added.
    See :doc:`my wishlist <plans/wishlist>` for current plans.
 
