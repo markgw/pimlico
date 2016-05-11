@@ -6,6 +6,7 @@
 Tool for browsing datasets, reading from the data output by pipeline modules.
 """
 import sys
+from traceback import format_exc
 
 import urwid
 from pimlico.datatypes.base import InvalidDocument
@@ -65,10 +66,13 @@ def browse_data(data, parse=False):
         else:
             doc = state.current_doc_data
             # Allow datatypes to provide a custom way to format the data, other than the __unicode__
-            if hasattr(doc, "browser_display"):
+            try:
                 doc = doc.browser_display
-            else:
+            except AttributeError:
                 doc = unicode(doc)
+            except Exception, e:
+                # browser_display exists, but there was an error calling it
+                doc = "Error formatting datatype %s for display:\n%s" % (type(doc).__name__, format_exc())
             body_text.set_text(doc.encode("ascii", "replace").replace("\t", "    "))
 
     def skip_docs(value_box, *args):
