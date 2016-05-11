@@ -139,7 +139,10 @@ class CaevoEvent(object):
         )
 
     def __unicode__(self):
-        return "Event(id={self.id}, eiid={self.eiid}, '{self.string}')".format(self=self)
+        return u"Event(id={self.id}, eiid={self.eiid}, '{self.string}')".format(self=self)
+
+    def __repr__(self):
+        return unicode(self).encode("ascii", "replace")
 
 
 class CaevoTimex(object):
@@ -160,7 +163,7 @@ class CaevoTimex(object):
         )
 
     def __unicode__(self):
-        return "Timex(tid={self.tid}, '{self.text}')".format(self=self)
+        return u"Timex(tid={self.tid}, '{self.text}')".format(self=self)
 
 
 class TLink(object):
@@ -185,3 +188,6 @@ class TLink(object):
 
     def __unicode__(self):
         return u"TLink(e1={self.event1}, e2={self.event2}, {self.relation})".format(self=self)
+
+    def __repr__(self):
+        return unicode(self).encode("ascii", "replace")

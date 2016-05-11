@@ -72,7 +72,8 @@ class Entity(object):
         )
 
     def __unicode__(self):
-        return u"Entity-%s(%s)" % (self.id, "/".join(truncate(unicode(m), 15).strip() for m in self.mentions))
+        return u"Entity-%s(%s)" % (self.id,
+                                   truncate(u"/".join(truncate(unicode(m), 30).strip() for m in self.mentions), 30))
 
     def __repr__(self):
         return unicode(self).encode("ascii", "ignore")

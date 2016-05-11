@@ -6,9 +6,12 @@
 Tool for browsing datasets, reading from the data output by pipeline modules.
 """
 import sys
+from importlib import import_module
 from traceback import format_exc
 
 import urwid
+from pimlico.cli.browser.formatter import DefaultFormatter
+from pimlico.core.modules.base import check_type, TypeCheckError
 from pimlico.datatypes.base import InvalidDocument
 
 PALETTE = [
@@ -23,7 +26,60 @@ PALETTE = [
 ]
 
 
-def browse_data(data, parse=False):
+def browse_cmd(pipeline, opts):
+    """
+    Command for main Pimlico CLI
+
+    """
+    from pimlico.datatypes.base import IterableCorpus
+
+    module_name = opts.module_name
+    output_name = opts.output_name
+    print "Loading %s of module '%s'" % \
+          ("default output" if output_name is None else "output '%s'" % output_name, module_name)
+    data = pipeline[module_name].get_output(output_name)
+    print "Datatype: %s" % data.datatype_name
+
+    # We can only browse tarred corpora document by document
+    if not isinstance(data, IterableCorpus):
+        print "%s is not a sub-type of iteratable corpus, so can't be browsed (datatype class is %s)" % \
+              (data.datatype_name, type(data).__name__)
+        sys.exit(1)
+
+    # Check we've got urwid installed
+    try:
+        import urwid
+    except ImportError:
+        print "You need Urwid to run the browser: install by running 'make urwid' in the Python lib dir"
+        sys.exit(1)
+
+    # Load the formatter if one was requested
+    if opts.formatter is not None:
+        try:
+            fmt_path, __, fmt_cls_name = opts.formatter.rpartition(".")
+            fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
+            fmt_cls = getattr(fmt_mod, fmt_cls_name)
+        except ImportError, e:
+            print "Could not load formatter %s: %s" % (opts.formatter, e)
+            sys.exit(1)
+        # If a formatter's given, use its attribute to determine whether we get raw input
+        parse = not fmt_cls.RAW_INPUT
+        # Check that the datatype provided is compatible with the formatter's datatype
+        try:
+            check_type(type(data), fmt_cls.DATATYPE)
+        except TypeCheckError, e:
+            print "formatter %s is not designed for this datatype (%s)" % (opts.formatter, type(data).__name__)
+            sys.exit(1)
+        # Instantiate the formatter, providing it with the dataset
+        formatter = fmt_cls(data)
+    else:
+        parse = opts.parse
+        formatter = DefaultFormatter(data, raw_data=not opts.parse)
+
+    browse_data(data, formatter, parse=parse)
+
+
+def browse_data(data, formatter, parse=False):
     if not parse:
         data.raw_data = True
     if not data.data_ready():
@@ -40,7 +96,8 @@ def browse_data(data, parse=False):
 
     # Middle: content
     body_text = urwid.Text("")
-    body = [body_text, urwid.Divider()]
+    #body = [body_text, urwid.Divider()]
+    content_scrollbox = urwid.ListBox(urwid.SimpleListWalker([body_text]))
 
     # Bottom: footer
     footer_text = urwid.Text("", align='right')
@@ -65,12 +122,10 @@ def browse_data(data, parse=False):
             )
         else:
             doc = state.current_doc_data
-            # Allow datatypes to provide a custom way to format the data, other than the __unicode__
+            # Format the doc using the formatter
             try:
-                doc = doc.browser_display
-            except AttributeError:
-                doc = unicode(doc)
-            except Exception, e:
+                doc = formatter.format_document(doc)
+            except:
                 # browser_display exists, but there was an error calling it
                 doc = "Error formatting datatype %s for display:\n%s" % (type(doc).__name__, format_exc())
             body_text.set_text(doc.encode("ascii", "replace").replace("\t", "    "))
@@ -90,7 +145,7 @@ def browse_data(data, parse=False):
     # Main layout
     main = urwid.LineBox(
         urwid.Frame(
-            urwid.ListBox(urwid.SimpleFocusListWalker(body)),
+            content_scrollbox,
             header=urwid.Pile(top_widgets),
             footer=urwid.Pile([urwid.Divider(), urwid.Columns(bottom_row)])
         )

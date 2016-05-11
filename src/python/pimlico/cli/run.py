@@ -4,10 +4,9 @@
 
 import argparse
 import os
-from traceback import print_exc, format_exception_only
-
 import sys
 from operator import itemgetter
+from traceback import print_exc, format_exception_only
 
 from pimlico.cli.check import check_cmd
 from pimlico.cli.status import status_cmd
@@ -15,6 +14,7 @@ from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
 from pimlico.utils.filesystem import copy_dir_with_progress
+from .browser.tool import browse_cmd
 
 
 def run_cmd(pipeline, opts):
@@ -68,33 +68,6 @@ def short_to_long(pipeline, opts):
     short_term_dir = os.path.join(pipeline.short_term_store, module_path)
     long_term_dir = os.path.join(pipeline.long_term_store, module_path)
     copy_dir_with_progress(short_term_dir, long_term_dir)
-
-
-def browse_cmd(pipeline, opts):
-    from pimlico.datatypes.base import IterableCorpus
-
-    module_name = opts.module_name
-    output_name = opts.output_name
-    print "Loading %s of module '%s'" % \
-          ("default output" if output_name is None else "output '%s'" % output_name, module_name)
-    data = pipeline[module_name].get_output(output_name)
-    print "Datatype: %s" % data.datatype_name
-
-    # We can only browse tarred corpora document by document
-    if not isinstance(data, IterableCorpus):
-        print "%s is not a sub-type of iteratable corpus, so can't be browsed (datatype class is %s)" % \
-              (data.datatype_name, type(data).__name__)
-        sys.exit(1)
-
-    # Check we've got urwid installed
-    try:
-        import urwid
-    except ImportError:
-        print "You need Urwid to run the browser: install by running 'make urwid' in the Python lib dir"
-        sys.exit(1)
-
-    from .browse import browse_data
-    browse_data(data, parse=opts.parse)
 
 
 if __name__ == "__main__":
@@ -160,6 +133,9 @@ if __name__ == "__main__":
     run.add_argument("--parse", "-p", action="store_true",
                      help="Parse the data using the output datatype (i.e. don't just read the raw text) and output "
                           "the result of applying str() to the parsed data structure")
+    run.add_argument("--formatter", "-f",
+                     help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
+                          "what to output for each document. If specified, --parse is ignored")
 
     opts = parser.parse_args()
 
