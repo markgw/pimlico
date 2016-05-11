@@ -16,6 +16,7 @@ Submodules
 
    pimlico.datatypes.arrays
    pimlico.datatypes.base
+   pimlico.datatypes.caevo
    pimlico.datatypes.dictionary
    pimlico.datatypes.features
    pimlico.datatypes.jsondoc

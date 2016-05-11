@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
 """
 Process documents one at a time with the `Stanford CoreNLP toolkit <http://stanfordnlp.github.io/CoreNLP/>`_.
 CoreNLP provides a large number of NLP tools, including a POS-tagger, various parsers, named-entity recognition

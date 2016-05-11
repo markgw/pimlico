@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
 """
 Datatypes provide interfaces for reading (and in some cases writing) datasets. At their most basic,
 they define a way to iterate over a dataset linearly. Some datatypes may also provide other functionality,

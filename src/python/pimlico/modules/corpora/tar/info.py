@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
 """
 Group the files of a multi-file iterable corpus into tar archives. This is a
 standard thing to do at the start of the pipeline, since it's a handy way to

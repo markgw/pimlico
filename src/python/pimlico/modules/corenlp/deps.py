@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
 from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 

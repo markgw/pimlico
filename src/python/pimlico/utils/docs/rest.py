@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
 
 def make_table(grid, header=None):
     all_rows = [header] + grid if header is not None else grid

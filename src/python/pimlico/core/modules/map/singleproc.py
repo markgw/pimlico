@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
 """
 Sometimes the simple multiprocessing-based approach to map module parallelization just isn't suitable.
 This module provides an equivalent set of implementations and convenience functions that don't use
