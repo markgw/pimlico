@@ -133,8 +133,6 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         docs_completed_before, start_after = self.retrieve_processing_status()
         total_to_process = len(self.input_iterator) - docs_completed_before
 
-        pbar = get_progress_bar(total_to_process, counter=True,
-                                title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
         try:
             # Prepare a corpus writer for the output
             with multiwith(*self.info.get_writers(append=start_after is not None)) as writers:
@@ -144,6 +142,8 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                     #  might need to finish writing metadata or suchlike if we failed last time once all docs were done
                     self.log.info("No documents to process")
                 else:
+                    pbar = get_progress_bar(total_to_process, counter=True,
+                                            title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
                     # Inputs will be taken from this as they're needed
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
                     # Set a thread going to feed things onto the input queue
@@ -215,8 +215,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
                             # Check what document we're waiting for now
                             next_document = input_feeder.get_next_output_document()
-
-            pbar.finish()
+                    pbar.finish()
             complete = True
         finally:
             # Call the finishing-off routine, if one's been defined
@@ -298,35 +297,72 @@ class InputQueueFeeder(Thread):
         self.daemon = True
         self.iterator = iterator
         self.input_queue = input_queue
-        self.docs_processing = Queue()
+        self._docs_processing = Queue()
         self.started = threading.Event()
-        self.finished = threading.Event()
+        self._feeding_complete = threading.Event()
+        self.exception_queue = Queue(1)
         self.start()
 
-    def no_more_outputs(self):
-        return self.finished.is_set() and self.docs_processing.empty()
-
     def get_next_output_document(self):
-        if self.no_more_outputs():
-            # No more outputs ever expected to come out
-            return None
-        else:
-            # Possible that docs_processing is empty, if we're waiting for the feeder
-            # Wait until we know what the next document to come out is to be
-            return self.docs_processing.get()
+        while True:
+            if self._feeding_complete.is_set():
+                # All docs have now been queued
+                # Once there are no more docs on _doc_processing, we're done
+                try:
+                    return self._docs_processing.get_nowait()
+                except Empty:
+                    return None
+            else:
+                # Possible that docs_processing is empty, if we're waiting for the feeder
+                # Wait until we know what the next document to come out is to be
+                # Don't wait forever: can deadlock if we get here twice between the last queue put and the complete
+                #  flag being set. Timeout and check whether feeding is complete if we don't get a result soon
+                try:
+                    return self._docs_processing.get(timeout=0.1)
+                except Empty:
+                    pass
 
     def run(self):
-        # Keep feeding inputs onto the queue as long as we've got more
-        for archive, filename, docs in self.iterator:
-            # If the queue is full, this will block until there's room to put the next one on
-            self.input_queue.put((archive, filename, docs))
-            # Record that we've sent this one off, so we can write the results out in the right order
-            self.docs_processing.put((archive, filename))
-            # As soon as something's been fed, the output processor can get going
+        try:
+            # Keep feeding inputs onto the queue as long as we've got more
+            for archive, filename, docs in self.iterator:
+                # If the queue is full, this will block until there's room to put the next one on
+                self.input_queue.put((archive, filename, docs))
+                # Record that we've sent this one off, so we can write the results out in the right order
+                self._docs_processing.put((archive, filename))
+                # As soon as something's been fed, the output processor can get going
+                self.started.set()
+            self._feeding_complete.set()
+        except Exception, e:
+            # Error in iterating over the input data -- actually quite common, since it could involve filter modules
+            # Make it available to the main thread
+            e.traceback = format_exc()
+            self.exception_queue.put(e, block=True)
+        finally:
+            # Just in case there aren't any inputs
             self.started.set()
-        # Just in case there aren't any inputs
-        self.started.set()
-        self.finished.set()
+
+    def check_for_error(self):
+        """
+        Can be called from the main thread to check whether an error has occurred in this thread and raise a
+        suitable exception if so
+
+        """
+        try:
+            error = self.exception_queue.get_nowait()
+        except Empty:
+            # No error
+            pass
+        else:
+            # Got an error from thread: raise something including it
+            # Sometimes, a traceback from within the process is included
+            if hasattr(error, "debugging_info"):
+                debugging = error.debugging_info
+            elif hasattr(error, "traceback"):
+                debugging = error.traceback
+            else:
+                debugging = None
+            raise ModuleExecutionError("error in input iterator: %s" % error, cause=error, debugging_info=debugging)
 
 
 class DocumentProcessorPool(object):

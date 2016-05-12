@@ -448,7 +448,10 @@ def check_for_cycles(pipeline):
     )
 
     def _search(node, check_for):
-        if len(dep_map[node]) == 0:
+        if node not in dep_map:
+            # Error in the config, but this should be picked up by other checks, not here
+            return False
+        elif len(dep_map[node]) == 0:
             # No dependencies: no cycle found
             return False
         elif check_for in dep_map[node]:

@@ -4,6 +4,7 @@
 
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
+from pimlico.datatypes.parse import Tree
 
 
 @skip_invalid
@@ -19,6 +20,11 @@ def process_document(worker, archive, filename, doc):
         elif output_name == "parse":
             # Caevo just stores the full parse tree as text
             outputs.append([entry.parse or "()" for entry in doc.entries])
+        elif output_name == "pos":
+            # POS tags aren't provided in a separate field: get them from parse tree
+            trees = [Tree.fromstring(entry.parse) for entry in doc.entries]
+            tags = [t.pos() for t in trees]
+            outputs.append(tags)
 
     return tuple(outputs)
 

@@ -28,6 +28,8 @@ from pimlico.core.modules.options import str_to_bool
 from pimlico.datatypes import TokenizedCorpus, TokenizedCorpusWriter
 from pimlico.datatypes.caevo import CaevoCorpus
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
+from pimlico.datatypes.word_annotations import WordAnnotationCorpusWithRequiredFields, WordAnnotationCorpusWithFields, \
+    SimpleWordAnnotationCorpusWriter
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -38,7 +40,8 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_outputs = []
     module_optional_outputs = [
         ("tokenized", TokenizedCorpus),
-        ("parse", ConstituencyParseTreeCorpus)
+        ("parse", ConstituencyParseTreeCorpus),
+        ("pos", WordAnnotationCorpusWithFields("word", "pos"))
     ]
     module_options = {
         "gzip": {
@@ -53,3 +56,6 @@ class ModuleInfo(DocumentMapModuleInfo):
             return TokenizedCorpusWriter(output_dir, append=append, gzip=self.options["gzip"])
         elif output_name == "parse":
             return ConstituencyParseTreeCorpusWriter(output_dir, append=append, gzip=self.options["gzip"])
+        elif output_name == "pos":
+            return SimpleWordAnnotationCorpusWriter(output_dir, ["word", "pos"],
+                                                    append=append, gzip=self.options["gzip"])

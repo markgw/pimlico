@@ -13,7 +13,7 @@ from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_inva
 
 __all__ = [
     "WordAnnotationCorpus", "WordAnnotationCorpusWriter", "SimpleWordAnnotationCorpusWriter",
-    "AddAnnotationField", "WordAnnotationCorpusWithFields",
+    "AddAnnotationField", "WordAnnotationCorpusWithRequiredFields",
     "AnnotationParseError"
 ]
 
@@ -132,6 +132,19 @@ class WordAnnotationCorpus(TarredCorpus):
             return True
 
 
+def WordAnnotationCorpusWithFields(*fields):
+    """
+    Functional type (factory) to create a subclass of WordAnnotationCorpus that has an exact set of fields.
+    Makes it slightly easier to specify output datatypes, without having to define a subclass of WordAnnotationCorpus
+    first.
+
+    """
+    # Make a suitable classname, to aid with debugging
+    cls_name = "WordAnnotationCorpusWith%s" % "And".join(filter(str.isalnum, f).capitalize() for f in fields)
+    # Define a subclass of WAC that specifies the annotation_fields attribute
+    return type(cls_name, (WordAnnotationCorpus,), dict(annotation_fields=fields))
+
+
 class WordAnnotationCorpusWriter(TarredCorpusWriter):
     """
     Ensures that the correct metadata is provided for a word annotation corpus. Doesn't take care of
@@ -233,14 +246,14 @@ class AddAnnotationField(DynamicOutputDatatype):
         return WordAnnotationCorpus
 
 
-class WordAnnotationCorpusWithFields(DynamicInputDatatypeRequirement):
+class WordAnnotationCorpusWithRequiredFields(DynamicInputDatatypeRequirement):
     """
     Dynamic (functional) type that can be used in place of a module's input type. In typechecking, checks whether the
     input module is a WordAnnotationCorpus (or subtype) and whether its fields include all of those required.
 
     """
     def __init__(self, required_fields):
-        super(WordAnnotationCorpusWithFields, self).__init__()
+        super(WordAnnotationCorpusWithRequiredFields, self).__init__()
 
         # Allow just a single field name to be given
         if isinstance(required_fields, basestring):

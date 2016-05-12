@@ -10,13 +10,13 @@ be repeated as the lemma.
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, CoNLLDependencyParseInputCorpusWriter
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithFields
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithRequiredFields
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "conll_parser_input"
     module_readable_name = "Annotated text to CoNLL dep parse input converter"
-    module_inputs = [("annotations", WordAnnotationCorpusWithFields(["word", "pos"]))]
+    module_inputs = [("annotations", WordAnnotationCorpusWithRequiredFields(["word", "pos"]))]
     module_outputs = [("conll_data", CoNLLDependencyParseInputCorpus)]
     module_options = {}
 

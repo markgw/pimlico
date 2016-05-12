@@ -238,6 +238,33 @@ class IterableCorpusWriter(PimlicoDatatypeWriter):
             raise DatatypeWriteError("writer for IterableDocumentCorpus must set a 'length' value in the metadata")
 
 
+class SingleTextDocument(PimlicoDatatype):
+    datatype_name = "single_doc"
+
+    def data_ready(self):
+        return super(SingleTextDocument, self).data_ready() and os.path.exists(self.data_dir, "data.txt")
+
+    def read_data(self):
+        with open(os.path.join(self.data_dir, "data.txt"), "r") as f:
+            return f.read().decode("utf-8")
+
+
+class SingleTextDocumentWriter(PimlicoDatatypeWriter):
+    def __init__(self, base_dir):
+        super(SingleTextDocumentWriter, self).__init__(base_dir)
+        self.data = ""
+        self.output_path = os.path.join(self.data_dir, "data.txt")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super(SingleTextDocumentWriter, self).__exit__(exc_type, exc_val, exc_tb)
+        if exc_type is None:
+            # Always encode data as utf-8
+            data = self.data.encode("utf-8")
+            # Write out the data file
+            with open(self.output_path, "w") as f:
+                f.write(data)
+
+
 class InvalidDocument(object):
     """
     Widely used in Pimlico to represent an empty document that is empty not because the original input document

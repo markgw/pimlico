@@ -16,7 +16,7 @@ from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 @skip_invalid
 def process_document(worker, archive, filename, doc):
     # Run tokenization
-    tokenized_sents = [sent.decode("utf-8") for sent in worker.gateway.entry_point.tokenize(doc.encode("utf-8"))]
+    tokenized_sents = [sent for sent in worker.gateway.entry_point.tokenize(doc.encode("utf-8"))]
     # Output one sentence per line
     return u"\n".join(tokenized_sents)
 
@@ -24,8 +24,8 @@ def process_document(worker, archive, filename, doc):
 def worker_set_up(worker):
     # Start a tokenizer process running in the background via Py4J
     worker.interface = Py4JInterface("pimlico.opennlp.TokenizerGateway",
-                                       gateway_args=[worker.info.sentence_model_path, worker.info.token_model_path],
-                                       pipeline=worker.info.pipeline, print_stderr=False, print_stdout=False)
+                                     gateway_args=[worker.info.sentence_model_path, worker.info.token_model_path],
+                                     pipeline=worker.info.pipeline, print_stderr=False, print_stdout=False)
     worker.interface.start()
     # Open a client gateway to the executor's py4j interface
     worker.gateway = worker.interface.gateway

@@ -3,6 +3,7 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from Queue import Empty
+from time import sleep
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import load_module_executor, BaseModuleInfo
@@ -101,10 +102,21 @@ class DocumentMapOutputTypeWrapper(object):
                                 pass
                             else:
                                 # Got an error from a process: raise it
+                                # First empty the exception queue, in case there were multiple errors
+                                sleep(0.05)
+                                while not executor.pool.exception_queue.empty():
+                                    executor.pool.exception_queue.get(timeout=0.1)
                                 # Sometimes, a traceback from within the process is included
-                                debugging = error.traceback if hasattr(error, "traceback") else None
+                                if hasattr(error, "debugging_info"):
+                                    # We've already attached debugging info at some lower level: just use it
+                                    debugging = error.debugging_info
+                                elif hasattr(error, "traceback"):
+                                    debugging = error.traceback
+                                else:
+                                    debugging = None
                                 raise ModuleExecutionError("error in worker process: %s" % error,
                                                            cause=error, debugging_info=debugging)
+                            input_feeder.check_for_error()
                         except:
                             raise
                         else:
@@ -126,7 +138,11 @@ class DocumentMapOutputTypeWrapper(object):
                         # Here the normal executor would write the outputs to disk
                         # Instead we simply yield the one we're interested in
                         # Use the writer to convert it from what it expects from the processing to raw text
-                        data = writer.document_to_raw_data(result.data[self.output_num])
+                        if type(result.data) is tuple:
+                            data = result.data[self.output_num]
+                        else:
+                            data = result.data
+                        data = writer.document_to_raw_data(data)
                         if not self.raw_data:
                             # If not outputting raw data, now use the output datatype to convert back from raw text
                             # It may seem a waste of time to convert to and from text, but sometimes the conversions
@@ -136,6 +152,10 @@ class DocumentMapOutputTypeWrapper(object):
                         yield result.archive, result.filename, data
                     # Check what document we're waiting for now
                     next_document = input_feeder.get_next_output_document()
+
+                # We get a None next_document if there's an error in the input feeder at the beginning
+                # Check whether this has happened
+                input_feeder.check_for_error()
 
                 complete = True
         finally:

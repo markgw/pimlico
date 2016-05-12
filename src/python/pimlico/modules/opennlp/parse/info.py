@@ -16,13 +16,13 @@ from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithFields
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithRequiredFields
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_parser"
     module_readable_name = "OpenNLP constituency parser"
-    module_inputs = [("documents", (TokenizedCorpus, WordAnnotationCorpusWithFields("word")))]
+    module_inputs = [("documents", (TokenizedCorpus, WordAnnotationCorpusWithRequiredFields("word")))]
     module_outputs = [("parser", ConstituencyParseTreeCorpus)]
     module_options = {
         "model": {
