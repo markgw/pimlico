@@ -158,6 +158,19 @@ class DocumentMapOutputTypeWrapper(object):
                 input_feeder.check_for_error()
 
                 complete = True
+        except Exception, e:
+            # Any other uncaught exception should be passed up as a ModuleExecutionError, since we're actually
+            #  executing a module here, even though we're pretending to iterate over data
+            # This causes the restart procedure to catch the error just as if something went wrong in map execution
+            if hasattr(e, "debugging_info"):
+                # We've already attached debugging info at some lower level: just use it
+                debugging = e.debugging_info
+            elif hasattr(e, "traceback"):
+                debugging = e.traceback
+            else:
+                debugging = None
+            raise ModuleExecutionError("error in filter %s: %s" % (self.wrapped_module_info.module_name, e),
+                                       cause=e, debugging_info=debugging)
         finally:
             # Call the finishing-off routine, if one's been defined
             executor.postprocess(error=not complete)

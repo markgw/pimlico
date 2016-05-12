@@ -19,11 +19,14 @@ def process_document(worker, archive, filename, doc):
         worker.gateway._gateway_client
     )
     tags = list(worker.gateway.entry_point.posTag(sentence_list))
+    tags = [sentence.split(" ") for sentence in tags]
+    # Filter out any |s from the words, as they'll destroy out output format
+    words = [[word.replace("|", "") for word in sentence] for sentence in doc]
     # Put the POS tags together with the words
     # The writer will format them to look like word|POS
     return [
-        zip(sentence_words, sentence_tags.split())
-        for (sentence_words, sentence_tags) in zip(doc, tags)
+        zip(sentence_words, sentence_tags)
+        for (sentence_words, sentence_tags) in zip(words, tags)
     ]
 
 
