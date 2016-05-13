@@ -3,6 +3,18 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from pimlico.utils.format import title_box
+from termcolor import colored
+
+
+def _status_color(module):
+    if module.is_filter():
+        return "green"
+    elif module.status == "COMPLETE":
+        return "green"
+    elif module.status == "UNEXECUTED":
+        return "red"
+    else:
+        return "yellow"
 
 
 def status_cmd(pipeline, opts):
@@ -16,12 +28,16 @@ def status_cmd(pipeline, opts):
         print "\nModule execution schedule with statuses:"
         for i, module_name in enumerate(pipeline.get_module_schedule(), start=1):
             module = pipeline[module_name]
-            print " %d. %s" % (i, module_name)
+            status_color = _status_color(module)
+            print colored(" %d. %s" % (i, module_name), status_color)
             # Check module status (has it been run?)
-            print "       status: %s" % module.status
+            print "       status: %s" % colored(module.status, status_color)
             # Check status of each input datatypes
             for input_name in module.input_names:
-                print "       input %s: %s" % (input_name, "ready" if module.input_ready(input_name) else "not ready")
+                print "       input %s: %s" % (
+                    input_name,
+                    colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
+                )
             print "       outputs: %s" % ", ".join(module.output_names)
     else:
         # Output more detailed status information for this module
@@ -46,6 +62,7 @@ def status_cmd(pipeline, opts):
 
 def module_status(module):
     also_output = []
+    status_color = _status_color(module)
 
     # Put together information about the inputs
     input_infos = []
@@ -60,7 +77,7 @@ Input {input_name}:
     From module: {input_module} ({input_module_output} output)
     Datatype: {input_datatype.datatype_name}""".format(
             input_name=input_name,
-            status="Data ready" if module.input_ready(input_name) else "Data not ready",
+            status=colored("Data ready", "green") if module.input_ready(input_name) else colored("Data not ready", "red"),
             input_module=input_module.module_name,
             input_module_output=input_module_output or "default",
             input_datatype=input_datatype,
@@ -95,7 +112,7 @@ Output {output_name}:
     Datatype: {output_datatype.datatype_name}
     Stored in: {corpus_dir}""".format(
             output_name=output_name,
-            status="Data available" if output_datatype.data_ready() else "Data not available",
+            status=colored("Data available", "green") if output_datatype.data_ready() else colored("Data not available", "red"),
             output_datatype=output_datatype,
             corpus_dir=corpus_dir,
         )
@@ -117,8 +134,8 @@ Output {output_name}:
 Status: {status}
 {inputs}
 {outputs}{module_details}""".format(
-        title=title_box("Module: %s" % module.module_name),
-        status="not executable" if module.is_filter() else module.status,
+        title=colored(title_box("Module: %s" % module.module_name), status_color),
+        status=colored("not executable", "green") if module.is_filter() else colored(module.status, status_color),
         inputs="\n".join(input_infos) if input_infos else "No inputs",
         outputs="\n".join(output_infos) if output_infos else "No outputs",
         module_details=module_details,

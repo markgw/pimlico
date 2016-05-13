@@ -14,15 +14,15 @@ ifeq ($(OS), Darwin)
 	FETCH := curl -L -O
 	FETCH_STDOUT := curl -L
 else
-    ifeq (, $(shell which wget))
-        # No wget available: fall back to using my python script
-        FETCH := python ../libutils/get.py
-        FETCH_STDOUT := python ../libutils/get_stdout.py
-    else
-        # Linux, etc
-        FETCH := wget
-        FETCH_STDOUT := wget -O -
-    endif
+	ifeq (, $(shell which wget))
+		# No wget available: fall back to using my python script
+		FETCH := python ../libutils/get.py
+		FETCH_STDOUT := python ../libutils/get_stdout.py
+	else
+		# Linux, etc
+		FETCH := wget
+		FETCH_STDOUT := wget -O -
+	endif
 endif
 
 ###############
@@ -30,6 +30,7 @@ endif
 core :
 	$(MAKE) progressbar
 	$(MAKE) tabulate.py
+	$(MAKE) termcolor.py
 
 tabulate.py :
 	$(FETCH) https://pypi.python.org/packages/source/t/tabulate/tabulate-0.7.3.tar.gz
@@ -42,6 +43,12 @@ progressbar :
 	tar xzf progressbar.tar.gz python-progressbar-2.6.2/progressbar
 	mv python-progressbar-2.6.2/progressbar .
 	rm -rf progressbar.tar.gz python-progressbar-2.6.2
+
+termcolor.py:
+	$(FETCH) https://pypi.python.org/packages/8a/48/a76be51647d0eb9f10e2a4511bf3ffb8cc1e6b14e9e4fab46173aa79f981/termcolor-1.1.0.tar.gz
+	tar -xzf termcolor-1.1.0.tar.gz
+	mv termcolor-1.1.0/termcolor.py .
+	rm -rf termcolor-1.1.0
 
 ###############
 py4j :
