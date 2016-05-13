@@ -11,6 +11,25 @@ directory, and call `python bootstrap.py`.
 """
 import sys
 import os
+import urllib2
+
+
+REPOSITORY_URL = "https://gitlab.com/markgw/pimlico/"
+RAW_URL = "%s/raw/master/" % REPOSITORY_URL
+
+
+def lookup_pimlico_versions():
+    release_list_url = "%sadmin/releases.txt"
+    try:
+        release_data = urllib2.urlopen(release_list_url).read()
+    except Exception, e:
+        print "Could not fetch Pimlico init code from %s: %s" % (release_list_url, e)
+        sys.exit(1)
+    return [line for line in release_data.splitlines() if not line.startswith("#")]
+
+
+def lookup_bleeding_edge():
+    return lookup_pimlico_versions()[-1]
 
 
 def start_new_project(directory):
@@ -46,7 +65,7 @@ def find_config_value(config_path, key, start_in_pipeline=False):
     return
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     args = sys.argv[1:]
     current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -57,4 +76,7 @@ if __name__ == "main":
         config_file = os.path.abspath(args[0])
         # Check the config file to find the version of Pimlico we need
         version = find_config_value(config_file, "release")
+        print "Config file requires Pimlico version %s" % version
+        bleeding_edge = lookup_bleeding_edge()
+        print "Bleeding edge release: %s" % bleeding_edge
         # TODO Get Pimlico

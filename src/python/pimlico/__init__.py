@@ -1,6 +1,6 @@
 import os
 
-__version__ = "0.2"
+__version__ = "0.2.1"
 PIMLICO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 LIB_DIR = os.path.join(PIMLICO_ROOT, "lib")
 JAVA_LIB_DIR = os.path.join(LIB_DIR, "java")
