@@ -4,7 +4,10 @@
 
 import os
 import shutil
+import tarfile
 import threading
+from zipfile import ZipFile
+
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -69,3 +72,50 @@ def copy_dir_with_progress(source_dir, target_dir):
     pbar.finish()
     # Remove from source
     shutil.rmtree(source_dir)
+
+
+def new_filename(directory, initial_filename="tmp_file"):
+    """
+    Generate a filename that doesn't already exist.
+
+    """
+    # If the file doesn't exist already, we're done
+    if not os.path.exists(os.path.join(directory, initial_filename)):
+        return initial_filename
+    else:
+        # Split off extension, so we can vary filename
+        # Special case for splitting off .tar.gz extensions
+        if initial_filename.endswith(".tar.gz"):
+            base_filename = initial_filename[:-7]
+            ext = initial_filename[-7:]
+        else:
+            base_filename, ext = os.path.splitext(initial_filename)
+        # Keep increasing this index until we get a filename that doesn't exist
+        index = 1
+        while True:
+            filename = "%s-%d.%s" % (base_filename, index, ext)
+            if not os.path.exists(os.path.join(directory, filename)):
+                return filename
+            index += 1
+
+
+def extract_from_archive(archive_filename, members, target_dir):
+    """
+    Extract a file or files from an archive, which may be a tarball or a zip file (determined by the file extension).
+
+    """
+    if isinstance(members, basestring):
+        members = [members]
+
+    if archive_filename.endswith(".tar.gz"):
+        # Tarball
+        with tarfile.open(archive_filename, "r") as tarball:
+            for member in members:
+                tarball.extract(member, target_dir)
+    elif archive_filename.endswith(".zip"):
+        with ZipFile(archive_filename) as zip_file:
+            for member in members:
+                zip_file.extract(member, target_dir)
+    else:
+        raise ValueError("could not determine archive type from filename %s. Expect a filename with extension .tar.gz "
+                         "or .zip" % archive_filename)

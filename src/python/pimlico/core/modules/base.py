@@ -460,6 +460,10 @@ class BaseModuleInfo(object):
         
         You should also call the super method for checking previous modules' dependencies.
 
+        .. deprecated:: 0.2
+           You should provide dependency information via :method:get_software_dependencies instead. This method
+           will be called as well for backward compatibility until v1.
+
         """
         missing_dependencies = []
         # Instantiate any input datatypes this module will need
@@ -478,6 +482,49 @@ class BaseModuleInfo(object):
             if not dep_module.module_executable:
                 missing_dependencies.extend(dep_module.check_runtime_dependencies())
         return missing_dependencies
+
+    def get_software_dependencies(self):
+        """
+        Check that all software required to execute this module is installed and locatable. This is
+        separate to metadata config checks, so that you don't need to satisfy the dependencies for
+        all modules in order to be able to run one of them. You might, for example, want to run different
+        modules on different machines. This is called when a module is about to be executed and each of the
+        dependencies is checked.
+
+        Returns a list of instances of subclasses of :class:~pimlico.core.dependencies.base.SoftwareDependency,
+        representing the libraries that this module depends on.
+
+        Take care when providing dependency classes that you don't put any import statements at the top of the Python
+        module that will make loading the dependency type itself dependent on runtime dependencies.
+        You'll want to run import checks by putting import statements within this method.
+
+        You should call the super method for checking superclass dependencies.
+
+        """
+        return []
+
+    def check_ready_to_run(self):
+        """
+        Called before a module is run, or if the 'check' command is called. This will only be called after
+        all library dependencies have been confirmed ready (see :method:get_software_dependencies).
+
+        Essentially, this covers any module-specific checks that used to be in check_runtime_dependencies()
+        other than library installation (e.g. checking models exist).
+
+        Always call the super class' method if you override.
+
+        Returns a list of (name, description) pairs, where the name identifies the problem briefly and the
+        description explains what's missing and (ideally) how to fix it.
+
+        """
+        # In the base case, there are no problems for this module
+        problems = []
+        # Check any previous modules that are not executable: their check also need to be satisfied when this one is run
+        for dep_module_name in self.dependencies:
+            dep_module = self.pipeline[dep_module_name]
+            if not dep_module.module_executable:
+                problems.extend(dep_module.check_ready_to_run())
+        return problems
 
     def reset_execution(self):
         """

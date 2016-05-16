@@ -3,34 +3,35 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 import os
-from Queue import Empty
-from collections import deque
-from subprocess import Popen, PIPE, check_output, STDOUT, CalledProcessError
-
 import sys
 import time
+from Queue import Empty
 from cStringIO import StringIO
+from collections import deque
+from subprocess import Popen, PIPE
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.logs import get_log_file
-from pimlico.core.modules.base import DependencyError
-from pimlico.utils.communicate import timeout_process
 from py4j.compat import CompatThread, hasattr2, Queue
 from py4j.protocol import smart_decode, Py4JJavaError
 
 CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, "%s/*" % JAVA_BUILD_JAR_DIR])
 
 
-def call_java(class_name, args=[]):
+def call_java(class_name, args=[], classpath=None):
+    if classpath is None:
+        classpath = CLASSPATH
     # May in future want to allow the path to the java executable to be specified in local config
-    process = Popen(["java", "-cp", CLASSPATH, class_name] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
+    process = Popen(["java", "-cp", classpath, class_name] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
     stdout_data, stderr_data = process.communicate()
     return stdout_data, stderr_data, process.returncode
 
 
-def start_java_process(class_name, args=[], java_args=[], wait=0.1):
+def start_java_process(class_name, args=[], java_args=[], wait=0.1, classpath=None):
+    if classpath is None:
+        classpath = CLASSPATH
     # May in future want to allow the path to the java executable to be specified in local config
-    cmd = ["java", "-cp", CLASSPATH] + java_args + [class_name] + args
+    cmd = ["java", "-cp", classpath] + java_args + [class_name] + args
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
     # Attach the command to the Popen object so it's easy to read what was run for debugging
     process.command_run = " ".join(cmd)
@@ -45,36 +46,6 @@ def start_java_process(class_name, args=[], java_args=[], wait=0.1):
             raise JavaProcessError("java process failed with return code %d: %s (ran: %s)" %
                                    (process.returncode, process.stderr.read(), " ".join(cmd)))
     return process
-
-
-def check_java_dependency(class_name):
-    """
-    Utility to check that a java class is able to be loaded.
-
-    """
-    # First check that the dependency checker itself can be loaded
-    out, err, code = call_java("pimlico.core.DependencyChecker")
-    if code != 0:
-        raise DependencyCheckerError(
-            "could not load Java dependency checker. Have you compiled the Pimlico java core? %s" % (err or ""))
-
-    out, err, code = call_java("pimlico.core.DependencyChecker", [class_name])
-    if code != 0:
-        raise DependencyError("could not load Java class %s. Have you compiled the relevant Java module?" % class_name,
-                              stderr=err, stdout=out)
-
-
-def check_java():
-    """
-    Check that the JVM executable can be found. Raises a DependencyError if it can't be found or can't
-    be run.
-
-    """
-    try:
-        check_output(["java", "-version"], stderr=STDOUT)
-    except CalledProcessError, e:
-        # If there was an error running this, Java was not found
-        raise DependencyError("java executable could not be run: %s" % e.output)
 
 
 class Py4JInterface(object):

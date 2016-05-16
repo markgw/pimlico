@@ -16,10 +16,14 @@ constantly fed with documents.
 import os
 
 from pimlico import LIB_DIR
+from pimlico.core.dependencies.base import SoftwareDependency
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.parse.candc import CandcOutputCorpusWriter, CandcOutputCorpus
+
+
+CANDC_BINARY_DIR = os.path.join(LIB_DIR, "bin", "candc")
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -39,28 +43,36 @@ class ModuleInfo(DocumentMapModuleInfo):
     def __init__(self, *args, **kwargs):
         super(ModuleInfo, self).__init__(*args, **kwargs)
         self.model_path = abs_path_or_model_dir_path(self.options["model"], "candc")
-        binary_dir = os.path.join(LIB_DIR, "bin", "candc")
-        self.server_binary = os.path.join(binary_dir, "soap_server")
-        self.client_binary = os.path.join(binary_dir, "soap_client")
+        self.server_binary = os.path.join(CANDC_BINARY_DIR, "soap_server")
+        self.client_binary = os.path.join(CANDC_BINARY_DIR, "soap_client")
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-
-        # Check the parser binaries are available
-        for binary_path in [self.server_binary, self.client_binary]:
-            if not os.path.exists(binary_path):
-                missing_dependencies.append(("C&C parser", self.module_name,
-                                             "C&C parser binary %s not available. See lib/bin/README_CANDC for "
-                                             "instructions on installing the parser" % binary_path))
-
+    def check_ready_to_run(self):
+        problems = super(ModuleInfo, self).check_ready_to_run()
         # Make sure the model files are available
         if not os.path.exists(self.model_path):
-            missing_dependencies.append(
-                ("C&C model dir", self.module_name, "Parsing model directory doesn't exist: %s" % self.model_path)
+            problems.append(
+                ("missing C&C model", "Parsing model directory doesn't exist: %s. Download a suitable pre-trained "
+                                      "model, or make sure you've specified the model name corectly" % self.model_path)
             )
-
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
+        return problems
 
     def get_writer(self, output_name, output_dir, append=False):
         return CandcOutputCorpusWriter(output_dir, append=append)
+
+
+class CandcParserDependency(SoftwareDependency):
+    """
+    The C&C parser cannot be installed automatically, since it requires a login to download it. Instead,
+    we provide instructions for downloading and building it.
+
+    """
+    def available(self):
+        return all(os.path.exists(os.path.join(CANDC_BINARY_DIR, binary)) for binary in ["soap_server", "soap_client"])
+
+    def installable(self):
+        return False
+
+    def installation_instructions(self):
+        return "C&C parser binary must be built in %s. We cannot do this automatically, since you need to sign up " \
+               "for an account on the website and download the parser. See %s/bin/README_CANDC for instructions on " \
+               "fetching and building it" % (CANDC_BINARY_DIR, LIB_DIR)

@@ -1,6 +1,7 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=$PYTHONPATH:$DIR/../src/python:$DIR/../lib/python
+python=$DIR/../lib/python_env/bin/python
 
 if [ -n "$GPU" ]; then
     export THEANO_FLAGS='device=gpu,floatX=float32'
@@ -29,5 +30,14 @@ elif [ -n "$GDB" ]; then
     echo "Running Python from gdb"
     gdb -ex r --args python $*
 else
-    /usr/bin/env python $*
+    if [ ! -f "$python" ]; then
+        echo "Virtualenv for installing local Python software is not yet setup: running setup now"
+        python $DIR/../lib/libutils/create_virtualenv.py
+        if [ "$?" != "0" ]; then
+            # Failed to set up virtualenv: don't carry on running
+            exit 1
+        fi
+    fi
+    # Run python using virtualenv python interpreter
+    $python $*
 fi

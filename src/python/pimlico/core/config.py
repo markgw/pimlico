@@ -13,6 +13,7 @@ import sys
 from cStringIO import StringIO
 from operator import itemgetter
 
+from pimlico.core.dependencies.base import LegacyModuleDependencies
 from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
 from pimlico.utils.format import multiline_tablate
 from pimlico.utils.logging import get_console_logger
@@ -531,6 +532,28 @@ def check_pipeline(pipeline):
         raise PipelineCheckError(e, "Input typechecking failed: %s" % e)
 
 
+def get_dependencies(pipeline, modules):
+    """
+    Get a list of software dependencies required by the subset of modules given.
+
+    :param pipeline:
+    :param modules: list of modules to check. If None, checks all modules
+    """
+    if modules is None:
+        modules = pipeline.module_names
+
+    dependencies = []
+    for module_name in modules:
+        module = pipeline[module_name]
+        # Get any software dependencies for this module
+        dependencies.extend(module.get_software_dependencies())
+        # Also wrap the module in order to check any dependencies specified in the old style, using
+        #  check_runtime_dependencies()
+        dependencies.append(LegacyModuleDependencies(module))
+    # TODO Remove duplicate dependencies that are shared by multiple modules
+    return dependencies
+
+
 def print_missing_dependencies(pipeline, modules):
     """
     Check runtime dependencies for a subset of modules and output a table of missing dependencies.
@@ -539,17 +562,23 @@ def print_missing_dependencies(pipeline, modules):
     :param modules: list of modules to check. If None, checks all modules
     :return: True if no missing dependencies, False otherwise
     """
-    if modules is None:
-        modules = pipeline.module_names
-    # Do runtime checks for the requested modules
-    missing_dependencies = []
-    for module_name in modules:
-        missing_dependencies.extend(pipeline[module_name].check_runtime_dependencies())
+    deps = get_dependencies(pipeline, modules)
+    missing_dependencies = [dep for dep in deps if not dep.available()]
 
     if len(missing_dependencies):
-        print "\nRuntime dependencies not satisfied:\n%s" % \
-              multiline_tablate(missing_dependencies, [30, 30, 60],
-                                tablefmt="orgtbl", headers=["Dependency", "Module", "Description"])
+        print "Some library dependencies were not satisfied\n"
+        auto_installable = False
+        for dep in missing_dependencies:
+            if dep.installable():
+                print "%s: can be automatically installed" % dep.name
+                auto_installable = True
+            else:
+                print "=== %s ===" % dep.name
+                print "Cannot be installed automatically"
+                print dep.installation_instructions()
+            print
+        if auto_installable:
+            print "Use 'install' command to install all automatically installable dependencies"
         return False
     else:
         return True

@@ -10,7 +10,8 @@
 """
 import os
 
-from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
+from pimlico.core.external.java import DependencyCheckerError
+from pimlico.core.dependencies.java import check_java_dependency
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path

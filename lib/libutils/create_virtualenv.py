@@ -1,0 +1,26 @@
+"""
+Called if a virtual environment has not yet been set up for this Pimlico environment.
+
+"""
+import os
+
+import sys
+
+try:
+    import virtualenv
+except ImportError:
+    print "Virtualenv must be installed to start using a Pimlico project"
+    print "See https://virtualenv.pypa.io/en/latest/ for details"
+    sys.exit(1)
+from virtualenv import create_environment
+
+
+lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+virtualenv_dir = os.path.join(lib_dir, "python_env")
+
+if not os.path.exists(virtualenv_dir):
+    os.makedirs(virtualenv_dir)
+
+# Make a new virtualenv that will be used by Pimlico to install software
+print "Creating new virtualenv in %s for installing Python software" % virtualenv_dir
+create_environment(virtualenv_dir, site_packages=True)

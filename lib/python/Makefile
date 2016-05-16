@@ -1,4 +1,8 @@
-# This makefile serves to fetch dependencies as you need them
+# This makefile used to serve to fetch dependencies as you need them
+# This system is now being replaced by a Python-based dependency checking and installation framework.
+# Python dependencies will be installed into a virtual env instead of just being unpacked here.
+# Some things are left here, until they've been replaced by new-style dependency installers.
+#
 # Just cd to the directory containing the Makefile (lib/python) and type:
 #  make dependency-name
 # to fetch a particular dependency.
@@ -24,31 +28,6 @@ else
 		FETCH_STDOUT := wget -O -
 	endif
 endif
-
-###############
-# Basic dependencies of core parts of Pimlico
-core :
-	$(MAKE) progressbar
-	$(MAKE) tabulate.py
-	$(MAKE) termcolor.py
-
-tabulate.py :
-	$(FETCH) https://pypi.python.org/packages/source/t/tabulate/tabulate-0.7.3.tar.gz
-	tar -xzf tabulate-0.7.3.tar.gz tabulate-0.7.3/tabulate.py
-	mv tabulate-0.7.3/tabulate.py .
-	rmdir tabulate-0.7.3
-
-progressbar :
-	$(FETCH_STDOUT) https://github.com/WoLpH/python-progressbar/archive/v2.6.2.tar.gz >progressbar.tar.gz
-	tar xzf progressbar.tar.gz python-progressbar-2.6.2/progressbar
-	mv python-progressbar-2.6.2/progressbar .
-	rm -rf progressbar.tar.gz python-progressbar-2.6.2
-
-termcolor.py:
-	$(FETCH) https://pypi.python.org/packages/8a/48/a76be51647d0eb9f10e2a4511bf3ffb8cc1e6b14e9e4fab46173aa79f981/termcolor-1.1.0.tar.gz
-	tar -xzf termcolor-1.1.0.tar.gz
-	mv termcolor-1.1.0/termcolor.py .
-	rm -rf termcolor-1.1.0
 
 ###############
 py4j :

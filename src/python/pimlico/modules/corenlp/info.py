@@ -34,7 +34,7 @@ from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyPar
 from pimlico.datatypes.parse.dependency import StanfordDependencyParseCorpus, StanfordDependencyParseCorpusWriter
 from pimlico.datatypes.tar import TarredCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
-from .deps import check_corenlp_dependencies
+from .deps import corenlp_dependencies
 
 
 class AnnotationFieldsFromOptions(DynamicOutputDatatype):
@@ -139,11 +139,12 @@ class ModuleInfo(DocumentMapModuleInfo):
         #self.sentence_model_path = abs_path_or_model_dir_path(self.options["sentence_model"], "opennlp")
         #self.token_model_path = abs_path_or_model_dir_path(self.options["token_model"], "opennlp")
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = check_corenlp_dependencies(self.module_name)
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + corenlp_dependencies
+
+    def check_ready_to_run(self):
         # TODO Check models are available here, when you've added the model path option
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
+        return super(ModuleInfo, self).check_ready_to_run()
 
     @staticmethod
     def get_extra_outputs_from_options(options):

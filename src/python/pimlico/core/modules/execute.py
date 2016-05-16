@@ -4,6 +4,7 @@
 
 import os
 from tarfile import TarFile
+from textwrap import wrap
 
 from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies
 from pimlico.core.modules.base import load_module_executor, ModuleInfoLoadError
@@ -32,6 +33,13 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     dep_checks_passed = print_missing_dependencies(pipeline, [module_name])
     if not dep_checks_passed:
         raise ModuleExecutionError("runtime dependencies not satisfied for executing module '%s'" % module_name)
+    # Run additional checks the module defines
+    problems = module.check_ready_to_run()
+    if len(problems):
+        for problem_name, problem_desc in problems:
+            print "Module '%s' cannot run: %s\n  %s" % \
+                  (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100).splitlines()))
+            raise ModuleExecutionError("runtime checks failed for module '%s'" % module_name)
 
     # Check that previous modules have been completed and input data is ready for us to use
     log.info("Checking inputs")

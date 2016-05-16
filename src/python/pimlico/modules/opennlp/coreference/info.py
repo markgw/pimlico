@@ -11,7 +11,8 @@
 import os
 
 from pimlico import MODEL_DIR
-from pimlico.core.external.java import check_java_dependency, DependencyCheckerError
+from pimlico.core.external.java import DependencyCheckerError
+from pimlico.core.dependencies.java import check_java_dependency
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool

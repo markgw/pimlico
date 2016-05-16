@@ -1,14 +1,28 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+import sys
+from pimlico.core.dependencies.base import check_and_install
+from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
+
+if __name__ == "__main__":
+    # Always check that core dependencies are satisfied before running anything
+    unavailable = [dep for dep in CORE_PIMLICO_DEPENDENCIES if not dep.available()]
+    if len(unavailable):
+        print >>sys.stderr, "Some core Pimlico dependencies are not available: %s\n" % \
+                            ", ".join(dep.name for dep in unavailable)
+        uninstalled = check_and_install(CORE_PIMLICO_DEPENDENCIES)
+        if len(uninstalled):
+            print >>sys.stderr, "Unable to install all core dependencies: exiting"
+            sys.exit(1)
+
 
 import argparse
 import os
-import sys
 from operator import itemgetter
 from traceback import print_exc, format_exception_only
 
-from pimlico.cli.check import check_cmd
+from pimlico.cli.check import check_cmd, install_cmd
 from pimlico.cli.status import status_cmd
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.base import ModuleInfoLoadError
@@ -136,6 +150,15 @@ if __name__ == "__main__":
     run.add_argument("--formatter", "-f",
                      help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
                           "what to output for each document. If specified, --parse is ignored")
+
+    install = subparsers.add_parser("install", help="Install missing module library dependencies")
+    install.set_defaults(func=install_cmd)
+    install.add_argument("modules", nargs="*",
+                         help="Check dependencies for named modules and install any that are automatically installable")
+    install.add_argument("--trust-downloaded", "-t", action="store_true",
+                         help="If an archive file to be downloaded is found to be in the lib dir already, trust "
+                              "that it is the file we're after. By default, we only reuse archives we've just "
+                              "downloaded, so we know they came from the right URL, avoiding accidental name clashes")
 
     opts = parser.parse_args()
 
