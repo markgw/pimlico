@@ -13,7 +13,7 @@ import sys
 from cStringIO import StringIO
 from operator import itemgetter
 
-from pimlico.core.dependencies.base import LegacyModuleDependencies
+from pimlico.core.dependencies.base import LegacyModuleDependencies, LegacyDatatypeDependencies
 from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
 from pimlico.utils.format import multiline_tablate
 from pimlico.utils.logging import get_console_logger
@@ -547,9 +547,17 @@ def get_dependencies(pipeline, modules):
         module = pipeline[module_name]
         # Get any software dependencies for this module
         dependencies.extend(module.get_software_dependencies())
+        # Also get dependencies of the input datatypes
+        dependencies.extend(module.get_input_software_dependencies())
+
+        ### These legacy wrappers will be removed later ###
         # Also wrap the module in order to check any dependencies specified in the old style, using
         #  check_runtime_dependencies()
         dependencies.append(LegacyModuleDependencies(module))
+        # Do the same thing with the input datatypes
+        for input_name in module.inputs.keys():
+            dependencies.append(LegacyDatatypeDependencies(module.get_input(input_name)))
+
     # TODO Remove duplicate dependencies that are shared by multiple modules
     return dependencies
 

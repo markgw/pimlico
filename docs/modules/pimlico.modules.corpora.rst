@@ -16,3 +16,4 @@ Base modules for reading input from textual corpora.
    pimlico.modules.corpora.subset
    pimlico.modules.corpora.tar
    pimlico.modules.corpora.tar_filter
+   pimlico.modules.corpora.vocab_builder

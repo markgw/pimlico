@@ -25,6 +25,7 @@ Submodules
    pimlico.utils.progress
    pimlico.utils.strings
    pimlico.utils.timeout
+   pimlico.utils.web
 
 Module contents
 ---------------

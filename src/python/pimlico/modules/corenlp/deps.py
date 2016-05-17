@@ -51,6 +51,11 @@ corenlp_jar_dependency = JavaJarsDependency(
             "->stanford-corenlp-full-2015-12-09/slf4j-simple.jar"
         ),
         (
+            "slf4j-api.jar",
+            "http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip"
+            "->stanford-corenlp-full-2015-12-09/slf4j-api.jar"
+        ),
+        (
             "xom.jar",
             "http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip"
             "->stanford-corenlp-full-2015-12-09/xom.jar"

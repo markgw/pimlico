@@ -4,6 +4,10 @@ Tools for Python library dependencies.
 Provides superclasses for Python library dependencies and a selection of commonly used dependency instances.
 
 """
+import copy
+import sys
+from traceback import format_exception_only
+
 from pimlico.core.dependencies.base import SoftwareDependency
 
 
@@ -19,10 +23,26 @@ class PythonPackageDependency(SoftwareDependency):
 
     def problems(self):
         probs = super(PythonPackageDependency, self).problems()
+        # Make a fresh start on trying to import the module, removing it from sys.modules if it's already been imported
+        # If we don't do this, we might not get the same error the second time we call this
+        removed_modules = []
+        for mod_name in copy.copy(sys.modules):
+            if mod_name.startswith(self.package):
+                removed_modules.append((mod_name, sys.modules[mod_name]))
+                del sys.modules[mod_name]
+
         try:
             __import__(self.package)
-        except ImportError:
-            probs.append("could not import %s" % self.package)
+        except ImportError, e:
+            e_type, e_value, __ = sys.exc_info()
+            error = " // ".join([e.strip(" \n") for e in format_exception_only(e_type, e_value)])
+            probs.append("could not import %s (%s)" % (self.package, error))
+        finally:
+            # If we removed any modules from sys.modules before the import and they've not been added in by the import,
+            #  put them back again now
+            for mod_name, mod_val in removed_modules:
+                if mod_name not in sys.modules:
+                    sys.modules[mod_name] = mod_val
         return probs
 
 
@@ -62,7 +82,10 @@ class PythonPackageOnPip(PythonPackageDependency):
     Python package that can be installed via pip. Will be installed in the virtualenv if not available.
 
     """
-    def __init__(self, package, name, pip_package=None, **kwargs):
+    def __init__(self, package, name=None, pip_package=None, **kwargs):
+        # Package names tend to be identical to the software name, so there's no need to specify both
+        if name is None:
+            name = package
         # If pip_package is given, use that as pip install target instead of package name
         # For cases where Python package name doesn't coincide with install target
         self.pip_package = pip_package or package
@@ -75,6 +98,10 @@ class PythonPackageOnPip(PythonPackageDependency):
         from pip.index import PackageFinder
         from pip.req import InstallRequirement, RequirementSet
         from pip.locations import build_prefix, src_prefix
+        from pip.log import logger
+
+        # Enable verbose output
+        logger.add_consumers((logger.INFO, sys.stdout))
 
         # Build a requirement set containing just the package we need
         requirement_set = RequirementSet(build_dir=build_prefix, src_dir=src_prefix, download_dir=None)
@@ -87,6 +114,9 @@ class PythonPackageOnPip(PythonPackageDependency):
         requirement_set.prepare_files(finder, force_root_egg_info=False, bundle=False)
         # Run installation
         requirement_set.install(install_options, global_options)
+
+    def __repr__(self):
+        return "PythonPackageOnPip<%s%s>" % (self.name, (" (%s)" % self.package) if self.package != self.name else "")
 
 
 ###################################

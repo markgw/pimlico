@@ -56,6 +56,9 @@ class ModuleInfo(DocumentMapModuleInfo):
             )
         return problems
 
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + [CandcParserDependency()]
+
     def get_writer(self, output_name, output_dir, append=False):
         return CandcOutputCorpusWriter(output_dir, append=append)
 

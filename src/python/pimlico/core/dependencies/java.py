@@ -183,10 +183,33 @@ def check_java():
         raise DependencyError("java executable could not be run: %s" % e.output)
 
 
-def get_classpath(deps):
+def get_classpath(deps, as_list=False):
     """
     Given a list of JavaDependency subclass instances, returns all the components of the classpath that will
-    make sure that the dependencies are available as a list. Get the full classpath by ":".join(x) on the list.
+    make sure that the dependencies are available.
+
+    If as_list=True, returned as a list.
+    Get the full classpath by ":".join(x) on the list.
+    If as_list=False, returns classpath string.
 
     """
-    return list(set([dep.get_classpath_components() for dep in deps]))
+    components = list(set(sum((dep.get_classpath_components() for dep in deps if isinstance(dep, JavaDependency)), [])))
+    if as_list:
+        return components
+    else:
+        return ":".join(components)
+
+
+def get_module_classpath(module):
+    """
+    Builds a classpath that includes all of the classpath elements specified by Java dependencies of the given
+    module. These include the dependencies from get_software_dependencies() and also any dependencies of the
+    datatype.
+
+    Used to ensure that Java modules that depend on particular jars or classes get all of those files included
+    on their classpath when Java is run.
+
+    """
+    deps = module.get_software_dependencies()
+    deps.extend(module.get_input_software_dependencies())
+    return get_classpath(deps)

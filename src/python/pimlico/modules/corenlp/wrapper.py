@@ -27,7 +27,8 @@ from pimlico.utils.pipes import OutputQueue
 
 
 class CoreNLP(object):
-    def __init__(self, pipeline, timeout=None):
+    def __init__(self, pipeline, timeout=None, classpath=None):
+        self.classpath = classpath
         self.timeout = timeout
         self.port = int(pipeline.local_config.get("corenlp_port", 9000))
         self.proc = None
@@ -57,7 +58,7 @@ class CoreNLP(object):
         # Wait a moment and check that it's started up
         self.proc = start_java_process("edu.stanford.nlp.pipeline.StanfordCoreNLPServer",
                                        args=args,
-                                       java_args=["-mx4g"], wait=0.4)
+                                       java_args=["-mx4g"], wait=0.4, classpath=self.classpath)
         # Put queues around the outputs, so we can read without blocking
         self.stdout_queue = OutputQueue(self.proc.stdout)
         self.stderr_queue = OutputQueue(self.proc.stderr)

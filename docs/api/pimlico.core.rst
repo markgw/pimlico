@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    pimlico.core.dependencies
     pimlico.core.external
     pimlico.core.modules
 

@@ -28,7 +28,7 @@ from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool
 from pimlico.datatypes.base import DynamicOutputDatatype
 from pimlico.datatypes.coref.corenlp import CorefCorpus
-from pimlico.datatypes.tokenized import TokenizedCorpus
+from pimlico.datatypes.tokenized import TokenizedCorpus, TokenizedCorpusWriter
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
 from pimlico.datatypes.parse.dependency import StanfordDependencyParseCorpus, StanfordDependencyParseCorpusWriter
@@ -90,6 +90,8 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_optional_outputs = [
         # The default output: annotated words
         ("annotations", AnnotationFieldsFromOptions()),
+        # We can also easily get tokenized text from the same source
+        ("tokenized", TokenizedCorpus),
         # Constituency parses
         ("parse", ConstituencyParseTreeCorpus),
         # Dependency parses extracted from constituency parses
@@ -171,5 +173,7 @@ class ModuleInfo(DocumentMapModuleInfo):
             return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
         elif output_name == "coref":
             return JsonDocumentCorpusWriter(output_dir, gzip=gzip, readable=readable, append=append)
+        elif output_name == "tokenized":
+            return TokenizedCorpusWriter(output_dir, gzip=gzip, append=append)
         else:
             raise ValueError("unknown output '%s'" % output_name)

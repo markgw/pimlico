@@ -503,6 +503,20 @@ class BaseModuleInfo(object):
         """
         return []
 
+    def get_input_software_dependencies(self):
+        """
+        Collects library dependencies from the input datatypes to this module, which will need to be satisfied
+        for the module to be run.
+
+        Unlike :meth:`get_software_dependencies`, it shouldn't need to be overridden by subclasses,
+        since it just collects the results of getting dependencies from the datatypes.
+
+        """
+        # Instantiate any input datatypes this module will need and check the datatype's dependencies
+        return sum([
+            self.get_input(input_name).get_software_dependencies() for input_name in self.inputs.keys()
+        ], [])
+
     def check_ready_to_run(self):
         """
         Called before a module is run, or if the 'check' command is called. This will only be called after

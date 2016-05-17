@@ -1,24 +1,13 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-import sys
-from pimlico.core.dependencies.base import check_and_install
-from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
-
 if __name__ == "__main__":
-    # Always check that core dependencies are satisfied before running anything
-    unavailable = [dep for dep in CORE_PIMLICO_DEPENDENCIES if not dep.available()]
-    if len(unavailable):
-        print >>sys.stderr, "Some core Pimlico dependencies are not available: %s\n" % \
-                            ", ".join(dep.name for dep in unavailable)
-        uninstalled = check_and_install(CORE_PIMLICO_DEPENDENCIES)
-        if len(uninstalled):
-            print >>sys.stderr, "Unable to install all core dependencies: exiting"
-            sys.exit(1)
-
+    from pimlico import install_core_dependencies
+    install_core_dependencies()
 
 import argparse
 import os
+import sys
 from operator import itemgetter
 from traceback import print_exc, format_exception_only
 

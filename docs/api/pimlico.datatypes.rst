@@ -22,6 +22,7 @@ Submodules
    pimlico.datatypes.jsondoc
    pimlico.datatypes.tar
    pimlico.datatypes.tokenized
+   pimlico.datatypes.word2vec
    pimlico.datatypes.word_annotations
    pimlico.datatypes.xml
 

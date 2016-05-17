@@ -16,3 +16,4 @@ learning module, such as a form of matrix factorization.
    :titlesonly:
 
    pimlico.modules.embeddings.dependencies
+   pimlico.modules.embeddings.word2vec

@@ -82,6 +82,30 @@ class PimlicoDatatype(object):
 
         Returns a list of pairs: (dependency short name, description/error message)
 
+        .. deprecated:: 0.2
+           You should provide dependency information via :meth:`get_software_dependencies` instead. This method
+           will be called as well for backward compatibility until v1.
+
+        """
+        return []
+
+    def get_software_dependencies(self):
+        """
+        Check that all software required to read this datatype is installed and locatable. This is
+        separate to metadata config checks, so that you don't need to satisfy the dependencies for
+        all modules in order to be able to run one of them. You might, for example, want to run different
+        modules on different machines. This is called when a module is about to be executed and each of the
+        dependencies is checked.
+
+        Returns a list of instances of subclasses of :class:~pimlico.core.dependencies.base.SoftwareDependency,
+        representing the libraries that this module depends on.
+
+        Take care when providing dependency classes that you don't put any import statements at the top of the Python
+        module that will make loading the dependency type itself dependent on runtime dependencies.
+        You'll want to run import checks by putting import statements within this method.
+
+        You should call the super method for checking superclass dependencies.
+
         """
         return []
 

@@ -148,7 +148,7 @@ def threading_executor_factory(process_document_fn, preprocess_fn=None, postproc
         # Define a worker thread type
         class FactoryMadeMapThread(ThreadingMapThread):
             def process_document(self, archive, filename, *docs):
-                process_document_fn(self, archive, filename, *docs)
+                return process_document_fn(self, archive, filename, *docs)
 
             def set_up(self):
                 if worker_set_up_fn is not None:

@@ -4,10 +4,9 @@ This is provided primarily so that the docs can be built on the ReadTheDocs serv
 code, including basic dependencies.
 
 """
-# Just call make to get the basic dependencies and set up in place
-import os
-from subprocess import call
-call(["make"], cwd=os.path.join("lib/python"), shell=True)
+# Install the basic, core Pimlico dependencies
+from pimlico import install_core_dependencies
+install_core_dependencies()
 
 """
 import os

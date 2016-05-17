@@ -75,6 +75,9 @@ class SoftwareDependency(object):
         """
         raise NotImplementedError
 
+    def __repr__(self):
+        return "%s<%s>" % (type(self).__name__, self.name)
+
 
 class LegacyModuleDependencies(SoftwareDependency):
     """
@@ -114,6 +117,53 @@ Some library dependencies are missing, but do not provide automatic installation
 %s
 """ % "\n\n".join(dep_messages)
 
+    def __repr__(self):
+        return "LegacyModuleDependencies<%s>" % self.module.module_name
+
+
+class LegacyDatatypeDependencies(SoftwareDependency):
+    """
+    Wrapper for datatypes that still use the old check_runtime_dependencies() method to specify their dependencies.
+    A single instance of this represents all of a datatype's dependencies. None of them are automatically installable,
+    but notes/installation instructions are provided.
+
+    Can also be applied to datatypes, which also have a check_runtime_dependencies() method.
+
+    This will be removed when the deprecated check_runtime_dependencies() method is removed.
+
+    """
+    def __init__(self, datatype):
+        super(LegacyDatatypeDependencies, self).__init__("dependencies for datatype '%s'" % datatype.datatype_name)
+        self.datatype = datatype
+
+    def problems(self):
+        probs = super(LegacyDatatypeDependencies, self).problems()
+        # Try calling check_runtime_dependencies() to see if anything's missing
+        missing_deps = self.datatype.check_runtime_dependencies()
+        for dep_name, desc in missing_deps:
+            probs.append("datatype '%s' is missing dependency '%s': %s" % (self.datatype.datatype_name, dep_name, desc))
+        return probs
+
+    def installable(self):
+        return False
+
+    def installation_instructions(self):
+        missing_deps = self.datatype.check_runtime_dependencies()
+        # Collect messages from each missing dependency
+        dep_messages = [
+            "%s (for %s):\n  %s" % (
+                dep_name, self.datatype.datatype_name, "\n  ".join(wrap(desc, width="100").splitlines())
+            ) for dep_name, desc in missing_deps
+            ]
+        return """\
+Some library dependencies are missing, but do not provide automatic installation.
+
+%s
+""" % "\n\n".join(dep_messages)
+
+    def __repr__(self):
+        return "LegacyDatatypeDependencies<%s>" % self.datatype.datatype_name
+
 
 def check_and_install(deps, trust_downloaded_archives=False):
     """
@@ -146,11 +196,11 @@ def check_and_install(deps, trust_downloaded_archives=False):
                     print "\n".join("  %s" % line for line in instructions.splitlines())
                 uninstallable.append(dep)
             print
-            
+
     if not installed and not uninstallable:
         print "All dependencies satisfied"
     else:
         print "Installed: %s" % ", ".join(installed)
         if uninstallable:
-            print "Could not install: %s" % ", ".join(uninstallable)
+            print "Could not install: %s" % ", ".join(dep.name for dep in uninstallable)
     return uninstallable

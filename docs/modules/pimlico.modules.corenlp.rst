@@ -52,6 +52,8 @@ Optional
 +=============+================================================================================================+
 | annotations | :class:`AnnotationFieldsFromOptions <pimlico.datatypes.word_annotations.WordAnnotationCorpus>` |
 +-------------+------------------------------------------------------------------------------------------------+
+| tokenized   | :class:`~pimlico.datatypes.tokenized.TokenizedCorpus`                                          |
++-------------+------------------------------------------------------------------------------------------------+
 | parse       | :class:`~pimlico.datatypes.parse.ConstituencyParseTreeCorpus`                                  |
 +-------------+------------------------------------------------------------------------------------------------+
 | parse-deps  | :class:`~pimlico.datatypes.parse.dependency.StanfordDependencyParseCorpus`                     |

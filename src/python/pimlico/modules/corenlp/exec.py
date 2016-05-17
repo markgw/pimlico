@@ -10,6 +10,8 @@ gets a new Java thread in the server.
 """
 from traceback import format_exc
 
+from pimlico.core.dependencies.java import get_module_classpath
+from pimlico.core.modules.execute import StopProcessing
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.threaded import threading_executor_factory
 from pimlico.datatypes.base import InvalidDocument
@@ -58,7 +60,8 @@ def preprocess(executor):
         executor.output_fields = None
 
     # Prepare a CoreNLP background process to do the processing
-    executor.corenlp = CoreNLP(executor.info.pipeline, executor.info.options["timeout"])
+    executor.corenlp = CoreNLP(executor.info.pipeline, executor.info.options["timeout"],
+                               classpath=get_module_classpath(executor.info))
     executor.corenlp.start()
     executor.log.info("CoreNLP server started on %s" % executor.corenlp.server_url)
     executor.log.info("Calling CoreNLP with annotators: %s" % ", ".join(annotators))
@@ -108,6 +111,12 @@ def process_document(worker, archive, filename, doc):
                 outputs.append(json_result)
             elif output_name == "coref":
                 outputs.append(json_result["corefs"])
+            elif output_name == "tokenized":
+                outputs.append([
+                    [word_data["word"] for word_data in sentence["tokens"]] for sentence in json_result["sentences"]
+                ])
+            else:
+                raise StopProcessing("unknown output name in output list: %s" % output_name)
 
         return tuple(outputs)
     else:

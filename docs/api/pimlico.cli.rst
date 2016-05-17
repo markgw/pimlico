@@ -1,12 +1,18 @@
 pimlico.cli package
 ===================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pimlico.cli.browser
+
 Submodules
 ----------
 
 .. toctree::
 
-   pimlico.cli.browse
    pimlico.cli.check
    pimlico.cli.run
    pimlico.cli.status
