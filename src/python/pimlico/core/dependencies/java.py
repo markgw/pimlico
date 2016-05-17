@@ -30,26 +30,32 @@ class JavaDependency(SoftwareDependency):
         self.jars = jars
         self.classes = classes
 
-    def available(self):
+    def problems(self):
+        probs = super(JavaDependency, self).problems()
         # Check that class dirs and jar files exist
         for dir in self.class_dirs:
             dir_path = os.path.join(JAVA_LIB_DIR, dir)
             if not os.path.exists(dir_path) or not os.path.isdir(dir_path):
-                return False
-        for jar_path in self.jars:
-            if not os.path.exists(os.path.join(JAVA_LIB_DIR, jar_path)):
-                return False
+                probs.append("class directory %s does not exist" % dir_path)
+        for jar_name in self.jars:
+            jar_path = os.path.join(JAVA_LIB_DIR, jar_name)
+            if not os.path.exists(jar_path):
+                probs.append("jar file %s does not exist" % jar_path)
         # Check Java is available
         try:
             check_java()
         except DependencyError:
-            return False
+            probs.append("Java is not installed")
         # Try loading each of the classes specified
+        classpath = ":".join(self.get_classpath_components())
         for cls in self.classes:
             try:
-                check_java_dependency(cls, classpath=":".join(self.get_classpath_components()))
-            except (DependencyCheckerError, DependencyError):
-                return False
+                check_java_dependency(cls, classpath=classpath)
+            except DependencyCheckerError:
+                probs.append("unable to load Java dependency checker to check classes are loadable")
+            except DependencyError:
+                probs.append("could not load Java class %s (classpath=%s)" % (cls, classpath))
+        return probs
 
     def installable(self):
         # By default, Java deps are installable, though subclasses may override this
@@ -77,13 +83,17 @@ class JavaJarsDependency(JavaDependency):
 
     def install(self, trust_downloaded_archives=False):
         downloaded_archives = {}
+        archive_files = {}
+        archives_to_download = []
+        to_download = []
+        # Only output the "reusing" message once per file
+        reusing = []
 
         for jar_name, jar_url in self.jar_urls:
             if not os.path.exists(os.path.join(JAVA_LIB_DIR, jar_name)):
                 if "->" in jar_url:
                     # Member to extract from an archive
                     archive_url, __, member = jar_url.partition("->")
-                    print "Getting %s from %s" % (member, archive_url)
                     # Check whether we've already downloaded this archive and don't do it again if so
                     if archive_url in downloaded_archives:
                         archive_filename = downloaded_archives[archive_url]
@@ -107,22 +117,35 @@ class JavaJarsDependency(JavaDependency):
                         if trust_downloaded_archives and os.path.exists(archive_filename):
                             # If we've been told to rely on previously downloaded archives to be the right thing,
                             # reuse this archive
-                            print "Reusing archive file %s and assuming it's come from %s" % \
-                                  (archive_filename, archive_url)
+                            if archive_filename not in reusing:
+                                print "Reusing archive file %s (as %s)" % \
+                                      (archive_filename, archive_url)
+                                reusing.append(archive_filename)
                         else:
                             # Download the archive
-                            print "Downloading %s from %s" % (archive_filename, archive_url)
-                            download_file(archive_url, archive_filename)
+                            archives_to_download.append((archive_url, archive_filename))
                             # Don't download the same archive again if we need it multiple times
                             downloaded_archives[archive_url] = archive_filename
 
                     # Extract the member from the archive
-                    extract_from_archive(archive_filename, member, JAVA_LIB_DIR)
-                    print "Extracted %s" % member
+                    archive_files.setdefault(archive_filename, []).append(member)
                 else:
                     # Download the jar file to the Java lib dir
-                    print "Downloading %s from %s" % (jar_name, jar_url)
-                    download_file(jar_url, os.path.join(JAVA_LIB_DIR, jar_name))
+                    to_download.append((jar_url, jar_name))
+
+        # Download all archives we need
+        for archive_url, archive_filename in archives_to_download:
+            print "Downloading %s from %s" % (archive_filename, archive_url)
+            download_file(archive_url, archive_filename)
+
+        # Got all the archives, extract the required members
+        for archive_filename, members in archive_files.iteritems():
+            extract_from_archive(archive_filename, members, JAVA_LIB_DIR, preserve_dirs=False)
+            print "Extracted %s" % ", ".join(members)
+
+        for jar_url, jar_name in to_download:
+            print "Downloading %s from %s" % (jar_name, jar_url)
+            download_file(jar_url, os.path.join(JAVA_LIB_DIR, jar_name))
 
         # Delete any archives we downloaded
         for filename in downloaded_archives.values():

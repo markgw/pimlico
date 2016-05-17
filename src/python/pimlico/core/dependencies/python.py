@@ -17,12 +17,13 @@ class PythonPackageDependency(SoftwareDependency):
         super(PythonPackageDependency, self).__init__(name, **kwargs)
         self.package = package
 
-    def available(self):
+    def problems(self):
+        probs = super(PythonPackageDependency, self).problems()
         try:
             __import__(self.package)
         except ImportError:
-            return False
-        return True
+            probs.append("could not import %s" % self.package)
+        return probs
 
 
 class PythonPackageSystemwideInstall(PythonPackageDependency):

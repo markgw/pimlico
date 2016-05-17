@@ -15,12 +15,15 @@ from pimlico.core.logs import get_log_file
 from py4j.compat import CompatThread, hasattr2, Queue
 from py4j.protocol import smart_decode, Py4JJavaError
 
-CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR, "%s/*" % JAVA_BUILD_JAR_DIR])
+ALWAYS_INCLUDE_IN_CLASSPATH = ["%s/*" % JAVA_BUILD_JAR_DIR]
+DEFAULT_CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR] + ALWAYS_INCLUDE_IN_CLASSPATH)
 
 
 def call_java(class_name, args=[], classpath=None):
     if classpath is None:
-        classpath = CLASSPATH
+        classpath = DEFAULT_CLASSPATH
+    else:
+        classpath = ":".join([classpath] + ALWAYS_INCLUDE_IN_CLASSPATH)
     # May in future want to allow the path to the java executable to be specified in local config
     process = Popen(["java", "-cp", classpath, class_name] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
     stdout_data, stderr_data = process.communicate()
@@ -29,7 +32,9 @@ def call_java(class_name, args=[], classpath=None):
 
 def start_java_process(class_name, args=[], java_args=[], wait=0.1, classpath=None):
     if classpath is None:
-        classpath = CLASSPATH
+        classpath = DEFAULT_CLASSPATH
+    else:
+        classpath = ":".join([classpath] + ALWAYS_INCLUDE_IN_CLASSPATH)
     # May in future want to allow the path to the java executable to be specified in local config
     cmd = ["java", "-cp", classpath] + java_args + [class_name] + args
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
@@ -224,9 +229,9 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
 
     # Allow extra things to be added to the start of the classpath
     if prefix_classpath is not None:
-        classpath = ":".join(prefix_classpath.split(":") + CLASSPATH.split(":"))
+        classpath = ":".join(prefix_classpath.split(":") + DEFAULT_CLASSPATH.split(":"))
     else:
-        classpath = CLASSPATH
+        classpath = DEFAULT_CLASSPATH
 
     # Launch the server in a subprocess.
     command = ["java", "-classpath", classpath] + javaopts + [gateway_class] + args

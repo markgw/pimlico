@@ -47,6 +47,4 @@ def install_cmd(pipeline, opts):
         return
 
     deps = get_dependencies(pipeline, opts.modules)
-    uninstallable = check_and_install(deps, trust_downloaded_archives=opts.trust_downloaded)
-    if len(uninstallable):
-        print "\nDependencies could not be installed for %s" % ", ".join(dep.name for dep in uninstallable)
+    check_and_install(deps, trust_downloaded_archives=opts.trust_downloaded)

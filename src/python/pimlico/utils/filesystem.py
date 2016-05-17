@@ -99,7 +99,7 @@ def new_filename(directory, initial_filename="tmp_file"):
             index += 1
 
 
-def extract_from_archive(archive_filename, members, target_dir):
+def extract_from_archive(archive_filename, members, target_dir, preserve_dirs=True):
     """
     Extract a file or files from an archive, which may be a tarball or a zip file (determined by the file extension).
 
@@ -111,11 +111,25 @@ def extract_from_archive(archive_filename, members, target_dir):
         # Tarball
         with tarfile.open(archive_filename, "r") as tarball:
             for member in members:
-                tarball.extract(member, target_dir)
+                tar_member = tarball.getmember(member)
+                if not preserve_dirs:
+                    # Replace member name with filename without directories, so we extract flat
+                    tar_member.name = os.path.basename(tar_member.name)
+                tarball.extract(tar_member, target_dir)
     elif archive_filename.endswith(".zip"):
         with ZipFile(archive_filename) as zip_file:
             for member in members:
-                zip_file.extract(member, target_dir)
+                if preserve_dirs:
+                    # Simple extract preserves directory structure
+                    zip_file.extract(member, target_dir)
+                else:
+                    # Extract flat
+                    zip_member = zip_file.getinfo(member)
+                    member_filename = os.path.basename(zip_member.filename)
+                    source = zip_file.open(zip_member)
+                    target = open(os.path.join(target_dir, member_filename), "w")
+                    with source, target:
+                        shutil.copyfileobj(source, target)
     else:
         raise ValueError("could not determine archive type from filename %s. Expect a filename with extension .tar.gz "
                          "or .zip" % archive_filename)

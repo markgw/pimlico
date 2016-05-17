@@ -66,8 +66,11 @@ class CandcParserDependency(SoftwareDependency):
     we provide instructions for downloading and building it.
 
     """
-    def available(self):
-        return all(os.path.exists(os.path.join(CANDC_BINARY_DIR, binary)) for binary in ["soap_server", "soap_client"])
+    def problems(self):
+        binaries = [os.path.join(CANDC_BINARY_DIR, binary) for binary in ["soap_server", "soap_client"]]
+        return super(CandcParserDependency, self).problems() + [
+            "missing binary %s" % binary for binary in binaries if not os.path.exists(binary)
+        ]
 
     def installable(self):
         return False

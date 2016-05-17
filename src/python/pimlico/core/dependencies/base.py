@@ -4,6 +4,8 @@ Base classes for defining software dependencies for module types and routines fo
 """
 from textwrap import wrap
 
+from pimlico.utils.format import title_box
+
 
 class SoftwareDependency(object):
     """
@@ -20,7 +22,17 @@ class SoftwareDependency(object):
         use.
 
         """
-        raise NotImplementedError
+        return len(self.problems()) == 0
+
+    def problems(self):
+        """
+        Returns a list of problems standing in the way of the dependency being available. If the list is empty,
+        the dependency is taken to be installed and ready to use.
+
+        Overriding methods should call super method.
+
+        """
+        return []
 
     def installable(self):
         """
@@ -77,13 +89,13 @@ class LegacyModuleDependencies(SoftwareDependency):
         super(LegacyModuleDependencies, self).__init__("dependencies for module '%s'" % module.module_name)
         self.module = module
 
-    def available(self):
+    def problems(self):
+        probs = super(LegacyModuleDependencies, self).problems()
         # Try calling check_runtime_dependencies() to see if anything's missing
         missing_deps = self.module.check_runtime_dependencies()
-        if len(missing_deps):
-            return False
-        else:
-            return True
+        for dep_name, module_name, desc in missing_deps:
+            probs.append("module '%s' is missing dependency '%s': %s" % (module_name, dep_name, desc))
+        return probs
 
     def installable(self):
         return False
@@ -110,18 +122,23 @@ def check_and_install(deps, trust_downloaded_archives=False):
 
     """
     uninstallable = []
+    installed = []
     for dep in deps:
         if not dep.available():
+            print title_box(dep.name)
             # Haven't got this library
             # TODO Also check recursive deps
             if dep.installable():
                 print "Installing %s" % dep.name
                 dep.install(trust_downloaded_archives=trust_downloaded_archives)
-                if not dep.available():
-                    print "Ran installation routine for %s, but it's still not available" % dep.name
+                remaining_problems = dep.problems()
+                if remaining_problems:
+                    print "\nRan installation routine for %s, but it's still not available due to the following " \
+                          "problems:\n%s" % (dep.name, "\n".join("  - %s" % p for p in remaining_problems))
                     uninstallable.append(dep)
                 else:
                     print "Installed"
+                    installed.append(dep.name)
             else:
                 print "%s cannot be installed automatically" % dep.name
                 instructions = dep.installation_instructions()
@@ -129,4 +146,11 @@ def check_and_install(deps, trust_downloaded_archives=False):
                     print "\n".join("  %s" % line for line in instructions.splitlines())
                 uninstallable.append(dep)
             print
+            
+    if not installed and not uninstallable:
+        print "All dependencies satisfied"
+    else:
+        print "Installed: %s" % ", ".join(installed)
+        if uninstallable:
+            print "Could not install: %s" % ", ".join(uninstallable)
     return uninstallable
