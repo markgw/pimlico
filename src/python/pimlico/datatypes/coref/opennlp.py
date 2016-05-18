@@ -64,11 +64,11 @@ class Entity(object):
             # Get rid of words that won't help us: stopwords and pronouns
             head_words = mention_head.split()
             if pronouns is not None:
-                head_words = [w for w in head_words if w not in pronouns]
+                head_words = [w for w in head_words if w not in pro]
             # Don't use any 1-letter words
             head_words = [w for w in head_words if len(w) > 1]
             # If there are no words left, we can't get a headword from this mention
-            # If there are multiple (a minority of cases), use the rightmost, which usually is the headword in English
+            # If there are multiple (a minority of cases), use the rightmost, which usually is the headword
             if head_words:
                 entity_head_words.add(head_words[-1])
         # If we've ended up with multiple possible head words (minority, but not uncommon), we've no way to choose
