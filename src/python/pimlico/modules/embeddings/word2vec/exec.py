@@ -9,12 +9,15 @@ class ModuleExecutor(BaseModuleExecutor):
         input_corpus = self.info.get_input("text")
         sentences = SentenceIterator(input_corpus)
 
-        self.log.info("Training word2vec on %d documents" % len(input_corpus))
+        self.log.info("Training word2vec on %d documents, %d iterations" %
+                      (len(input_corpus), self.info.options["iters"]))
         word2vec = Word2Vec(
             sentences,
             min_count=self.info.options["min_count"],
             size=self.info.options["size"],
             workers=self.processes,
+            iter=self.info.options["iters"],
+            negative=self.info.options["negative_samples"],
         )
         self.log.info("Training complete: saving model")
         with Word2VecModelWriter(self.info.get_absolute_output_dir("model")) as model:

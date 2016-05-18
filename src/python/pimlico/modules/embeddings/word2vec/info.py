@@ -33,7 +33,17 @@ class ModuleInfo(BaseModuleInfo):
             "help": "number of dimensions in learned vectors. Default: 200",
             "type": int,
             "default": 200,
-        }
+        },
+        "iters": {
+            "help": "number of iterations over the data to perform. Default: 5",
+            "type": int,
+            "default": 5,
+        },
+        "negative_samples": {
+            "help": "number of negative samples to include per positive. Default: 5",
+            "type": int,
+            "default": 5,
+        },
     }
 
     def __init__(self, module_name, pipeline, **kwargs):

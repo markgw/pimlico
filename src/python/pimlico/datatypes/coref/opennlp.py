@@ -13,6 +13,7 @@ to the two (which for most purposes will be sufficient).
 
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
 from pimlico.datatypes.tar import pass_up_invalid
+from pimlico.utils.linguistic import strip_punctuation, ENGLISH_PRONOUNS
 from pimlico.utils.strings import truncate
 
 
@@ -41,6 +42,42 @@ class Entity(object):
         self.number_prob = number_prob
         self.id = id
         self.mentions = mentions
+
+    def get_head_word(self, pronouns=ENGLISH_PRONOUNS):
+        """
+        Retrieve a head word from the entity's mentions if possible. Returns None if no suitable head
+        word can be found: e.g., if all mentions are pronouns.
+
+        Pronouns are filtered out using :data:pimlico.utils.linguistic.ENGLISH_PRONOUNS by default. You can
+        override this with the `pronouns` kwargs. If `pronouns=None`, no filtering is done.
+
+        """
+        entity_head_words = set()
+        # Gather a head word, if possible, from each mention
+        for mention in self.mentions:
+            mention_head = mention.text[
+                           mention.head_start_index-mention.start_index:mention.head_end_index-mention.start_index
+                           ].lower()
+            # Process the head phrase a bit
+            # Remove punctuation
+            mention_head = strip_punctuation(mention_head)
+            # Get rid of words that won't help us: stopwords and pronouns
+            head_words = mention_head.split()
+            if pronouns is not None:
+                head_words = [w for w in head_words if w not in pronouns]
+            # Don't use any 1-letter words
+            head_words = [w for w in head_words if len(w) > 1]
+            # If there are no words left, we can't get a headword from this mention
+            # If there are multiple (a minority of cases), use the rightmost, which usually is the headword in English
+            if head_words:
+                entity_head_words.add(head_words[-1])
+        # If we've ended up with multiple possible head words (minority, but not uncommon), we've no way to choose
+        # We could just pick one randomly
+        # Take the lexicographic first, just to be consistent
+        if len(entity_head_words):
+            return list(sorted(entity_head_words))[0]
+        else:
+            return None
 
     def to_json_dict(self):
         return {

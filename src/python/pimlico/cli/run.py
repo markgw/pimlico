@@ -18,6 +18,7 @@ from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
 from pimlico.utils.filesystem import copy_dir_with_progress
 from .browser.tool import browse_cmd
+from .shell.runner import shell_cmd
 
 
 def run_cmd(pipeline, opts):
@@ -139,6 +140,12 @@ if __name__ == "__main__":
     run.add_argument("--formatter", "-f",
                      help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
                           "what to output for each document. If specified, --parse is ignored")
+
+    run = subparsers.add_parser("shell", help="Open a shell to give access to the data output by a module")
+    run.set_defaults(func=shell_cmd)
+    run.add_argument("module_name", help="The name of the module whose output to look at")
+    run.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
+                                                    "load the default output")
 
     install = subparsers.add_parser("install", help="Install missing module library dependencies")
     install.set_defaults(func=install_cmd)

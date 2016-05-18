@@ -47,6 +47,10 @@ class PimlicoDatatype(object):
     datatype_name = "base_datatype"
     requires_data_preparation = False
     input_module_options = {}
+    """
+    Override to provide shell commands specific to this datatype. Should include the superclass' list.
+    """
+    shell_commands = []
 
     def __init__(self, base_dir, pipeline, **kwargs):
         self.pipeline = pipeline
