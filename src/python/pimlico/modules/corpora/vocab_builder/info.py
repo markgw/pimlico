@@ -16,8 +16,8 @@ from pimlico.datatypes.tokenized import TokenizedCorpus
 
 
 class ModuleInfo(BaseModuleInfo):
-    module_type_name = "term_feature_vocab_builder"
-    module_readable_name = "Term-feature corpus vocab builder"
+    module_type_name = "vocab_builder"
+    module_readable_name = "Corpus vocab builder"
     module_inputs = [("text", TokenizedCorpus)]
     module_outputs = [("vocab", Dictionary)]
     module_options = {

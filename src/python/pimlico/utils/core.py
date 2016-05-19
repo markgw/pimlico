@@ -65,3 +65,14 @@ def is_identifier(ident):
     if root.body[0].value.id != ident:
         return False
     return True
+
+
+def remove_duplicates(lst, key=lambda x: x):
+    """
+    Remove duplicate values from a list, keeping just the first one, using a particular key function to compare them.
+
+    """
+    seen = set()
+    seen_add = seen.add
+    return [x for x in lst if key(x) not in seen and not seen_add(key(x))]
+

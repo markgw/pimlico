@@ -81,6 +81,10 @@ class Word2VecModel(PimlicoDatatype):
             self._model = Word2Vec.load_word2vec_format(os.path.join(self.data_dir, "vectors.bin"), binary=True)
         return self._model
 
+    @property
+    def model(self):
+        return self.load_model()
+
     def get_software_dependencies(self):
         # Depend on Gensim, which can be installed using Pip
         return super(Word2VecModel, self).get_software_dependencies() + [

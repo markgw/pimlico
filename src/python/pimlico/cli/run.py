@@ -24,7 +24,7 @@ from .shell.runner import shell_cmd
 def run_cmd(pipeline, opts):
     debug = opts.debug
     try:
-        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=debug)
+        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=debug, stage=opts.stage)
     except ModuleInfoLoadError, e:
         if debug:
             print_exc()
@@ -112,6 +112,9 @@ if __name__ == "__main__":
     run.add_argument("module_name", help="The name of the module to run")
     run.add_argument("--force-rerun", "-f", action="store_true",
                      help="Force running the module, even if it's already been run to completion")
+    run.add_argument("--stage",
+                     help="Run the named stage of a multi-stage module. If the module isn't multi-stage, this option "
+                          "will be ignored")
 
     variants = subparsers.add_parser("variants", help="List the available variants of a pipeline config")
     variants.set_defaults(func=list_variants)

@@ -115,6 +115,7 @@ class PipelineConfig(object):
                         input_module_output = None
                     self.used_outputs.setdefault(input_module, set([])).add(input_module_output)
 
+        # Never clear this. It's not really just a cache as such
         self._module_info_cache = {}
         self._module_schedule = None
 
@@ -124,6 +125,9 @@ class PipelineConfig(object):
 
     def __getitem__(self, item):
         return self.load_module_info(item)
+
+    def __contains__(self, item):
+        return item in self._module_info_cache
 
     def load_module_info(self, module_name):
         """
@@ -181,6 +185,16 @@ class PipelineConfig(object):
 
             self._module_info_cache[module_name] = module_info
         return self._module_info_cache[module_name]
+
+    def insert_module(self, module_info):
+        """
+        Usually, all modules in the pipeline are loaded, based on config, by this class. However, occasionally,
+        we may want to make modules available as part of the pipeline from elsewhere. In particular, this is
+        necessary when building multi-stage modules -- each stage is added (with special module name prefixes)
+        into the main pipeline.
+
+        """
+        self._module_info_cache[module_info.module_name] = module_info
 
     def get_module_schedule(self):
         """

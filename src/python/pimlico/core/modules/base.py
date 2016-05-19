@@ -614,7 +614,10 @@ class BaseModuleExecutor(object):
     do the work of executing the module on given inputs, writing to given output locations.
 
     """
-    def __init__(self, module_instance_info):
+    def __init__(self, module_instance_info, stage=None, debug=False, force_rerun=False):
+        self.debug = debug
+        self.force_rerun = force_rerun
+        self.stage = stage
         self.info = module_instance_info
         self.log = module_instance_info.pipeline.log.getChild(module_instance_info.module_name)
         # Work out how many processes we should use
@@ -622,6 +625,14 @@ class BaseModuleExecutor(object):
         self.processes = module_instance_info.pipeline.processes if not module_instance_info.is_filter() else 1
 
     def execute(self):
+        """
+        Run the actual module execution.
+
+        May return None, in which case it's assumed to have fully completed. If a string is returned, it's used
+        as an alternative module execution status. Used, e.g., by multi-stage modules that need to be run multiple
+        times.
+
+        """
         raise NotImplementedError
 
 

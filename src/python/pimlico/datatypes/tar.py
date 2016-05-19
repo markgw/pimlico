@@ -65,6 +65,7 @@ class TarredCorpus(IterableCorpus):
 
     def archive_iter(self, subsample=None, start_after=None):
         gzipped = self.metadata.get("gzip", False)
+        encoding = self.metadata.get("encoding", "utf-8")
         # Prepare a temporary directory to extract everything to
         tmp_dir = mkdtemp()
 
@@ -116,7 +117,8 @@ class TarredCorpus(IterableCorpus):
                                 # For backwards-compatibility, where gzip=True, but the gz extension wasn't used, we
                                 #  just decompress with zlib, without trying to parse the gzip headers
                                 document = zlib.decompress(document)
-                        document = document.decode("utf-8")
+                        if encoding is not None:
+                            document = document.decode(encoding)
                         # Catch invalid documents
                         document = InvalidDocument.invalid_document_or_text(document)
                         # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
@@ -187,7 +189,7 @@ class TarredCorpusWriter(IterableCorpusWriter):
     trust the metadata, however, setting trust_length=True will speed things up.
 
     """
-    def __init__(self, base_dir, gzip=False, append=False, trust_length=False):
+    def __init__(self, base_dir, gzip=False, append=False, trust_length=False, encoding="utf-8"):
         super(TarredCorpusWriter, self).__init__(base_dir)
         self.append = append
         self.current_archive_name = None
@@ -195,6 +197,8 @@ class TarredCorpusWriter(IterableCorpusWriter):
         self.gzip = gzip
         # Set "gzip" in the metadata, so we know to unzip when reading
         self.metadata["gzip"] = gzip
+        self.encoding = encoding
+        self.metadata["encoding"] = encoding
 
         self.metadata["length"] = 0
         if append:
@@ -243,7 +247,8 @@ class TarredCorpusWriter(IterableCorpusWriter):
                 self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
 
         # Add a new document to archive
-        data = data.encode("utf-8")
+        if self.encoding is not None:
+            data = data.encode(self.encoding)
         if self.gzip:
             # We used to just use zlib to compress, which works fine, but it's not easy to open the files manually
             # Using gzip (i.e. writing gzip headers) makes it easier to use the data outside Pimlico
@@ -290,6 +295,14 @@ def pass_up_invalid(fn):
         else:
             return fn(self, data)
     return _fn
+
+
+def exclude_invalid(doc_iter):
+    """
+    Generator that skips any invalid docs when iterating over a document dataset.
+
+    """
+    return ((doc_name, doc) for (doc_name, doc) in doc_iter if not isinstance(doc, InvalidDocument))
 
 
 class AlignedTarredCorpora(object):

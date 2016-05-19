@@ -37,8 +37,10 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         return TarredCorpusWriter(output_dir, append=append)
 
     def get_writers(self, append=False):
-        return tuple(self.get_writer(name, self.get_absolute_output_dir(name), append=append)
-                     for name in self.output_names)
+        # Only include the outputs that are tarred corpus types
+        # This allows there to be other outputs aside from those mapped to
+        outputs = [name for name in self.output_names if isinstance(self.get_output(name), TarredCorpus)]
+        return tuple(self.get_writer(name, self.get_absolute_output_dir(name), append=append) for name in outputs)
 
     def get_detailed_status(self):
         status_lines = super(DocumentMapModuleInfo, self).get_detailed_status()
@@ -64,13 +66,17 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     :mod:.singleproc.
 
     """
-    def __init__(self, module_instance_info):
-        super(DocumentMapModuleExecutor, self).__init__(module_instance_info)
+    def __init__(self, module_instance_info, **kwargs):
+        super(DocumentMapModuleExecutor, self).__init__(module_instance_info, **kwargs)
 
         # We may have multiple inputs, which should be aligned tarred corpora
         # If there's only one, this also works
-        self.input_corpora = [self.info.get_input(input_name)
-                              for input_name in self.info.input_names]
+        inputs = [self.info.get_input(input_name) for input_name in self.info.input_names]
+        # We also allow (additional) inputs that are not tarred corpora, which get left out of this
+        self.input_corpora = [corpus for corpus in inputs if isinstance(corpus, TarredCorpus)]
+        if len(self.input_corpora) == 0:
+            raise ModuleExecutionError(
+                "document map module '%s' got no TarredCorpus instances among its inputs" % self.info.module_name)
         self.input_iterator = AlignedTarredCorpora(self.input_corpora)
 
     def preprocess(self):

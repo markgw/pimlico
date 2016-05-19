@@ -6,7 +6,7 @@ from pimlico.utils.format import title_box
 from termcolor import colored
 
 
-def _status_color(module):
+def module_status_color(module):
     if module.is_filter():
         return "green"
     elif module.status == "COMPLETE":
@@ -15,6 +15,16 @@ def _status_color(module):
         return "red"
     else:
         return "yellow"
+
+
+def status_colored(module, text=None):
+    """
+    Colour the text according to the status of the given module. If text is not given, the module's name is
+    returned.
+
+    """
+    text = text or module.module_name
+    return colored(text, module_status_color(module))
 
 
 def status_cmd(pipeline, opts):
@@ -28,10 +38,9 @@ def status_cmd(pipeline, opts):
         print "\nModule execution schedule with statuses:"
         for i, module_name in enumerate(pipeline.get_module_schedule(), start=1):
             module = pipeline[module_name]
-            status_color = _status_color(module)
-            print colored(" %d. %s" % (i, module_name), status_color)
+            print colored(status_colored(module, " %d. %s" % (i, module_name)))
             # Check module status (has it been run?)
-            print "       status: %s" % colored(module.status, status_color)
+            print "       status: %s" % status_colored(module, module.status)
             # Check status of each input datatypes
             for input_name in module.input_names:
                 print "       input %s: %s" % (
@@ -62,7 +71,7 @@ def status_cmd(pipeline, opts):
 
 def module_status(module):
     also_output = []
-    status_color = _status_color(module)
+    status_color = module_status_color(module)
 
     # Put together information about the inputs
     input_infos = []

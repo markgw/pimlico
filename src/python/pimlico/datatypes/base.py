@@ -270,7 +270,7 @@ class SingleTextDocument(PimlicoDatatype):
     datatype_name = "single_doc"
 
     def data_ready(self):
-        return super(SingleTextDocument, self).data_ready() and os.path.exists(self.data_dir, "data.txt")
+        return super(SingleTextDocument, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "data.txt"))
 
     def read_data(self):
         with open(os.path.join(self.data_dir, "data.txt"), "r") as f:
@@ -291,6 +291,70 @@ class SingleTextDocumentWriter(PimlicoDatatypeWriter):
             # Write out the data file
             with open(self.output_path, "w") as f:
                 f.write(data)
+
+
+class Dict(PimlicoDatatype):
+    """
+    Simply stores a Python dict, pickled to disk.
+
+    """
+    datatype_name = "dict"
+
+    def data_ready(self):
+        return super(Dict, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "data"))
+
+    @property
+    def data(self):
+        import cPickle as pickle
+        with open(os.path.join(self.data_dir, "data"), "r") as f:
+            return pickle.load(f)
+
+
+class DictWriter(PimlicoDatatypeWriter):
+    def __init__(self, base_dir):
+        super(DictWriter, self).__init__(base_dir)
+        self.data = {}
+        self.output_path = os.path.join(self.data_dir, "data")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        import cPickle as pickle
+
+        super(DictWriter, self).__exit__(exc_type, exc_val, exc_tb)
+        if exc_type is None:
+            # Write out the data file
+            with open(self.output_path, "w") as f:
+                pickle.dump(self.data, f, -1)
+
+
+class StringList(PimlicoDatatype):
+    """
+    Simply stores a Python list of strings, written out to disk in a readable form. Not the most efficient
+    format, but if the list isn't humungous it's OK (e.g. storing vocabularies).
+
+    """
+    datatype_name = "string_list"
+
+    def data_ready(self):
+        return super(StringList, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "data"))
+
+    @property
+    def data(self):
+        with open(os.path.join(self.data_dir, "data"), "r") as f:
+            return f.read().decode("utf-8").splitlines()
+
+
+class StringListWriter(PimlicoDatatypeWriter):
+    def __init__(self, base_dir):
+        super(StringListWriter, self).__init__(base_dir)
+        self.data = []
+        self.output_path = os.path.join(self.data_dir, "data")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super(StringListWriter, self).__exit__(exc_type, exc_val, exc_tb)
+        if exc_type is None:
+            # Write out the data file
+            with open(self.output_path, "w") as f:
+                f.write((u"\n".join(self.data)).encode("utf-8"))
 
 
 class InvalidDocument(object):

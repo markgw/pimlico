@@ -11,7 +11,7 @@ from pimlico.core.modules.base import load_module_executor, ModuleInfoLoadError
 from pimlico.utils.logging import get_console_logger
 
 
-def execute_module(pipeline, module_name, force_rerun=False, debug=False):
+def execute_module(pipeline, module_name, force_rerun=False, debug=False, stage=None):
     # Prepare a logger
     log = get_console_logger("Pimlico", debug=debug)
 
@@ -20,7 +20,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     log.info("Loaded pipeline %s" % pipeline_name)
 
     # Load the module instance
-    if module_name not in pipeline.modules:
+    if module_name not in pipeline:
         raise ModuleExecutionError("%s pipeline doesn't have a module called '%s'" % (pipeline.name, module_name))
     module = pipeline[module_name]
     log.info("Checking module config")
@@ -51,10 +51,12 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
     # Check the status of the module, so we don't accidentally overwrite module output that's already complete
     if module.status == "COMPLETE":
         if force_rerun:
-            log.info("module '%s' already fully run, but forcing rerun" % module_name)
-            # If rerunning, delete the old data first so we make a fresh start
-            module.reset_execution()
-            module.status = "STARTED"
+            # If stage is specified then we'll force a rerun of the specific stage and not the main module
+            if stage is None:
+                log.info("module '%s' already fully run, but forcing rerun" % module_name)
+                # If rerunning, delete the old data first so we make a fresh start
+                module.reset_execution()
+                module.status = "STARTED"
         else:
             raise ModuleAlreadyCompletedError("module '%s' has already been run to completion. Use --force-rerun if "
                                               "you want to run it again and overwrite the output" % module_name)
@@ -92,7 +94,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
         # Get hold of an executor for this module
         executer = load_module_executor(module)
         # Give the module an initial in-progress status
-        executer(module).execute()
+        end_status = executer(module, stage=stage, debug=debug, force_rerun=force_rerun).execute()
     except ModuleInfoLoadError, e:
         module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
         raise
@@ -104,8 +106,12 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False):
         module.add_execution_history_record("Execution of %s halted by user" % module_name)
         raise
 
-    # Update the module status so we know it's been completed
-    module.status = "COMPLETE"
+    if end_status is None:
+        # Update the module status so we know it's been completed
+        module.status = "COMPLETE"
+    else:
+        # Custom status was given
+        module.status = end_status
 
 
 class ModuleExecutionError(Exception):
