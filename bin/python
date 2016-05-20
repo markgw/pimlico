@@ -3,6 +3,16 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=$PYTHONPATH:$DIR/../src/python:$DIR/../lib/python
 python=$DIR/../lib/python_env/bin/python
 
+# Check the virtualenv environment is set up
+if [ ! -f "$python" ]; then
+    echo "Virtualenv for installing local Python software is not yet setup: running setup now"
+    python $DIR/../lib/libutils/create_virtualenv.py
+    if [ "$?" != "0" ]; then
+        # Failed to set up virtualenv: don't carry on running
+        exit 1
+    fi
+fi
+
 if [ -n "$GPU" ]; then
     export THEANO_FLAGS='device=gpu,floatX=float32'
 fi
@@ -21,23 +31,15 @@ if [ -n "$PROFILE" ]; then
         # Replace arg 1
         set -- $script_name "${@:2}"
     fi
-    /usr/bin/env python $PYARGS -m cProfile -o $profile_out $*
+    $python $PYARGS -m cProfile -o $profile_out $*
 elif [ -n "$MEMPROFILE" ]; then
     # Similar, does memory profiling
     echo "Memory profiling"
-    /usr/bin/env python -m memory_profiler $*
+    $python -m memory_profiler $*
 elif [ -n "$GDB" ]; then
     echo "Running Python from gdb"
-    gdb -ex r --args python $*
+    gdb -ex r --args $python $*
 else
-    if [ ! -f "$python" ]; then
-        echo "Virtualenv for installing local Python software is not yet setup: running setup now"
-        python $DIR/../lib/libutils/create_virtualenv.py
-        if [ "$?" != "0" ]; then
-            # Failed to set up virtualenv: don't carry on running
-            exit 1
-        fi
-    fi
     # Run python using virtualenv python interpreter
     $python $*
 fi

@@ -62,15 +62,6 @@ def slice_progress(iterable, num_items, title=None):
     return items
 
 
-def iter_progress(iterable, num_items, title=None):
-    pbar = get_progress_bar(num_items, title=title)
-    for i, item in enumerate(iterable):
-        yield item
-        if i < num_items:
-            pbar.update(i)
-    pbar.finish()
-
-
 class ProgressBarIter(object):
     def __init__(self, iterable, title=None):
         self.title = title
@@ -90,4 +81,5 @@ class ProgressBarIter(object):
         else:
             title = self.title
         self._iteration += 1
-        return iter_progress(self.iterable, len(self), title=title)
+        pbar = get_progress_bar(len(self), title=title)
+        return pbar(self.iterable)

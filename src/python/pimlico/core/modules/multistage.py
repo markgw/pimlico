@@ -17,7 +17,7 @@ class MultistageModuleExecutor(BaseModuleExecutor):
 
         # Check what the last completed stage is
         if not self.info.status.startswith("COMPLETED STAGE "):
-            if self.info.status == "COMPLETED":
+            if self.info.status == "COMPLETE":
                 # Completed all stages
                 last_stage = self.info.stages[-1].name
                 last_stage_num = len(self.info.stages)-1
@@ -43,13 +43,15 @@ class MultistageModuleExecutor(BaseModuleExecutor):
                        force_rerun=self.force_rerun, debug=self.debug)
 
         # Only update main module status if submodule has completed
-        if self.info.internal_modules[stage_num].status == "COMPLETED":
+        if self.info.internal_modules[stage_num].status == "COMPLETE":
             if stage_num == len(self.info.stages) - 1:
                 #  Finished the last stage: all done
                 return
             else:
                 # Use special module status to indicate what stage we've completed
                 return "COMPLETED STAGE %s" % stage
+        else:
+            return "STAGE %d IN PROGRESS (%s)" % (stage, self.info.internal_modules[stage_num].status)
 
 
 def multistage_module(module_name, stages):
