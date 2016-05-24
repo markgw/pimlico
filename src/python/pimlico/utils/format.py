@@ -2,10 +2,11 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-from tabulate import tabulate
 from textwrap import wrap
 
+
 def multiline_tablate(table, widths, **kwargs):
+    from tabulate import tabulate
     # Wrap columns
     table = [[wrap(cell, width=width) for (cell, width) in zip(row, widths)] for row in table]
     table_split = []

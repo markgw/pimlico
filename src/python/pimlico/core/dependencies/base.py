@@ -4,8 +4,6 @@ Base classes for defining software dependencies for module types and routines fo
 """
 from textwrap import wrap
 
-from pimlico.utils.format import title_box
-
 
 class SoftwareDependency(object):
     """
@@ -171,6 +169,7 @@ def check_and_install(deps, trust_downloaded_archives=False):
     that can't be installed.
 
     """
+    from pimlico.utils.format import title_box
     uninstallable = []
     installed = []
     for dep in deps:
