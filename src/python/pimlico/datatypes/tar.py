@@ -60,26 +60,30 @@ class TarredCorpus(IterableCorpus):
             return archive.extractfile(filename).read()
 
     def __iter__(self):
-        for __, doc_name, doc in self.archive_iter():
+        return self.doc_iter()
+
+    def doc_iter(self, subsample=None, start_after=None, skip=None):
+        for __, doc_name, doc in self.archive_iter(subsample=subsample, start_after=start_after, skip=skip):
             yield doc_name, doc
 
-    def archive_iter(self, subsample=None, start_after=None):
+    def archive_iter(self, subsample=None, start_after=None, skip=None):
         gzipped = self.metadata.get("gzip", False)
         encoding = self.metadata.get("encoding", "utf-8")
         # Prepare a temporary directory to extract everything to
         tmp_dir = mkdtemp()
 
-        if start_after is None:
+        skipped = 0
+        if start_after is None and skip is None:
             # Don't wait to start
             started = True
         else:
-            # Start after we've hit this (archive, doc name)
+            # Start after we've hit this (archive, doc name), or after we've passed a certain number of docs
             started = False
 
         try:
             for tar_name, tarball_filename in zip(self.tarballs, self.tar_filenames):
-                # If we're waiting for a particular archive/file, we can skip archives until we're in the right one
-                if not started and start_after[0] != tar_name:
+                if not started and start_after is not None and start_after[0] != tar_name:
+                    # If we're waiting for a particular archive/file, we can skip archives until we're in the right one
                     continue
 
                 # Extract the tarball to the temp dir
@@ -91,12 +95,21 @@ class TarredCorpus(IterableCorpus):
 
                         # Allow the first portion of the corpus to be skipped
                         if not started:
-                            # We know we're in the right archive now, skip until we get to the requested file
-                            if start_after[1] == filename:
-                                # We've hit the condition for starting
-                                # Skip this doc and start on the next
-                                started = True
-                            continue
+                            if skip is not None:
+                                if skipped >= skip:
+                                    # Skipped enough now: stop skipping
+                                    started = True
+                                else:
+                                    # Keep skipping docs
+                                    skipped += 1
+                                    continue
+                            else:
+                                # We know we're in the right archive now, skip until we get to the requested file
+                                if start_after[1] == filename:
+                                    # We've hit the condition for starting
+                                    # Skip this doc and start on the next
+                                    started = True
+                                continue
 
                         # If subsampling, decide whether to extract this file
                         if subsample is not None and random.random() > subsample:

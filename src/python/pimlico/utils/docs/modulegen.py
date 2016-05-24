@@ -7,6 +7,9 @@ Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 
 """
 import argparse
+
+import sys
+
 import os
 import warnings
 from importlib import import_module
@@ -14,22 +17,17 @@ from pkgutil import iter_modules
 from sphinx import __version__
 from sphinx.apidoc import format_heading
 
-import pimlico.modules
 from pimlico.core.modules.options import format_option_type
 from pimlico.datatypes.base import DynamicOutputDatatype, PimlicoDatatype
 from pimlico.utils.docs import trim_docstring
 from pimlico.utils.docs.rest import make_table
 
 
-def generate_docs(output_dir):
-    """
-    Generate RST docs for all core Pimlico modules and output to a directory.
-
-    """
-    generate_docs_for_pymod(pimlico.modules, output_dir)
-
-
 def generate_docs_for_pymod(module, output_dir):
+    """
+    Generate RST docs for Pimlico modules on a given Python path and output to a directory.
+
+    """
     module_name = module.__name__
     # Look at all this module's submodules
     submodules = dict((modname, (importer, is_package)) for (importer, modname, is_package) in
@@ -75,7 +73,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir):
     key_info = [
         ["Path", module_path],
         ["Executable", "yes" if ModuleInfo.module_executable else "no"],
-    ]
+    ] + ModuleInfo.get_key_info_table()
     input_table = [
         [input_name, input_datatype_list(input_types)] for input_name, input_types in ModuleInfo.module_inputs
     ]
@@ -104,7 +102,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir):
             "(required) " if d.get("required", False) else "" + d.get("help", ""),
             format_option_type(d.get("type", str)),
         ]
-        for (option_name, d) in sorted(ModuleInfo.module_options.items())
+        for (option_name, d) in ModuleInfo.module_options.items()
     ]
 
     filename = os.path.join(output_dir, "%s.rst" % module_path)
@@ -206,17 +204,31 @@ def generate_contents_page(modules, output_dir, index_name, title, content):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate module documentation RST files from the modules")
+    parser = argparse.ArgumentParser(description="Generate module documentation RST files from core Pimlico modules, "
+                                                 "or your own Pimlico modules")
     parser.add_argument("output_dir", help="Where to put the .rst files")
+    parser.add_argument("--path", default="pimlico.modules",
+                        help="Base Python module path to generate docs for. Defaults to generating docs for core "
+                             "modules from the Pimlico distribution. Use this to generate module docs for your own "
+                             "modules")
     opts = parser.parse_args()
 
     output_dir = os.path.abspath(opts.output_dir)
 
     print "Sphinx %s" % __version__
     print "Pimlico module doc generator"
+    try:
+        base_mod = import_module(opts.path)
+    except ImportError, e:
+        print "Could not import base module %s: %s" % (opts.path, e)
+        print "Did you add your own modules to the pythonpath? (Current paths: %s)" % \
+              u", ".join(sys.path).encode("ascii", "ignore")
+        print "Cannot generate docs"
+        sys.exit(1)
+    print "Generating docs for %s (including all submodules)" % opts.path
     print "Outputting module docs to %s" % output_dir
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    generate_docs(output_dir)
+    generate_docs_for_pymod(base_mod, output_dir)

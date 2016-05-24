@@ -6,24 +6,31 @@ import os
 from tarfile import TarFile
 from textwrap import wrap
 
-from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies
+from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies, PipelineStructureError
 from pimlico.core.modules.base import load_module_executor, ModuleInfoLoadError
+from pimlico.core.modules.multistage import MultistageModuleInfo
 from pimlico.utils.logging import get_console_logger
 
 
-def execute_module(pipeline, module_name, force_rerun=False, debug=False, stage=None):
-    # Prepare a logger
-    log = get_console_logger("Pimlico", debug=debug)
+def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=None):
+    if log is None:
+        # Prepare a logger
+        log = get_console_logger("Pimlico", debug=debug)
 
     pipeline_name = "'%s'" % pipeline.name if pipeline.variant == "main" else \
         "'%s' (variant '%s')" % (pipeline.name, pipeline.variant)
-    log.info("Loaded pipeline %s" % pipeline_name)
+    log.info("Using pipeline %s" % pipeline_name)
 
     # Load the module instance
-    if module_name not in pipeline:
-        raise ModuleExecutionError("%s pipeline doesn't have a module called '%s'" % (pipeline.name, module_name))
-    module = pipeline[module_name]
-    log.info("Checking module config")
+    try:
+        module = pipeline[module_name]
+    except PipelineStructureError, e:
+        raise ModuleExecutionError("could not load module '%s': %s" % (module_name, e))
+    # If we loaded a multi-stage module, default to executing its first stage
+    if isinstance(module, MultistageModuleInfo):
+        log.info("Multi-stage module without stage specified: defaulting to first stage, '%s'" % module.stages[0].name)
+        module = module.internal_modules[0]
+
     # Run basic checks on the config for the whole pipeline
     try:
         check_pipeline(pipeline)
@@ -51,12 +58,10 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, stage=
     # Check the status of the module, so we don't accidentally overwrite module output that's already complete
     if module.status == "COMPLETE":
         if force_rerun:
-            # If stage is specified then we'll force a rerun of the specific stage and not the main module
-            if stage is None:
-                log.info("module '%s' already fully run, but forcing rerun" % module_name)
-                # If rerunning, delete the old data first so we make a fresh start
-                module.reset_execution()
-                module.status = "STARTED"
+            log.info("module '%s' already fully run, but forcing rerun" % module_name)
+            # If rerunning, delete the old data first so we make a fresh start
+            module.reset_execution()
+            module.status = "STARTED"
         else:
             raise ModuleAlreadyCompletedError("module '%s' has already been run to completion. Use --force-rerun if "
                                               "you want to run it again and overwrite the output" % module_name)
@@ -94,7 +99,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, stage=
         # Get hold of an executor for this module
         executer = load_module_executor(module)
         # Give the module an initial in-progress status
-        end_status = executer(module, stage=stage, debug=debug, force_rerun=force_rerun).execute()
+        end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
     except ModuleInfoLoadError, e:
         module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
         raise

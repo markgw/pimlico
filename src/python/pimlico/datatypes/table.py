@@ -38,8 +38,8 @@ class IntegerTableDocumentCorpus(TarredCorpus):
     may be signed.
 
     """
-    def __init__(self, base_dir, pipeline):
-        super(IntegerTableDocumentCorpus, self).__init__(base_dir, pipeline)
+    def __init__(self, base_dir, pipeline, **kwargs):
+        super(IntegerTableDocumentCorpus, self).__init__(base_dir, pipeline, **kwargs)
         self._unpacker = None
 
     @property

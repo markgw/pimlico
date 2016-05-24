@@ -1,60 +1,92 @@
-from collections import Counter
+from collections import Counter, OrderedDict
+from itertools import takewhile
 
 from pimlico.cli.status import status_colored
-from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor, load_module_executor
-from pimlico.core.modules.execute import ModuleExecutionError, execute_module
+from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.utils.core import remove_duplicates
 
 
-class MultistageModuleExecutor(BaseModuleExecutor):
-    def execute(self):
-        # If no stage is specified, assume the first one
-        stage = self.stage or self.info.stages[0].name
-        if stage not in self.info.named_internal_modules:
-            raise ModuleExecutionError("'%s' is not one of the execution stages for %s modules. Choose from: %s" %
-                                       (stage, self.info.module_type_name, ", ".join(s.name for s in self.info.stages)))
-        stage_num = (num for (num, s) in enumerate(self.info.stages) if s.name == stage).next()
+class MultistageModuleInfo(BaseModuleInfo):
+    """
+    Base class for multi-stage modules. You almost certainly don't want to override this yourself, but use the
+    factory method instead. It exists mainly for providing a way of identifying multi-stage modules.
 
-        # Check what the last completed stage is
-        if not self.info.status.startswith("COMPLETED STAGE "):
-            if self.info.status == "COMPLETE":
-                # Completed all stages
-                last_stage = self.info.stages[-1].name
-                last_stage_num = len(self.info.stages)-1
-            else:
-                # Only allowed to execute first stage
-                last_stage = None
-                last_stage_num = -1
+    """
+    module_executable = True
+    stages = None  # Set by factory
+
+    def __init__(self, module_name, pipeline, **kwargs):
+        super(MultistageModuleInfo, self).__init__(module_name, pipeline, **kwargs)
+        self.internal_modules = []
+        self.named_internal_modules = {}
+
+    def typecheck_inputs(self):
+        """
+        Overridden to check internal output-input connections as well as the main module's inputs.
+
+        """
+        super(MultistageModuleInfo, self).typecheck_inputs()
+        for submodule in self.internal_modules:
+            submodule.typecheck_inputs()
+
+    def get_software_dependencies(self):
+        # Include dependencies for each submodule
+        deps = super(MultistageModuleInfo, self).get_software_dependencies()
+        for module in self.internal_modules:
+            deps.extend(module.get_software_dependencies())
+        return deps
+
+    def get_input_software_dependencies(self):
+        # Only check the sub-modules' deps
+        # No need to call super, since it will only duplicate some of the submodules' inputs
+        return [dep for module in self.internal_modules for dep in module.get_input_software_dependencies()]
+
+    def check_ready_to_run(self):
+        problems = super(MultistageModuleInfo, self).check_ready_to_run()
+        for module in self.internal_modules:
+            problems.extend(module.check_ready_to_run())
+        return problems
+
+    def get_detailed_status(self):
+        return super(MultistageModuleInfo, self).get_detailed_status() + [
+            "Stages in multi-stage module: %s" % ", ".join(
+                status_colored(mod, stage.name) for (stage, mod) in zip(self.stages, self.internal_modules)
+            )
+        ]
+
+    def reset_execution(self):
+        # Reset the main module
+        super(MultistageModuleInfo, self).reset_execution()
+        # Also reset all stage modules
+        for module in self.internal_modules:
+            module.reset_execution()
+
+    @classmethod
+    def get_key_info_table(cls):
+        """
+        Add the stages into the key info table.
+
+        """
+        return super(MultistageModuleInfo, cls).get_key_info_table() + [
+            ["Stages", ", ".join(stage.name for stage in cls.stages)],
+        ]
+
+    @property
+    def status(self):
+        # Override status to compute it from sub-module statuses
+        stage_statuses = [m.status for m in self.internal_modules]
+        if all(s == "COMPLETE" for s in stage_statuses):
+            return "COMPLETE"
+        elif not any(s == "COMPLETE" for s in stage_statuses):
+            return "UNEXECUTED"
         else:
-            last_stage = self.info.status[16:]
-            last_stage_num = (num for (num, s) in enumerate(self.info.stages) if s.name == last_stage).next()
-
-        if stage_num != last_stage_num + 1:
-            if self.force_rerun:
-                self.log.info("Rerunning stage %s" % stage)
-            else:
-                raise ModuleExecutionError("tried to execute stage %d (%s), but %s" %
-                                           (stage_num, stage,
-                                            ("last stage to be completed was %d (%s)" % (last_stage_num, last_stage))
-                                            if last_stage is not None else "no stages have been executed yet"))
-
-        self.log.info("Executing stage %d: %s" % (stage_num, stage))
-        execute_module(self.info.pipeline, "%s:%s" % (self.info.module_name, stage),
-                       force_rerun=self.force_rerun, debug=self.debug)
-
-        # Only update main module status if submodule has completed
-        if self.info.internal_modules[stage_num].status == "COMPLETE":
-            if stage_num == len(self.info.stages) - 1:
-                #  Finished the last stage: all done
-                return
-            else:
-                # Use special module status to indicate what stage we've completed
-                return "COMPLETED STAGE %s" % stage
-        else:
-            return "STAGE %d IN PROGRESS (%s)" % (stage, self.info.internal_modules[stage_num].status)
+            last_completed = list(
+                takewhile(lambda (m, s): m.status == "COMPLETE", zip(self.internal_modules, self.stages))
+            )[-1][1]
+            return "COMPLETED STAGE %s" % last_completed.name
 
 
-def multistage_module(module_name, stages):
+def multistage_module(module_name, module_stages):
     """
     Factory to build a multi-stage module type out of a series of stages, each of which specifies a module type
     for the stage.
@@ -73,7 +105,7 @@ def multistage_module(module_name, stages):
     # Like pipeline.used_outputs (and added to it when necessary)
     used_internal_outputs = {}
 
-    for stage_num, stage in enumerate(stages):
+    for stage_num, stage in enumerate(module_stages):
         # Make sure we can identify all of the module connections that provide this stage's inputs
         for connection in stage.connections:
             if type(connection) is InternalModuleConnection:
@@ -82,7 +114,7 @@ def multistage_module(module_name, stages):
                 # Look for the previous module we're connecting to
                 if connection.previous_module is None:
                     # Default to the previous one in the sequence
-                    previous_stage = stages[stage_num-1]
+                    previous_stage = module_stages[stage_num - 1]
                 elif connection.previous_module not in named_stages:
                     raise MultistageModulePreparationError(
                         "stage %s connects to a previous module that does not precede it in the stage sequence: %s" %
@@ -131,11 +163,11 @@ def multistage_module(module_name, stages):
 
     # If no inputs were specified, use the default
     if len(main_inputs) == 0:
-        main_inputs.append(stages[0].module_info_cls.module_inputs[0])
+        main_inputs.append(module_stages[0].module_info_cls.module_inputs[0])
     # Same with the outputs
     if len(main_outputs) == 0:
         main_outputs.append(
-            (stages[-1].module_info_cls.module_outputs + stages[-1].module_info_cls.module_optional_outputs)[0])
+            (module_stages[-1].module_info_cls.module_outputs + module_stages[-1].module_info_cls.module_optional_outputs)[0])
     # Check we've not ended up with duplicate output names
     duplicate_output_names = [n for (n, c) in Counter([name for (name, dtype) in main_outputs]).iteritems() if c > 1]
     if duplicate_output_names:
@@ -146,34 +178,31 @@ def multistage_module(module_name, stages):
     main_inputs = remove_duplicates(main_inputs, key=lambda (input_name, itype): input_name)
 
     # Define a ModuleInfo for the multi-stage module
-    class MultistageModuleInfo(BaseModuleInfo):
+    class ModuleInfo(MultistageModuleInfo):
         module_readable_name = module_name
-        module_executable = True
         module_type_name = module_name
         module_inputs = main_inputs
         module_outputs = main_outputs
         # Module options for the MS module includes all of the internal modules' options, with prefixes
-        module_options = dict(("%s_%s" % (stage.name, opt_name), opt_def) for stage in stages
-                              for (opt_name, opt_def) in stage.module_info_cls.module_options.iteritems())
-        module_executor_override = MultistageModuleExecutor
+        # Keep the options in the order of the modules, to make the help more readable
+        module_options = OrderedDict(("%s_%s" % (stage.name, opt_name), opt_def) for stage in module_stages
+                                     for (opt_name, opt_def) in stage.module_info_cls.module_options.iteritems())
+        stages = module_stages
 
         def __init__(self, module_name, pipeline, **kwargs):
             """
             Overridden to also instantiate all of the internal module infos.
 
             """
-            super(MultistageModuleInfo, self).__init__(module_name, pipeline, **kwargs)
+            super(ModuleInfo, self).__init__(module_name, pipeline, **kwargs)
             # Before instantiating internal modules, make available the list of used outputs from within the MS module
             pipeline.used_outputs.update(dict(
                 ("%s:%s" % (self.module_name, stage_name), cntns)
                 for (stage_name, cntns) in used_internal_outputs.iteritems()
             ))
-            self.stages = stages
 
-            self.internal_modules = []
-            self.named_internal_modules = {}
             # Instantiate each internal module in turn
-            for stage in self.stages:
+            for stage_num, stage in enumerate(self.stages):
                 # Get the sub-module's options by removing prefixes
                 sub_options = dict((opt_name.partition("%s_" % stage.name)[2], opt_val)
                                    for (opt_name, opt_val) in self.options.iteritems())
@@ -200,54 +229,15 @@ def multistage_module(module_name, stages):
                 module_info = stage.module_info_cls(
                     "%s:%s" % (self.module_name, stage.name), self.pipeline, inputs=sub_inputs, options=sub_options
                 )
+                # Give the stage a pointer to the main module
+                module_info.main_module = self
 
                 self.internal_modules.append(module_info)
                 self.named_internal_modules[stage.name] = module_info
                 # Also add the module into the pipeline, with the MS module prefix, so we can make connections
                 self.pipeline.insert_module(module_info)
 
-        def typecheck_inputs(self):
-            """
-            Overridden to check internal output-input connections as well as the main module's inputs.
-
-            """
-            super(MultistageModuleInfo, self).typecheck_inputs()
-            for submodule in self.internal_modules:
-                submodule.typecheck_inputs()
-
-        def get_software_dependencies(self):
-            # Include dependencies for each submodule
-            deps = super(MultistageModuleInfo, self).get_software_dependencies()
-            for module in self.internal_modules:
-                deps.extend(module.get_software_dependencies())
-            return deps
-
-        def get_input_software_dependencies(self):
-            # Only check the sub-modules' deps
-            # No need to call super, since it will only duplicate some of the submodules' inputs
-            return [dep for module in self.internal_modules for dep in module.get_input_software_dependencies()]
-
-        def check_ready_to_run(self):
-            problems = super(MultistageModuleInfo, self).check_ready_to_run()
-            for module in self.internal_modules:
-                problems.extend(module.check_ready_to_run())
-            return problems
-
-        def get_detailed_status(self):
-            return super(MultistageModuleInfo, self).get_detailed_status() + [
-                "Stages in multi-stage module: %s" % ", ".join(
-                    status_colored(mod, stage.name) for (stage, mod) in zip(self.stages, self.internal_modules)
-                )
-            ]
-
-        def reset_execution(self):
-            # Reset the main module
-            super(MultistageModuleInfo, self).reset_execution()
-            # Also reset all stage modules
-            for module in self.internal_modules:
-                module.reset_execution()
-
-    return MultistageModuleInfo
+    return ModuleInfo
 
 
 class ModuleStage(object):

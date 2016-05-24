@@ -60,6 +60,11 @@ class BaseModuleInfo(object):
     module_executable = True
     """ If specified, this ModuleExecutor class will be used instead of looking one up in the exec Python module """
     module_executor_override = None
+    """
+    Usually None. In the case of stages of a multi-stage module, stores a pointer to the main module.
+
+    """
+    main_module = None
 
     def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[]):
         self.inputs = inputs
@@ -95,6 +100,16 @@ class BaseModuleInfo(object):
 
     def __repr__(self):
         return "%s(%s)" % (self.module_type_name, self.module_name)
+
+    @classmethod
+    def get_key_info_table(cls):
+        """
+        When generating module docs, the table at the top of the page is produced by calling this method. It should
+        return a list of two-item lists (title + value). Make sure to include the super-class call if you override
+        this to add in extra module-specific info.
+
+        """
+        return []
 
     @property
     def metadata_filename(self):

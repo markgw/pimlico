@@ -15,6 +15,7 @@ from operator import itemgetter
 
 from pimlico.core.dependencies.base import LegacyModuleDependencies, LegacyDatatypeDependencies
 from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
+from pimlico.utils.core import remove_duplicates
 from pimlico.utils.format import multiline_tablate
 from pimlico.utils.logging import get_console_logger
 
@@ -127,7 +128,7 @@ class PipelineConfig(object):
         return self.load_module_info(item)
 
     def __contains__(self, item):
-        return item in self._module_info_cache
+        return item in self._module_info_cache or item in self.raw_module_configs
 
     def load_module_info(self, module_name):
         """
@@ -137,7 +138,7 @@ class PipelineConfig(object):
         :param module_name:
         :return:
         """
-        # Cache the module info object so we can easily do repreated lookups without worrying about wasting time
+        # Cache the module info object so we can easily do repeated lookups without worrying about wasting time
         if module_name not in self._module_info_cache:
             from pimlico.core.modules.base import load_module_info
             from pimlico.core.modules.inputs import input_module_factory
@@ -145,7 +146,15 @@ class PipelineConfig(object):
             from pimlico.core.modules.map import DocumentMapModuleInfo
             from pimlico.core.modules.map.filter import wrap_module_info_as_filter
 
-            if module_name not in self.raw_module_configs:
+            if ":" in module_name:
+                # Tried to load a multi-stage module's stage, but it doesn't exist
+                main_module_name, __, stage_name = module_name.rpartition(":")
+                if main_module_name in self:
+                    raise PipelineStructureError("module '%s' does not have a stage named '%s'" %
+                                                 (main_module_name, stage_name))
+                else:
+                    raise PipelineStructureError("undefined module '%s'" % main_module_name)
+            elif module_name not in self.raw_module_configs:
                 raise PipelineStructureError("undefined module '%s'" % module_name)
             module_config = self.raw_module_configs[module_name]
 
@@ -277,7 +286,7 @@ class PipelineConfig(object):
         # If we were asked to load a particular variant, check it's in the list of available variants
         if variant != "main" and variant not in available_variants:
             raise PipelineConfigParseError("could not load pipeline variant '%s': it is not declared anywhere in the "
-                                           "config file")
+                                           "config file" % variant)
         config_section_dict = dict(config_sections)
 
         # Check for the special overall pipeline config section "pipeline"
@@ -572,7 +581,9 @@ def get_dependencies(pipeline, modules):
         for input_name in module.inputs.keys():
             dependencies.append(LegacyDatatypeDependencies(module.get_input(input_name)))
 
-    # TODO Remove duplicate dependencies that are shared by multiple modules
+    # We may want to do something cleverer to remove duplicate dependencies, but at lest remove any duplicates
+    #  of exactly the same object
+    dependencies = remove_duplicates(dependencies, lambda x: id(x))
     return dependencies
 
 

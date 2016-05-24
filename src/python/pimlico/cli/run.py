@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
     install_core_dependencies()
@@ -19,12 +20,24 @@ from pimlico.core.modules.execute import execute_module, ModuleExecutionError
 from pimlico.utils.filesystem import copy_dir_with_progress
 from .browser.tool import browse_cmd
 from .shell.runner import shell_cmd
+from pimlico.core.modules.multistage import MultistageModuleInfo
 
 
 def run_cmd(pipeline, opts):
     debug = opts.debug
+
+    module_name, __, stage_name = opts.module_name.rpartition(":")
+    if stage_name in ["?", "help"]:
+        # Just output stage names and exit
+        module = pipeline[module_name]
+        if not isinstance(module, MultistageModuleInfo):
+            print "%s is not a multi-stage module" % module_name
+            sys.exit(1)
+        print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
+        sys.exit(0)
+
     try:
-        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=debug, stage=opts.stage)
+        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=debug)
     except ModuleInfoLoadError, e:
         if debug:
             print_exc()
@@ -109,12 +122,11 @@ if __name__ == "__main__":
 
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")
     run.set_defaults(func=run_cmd)
-    run.add_argument("module_name", help="The name of the module to run")
+    run.add_argument("module_name", help="The name of the module to run. To run a stage from a multi-stage module, "
+                                         "use 'module:stage'. Use 'module:?' or 'module:help' to list available "
+                                         "stages")
     run.add_argument("--force-rerun", "-f", action="store_true",
                      help="Force running the module, even if it's already been run to completion")
-    run.add_argument("--stage",
-                     help="Run the named stage of a multi-stage module. If the module isn't multi-stage, this option "
-                          "will be ignored")
 
     variants = subparsers.add_parser("variants", help="List the available variants of a pipeline config")
     variants.set_defaults(func=list_variants)
@@ -134,7 +146,8 @@ if __name__ == "__main__":
 
     run = subparsers.add_parser("browse", help="View the data output by a module")
     run.set_defaults(func=browse_cmd)
-    run.add_argument("module_name", help="The name of the module whose output to look at")
+    run.add_argument("module_name", help="The name of the module whose output to look at. Use 'module:stage' for "
+                                         "multi-stage modules")
     run.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
                                                     "load the default output")
     run.add_argument("--parse", "-p", action="store_true",
