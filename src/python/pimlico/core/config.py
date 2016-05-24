@@ -65,6 +65,11 @@ class PipelineConfig(object):
     - `include`:
         Include the entire contents of another file. The filename, specified relative to the config file in which the
         directive is found, is given after a space.
+    - `copy`:
+        Copies all config settings from another module, whose name is given as the sole argument. May be used multiple
+        times in the same module and later copies will override earlier. Settings given explicitly in the module's
+        config override any copied settings. The following settings are not copied: input(s), `filter`, `outputs`,
+        `type`.
 
     """
     def __init__(self, name, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
@@ -391,12 +396,41 @@ class PipelineStructureError(Exception):
 
 
 def preprocess_config_file(filename, variant="main"):
+    copies = {}
+    config_sections, available_variants, vars, all_filenames = \
+        _preprocess_config_file(filename, variant=variant, copies=copies)
+    config_sections_dict = dict(config_sections)
+
+    # Copy config values according to copy directives
+    for target_section, source_sections in copies.iteritems():
+        # There may be multiple source sections: process in order of directives, so later ones override earlier
+        copy_values = {}
+        for source_section in source_sections:
+            if source_section not in config_sections_dict:
+                raise PipelineConfigParseError("copy directive in [%s] referred to unknown module '%s'" %
+                                               (target_section, source_section))
+            # Accumulate values to the copied into target section
+            copy_values.update(config_sections_dict[source_section])
+        # Remove certain keys that shouldn't be copied
+        copy_values = dict((key, val) for (key, val) in copy_values.iteritems()
+                           if key not in ["filter", "outputs", "type"] and not key.startswith("input"))
+        # Values set in section itself take precedence over those copied
+        copy_values.update(config_sections_dict[target_section])
+        # Replace the settings for this module
+        config_sections = [(sect, copy_values) if sect == target_section else (sect, settings)
+                           for (sect, settings) in config_sections]
+
+    return config_sections, available_variants, vars, all_filenames
+
+
+def _preprocess_config_file(filename, variant="main", copies={}):
     # Read in the file
     config_lines = []
     available_variants = set([])
     sub_configs = []
     sub_vars = []
     all_filenames = [os.path.abspath(filename)]
+    current_section = None
 
     with open(filename, "r") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
@@ -420,16 +454,24 @@ def preprocess_config_file(filename, variant="main"):
                     include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), rest.strip("\n ")))
                     # Run preprocessing over that file too, so we can have embedded includes, etc
                     incl_config, incl_variants, incl_vars, incl_filenames = \
-                        preprocess_config_file(include_filename, variant=variant)
+                        _preprocess_config_file(include_filename, variant=variant, copies=copies)
                     all_filenames.extend(incl_filenames)
                     # Save this subconfig and incorporate it later
                     sub_configs.append((include_filename, incl_config))
                     # Also save vars section, which may override variables that were defined earlier
                     sub_vars.append(incl_vars)
                     available_variants.update(incl_variants)
+                elif directive == "copy":
+                    # Copy config values from another section
+                    # For now, just store a list of sections to copy from: we'll do the copying later
+                    source_section = rest.strip()
+                    copies.setdefault(current_section, []).append(source_section)
                 else:
                     raise PipelineConfigParseError("unknown directive '%s' used in config file" % directive)
             else:
+                if line.startswith("["):
+                    # Track what section we're in at any time
+                    current_section = line.strip("[] \n")
                 config_lines.append(line)
 
     # Parse the result as a config file
