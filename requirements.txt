@@ -1,0 +1,8 @@
+# Core dependencies for Pimlico, which may be installed before running it:
+# pip install -r requirements.txt
+#
+# These things also get installed in a local environment when you run Pimlico for the first time.
+# The main reason for also having this requirements file is to allow ReadTheDocs to set up its environment.
+progressbar
+tabulate
+termcolor
