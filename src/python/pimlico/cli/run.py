@@ -109,6 +109,8 @@ if __name__ == "__main__":
     check.add_argument("modules", nargs="*",
                        help="Check runtime dependencies for named modules. By default, these are not all checked, as "
                             "you might be happy with them not all being satisfied at once")
+    check.add_argument("--verbose", "-v", action="store_true",
+                       help="Show details of why dependencies aren't available where possible")
 
     status = subparsers.add_parser("status", help="Output a module execution schedule for the pipeline and execution "
                                                   "status for every module")

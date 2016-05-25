@@ -104,6 +104,9 @@ def extract_from_archive(archive_filename, members, target_dir, preserve_dirs=Tr
     Extract a file or files from an archive, which may be a tarball or a zip file (determined by the file extension).
 
     """
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+
     if isinstance(members, basestring):
         members = [members]
 
@@ -130,6 +133,26 @@ def extract_from_archive(archive_filename, members, target_dir, preserve_dirs=Tr
                     target = open(os.path.join(target_dir, member_filename), "w")
                     with source, target:
                         shutil.copyfileobj(source, target)
+    else:
+        raise ValueError("could not determine archive type from filename %s. Expect a filename with extension .tar.gz "
+                         "or .zip" % archive_filename)
+
+
+def extract_archive(archive_filename, target_dir, preserve_dirs=True):
+    """
+    Extract all files from an archive, which may be a tarball or a zip file (determined by the file extension).
+
+    """
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+
+    if archive_filename.endswith(".tar.gz"):
+        # Tarball
+        with tarfile.open(archive_filename, "r") as tarball:
+            tarball.extractall(target_dir)
+    elif archive_filename.endswith(".zip"):
+        with ZipFile(archive_filename) as zip_file:
+            zip_file.extractall(target_dir)
     else:
         raise ValueError("could not determine archive type from filename %s. Expect a filename with extension .tar.gz "
                          "or .zip" % archive_filename)

@@ -14,16 +14,15 @@ into Pimlico using Py4J.
    Replace check_runtime_dependencies() with get_software_dependencies()
 
 """
-import os
 
+import os
 from pimlico import MODEL_DIR, JAVA_BUILD_JAR_DIR
-from pimlico.core.external.java import DependencyCheckerError
-from pimlico.core.dependencies.java import check_java_dependency
-from pimlico.core.modules.base import DependencyError
+from pimlico.core.dependencies.java import argparse4j_dependency
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.caevo import CaevoCorpus
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
+from .deps import caevo_dependency, caevo_wrapper_dependency
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -46,47 +45,12 @@ class ModuleInfo(DocumentMapModuleInfo):
         self.wordnet_dir = os.path.join(MODEL_DIR, "caevo", "dict")
         self.template_jwnl_path = os.path.join(JAVA_BUILD_JAR_DIR, "caevo_jwnl_file_properties.xml")
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-
-        # Make sure the model is available
-        if not os.path.exists(self.sieves_path):
-            missing_dependencies.append(
-                ("Sieve list", self.module_name, "Sieve list file doesn't exists: %s" % self.sieves_path)
-            )
-
-        try:
-            # Check for Caevo wrapper
-            class_name = "pimlico.caevo.CaevoGateway"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("Caevo wrapper", self.module_name, "Couldn't load %s" % class_name))
-
-            # Check for Caevo itself
-            class_name = "caevo.SieveDocument"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("Caevo jar",
-                                             self.module_name,
-                                             "Couldn't load %s. Install Caevo by running 'make caevo' in Java lib dir" %
-                                             class_name))
-
-            # Argparse4j
-            class_name = "net.sourceforge.argparse4j.ArgumentParsers"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("argparse4j",
-                                             self.module_name,
-                                             "Couldn't load %s. Install argparse4j by running 'make argparse4j' in "
-                                             "Java lib dir" % class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
-
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + [
+            argparse4j_dependency,
+            caevo_wrapper_dependency,
+            caevo_dependency
+        ]
 
     def get_writer(self, output_name, output_dir, append=False):
         return TarredCorpusWriter(output_dir, append=append, gzip=True)

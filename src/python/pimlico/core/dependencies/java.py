@@ -1,7 +1,7 @@
 import os
 from subprocess import check_output, STDOUT, CalledProcessError
 
-from pimlico import JAVA_LIB_DIR
+from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.dependencies.base import SoftwareDependency
 from pimlico.core.external.java import call_java, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
@@ -21,7 +21,7 @@ class JavaDependency(SoftwareDependency):
 
     Jar paths and class directory paths are assumed to be relative to the Java lib dir (lib/java).
 
-    Subclasses should provide install().
+    Subclasses should provide install() and override installable() if it's possible to install them automatically.
 
     """
     def __init__(self, name, classes=[], jars=[], class_dirs=[]):
@@ -53,16 +53,20 @@ class JavaDependency(SoftwareDependency):
                 check_java_dependency(cls, classpath=classpath)
             except DependencyCheckerError:
                 probs.append("unable to load Java dependency checker to check classes are loadable")
-            except DependencyError:
-                probs.append("could not load Java class %s (classpath=%s)" % (cls, classpath))
+            except DependencyError, e:
+                # Usually, the first line is enough to tell what the error was (start of stack trace)
+                error_output = e.stderr.partition("\n")[0].strip()
+                extra_message = ". Loader output: %s" % error_output if error_output else ""
+                probs.append("could not load Java class %s (classpath=%s)%s" % (cls, classpath, extra_message))
         return probs
 
     def installable(self):
-        # By default, Java deps are installable, though subclasses may override this
-        return True
+        # By default, Java deps are not installable, though subclasses may override this if they provide install()
+        return False
 
     def get_classpath_components(self):
-        return [os.path.join(JAVA_LIB_DIR, path) for path in self.jars + self.class_dirs]
+        return [path if os.path.isabs(path) else os.path.join(JAVA_LIB_DIR, path)
+                for path in self.jars + self.class_dirs]
 
 
 class JavaJarsDependency(JavaDependency):
@@ -152,6 +156,20 @@ class JavaJarsDependency(JavaDependency):
             os.remove(filename)
 
 
+class PimlicoJavaLibrary(JavaDependency):
+    """
+    Special type of Java dependency for the Java libraries provided with Pimlico. These are packages up in jars
+    and stored in the build dir.
+
+    """
+    def __init__(self, name, classes=[], additional_jars=[]):
+        super(PimlicoJavaLibrary, self).__init__(
+            "%s Pimlico library" % name.capitalize(),
+            jars=[os.path.join(JAVA_BUILD_JAR_DIR, "%s.jar" % name)] + additional_jars,
+            classes=classes
+        )
+
+
 def check_java_dependency(class_name, classpath=None):
     """
     Utility to check that a java class is able to be loaded.
@@ -161,13 +179,12 @@ def check_java_dependency(class_name, classpath=None):
     out, err, code = call_java("pimlico.core.DependencyChecker", classpath=classpath)
     if code != 0:
         raise DependencyCheckerError(
-            "could not load Java dependency checker. Have you compiled the Pimlico java core? %s" % (err or "")
+            "could not load Java dependency checker. Problem with Pimlico setup. %s" % (err or "")
         )
 
     out, err, code = call_java("pimlico.core.DependencyChecker", [class_name], classpath=classpath)
     if code != 0:
-        raise DependencyError("could not load Java class %s. Have you compiled the relevant Java module?" % class_name,
-                              stderr=err, stdout=out)
+        raise DependencyError("could not load Java class %s" % class_name, stderr=err, stdout=out)
 
 
 def check_java():
@@ -213,3 +230,9 @@ def get_module_classpath(module):
     deps = module.get_software_dependencies()
     deps.extend(module.get_input_software_dependencies())
     return get_classpath(deps)
+
+
+argparse4j_dependency = JavaJarsDependency(
+    "argparse4j",
+    jar_urls=[("argparse4j.jar", "http://sourceforge.net/projects/argparse4j/files/latest/download?source=files")]
+)

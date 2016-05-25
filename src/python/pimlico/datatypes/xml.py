@@ -14,6 +14,7 @@ from multiprocessing import Pool
 
 import time
 
+from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.options import comma_separated_strings
 from pimlico.datatypes.base import IterableCorpus, PimlicoDatatypeWriter
 from pimlico.utils.progress import get_progress_bar
@@ -85,14 +86,10 @@ class XmlDocumentIterator(IterableCorpus):
         except TruncateNow:
             pass
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-        try:
-            safe_import_bs4()
-        except ImportError:
-            missing_dependencies.append(("BeautifulSoup", "install in Python lib dir using make"))
-        missing_dependencies.extend(super(XmlDocumentIterator, self).check_runtime_dependencies())
-        return missing_dependencies
+    def get_software_dependencies(self):
+        return super(XmlDocumentIterator, self).get_software_dependencies() + [
+            PythonPackageOnPip("bs4", pip_package="beautifulsoup4")
+        ]
 
     def prepare_data(self, output_dir, log):
         path = self.options["path"]

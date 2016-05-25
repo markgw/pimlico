@@ -2,6 +2,7 @@
 Base classes for defining software dependencies for module types and routines for fetching them.
 
 """
+import subprocess
 from textwrap import wrap
 
 
@@ -106,7 +107,7 @@ class LegacyModuleDependencies(SoftwareDependency):
         # Collect messages from each missing dependency
         dep_messages = [
             "%s (for %s):\n  %s" % (
-                dep_name, module_name, "\n  ".join(wrap(desc, width="100").splitlines())
+                dep_name, module_name, "\n  ".join(wrap(desc, width=100))
             ) for dep_name, module_name, desc in missing_deps
         ]
         return """\
@@ -163,6 +164,37 @@ Some library dependencies are missing, but do not provide automatic installation
         return "LegacyDatatypeDependencies<%s>" % self.datatype.datatype_name
 
 
+class SystemCommandDependency(SoftwareDependency):
+    """
+    Dependency that tests whether a command is available on the command line.
+    Generally requires system-wide installation.
+
+    """
+    def __init__(self, name, test_command, **kwargs):
+        super(SystemCommandDependency, self).__init__(name, **kwargs)
+        self.test_command = test_command
+
+    def installable(self):
+        """
+        Usually not automatically installable
+        """
+        return False
+
+    def problems(self):
+        problems = super(SystemCommandDependency, self).problems()
+        # Try running the test command
+        command = self.test_command.split()
+        try:
+            subprocess.check_output(command, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError, e:
+            problems.append("Command '%s' failed: %s" % (self.test_command, e.output))
+        return problems
+
+
+class InstallationError(Exception):
+    pass
+
+
 def check_and_install(deps, trust_downloaded_archives=False):
     """
     Check whether dependencies are available and try to install those that aren't. Returns a list of dependencies
@@ -176,14 +208,11 @@ def check_and_install(deps, trust_downloaded_archives=False):
         if not dep.available():
             print title_box(dep.name)
             # Haven't got this library
-            # TODO Also check recursive deps
             if dep.installable():
-                print "Installing %s" % dep.name
-                dep.install(trust_downloaded_archives=trust_downloaded_archives)
-                remaining_problems = dep.problems()
-                if remaining_problems:
-                    print "\nRan installation routine for %s, but it's still not available due to the following " \
-                          "problems:\n%s" % (dep.name, "\n".join("  - %s" % p for p in remaining_problems))
+                try:
+                    install(dep, trust_downloaded_archives=trust_downloaded_archives)
+                except InstallationError, e:
+                    print "Could not install %s:\n%s" % (dep.name, e)
                     uninstallable.append(dep)
                 else:
                     print "Installed"
@@ -203,3 +232,44 @@ def check_and_install(deps, trust_downloaded_archives=False):
         if uninstallable:
             print "Could not install: %s" % ", ".join(dep.name for dep in uninstallable)
     return uninstallable
+
+
+def install(dep, trust_downloaded_archives=False):
+    if not dep.installable():
+        raise InstallationError("%s is not installable" % dep.name)
+    # Collect any recursive dependencies that need to be installed first
+    all_deps = recursive_deps(dep)
+    all_deps.append(dep)
+    # Only need to include deps not already available
+    to_install = [dep for dep in all_deps if not dep.available()]
+    # Check everything is installable
+    uninstallable = [dep for dep in to_install if not dep.installable()]
+    if uninstallable:
+        raise InstallationError("could not install %s, as some of its dependencies are unavailable and not "
+                                "automatically installable: %s" % (dep.name, ", ".join(d.name for d in uninstallable)))
+    # Install each of the prerequisites
+    for sub_dep in to_install:
+        # Check that this is still not available, in case installing one of the others has provided incidentally
+        if not sub_dep.available():
+            extra_message = "" if sub_dep is dep else " (prerequisite for %s)" % dep.name
+            print "Installing %s%s" % (sub_dep.name, extra_message)
+            sub_dep.install(trust_downloaded_archives=trust_downloaded_archives)
+            # Check the installation worked
+            remaining_problems = sub_dep.problems()
+            if remaining_problems:
+                raise InstallationError(
+                    "Ran installation routine for %s, but it's still not available due to the following " \
+                    "problems:\n%s" % (sub_dep.name, "\n".join("  - %s" % p for p in remaining_problems)))
+
+
+def recursive_deps(dep):
+    """
+    Collect all recursive dependencies of this dependency. Does a depth-first search so that everything comes
+    later in the list than things it depends on.
+
+    """
+    all_deps = []
+    for sub_dep in dep.dependencies():
+        all_deps.extend(recursive_deps(sub_dep))
+        all_deps.append(sub_dep)
+    return all_deps

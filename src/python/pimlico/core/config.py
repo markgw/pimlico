@@ -16,7 +16,7 @@ from operator import itemgetter
 from pimlico.core.dependencies.base import LegacyModuleDependencies, LegacyDatatypeDependencies
 from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
 from pimlico.utils.core import remove_duplicates
-from pimlico.utils.format import multiline_tablate
+from pimlico.utils.format import multiline_tablate, title_box
 from pimlico.utils.logging import get_console_logger
 
 REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
@@ -397,8 +397,11 @@ class PipelineStructureError(Exception):
 
 def preprocess_config_file(filename, variant="main"):
     copies = {}
-    config_sections, available_variants, vars, all_filenames = \
-        _preprocess_config_file(filename, variant=variant, copies=copies)
+    try:
+        config_sections, available_variants, vars, all_filenames = \
+            _preprocess_config_file(filename, variant=variant, copies=copies)
+    except IOError, e:
+        raise PipelineConfigParseError("could not read config file %s: %s" % (filename, e))
     config_sections_dict = dict(config_sections)
 
     # Copy config values according to copy directives
@@ -451,10 +454,15 @@ def _preprocess_config_file(filename, variant="main", copies={}):
                     available_variants.update(variant_conds)
                 elif directive == "include":
                     # Include another file, given relative to this one
-                    include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), rest.strip("\n ")))
+                    relative_filename = rest.strip("\n ")
+                    include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), relative_filename))
                     # Run preprocessing over that file too, so we can have embedded includes, etc
-                    incl_config, incl_variants, incl_vars, incl_filenames = \
-                        _preprocess_config_file(include_filename, variant=variant, copies=copies)
+                    try:
+                        incl_config, incl_variants, incl_vars, incl_filenames = \
+                            _preprocess_config_file(include_filename, variant=variant, copies=copies)
+                    except IOError, e:
+                        raise PipelineConfigParseError("could not find included config file '%s': %s" %
+                                                       (relative_filename, e))
                     all_filenames.extend(incl_filenames)
                     # Save this subconfig and incorporate it later
                     sub_configs.append((include_filename, incl_config))
@@ -629,7 +637,7 @@ def get_dependencies(pipeline, modules):
     return dependencies
 
 
-def print_missing_dependencies(pipeline, modules):
+def print_missing_dependencies(pipeline, modules, verbose=False):
     """
     Check runtime dependencies for a subset of modules and output a table of missing dependencies.
 
@@ -644,13 +652,19 @@ def print_missing_dependencies(pipeline, modules):
         print "Some library dependencies were not satisfied\n"
         auto_installable = False
         for dep in missing_dependencies:
+            print title_box(dep.name.capitalize())
+            if verbose:
+                print "Dependency not satisfied because of the following problems:"
+                for problem in dep.problems():
+                    print " - %s" % problem
             if dep.installable():
-                print "%s: can be automatically installed" % dep.name
+                print "Can be automatically installed using install command"
                 auto_installable = True
             else:
-                print "=== %s ===" % dep.name
                 print "Cannot be installed automatically"
-                print dep.installation_instructions()
+                instructions = dep.installation_instructions()
+                if instructions:
+                    print instructions
             print
         if auto_installable:
             print "Use 'install' command to install all automatically installable dependencies"
