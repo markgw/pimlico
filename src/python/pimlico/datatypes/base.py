@@ -160,7 +160,7 @@ class DynamicOutputDatatype(object):
     needed, passing in the module info instance for the module, so that a specialized datatype can be
     produced on the basis of options, input types, etc.
 
-    The dynamic type must provide certain pieces of information need to typechecking.
+    The dynamic type must provide certain pieces of information needed for typechecking.
 
     """
     """
@@ -175,7 +175,7 @@ class DynamicOutputDatatype(object):
     def get_base_datatype_class(self):
         """
         If it's possible to say before the instance of a ModuleInfo is available what base datatype will be
-        produced, implement this to return the class. By default, it return None.
+        produced, implement this to return the class. By default, it returns None.
 
         If this information is available, it will be used in documentation.
 

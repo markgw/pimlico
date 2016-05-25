@@ -149,7 +149,7 @@ class TarredCorpus(IterableCorpus):
                     # Catch the case where the archive/filename requested as a starting point wasn't found
                     # We only get here with started=False when we're in the right archive and have got through the
                     #  the whole thing without finding the requested filename
-                    if not started:
+                    if not started and start_after is not None:
                         raise TarredCorpusIterationError(
                             "tried to start iteration over tarred corpus at document (%s, %s), but filename %s "
                             "wasn't found in archive %s" % (start_after[0], start_after[1], start_after[1], tar_name)
