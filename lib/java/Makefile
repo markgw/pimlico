@@ -109,35 +109,35 @@ liblinear-java-1.95.jar :
 	$(FETCH) http://www.bwaldvogel.de/liblinear-java/liblinear-java-1.95.jar
 
 ############ Caevo ############
+### Replaced by new-style dependencies in Python code
+#caevo : caevo-1.1.jar
+#caevo-1.1.jar :
+#	# Check we've got Maven
+#	@if ! mvn -v >/dev/null; then echo "Caevo build requires Maven: please install"; exit 1; fi
+#	$(MAKE) src/caevo
+#	# Get hold of the WordNet dictionaries
+#	if [ !-d src/caevo/src/test/resources/wordnet/dict ]; then cd src/caevo && ./download-wordnet-dictionaries; fi
+#	# Build Caevo using Maven
+#	cd src/caevo && mvn compile
+#	# Package Caevo up, together with dependencies, in jar
+#	cd src/caevo && JWNL=src/test/resources/jwnl_file_properties.xml mvn package assembly:single
+#	# Put the jars in the lib dir, where Pimlico can find it
+#	mv src/caevo/target/caevo-1.1-jar-with-dependencies.jar .
+#	mv src/caevo/target/caevo-1.1.jar .
+#	# Put sieve configs in models dir
+#	mkdir -p ../../models/caevo
+#	cp src/caevo/*.sieves ../../models/caevo/
+#	# And wordnet files
+#	if [ ! -d ../../models/caevo/dict ]; then cp -r src/caevo/src/test/resources/wordnet/dict ../../models/caevo; fi
+#	# Keep the source code for debugging purposes for now
 
-caevo : caevo-1.1.jar
-caevo-1.1.jar :
-	# Check we've got Maven
-	@if ! mvn -v >/dev/null; then echo "Caevo build requires Maven: please install"; exit 1; fi
-	$(MAKE) src/caevo
-	# Get hold of the WordNet dictionaries
-	if [ !-d src/caevo/src/test/resources/wordnet/dict ]; then cd src/caevo && ./download-wordnet-dictionaries; fi
-	# Build Caevo using Maven
-	cd src/caevo && mvn compile
-	# Package Caevo up, together with dependencies, in jar
-	cd src/caevo && JWNL=src/test/resources/jwnl_file_properties.xml mvn package assembly:single
-	# Put the jars in the lib dir, where Pimlico can find it
-	mv src/caevo/target/caevo-1.1-jar-with-dependencies.jar .
-	mv src/caevo/target/caevo-1.1.jar .
-	# Put sieve configs in models dir
-	mkdir -p ../../models/caevo
-	cp src/caevo/*.sieves ../../models/caevo/
-	# And wordnet files
-	if [ ! -d ../../models/caevo/dict ]; then cp -r src/caevo/src/test/resources/wordnet/dict ../../models/caevo; fi
-	# Keep the source code for debugging purposes for now
-
-src/caevo :
-	# Fetch Caevo code
-	$(FETCH_STDOUT) https://github.com/nchambers/caevo/archive/8cfc810baff833063da9b423ef7a36983b3ab0e2.zip >caevo.zip
-	unzip caevo.zip
-	mkdir -p src
-	mv caevo-8cfc810baff833063da9b423ef7a36983b3ab0e2 src/caevo
-	rm caevo.zip
+#src/caevo :
+#	# Fetch Caevo code
+#	$(FETCH_STDOUT) https://github.com/nchambers/caevo/archive/8cfc810baff833063da9b423ef7a36983b3ab0e2.zip >caevo.zip
+#	unzip caevo.zip
+#	mkdir -p src
+#	mv caevo-8cfc810baff833063da9b423ef7a36983b3ab0e2 src/caevo
+#	rm caevo.zip
 
 
 ############ C&C parser, Java version #######
