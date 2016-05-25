@@ -1,5 +1,5 @@
 from collections import Counter, OrderedDict
-from itertools import takewhile
+from itertools import takewhile, dropwhile
 
 from pimlico.cli.status import status_colored
 from pimlico.core.modules.base import BaseModuleInfo
@@ -70,6 +70,19 @@ class MultistageModuleInfo(BaseModuleInfo):
         return super(MultistageModuleInfo, cls).get_key_info_table() + [
             ["Stages", ", ".join(stage.name for stage in cls.stages)],
         ]
+
+    def get_next_stage(self):
+        """
+        If there are more stages to be executed, returns a pair of the module info and stage definition.
+        Otherwise, returns (None, None)
+
+        """
+        try:
+            return dropwhile(
+                lambda (m, s): m.status == "COMPLETE", zip(self.internal_modules, self.stages)).next()
+        except StopIteration:
+            # No more left to execute
+            return (None, None)
 
     @property
     def status(self):

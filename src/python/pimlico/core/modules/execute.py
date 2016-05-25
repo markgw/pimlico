@@ -28,8 +28,12 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=No
         raise ModuleExecutionError("could not load module '%s': %s" % (module_name, e))
     # If we loaded a multi-stage module, default to executing its first stage
     if isinstance(module, MultistageModuleInfo):
-        log.info("Multi-stage module without stage specified: defaulting to first stage, '%s'" % module.stages[0].name)
-        module = module.internal_modules[0]
+        module, next_stage = module.get_next_stage()
+        if next_stage is None:
+            raise ModuleAlreadyCompletedError("All stages of multi-stage module have been completed")
+        else:
+            log.info("Multi-stage module without stage specified: defaulting to next incomplete stage, '%s'" %
+                     next_stage.name)
 
     # Run basic checks on the config for the whole pipeline
     try:
