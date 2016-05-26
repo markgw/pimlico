@@ -40,7 +40,8 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=No
         check_pipeline(pipeline)
     except PipelineCheckError, e:
         raise ModuleExecutionError("error in pipeline config: %s" % e)
-    # Run checks for runtime dependencies of this module
+
+    # Run checks for runtime dependencies of this module and any others that will be run
     dep_checks_passed = print_missing_dependencies(pipeline, [module_name])
     if not dep_checks_passed:
         raise ModuleExecutionError("runtime dependencies not satisfied for executing module '%s'" % module_name)
@@ -58,6 +59,11 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=No
     if missing_inputs:
         raise ModuleNotReadyError("cannot execute module '%s', since its inputs are not all ready: %s" %
                                   (module_name, ", ".join(missing_inputs)))
+
+    log.info("Executing module tree:")
+    execution_tree = module.get_execution_dependency_tree()
+    for line in format_execution_dependency_tree(execution_tree):
+        log.info("    %s" % line)
 
     # Check the status of the module, so we don't accidentally overwrite module output that's already complete
     if module.status == "COMPLETE":
@@ -121,6 +127,18 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=No
     else:
         # Custom status was given
         module.status = end_status
+
+
+def format_execution_dependency_tree(tree):
+    module, inputs = tree
+    lines = ["%s" % module]
+    for (input_name, output_name, input_tree) in inputs:
+        if output_name is None:
+            output_name = "default_output"
+        input_lines = format_execution_dependency_tree(input_tree)
+        input_lines = ["|- %s.%s" % (input_lines[0], output_name)] + ["|  %s" % line for line in input_lines[1:]]
+        lines.extend(input_lines)
+    return lines
 
 
 class ModuleExecutionError(Exception):

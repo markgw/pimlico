@@ -582,6 +582,37 @@ class BaseModuleInfo(object):
         """
         return cls.__module__.rpartition(".info")[0]
 
+    def get_execution_dependency_tree(self):
+        """
+        Tree of modules that will be executed when this one is executed. Where this module depends on filters,
+        the tree goes back through them to find what they depend on (since they will be executed simultaneously)
+
+        """
+        inputs = []
+        for input_name in self.input_names:
+            previous_module, output_name = self.get_input_module_connection(input_name)
+            if previous_module.is_filter():
+                inputs.append((input_name, output_name, previous_module.get_execution_dependency_tree()))
+            else:
+                inputs.append((input_name, output_name, (previous_module, [])))
+        return self, inputs
+
+    def get_all_executed_modules(self):
+        """
+        Returns a list of all the modules that will be executed when this one is (including itself).
+        This is the current module (if executable), plus any filters used to produce its inputs.
+
+        """
+        if self.is_input():
+            return []
+        else:
+            modules = [self]
+            for input_name in self.input_names:
+                previous_module, output_name = self.get_input_module_connection(input_name)
+                if previous_module.is_filter():
+                    modules.extend(previous_module.get_all_executed_modules())
+            return modules
+
 
 def check_type(provided_type, type_requirements):
     """

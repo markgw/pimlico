@@ -55,7 +55,7 @@ class TarredCorpusFilter(TarredCorpus):
             self._tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
         return self._tarballs
 
-    def archive_iter(self, subsample=None, start_after=None):
+    def archive_iter(self, subsample=None, start_after=None, skip=None):
         tarballs = self.tarballs
 
         current_archive = 0

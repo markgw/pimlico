@@ -88,7 +88,7 @@ class XmlDocumentIterator(IterableCorpus):
 
     def get_software_dependencies(self):
         return super(XmlDocumentIterator, self).get_software_dependencies() + [
-            PythonPackageOnPip("bs4", pip_package="beautifulsoup4")
+            BeautifulSoupDependency()
         ]
 
     def prepare_data(self, output_dir, log):
@@ -201,7 +201,7 @@ def get_doc_nodes(filename, document_node_type, attr_constraints):
             data = f.read()
 
     # Read the XML using Beautiful Soup, so we can handle messy XML in a tolerant fashion
-    soup = BeautifulSoup(data)
+    soup = BeautifulSoup(data, "lxml")
     # Look for the type of XML node that documents are stored in and count them
     return soup.find_all(document_node_type, attrs=attr_constraints)
 
@@ -219,3 +219,15 @@ def safe_import_bs4():
 
 class TruncateNow(StopIteration):
     pass
+
+
+class BeautifulSoupDependency(PythonPackageOnPip):
+    """
+    Test import with special BS import behaviour.
+
+    """
+    def __init__(self):
+        super(BeautifulSoupDependency, self).__init__("bs4", pip_package="beautifulsoup4")
+
+    def import_package(self):
+        safe_import_bs4()

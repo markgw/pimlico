@@ -615,6 +615,11 @@ def get_dependencies(pipeline, modules):
     if modules is None:
         modules = pipeline.module_names
 
+    # Add to the list of modules any that will be executed along with the specified ones
+    modules = remove_duplicates(
+        [mod.module_name for module_name in modules for mod in pipeline[module_name].get_all_executed_modules()]
+    )
+
     dependencies = []
     for module_name in modules:
         module = pipeline[module_name]

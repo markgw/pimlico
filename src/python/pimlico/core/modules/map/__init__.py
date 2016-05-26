@@ -327,6 +327,23 @@ class InputQueueFeeder(Thread):
                     return self._docs_processing.get(timeout=0.1)
                 except Empty:
                     pass
+                # Check there wasn't an error during feeding
+                # Happens, e.g., if the input datatype or filter has an error
+                try:
+                    error = self.exception_queue.get_nowait()
+                except Empty:
+                    # No error: just keep waiting
+                    pass
+                else:
+                    # Got an error from feed iterator: raise it
+                    # First empty the exception queue, in case there were multiple errors
+                    sleep(0.05)
+                    while not self.exception_queue.empty():
+                        self.exception_queue.get(timeout=0.1)
+                    # Sometimes, a traceback from within the process is included
+                    debugging = error.traceback if hasattr(error, "traceback") else None
+                    raise ModuleExecutionError("error in worker process: %s" % error,
+                                               cause=error, debugging_info=debugging)
 
     def run(self):
         try:

@@ -32,7 +32,7 @@ class PythonPackageDependency(SoftwareDependency):
                 del sys.modules[mod_name]
 
         try:
-            __import__(self.package)
+            self.import_package()
         except ImportError, e:
             e_type, e_value, __ = sys.exc_info()
             error = " // ".join([e.strip(" \n") for e in format_exception_only(e_type, e_value)])
@@ -44,6 +44,16 @@ class PythonPackageDependency(SoftwareDependency):
                 if mod_name not in sys.modules:
                     sys.modules[mod_name] = mod_val
         return probs
+
+    def import_package(self):
+        """
+        Try importing package_name. By default, just uses `__import__`. Allows subclasses to allow for
+        special import behaviour.
+
+        Should raise an `ImportError` if import fails.
+
+        """
+        __import__(self.package)
 
 
 class PythonPackageSystemwideInstall(PythonPackageDependency):
@@ -98,10 +108,15 @@ class PythonPackageOnPip(PythonPackageDependency):
         from pip.index import PackageFinder
         from pip.req import InstallRequirement, RequirementSet
         from pip.locations import build_prefix, src_prefix
-        from pip.log import logger
 
         # Enable verbose output
-        logger.add_consumers((logger.INFO, sys.stdout))
+        # NB: This only works on old versions of Pip
+        # TODO Implement equivalent for newer versions
+        try:
+            from pip.log import logger
+            logger.add_consumers((logger.INFO, sys.stdout))
+        except:
+            pass
 
         # Build a requirement set containing just the package we need
         requirement_set = RequirementSet(build_dir=build_prefix, src_dir=src_prefix, download_dir=None)
