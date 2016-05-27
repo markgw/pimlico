@@ -17,6 +17,7 @@ import gzip
 from itertools import izip
 
 from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument
+from pimlico.utils.filesystem import retry_open
 from .base import IterableCorpus
 
 
@@ -87,7 +88,7 @@ class TarredCorpus(IterableCorpus):
                     continue
 
                 # Extract the tarball to the temp dir
-                with tarfile.open(tarball_filename, 'r') as tarball:
+                with tarfile.open(tarball_filename, fileobj=retry_open(tarball_filename, mode="r")) as tarball:
                     for tarinfo in tarball:
                         filename = tarinfo.name
                         # By default, doc name is just the same as filename

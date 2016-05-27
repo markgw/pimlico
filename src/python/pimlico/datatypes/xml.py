@@ -9,6 +9,8 @@ Depends on BeautifulSoup (see "bs4" target in lib dir Makefile).
 
 """
 import gzip
+from gzip import GzipFile
+
 import os
 from multiprocessing import Pool
 
@@ -17,6 +19,7 @@ import time
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.options import comma_separated_strings
 from pimlico.datatypes.base import IterableCorpus, PimlicoDatatypeWriter
+from pimlico.utils.filesystem import retry_open
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -194,10 +197,10 @@ def get_doc_nodes(filename, document_node_type, attr_constraints):
 
     if filename.endswith(".gz"):
         # Permit gzip files by opening them using the gzip library
-        with gzip.open(filename, "r") as f:
+        with GzipFile(filename, fileobj=retry_open(filename, mode="rb")) as f:
             data = f.read()
     else:
-        with open(filename, "r") as f:
+        with retry_open(filename, mode="r") as f:
             data = f.read()
 
     # Read the XML using Beautiful Soup, so we can handle messy XML in a tolerant fashion

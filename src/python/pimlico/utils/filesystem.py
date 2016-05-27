@@ -99,6 +99,54 @@ def new_filename(directory, initial_filename="tmp_file"):
             index += 1
 
 
+def retry_open(filename, errnos=[13], retry_schedule=[2, 10, 30, 120, 300], **kwargs):
+    """
+    Try opening a file, using the builtin open() function. If an IOError is raised and its `errno` is in the given
+    list, wait a moment then retry. Keeps doing this, waiting a bit longer each time, hoping that the problem will
+    go away.
+
+    Once too many attempts have been made, outputs a message and waits for user input. This means the
+    user can fix the problem (e.g. renew credentials) and pick up where execution left off. If they choose not to,
+    the original error will be raised
+
+    Default list of errnos is just `[13]` -- permission denied.
+
+    Use `retry_schedule` to customize the lengths of time waited between retries. Default: 2s, 10s, 30s, 2m, 5m,
+    then give up.
+
+    Additional kwargs are pass on to `open()`.
+
+    """
+    import warnings
+    import time
+
+    while True:
+        for retry_wait in retry_schedule + [None]:
+            try:
+                return open(filename, **kwargs)
+            except IOError, e:
+                if e.errno not in errnos:
+                    # Caught an error, but not one we should retry on
+                    raise
+                # Any other errors just get raised
+                if retry_wait is None:
+                    # If we've used our last retry: time to give up and ask user what to do
+                    # Ran out of retries: ask the user what to do
+                    warnings.warn("Error opening file: %s. Not making any more attempts. If possible, fix the problem "
+                                  "and we can try again" % e)
+                    answer = raw_input("Try opening %s again? [Y/n] " % filename)
+                    if answer.lower() == "n":
+                        # Don't try again, give up and raise the error
+                        raise
+                    else:
+                        # Go round again, starting the schedule over
+                        continue
+                else:
+                    # If IOErrro had a suitable errno, we wait a bit and try again
+                    warnings.warn("open file failed with error: %s. Waiting %d secs and trying again" % (e, retry_wait))
+                    time.sleep(retry_wait)
+
+
 def extract_from_archive(archive_filename, members, target_dir, preserve_dirs=True):
     """
     Extract a file or files from an archive, which may be a tarball or a zip file (determined by the file extension).
