@@ -47,6 +47,15 @@ def worker_set_up(worker):
         # Put the Caevo dependencies at front of classpath, to make sure they take precedence over other versions
         prefix_classpath=os.path.join(JAVA_LIB_DIR, "caevo-1.1-jar-with-dependencies.jar"),
         print_stderr=False, print_stdout=False,
+        # Try to bleed everything we can out of Java, as Caevo is very slow
+        java_opts=[
+            # Makes startup slower, but execution faster
+            "-server",
+            # Enables aggressive optimization, which might make it faster
+            "-XX:+AggressiveOpts",
+            # Parallel garbage collection: seems to speed things up a bit
+            "-XX:+UseParallelGC"
+        ],
     )
     worker.interface.start(port_output_prefix="PORT: ")
 
