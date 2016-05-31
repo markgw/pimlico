@@ -9,6 +9,7 @@ from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora, TarredCorpusWriter
 from pimlico.utils.core import multiwith
+from pimlico.utils.pipes import qget
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -165,7 +166,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                         while True:
                             try:
                                 # Wait a little bit to see if there's a result available
-                                result = self.pool.output_queue.get(timeout=0.2)
+                                result = qget(self.pool.output_queue, timeout=0.2)
                             except Empty:
                                 # Timed out: check there's not been an error in one of the processes
                                 try:

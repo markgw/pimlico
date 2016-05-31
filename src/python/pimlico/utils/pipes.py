@@ -6,6 +6,27 @@ from Queue import Queue, Empty
 from threading import Thread
 
 
+def qget(queue, *args, **kwargs):
+    """
+    Wrapper that calls the get() method of a queue, catching EINTR interrupts and retrying. Recent versions
+    of Python have this built in, but with earlier versions you can end up having processes die while waiting
+    on queue output because an EINTR has received (which isn't necessarily a problem).
+
+    :param queue:
+    :param args: args to pass to queue's get()
+    :param kwargs: kwargs to pass to queue's get()
+    :return:
+    """
+    while True:
+        try:
+            return queue.get(*args, **kwargs)
+        except IOError, e:
+            if e.errno == 4:
+                # Got an EINTR: try getting again
+                continue
+            raise
+
+
 def _enqueue_output(out, queue):
     for line in iter(out.readline, b''):
         queue.put(line)
