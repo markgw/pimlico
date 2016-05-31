@@ -14,6 +14,7 @@ from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.logs import get_log_file
 from py4j.compat import CompatThread, hasattr2, Queue
 from py4j.protocol import smart_decode, Py4JJavaError
+from pimlico.utils.pipes import qget
 
 ALWAYS_INCLUDE_IN_CLASSPATH = ["%s/*" % JAVA_BUILD_JAR_DIR]
 DEFAULT_CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR] + ALWAYS_INCLUDE_IN_CLASSPATH)
@@ -268,7 +269,7 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     try:
         while remaining_time > 0.:
             # Get lines from stdout until the timeout is reached
-            output = stdout_queue.get(timeout=remaining_time)
+            output = qget(stdout_queue, timeout=remaining_time)
             if port_output_prefix is None or output.strip("\n ") == "ERROR":
                 # Don't look for a particular prefix, just use the first line we get, or if it's an error
                 # don't keep waiting

@@ -151,10 +151,12 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                 else:
                     pbar = get_progress_bar(total_to_process, counter=True,
                                             title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
+                    self.log.info("Starting execution on %d docs" % total_to_process)
                     # Inputs will be taken from this as they're needed
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
                     # Set a thread going to feed things onto the input queue
-                    input_feeder = InputQueueFeeder(self.pool.input_queue, input_iter)
+                    input_feeder = InputQueueFeeder(self.pool.input_queue, input_iter,
+                                                    complete_callback=self.pool.notify_no_more_inputs)
 
                     # Wait to make sure the input feeder's fed something into the input queue
                     input_feeder.started.wait()
@@ -179,7 +181,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                                     # First empty the exception queue, in case there were multiple errors
                                     sleep(0.05)
                                     while not self.pool.exception_queue.empty():
-                                        self.pool.exception_queue.get(timeout=0.1)
+                                        qget(self.pool.exception_queue, timeout=0.1)
                                     # Sometimes, a traceback from within the process is included
                                     debugging = error.traceback if hasattr(error, "traceback") else None
                                     raise ModuleExecutionError("error in worker process: %s" % error,
@@ -257,6 +259,27 @@ def skip_invalid(fn):
     return _fn
 
 
+def skip_invalids(fn):
+    """
+    Decorator to apply to document map executor process_documents() methods where you want to skip doing any
+    processing if any of the input documents are invalid and just pass through the error information.
+
+    """
+    def _fn(self, input_tuples):
+        invalids = [[doc for doc in args[2:] if type(doc) is InvalidDocument] for args in input_tuples]
+        # Leave out input tuples where there are invalid docs
+        input_tuples = [input_tuple for (input_tuple, invalid) in zip(input_tuples, invalids) if len(invalid) == 0]
+        # Only call the inner function in those without invalid docs
+        results = fn(self, input_tuples) if len(input_tuples) else []
+        # Reinsert a single invalid doc in the positions where they were in the input
+        for i, invalid in enumerate(invalids):
+            if len(invalid) > 0:
+                # As with the single-doc version, use the first invalid doc among the inputs
+                results.insert(i, invalid[0])
+        return results
+    return _fn
+
+
 def invalid_doc_on_error(fn):
     """
     Decorator to apply to process_document() methods that causes all exceptions to be caught and an InvalidDocument
@@ -299,20 +322,21 @@ class InputQueueFeeder(Thread):
     processes/threads.
 
     """
-    def __init__(self, input_queue, iterator):
+    def __init__(self, input_queue, iterator, complete_callback=None):
         super(InputQueueFeeder, self).__init__()
+        self.complete_callback = staticmethod(complete_callback)
         self.daemon = True
         self.iterator = iterator
         self.input_queue = input_queue
         self._docs_processing = Queue()
         self.started = threading.Event()
-        self._feeding_complete = threading.Event()
+        self.feeding_complete = threading.Event()
         self.exception_queue = Queue(1)
         self.start()
 
     def get_next_output_document(self):
         while True:
-            if self._feeding_complete.is_set():
+            if self.feeding_complete.is_set():
                 # All docs have now been queued
                 # Once there are no more docs on _doc_processing, we're done
                 try:
@@ -356,7 +380,9 @@ class InputQueueFeeder(Thread):
                 self._docs_processing.put((archive, filename))
                 # As soon as something's been fed, the output processor can get going
                 self.started.set()
-            self._feeding_complete.set()
+            self.feeding_complete.set()
+            if self.complete_callback is not None:
+                self.complete_callback()
         except Exception, e:
             # Error in iterating over the input data -- actually quite common, since it could involve filter modules
             # Make it available to the main thread
@@ -403,6 +429,9 @@ class DocumentProcessorPool(object):
         self.exception_queue = self.create_queue()
         self.processes = processes
 
+    def notify_no_more_inputs(self):
+        pass
+
     @staticmethod
     def create_queue(maxsize=None):
         """
@@ -418,7 +447,8 @@ class DocumentMapProcessMixin(object):
     Mixin/base class that should be implemented by all worker processes for document map pools.
 
     """
-    def __init__(self, input_queue, output_queue, exception_queue):
+    def __init__(self, input_queue, output_queue, exception_queue, docs_per_batch=1):
+        self.docs_per_batch = docs_per_batch
         self.exception_queue = exception_queue
         self.output_queue = output_queue
         self.input_queue = input_queue
@@ -433,9 +463,27 @@ class DocumentMapProcessMixin(object):
     def process_document(self, archive, filename, *docs):
         raise NotImplementedError
 
+    def process_documents(self, doc_tuples):
+        """
+        Batched version of process_document(). Default implementation just calls process_document() on each document,
+        but if you want to group documents together and process multiple at once, you can override this method
+        and make sure the `docs_per_batch` is set > 1.
+
+        Each item in the list of doc tuples should be a tuple of the positional args to process_document() --
+        i.e. archive_name, filename, doc_from_corpus1, [doc_from corpus2, ...]
+
+        """
+        return [(doc_tuple[0], doc_tuple[1], self.process_document(*doc_tuple)) for doc_tuple in doc_tuples]
+
     def tear_down(self):
         """
         Called from within the process after processing is complete, before exiting.
 
+        """
+        pass
+
+    def notify_no_more_inputs(self):
+        """
+        Called when there aren't any more inputs to come.
         """
         pass

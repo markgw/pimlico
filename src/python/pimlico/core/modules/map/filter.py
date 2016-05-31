@@ -11,6 +11,7 @@ from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import InputQueueFeeder
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora
+from pimlico.utils.pipes import qget
 
 
 class DocumentMapOutputTypeWrapper(object):
@@ -79,7 +80,9 @@ class DocumentMapOutputTypeWrapper(object):
 
                 # Set a thread going to feed things onto the input queue
                 input_feeder = InputQueueFeeder(
-                    executor.pool.input_queue, input_iterator.archive_iter(subsample=subsample, start_after=start_after)
+                    executor.pool.input_queue,
+                    input_iterator.archive_iter(subsample=subsample, start_after=start_after),
+                    complete_callback=executor.pool.notify_no_more_inputs
                 )
 
                 # Wait to make sure the input feeder's fed something into the input queue
@@ -92,7 +95,7 @@ class DocumentMapOutputTypeWrapper(object):
                     while True:
                         try:
                             # Wait a little bit to see if there's a result available
-                            result = executor.pool.output_queue.get(timeout=0.2)
+                            result = qget(executor.pool.output_queue, timeout=0.2)
                         except Empty:
                             # Timed out: check there's not been an error in one of the processes
                             try:
@@ -105,7 +108,7 @@ class DocumentMapOutputTypeWrapper(object):
                                 # First empty the exception queue, in case there were multiple errors
                                 sleep(0.05)
                                 while not executor.pool.exception_queue.empty():
-                                    executor.pool.exception_queue.get(timeout=0.1)
+                                    qget(executor.pool.exception_queue, timeout=0.1)
                                 # Sometimes, a traceback from within the process is included
                                 if hasattr(error, "debugging_info"):
                                     # We've already attached debugging info at some lower level: just use it

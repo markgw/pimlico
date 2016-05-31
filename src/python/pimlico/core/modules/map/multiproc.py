@@ -18,6 +18,7 @@ from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor
+from pimlico.utils.pipes import qget
 
 
 class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin):
@@ -27,16 +28,21 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
     itself (like the CoreNLP module) there's no need for multiprocessing in the Python code.
 
     """
-    def __init__(self, input_queue, output_queue, exception_queue, executor):
+    def __init__(self, input_queue, output_queue, exception_queue, executor, docs_per_batch=1):
         multiprocessing.Process.__init__(self)
-        DocumentMapProcessMixin.__init__(self, input_queue, output_queue, exception_queue)
+        DocumentMapProcessMixin.__init__(self, input_queue, output_queue, exception_queue,
+                                         docs_per_batch=docs_per_batch)
         self.executor = executor
         self.info = executor.info
         self.daemon = True
         self.stopped = multiprocessing.Event()
         self.initialized = multiprocessing.Event()
+        self.no_more_inputs = multiprocessing.Event()
 
         self.start()
+
+    def notify_no_more_inputs(self):
+        self.no_more_inputs.set()
 
     def run(self):
         try:
@@ -44,17 +50,23 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
             self.set_up()
             # Notify waiting processes that we've finished initialization
             self.initialized.set()
+            input_buffer = []
             try:
                 while not self.stopped.is_set():
                     try:
                         # Timeout and go round the loop again to check whether we're supposed to have stopped
-                        archive, filename, docs = self.input_queue.get(timeout=0.05)
+                        archive, filename, docs = qget(self.input_queue, timeout=0.05)
                     except Empty:
                         # Don't worry if the queue is empty: just keep waiting for more until we're shut down
                         pass
                     else:
-                        result = self.process_document(archive, filename, *docs)
-                        self.output_queue.put(ProcessOutput(archive, filename, result))
+                        # Buffer input documents, so that we can process multiple at once if requested
+                        input_buffer.append(tuple([archive, filename] + docs))
+                        if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
+                            results = self.process_documents(input_buffer)
+                            for input_tuple, result in zip(input_buffer, results):
+                                self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
+                            input_buffer = []
             finally:
                 try:
                     self.tear_down()
@@ -111,6 +123,10 @@ class MultiprocessingMapPool(DocumentProcessorPool):
         #  is emptied, but we don't want to do that yet
         # They're all daemon processes anyway
 
+    def notify_no_more_inputs(self):
+        for worker in self.workers:
+            worker.notify_no_more_inputs()
+
 
 class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):
     POOL_TYPE = None
@@ -123,14 +139,14 @@ class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):
 
 
 def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,
-                                     worker_set_up_fn=None, worker_tear_down_fn=None):
+                                     worker_set_up_fn=None, worker_tear_down_fn=None, batch_docs=None):
     """
     Factory function for creating an executor that uses the multiprocessing-based implementations of document-map
     pools and worker processes.
     This is an easy way to implement a parallelizable executor, which is suitable for a large number of module
     types.
 
-    process_document_fn should be a function that takes the following arguments:
+    process_document_fn should be a function that takes the following arguments (unless `batch_docs` is given):
 
     - the worker process instance (allowing access to things set during setup)
     - archive name
@@ -150,6 +166,12 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
     Alternatively, you can supply a worker type, a subclass of :class:.MultiprocessingMapProcess, as the first argument.
     If you do this, worker_set_up_fn and worker_tear_down_fn will be ignored.
 
+    If `batch_docs` is not None, `process_document_fn` is treated differently. Instead of supplying the
+    `process_document()` of the worker, it supplies a `process_documents()`. The second argument is a list of tuples,
+    each of which is assumed to be the args to `process_document()` for a single document. In this case,
+    `docs_per_batch` is set on the worker processes, so that the given number of docs are collected from the input
+    and passed into `process_documents()` at once.
+
     """
     if isinstance(process_document_fn, type):
         if not issubclass(process_document_fn, MultiprocessingMapProcess):
@@ -159,8 +181,9 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
     else:
         # Define a worker process type
         class FactoryMadeMapProcess(MultiprocessingMapProcess):
-            def process_document(self, archive, filename, *docs):
-                return process_document_fn(self, archive, filename, *docs)
+            def __init__(self, input_queue, output_queue, exception_queue, executor):
+                super(FactoryMadeMapProcess, self).__init__(input_queue, output_queue, exception_queue, executor,
+                                                            docs_per_batch=batch_docs or 1)
 
             def set_up(self):
                 if worker_set_up_fn is not None:
@@ -169,6 +192,11 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
             def tear_down(self):
                 if worker_tear_down_fn is not None:
                     worker_tear_down_fn(self)
+
+        if batch_docs is not None:
+            FactoryMadeMapProcess.process_documents = process_document_fn
+        else:
+            FactoryMadeMapProcess.process_document = process_document_fn
         worker_type = FactoryMadeMapProcess
 
     # Define a pool type to use this worker process type

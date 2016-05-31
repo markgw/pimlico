@@ -377,6 +377,21 @@ public class Main {
 		return docs;
 	}
 
+    public SieveDocuments markupRawTexts(List<String> filenames, List<String> texts) {
+        SieveDocuments docs = new SieveDocuments();
+
+        for (int i = 0; i < filenames.size(); i++) {
+            // Parse the text
+            SieveDocument doc = Tempeval3Parser.parseText(filenames.get(i), texts.get(i), parser, gsf);
+            docs.addDocument(doc);
+        }
+
+        // Markup events, times, and tlinks.
+        markupAll(docs);
+
+        return docs;
+    }
+
 	public SieveDocuments getDataset(DatasetType type, SieveDocuments docs) {
 		SieveDocuments dataset;
 		if( type == DatasetType.TRAIN )

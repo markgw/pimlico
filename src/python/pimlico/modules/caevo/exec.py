@@ -4,24 +4,45 @@
 
 import os
 import tempfile
+from py4j.java_collections import ListConverter
 
 from pimlico import JAVA_LIB_DIR
 from pimlico.core.external.java import Py4JInterface, make_py4j_errors_safe
-from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
+from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error, skip_invalids
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 
 
-@skip_invalid
-@invalid_doc_on_error
+# Used to do it this way
+# @skip_invalid
+# @invalid_doc_on_error
+# @make_py4j_errors_safe
+# def process_document(worker, archive, filename, doc):
+#     # Call Caevo
+#     result = worker.interface.gateway.entry_point.markupRawText(filename, doc.encode("utf-8"))
+#     # JDOM uses Windows-style double carriage returns
+#     # Change to \ns, to be consistent with what we normally do
+#     result = u"\n".join(result.splitlines())
+#     worker.interface.clear_output_queues()
+#     return result
+
+
+@skip_invalids
 @make_py4j_errors_safe
-def process_document(worker, archive, filename, doc):
+def process_documents(worker, input_tuples):
+    # Take a load of docs in one go to speed things up
+    filenames = [doc_tuple[1] for doc_tuple in input_tuples]
+    docs = [doc_tuple[2].encode("utf-8") for doc_tuple in input_tuples]
+    # Make into Java lists
+    filenames = ListConverter().convert(filenames, worker.interface.gateway._gateway_client)
+    docs = ListConverter().convert(docs, worker.interface.gateway._gateway_client)
+
     # Call Caevo
-    result = worker.interface.gateway.entry_point.markupRawText(filename, doc.encode("utf-8"))
+    results = worker.interface.gateway.entry_point.markupRawTexts(filenames, docs)
     # JDOM uses Windows-style double carriage returns
     # Change to \ns, to be consistent with what we normally do
-    result = u"\n".join(result.splitlines())
+    results = [u"\n".join(result.splitlines()) for result in results]
     worker.interface.clear_output_queues()
-    return result
+    return results
 
 
 def preprocess(executor):
@@ -66,7 +87,9 @@ def worker_tear_down(worker):
 
 
 ModuleExecutor = multiprocessing_executor_factory(
-    process_document,
+    process_documents,
     preprocess_fn=preprocess, postprocess_fn=postprocess,
     worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down,
+    # Try to speed things up by giving Caevo multiple docs at once to process
+    batch_docs=20
 )

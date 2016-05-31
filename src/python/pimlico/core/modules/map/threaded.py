@@ -16,6 +16,7 @@ from traceback import format_exc
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor
 from pimlico.datatypes.base import InvalidDocument
+from pimlico.utils.pipes import qget
 
 
 class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
@@ -27,8 +28,12 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
         self.daemon = True
         self.stopped = threading.Event()
         self.initialized = threading.Event()
+        self.no_more_inputs = threading.Event()
 
         self.start()
+
+    def notify_no_more_inputs(self):
+        self.no_more_inputs.set()
 
     def run(self):
         try:
@@ -36,23 +41,22 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
             self.set_up()
             # Notify waiting processes that we've finished initialization
             self.initialized.set()
+            input_buffer = []
             try:
                 while not self.stopped.is_set():
                     try:
                         # Timeout and go round the loop again to check whether we're supposed to have stopped
-                        archive, filename, docs = self.input_queue.get(timeout=0.05)
-                        try:
-                            result = self.process_document(archive, filename, *docs)
-                        except Exception, e:
-                            self.output_queue.put(
-                                ProcessOutput(archive, filename, InvalidDocument(self.info.module_name,
-                                                                                 "%s\n%s" % (e, format_exc())))
-                            )
-                        else:
-                            self.output_queue.put(ProcessOutput(archive, filename, result))
+                        archive, filename, docs = qget(self.input_queue, timeout=0.05)
                     except Empty:
                         # Don't worry if the queue is empty: just keep waiting for more until we're shut down
                         pass
+                    else:
+                        input_buffer.append(tuple([archive, filename] + docs))
+                        if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
+                            results = self.process_documents(input_buffer)
+                            for archive, filename, result in results:
+                                self.output_queue.put(ProcessOutput(archive, filename, result))
+                            input_buffer = []
             finally:
                 self.tear_down()
         except Exception, e:
