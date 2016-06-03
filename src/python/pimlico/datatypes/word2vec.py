@@ -71,6 +71,8 @@ class Word2VecModel(PimlicoDatatype):
     def __init__(self, base_dir, pipeline, **kwargs):
         super(Word2VecModel, self).__init__(base_dir, pipeline, **kwargs)
         self._model = None
+        # Old models don't have this set, so default to False
+        self.verb_only = self.metadata.get("verb_only", False)
 
     def data_ready(self):
         return super(Word2VecModel, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "vectors.bin"))
@@ -93,9 +95,10 @@ class Word2VecModel(PimlicoDatatype):
 
 
 class Word2VecModelWriter(PimlicoDatatypeWriter):
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, verb_only=False):
         super(Word2VecModelWriter, self).__init__(base_dir)
         self.word2vec_model = None
+        self.metadata["verb_only"] = verb_only
 
     def __enter__(self):
         return self
