@@ -14,9 +14,8 @@ compatible with the datatype being browsed and provides a method to format each 
 in your custom code and refer to them by their fully qualified class name.
 
 """
-from traceback import format_exc
-
-from pimlico.datatypes.base import IterableCorpus
+from pimlico.core.modules.base import check_type, TypeCheckError
+from pimlico.datatypes.base import IterableCorpus, InvalidDocument
 
 
 class DocumentBrowserFormatter(object):
@@ -51,6 +50,15 @@ class DocumentBrowserFormatter(object):
         """
         raise NotImplementedError
 
+    def filter_document(self, doc):
+        """
+        Each doc is passed through this function directly after being read from the corpus. If None is returned,
+        the doc is skipped. Otherwise, the result is used instead of the doc data. The default implementation
+        does nothing.
+
+        """
+        return doc
+
 
 class DefaultFormatter(DocumentBrowserFormatter):
     """
@@ -74,3 +82,50 @@ class DefaultFormatter(DocumentBrowserFormatter):
             except AttributeError:
                 doc = unicode(doc)
         return doc
+
+
+class InvalidDocumentFormatter(DocumentBrowserFormatter):
+    """
+    Formatter that skips over all docs other than invalid results. Uses standard formatting for InvalidDocument
+    information.
+
+    """
+    DATATYPE = IterableCorpus
+
+    def format_document(self, doc):
+        return doc
+
+    def filter_document(self, doc):
+        return doc if isinstance(doc, InvalidDocument) else None
+
+
+def load_formatter(dataset, formatter_name=None, parse=True):
+    """
+    Load a formatter specified by its fully qualified Python class name. If None, loads the default formatter.
+
+    :param formatter_name: class name
+    :param dataset: dataset that will be formatted
+    :param parse: only used if the default formatter is loaded, determines `raw_data` (`= not parse`)
+    :return: instantiated formatter
+    """
+    if formatter_name is not None:
+        try:
+            fmt_path, __, fmt_cls_name = formatter_name.rpartition(".")
+            fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
+            fmt_cls = getattr(fmt_mod, fmt_cls_name)
+        except ImportError, e:
+            raise TypeError("Could not load formatter %s: %s" % (formatter_name, e))
+        # If a formatter's given, use its attribute to determine whether we get raw input
+        parse = not fmt_cls.RAW_INPUT
+        # Check that the datatype provided is compatible with the formatter's datatype
+        try:
+            check_type(type(dataset), fmt_cls.DATATYPE)
+        except TypeCheckError, e:
+            raise TypeCheckError(
+                "formatter %s is not designed for this datatype (%s)" % (formatter_name, type(dataset).__name__)
+            )
+        # Instantiate the formatter, providing it with the dataset
+        formatter = fmt_cls(dataset)
+    else:
+        formatter = DefaultFormatter(dataset, raw_data=not parse)
+    return formatter

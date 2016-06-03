@@ -4,12 +4,13 @@
 
 import os
 import tempfile
-from py4j.java_collections import ListConverter
 
+from py4j.java_collections import ListConverter
 from pimlico import JAVA_LIB_DIR
 from pimlico.core.external.java import Py4JInterface, make_py4j_errors_safe
-from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error, skip_invalids
+from pimlico.core.modules.map import skip_invalids, invalid_docs_on_error
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
+
 
 
 # Used to do it this way
@@ -27,6 +28,7 @@ from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 
 
 @skip_invalids
+@invalid_docs_on_error
 @make_py4j_errors_safe
 def process_documents(worker, input_tuples):
     # Take a load of docs in one go to speed things up
@@ -91,5 +93,5 @@ ModuleExecutor = multiprocessing_executor_factory(
     preprocess_fn=preprocess, postprocess_fn=postprocess,
     worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down,
     # Try to speed things up by giving Caevo multiple docs at once to process
-    batch_docs=20
+    batch_docs=10
 )

@@ -16,7 +16,11 @@ from virtualenv import create_environment
 
 
 lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-virtualenv_dir = os.path.join(lib_dir, "python_env")
+if len(sys.argv) > 1:
+    # Allow alternative env location to be specified
+    virtualenv_dir = sys.argv[1]
+else:
+    virtualenv_dir = os.path.join(lib_dir, "python_env")
 
 if not os.path.exists(virtualenv_dir):
     os.makedirs(virtualenv_dir)

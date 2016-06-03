@@ -1,12 +1,19 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PYTHONPATH=$PYTHONPATH:$DIR/../src/python:$DIR/../lib/python
-python=$DIR/../lib/python_env/bin/python
+
+if [ -n "$VIRTUALENV" ]; then
+    echo "Using virtualenv dir $VIRTUALENV"
+    virtualenv_dir=$VIRTUALENV
+else
+    virtualenv_dir=$DIR/../lib/python_env
+fi
+python=$virtualenv_dir/bin/python
 
 # Check the virtualenv environment is set up
 if [ ! -f "$python" ]; then
     echo "Virtualenv for installing local Python software is not yet setup: running setup now"
-    python $DIR/../lib/libutils/create_virtualenv.py
+    python $DIR/../lib/libutils/create_virtualenv.py $virtualenv_dir
     if [ "$?" != "0" ]; then
         # Failed to set up virtualenv: don't carry on running
         exit 1

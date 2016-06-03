@@ -306,6 +306,31 @@ def invalid_doc_on_error(fn):
     return _fn
 
 
+def invalid_docs_on_error(fn):
+    """
+    Decorator to apply to process_documents() methods that causes all exceptions to be caught and an InvalidDocument
+    to be returned as the result for every input document.
+
+    """
+    def _fn(self, input_tuples):
+        try:
+            return fn(self, input_tuples)
+        except StopProcessing:
+            # Processing was cancelled, killed or otherwise called to a halt
+            # Don't report this as an error processing a doc, but raise it
+            raise
+        except Exception, e:
+            # Error while processing the document: output invalid documents, with some error information
+            if isinstance(self, TarredCorpus):
+                # Decorator wrapped a process_document() method on a datatype
+                # Instead of the module name, output the datatype name and its base dir
+                return [InvalidDocument("datatype:%s[%s]" % (self.datatype_name, self.base_dir),
+                                        "%s\n%s" % (e, format_exc()))] * len(input_tuples)
+            else:
+                return [InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))] * len(input_tuples)
+    return _fn
+
+
 class ProcessOutput(object):
     """
     Wrapper for all result data coming out from a worker.
@@ -373,7 +398,7 @@ class InputQueueFeeder(Thread):
     def run(self):
         try:
             # Keep feeding inputs onto the queue as long as we've got more
-            for archive, filename, docs in self.iterator:
+            for i, (archive, filename, docs) in enumerate(self.iterator):
                 # If the queue is full, this will block until there's room to put the next one on
                 self.input_queue.put((archive, filename, docs))
                 # Record that we've sent this one off, so we can write the results out in the right order
@@ -473,7 +498,7 @@ class DocumentMapProcessMixin(object):
         i.e. archive_name, filename, doc_from_corpus1, [doc_from corpus2, ...]
 
         """
-        return [(doc_tuple[0], doc_tuple[1], self.process_document(*doc_tuple)) for doc_tuple in doc_tuples]
+        return [self.process_document(*doc_tuple) for doc_tuple in doc_tuples]
 
     def tear_down(self):
         """

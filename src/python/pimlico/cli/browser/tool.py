@@ -10,7 +10,7 @@ from importlib import import_module
 from traceback import format_exc
 
 import urwid
-from pimlico.cli.browser.formatter import DefaultFormatter
+from pimlico.cli.browser.formatter import DefaultFormatter, load_formatter
 from pimlico.core.modules.base import check_type, TypeCheckError
 from pimlico.datatypes.base import InvalidDocument
 
@@ -54,27 +54,13 @@ def browse_cmd(pipeline, opts):
         sys.exit(1)
 
     # Load the formatter if one was requested
+    formatter = load_formatter(data, opts.formatter, parse=opts.parse)
     if opts.formatter is not None:
-        try:
-            fmt_path, __, fmt_cls_name = opts.formatter.rpartition(".")
-            fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
-            fmt_cls = getattr(fmt_mod, fmt_cls_name)
-        except ImportError, e:
-            print "Could not load formatter %s: %s" % (opts.formatter, e)
-            sys.exit(1)
         # If a formatter's given, use its attribute to determine whether we get raw input
-        parse = not fmt_cls.RAW_INPUT
-        # Check that the datatype provided is compatible with the formatter's datatype
-        try:
-            check_type(type(data), fmt_cls.DATATYPE)
-        except TypeCheckError, e:
-            print "formatter %s is not designed for this datatype (%s)" % (opts.formatter, type(data).__name__)
-            sys.exit(1)
-        # Instantiate the formatter, providing it with the dataset
-        formatter = fmt_cls(data)
+        parse = not formatter.RAW_INPUT
     else:
+        # Otherwise (default formatter), use the cmd-line option
         parse = opts.parse
-        formatter = DefaultFormatter(data, raw_data=not opts.parse)
 
     browse_data(data, formatter, parse=parse)
 
@@ -106,30 +92,6 @@ def browse_data(data, formatter, parse=False):
     # Management of current document, navigation
     corpus_state = CorpusState(data)
 
-    def next_document(state):
-        # Get the next doc from the corpus
-        try:
-            state.next_document()
-        except StopIteration:
-            footer_text.set_text("Reached end of corpus. Exiting")
-            _exit()
-        doc_line.set_text("%s  ---  Doc %d / %d" % (state.current_doc_name, state.doc_num+1, state.total_docs))
-        if isinstance(state.current_doc_data, InvalidDocument):
-            body_text.set_text(
-                "== INVALID DOCUMENT ==\nInvalid output was produced by module '%s'.\n\nFull error info from %s:\n%s" %
-                (state.current_doc_data.module_name, state.current_doc_data.module_name,
-                 state.current_doc_data.error_info)
-            )
-        else:
-            doc = state.current_doc_data
-            # Format the doc using the formatter
-            try:
-                doc = formatter.format_document(doc)
-            except:
-                # browser_display exists, but there was an error calling it
-                doc = "Error formatting datatype %s for display:\n%s" % (type(doc).__name__, format_exc())
-            body_text.set_text(doc.encode("ascii", "replace").replace("\t", "    "))
-
     def skip_docs(value_box, *args):
         skip = value_box.value()
         try:
@@ -139,9 +101,6 @@ def browse_data(data, formatter, parse=False):
             footer_text.set_text("Reached end of corpus. Exiting")
             _exit()
 
-    # Move onto the first doc to start with
-    next_document(corpus_state)
-
     # Main layout
     main = urwid.LineBox(
         urwid.Frame(
@@ -150,7 +109,36 @@ def browse_data(data, formatter, parse=False):
             footer=urwid.Pile([urwid.Divider(), urwid.Columns(bottom_row)])
         )
     )
-    main = SkipPopupLauncher(main, "Skip docs", callback=skip_docs)
+    skip_launcher = SkipPopupLauncher(main, "Skip docs", callback=skip_docs)
+
+    def next_document(state):
+        doc_data = None
+        # Skip over docs until we get one that's not rejected by the formatter
+        while doc_data is None:
+            # Get the next doc from the corpus
+            try:
+                state.next_document()
+            except StopIteration:
+                footer_text.set_text("Reached end of corpus. Exiting")
+                _exit()
+            doc_line.set_text("%s  ---  Doc %d / %d" % (state.current_doc_name, state.doc_num+1, state.total_docs))
+            if main_loop.screen.started:
+                main_loop.draw_screen()
+            doc_data = formatter.filter_document(state.current_doc_data)
+
+        if isinstance(doc_data, InvalidDocument):
+            body_text.set_text(
+                "== INVALID DOCUMENT ==\nInvalid output was produced by module '%s'.\n\nFull error info from %s:\n%s" %
+                (doc_data.module_name, doc_data.module_name,
+                 doc_data.error_info)
+            )
+        else:
+            # Format the doc using the formatter
+            try:
+                doc = formatter.format_document(doc_data)
+            except:
+                doc = "Error formatting datatype %s for display:\n%s" % (type(doc_data).__name__, format_exc())
+            body_text.set_text(doc.encode("ascii", "replace").replace("\t", "    "))
 
     def _keypress(key):
         if key == "esc" or key == "q":
@@ -158,9 +146,14 @@ def browse_data(data, formatter, parse=False):
         elif key == "n" or key == "N" or key == " ":
             next_document(corpus_state)
         elif key == "s" or key == "S":
-            main.open_pop_up()
+            skip_launcher.open_pop_up()
 
-    urwid.MainLoop(main, palette=PALETTE, unhandled_input=_keypress, pop_ups=True).run()
+    main_loop = urwid.MainLoop(skip_launcher, palette=PALETTE, unhandled_input=_keypress, pop_ups=True)
+
+    # Move onto the first doc to start with
+    next_document(corpus_state)
+
+    main_loop.run()
 
 
 class CorpusState(object):
@@ -220,6 +213,14 @@ class SkipDialog(urwid.WidgetWrap):
         super(SkipDialog, self).keypress(size, k)
 
 
+class MessageDialog(urwid.WidgetWrap):
+    """A dialog that appears with a message """
+    def __init__(self, text, default=None):
+        w = urwid.Text(text)
+        w = urwid.LineBox(urwid.Filler(w))
+        super(MessageDialog, self).__init__(urwid.AttrWrap(w, 'popbg'))
+
+
 class SkipPopupLauncher(urwid.PopUpLauncher):
     def __init__(self, original_widget, text, default=None, callback=None):
         super(SkipPopupLauncher, self).__init__(original_widget)
@@ -234,6 +235,21 @@ class SkipPopupLauncher(urwid.PopUpLauncher):
         urwid.connect_signal(pop_up, "close", lambda button: self.close_pop_up())
         urwid.connect_signal(pop_up, "cancel", lambda button: self.close_pop_up())
         return pop_up
+
+    def get_pop_up_parameters(self):
+        lines = self.text.splitlines()
+        height = len(lines) + 6
+        width = max(25, max(len(l) for l in lines) + 4)
+        return {'left': 5, 'top': 5, 'overlay_width': width, 'overlay_height': height}
+
+
+class MessagePopupLauncher(urwid.PopUpLauncher):
+    def __init__(self, original_widget, text):
+        super(MessagePopupLauncher, self).__init__(original_widget)
+        self.text = text
+
+    def create_pop_up(self):
+        return MessageDialog(self.text)
 
     def get_pop_up_parameters(self):
         lines = self.text.splitlines()

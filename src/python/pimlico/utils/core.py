@@ -76,3 +76,8 @@ def remove_duplicates(lst, key=lambda x: x):
     seen_add = seen.add
     return [x for x in lst if key(x) not in seen and not seen_add(key(x))]
 
+
+def infinite_cycle(iterable):
+    while True:
+        for x in iterable:
+            yield x

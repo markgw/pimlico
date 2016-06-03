@@ -17,6 +17,53 @@ from pimlico.datatypes.base import IterableCorpus
 from pimlico.datatypes.tar import TarredCorpus
 
 
+class TarredCorpusGrouper(object):
+    """
+    Tool for grouping documents into tar archives and naming the archives appropriately.
+
+    Requires a total number of documents at initialization, but does not depend on this being exactly correct.
+    It is used to determine the format of the archive names. It's better to ensure that the given length is an
+    overestimate, so the archive names get padded with enough zeroes.
+
+    """
+    def __init__(self, archive_size, total_docs, archive_basename="archive"):
+        self.archive_basename = archive_basename
+        self.total_docs = total_docs
+        self.archive_size = archive_size
+
+        # Work out now what the archive names are going to look like
+        self.total_archives = int(math.ceil(float(total_docs) / self.archive_size))
+        # Work out how many digits to pad the archive numbers with in the filenames
+        digits = len("%d" % (self.total_archives-1))
+        # Prepare a formatter for archive numbers
+        self.archive_name_format = "%s-%%%sd" % (self.archive_basename, "0%d" % digits)
+
+        self.current_archive = 0
+        self.current_archive_count = 0
+        self.current_archive_name = self.archive_name_format % self.current_archive
+
+    def get_archive_names(self):
+        """
+        Returns a list of all archive names that will be created, assuming that the given total_docs numbers
+        was accurate.
+        """
+        return [self.archive_name_format % i for i in range(self.total_archives)]
+
+    def next_document(self):
+        """
+        Move onto the next document and return the archive name for the archive it should be added to.
+
+        """
+        # Check whether we've put enough files in the current archive to move onto the next
+        if self.current_archive_count == self.archive_size:
+            self.current_archive += 1
+            self.current_archive_count = 1
+            self.current_archive_name = self.archive_name_format % self.current_archive
+        else:
+            self.current_archive_count += 1
+        return self.current_archive_name
+
+
 # Subclass TarredCorpus so that inputs expecting one can accept this
 class TarredCorpusFilter(TarredCorpus):
     def __init__(self, pipeline, input_datatype, archive_size, archive_basename="archive"):
@@ -42,24 +89,11 @@ class TarredCorpusFilter(TarredCorpus):
     def tarballs(self):
         if not self.data_ready():
             return []
-
-        if self._tarballs is None:
-            # Work out now what the archive names are going to look like and how many there will be
-            total_archives = int(math.ceil(float(len(self)) / self.archive_size))
-
-            # Work out how many digits to pad the archive numbers with in the filenames
-            digits = len("%d" % (total_archives-1))
-            # Prepare a formatter for archive numbers
-            archive_name_format = "%s-%%%sd" % (self.archive_basename, "0%d" % digits)
-
-            self._tarballs = [archive_name_format % archive_num for archive_num in range(total_archives)]
-        return self._tarballs
+        return TarredCorpusGrouper(
+            self.archive_size, len(self), archive_basename=self.archive_basename).get_archive_names()
 
     def archive_iter(self, subsample=None, start_after=None, skip=None):
-        tarballs = self.tarballs
-
-        current_archive = 0
-        current_archive_count = 0
+        grouper = TarredCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
 
         if start_after is None:
             # Don't wait to start
@@ -69,20 +103,12 @@ class TarredCorpusFilter(TarredCorpus):
             started = False
 
         for doc_name, doc in self.input_datatype:
-            # Check whether we've put enough files in the current archive to move onto the next
-            if current_archive_count == self.archive_size:
-                current_archive += 1
-                if current_archive >= len(tarballs):
-                    raise ValueError("moved on to archive %d, but we've only prepared %d tarball names: inaccurate "
-                                     "count on the input datatype?" % (current_archive, len(tarballs)))
-                # We'll check this next time round the loop, after we've processed the current doc
-                current_archive_count = 1
-            else:
-                current_archive_count += 1
+            # Update the archive name, perhaps moving on to the next one
+            archive_name = grouper.next_document()
 
             # Allow the first portion of the corpus to be skipped
             if not started:
-                if start_after == (tarballs[current_archive], doc_name):
+                if start_after == (archive_name, doc_name):
                     # We've hit the condition for starting
                     # Skip this doc and start on the next
                     started = True
@@ -93,7 +119,7 @@ class TarredCorpusFilter(TarredCorpus):
                 # Reject this file
                 continue
 
-            yield tarballs[current_archive], doc_name, doc
+            yield archive_name, doc_name, doc
 
     def list_archive_iter(self):
         # Since we're not extracting the data here, we can't make things any faster in the case where the document
