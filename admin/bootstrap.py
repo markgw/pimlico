@@ -1,7 +1,7 @@
 """
 Bootstrapping script that create a basic Pimlico setup, either for an existing config file, or for a new project.
 
-One use of this is to distribute it with your Pimlico project code. You don't need to distribute Pimlico itself
+Distribute this with your Pimlico project code. You don't need to distribute Pimlico itself
 with your project, since it can be downloaded later. Just distribute a directory tree containing your config files,
 your own code and this Python script, which will fetch everything else it needs.
 
