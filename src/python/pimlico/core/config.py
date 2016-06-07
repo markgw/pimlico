@@ -6,6 +6,8 @@
 Reading of various types of config files, in particular a pipeline config.
 """
 import ConfigParser
+import copy
+
 import os
 from ConfigParser import SafeConfigParser, RawConfigParser
 
@@ -70,6 +72,20 @@ class PipelineConfig(object):
         times in the same module and later copies will override earlier. Settings given explicitly in the module's
         config override any copied settings. The following settings are not copied: input(s), `filter`, `outputs`,
         `type`.
+
+    **Multiple parameter values:**
+
+    Sometimes you want to write a whole load of modules that are almost identical, varying in just one or two
+    parameters. You can give a parameter multiple values by writing them separated by vertical bars (|). The module
+    definition will be expanded to produce a separate module for each value, with all the other parameters being
+    identical.
+
+    You can even do this with multiple parameters of the same module and the expanded modules will cover all
+    combinations of the parameter assignments.
+
+    Each module will be given a distinct name, based on the varied parameters. If just one is varied, the names
+    will be of the form `module_name{param_value}`. If multiple parameters are varied at once, the names will be
+    `module_name{param_name0=param_value0~param_name1=param_value1~...)`.
 
     """
     def __init__(self, name, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
@@ -303,6 +319,41 @@ class PipelineConfig(object):
             (key, var_substitute(val, vars)) for (key, val) in config_section_dict["pipeline"].items()
         ])
 
+        # Parameters and inputs can be given multiple values, separated by |s
+        # In this case, we need to multiply out all the alternatives, to make multiple modules
+        expanded_config_sections = []
+        for section, section_config in config_sections:
+            if any("|" in val for val in section_config.values()):
+                # There are alternatives in this module: expand into multiple modules
+                params_with_alternatives = {}
+                fixed_params = {}
+                for key, val in section_config.items():
+                    if "|" in val:
+                        # Split up the alternatives and allow space around the |s
+                        params_with_alternatives[key] = [alt.strip() for alt in val.split("|")]
+                    else:
+                        fixed_params[key] = val
+                # Generate all combinations of params that have alternatives
+                alternative_configs = multiply_alternatives(params_with_alternatives.items())
+                # Generate a name for each
+                alternative_config_names = [
+                    "%s{%s}" % (
+                        section,
+                        # If there's only 1 parameter that's varied, don't include the key in the name
+                        params_set[0][1] if len(params_set) == 1
+                            else "~".join("%s=%s" % (key, val) for (key, val) in params_set)
+                    ) for params_set in alternative_configs
+                ]
+                # Add in fixed params to them all
+                alternative_configs = [dict(params_set, **copy.deepcopy(fixed_params))
+                                       for params_set in alternative_configs]
+                expanded_config_sections.extend(zip(alternative_config_names, alternative_configs))
+            else:
+                # No alternatives
+                expanded_config_sections.append((section, section_config))
+        config_sections = expanded_config_sections
+        config_section_dict = dict(expanded_config_sections)
+
         module_order = [section for section, config in config_sections if section != "pipeline"]
 
         # All other sections of the config describe a module instance
@@ -376,6 +427,19 @@ class PipelineConfig(object):
         for store_base in [self.short_term_store, self.long_term_store]:
             if os.path.exists(os.path.join(store_base, path)):
                 yield os.path.join(store_base, path)
+
+
+def multiply_alternatives(alternative_params):
+    if len(alternative_params):
+        # Pick a key
+        key, vals = alternative_params.pop()
+        # Recursively generate all alternatives by other keys
+        alternatives = multiply_alternatives(alternative_params)
+        # Make a copy of each alternative combined with each val for this key
+        return [alt_params + [(key, val)] for val in vals for alt_params in alternatives]
+    else:
+        # No alternatives left, base case: return an empty list
+        return [[]]
 
 
 def var_substitute(option_val, vars):
