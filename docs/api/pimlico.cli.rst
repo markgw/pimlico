@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     pimlico.cli.browser
+    pimlico.cli.shell
 
 Submodules
 ----------

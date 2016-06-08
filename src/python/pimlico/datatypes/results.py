@@ -24,16 +24,19 @@ class NumericResult(PimlicoDatatype):
 
     @property
     def data(self):
+        """Raw JSON data"""
         if self._data_cache is None:
             self._read_data()
         return self._data_cache
 
     @property
     def result(self):
+        """The numeric result being stored"""
         return self.data["result"]
 
     @property
     def label(self):
+        """A label to identify this result (e.g. model name)"""
         return self.data["label"]
 
 

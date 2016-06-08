@@ -22,6 +22,7 @@ Submodules
    pimlico.utils.network
    pimlico.utils.pipes
    pimlico.utils.pos
+   pimlico.utils.probability
    pimlico.utils.progress
    pimlico.utils.strings
    pimlico.utils.timeout

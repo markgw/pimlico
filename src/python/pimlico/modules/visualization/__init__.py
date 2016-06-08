@@ -1,5 +1,7 @@
 """
-Visualization tools: plotting and suchlike
+Visualization tools
+
+Modules for plotting and suchlike
 
 """
 from pimlico.core.dependencies.python import PythonPackageOnPip

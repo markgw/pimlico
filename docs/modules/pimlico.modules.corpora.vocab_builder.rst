@@ -1,5 +1,5 @@
-Term-feature corpus vocab builder
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Corpus vocab builder
+~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.vocab_builder
 
@@ -40,10 +40,10 @@ Options
 +-----------+------------------------------------------------------------------------------+-------+
 | Name      | Description                                                                  | Type  |
 +===========+==============================================================================+=======+
-| limit     | Limit vocab size to this number of most common entries (after other filters) | int   |
+| threshold | Minimum number of occurrences required of a term to be included              | int   |
 +-----------+------------------------------------------------------------------------------+-------+
 | max_prop  | Include terms that occur in max this proportion of documents                 | float |
 +-----------+------------------------------------------------------------------------------+-------+
-| threshold | Minimum number of occurrences required of a term to be included              | int   |
+| limit     | Limit vocab size to this number of most common entries (after other filters) | int   |
 +-----------+------------------------------------------------------------------------------+-------+
 

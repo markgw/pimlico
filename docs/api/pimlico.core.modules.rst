@@ -16,6 +16,7 @@ Submodules
    pimlico.core.modules.base
    pimlico.core.modules.execute
    pimlico.core.modules.inputs
+   pimlico.core.modules.multistage
    pimlico.core.modules.options
 
 Module contents

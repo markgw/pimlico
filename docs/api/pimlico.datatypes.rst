@@ -20,6 +20,9 @@ Submodules
    pimlico.datatypes.dictionary
    pimlico.datatypes.features
    pimlico.datatypes.jsondoc
+   pimlico.datatypes.plotting
+   pimlico.datatypes.results
+   pimlico.datatypes.table
    pimlico.datatypes.tar
    pimlico.datatypes.tokenized
    pimlico.datatypes.word2vec

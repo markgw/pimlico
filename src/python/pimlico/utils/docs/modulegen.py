@@ -18,7 +18,7 @@ from sphinx import __version__
 from sphinx.apidoc import format_heading
 
 from pimlico.core.modules.options import format_option_type
-from pimlico.datatypes.base import DynamicOutputDatatype, PimlicoDatatype
+from pimlico.datatypes.base import DynamicOutputDatatype, PimlicoDatatype, MultipleInputs
 from pimlico.utils.docs import trim_docstring
 from pimlico.utils.docs.rest import make_table
 
@@ -158,7 +158,11 @@ def input_datatype_list(types):
 
 def input_datatype_text(datatype):
     if isinstance(datatype, type) and issubclass(datatype, PimlicoDatatype):
+        # Standard behaviour for normal datatypes
         return ":class:`%s <%s>`" % (datatype.__name__, datatype.datatype_full_class_name())
+    elif isinstance(datatype, MultipleInputs):
+        # Multiple inputs, but the datatype is known: call this function to format the common type
+        return "list of %s" % input_datatype_text(datatype.datatype_requirements)
     elif datatype.datatype_doc_info is not None:
         # Dynamic input type that gives us a name to use
         return datatype.datatype_doc_info

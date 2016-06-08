@@ -43,8 +43,8 @@ Options
 +----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | Name           | Description                                                                                                                                                        | Type   |
 +================+====================================================================================================================================================================+========+
-| sentence_model | Sentence segmentation model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/) | string |
-+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | token_model    | Tokenization model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/)          | string |
++----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
+| sentence_model | Sentence segmentation model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/) | string |
 +----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 

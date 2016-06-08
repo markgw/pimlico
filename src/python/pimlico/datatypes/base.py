@@ -156,7 +156,7 @@ class PimlicoDatatype(object):
 class DynamicOutputDatatype(object):
     """
     Types of module outputs may be specified as a subclass of :class:`.PimlicoDatatype`, or alternatively
-    as an instance of DynamicOutputType. In this case, get_datatype() is called when the output datatype is
+    as an *instance* of DynamicOutputType. In this case, get_datatype() is called when the output datatype is
     needed, passing in the module info instance for the module, so that a specialized datatype can be
     produced on the basis of options, input types, etc.
 

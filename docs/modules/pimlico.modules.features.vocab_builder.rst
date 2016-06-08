@@ -44,12 +44,12 @@ Options
 +-------------------+------------------------------------------------------------------------------+-------+
 | feature_max_prop  | Include features that occur in max this proportion of documents              | float |
 +-------------------+------------------------------------------------------------------------------+-------+
-| feature_threshold | Minimum number of occurrences required of a feature to be included           | int   |
-+-------------------+------------------------------------------------------------------------------+-------+
-| term_limit        | Limit vocab size to this number of most common entries (after other filters) | int   |
-+-------------------+------------------------------------------------------------------------------+-------+
 | term_max_prop     | Include terms that occur in max this proportion of documents                 | float |
 +-------------------+------------------------------------------------------------------------------+-------+
 | term_threshold    | Minimum number of occurrences required of a term to be included              | int   |
++-------------------+------------------------------------------------------------------------------+-------+
+| feature_threshold | Minimum number of occurrences required of a feature to be included           | int   |
++-------------------+------------------------------------------------------------------------------+-------+
+| term_limit        | Limit vocab size to this number of most common entries (after other filters) | int   |
 +-------------------+------------------------------------------------------------------------------+-------+
 

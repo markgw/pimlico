@@ -16,6 +16,7 @@ from pimlico.datatypes.tar import TarredCorpus
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "format"
+    module_readable_name = "Human-readable formatting"
     module_inputs = [("corpus", TarredCorpus)]
     module_outputs = [("formatted", TarredCorpus)]
     module_options = {

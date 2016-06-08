@@ -13,6 +13,8 @@ Base modules for reading input from textual corpora.
    :maxdepth: 2
    :titlesonly:
 
+   pimlico.modules.corpora.format
+   pimlico.modules.corpora.split
    pimlico.modules.corpora.subset
    pimlico.modules.corpora.tar
    pimlico.modules.corpora.tar_filter
