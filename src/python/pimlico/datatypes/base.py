@@ -202,6 +202,20 @@ class DynamicInputDatatypeRequirement(object):
         raise NotImplementedError
 
 
+class MultipleInputs(object):
+    """
+    An input datatype that can be used as an item in a module's inputs, which lets the module accept an unbounded
+    number of inputs, all satisfying the same datatype requirements. When writing the inputs in a config file,
+    they can be specified as a comma-separated list of the usual type of specification (module name, with optional
+    output name). Each item in the list must point to a datatype that satisfies the type-checking.
+
+    When get_input() is called on the module, instead of returning a single datatype, a list of datatypes is returned.
+
+    """
+    def __init__(self, datatype_requirements):
+        self.datatype_requirements = datatype_requirements
+
+
 class PimlicoDatatypeWriter(object):
     """
     Abstract base class fo data writer associated with Pimlico datatypes.

@@ -33,7 +33,8 @@ from operator import itemgetter
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
-from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement
+from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
+    MultipleInputs
 
 
 class BaseModuleInfo(object):
@@ -254,14 +255,18 @@ class BaseModuleInfo(object):
 
         # Split up the input specifiers
         for input_name, input_spec in inputs.items():
-            if "." in input_spec:
-                # This is a module name + output name
-                module_name, __, output_name = input_spec.rpartition(".")
-            else:
-                # Just a module name, using the default output
-                module_name = input_spec
-                output_name = None
-            inputs[input_name] = (module_name, output_name)
+            # Multiple inputs may be specified, separated by commas
+            # This will only work if the input datatype is a MultipleInputs
+            inputs[input_name] = []
+            for spec in input_spec.split(","):
+                if "." in spec:
+                    # This is a module name + output name
+                    module_name, __, output_name = spec.rpartition(".")
+                else:
+                    # Just a module name, using the default output
+                    module_name = spec
+                    output_name = None
+                inputs[input_name].append((module_name, output_name))
 
         return inputs
 
@@ -356,11 +361,28 @@ class BaseModuleInfo(object):
         output_name, datatype = self.get_output_datatype(output_name=output_name)
         return self.instantiate_output_datatype(output_name, datatype)
 
-    def get_input_module_connection(self, input_name=None):
+    def is_multiple_input(self, input_name=None):
+        """
+        Returns True if the named input (or default input if no name is given) is a MultipleInputs input, False
+        otherwise. If it is, get_input() will return a list, otherwise it will return a single datatype.
+
+        """
+        if input_name is None:
+            input_type = self.module_inputs[0][1]
+        else:
+            input_type = dict(self.module_inputs)[input_name]
+        return isinstance(input_type, MultipleInputs)
+
+    def get_input_module_connection(self, input_name=None, always_list=False):
         """
         Get the ModuleInfo instance and output name for the output that connects up with a named input (or the
         first input) on this module instance. Used by get_input() -- most of the time you probably want to
         use that to get the instantiated datatype for an input.
+
+        If the input type was specified with MultipleInputs, meaning that we're expecting an unbounded number
+        of inputs, this is a list. Otherwise, it's a single (module, output_name) pair.
+        If always_list=True, in this latter case we return a single-item list.
+
         """
         if input_name is None:
             if len(self.module_inputs) == 0:
@@ -369,35 +391,54 @@ class BaseModuleInfo(object):
             input_name = self.module_inputs[0][0]
         if input_name not in self.inputs:
             raise PipelineStructureError("module '%s' doesn't have an input '%s'" % (self.module_name, input_name))
-        previous_module_name, output_name = self.inputs[input_name]
-        # Try getting hold of the module that we need the output of
-        previous_module = self.pipeline[previous_module_name]
-        return previous_module, output_name
 
-    def get_input_datatype(self, input_name=None):
+        # Try getting hold of the module that we need the output of
+        if always_list or self.is_multiple_input(input_name):
+            return [(self.pipeline[previous_module_name], output_name)
+                    for previous_module_name, output_name in self.inputs[input_name]]
+        else:
+            previous_module_name, output_name = self.inputs[input_name][0]
+            return self.pipeline[previous_module_name], output_name
+
+    def get_input_datatype(self, input_name=None, always_list=False):
         """
-        Get a datatype class corresponding to one of the inputs to the module.
+        Get a list of datatype classes corresponding to one of the inputs to the module.
         If an input name is not given, the first input is returned.
 
-        """
-        previous_module, output_name = self.get_input_module_connection(input_name)
-        return previous_module.get_output_datatype(output_name)
+        If the input type was specified with MultipleInputs, meaning that we're expecting an unbounded number
+        of inputs, this is a list. Otherwise, it's a single datatype.
 
-    def get_input(self, input_name=None):
         """
-        Get a datatype instance corresponding to one of the inputs to the module.
+        datatypes = [
+            previous_module.get_output_datatype(output_name)
+            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
+        ]
+        return datatypes if always_list or self.is_multiple_input(input_name) else datatypes[0]
+
+    def get_input(self, input_name=None, always_list=False):
+        """
+        Get a datatype instances corresponding to one of the inputs to the module.
         Looks up the corresponding output from another module and uses that module's metadata to
         get that output's instance.
         If an input name is not given, the first input is returned.
 
+        If the input type was specified with MultipleInputs, meaning that we're expecting an unbounded number
+        of inputs, this is a list. Otherwise, it's a single datatype instance.
+        If always_list=True, in this latter case we return a single-item list.
+
         """
-        previous_module, output_name = self.get_input_module_connection(input_name)
-        return previous_module.get_output(output_name)
+        inputs = [
+            previous_module.get_output(output_name)
+            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
+        ]
+        return inputs if always_list or self.is_multiple_input(input_name) else inputs[0]
 
     def input_ready(self, input_name=None):
-        previous_module, output_name = self.get_input_module_connection(input_name)
-        # Check whether the datatype is ready to go
-        return previous_module.get_output(output_name).data_ready()
+        # Check whether the datatype is (or datatypes are) ready to go
+        return all(
+            previous_module.get_output(output_name).data_ready()
+            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
+        )
 
     @classmethod
     def is_filter(cls):
@@ -411,13 +452,13 @@ class BaseModuleInfo(object):
         """
         missing = []
         for input_name in self.input_names:
-            previous_module, output_name = self.get_input_module_connection(input_name)
-            if not previous_module.get_output(output_name).data_ready():
-                # If the previous module is a filter, it's more helpful to say exactly what data it's missing
-                if previous_module.is_filter():
-                    missing.extend(previous_module.missing_data())
-                else:
-                    missing.append("%s output '%s'" % (previous_module.module_name, output_name))
+            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True):
+                if not previous_module.get_output(output_name).data_ready():
+                    # If the previous module is a filter, it's more helpful to say exactly what data it's missing
+                    if previous_module.is_filter():
+                        missing.extend(previous_module.missing_data())
+                    else:
+                        missing.append("%s output '%s'" % (previous_module.module_name, output_name))
         return missing
 
     @classmethod
@@ -427,7 +468,8 @@ class BaseModuleInfo(object):
 
     @property
     def dependencies(self):
-        return [module_name for (module_name, output_name) in self.inputs.values()]
+        return [module_name for input_connections in self.inputs.values()
+                for (module_name, output_name) in input_connections]
 
     def typecheck_inputs(self):
         if self.is_input() or len(self.module_inputs) == 0:
@@ -435,30 +477,39 @@ class BaseModuleInfo(object):
             return
 
         module_inputs = dict(self.module_inputs)
-        for input_name, (dep_module_name, output) in self.inputs.items():
+        for input_name, input_connections in self.inputs.items():
             # Check the type of each input in turn
             input_type_requirements = module_inputs[input_name]
 
-            # Load the dependent module
-            dep_module = self.pipeline[dep_module_name]
-            # Try to load the named output (or the default, if no name was given)
-            output_name, dep_module_output = dep_module.get_output_datatype(output_name=output)
+            if isinstance(input_type_requirements, MultipleInputs):
+                # Type requirements are the same for all inputs
+                input_type_requirements = input_type_requirements.datatype_requirements
+            elif len(input_connections) > 1:
+                # Doesn't accept multiple datatypes on a single input, so shouldn't have more than one
+                raise PipelineStructureError("input %s on module '%s' does not accept multiple inputs, but %d were "
+                                             "given" % (input_name, self.module_name, len(input_connections)))
 
-            # Check the output datatype is given in a suitable form
-            if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)):
-                if isinstance(dep_module_output, type):
-                    type_name = dep_module_output.__name__
-                else:
-                    type_name = "instance of %s" % type(dep_module_output).__name__
-                raise PipelineStructureError("invalid output datatype from module '%s'. Must be either "
-                                             "PimlicoDatatype subclass or an instance of a DynamicOutputDatatype "
-                                             "subclass: got %s" % (self.module_name, type_name))
-            try:
-                check_type(dep_module_output, input_type_requirements)
-            except TypeCheckError, e:
-                raise PipelineStructureError("type-checking error matching input '%s' to module '%s' with output "
-                                             "'%s' from module '%s': %s" %
-                                             (input_name, self.module_name, output_name, dep_module_name, e))
+            for (dep_module_name, output) in input_connections:
+                # Load the dependent module
+                dep_module = self.pipeline[dep_module_name]
+                # Try to load the named output (or the default, if no name was given)
+                output_name, dep_module_output = dep_module.get_output_datatype(output_name=output)
+
+                # Check the output datatype is given in a suitable form
+                if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)):
+                    if isinstance(dep_module_output, type):
+                        type_name = dep_module_output.__name__
+                    else:
+                        type_name = "instance of %s" % type(dep_module_output).__name__
+                    raise PipelineStructureError("invalid output datatype from module '%s'. Must be either "
+                                                 "PimlicoDatatype subclass or an instance of a DynamicOutputDatatype "
+                                                 "subclass: got %s" % (self.module_name, type_name))
+                try:
+                    check_type(dep_module_output, input_type_requirements)
+                except TypeCheckError, e:
+                    raise PipelineStructureError("type-checking error matching input '%s' to module '%s' with output "
+                                                 "'%s' from module '%s': %s" %
+                                                 (input_name, self.module_name, output_name, dep_module_name, e))
 
     def check_runtime_dependencies(self):
         """
@@ -483,12 +534,12 @@ class BaseModuleInfo(object):
         missing_dependencies = []
         # Instantiate any input datatypes this module will need
         for input_name in self.inputs.keys():
-            input_datatype = self.get_input(input_name)
-            # Check the datatype's dependencies
-            missing_dependencies.extend([
-                (name, "%s input %s datatype" % (self.module_name, input_name), desc)
-                for (name, desc) in input_datatype.check_runtime_dependencies()
-            ])
+            for input_datatype in self.get_input(input_name, always_list=True):
+                # Check the datatype's dependencies
+                missing_dependencies.extend([
+                    (name, "%s input %s datatype" % (self.module_name, input_name), desc)
+                    for (name, desc) in input_datatype.check_runtime_dependencies()
+                ])
 
         # Check the dependencies of any previous modules that are not executable: their dependencies 
         # also need to be satisfied when this one is run
@@ -529,7 +580,8 @@ class BaseModuleInfo(object):
         """
         # Instantiate any input datatypes this module will need and check the datatype's dependencies
         return sum([
-            self.get_input(input_name).get_software_dependencies() for input_name in self.inputs.keys()
+            mod.get_software_dependencies() for input_name in self.inputs.keys()
+            for mod in self.get_input(input_name, always_list=True)
         ], [])
 
     def check_ready_to_run(self):
@@ -590,11 +642,11 @@ class BaseModuleInfo(object):
         """
         inputs = []
         for input_name in self.input_names:
-            previous_module, output_name = self.get_input_module_connection(input_name)
-            if previous_module.is_filter():
-                inputs.append((input_name, output_name, previous_module.get_execution_dependency_tree()))
-            else:
-                inputs.append((input_name, output_name, (previous_module, [])))
+            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True):
+                if previous_module.is_filter():
+                    inputs.append((input_name, output_name, previous_module.get_execution_dependency_tree()))
+                else:
+                    inputs.append((input_name, output_name, (previous_module, [])))
         return self, inputs
 
     def get_all_executed_modules(self):
@@ -608,9 +660,9 @@ class BaseModuleInfo(object):
         else:
             modules = [self]
             for input_name in self.input_names:
-                previous_module, output_name = self.get_input_module_connection(input_name)
-                if previous_module.is_filter():
-                    modules.extend(previous_module.get_all_executed_modules())
+                for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True):
+                    if previous_module.is_filter():
+                        modules.extend(previous_module.get_all_executed_modules())
             return modules
 
 
@@ -620,7 +672,6 @@ def check_type(provided_type, type_requirements):
     satisfy the requirements for.
 
     """
-
     # Input types may be tuples, to allow multiple types
     if type(type_requirements) is not tuple:
         type_requirements = (type_requirements,)

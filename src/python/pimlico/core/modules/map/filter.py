@@ -185,8 +185,9 @@ class DocumentMapOutputTypeWrapper(object):
         Ready to supply this data as soon as all the wrapper module's inputs are ready to produce their data.
 
         """
-        return all(self.wrapped_module_info.get_input(input_name).data_ready()
-                   for input_name in self.wrapped_module_info.input_names)
+        return all(input_type.data_ready()
+                   for input_name in self.wrapped_module_info.input_names
+                   for input_type in self.wrapped_module_info.get_input(input_name, always_list=True))
 
 
 def _wrap_output(module_info_instance, inner_output_name):

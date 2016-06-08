@@ -698,7 +698,8 @@ def get_dependencies(pipeline, modules):
         dependencies.append(LegacyModuleDependencies(module))
         # Do the same thing with the input datatypes
         for input_name in module.inputs.keys():
-            dependencies.append(LegacyDatatypeDependencies(module.get_input(input_name)))
+            for input in module.get_input(input_name, always_list=True):
+                dependencies.append(LegacyDatatypeDependencies(input))
 
     # We may want to do something cleverer to remove duplicate dependencies, but at lest remove any duplicates
     #  of exactly the same object
