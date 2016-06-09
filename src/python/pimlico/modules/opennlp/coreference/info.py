@@ -24,7 +24,7 @@ from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.coref.opennlp import CorefCorpus, CorefCorpusWriter
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus
-
+from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 WORDNET_DIR = os.path.join(MODEL_DIR, "wordnet", "db-3.1")
 
@@ -67,42 +67,6 @@ class ModuleInfo(DocumentMapModuleInfo):
         super(ModuleInfo, self).__init__(*args, **kwargs)
         self.model_path = abs_path_or_model_dir_path(self.options["model"], "opennlp")
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-
-        # We need Py4j to call the tokenizer
-        try:
-            import py4j
-        except ImportError:
-            missing_dependencies.append(("Py4J", self.module_name, "Install in lib/python/ dir using 'make py4j'"))
-
-        # Check whether the OpenNLP POS tagger is available
-        try:
-            class_name = "pimlico.opennlp.CoreferenceResolverGateway"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("OpenNLP coref wrapper",
-                                             self.module_name,
-                                             "Couldn't load %s. Build the OpenNLP Java wrapper module provided with "
-                                             "Pimlico" % class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
-
-        # Check model files are available
-        if not os.path.exists(self.model_path):
-            missing_dependencies.append(("OpenNLP coref model", self.module_name,
-                                         "Path %s does not exist" % self.model_path))
-
-        # For coref, we also need WordNet dictionary files
-        if not os.path.exists(WORDNET_DIR):
-            missing_dependencies.append(("WordNet dictionaries", self.module_name,
-                                         "Download together with OpenNLP coref model using 'make opennlp' in model dir"
-                                         ))
-
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
-
     def get_writer(self, output_name, output_dir, append=False):
         return CorefCorpusWriter(
             output_dir,
@@ -143,3 +107,22 @@ class ModuleInfo(DocumentMapModuleInfo):
             # Just put the whole number
             process_limit_string = "%d" % process_limit
         return process_limit_string
+
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + dependencies
+
+    def check_ready_to_run(self):
+        problems = super(ModuleInfo, self).check_ready_to_run()
+        # Check models exist
+        if not os.path.exists(self.model_path):
+            problems.append(("Missing OpenNLP coref model", "Path %s does not exist" % self.model_path))
+        # For coref, we also need WordNet dictionary files
+        if not os.path.exists(WORDNET_DIR):
+            problems.append(("WordNet dictionaries",
+                             "Download together with OpenNLP coref model using 'make opennlp' in model dir"))
+        return problems
+
+
+dependencies = [
+    py4j_wrapper_dependency("pimlico.opennlp.CoreferenceResolverGateway"),
+]

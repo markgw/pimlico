@@ -7,22 +7,14 @@
 
    Document this module
 
-
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
-
 """
 import os
-
-from pimlico.core.external.java import DependencyCheckerError
-from pimlico.core.dependencies.java import check_java_dependency
-from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
+from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithRequiredFields
+from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -55,35 +47,20 @@ class ModuleInfo(DocumentMapModuleInfo):
         """
         return "\n".join(" ".join(token["word"] for token in sentence) for sentence in doc)
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-
-        # We need Py4j to call the tokenizer
-        try:
-            import py4j
-        except ImportError:
-            missing_dependencies.append(("Py4J", self.module_name, "Install in lib/python/ dir using 'make py4j'"))
-
-        # Check whether the OpenNLP POS tagger is available
-        try:
-            class_name = "pimlico.opennlp.ParserGateway"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("OpenNLP parser wrapper",
-                                             self.module_name,
-                                             "Couldn't load %s. Build the OpenNLP Java wrapper module provided with "
-                                             "Pimlico" % class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
-
-        # Check model files are available
-        if not os.path.exists(self.model_path):
-            missing_dependencies.append(("OpenNLP parsing model", self.module_name,
-                                         "Path %s does not exist" % self.model_path))
-
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
-
     def get_writer(self, output_name, output_dir, append=False):
         return ConstituencyParseTreeCorpusWriter(output_dir, append=append)
+
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + dependencies
+
+    def check_ready_to_run(self):
+        problems = super(ModuleInfo, self).check_ready_to_run()
+        # Check models exist
+        if not os.path.exists(self.model_path):
+            problems.append(("Missing OpenNLP parsing model", "Path %s does not exist" % self.model_path))
+        return problems
+
+
+dependencies = [
+    py4j_wrapper_dependency("pimlico.opennlp.ParserGateway"),
+]

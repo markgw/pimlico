@@ -9,15 +9,12 @@ a tool for extracting events of many types from text and ordering them.
 `CAEVO is open source <https://github.com/nchambers/caevo>`_, implemented in Java, so is easily integrated
 into Pimlico using Py4J.
 
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
-
 """
 
 import os
 from pimlico import MODEL_DIR, JAVA_BUILD_JAR_DIR
-from pimlico.core.dependencies.java import argparse4j_dependency
+from pimlico.core.dependencies.java import argparse4j_dependency, py4j_dependency
+from pimlico.core.external.java import py4j_dependency
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.caevo import CaevoCorpus
@@ -47,6 +44,7 @@ class ModuleInfo(DocumentMapModuleInfo):
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [
+            py4j_dependency,
             argparse4j_dependency,
             caevo_wrapper_dependency,
             caevo_dependency

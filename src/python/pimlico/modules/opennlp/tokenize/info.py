@@ -3,25 +3,15 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-.. todo::
-
-   Document this module
-
-
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
+Sentence splitting and tokenization using OpenNLP's tools.
 
 """
 import os
-
-from pimlico.core.external.java import DependencyCheckerError
-from pimlico.core.dependencies.java import check_java_dependency
-from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.tar import TarredCorpus
+from pimlico.datatypes.tokenized import TokenizedCorpus
+from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -48,35 +38,19 @@ class ModuleInfo(DocumentMapModuleInfo):
         self.sentence_model_path = abs_path_or_model_dir_path(self.options["sentence_model"], "opennlp")
         self.token_model_path = abs_path_or_model_dir_path(self.options["token_model"], "opennlp")
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + dependencies
 
-        # We need Py4j to call the tokenizer
-        try:
-            import py4j
-        except ImportError:
-            missing_dependencies.append(("Py4J", self.module_name, "Install in lib/python/ dir using 'make py4j'"))
-
-        # Check whether the OpenNLP tokenizer is available
-        try:
-            class_name = "pimlico.opennlp.TokenizerGateway"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("OpenNLP tokenizer wrapper",
-                                             self.module_name,
-                                             "Couldn't load %s. Build the OpenNLP Java wrapper module provided with "
-                                             "Pimlico" % class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
-
-        # Check model files are available
+    def check_ready_to_run(self):
+        problems = super(ModuleInfo, self).check_ready_to_run()
+        # Check models exist
         if not os.path.exists(self.sentence_model_path):
-            missing_dependencies.append(("OpenNLP sentence model", self.module_name,
-                                         "Path %s does not exist" % self.sentence_model_path))
+            problems.append(("Missing OpenNLP sentence model", "Path %s does not exist" % self.sentence_model_path))
         if not os.path.exists(self.token_model_path):
-            missing_dependencies.append(("OpenNLP tokenization model", self.module_name,
-                                         "Path %s does not exist" % self.token_model_path))
+            problems.append(("Missing OpenNLP tokenization model", "Path %s does not exist" % self.token_model_path))
+        return problems
 
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
+
+dependencies = [
+    py4j_wrapper_dependency("pimlico.opennlp.TokenizerGateway"),
+]

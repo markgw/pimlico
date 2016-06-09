@@ -1,10 +1,15 @@
+import shutil
+
+import sys
+
 import os
 from subprocess import check_output, STDOUT, CalledProcessError
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
-from pimlico.core.dependencies.base import SoftwareDependency
+from pimlico.core.dependencies.base import SoftwareDependency, InstallationError
 from pimlico.core.external.java import call_java, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
+from pimlico.utils.core import remove_duplicates
 from pimlico.utils.filesystem import new_filename, extract_from_archive
 from pimlico.utils.web import download_file
 
@@ -19,13 +24,14 @@ class JavaDependency(SoftwareDependency):
     The instance has a set of representative Java classes that the checker will try to load to check whether
     the library is available and functional. It will also check that all jar files exist.
 
-    Jar paths and class directory paths are assumed to be relative to the Java lib dir (lib/java).
+    Jar paths and class directory paths are assumed to be relative to the Java lib dir (lib/java), unless they
+    are absolute paths.
 
     Subclasses should provide install() and override installable() if it's possible to install them automatically.
 
     """
-    def __init__(self, name, classes=[], jars=[], class_dirs=[]):
-        super(JavaDependency, self).__init__(name)
+    def __init__(self, name, classes=[], jars=[], class_dirs=[], **kwargs):
+        super(JavaDependency, self).__init__(name, **kwargs)
         self.class_dirs = class_dirs
         self.jars = jars
         self.classes = classes
@@ -64,9 +70,17 @@ class JavaDependency(SoftwareDependency):
         # By default, Java deps are not installable, though subclasses may override this if they provide install()
         return False
 
-    def get_classpath_components(self):
+    def _get_classpath_components_non_recursive(self):
         return [path if os.path.isabs(path) else os.path.join(JAVA_LIB_DIR, path)
                 for path in self.jars + self.class_dirs]
+
+    def get_classpath_components(self):
+        # Include our own class dirs and jars, as well as those of any java dependencies
+        java_deps = [dep for dep in self.all_dependencies() if isinstance(dep, JavaDependency)]
+        java_deps.insert(0, self)
+        return remove_duplicates(
+            sum((dep._get_classpath_components_non_recursive() for dep in java_deps), [])
+        )
 
 
 class JavaJarsDependency(JavaDependency):
@@ -236,3 +250,55 @@ argparse4j_dependency = JavaJarsDependency(
     "argparse4j",
     jar_urls=[("argparse4j.jar", "http://sourceforge.net/projects/argparse4j/files/latest/download?source=files")]
 )
+
+
+class Py4JSoftwareDependency(JavaDependency):
+    """
+    Java component of Py4J. Use this one as the main dependency, as it depends on the Python component and will
+    install that first if necessary.
+
+    """
+    def __init__(self):
+        super(Py4JSoftwareDependency, self).__init__("Py4J Java component", classes=["py4j.Gateway"])
+        self._extra_jars = []
+
+    def dependencies(self):
+        # Must have the Python component installed first
+        from .python import PythonPackageOnPip
+        return super(Py4JSoftwareDependency, self).dependencies() + [PythonPackageOnPip("py4j")]
+
+    def __get_jars(self):
+        try:
+            from py4j.version import __version__ as py4j_version
+        except ImportError:
+            # python-side package isn't installed, can't work out what jar name should be
+            return self._extra_jars + ["py4jx.y.jar"]
+        else:
+            return self._extra_jars + ["py4j%s.jar" % py4j_version]
+
+    def __set_jars(self, jars):
+        self._extra_jars = jars
+
+    jars = property(__get_jars, __set_jars)
+
+    def installable(self):
+        return True
+
+    def install(self, trust_downloaded_archives=False):
+        # We know Py4J (Python component) is already installed
+        # If it's installed system-wide, this is tricky, as we don't know where it is
+        jar_name = self.jars[0]
+        # Get hold of the jar file, which should have been installed along with Py4J and put it in our java lib dir
+        try:
+            import py4j
+        except ImportError:
+            raise InstallationError("can't import py4j package: something must have gone wrong in installation")
+
+        jar_path = os.path.join(sys.prefix, "share", "py4j", jar_name)
+        if not os.path.exists(jar_path):
+            raise InstallationError("py4j importable in Python, but jar file %s doesn't exist. Locate it and copy to "
+                                    "%s" % (jar_path, JAVA_LIB_DIR))
+        shutil.copy2(jar_path, JAVA_LIB_DIR)
+
+
+py4j_dependency = Py4JSoftwareDependency()

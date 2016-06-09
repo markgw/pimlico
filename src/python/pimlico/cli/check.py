@@ -21,7 +21,7 @@ def check_cmd(pipeline, opts):
         print "Error in pipeline: %s" % e
 
     if opts.modules:
-        passed = print_missing_dependencies(pipeline, opts.modules, verbose=opts.verbose)
+        passed = print_missing_dependencies(pipeline, opts.modules)
         if passed:
             for module_name in opts.modules:
                 # Check for remaining execution barriers

@@ -11,9 +11,10 @@ class SoftwareDependency(object):
     Base class for all Pimlico module software dependencies.
 
     """
-    def __init__(self, name, url=None):
+    def __init__(self, name, url=None, dependencies=None):
         self.url = url
         self.name = name
+        self._dependencies = dependencies or []
 
     def available(self):
         """
@@ -31,7 +32,7 @@ class SoftwareDependency(object):
         Overriding methods should call super method.
 
         """
-        return []
+        return sum([dep.problems() for dep in self.dependencies()], [])
 
     def installable(self):
         """
@@ -61,7 +62,7 @@ class SoftwareDependency(object):
         installed, we will check first that all of these are available (and try to install them if not).
 
         """
-        return []
+        return self._dependencies
 
     def install(self, trust_downloaded_archives=False):
         """
@@ -76,6 +77,13 @@ class SoftwareDependency(object):
 
     def __repr__(self):
         return "%s<%s>" % (type(self).__name__, self.name)
+
+    def all_dependencies(self):
+        """
+        Recursively fetch all dependencies of this dependency (not including itself).
+
+        """
+        return self.dependencies() + [dep.all_dependencies() for dep in self.dependencies()]
 
 
 class LegacyModuleDependencies(SoftwareDependency):
@@ -206,31 +214,33 @@ def check_and_install(deps, trust_downloaded_archives=False):
     installed = []
     for dep in deps:
         if not dep.available():
-            print title_box(dep.name)
             # Haven't got this library
-            if dep.installable():
-                try:
-                    install(dep, trust_downloaded_archives=trust_downloaded_archives)
-                except InstallationError, e:
-                    print "Could not install %s:\n%s" % (dep.name, e)
-                    uninstallable.append(dep)
+            # First check whether there are recursive deps we can install
+            check_and_install(dep.dependencies(), trust_downloaded_archives=trust_downloaded_archives)
+            # Now check again whether the library's available
+            if not dep.available():
+                print "\n%s" % title_box(dep.name)
+                if dep.installable():
+                    try:
+                        install(dep, trust_downloaded_archives=trust_downloaded_archives)
+                    except InstallationError, e:
+                        print "Could not install %s:\n%s" % (dep.name, e)
+                        uninstallable.append(dep)
+                    else:
+                        print "Installed"
+                        installed.append(dep.name)
                 else:
-                    print "Installed"
-                    installed.append(dep.name)
-            else:
-                print "%s cannot be installed automatically" % dep.name
-                instructions = dep.installation_instructions()
-                if instructions:
-                    print "\n".join("  %s" % line for line in instructions.splitlines())
-                uninstallable.append(dep)
-            print
+                    print "%s cannot be installed automatically" % dep.name
+                    instructions = dep.installation_instructions()
+                    if instructions:
+                        print "\n".join("  %s" % line for line in instructions.splitlines())
+                    uninstallable.append(dep)
+                print
 
-    if not installed and not uninstallable:
-        print "All dependencies satisfied"
-    else:
+    if installed:
         print "Installed: %s" % ", ".join(installed)
-        if uninstallable:
-            print "Could not install: %s" % ", ".join(dep.name for dep in uninstallable)
+    if uninstallable:
+        print "Could not install: %s" % ", ".join(dep.name for dep in uninstallable)
     return uninstallable
 
 

@@ -1,19 +1,17 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-
-import os
 import sys
 import time
 from Queue import Empty
 from cStringIO import StringIO
 from collections import deque
 from subprocess import Popen, PIPE
+from threading import Thread
 
+import os
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.logs import get_log_file
-from py4j.compat import CompatThread, hasattr2, Queue
-from py4j.protocol import smart_decode, Py4JJavaError
 from pimlico.utils.pipes import qget
 
 ALWAYS_INCLUDE_IN_CLASSPATH = ["%s/*" % JAVA_BUILD_JAR_DIR]
@@ -82,6 +80,7 @@ class Py4JInterface(object):
         self.port = port
         self.timeout = timeout
 
+        from py4j.compat import Queue
         self.stderr_queue = Queue()
         self.stdout_queue = Queue()
 
@@ -223,6 +222,7 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     Our own more flexble version of Py4J's launch_gateway.
     """
     from py4j.java_gateway import ProcessConsumer
+    from py4j.compat import Queue
 
     # Add custom environment variables to the ones we've already got
     java_env = os.environ.copy()
@@ -341,6 +341,9 @@ def _pipe_fd(redirect, line):
 
 
 def get_redirect_func(redirect):
+    from py4j.compat import hasattr2
+    from py4j.compat import Queue
+
     if isinstance(redirect, Queue):
         return _pipe_queue
     if isinstance(redirect, deque):
@@ -349,7 +352,7 @@ def get_redirect_func(redirect):
         return _pipe_fd
 
 
-class OutputConsumer(CompatThread):
+class OutputConsumer(Thread):
     """Thread that consumes output
     Modification of Py4J's OutputConsumer to allow multiple redirects.
     """
@@ -371,6 +374,7 @@ class OutputConsumer(CompatThread):
         self.temporary_redirect_funcs = []
 
     def run(self):
+        from py4j.protocol import smart_decode
         lines_iterator = iter(self.stream.readline, b"")
         for line in lines_iterator:
             for redirect, fn in zip(self.redirects, self.redirect_funcs):
@@ -402,6 +406,7 @@ def make_py4j_errors_safe(fn):
     containing some of the information about the Java exception if possible.
 
     """
+    from py4j.protocol import Py4JJavaError
     def _wrapped_fn(*args, **kwargs):
         try:
             return fn(*args, **kwargs)

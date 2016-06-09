@@ -3,26 +3,21 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-.. todo::
+Part-of-speech tagging using OpenNLP's tools.
 
-   Document this module
-
-
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
+By default, uses the pre-trained English model distributed with OpenNLP. If you want to use other models (e.g.
+for other languages), download them from the OpenNLP website to the models dir (`models/opennlp`) and specify
+the model name as an option.
 
 """
 import os
 
-from pimlico.core.external.java import DependencyCheckerError
-from pimlico.core.dependencies.java import check_java_dependency
-from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, AddAnnotationField, \
     SimpleWordAnnotationCorpusWriter
+from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -42,35 +37,8 @@ class ModuleInfo(DocumentMapModuleInfo):
         super(ModuleInfo, self).__init__(*args, **kwargs)
         self.model_path = abs_path_or_model_dir_path(self.options["model"], "opennlp")
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-
-        # We need Py4j to call the tokenizer
-        try:
-            import py4j
-        except ImportError:
-            missing_dependencies.append(("Py4J", self.module_name, "Install in lib/python/ dir using 'make py4j'"))
-
-        # Check whether the OpenNLP POS tagger is available
-        try:
-            class_name = "pimlico.opennlp.PosTaggerGateway"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("OpenNLP POS tagger wrapper",
-                                             self.module_name,
-                                             "Couldn't load %s. Build the OpenNLP Java wrapper module provided with "
-                                             "Pimlico" % class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
-
-        # Check model files are available
-        if not os.path.exists(self.model_path):
-            missing_dependencies.append(("OpenNLP POS tagger model", self.module_name,
-                                         "Path %s does not exist" % self.model_path))
-
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + dependencies
 
     def get_writer(self, output_name, output_dir, append=False):
         return SimpleWordAnnotationCorpusWriter(
@@ -78,3 +46,15 @@ class ModuleInfo(DocumentMapModuleInfo):
             self.get_output("documents").annotation_fields,
             append=append
         )
+
+    def check_ready_to_run(self):
+        problems = super(ModuleInfo, self).check_ready_to_run()
+        # Check models exist
+        if not os.path.exists(self.model_path):
+            problems.append(("Missing OpenNLP tagger model", "Path %s does not exist" % self.model_path))
+        return problems
+
+
+dependencies = [
+    py4j_wrapper_dependency("pimlico.opennlp.PosTaggerGateway"),
+]
