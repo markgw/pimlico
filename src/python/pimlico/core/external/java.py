@@ -359,7 +359,9 @@ class OutputConsumer(Thread):
 
     def __init__(self, redirects, stream, *args, **kwargs):
         self.temporary_redirects = kwargs.pop("temporary_redirects", [])
+        daemon = kwargs.pop("daemon", False)
         super(OutputConsumer, self).__init__(*args, **kwargs)
+        self.daemon = daemon
         # Also allow the one-redirect case, just like Py4J's class
         if not isinstance(redirects, list):
             redirects = [redirects]

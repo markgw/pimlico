@@ -17,7 +17,7 @@ from Queue import Empty
 from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
-    DocumentMapModuleExecutor
+    DocumentMapModuleExecutor, WorkerStartupError, WorkerShutdownError
 from pimlico.utils.pipes import qget
 
 
@@ -71,7 +71,7 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                 try:
                     self.tear_down()
                 except Exception, e:
-                    self.exception_queue.put(ProcessShutdownError("error in tear_down() call", cause=e), block=True)
+                    self.exception_queue.put(WorkerShutdownError("error in tear_down() call", cause=e), block=True)
         except Exception, e:
             # If there's any uncaught exception, make it available to the main process
             # Include the formatted stack trace, since we can't get this later from the exception outside this process
@@ -103,7 +103,12 @@ class MultiprocessingMapPool(DocumentProcessorPool):
                 # No error
                 pass
             else:
-                raise ProcessStartupError("error starting up worker process: %s" % e, cause=e)
+                if hasattr(e, "traceback"):
+                    debugging_info = e.traceback
+                else:
+                    debugging_info = None
+                raise WorkerStartupError("error starting up worker process: %s" % e, cause=e,
+                                         debugging_info=debugging_info)
 
     def start_worker(self):
         return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
@@ -218,15 +223,3 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
                 postprocess_fn(self, error=error)
 
     return ModuleExecutor
-
-
-class ProcessStartupError(Exception):
-    def __init__(self, *args, **kwargs):
-        self.cause = kwargs.pop("cause", None)
-        super(ProcessStartupError, self).__init__(*args, **kwargs)
-
-
-class ProcessShutdownError(Exception):
-    def __init__(self, *args, **kwargs):
-        self.cause = kwargs.pop("cause", None)
-        super(ProcessShutdownError, self).__init__(*args, **kwargs)

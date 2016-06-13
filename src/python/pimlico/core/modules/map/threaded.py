@@ -14,7 +14,7 @@ from Queue import Empty, Queue
 from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
-    DocumentMapModuleExecutor
+    DocumentMapModuleExecutor, WorkerStartupError
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.utils.pipes import qget
 
@@ -84,7 +84,7 @@ class ThreadingMapPool(DocumentProcessorPool):
                 # No error
                 pass
             else:
-                raise ThreadStartupError("error in worker process: %s" % e, cause=e)
+                raise WorkerStartupError("error in worker process: %s" % e, cause=e)
 
     def start_worker(self):
         return self.THREAD_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
@@ -182,9 +182,3 @@ def threading_executor_factory(process_document_fn, preprocess_fn=None, postproc
                 postprocess_fn(self, error=error)
 
     return ModuleExecutor
-
-
-class ThreadStartupError(Exception):
-    def __init__(self, *args, **kwargs):
-        self.cause = kwargs.pop("cause", None)
-        super(ThreadStartupError, self).__init__(*args, **kwargs)

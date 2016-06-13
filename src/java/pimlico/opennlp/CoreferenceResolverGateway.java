@@ -116,7 +116,7 @@ public class CoreferenceResolverGateway {
             return corefLinker.getEntities(mentionArray);
         } catch (RuntimeException e) {
             // Sadly this happens occasionally: handle it nicely
-            System.out.println("Runtime exception getting entities: ");
+            System.err.println("Runtime exception getting entities: " + e);
             e.printStackTrace();
             return null;
         }

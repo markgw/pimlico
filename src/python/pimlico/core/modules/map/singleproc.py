@@ -13,7 +13,7 @@ from Queue import Queue, Empty
 from traceback import format_exc
 
 from pimlico.core.modules.map import DocumentMapProcessMixin, ProcessOutput, DocumentProcessorPool, \
-    DocumentMapModuleExecutor
+    DocumentMapModuleExecutor, WorkerStartupError
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.utils.pipes import qget
 
@@ -158,9 +158,3 @@ def single_process_executor_factory(process_document_fn, preprocess_fn=None, pos
                 postprocess_fn(self, error=error)
 
     return ModuleExecutor
-
-
-class WorkerStartupError(Exception):
-    def __init__(self, *args, **kwargs):
-        self.cause = kwargs.pop("cause", None)
-        super(WorkerStartupError, self).__init__(*args, **kwargs)

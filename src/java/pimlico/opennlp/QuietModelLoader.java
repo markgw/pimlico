@@ -25,8 +25,7 @@ public abstract class QuietModelLoader<T> {
         this.modelName = modelName;
     }
 
-    protected abstract T loadModel(InputStream modelIn) throws
-            IOException, InvalidFormatException;
+    protected abstract T loadModel(InputStream modelIn) throws IOException;
 
     public T load(File modelFile) {
         CmdLineUtil.checkInputFile(modelName + " model", modelFile);

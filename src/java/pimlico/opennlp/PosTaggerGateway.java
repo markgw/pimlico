@@ -14,7 +14,7 @@ import opennlp.tools.postag.POSTaggerME;
 import pimlico.core.Py4JGatewayStarter;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Py4J gateway to POS tagger.
@@ -23,9 +23,9 @@ public class PosTaggerGateway {
     POSTaggerME tagger;
     private Joiner whitespaceJoiner;
 
-    public PosTaggerGateway(String modelFilename) {
+    public PosTaggerGateway(File modelFile) {
         // Load model
-        POSModel model = new POSModelLoader().load(new File(modelFilename));
+        POSModel model = new POSModelLoader().load(modelFile);
         tagger = new POSTaggerME(model);
         whitespaceJoiner = Joiner.on(' ');
     }
@@ -37,7 +37,7 @@ public class PosTaggerGateway {
      * @param sentences input sentences
      * @return array of POS tagged sentences
      */
-    public String[] posTag(ArrayList sentences) {
+    public String[] posTag(List sentences) {
         String[] result = new String[sentences.size()];
         String[] words, tags;
 
@@ -68,7 +68,7 @@ public class PosTaggerGateway {
         }
 
         // Load the gateway instance
-        PosTaggerGateway entryPoint = new PosTaggerGateway(opts.getString("model"));
+        PosTaggerGateway entryPoint = new PosTaggerGateway(new File(opts.getString("model")));
         // Run the gateway
         Py4JGatewayStarter.startGateway(entryPoint, opts.getInt("port"), opts.getInt("python_port"));
     }

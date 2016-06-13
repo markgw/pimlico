@@ -131,7 +131,10 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         self.preprocess()
 
         # Start up a pool
-        self.pool = self.create_pool(self.processes)
+        try:
+            self.pool = self.create_pool(self.processes)
+        except WorkerStartupError, e:
+            raise ModuleExecutionError(e.message, cause=e.cause, debugging_info=e.debugging_info)
 
         complete = False
         result_buffer = {}
@@ -512,3 +515,16 @@ class DocumentMapProcessMixin(object):
         Called when there aren't any more inputs to come.
         """
         pass
+
+
+class WorkerStartupError(Exception):
+    def __init__(self, *args, **kwargs):
+        self.cause = kwargs.pop("cause", None)
+        self.debugging_info = kwargs.pop("debugging_info", None)
+        super(WorkerStartupError, self).__init__(*args, **kwargs)
+
+
+class WorkerShutdownError(Exception):
+    def __init__(self, *args, **kwargs):
+        self.cause = kwargs.pop("cause", None)
+        super(WorkerShutdownError, self).__init__(*args, **kwargs)

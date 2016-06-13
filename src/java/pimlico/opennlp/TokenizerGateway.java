@@ -26,12 +26,12 @@ public class TokenizerGateway {
     private Tokenizer tokenizer;
     private Joiner whitespaceJoiner;
 
-    public TokenizerGateway(String sentModelFilename, String tokModelFilename) {
+    public TokenizerGateway(File sentModelFile, File tokModelFile) {
         // Load models
-        SentenceModel sentenceModel = new SentenceModelLoader().load(new File(sentModelFilename));
+        SentenceModel sentenceModel = new SentenceModelLoader().load(sentModelFile);
         sentenceDetector = new SentenceDetectorME(sentenceModel);
 
-        TokenizerModel tokenizerModel = new TokenizerModelLoader().load(new File(tokModelFilename));
+        TokenizerModel tokenizerModel = new TokenizerModelLoader().load(tokModelFile);
         tokenizer = new TokenizerME(tokenizerModel);
 
         whitespaceJoiner = Joiner.on(' ');
@@ -78,7 +78,7 @@ public class TokenizerGateway {
         String tokModelFilename = opts.getString("tok_model");
 
         // Load the gateway instance
-        TokenizerGateway entryPoint = new TokenizerGateway(sentModelFilename, tokModelFilename);
+        TokenizerGateway entryPoint = new TokenizerGateway(new File(sentModelFilename), new File(tokModelFilename));
         // Create a gateway server, using this as an entry point
         Py4JGatewayStarter.startGateway(entryPoint, opts.getInt("port"), opts.getInt("python_port"));
     }

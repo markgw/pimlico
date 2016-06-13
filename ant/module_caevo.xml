@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="caevo">
+  <path id="caevo.classpath">
+    <path refid="pimlico.module.production.classpath"/>
+    <fileset dir="${basedir}/lib/java">
+      <include name="caevo-1.1-jar-with-dependencies.jar/"/>
+    </fileset>
+  </path>
+
   <target name="compile.module.caevo" description="Compile module Pimlico-Caevo; production classes">
     <mkdir dir="${pimlico.class.dir}"/>
     <javac destdir="${pimlico.class.dir}" verbose="true" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.pimlico}/javac" includeantruntime="false">
       <compilerarg line="${compiler.args.pimlico}"/>
-      <bootclasspath refid="pimlico.module.bootclasspath"/>
-      <classpath refid="pimlico.module.production.classpath"/>
+      <bootclasspath refid="caevo.classpath"/>
+      <classpath refid="caevo.classpath"/>
       <src refid="pimlico.module.sourcepath"/>
       <include name="pimlico/caevo/**/*.java"/>
     </javac>

@@ -50,6 +50,8 @@ def run_cmd(pipeline, opts):
             if e.debugging_info is not None:
                 # Extra debugging information was provided by the exception
                 print >>sys.stderr, e.debugging_info
+            if e.cause is not None:
+                print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
         print >>sys.stderr, "Error executing module '%s': %s" % (opts.module_name, e)
     except KeyboardInterrupt:
         print >>sys.stderr, "Exiting before execution completed due to user interrupt"

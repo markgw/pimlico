@@ -76,6 +76,8 @@
     </fileset>
     <fileset dir="${basedir}/lib/java">
       <exclude name="src/"/>
+      <!-- Excluded for most purposes, as it has an old version of OpenNLP, which overrides the newer version -->
+      <exclude name="caevo-1.1-jar-with-dependencies.jar/"/>
     </fileset>
   </path>
 
@@ -91,7 +93,7 @@
   <property name="module.jdk.home.pimlico" value="${project.jdk.home}"/>
   <property name="module.jdk.bin.pimlico" value="${project.jdk.bin}"/>
   <property name="module.jdk.classpath.pimlico" value="${project.jdk.classpath}"/>
-  <property name="compiler.args.pimlico" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
+  <property name="compiler.args.pimlico" value="-encoding UTF-8 -source 1.7 ${compiler.args}"/>
 
 
   <!-- Basic property configuration that most modules will share, but can override/modify -->
