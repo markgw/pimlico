@@ -13,7 +13,7 @@ package should be laid out as follows:
 
 - The module's metadata is defined by a class in info.py called ModuleInfo, which should inherit from
   BaseModuleInfo or one of its subclasses.
-- The module's functionality is provided by a class in exec.py called ModuleExecutor, which should inherit
+- The module's functionality is provided by a class in execute.py called ModuleExecutor, which should inherit
   from BaseModuleExecutor.
 
 The exec Python module will not be imported until an instance of the module is to be run. This means that
@@ -23,6 +23,8 @@ is loaded.
 
 """
 import json
+import warnings
+
 import os
 import shutil
 from importlib import import_module
@@ -788,21 +790,41 @@ def load_module_executor(path_or_info):
         return module_info.module_executor_override
     else:
         if isinstance(path_or_info, basestring):
-            executor_path = "%s.exec" % path_or_info
+            # Try loading a module called "execute"
+            executor_path = "%s.execute" % path_or_info
 
             try:
                 mod = import_module(executor_path)
             except ImportError, e:
-                raise ModuleInfoLoadError("module %s could not be loaded, could not import path %s" %
-                                          (path_or_info, executor_path), cause=e)
+                # Executors used to be defined in a module called "exec", until I realised this was stupid, as it's
+                #  as reserved word!
+                # Check whether one such exists and use it if it does
+                try:
+                    mod = import_module("%s.exec" % path_or_info)
+                except ImportError:
+                    # If not, raise an error relating to the new "execute" convention, not the old, deprecated name
+                    raise ModuleInfoLoadError("module %s could not be loaded, could not import path %s" %
+                                              (path_or_info, executor_path), cause=e)
+                else:
+                    # Output a deprecation warning so we know to fix this naming
+                    warnings.warn("module '%s' uses an 'exec' python module to define its executor. Should be renamed "
+                                  "to 'execute'" % path_or_info)
         else:
             # We were given a module info instance: work out where it lives and get the executor relatively
             try:
-                mod = import_module("..exec", module_info.__module__)
+                mod = import_module("..execute", module_info.__module__)
             except ImportError, e:
-                raise ModuleInfoLoadError("module %s could not be loaded, could not import ..exec from ModuleInfo's "
-                                          "module, %s" %
-                                          (path_or_info, module_info.__module__), cause=e)
+                # Check whether an 'exec' module exists
+                try:
+                    mod = import_module("..exec", module_info.__module__)
+                except ImportError:
+                    raise ModuleInfoLoadError("module %s could not be loaded, could not import ..execute from "
+                                              "ModuleInfo's module, %s" %
+                                              (path_or_info, module_info.__module__), cause=e)
+                else:
+                    # Output a deprecation warning so we know to fix this naming
+                    warnings.warn("module '%s' uses an 'exec' python module to define its executor. Should be renamed "
+                                  "to 'execute'" % path_or_info.module_package_name)
         if not hasattr(mod, "ModuleExecutor"):
             raise ModuleExecutorLoadError("could not load class %s.ModuleExecutor" % mod.__name__)
         return mod.ModuleExecutor

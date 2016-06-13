@@ -61,11 +61,11 @@ Write a module
 A Pimlico module consists of a Python package with a special layout. Every module has a file
 `info.py`. This contains the definition of the module's metadata: its inputs, outputs, options, etc.
 
-Most modules also have a file `exec.py`, which defines the routine that's called when it's run. You should take
+Most modules also have a file `execute.py`, which defines the routine that's called when it's run. You should take
 care when writing `info.py` not to import any non-standard Python libraries or have any time-consuming operations
 that get run when it gets imported.
 
-`exec.py`, on the other hand, will only get imported when the module is to be
+`execute.py`, on the other hand, will only get imported when the module is to be
 run, after dependency checks have been run.
 
 Metadata
