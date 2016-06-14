@@ -15,10 +15,11 @@ import sys
 from cStringIO import StringIO
 from operator import itemgetter
 
+from pimlico import PIMLICO_ROOT, PROJECT_ROOT
 from pimlico.core.dependencies.base import LegacyModuleDependencies, LegacyDatatypeDependencies
 from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
 from pimlico.utils.core import remove_duplicates
-from pimlico.utils.format import multiline_tablate, title_box
+from pimlico.utils.format import title_box
 from pimlico.utils.logging import get_console_logger
 
 REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
@@ -50,6 +51,15 @@ class PipelineConfig(object):
         * `python_path`: a path or paths, relative to the directory containing the config file, in which Python
           modules/packages used by the pipeline can be found. Typically, a config file is distributed with a
           directory of Python code providing extra modules, datatypes, etc. Multiple paths are separated by colons (:).
+
+    **Special variable substitutions**
+
+    Certain variable substitutions are always available, in addition to those defined in `vars` sections.
+
+    - `pimlico_root`:
+        Root directory of Pimlico, usually the directory `pimlico/` within the project directory.
+    - `proejct_root`:
+        Root directory of the whole project. Current assumed to always be the parent directory of `pimlico_root`.
 
     **Directives:**
 
@@ -301,9 +311,15 @@ class PipelineConfig(object):
             if attr not in local_config_data:
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
 
+        # Special vars are available for substitution in all options, including other vars
+        special_vars = {
+            "project_root": PROJECT_ROOT,
+            "pimlico_root": PIMLICO_ROOT,
+        }
+
         # Perform pre-processing of config file to replace includes, etc
         config_sections, available_variants, vars, all_filenames = \
-            preprocess_config_file(os.path.abspath(filename), variant=variant)
+            preprocess_config_file(os.path.abspath(filename), variant=variant, initial_vars=special_vars)
         # If we were asked to load a particular variant, check it's in the list of available variants
         if variant != "main" and variant not in available_variants:
             raise PipelineConfigParseError("could not load pipeline variant '%s': it is not declared anywhere in the "
@@ -314,6 +330,8 @@ class PipelineConfig(object):
         if "pipeline" not in config_section_dict:
             raise PipelineConfigParseError("no 'pipeline' section found in config: must be supplied to give basic "
                                            "pipeline configuration")
+        # Include special variables in those used for substitutions
+        vars.update(special_vars)
         # Do variable interpolation in the pipeline config section as well as module configs
         pipeline_config = dict([
             (key, var_substitute(val, vars)) for (key, val) in config_section_dict["pipeline"].items()
@@ -459,11 +477,11 @@ class PipelineStructureError(Exception):
     pass
 
 
-def preprocess_config_file(filename, variant="main"):
+def preprocess_config_file(filename, variant="main", initial_vars={}):
     copies = {}
     try:
         config_sections, available_variants, vars, all_filenames = \
-            _preprocess_config_file(filename, variant=variant, copies=copies)
+            _preprocess_config_file(filename, variant=variant, copies=copies, initial_vars=initial_vars)
     except IOError, e:
         raise PipelineConfigParseError("could not read config file %s: %s" % (filename, e))
     config_sections_dict = dict(config_sections)
@@ -490,7 +508,7 @@ def preprocess_config_file(filename, variant="main"):
     return config_sections, available_variants, vars, all_filenames
 
 
-def _preprocess_config_file(filename, variant="main", copies={}):
+def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}):
     # Read in the file
     config_lines = []
     available_variants = set([])
@@ -523,7 +541,8 @@ def _preprocess_config_file(filename, variant="main", copies={}):
                     # Run preprocessing over that file too, so we can have embedded includes, etc
                     try:
                         incl_config, incl_variants, incl_vars, incl_filenames = \
-                            _preprocess_config_file(include_filename, variant=variant, copies=copies)
+                            _preprocess_config_file(include_filename, variant=variant, copies=copies,
+                                                    initial_vars=initial_vars)
                     except IOError, e:
                         raise PipelineConfigParseError("could not find included config file '%s': %s" %
                                                        (relative_filename, e))
@@ -555,7 +574,12 @@ def _preprocess_config_file(filename, variant="main", copies={}):
 
     # If there's a "vars" section in this config file, remove it now and return it separately
     if config_parser.has_section("vars"):
-        vars = dict(config_parser.items("vars"))
+        # Do variable substitution within the vars, using the initial vars and allowing vars to substitute into
+        #  subsequent ones
+        vars = copy.copy(initial_vars)
+        for key, val in config_parser.items("vars"):
+            key, val = key, var_substitute(val, vars)
+            vars[key] = val
     else:
         vars = {}
     # If there were "vars" sections in included configs, allow them to override vars in this one

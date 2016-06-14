@@ -64,7 +64,7 @@ class Entity(object):
             # Get rid of words that won't help us: stopwords and pronouns
             head_words = mention_head.split()
             if pronouns is not None:
-                head_words = [w for w in head_words if w not in pro]
+                head_words = [w for w in head_words if w not in pronouns]
             # Don't use any 1-letter words
             head_words = [w for w in head_words if len(w) > 1]
             # If there are no words left, we can't get a headword from this mention

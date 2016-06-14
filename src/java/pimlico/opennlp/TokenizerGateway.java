@@ -14,6 +14,7 @@ import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
+import opennlp.tools.util.Span;
 import pimlico.core.Py4JGatewayStarter;
 
 import java.io.File;
@@ -55,6 +56,10 @@ public class TokenizerGateway {
             }
             return tokenizedSents;
         }
+    }
+
+    public Span[] sentenceSplitSpans(String input) {
+        return sentenceDetector.sentPosDetect(input);
     }
 
     public static void main(String[] args) {

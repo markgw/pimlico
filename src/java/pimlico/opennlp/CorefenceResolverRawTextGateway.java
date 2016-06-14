@@ -6,6 +6,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 import opennlp.tools.coref.DiscourseEntity;
 import opennlp.tools.parser.Parse;
+import opennlp.tools.util.Span;
 import pimlico.core.Py4JGatewayStarter;
 
 import java.io.File;
@@ -39,6 +40,9 @@ public class CorefenceResolverRawTextGateway {
         Parse[] parses = null;
         String[] posTags = null;
 
+        // Do sentence splitting separately, so we get the spans
+        Span[] sentenceSpans = tokenizerGateway.sentenceSplitSpans(inputText);
+        // This actually repeats the sentence splitting, but it doesn't take long, so no matter
         String[] tokenizedSentences = tokenizerGateway.tokenize(inputText);
         if (tokenizedSentences != null) {
             posTags = posTaggerGateway.posTag(Arrays.asList(tokenizedSentences));
@@ -48,7 +52,7 @@ public class CorefenceResolverRawTextGateway {
                 entities = coreferenceResolverGateway.resolveCoreference(parseTrees);
             }
         }
-        return new CoreferenceResolutionPipelineResult(entities, parses, posTags, tokenizedSentences);
+        return new CoreferenceResolutionPipelineResult(entities, parses, posTags, tokenizedSentences, sentenceSpans);
     }
 
     public static void main(String[] args) {

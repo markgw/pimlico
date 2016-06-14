@@ -143,10 +143,13 @@ Output {output_name}:
 {title}
 Status: {status}
 {inputs}
-{outputs}{module_details}""".format(
+{outputs}
+Options:
+    {options}{module_details}""".format(
         title=colored(title_box("Module: %s" % module.module_name), status_color),
         status=colored("not executable", "green") if module.is_filter() else colored(module.status, status_color),
         inputs="\n".join(input_infos) if input_infos else "No inputs",
         outputs="\n".join(output_infos) if output_infos else "No outputs",
+        options="\n    ".join("%s: %s" % (key, val) for (key, val) in module.options.items()),
         module_details=module_details,
     ), also_output
