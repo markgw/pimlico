@@ -3,9 +3,14 @@ import sys
 from pimlico.core.dependencies.base import check_and_install
 from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
 
-__version__ = "0.2.1"
-
 PIMLICO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+
+# Fetch current version number from PIMLICO_ROOT/admin/releases.txt
+with open(os.path.join(PIMLICO_ROOT, "admin", "releases.txt"), "r") as releases_file:
+    _lines = [r.strip() for r in releases_file.read().splitlines()]
+    releases = [r[1:] for r in _lines if r.startswith("v")]
+# The last listed version is not a release tag name, but the current, bleeding-edge version number
+__version__ = releases[-1]
 
 PROJECT_ROOT = os.path.abspath(os.path.join(PIMLICO_ROOT, ".."))
 
