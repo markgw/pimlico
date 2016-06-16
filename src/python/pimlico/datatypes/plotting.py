@@ -1,6 +1,7 @@
 import os
 
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
+from pimlico.datatypes.files import NamedFile
 
 
 class PlotOutput(PimlicoDatatype):
@@ -9,7 +10,15 @@ class PlotOutput(PimlicoDatatype):
 
     Contains the dataset being plotted, a script to build the plot, and the output PDF.
 
+    Also supplies additional datatypes to point to the individual files.
+
     """
+    supplied_additional = [
+        ("pdf", NamedFile("plot.pdf")),
+        ("code", NamedFile("plot.py")),
+        ("data", NamedFile("data.csv")),
+    ]
+
     @property
     def script_path(self):
         return os.path.join(self.data_dir, "plot.py")

@@ -8,6 +8,7 @@ import tarfile
 import threading
 from zipfile import ZipFile
 
+from pimlico import OUTPUT_DIR
 from pimlico.utils.progress import get_progress_bar
 
 

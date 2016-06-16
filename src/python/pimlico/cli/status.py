@@ -83,7 +83,7 @@ def module_status(module):
     # Put together information about the inputs
     input_infos = []
     for input_name in module.input_names:
-        for (input_datatype, (input_module, input_module_output)) in \
+        for (input_datatype, (input_module, input_module_output, input_additional_names)) in \
                 zip(module.get_input(input_name, always_list=True),
                     module.get_input_module_connection(input_name, always_list=True)):
             corpus_dir = input_datatype.absolute_base_dir or "not available yet"

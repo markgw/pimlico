@@ -122,6 +122,7 @@ def multistage_module(multistage_module_type_name, module_stages):
     main_inputs = []
     main_outputs = []
     named_stages = {}
+    output_stage_names = {}
     # Like pipeline.used_outputs (and added to it when necessary)
     used_internal_outputs = {}
 
@@ -178,6 +179,7 @@ def multistage_module(multistage_module_type_name, module_stages):
                         (stage.name, stage_output_name))
                 main_output_name = connection.main_output_name or stage_output_name
                 main_outputs.append((main_output_name, output_type))
+                output_stage_names[main_output_name] = (stage.name, stage_output_name)
 
         named_stages[stage.name] = stage
 
@@ -188,6 +190,7 @@ def multistage_module(multistage_module_type_name, module_stages):
     if len(main_outputs) == 0:
         main_outputs.append(
             (module_stages[-1].module_info_cls.module_outputs + module_stages[-1].module_info_cls.module_optional_outputs)[0])
+        output_stage_names[main_outputs[-1][0]] = (module_stages[-1].name, main_outputs[-1][0])
     # Check we've not ended up with duplicate output names
     duplicate_output_names = [n for (n, c) in Counter([name for (name, dtype) in main_outputs]).iteritems() if c > 1]
     if duplicate_output_names:
@@ -238,8 +241,10 @@ def multistage_module(multistage_module_type_name, module_stages):
                             previous_stage_name = connection.previous_module
                         # This will be referred to in the pipeline using a prefixed name
                         input_name = connection.input_name or stage.module_info_cls.module_inputs[0][0]
+                        # We don't currently allow additional output specifiers within multistage modules, but
+                        # there's no reason why we couldn't
                         sub_inputs[input_name] = \
-                            [("%s:%s" % (self.module_name, previous_stage_name), connection.output_name)]
+                            [("%s:%s" % (self.module_name, previous_stage_name), connection.output_name, [])]
                     elif type(connection) is ModuleInputConnection:
                         # Connection to multi-stage module input
                         stage_input_name = connection.stage_input_name or stage.module_info_cls.inputs[0][0]
@@ -256,6 +261,11 @@ def multistage_module(multistage_module_type_name, module_stages):
                 self.named_internal_modules[stage.name] = module_info
                 # Also add the module into the pipeline, with the MS module prefix, so we can make connections
                 self.pipeline.insert_module(module_info)
+
+        def instantiate_output_datatype(self, output_name, output_datatype):
+            # Hand over to the appropriate module that the output came from to do the instantiation
+            return self.pipeline["%s:%s" % (self.module_name, output_stage_names[output_name][0])].\
+                instantiate_output_datatype(output_stage_names[output_name][1], output_datatype)
 
     return ModuleInfo
 

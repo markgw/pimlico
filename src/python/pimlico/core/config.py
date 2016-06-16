@@ -15,7 +15,7 @@ import sys
 from cStringIO import StringIO
 from operator import itemgetter
 
-from pimlico import PIMLICO_ROOT, PROJECT_ROOT
+from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR
 from pimlico.core.dependencies.base import LegacyModuleDependencies, LegacyDatatypeDependencies
 from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
 from pimlico.utils.core import remove_duplicates
@@ -60,6 +60,8 @@ class PipelineConfig(object):
         Root directory of Pimlico, usually the directory `pimlico/` within the project directory.
     - `proejct_root`:
         Root directory of the whole project. Current assumed to always be the parent directory of `pimlico_root`.
+    - `output_dir`:
+        Path to output dir (usually `output` in Pimlico root).
 
     **Directives:**
 
@@ -315,6 +317,7 @@ class PipelineConfig(object):
         special_vars = {
             "project_root": PROJECT_ROOT,
             "pimlico_root": PIMLICO_ROOT,
+            "output_dir": OUTPUT_DIR,
         }
 
         # Perform pre-processing of config file to replace includes, etc

@@ -19,6 +19,7 @@ from importlib import import_module
 
 import cPickle as pickle
 
+from pimlico.core.config import PipelineStructureError
 
 __all__ = [
     "PimlicoDatatype", "PimlicoDatatypeWriter", "IterableCorpus", "IterableCorpusWriter",
@@ -43,6 +44,19 @@ class PimlicoDatatype(object):
     Datatypes may require/allow options to be set when they're used to read pipeline inputs. These
     are specified, in the same way as module options, by input_module_options on the datatype class.
 
+    Datatypes may supply a set of additional datatypes. These should be guaranteed to be available if the
+    main datatype is available. They must require no extra processing to be made available, unless that
+    is done on the fly while reading the datatype (like a filter) or while the main datatype is being
+    written.
+
+    Additional datatypes can be accessed in config files by specifying the main datatype (as a previous module,
+    optionally with an output name) and the additional datatype name in the form `main_datatype->additional_name`.
+    Multiple additional names may be given, causing the next name to be looked up as an additional
+    datatype of the initially loaded additional datateyp. E..g `main_datatype->additional0->additional1`.
+
+    To avoid conflicts in the metadata between datatypes using the same directory, datatypes loaded as additional
+    datatypes have their additional name available to them and use it as a prefix to the metadata filename.
+
     """
     datatype_name = "base_datatype"
     requires_data_preparation = False
@@ -51,8 +65,16 @@ class PimlicoDatatype(object):
     Override to provide shell commands specific to this datatype. Should include the superclass' list.
     """
     shell_commands = []
+    """
+    List of additional datatypes provided by this one, given as (name, datatype class) pairs.
+    For each of these, a call to `get_additional_datatype(name)` (once the main datatype is ready) should return a
+    datatype instance that is also ready.
 
-    def __init__(self, base_dir, pipeline, **kwargs):
+    """
+    supplied_additional = []
+
+    def __init__(self, base_dir, pipeline, additional_name=None, **kwargs):
+        self.additional_name = additional_name
         self.pipeline = pipeline
         self.base_dir = base_dir
         # Search for an absolute path to the base dir that exists
@@ -69,10 +91,15 @@ class PimlicoDatatype(object):
     @property
     def metadata(self):
         if self._metadata is None:
+            if self.additional_name is None:
+                metadata_filename = "corpus_metadata"
+            else:
+                metadata_filename = "%s_corpus_metadata" % self.additional_name
+
             if self.absolute_base_dir is not None and \
-                    os.path.exists(os.path.join(self.absolute_base_dir, "corpus_metadata")):
+                    os.path.exists(os.path.join(self.absolute_base_dir, metadata_filename)):
                 # Load dictionary of metadata
-                with open(os.path.join(self.absolute_base_dir, "corpus_metadata"), "r") as f:
+                with open(os.path.join(self.absolute_base_dir, metadata_filename), "r") as f:
                     self._metadata = pickle.load(f)
             else:
                 # No metadata written: data may not have been written yet
@@ -151,6 +178,16 @@ class PimlicoDatatype(object):
 
         """
         return "%s.%s" % (cls.__module__, cls.__name__)
+
+    @classmethod
+    def instantiate_additional_datatype(cls, name, additional_name, base_dir, pipeline, **options):
+        """
+        Default implementation just assumes the datatype class can be instantiated using the default constructor,
+        with the same base dir and pipeline as the main datatype. Options given to the main datatype are passed
+        down to the additional datatype.
+
+        """
+        return dict(cls.supplied_additional)[name](base_dir, pipeline, additional_name=additional_name, **options)
 
 
 class DynamicOutputDatatype(object):

@@ -261,6 +261,11 @@ class BaseModuleInfo(object):
             # This will only work if the input datatype is a MultipleInputs
             inputs[input_name] = []
             for spec in input_spec.split(","):
+                # Split off any additional datatype specifiers: there could be multiple (recursive)
+                spec_parts = spec.split("->")
+                spec = spec_parts[0]
+                additional_names = spec_parts[1:]  # Most of the time this is empty
+
                 if "." in spec:
                     # This is a module name + output name
                     module_name, __, output_name = spec.rpartition(".")
@@ -268,7 +273,7 @@ class BaseModuleInfo(object):
                     # Just a module name, using the default output
                     module_name = spec
                     output_name = None
-                inputs[input_name].append((module_name, output_name))
+                inputs[input_name].append((module_name, output_name, additional_names))
 
         return inputs
 
@@ -328,7 +333,7 @@ class BaseModuleInfo(object):
     def get_output_dir(self, output_name, short_term_store=False):
         return os.path.join(self.get_module_output_dir(short_term_store=short_term_store), output_name)
 
-    def get_output_datatype(self, output_name=None):
+    def get_output_datatype(self, output_name=None, additional_names=[]):
         if output_name is None:
             # Get the default output
             # Often there'll be only one output, so a name needn't be specified
@@ -345,6 +350,17 @@ class BaseModuleInfo(object):
         if isinstance(datatype, DynamicOutputDatatype):
             # Call the get_datatype() method to build the actual datatype
             datatype = datatype.get_datatype(self)
+
+        # Recursively retrieve additional datatypes from this one
+        additional_names = additional_names or []
+        for additional_name in additional_names:
+            if additional_name not in dict(datatype.supplied_additional):
+                raise PipelineStructureError("datatype '%s' does not supplied an additional datatype by the name of "
+                                             "'%s'. Additional datatypes it supplies: %s" %
+                                             (datatype.datatype_name, additional_name,
+                                              dict(datatype.supplied_additional).keys()))
+            datatype = dict(datatype.supplied_additional)[additional_name]
+
         return output_name, datatype
 
     def instantiate_output_datatype(self, output_name, output_datatype):
@@ -355,13 +371,22 @@ class BaseModuleInfo(object):
         """
         return output_datatype(self.get_output_dir(output_name), self.pipeline)
 
-    def get_output(self, output_name=None):
+    def get_output(self, output_name=None, additional_names=None):
         """
         Get a datatype instance corresponding to one of the outputs of the module.
 
         """
-        output_name, datatype = self.get_output_datatype(output_name=output_name)
-        return self.instantiate_output_datatype(output_name, datatype)
+        if additional_names:
+            # We need to use the datatype above the lowest to instantiate the additional datatype
+            # This might be (usually is) the main datatype
+            output_name, super_datatype = \
+                self.get_output_datatype(output_name=output_name, additional_names=additional_names[:-1])
+            additional_name = "->".join(additional_names)
+            return super_datatype.instantiate_additional_datatype(additional_names[-1], additional_name,
+                                                                  self.get_output_dir(output_name), self.pipeline)
+        else:
+            output_name, datatype = self.get_output_datatype(output_name=output_name)
+            return self.instantiate_output_datatype(output_name, datatype)
 
     def is_multiple_input(self, input_name=None):
         """
@@ -396,11 +421,11 @@ class BaseModuleInfo(object):
 
         # Try getting hold of the module that we need the output of
         if always_list or self.is_multiple_input(input_name):
-            return [(self.pipeline[previous_module_name], output_name)
-                    for previous_module_name, output_name in self.inputs[input_name]]
+            return [(self.pipeline[previous_module_name], output_name, additional_names)
+                    for (previous_module_name, output_name, additional_names) in self.inputs[input_name]]
         else:
-            previous_module_name, output_name = self.inputs[input_name][0]
-            return self.pipeline[previous_module_name], output_name
+            previous_module_name, output_name, additional_names = self.inputs[input_name][0]
+            return self.pipeline[previous_module_name], output_name, additional_names
 
     def get_input_datatype(self, input_name=None, always_list=False):
         """
@@ -412,8 +437,9 @@ class BaseModuleInfo(object):
 
         """
         datatypes = [
-            previous_module.get_output_datatype(output_name)
-            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
+            previous_module.get_output_datatype(output_name, additional_names=additional_names)
+            for previous_module, output_name, additional_names in
+            self.get_input_module_connection(input_name, always_list=True)
         ]
         return datatypes if always_list or self.is_multiple_input(input_name) else datatypes[0]
 
@@ -430,8 +456,9 @@ class BaseModuleInfo(object):
 
         """
         inputs = [
-            previous_module.get_output(output_name)
-            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
+            previous_module.get_output(output_name, additional_names=additional_names)
+            for previous_module, output_name, additional_names in
+            self.get_input_module_connection(input_name, always_list=True)
         ]
         return inputs if always_list or self.is_multiple_input(input_name) else inputs[0]
 
@@ -443,8 +470,10 @@ class BaseModuleInfo(object):
         :return: True if input is ready
         """
         return all(
+            # Don't check whether additional datatypes are ready -- they're supposedly guaranteed to be if the main is
             previous_module.get_output(output_name).data_ready()
-            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
+            for previous_module, output_name, additional_names in
+            self.get_input_module_connection(input_name, always_list=True)
         )
 
     def all_inputs_ready(self):
@@ -467,7 +496,8 @@ class BaseModuleInfo(object):
         """
         missing = []
         for input_name in self.input_names:
-            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True):
+            for previous_module, output_name, additional_names in \
+                    self.get_input_module_connection(input_name, always_list=True):
                 if not previous_module.get_output(output_name).data_ready():
                     # If the previous module is a filter, it's more helpful to say exactly what data it's missing
                     if previous_module.is_filter():
@@ -484,7 +514,7 @@ class BaseModuleInfo(object):
     @property
     def dependencies(self):
         return [module_name for input_connections in self.inputs.values()
-                for (module_name, output_name) in input_connections]
+                for (module_name, output_name, additional_names) in input_connections]
 
     def typecheck_inputs(self):
         if self.is_input() or len(self.module_inputs) == 0:
@@ -504,11 +534,12 @@ class BaseModuleInfo(object):
                 raise PipelineStructureError("input %s on module '%s' does not accept multiple inputs, but %d were "
                                              "given" % (input_name, self.module_name, len(input_connections)))
 
-            for (dep_module_name, output) in input_connections:
+            for (dep_module_name, output, additional_names) in input_connections:
                 # Load the dependent module
                 dep_module = self.pipeline[dep_module_name]
                 # Try to load the named output (or the default, if no name was given)
-                output_name, dep_module_output = dep_module.get_output_datatype(output_name=output)
+                output_name, dep_module_output = dep_module.get_output_datatype(output_name=output,
+                                                                                additional_names=additional_names)
 
                 # Check the output datatype is given in a suitable form
                 if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)):
@@ -522,9 +553,11 @@ class BaseModuleInfo(object):
                 try:
                     check_type(dep_module_output, input_type_requirements)
                 except TypeCheckError, e:
+                    additional_name_str = "".join("->%s" % an for an in additional_names)
                     raise PipelineStructureError("type-checking error matching input '%s' to module '%s' with output "
-                                                 "'%s' from module '%s': %s" %
-                                                 (input_name, self.module_name, output_name, dep_module_name, e))
+                                                 "'%s%s' from module '%s': %s" %
+                                                 (input_name, self.module_name, output_name, additional_name_str,
+                                                  dep_module_name, e))
 
     def check_runtime_dependencies(self):
         """
@@ -657,7 +690,8 @@ class BaseModuleInfo(object):
         """
         inputs = []
         for input_name in self.input_names:
-            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True):
+            for previous_module, output_name, additional_names in \
+                    self.get_input_module_connection(input_name, always_list=True):
                 if previous_module.is_filter():
                     inputs.append((input_name, output_name, previous_module.get_execution_dependency_tree()))
                 else:
@@ -675,7 +709,8 @@ class BaseModuleInfo(object):
         else:
             modules = [self]
             for input_name in self.input_names:
-                for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True):
+                for previous_module, output_name, additional_names in \
+                        self.get_input_module_connection(input_name, always_list=True):
                     if previous_module.is_filter():
                         modules.extend(previous_module.get_all_executed_modules())
             return modules
