@@ -69,6 +69,9 @@ class CandcParserDependency(SoftwareDependency):
     we provide instructions for downloading and building it.
 
     """
+    def __init__(self):
+        super(CandcParserDependency, self).__init__("candc")
+
     def problems(self):
         binaries = [os.path.join(CANDC_BINARY_DIR, binary) for binary in ["soap_server", "soap_client"]]
         return super(CandcParserDependency, self).problems() + [

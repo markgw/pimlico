@@ -98,8 +98,15 @@ class MultistageModuleInfo(BaseModuleInfo):
             )[-1][1]
             return "COMPLETED STAGE %s" % last_completed.name
 
+    def is_locked(self):
+        module, stage = self.get_next_stage()
+        if module is None:
+            return False
+        else:
+            return module.is_locked()
 
-def multistage_module(module_name, module_stages):
+
+def multistage_module(multistage_module_type_name, module_stages):
     """
     Factory to build a multi-stage module type out of a series of stages, each of which specifies a module type
     for the stage.
@@ -192,8 +199,8 @@ def multistage_module(module_name, module_stages):
 
     # Define a ModuleInfo for the multi-stage module
     class ModuleInfo(MultistageModuleInfo):
-        module_readable_name = module_name
-        module_type_name = module_name
+        module_readable_name = multistage_module_type_name
+        module_type_name = multistage_module_type_name
         module_inputs = main_inputs
         module_outputs = main_outputs
         # Module options for the MS module includes all of the internal modules' options, with prefixes
@@ -232,7 +239,7 @@ def multistage_module(module_name, module_stages):
                         # This will be referred to in the pipeline using a prefixed name
                         input_name = connection.input_name or stage.module_info_cls.module_inputs[0][0]
                         sub_inputs[input_name] = \
-                            ("%s:%s" % (self.module_name, previous_stage_name), connection.output_name)
+                            [("%s:%s" % (self.module_name, previous_stage_name), connection.output_name)]
                     elif type(connection) is ModuleInputConnection:
                         # Connection to multi-stage module input
                         stage_input_name = connection.stage_input_name or stage.module_info_cls.inputs[0][0]

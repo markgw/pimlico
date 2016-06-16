@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from pimlico.utils.logging import get_console_logger
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
@@ -25,25 +26,42 @@ from pimlico.core.modules.multistage import MultistageModuleInfo
 
 def run_cmd(pipeline, opts):
     debug = opts.debug
+    log = get_console_logger("Pimlico", debug=debug)
 
-    module_name, __, stage_name = opts.module_name.rpartition(":")
-    if stage_name in ["?", "help"]:
-        # Just output stage names and exit
-        module = pipeline[module_name]
-        if not isinstance(module, MultistageModuleInfo):
-            print "%s is not a multi-stage module" % module_name
+    if opts.module_name is None:
+        # No module name given: default to next one that's ready to run
+        modules = [(module_name, pipeline[module_name]) for module_name in pipeline.modules]
+        ready_modules = [module_name for (module_name, module) in modules
+                         if module.module_executable and not module.is_locked()
+                         and module.status != "COMPLETE" and module.all_inputs_ready()]
+        if len(ready_modules) == 0:
+            print >>sys.stderr, "No modules not already completed have all their inputs ready: no module name to " \
+                                "default to"
             sys.exit(1)
-        print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
-        sys.exit(0)
+        else:
+            module_spec = ready_modules[0]
+            log.info("No module name specified. Defaulting to next unexecuted, ready module: '%s'" % module_spec)
+    else:
+        module_spec = opts.module_name
+        # In the case of a multi-stage module allow a list to be output of available stages
+        module_name, __, stage_name = module_spec.rpartition(":")
+        if stage_name in ["?", "help"]:
+            # Just output stage names and exit
+            module = pipeline[module_name]
+            if not isinstance(module, MultistageModuleInfo):
+                print "%s is not a multi-stage module" % module_name
+                sys.exit(1)
+            print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
+            sys.exit(0)
 
     try:
-        execute_module(pipeline, opts.module_name, force_rerun=opts.force_rerun, debug=debug)
+        execute_module(pipeline, module_spec, force_rerun=opts.force_rerun, debug=debug, log=log)
     except ModuleInfoLoadError, e:
         if debug:
             print_exc()
             if e.cause is not None:
                 print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
-        print >>sys.stderr, "Error loading module '%s': %s" % (opts.module_name, e)
+        print >>sys.stderr, "Error loading module '%s': %s" % (module_spec, e)
     except ModuleExecutionError, e:
         if debug:
             print_exc()
@@ -52,7 +70,7 @@ def run_cmd(pipeline, opts):
                 print >>sys.stderr, e.debugging_info
             if e.cause is not None:
                 print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
-        print >>sys.stderr, "Error executing module '%s': %s" % (opts.module_name, e)
+        print >>sys.stderr, "Error executing module '%s': %s" % (module_spec, e)
     except KeyboardInterrupt:
         print >>sys.stderr, "Exiting before execution completed due to user interrupt"
         # Raise the exception so we see the full stack trace
@@ -87,6 +105,15 @@ def short_to_long(pipeline, opts):
     short_term_dir = os.path.join(pipeline.short_term_store, module_path)
     long_term_dir = os.path.join(pipeline.long_term_store, module_path)
     copy_dir_with_progress(short_term_dir, long_term_dir)
+
+
+def unlock_cmd(pipeline, opts):
+    module = pipeline[opts.module_name]
+    if not module.is_locked():
+        print "Module '%s' is not locked" % opts.module_name
+    else:
+        module.unlock()
+        print "Module unlocked"
 
 
 if __name__ == "__main__":
@@ -127,8 +154,9 @@ if __name__ == "__main__":
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")
     run.set_defaults(func=run_cmd)
     run.add_argument("module_name", help="The name of the module to run. To run a stage from a multi-stage module, "
-                                         "use 'module:stage'. Use 'module:?' or 'module:help' to list available "
-                                         "stages")
+                                         "use 'module:stage'. Use 'status' command to see available modules. Use "
+                                         "'module:?' or 'module:help' to list available stages. If not given, defaults "
+                                         "to next incomplete module that has all its inputs ready", nargs="?")
     run.add_argument("--force-rerun", "-f", action="store_true",
                      help="Force running the module, even if it's already been run to completion")
 
@@ -140,6 +168,13 @@ if __name__ == "__main__":
     reset.set_defaults(func=reset_module)
     reset.add_argument("module_name", help="The name of the module to reset, or multiple separated by commas, or "
                                            "'all' to reset the whole pipeline")
+
+    unlock = subparsers.add_parser("unlock",
+                                   help="Forcibly remove an execution lock from a module. If a lock has ended up "
+                                        "getting left on when execution exited prematurely, use this to remove it. "
+                                        "Usually shouldn't be necessary, even if there's an error during execution")
+    unlock.set_defaults(func=unlock)
+    unlock.add_argument("module_name", help="The name of the module to unlock")
 
     reset = subparsers.add_parser("longstore",
                                   help="Move a particular module's output from the short-term store to the long-term "

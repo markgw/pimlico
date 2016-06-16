@@ -19,13 +19,13 @@ import java.util.List;
  * Combines the functionality of the sentence splitter, tokenizer, pos tagger, parser and coreference resolver
  * and returns the results from all of them.
  */
-public class CorefenceResolverRawTextGateway {
+public class CoreferenceResolverRawTextGateway {
     private final TokenizerGateway tokenizerGateway;
     private final PosTaggerGateway posTaggerGateway;
     private final ParserGateway parserGateway;
     private final CoreferenceResolverGateway coreferenceResolverGateway;
 
-    public CorefenceResolverRawTextGateway(
+    public CoreferenceResolverRawTextGateway(
             File sentModelFile, File tokModelFile, File posModelFile, File parserModelFile,
             File corefModelDir, Integer timeout)
             throws CoreferenceResolverGateway.ModelLoadError, ParserGateway.ModelLoadError {
@@ -84,9 +84,9 @@ public class CorefenceResolverRawTextGateway {
         File corefModelDir = new File(opts.getString("coref_model_dir"));
 
         // Load the gateway instance
-        CorefenceResolverRawTextGateway entryPoint = null;
+        CoreferenceResolverRawTextGateway entryPoint = null;
         try {
-            entryPoint = new CorefenceResolverRawTextGateway(
+            entryPoint = new CoreferenceResolverRawTextGateway(
                     sentModelFile, tokenModelFile, posModelFile, parserModelFile, corefModelDir, opts.getInt("timeout")
             );
         } catch (CoreferenceResolverGateway.ModelLoadError modelLoadError) {

@@ -436,11 +436,24 @@ class BaseModuleInfo(object):
         return inputs if always_list or self.is_multiple_input(input_name) else inputs[0]
 
     def input_ready(self, input_name=None):
-        # Check whether the datatype is (or datatypes are) ready to go
+        """
+        Check whether the datatype is (or datatypes are) ready to go, corresponding to the named input.
+
+        :param input_name: input to check
+        :return: True if input is ready
+        """
         return all(
             previous_module.get_output(output_name).data_ready()
             for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
         )
+
+    def all_inputs_ready(self):
+        """
+        Check `input_ready()` on all inputs.
+
+        :return: True if all input datatypes are ready to be used
+        """
+        return len(self.missing_data()) == 0
 
     @classmethod
     def is_filter(cls):
@@ -666,6 +679,33 @@ class BaseModuleInfo(object):
                     if previous_module.is_filter():
                         modules.extend(previous_module.get_all_executed_modules())
             return modules
+
+    @property
+    def lock_path(self):
+        return os.path.join(self.get_module_output_dir(short_term_store=True), ".execution_lock")
+
+    def lock(self):
+        """
+        Mark the module as locked, so that it cannot be executed. Called when execution begins, to ensure that
+        you don't end up executing the same module twice simultaneously.
+
+        """
+        with open(self.lock_path, "w") as f:
+            f.write("This module cannot be executed, because it is locked")
+
+    def unlock(self):
+        """
+        Remove the execution lock on this module.
+
+        """
+        if os.path.exists(self.lock_path):
+            os.remove(self.lock_path)
+
+    def is_locked(self):
+        """
+        :return: True is the module is currently locked from execution
+        """
+        return os.path.exists(self.lock_path)
 
 
 def check_type(provided_type, type_requirements):

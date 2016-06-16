@@ -65,6 +65,11 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=No
     for line in format_execution_dependency_tree(execution_tree):
         log.info("    %s" % line)
 
+    # Check that we're allowed to execute the module
+    if module.is_locked():
+        raise ModuleExecutionError("module is locked: is it currently being executed? If not, remove the lock using "
+                                   "the 'unlock' command")
+
     # Check the status of the module, so we don't accidentally overwrite module output that's already complete
     if module.status == "COMPLETE":
         if force_rerun:
@@ -106,20 +111,26 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=No
                                         (module_name, config_store_path))
 
     try:
-        # Get hold of an executor for this module
-        executer = load_module_executor(module)
-        # Give the module an initial in-progress status
-        end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
-    except ModuleInfoLoadError, e:
-        module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
-        raise
-    except ModuleExecutionError, e:
-        # If there's any error, note in the history that execution didn't complete
-        module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
-        raise
-    except KeyboardInterrupt:
-        module.add_execution_history_record("Execution of %s halted by user" % module_name)
-        raise
+        module.lock()
+
+        try:
+            # Get hold of an executor for this module
+            executer = load_module_executor(module)
+            # Give the module an initial in-progress status
+            end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
+        except ModuleInfoLoadError, e:
+            module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
+            raise
+        except ModuleExecutionError, e:
+            # If there's any error, note in the history that execution didn't complete
+            module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
+            raise
+        except KeyboardInterrupt:
+            module.add_execution_history_record("Execution of %s halted by user" % module_name)
+            raise
+    finally:
+        # Always remove the lock at the end, even if something goes wrong
+        module.unlock()
 
     if end_status is None:
         # Update the module status so we know it's been completed
