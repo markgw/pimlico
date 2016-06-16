@@ -48,6 +48,8 @@ def status_cmd(pipeline, opts):
                     colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
                 )
             print "       outputs: %s" % ", ".join(module.output_names)
+            if module.is_locked():
+                print "       locked: ongoing execution"
     else:
         # Output more detailed status information for this module
         to_output = [opts.module_name]
@@ -143,7 +145,7 @@ Output {output_name}:
 {title}
 Status: {status}
 {inputs}
-{outputs}
+{outputs}{lock_status}
 Options:
     {options}{module_details}""".format(
         title=colored(title_box("Module: %s" % module.module_name), status_color),
@@ -152,4 +154,5 @@ Options:
         outputs="\n".join(output_infos) if output_infos else "No outputs",
         options="\n    ".join("%s: %s" % (key, val) for (key, val) in module.options.items()),
         module_details=module_details,
+        lock_status="" if not module.is_locked() else "\nLocked: ongoing execution"
     ), also_output
