@@ -12,9 +12,14 @@ def module_status_color(module):
     elif module.status == "COMPLETE":
         return "green"
     elif module.status == "UNEXECUTED":
-        return "red"
+        # If the module's not been started, but its inputs are ready, use yellow
+        if module.all_inputs_ready():
+            return "yellow"
+        else:
+            return "red"
     else:
-        return "yellow"
+        # All other cases are blue -- usually partial completion, ongoing execution, etc
+        return "cyan"
 
 
 def status_colored(module, text=None):
