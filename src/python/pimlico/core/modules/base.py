@@ -23,20 +23,18 @@ is loaded.
 
 """
 import json
-import warnings
-
-import os
 import shutil
-from importlib import import_module
-from types import FunctionType
-
 from datetime import datetime
+from importlib import import_module
 from operator import itemgetter
 
+import os
+import warnings
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
 from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
     MultipleInputs
+from pimlico.utils.core import remove_duplicates
 
 
 class BaseModuleInfo(object):
@@ -469,12 +467,7 @@ class BaseModuleInfo(object):
         :param input_name: input to check
         :return: True if input is ready
         """
-        return all(
-            # Don't check whether additional datatypes are ready -- they're supposedly guaranteed to be if the main is
-            previous_module.get_output(output_name).data_ready()
-            for previous_module, output_name, additional_names in
-            self.get_input_module_connection(input_name, always_list=True)
-        )
+        return len(self.missing_data([input_name])) == 0
 
     def all_inputs_ready(self):
         """
@@ -488,16 +481,23 @@ class BaseModuleInfo(object):
     def is_filter(cls):
         return not cls.module_executable and len(cls.module_inputs) > 0
 
-    def missing_data(self):
+    def missing_data(self, input_names=None):
         """
         Check whether all the input data for this module is available. If not, return a list strings indicating
         which outputs of which modules are not available. If it's all ready, returns an empty list.
 
+        To check specific inputs, give a list of input names. To check all inputs, don't specify `input_names`.
+        To check the default input, give `input_names=[None]`.
+
         """
+        if input_names is None:
+            # Default to checking all inputs
+            input_names = self.input_names
         missing = []
-        for input_name in self.input_names:
+        for input_name in input_names:
             for previous_module, output_name, additional_names in \
                     self.get_input_module_connection(input_name, always_list=True):
+                # Don't check whether additional datatypes are ready -- supposedly guaranteed if the main is
                 if not previous_module.get_output(output_name).data_ready():
                     # If the previous module is a filter, it's more helpful to say exactly what data it's missing
                     if previous_module.is_filter():
@@ -513,8 +513,12 @@ class BaseModuleInfo(object):
 
     @property
     def dependencies(self):
-        return [module_name for input_connections in self.inputs.values()
-                for (module_name, output_name, additional_names) in input_connections]
+        """
+        :return: list of names of modules that this one depends on for its inputs.
+        """
+        return remove_duplicates(
+            [module_name for input_connections in self.inputs.values()
+             for (module_name, output_name, additional_names) in input_connections])
 
     def typecheck_inputs(self):
         if self.is_input() or len(self.module_inputs) == 0:
@@ -658,6 +662,10 @@ class BaseModuleInfo(object):
     def reset_execution(self):
         """
         Remove all output data and metadata from this module to make a fresh start, as if it's never been executed.
+
+        May be overridden if a module has some side effect other than creating/modifying things in its output
+        directory(/ies), but overridden methods should always call the super method. Occasionally this is
+        necessary, but most of the time the base implementation is enough.
 
         """
         for path in self.pipeline.find_all_data_paths(self.get_module_output_dir()):

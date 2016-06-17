@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from pimlico.utils.core import remove_duplicates
 from pimlico.utils.logging import get_console_logger
 
 if __name__ == "__main__":
@@ -84,7 +85,26 @@ def reset_module(pipeline, opts):
         module_names = pipeline.modules
     else:
         module_names = opts.module_name.split(",")
-    for module_name in module_names:
+
+    # Check for modules that depend on these ones: they should also be reset, since their input data will be rebuilt
+    dependent_modules = remove_duplicates(sum(
+        (pipeline.get_dependent_modules(module_name, recurse=True) for module_name in module_names), []
+    ))
+    dependent_modules = [m for m in dependent_modules if m not in module_names]
+    # Don't bother to include ones that haven't been executed anyway
+    dependent_modules = [m for m in dependent_modules if pipeline[m].status != "UNEXECUTED"]
+    if len(dependent_modules) > 0:
+        # There are additional modules that we should reset along with these,
+        # but check with the user in case they didn't intend that
+        print "The following modules depend on %s. Their execution state will be reset too if you continue." % \
+              ", ".join(module_names)
+        print "  %s" % ", ".join(dependent_modules)
+        answer = raw_input("Do you want to continue? [y/N] ")
+        if answer.lower() != "y":
+            print "Cancelled"
+            return
+
+    for module_name in module_names + dependent_modules:
         print "Resetting execution state of module %s" % module_name
         module = pipeline[module_name]
         module.reset_execution()

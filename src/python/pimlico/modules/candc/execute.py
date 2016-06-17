@@ -78,13 +78,18 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
         worker.stderr_consumer = OutputConsumer([worker.stderr_queue, worker.stderr_buffer], worker._server_process.stderr)
         worker.stderr_consumer.start()
 
+        # Allow the local config to override the default startup timeout
+        local_conf = worker.info.pipeline.local_config
+        timeout = float(local_conf.get("candc_timeout", 10.))
+
         # The server outputs a line to stderr when it's ready, so we should wait for this before continuing
         try:
-            err = worker.stderr_queue.get(timeout=10.)
+            err = worker.stderr_queue.get(timeout=timeout)
         except Queue.Empty:
             err_path = output_candc_error_info(server_args, worker._server_process.returncode,
                                                worker.stdout_buffer.getvalue(), worker.stderr_buffer.getvalue())
-            raise CandCServerError("server startup timed out after 10 seconds. See %s for more details" % err_path)
+            raise CandCServerError("server startup timed out after %.0f seconds. See %s for more details" %
+                                   (timeout, err_path))
 
         # Check that the server's running nicely
         if not err.startswith("waiting for connections"):

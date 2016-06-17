@@ -6,6 +6,8 @@
 Base classes and utilities for input modules in a pipeline.
 
 """
+import copy
+
 from .base import BaseModuleInfo
 from pimlico.core.modules.base import BaseModuleExecutor
 
@@ -43,8 +45,12 @@ def input_module_factory(datatype):
         module_outputs = [("data", datatype)]
         module_options = datatype.input_module_options
 
+        def __init__(self, module_name, pipeline, **kwargs):
+            super(DatatypeInputModuleInfo, self).__init__(module_name, pipeline, **kwargs)
+
         def instantiate_output_datatype(self, output_name, output_datatype):
-            return output_datatype.create_from_options(self.get_output_dir(output_name), self.pipeline, self.options)
+            return output_datatype.create_from_options(self.get_output_dir(output_name), self.pipeline,
+                                                       copy.deepcopy(self.options))
 
     if datatype.requires_data_preparation:
         # This module needs to be executed

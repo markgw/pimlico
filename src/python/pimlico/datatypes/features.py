@@ -214,8 +214,9 @@ class IndexedTermFeatureListCorpusWriter(IterableCorpusWriter):
     are assumed to be ints. Otherwise, inputs will be looked up in the appropriate dictionary to get an index.
 
     """
-    def __init__(self, base_dir, term_dictionary, feature_dictionary, bytes=4, signed=False, index_input=False):
-        super(IndexedTermFeatureListCorpusWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, term_dictionary, feature_dictionary, bytes=4, signed=False, index_input=False,
+                 **kwargs):
+        super(IndexedTermFeatureListCorpusWriter, self).__init__(base_dir, **kwargs)
         self.metadata["bytes"] = bytes
         self.metadata["signed"] = signed
         self.write_metadata()

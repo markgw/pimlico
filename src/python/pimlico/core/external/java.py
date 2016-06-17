@@ -224,6 +224,9 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     from py4j.java_gateway import ProcessConsumer
     from py4j.compat import Queue
 
+    if startup_timeout is None:
+        startup_timeout = 10.
+
     # Add custom environment variables to the ones we've already got
     java_env = os.environ.copy()
     java_env.update(env)

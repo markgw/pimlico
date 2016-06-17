@@ -1,3 +1,6 @@
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 """
 Copy a file
 
@@ -5,6 +8,7 @@ Simple utility for copying a file (which presumably comes from the output of ano
 location. Useful for collecting together final output at the end of a pipeline.
 
 """
+
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.base import MultipleInputs
 from pimlico.datatypes.files import File

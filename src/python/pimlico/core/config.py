@@ -153,6 +153,8 @@ class PipelineConfig(object):
         self._module_info_cache = {}
         self._module_schedule = None
 
+        self._dependency_cache = None
+
     @property
     def modules(self):
         return self.module_order
@@ -162,6 +164,32 @@ class PipelineConfig(object):
 
     def __contains__(self, item):
         return item in self._module_info_cache or item in self.raw_module_configs
+
+    @property
+    def module_dependencies(self):
+        """
+        Dictionary mapping a module name to a list of the names of modules that it depends on for its inputs.
+        """
+        if self._dependency_cache is None:
+            self._dependency_cache = dict(
+                (module_name, self[module_name].dependencies) for module_name in self.modules
+            )
+        return self._dependency_cache
+
+    def get_dependent_modules(self, module_name, recurse=False):
+        """
+        Return a list of the names of modules that depend on the named module for their inputs.
+
+        :param recurse: include all transitive dependents, not just those that immediately depend on the module.
+        """
+        dependents = [mod for (mod, dependencies) in self.module_dependencies.items() if module_name in dependencies]
+        if recurse:
+            # Fetch the dependents of each of the dependents of this module
+            # This should never result in an infinite loop, since we check for cycles in the graph
+            # If the check hasn't been run, things might go bad!
+            for dep_mod in dependents:
+                dependents.extend(self.get_dependent_modules(dep_mod, recurse=True))
+        return remove_duplicates(dependents)
 
     def load_module_info(self, module_name):
         """

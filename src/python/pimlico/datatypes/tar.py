@@ -203,8 +203,8 @@ class TarredCorpusWriter(IterableCorpusWriter):
     trust the metadata, however, setting trust_length=True will speed things up.
 
     """
-    def __init__(self, base_dir, gzip=False, append=False, trust_length=False, encoding="utf-8"):
-        super(TarredCorpusWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, gzip=False, append=False, trust_length=False, encoding="utf-8", **kwargs):
+        super(TarredCorpusWriter, self).__init__(base_dir, **kwargs)
         self.append = append
         self.current_archive_name = None
         self.current_archive_tar = None

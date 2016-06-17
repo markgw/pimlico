@@ -41,8 +41,8 @@ class NumericResult(PimlicoDatatype):
 
 
 class NumericResultWriter(PimlicoDatatypeWriter):
-    def __init__(self, base_dir):
-        super(NumericResultWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, **kwargs):
+        super(NumericResultWriter, self).__init__(base_dir, **kwargs)
         self.result = None
         self.label = None
 

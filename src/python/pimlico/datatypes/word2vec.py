@@ -95,8 +95,8 @@ class Word2VecModel(PimlicoDatatype):
 
 
 class Word2VecModelWriter(PimlicoDatatypeWriter):
-    def __init__(self, base_dir, verb_only=False):
-        super(Word2VecModelWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, verb_only=False, **kwargs):
+        super(Word2VecModelWriter, self).__init__(base_dir, **kwargs)
         self.word2vec_model = None
         self.metadata["verb_only"] = verb_only
 

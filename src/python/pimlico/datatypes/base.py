@@ -258,7 +258,8 @@ class PimlicoDatatypeWriter(object):
     Abstract base class fo data writer associated with Pimlico datatypes.
 
     """
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, additional_name=None):
+        self.additional_name = additional_name
         self.base_dir = base_dir
         self.data_dir = os.path.join(self.base_dir, "data")
         self.metadata = {}
@@ -273,8 +274,19 @@ class PimlicoDatatypeWriter(object):
         self.write_metadata()
 
     def write_metadata(self):
-        with open(os.path.join(self.base_dir, "corpus_metadata"), "w") as f:
-            pickle.dump(self.metadata, f, -1)
+        if self.additional_name is None:
+            metadata_filename = "corpus_metadata"
+        else:
+            metadata_filename = "%s_corpus_metadata" % self.additional_name
+
+        with open(os.path.join(self.base_dir, metadata_filename), "w") as f:
+                pickle.dump(self.metadata, f, -1)
+
+    def subordinate_additional_name(self, name):
+        if self.additional_name is not None:
+            return "%s->%s" % (self.additional_name, name)
+        else:
+            return name
 
 
 class IterableCorpus(PimlicoDatatype):
@@ -329,8 +341,8 @@ class SingleTextDocument(PimlicoDatatype):
 
 
 class SingleTextDocumentWriter(PimlicoDatatypeWriter):
-    def __init__(self, base_dir):
-        super(SingleTextDocumentWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, **kwargs):
+        super(SingleTextDocumentWriter, self).__init__(base_dir, **kwargs)
         self.data = ""
         self.output_path = os.path.join(self.data_dir, "data.txt")
 
@@ -362,8 +374,8 @@ class Dict(PimlicoDatatype):
 
 
 class DictWriter(PimlicoDatatypeWriter):
-    def __init__(self, base_dir):
-        super(DictWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, **kwargs):
+        super(DictWriter, self).__init__(base_dir, **kwargs)
         self.data = {}
         self.output_path = os.path.join(self.data_dir, "data")
 
@@ -395,8 +407,8 @@ class StringList(PimlicoDatatype):
 
 
 class StringListWriter(PimlicoDatatypeWriter):
-    def __init__(self, base_dir):
-        super(StringListWriter, self).__init__(base_dir)
+    def __init__(self, base_dir, **kwargs):
+        super(StringListWriter, self).__init__(base_dir, **kwargs)
         self.data = []
         self.output_path = os.path.join(self.data_dir, "data")
 
