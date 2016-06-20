@@ -2,24 +2,18 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-from pimlico.core.external.java import Py4JInterface, gateway_client_to_running_server
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus
-from py4j.java_collections import ListConverter
+from .tagger import PosTagger
 
 
 @skip_invalid
 def process_document(worker, archive, filename, doc):
     # Input is a list of tokenized sentences
     # Run POS tagging
-    sentence_list = ListConverter().convert(
-        [" ".join(sentence) for sentence in doc],
-        worker.gateway._gateway_client
-    )
-    tags = list(worker.gateway.entry_point.posTag(sentence_list))
-    tags = [sentence.split(" ") for sentence in tags]
+    tags = worker.tagger.tag_sentences(doc)
     # Filter out any |s from the words, as they'll destroy out output format
     words = [[word.replace("|", "") for word in sentence] for sentence in doc]
     # Put the POS tags together with the words
@@ -37,14 +31,12 @@ def worker_set_up(worker):
         if "word" not in available_fields:
             raise ModuleExecutionError("input datatype does not provide a field 'word' -- can't POS tag it")
     # Start a tokenizer process running in the background via Py4J
-    worker.interface = Py4JInterface("pimlico.opennlp.PosTaggerGateway", gateway_args=[worker.info.model_path],
-                                     pipeline=worker.info.pipeline, print_stderr=False, print_stdout=False)
-    worker.interface.start()
-    worker.gateway = worker.interface.gateway
+    worker.tagger = PosTagger(worker.info.model_path, pipeline=worker.info.pipeline)
+    worker.tagger.start()
 
 
 def worker_tear_down(worker):
-    worker.interface.stop()
+    worker.tagger.stop()
 
 
 ModuleExecutor = multiprocessing_executor_factory(

@@ -629,6 +629,14 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                                          "config file" % (" + ".join(overlap_sections), subconfig_filename))
         config_sections.extend(subconfig)
 
+    # Config parser permits values that span multiple lines and removes indent of subsequent lines
+    # This is good, but we don't want the newlines to be included in the values
+    config_sections = [
+        (section, dict(
+            (key, val.replace(u"\n", u"")) for (key, val) in section_config.items()
+        )) for (section, section_config) in config_sections
+    ]
+
     # Don't include "main" variant in available variants
     available_variants.discard("main")
     return config_sections, available_variants, vars, all_filenames
