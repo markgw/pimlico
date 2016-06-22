@@ -9,30 +9,27 @@ through the basic setup of your project. You don't have to do everything exactly
 good starting point and follows Pimlico's recommended procedures. It steps through the setup for a very
 basic pipeline.
 
-Getting Pimlico
-===============
-You'll want to use the latest release of Pimlico.
-Create a new directory to put your project in and put the Pimlico codebase into
-a directory `pimlico` within the project directory, following the instructions on :doc:`/core/download`.
-
 System-wide configuration
 =========================
-Pimlico needs you to specify certain parameters regarding your local system. It needs to
+Pimlico needs you to specify certain parameters regarding your local system.
+
+It needs to
 know where to put output files as it executes. Settings are given in a config file in your home directory and
 apply to all Pimlico pipelines you run. Note that Pimlico will make sure that different pipelines don't interfere 
 with each other's output (provided you give them different names).
 
 There are two locations you need to specify: **short-term** and **long-term storage**.
-These could be just two subdirectories of the same directory. However, it can be
-useful to distinguish them.
 
-The **short-term store** should be on a local disk (not NFS) that's as fast as possible to
-write to. It needs to be large enough to store output between pipeline stages (though if necessary you could delete
-output from earlier stages as you go along).
+The **short-term store** should be on a disk that's as fast as possible to write to. For example, avoid using an NFS
+disk. It needs to be large enough to store output between pipeline stages, though you can easily move
+output from earlier stages into the long-term store as you go along.
 
 The **long-term store** is where things are typically put at the end of
 a pipeline. It therefore doesn't need to be super-fast to access, but you may want it to be in a location that gets 
 backed up, so you don't lose your valuable output.
+
+For a simple setup, these could be just two subdirectories of the same directory. However, it can be
+useful to distinguish them.
 
 Create a file `~/.pimlico` that looks like this:
 
@@ -43,30 +40,47 @@ Create a file `~/.pimlico` that looks like this:
 
 Remember, these paths are not specific to a pipeline: all pipelines will use different subdirectories of these ones.
 
-Creating a config file
-======================
-In the simplest case, the only thing left to do is to write a **config file** for your pipeline and run it! Let's make
-a simple one as an example.
+Getting started with Pimlico
+============================
+The procedure for starting a new Pimlico project, using the latest release, is very simple.
 
-We're going to create the file `~/myproject/pipeline.conf`. Start by writing a `pipeline` section to give the
-basic pipeline setup.
+Create a new, empty directory to put your project in. Download
+`newproject.py <https://gitlab.com/markgw/pimlico/raw/master/admin/newproject.py>`_ into the project directory.
+
+Choose a name for your project (e.g. `myproject`) and run:
+
+.. code-block:: bash
+
+    python newproject.py myproject
+
+This fetches the latest version of Pimlico (now in the `pimlico/` directory) and creates a basic config file template,
+which will define your pipeline.
+
+It also retrieves some libraries that Pimlico needs to run. Other libraries required by specific pipeline modules will
+be installed as necessary when you use the modules.
+
+Building the pipeline
+=====================
+You've now got a config file in `myproject.conf`. This already includes a `pipeline` section, which gives the
+basic pipeline setup. It will look something like this:
 
 .. code-block:: ini
 
     [pipeline]
     name=myproject
-    release=0.1
+    release=<release number>
+    python_path=%(project_root)s/src/python
 
 The `name` needs to be distinct from any other pipelines that you run &ndash; it's what distinguishes the storage 
 locations.
 
-`release` is the release of Pimlico that you're using: set it to the one you downloaded.
+`release` is the release of Pimlico that you're using: it's automatically set to the latest one, which has
+been downloaded.
 
 If you later 
 try running the same pipeline with an updated version of Pimlico, it will work fine as long as it's the same major 
-version (the first digit). Otherwise, there are likely to be backwards incompatible changes in the library, so you'd 
-need to either get an older version of Pimlico, or update your config file, ensuring it plays nicely with the later 
-Pimlico version.
+version (the first digit). Otherwise, there may be backwards incompatible changes, so you'd
+need to update your config file, ensuring it plays nicely with the later Pimlico version.
 
 Getting input
 -------------
@@ -149,26 +163,29 @@ and POS tagging modules use OpenNLP.
 
 Fetching dependencies
 ---------------------
-All the standard modules provide easy ways to get hold of their dependencies via makefiles for GNU Make. Let's get 
-Beautiful Soup.
+All the standard modules provide easy ways to get hold of their dependencies automatically, or as close as possible.
+Most of the time, all you need to do is tell Pimlico to install them.
+
+You can use the `check` command, with a module name, to check whether a module is ready to run.
 
 .. code-block:: bash
 
-    cd ~/myproject/pimlico/lib/python
-    make bs4
+    ./pimlico.sh myproject.conf check tokenize
+
+In this case, it will tell you that some libraries are missing, but they can be installed automatically. Simply issue
+the `install` command for the module.
+
+.. code-block:: bash
+
+    ./pimlico.sh myproject.conf install tokenize
 
 Simple as that.
 
-OpenNLP is a little trickier. To make things simple, we just get all the OpenNLP tools and libraries required to
-run the OpenNLP wrappers at once. The `opennlp` make target gets all of these at once.
-
-.. code-block:: bash
-
-    cd ~/myproject/pimlico/lib/java
-    make opennlp
-
 There's one more thing to do: the tools we're using
 require statistical models. We can simply download the pre-trained English models from the OpenNLP website.
+
+At present, Pimlico doesn't yet provide a built-in way for the modules to do this, as it does with software libraries,
+but it does include a GNU Makefile to make it easy to do:
 
 .. code-block:: bash
 
@@ -181,28 +198,15 @@ extra options in the module definition in your config file.
 
 Checking everything's dandy
 ---------------------------
-We now run some checks over the pipeline to make sure that our config file is valid and we've got Pimlico basically 
-ready to run.
+Now you can run the `check` command to check that the modules are ready to run. To check the whole pipeline's
+dependencies, run:
 
 .. code-block:: bash
 
-    cd ~/myproject/
-    ./pimlico/bin/pimlico pipeline.conf check
+    ./pimlico.sh myproject.conf check all
 
-With any luck, all the checks will be successful. If not, you'll need to address any problems with dependencies 
+With any luck, all the checks will be successful. If not, you'll need to address any problems with dependencies
 before going any further.
-
-So far, we've checked the basic Pimlico dependencies and the config file's validity, but not the dependencies of 
-each module. This is intentional: in some setups, we might run different modules on different machines or environments, 
-such that in no one of them do all modules have all of their dependencies.
-
-You can run further checks on the *runtime* dependencies one module at a time:
-
-.. code-block:: bash
-
-    ./pimlico/bin/pimlico pipeline.conf check tokenize
-
-If that works as well, we're able to start running modules.
 
 Running the pipeline
 ====================
@@ -213,7 +217,7 @@ pipeline is entirely linear &ndash; it's clear which ones need to be run before 
 
 .. code-block:: bash
 
-    ./pimlico/bin/pimlico pipeline.conf status
+    ./pimlico.sh myproject.conf status
 
 The output also tells you the current status of each module. At the moment, all the modules are `UNEXECUTED`.
 
@@ -232,9 +236,9 @@ The modules can be run using the `run` command and specifying the module by name
 
 .. code-block:: bash
 
-    ./pimlico/bin/pimlico.sh pipeline.conf run input-text
-    ./pimlico/bin/pimlico.sh pipeline.conf run tokenize
-    ./pimlico/bin/pimlico.sh pipeline.conf run pos-tag
+    ./pimlico.sh myproject.conf run input-text
+    ./pimlico.sh myproject.conf run tokenize
+    ./pimlico.sh myproject.conf run pos-tag
 
 Adding custom modules
 =====================
@@ -242,24 +246,16 @@ Most likely, for your project you need to do some processing not covered by the 
 point, you can start implementing your own modules, which you can distribute along with the config file so that 
 people can replicate what you did.
 
-First, let's create a directory where our custom source code will live.
+The `newproject.py` script has already created a directory where our custom source code will live: `src/python`,
+with some subdirectories according to the standard code layout, with module types and datatypes in separate
+packages.
 
-.. code-block:: bash
-
-    cd ~/myproject
-    mkdir -p src/python
-
-Now we need Pimlico to find the code we put in there. We simply add an option to our pipeline configuration. Note that 
+The template pipeline also already has an option `python_path` pointing to this directory, so that Pimlico knows where to
+find your code. Note that
 the code's in a subdirectory of that containing the pipeline config and we specify the custom code path relative to 
 the config file, so it's easy to distribute the two together.
 
-Add this option to the `[pipeline]` section in the config file:
-
-.. code-block:: ini
-
-    python_path=src/python
-
-Now you can create Python modules or packages in `src/python`, following the same conventions as the built-in modules 
+Now you can create Python modules or packages in `src/python`, following the same conventions as the built-in modules
 and overriding the standard base classes, as they do. The following articles tell you more about how to do this:
 
  - :doc:`/guides/module`

@@ -162,7 +162,8 @@ if __name__ == "__main__":
     check.set_defaults(func=check_cmd)
     check.add_argument("modules", nargs="*",
                        help="Check runtime dependencies for named modules. By default, these are not all checked, as "
-                            "you might be happy with them not all being satisfied at once")
+                            "you might be happy with them not all being satisfied at once. To check the whole "
+                            "pipeline, use 'all'")
     check.add_argument("--verbose", "-v", action="store_true",
                        help="Show details of why dependencies aren't available where possible")
 

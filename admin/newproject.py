@@ -124,7 +124,7 @@ def main():
 
     print "\nRunning Pimlico for the first time to test setup and fetch basic dependencies"
     try:
-        subprocess.check_call([os.path.join(base_dir, "pimlico.sh"), conf_filename, "check"], cwd=base_dir, shell=True)
+        subprocess.check_call([os.path.join(base_dir, "pimlico.sh"), conf_filename, "check"], cwd=base_dir)
     except subprocess.CalledProcessError:
         print "\nError running pimlico.sh for the first time"
         print "Your project setup is complete, but you need to fix the problem above before Pimlico is ready to run"
@@ -134,6 +134,14 @@ def main():
     else:
         print "\nPimlico setup is complete"
         print "Edit the skeletal pipeline config in %s to start building your pipeline" % conf_filename
+
+    # Get rid of the scripts themselves used to set up the project
+    def _rem(filename):
+        if os.path.exists(os.path.join(base_dir, filename)):
+            os.remove(os.path.join(base_dir, filename))
+    _rem("bootstrap.py")
+    _rem("bootstrap.pyc")
+    _rem("newproject.py")
 
 
 TEMPLATE_CONF = """\

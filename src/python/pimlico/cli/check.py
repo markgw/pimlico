@@ -21,9 +21,15 @@ def check_cmd(pipeline, opts):
         print "Error in pipeline: %s" % e
 
     if opts.modules:
-        passed = print_missing_dependencies(pipeline, opts.modules)
+        if "all" in opts.modules:
+            # Check all modules
+            modules = pipeline.modules
+        else:
+            modules = pipeline.modules
+        passed = print_missing_dependencies(pipeline, modules)
+        
         if passed:
-            for module_name in opts.modules:
+            for module_name in modules:
                 # Check for remaining execution barriers
                 problems = pipeline[module_name].check_ready_to_run()
                 if len(problems):
@@ -32,7 +38,7 @@ def check_cmd(pipeline, opts):
                               (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100).splitlines()))
                     passed = False
             if passed:
-                print "Runtime dependency checks successful for modules: %s" % ", ".join(opts.modules)
+                print "Runtime dependency checks successful for modules: %s" % ", ".join(modules)
 
 
 def install_cmd(pipeline, opts):
