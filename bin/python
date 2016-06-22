@@ -18,6 +18,11 @@ if [ ! -f "$python" ]; then
         # Failed to set up virtualenv: don't carry on running
         exit 1
     fi
+    if [ ! -f "$python" ]; then
+        echo "Virtualenv setup seemed to work, but Python interpreter $python is still not available"
+        exit 1
+    fi
+    echo "Successfully set up virtualenv for running Pimlico"
 fi
 
 if [ -n "$GPU" ]; then
@@ -48,5 +53,6 @@ elif [ -n "$GDB" ]; then
     gdb -ex r --args $python $*
 else
     # Run python using virtualenv python interpreter
+    echo "$*"
     $python $*
 fi

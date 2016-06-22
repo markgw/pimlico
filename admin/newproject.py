@@ -8,6 +8,7 @@ Just download this Python file into a new directory where you want your Pimlico 
 import os
 import sys
 import urllib2
+import subprocess
 
 
 RAW_URL = "https://gitlab.com/markgw/pimlico/raw/master/"
@@ -117,13 +118,22 @@ def main():
 
     print "Bootstrapped project: Pimlico is now available in pimlico/ dir\n"
     # Create symlink to pimlico.sh, so it's easier to run
-    symlink(os.path.join("pimlico", "bin", "pimlico.sh"), "pimlico.sh")
     print "Creating symlink pimlico.sh for running Pimlico"
+    symlink(os.path.join("pimlico", "bin", "pimlico.sh"), "pimlico.sh")
+    print "Project setup complete!"
 
-    print "\nProject setup complete!"
-    print "Run:"
-    print "  ./pimlico.sh %s" % conf_filename
-    print "to launch Pimlico for the first time and fetch basic dependencies"
+    print "\nRunning Pimlico for the first time to test setup and fetch basic dependencies"
+    try:
+        subprocess.check_call([os.path.join(base_dir, "pimlico.sh"), conf_filename, "check"], cwd=base_dir, shell=True)
+    except subprocess.CalledProcessError:
+        print "\nError running pimlico.sh for the first time"
+        print "Your project setup is complete, but you need to fix the problem above before Pimlico is ready to run"
+        print "When you've done that, you can just run the Pimlico 'check' command again to complete dependency " \
+              "resolution:"
+        print "  ./pimlico.sh %s check" % conf_filename
+    else:
+        print "\nPimlico setup is complete"
+        print "Edit the skeletal pipeline config in %s to start building your pipeline" % conf_filename
 
 
 TEMPLATE_CONF = """\
