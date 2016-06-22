@@ -32,10 +32,18 @@ def symlink(source, link_name):
 
 
 def create_directory_structure(dirs, base_dir):
-    for dir_name, subdirs in dirs:
-        os.mkdir(os.path.join(base_dir, dir_name))
-        if subdirs:
-            create_directory_structure(subdirs, os.path.join(base_dir, dir_name))
+    for content in dirs:
+        if type(content) is tuple:
+            # Create a subdirectory, potentially with further subdirectories
+            dir_name, subdirs = content
+            os.mkdir(os.path.join(base_dir, dir_name))
+            if subdirs:
+                create_directory_structure(subdirs, os.path.join(base_dir, dir_name))
+        else:
+            # Things that aren't pairs simply create named files (equivalent to touch)
+            filename = os.path.join(base_dir, content)
+            with open(filename, "w") as f:
+                f.write("")
 
 
 def lookup_bleeding_edge():
@@ -66,8 +74,9 @@ def main():
         ("src", [
             ("python", [
                 (project_name, [
-                    ("datatypes", []),
-                    ("modules", []),
+                    "__init__.py",
+                    ("datatypes", ["__init__.py"]),
+                    ("modules", ["__init__.py"]),
                 ])
             ])
         ]),
@@ -99,11 +108,11 @@ def main():
     print "Fetched bootstrap.py"
 
     try:
-        from .bootstrap import bootstrap
+        from bootstrap import bootstrap
     except ImportError:
         print "Got bootstrap.py, but could not import it"
         sys.exit(1)
-    print "Bootstrapping project %s to fetch Pimlico and run basic setup..."
+    print "Bootstrapping project %s to fetch Pimlico and run basic setup..." % project_name
     bootstrap(conf_filename)
 
     # TODO Create symlink to pimlico.sh

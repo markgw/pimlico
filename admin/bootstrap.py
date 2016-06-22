@@ -77,6 +77,12 @@ def tar_dirname(tar_path):
 
 
 def bootstrap(config_file):
+    current_dir = os.path.abspath(os.path.dirname(__file__))
+
+    if os.path.exists(os.path.join(current_dir, "pimlico")):
+        print "Pimlico source directory already exists: delete it if you want to fetch again"
+        sys.exit(1)
+
     # Check the config file to find the version of Pimlico we need
     version = find_config_value(config_file, "release")
     major_version = int(version.partition(".")[0])
@@ -114,11 +120,6 @@ def bootstrap(config_file):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    current_dir = os.path.abspath(os.path.dirname(__file__))
-
-    if os.path.exists(os.path.join(current_dir, "pimlico")):
-        print "Pimlico source directory already exists: delete it if you want to fetch again"
-        sys.exit(1)
 
     if len(args) == 0:
         print "Specify a Pimlico config file to set up Pimlico for"
