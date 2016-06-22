@@ -9,14 +9,7 @@ OpenNLP tokenizer
 | Executable | yes                              |
 +------------+----------------------------------+
 
-.. todo::
-
-   Document this module
-
-
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
+Sentence splitting and tokenization using OpenNLP's tools.
 
 
 Inputs

@@ -23,4 +23,5 @@ machine learning tools.
    pimlico.modules.opennlp
    pimlico.modules.regex
    pimlico.modules.sklearn
+   pimlico.modules.utility
    pimlico.modules.visualization

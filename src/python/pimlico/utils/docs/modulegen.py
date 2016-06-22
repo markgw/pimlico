@@ -17,6 +17,7 @@ from pkgutil import iter_modules
 from sphinx import __version__
 from sphinx.apidoc import format_heading
 
+from pimlico import install_core_dependencies
 from pimlico.core.modules.options import format_option_type
 from pimlico.datatypes.base import DynamicOutputDatatype, PimlicoDatatype, MultipleInputs
 from pimlico.utils.docs import trim_docstring
@@ -218,6 +219,9 @@ if __name__ == "__main__":
     opts = parser.parse_args()
 
     output_dir = os.path.abspath(opts.output_dir)
+
+    # Install basic Pimlico requirements
+    install_core_dependencies()
 
     print "Sphinx %s" % __version__
     print "Pimlico module doc generator"

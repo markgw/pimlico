@@ -3,8 +3,9 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
+PYTHON        = ../bin/python
 # Use virtualenv so we see all the installed Python libraries
-SPHINXBUILD   = ../bin/python $(shell which sphinx-build)
+SPHINXBUILD   = $(PYTHON) $(shell which sphinx-build)
 PAPER         =
 BUILDDIR      = _build
 SPHINXAPI     = sphinx-apidoc
@@ -55,7 +56,7 @@ api:
 
 modules:
 	@rm -rf $(MODULEDIR)
-	@../bin/python -m pimlico.utils.docs.modulegen $(MODULEDIR)
+	@$(PYTHON) -m pimlico.utils.docs.modulegen $(MODULEDIR)
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

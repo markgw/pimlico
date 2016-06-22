@@ -9,14 +9,11 @@ OpenNLP POS-tagger
 | Executable | yes                         |
 +------------+-----------------------------+
 
-.. todo::
+Part-of-speech tagging using OpenNLP's tools.
 
-   Document this module
-
-
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
+By default, uses the pre-trained English model distributed with OpenNLP. If you want to use other models (e.g.
+for other languages), download them from the OpenNLP website to the models dir (`models/opennlp`) and specify
+the model name as an option.
 
 
 Inputs
