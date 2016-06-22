@@ -5,13 +5,25 @@
 """
 Tool for browsing datasets, reading from the data output by pipeline modules.
 """
+
 import sys
-from importlib import import_module
 from traceback import format_exc
 
-import urwid
-from pimlico.cli.browser.formatter import DefaultFormatter, load_formatter
-from pimlico.core.modules.base import check_type, TypeCheckError
+try:
+    import urwid
+except ImportError:
+    print "Urwid is not installed: installing now"
+    from pimlico.core.dependencies.python import PythonPackageOnPip
+    urwid_dep = PythonPackageOnPip("urwid")
+    urwid_dep.install()
+
+    try:
+        import urwid
+    except ImportError:
+        print "Tried to install Urwid, but still not available"
+        raise
+
+from pimlico.cli.browser.formatter import load_formatter
 from pimlico.datatypes.base import InvalidDocument
 
 PALETTE = [

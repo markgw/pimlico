@@ -122,7 +122,7 @@ def main():
 
     print "\nProject setup complete!"
     print "Run:"
-    print "  pimlico.sh %s" % conf_filename
+    print "  ./pimlico.sh %s" % conf_filename
     print "to launch Pimlico for the first time and fetch basic dependencies"
 
 

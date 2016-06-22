@@ -20,7 +20,6 @@ from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.execute import execute_module, ModuleExecutionError
 from pimlico.utils.filesystem import copy_dir_with_progress
-from .browser.tool import browse_cmd
 from .shell.runner import shell_cmd
 from pimlico.core.modules.multistage import MultistageModuleInfo
 
@@ -136,6 +135,12 @@ def unlock_cmd(pipeline, opts):
         print "Module unlocked"
 
 
+def browse_cmd_with_deps(*args):
+    # When this is first imported, it checks that it has its dependencies
+    from .browser.tool import browse_cmd
+    return browse_cmd(*args)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
@@ -204,7 +209,7 @@ if __name__ == "__main__":
     reset.add_argument("module_name", help="The name of the module whose output to move")
 
     run = subparsers.add_parser("browse", help="View the data output by a module")
-    run.set_defaults(func=browse_cmd)
+    run.set_defaults(func=browse_cmd_with_deps)
     run.add_argument("module_name", help="The name of the module whose output to look at. Use 'module:stage' for "
                                          "multi-stage modules")
     run.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
