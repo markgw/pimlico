@@ -43,16 +43,15 @@ if [ -n "$PROFILE" ]; then
         # Replace arg 1
         set -- $script_name "${@:2}"
     fi
-    $python $PYARGS -m cProfile -o $profile_out $*
+    $python $PYARGS -m cProfile -o $profile_out "$@"
 elif [ -n "$MEMPROFILE" ]; then
     # Similar, does memory profiling
     echo "Memory profiling"
-    $python -m memory_profiler $*
+    $python -m memory_profiler "$@"
 elif [ -n "$GDB" ]; then
     echo "Running Python from gdb"
-    gdb -ex r --args $python $*
+    gdb -ex r --args $python "$@"
 else
     # Run python using virtualenv python interpreter
-    echo "$*"
-    $python $*
+    $python "$@"
 fi
