@@ -80,8 +80,8 @@ def main():
                 ])
             ])
         ]),
-        ("pimlico", []),
         ("output", [])
+        # `pimlico` dir will be created by bootstrap.py
     ]
     create_directory_structure(structure, base_dir)
 
@@ -112,11 +112,18 @@ def main():
     except ImportError:
         print "Got bootstrap.py, but could not import it"
         sys.exit(1)
-    print "Bootstrapping project %s to fetch Pimlico and run basic setup..." % project_name
+    print "\nBootstrapping project %s to fetch Pimlico and run basic setup..." % project_name
     bootstrap(conf_filename)
 
-    # TODO Create symlink to pimlico.sh
-    # TODO Run Pimlico for the first time to fetch basic dependencies
+    print "Bootstrapped project: Pimlico is now available in pimlico/ dir\n"
+    # Create symlink to pimlico.sh, so it's easier to run
+    symlink(os.path.join("pimlico", "bin", "pimlico.sh"), "pimlico.sh")
+    print "Creating symlink pimlico.sh for running Pimlico"
+
+    print "\nProject setup complete!"
+    print "Run:"
+    print "  pimlico.sh %s" % conf_filename
+    print "to launch Pimlico for the first time and fetch basic dependencies"
 
 
 TEMPLATE_CONF = """\
