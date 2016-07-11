@@ -67,7 +67,8 @@ class BaseModuleInfo(object):
     """
     main_module = None
 
-    def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[]):
+    def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[], docstring=""):
+        self.docstring = docstring
         self.inputs = inputs
         self.options = options
         self.module_name = module_name
@@ -211,7 +212,7 @@ class BaseModuleInfo(object):
         return process_module_options(module_options, opt_dict, cls.module_type_name)
 
     @classmethod
-    def extract_input_options(cls, opt_dict, module_name=None):
+    def extract_input_options(cls, opt_dict, module_name=None, previous_module_name=None):
         """
         Given the config options for a module instance, pull out the ones that specify where the
         inputs come from and match them up with the appropriate input names.
@@ -222,6 +223,8 @@ class BaseModuleInfo(object):
 
         :param module_name: name of the module being processed, for error output. If not given, the name
             isn't included in the error.
+        :param previous_module_name: name of the previous module in the order given in the config file, allowing
+            a single-input module to default to connecting to this if the input connection wasn't given
         :return: dictionary of inputs
         """
         inputs = {}
@@ -244,6 +247,11 @@ class BaseModuleInfo(object):
                         input_name, ", ".join([i[0] for i in cls.module_inputs])
                     ))
                 inputs[input_name] = opt_dict.pop(opt_name)
+
+        # Allow a special case of a single-input module whose input is unspecified and defaults to the
+        # default output from the previous module in the order given in the config file
+        if len(inputs) == 0 and len(cls.module_inputs) == 1 and previous_module_name is not None:
+            inputs[cls.module_inputs[0][0]] = previous_module_name
 
         # Check for any inputs that weren't specified
         unspecified_inputs = set(i[0] for i in cls.module_inputs) - set(inputs.keys())
@@ -289,7 +297,7 @@ class BaseModuleInfo(object):
         return []
 
     @classmethod
-    def process_config(cls, config_dict, module_name=None):
+    def process_config(cls, config_dict, module_name=None, previous_module_name=None):
         """
         Convenience wrapper to do all config processing from a dictionary of module config.
 
@@ -301,7 +309,7 @@ class BaseModuleInfo(object):
         output_opt = options.pop("output", "")
         outputs = output_opt.split(",") if output_opt else []
         # Pull out the input options and match them up with inputs
-        inputs = cls.extract_input_options(options, module_name=module_name)
+        inputs = cls.extract_input_options(options, module_name=module_name, previous_module_name=previous_module_name)
         # Process the rest of the values as module options
         options = cls.process_module_options(options)
 
@@ -374,17 +382,15 @@ class BaseModuleInfo(object):
         Get a datatype instance corresponding to one of the outputs of the module.
 
         """
+        output_name, datatype = self.get_output_datatype(output_name=output_name)
+        output_datatype_instance = self.instantiate_output_datatype(output_name, datatype)
         if additional_names:
-            # We need to use the datatype above the lowest to instantiate the additional datatype
-            # This might be (usually is) the main datatype
-            output_name, super_datatype = \
-                self.get_output_datatype(output_name=output_name, additional_names=additional_names[:-1])
-            additional_name = "->".join(additional_names)
-            return super_datatype.instantiate_additional_datatype(additional_names[-1], additional_name,
-                                                                  self.get_output_dir(output_name), self.pipeline)
-        else:
-            output_name, datatype = self.get_output_datatype(output_name=output_name)
-            return self.instantiate_output_datatype(output_name, datatype)
+            # Use the main output datatype to fetch additional datatype(s)
+            for i in range(len(additional_names)):
+                additional_name = "->".join(additional_names[:i+1])
+                output_datatype_instance = \
+                    output_datatype_instance.instantiate_additional_datatype(additional_names[i], additional_name)
+        return output_datatype_instance
 
     def is_multiple_input(self, input_name=None):
         """
@@ -435,7 +441,7 @@ class BaseModuleInfo(object):
 
         """
         datatypes = [
-            previous_module.get_output_datatype(output_name, additional_names=additional_names)
+            previous_module.get_output_datatype(output_name, additional_names=additional_names)[1]
             for previous_module, output_name, additional_names in
             self.get_input_module_connection(input_name, always_list=True)
         ]

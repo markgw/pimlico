@@ -162,8 +162,7 @@ if __name__ == "__main__":
     check.set_defaults(func=check_cmd)
     check.add_argument("modules", nargs="*",
                        help="Check runtime dependencies for named modules. By default, these are not all checked, as "
-                            "you might be happy with them not all being satisfied at once. To check the whole "
-                            "pipeline, use 'all'")
+                            "you might be happy with them not all being satisfied at once")
     check.add_argument("--verbose", "-v", action="store_true",
                        help="Show details of why dependencies aren't available where possible")
 
@@ -202,31 +201,32 @@ if __name__ == "__main__":
     unlock.set_defaults(func=unlock)
     unlock.add_argument("module_name", help="The name of the module to unlock")
 
-    reset = subparsers.add_parser("longstore",
-                                  help="Move a particular module's output from the short-term store to the long-term "
-                                       "store. It will still be found here by input readers. You might want to do "
-                                       "this if your long-term store is bigger, to keep down the short-term store size")
-    reset.set_defaults(func=short_to_long)
-    reset.add_argument("module_name", help="The name of the module whose output to move")
+    longstore = subparsers.add_parser("longstore",
+                                      help="Move a particular module's output from the short-term store to the long-term "
+                                           "store. It will still be found here by input readers. You might want to do "
+                                           "this if your long-term store is bigger, to keep down the short-term store size")
+    longstore.set_defaults(func=short_to_long)
+    longstore.add_argument("module_name", help="The name of the module whose output to move")
 
-    run = subparsers.add_parser("browse", help="View the data output by a module")
-    run.set_defaults(func=browse_cmd_with_deps)
-    run.add_argument("module_name", help="The name of the module whose output to look at. Use 'module:stage' for "
-                                         "multi-stage modules")
-    run.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
-                                                    "load the default output")
-    run.add_argument("--parse", "-p", action="store_true",
-                     help="Parse the data using the output datatype (i.e. don't just read the raw text) and output "
-                          "the result of applying str() to the parsed data structure")
-    run.add_argument("--formatter", "-f",
-                     help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
-                          "what to output for each document. If specified, --parse is ignored")
+    browse = subparsers.add_parser("browse", help="View the data output by a module")
+    browse.set_defaults(func=browse_cmd_with_deps)
+    browse.add_argument("module_name", help="The name of the module whose output to look at. Use 'module:stage' for "
+                                            "multi-stage modules")
+    browse.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
+                                                       "load the default output")
+    browse.add_argument("--raw", "-r", action="store_true",
+                        help="Don't parse the data using the output datatype (i.e. just read the raw text). If not "
+                             "set, we output the result of applying unicode() to the parsed data structure, or a "
+                             "custom formatting if the datatype loaded defines one")
+    browse.add_argument("--formatter", "-f",
+                        help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
+                             "what to output for each document. If specified, --raw is ignored")
 
-    run = subparsers.add_parser("shell", help="Open a shell to give access to the data output by a module")
-    run.set_defaults(func=shell_cmd)
-    run.add_argument("module_name", help="The name of the module whose output to look at")
-    run.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
-                                                    "load the default output")
+    shell = subparsers.add_parser("shell", help="Open a shell to give access to the data output by a module")
+    shell.set_defaults(func=shell_cmd)
+    shell.add_argument("module_name", help="The name of the module whose output to look at")
+    shell.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
+                                                      "load the default output")
 
     install = subparsers.add_parser("install", help="Install missing module library dependencies")
     install.set_defaults(func=install_cmd)

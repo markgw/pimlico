@@ -11,6 +11,9 @@ class ModuleExecutor(BaseModuleExecutor):
         input_corpus = self.info.get_input("corpus")
         input_corpus.raw_data = True
 
+        gzip = input_corpus.metadata.get("gzip", False)
+        encoding = input_corpus.metadata.get("encoding", "utf-8")
+
         set1_list = []
         set2_list = []
         output_set2_list = "doc_list2" in self.info.output_names
@@ -21,10 +24,9 @@ class ModuleExecutor(BaseModuleExecutor):
         pbar = get_progress_bar(len(input_corpus), title="Splitting")
 
         # Use a generic TarredCorpusWriter, since we're just passing through the encoded data from the input
-        with TarredCorpusWriter(self.info.get_absolute_output_dir("set1"),
-                                gzip=input_corpus.gzip, encoding=input_corpus.encoding) as set1_writer:
+        with TarredCorpusWriter(self.info.get_absolute_output_dir("set1"), gzip=gzip, encoding=encoding) as set1_writer:
             with TarredCorpusWriter(self.info.get_absolute_output_dir("set2"),
-                                    gzip=input_corpus.gzip, encoding=input_corpus.encoding) as set2_writer:
+                                    gzip=gzip, encoding=encoding) as set2_writer:
                 for archive_name, doc_name, doc_data in pbar(input_corpus.archive_iter()):
                     if set1_remaining == 0:
                         # Must be set 2

@@ -17,6 +17,9 @@ opennlp_dependency = JavaJarsDependency(
             "opennlp-uima-{v}.jar".format(v=OPENNLP_VERSION),
             "jwnl-1.3.3.jar",
         ]
+    ] + [
+        # Not everything necessarily needs Guava, but we tend to use it a lot, so include in all OpenNLP dep sets
+        ("guava.jar", "http://search.maven.org/remotecontent?filepath=com/google/guava/guava/15.0/guava-15.0.jar"),
     ]
 )
 

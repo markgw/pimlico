@@ -101,13 +101,14 @@ class PipelineConfig(object):
 
     """
     def __init__(self, name, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
-                 variant="main", available_variants=[], log=None, all_filenames=None):
+                 variant="main", available_variants=[], log=None, all_filenames=None, module_docstrings={}):
         if log is None:
             log = get_console_logger("Pimlico")
         self.log = log
 
         self.available_variants = available_variants
         self.variant = variant
+        self.module_docstrings = module_docstrings
         # Stores the module names in the order they were specified in the config file
         self.module_order = module_order
         self.local_config = local_config
@@ -235,16 +236,25 @@ class PipelineConfig(object):
             # Allow document map types to be used as filters simply by specifying filter=T
             filter_type = str_to_bool(module_config.pop("filter", ""))
 
+            # Work out what the previous module was, so that we can use it as a default connection
+            try:
+                module_index = self.module_order.index(module_name)
+            except ValueError:
+                module_index = 0
+            previous_module_name = self.module_order[module_index-1] if module_index > 0 else None
+
             # Pass in all other options to the info constructor
             options_dict = dict(module_config)
             try:
-                inputs, optional_outputs, options = module_info_class.process_config(options_dict)
+                inputs, optional_outputs, options = module_info_class.process_config(
+                    options_dict, module_name=module_name, previous_module_name=previous_module_name)
             except ModuleOptionParseError, e:
                 raise PipelineConfigParseError("error in '%s' options: %s" % (module_name, e))
 
             # Instantiate the module info
             module_info = \
-                module_info_class(module_name, self, inputs=inputs, options=options, optional_outputs=optional_outputs)
+                module_info_class(module_name, self, inputs=inputs, options=options, optional_outputs=optional_outputs,
+                                  docstring=self.module_docstrings.get(module_name, ""))
 
             # If we're loading as a filter, wrap the module info
             if filter_type:
@@ -349,7 +359,7 @@ class PipelineConfig(object):
         }
 
         # Perform pre-processing of config file to replace includes, etc
-        config_sections, available_variants, vars, all_filenames = \
+        config_sections, available_variants, vars, all_filenames, section_docstrings = \
             preprocess_config_file(os.path.abspath(filename), variant=variant, initial_vars=special_vars)
         # If we were asked to load a particular variant, check it's in the list of available variants
         if variant != "main" and variant not in available_variants:
@@ -430,7 +440,7 @@ class PipelineConfig(object):
         pipeline = PipelineConfig(
             name, pipeline_config, local_config_data, raw_module_options, module_order,
             filename=filename, variant=variant, available_variants=list(sorted(available_variants)),
-            all_filenames=all_filenames
+            all_filenames=all_filenames, module_docstrings=section_docstrings,
         )
 
         # Now that we've got the pipeline instance prepared, load all the module info instances, so they've cached
@@ -511,7 +521,7 @@ class PipelineStructureError(Exception):
 def preprocess_config_file(filename, variant="main", initial_vars={}):
     copies = {}
     try:
-        config_sections, available_variants, vars, all_filenames = \
+        config_sections, available_variants, vars, all_filenames, section_docstrings = \
             _preprocess_config_file(filename, variant=variant, copies=copies, initial_vars=initial_vars)
     except IOError, e:
         raise PipelineConfigParseError("could not read config file %s: %s" % (filename, e))
@@ -536,7 +546,12 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
         config_sections = [(sect, copy_values) if sect == target_section else (sect, settings)
                            for (sect, settings) in config_sections]
 
-    return config_sections, available_variants, vars, all_filenames
+    if "pipeline" in section_docstrings:
+        del section_docstrings["pipeline"]
+    if "vars" in section_docstrings:
+        del [section_docstrings["vars"]]
+
+    return config_sections, available_variants, vars, all_filenames, section_docstrings
 
 
 def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}):
@@ -547,6 +562,9 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     sub_vars = []
     all_filenames = [os.path.abspath(filename)]
     current_section = None
+    # Keep the last comments in a buffer so that we can grab those that were just before a section start
+    comment_memory = []
+    section_docstrings = {}
 
     with open(filename, "r") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
@@ -565,13 +583,15 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                         config_lines.append(rest.lstrip())
                     # Keep a list of all available variants
                     available_variants.update(variant_conds)
+                elif directive.lower().startswith("variant"):
+                    raise PipelineConfigParseError("variant directive must specify a variant name, as 'variant:<name>'")
                 elif directive == "include":
                     # Include another file, given relative to this one
                     relative_filename = rest.strip("\n ")
                     include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), relative_filename))
                     # Run preprocessing over that file too, so we can have embedded includes, etc
                     try:
-                        incl_config, incl_variants, incl_vars, incl_filenames = \
+                        incl_config, incl_variants, incl_vars, incl_filenames, incl_section_docstrings = \
                             _preprocess_config_file(include_filename, variant=variant, copies=copies,
                                                     initial_vars=initial_vars)
                     except IOError, e:
@@ -583,6 +603,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     # Also save vars section, which may override variables that were defined earlier
                     sub_vars.append(incl_vars)
                     available_variants.update(incl_variants)
+                    section_docstrings.update(incl_section_docstrings)
                 elif directive == "copy":
                     # Copy config values from another section
                     # For now, just store a list of sections to copy from: we'll do the copying later
@@ -590,10 +611,21 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     copies.setdefault(current_section, []).append(source_section)
                 else:
                     raise PipelineConfigParseError("unknown directive '%s' used in config file" % directive)
+                comment_memory = []
             else:
                 if line.startswith("["):
                     # Track what section we're in at any time
                     current_section = line.strip("[] \n")
+                    # Take the recent comments to be a docstring for the section
+                    section_docstrings[current_section] = "\n".join(comment_memory)
+                    comment_memory = []
+                elif line.startswith("#"):
+                    # Don't need to filter out comments, because the config parser handles them, but grab any that
+                    # were just before a section to use as a docstring
+                    comment_memory.append(line.lstrip("#").strip(" \n"))
+                else:
+                    # Reset the comment memory for anything other than comments
+                    comment_memory = []
                 config_lines.append(line)
 
     # Parse the result as a config file
@@ -639,7 +671,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
 
     # Don't include "main" variant in available variants
     available_variants.discard("main")
-    return config_sections, available_variants, vars, all_filenames
+    return config_sections, available_variants, vars, all_filenames, section_docstrings
 
 
 def check_for_cycles(pipeline):

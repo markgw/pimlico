@@ -66,13 +66,13 @@ def browse_cmd(pipeline, opts):
         sys.exit(1)
 
     # Load the formatter if one was requested
-    formatter = load_formatter(data, opts.formatter, parse=opts.parse)
+    formatter = load_formatter(data, opts.formatter, parse=not opts.raw)
     if opts.formatter is not None:
         # If a formatter's given, use its attribute to determine whether we get raw input
         parse = not formatter.RAW_INPUT
     else:
         # Otherwise (default formatter), use the cmd-line option
-        parse = opts.parse
+        parse = not opts.raw
 
     browse_data(data, formatter, parse=parse)
 

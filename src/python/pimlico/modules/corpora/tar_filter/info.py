@@ -66,6 +66,8 @@ class TarredCorpusGrouper(object):
 
 # Subclass TarredCorpus so that inputs expecting one can accept this
 class TarredCorpusFilter(TarredCorpus):
+    emulated_datatype = TarredCorpus
+
     def __init__(self, pipeline, input_datatype, archive_size, archive_basename="archive"):
         IterableCorpus.__init__(self, None, pipeline)
 

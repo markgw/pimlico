@@ -145,10 +145,15 @@ Output {output_name}:
     module_details = module.get_detailed_status()
     module_details = "\n%s" % "\n".join(module_details) if module_details else ""
 
+    if module.docstring:
+        docstring = "%s\n" % module.docstring
+    else:
+        docstring = ""
+
     # Put together a neat summary, include the things we've formatted above
     return """
 {title}
-Status: {status}
+{docstring}Status: {status}
 {inputs}
 {outputs}{lock_status}
 Options:
@@ -159,5 +164,6 @@ Options:
         outputs="\n".join(output_infos) if output_infos else "No outputs",
         options="\n    ".join("%s: %s" % (key, val) for (key, val) in module.options.items()),
         module_details=module_details,
-        lock_status="" if not module.is_locked() else "\nLocked: ongoing execution"
+        lock_status="" if not module.is_locked() else "\nLocked: ongoing execution",
+        docstring=docstring,
     ), also_output

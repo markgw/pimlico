@@ -35,7 +35,7 @@ def check_cmd(pipeline, opts):
                 if len(problems):
                     for problem_name, problem_desc in problems:
                         print "Module '%s' cannot run: %s\n  %s" % \
-                              (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100).splitlines()))
+                              (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100)))
                     passed = False
             if passed:
                 print "Runtime dependency checks successful for modules: %s" % ", ".join(modules)

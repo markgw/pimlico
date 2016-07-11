@@ -57,6 +57,9 @@ class PimlicoDatatype(object):
     To avoid conflicts in the metadata between datatypes using the same directory, datatypes loaded as additional
     datatypes have their additional name available to them and use it as a prefix to the metadata filename.
 
+    If `use_main_metadata=True` on an additional datatype, the same metadata will be read as for the main
+    datatype to which this is an additional datatype.
+
     """
     datatype_name = "base_datatype"
     requires_data_preparation = False
@@ -72,8 +75,21 @@ class PimlicoDatatype(object):
 
     """
     supplied_additional = []
+    """
+    Most datatype classes define their own type of corpus, which is often a subtype of some other. Some, however,
+    emulate another type and it is that type that should be considered the be the type of the dataset, not the
+    class itself.
 
-    def __init__(self, base_dir, pipeline, additional_name=None, **kwargs):
+    For example, TarredCorpusFilter dynamically produces something that looks like a TarredCorpus,
+    and further down the pipeline, if its type is need, it should be considered to be a TarredCorpus.
+
+    Most of the time, this can be left empty, but occasionally it needs to be set.
+
+    """
+    emulated_datatype = None
+
+    def __init__(self, base_dir, pipeline, additional_name=None, use_main_metadata=False, **kwargs):
+        self.use_main_metadata = use_main_metadata
         self.additional_name = additional_name
         self.pipeline = pipeline
         self.base_dir = base_dir
@@ -88,10 +104,9 @@ class PimlicoDatatype(object):
             setattr(self, attr, val)
         self.options = kwargs
 
-    @property
-    def metadata(self):
+    def _get_metadata(self):
         if self._metadata is None:
-            if self.additional_name is None:
+            if self.additional_name is None or self.use_main_metadata:
                 metadata_filename = "corpus_metadata"
             else:
                 metadata_filename = "%s_corpus_metadata" % self.additional_name
@@ -105,6 +120,7 @@ class PimlicoDatatype(object):
                 # No metadata written: data may not have been written yet
                 self._metadata = {}
         return self._metadata
+    metadata = property(_get_metadata)
 
     def check_runtime_dependencies(self):
         """
@@ -179,15 +195,15 @@ class PimlicoDatatype(object):
         """
         return "%s.%s" % (cls.__module__, cls.__name__)
 
-    @classmethod
-    def instantiate_additional_datatype(cls, name, additional_name, base_dir, pipeline, **options):
+    def instantiate_additional_datatype(self, name, additional_name):
         """
         Default implementation just assumes the datatype class can be instantiated using the default constructor,
         with the same base dir and pipeline as the main datatype. Options given to the main datatype are passed
         down to the additional datatype.
 
         """
-        return dict(cls.supplied_additional)[name](base_dir, pipeline, additional_name=additional_name, **options)
+        return dict(self.supplied_additional)[name](
+            self.base_dir, self.pipeline, additional_name=additional_name, **self.options)
 
 
 class DynamicOutputDatatype(object):
@@ -308,6 +324,9 @@ class IterableCorpus(PimlicoDatatype):
         Subclasses should implement an iter method that simply iterates over all the documents in the
         corpus in a consistent order. They may also provide other methods for iterating over or otherwise
         accessing the data.
+
+        Each yielded document should consist of a pair `(name, doc)`, where `name` is an identifier for the document
+        (e.g. filename) and `doc` is the document's data, in whatever type is appropriate.
 
         """
         raise NotImplementedError
