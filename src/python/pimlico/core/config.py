@@ -79,6 +79,9 @@ class PipelineConfig(object):
     - `include`:
         Include the entire contents of another file. The filename, specified relative to the config file in which the
         directive is found, is given after a space.
+    - `abstract`:
+        Marks a config file as being abstract. This means that Pimlico will not allow it to be loaded as a top-level
+        config file, but only allow it to be included in another config file.
     - `copy`:
         Copies all config settings from another module, whose name is given as the sole argument. May be used multiple
         times in the same module and later copies will override earlier. Settings given explicitly in the module's
@@ -521,10 +524,14 @@ class PipelineStructureError(Exception):
 def preprocess_config_file(filename, variant="main", initial_vars={}):
     copies = {}
     try:
-        config_sections, available_variants, vars, all_filenames, section_docstrings = \
+        config_sections, available_variants, vars, all_filenames, section_docstrings, abstract = \
             _preprocess_config_file(filename, variant=variant, copies=copies, initial_vars=initial_vars)
     except IOError, e:
         raise PipelineConfigParseError("could not read config file %s: %s" % (filename, e))
+    # If the top-level config file was marked abstract, complain: it shouldn't be run itself
+    if abstract:
+        raise PipelineConfigParseError("config file %s is abstract: it shouldn't be run itself, but included in "
+                                       "another config file" % filename)
     config_sections_dict = dict(config_sections)
 
     # Copy config values according to copy directives
@@ -565,10 +572,13 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     # Keep the last comments in a buffer so that we can grab those that were just before a section start
     comment_memory = []
     section_docstrings = {}
+    # File will be marked abstract if an abstract directive is encountered
+    abstract = False
 
     with open(filename, "r") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
         for line in f:
+            line = line.rstrip("\n")
             if line.startswith("%% "):
                 # Directive: process this now
                 directive, __, rest = line[3:].partition(" ")
@@ -591,7 +601,8 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     include_filename = os.path.abspath(os.path.join(os.path.dirname(filename), relative_filename))
                     # Run preprocessing over that file too, so we can have embedded includes, etc
                     try:
-                        incl_config, incl_variants, incl_vars, incl_filenames, incl_section_docstrings = \
+                        # Ignore abstract flag of included file: it's allowed to be abstract, since it's been included
+                        incl_config, incl_variants, incl_vars, incl_filenames, incl_section_docstrings, __ = \
                             _preprocess_config_file(include_filename, variant=variant, copies=copies,
                                                     initial_vars=initial_vars)
                     except IOError, e:
@@ -609,6 +620,9 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     # For now, just store a list of sections to copy from: we'll do the copying later
                     source_section = rest.strip()
                     copies.setdefault(current_section, []).append(source_section)
+                elif directive == "abstract":
+                    # Mark this file as being abstract (must be included)
+                    abstract = True
                 else:
                     raise PipelineConfigParseError("unknown directive '%s' used in config file" % directive)
                 comment_memory = []
@@ -671,7 +685,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
 
     # Don't include "main" variant in available variants
     available_variants.discard("main")
-    return config_sections, available_variants, vars, all_filenames, section_docstrings
+    return config_sections, available_variants, vars, all_filenames, section_docstrings, abstract
 
 
 def check_for_cycles(pipeline):
