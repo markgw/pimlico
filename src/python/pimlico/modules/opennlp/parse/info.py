@@ -9,10 +9,12 @@
 
 """
 import os
+
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
-from pimlico.datatypes.tokenized import TokenizedCorpus
+from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.datatypes.tokenized import TokenizedDocumentType
 from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithRequiredFields
 from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
@@ -20,7 +22,8 @@ from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_parser"
     module_readable_name = "OpenNLP constituency parser"
-    module_inputs = [("documents", (TokenizedCorpus, WordAnnotationCorpusWithRequiredFields("word")))]
+    module_inputs = [("documents", (TarredCorpusType(TokenizedDocumentType),
+                                    WordAnnotationCorpusWithRequiredFields("word")))]
     module_outputs = [("parser", ConstituencyParseTreeCorpus)]
     module_options = {
         "model": {

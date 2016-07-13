@@ -7,6 +7,7 @@ import re
 from operator import itemgetter
 
 from pimlico.datatypes.base import DatatypeLoadError, DynamicOutputDatatype, DynamicInputDatatypeRequirement
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
@@ -14,31 +15,16 @@ from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_inva
 __all__ = [
     "WordAnnotationCorpus", "WordAnnotationCorpusWriter", "SimpleWordAnnotationCorpusWriter",
     "AddAnnotationField", "WordAnnotationCorpusWithRequiredFields",
-    "AnnotationParseError"
+    "AnnotationParseError", "WordAnnotationsDocumentType"
 ]
 
 
-class WordAnnotationCorpus(TarredCorpus):
-    datatype_name = "word_annotations"
-    # Subclasses may provide a list of the fields included for each word
-    # Doing so allows an extra level of type checking, since datatype users know before the dataset is available
-    #  which fields will be in it
-    annotation_fields = None
-
-    def __init__(self, base_dir, pipeline):
-        super(WordAnnotationCorpus, self).__init__(base_dir, pipeline)
-        self._sentence_boundary_re = None
+class WordAnnotationsDocumentType(RawDocumentType):
+    def __init__(self, options, metadata):
+        super(WordAnnotationsDocumentType, self).__init__(options, metadata)
         self._word_re = None
         self._word_boundary = None
-
-    def read_annotation_fields(self):
-        """
-        Get the available annotation fields from the dataset's configuration. These are the actual
-        fields that will be available in the dictionary produced corresponding to each word.
-
-        """
-        # To make sure the fields are in the order in which they're specified, order by matching group number
-        return list(map(itemgetter(0), sorted(self.word_re.groupindex.items(), key=itemgetter(1))))
+        self._sentence_boundary_re = None
 
     @property
     def sentence_boundary_re(self):
@@ -92,19 +78,19 @@ class WordAnnotationCorpus(TarredCorpus):
             self._word_re = re.compile(word_re)
         return self._word_re
 
-    def process_document(self, doc):
+    def process_document(self, raw_data):
         sentences = []
-        while len(doc):
+        while len(raw_data):
             # Find the next sentence boundary
-            sb = self.sentence_boundary_re.search(doc)
+            sb = self.sentence_boundary_re.search(raw_data)
             if sb is None:
                 # No more sentence boundaries, the rest must be a single sentence
-                sentence_text = doc
-                doc = ""
+                sentence_text = raw_data
+                raw_data = ""
             else:
                 # Process the text up to the next boundary as a sentence
-                sentence_text = doc[:sb.start()]
-                doc = doc[sb.end():]
+                sentence_text = raw_data[:sb.start()]
+                raw_data = raw_data[sb.end():]
             # Split the sentence on word boundaries
             words = sentence_text.split(self.word_boundary)
             # Parse each word
@@ -117,15 +103,40 @@ class WordAnnotationCorpus(TarredCorpus):
             sentences.append(word_dicts)
         return sentences
 
+
+class WordAnnotationCorpus(TarredCorpus):
+    datatype_name = "word_annotations"
+    data_point_type = WordAnnotationsDocumentType
+    # Subclasses may provide a list of the fields included for each word
+    # Doing so allows an extra level of type checking, since datatype users know before the dataset is available
+    #  which fields will be in it
+    annotation_fields = None
+
+    def __init__(self, base_dir, pipeline):
+        super(WordAnnotationCorpus, self).__init__(base_dir, pipeline)
+        self._sentence_boundary_re = None
+        self._word_re = None
+        self._word_boundary = None
+
+    def read_annotation_fields(self):
+        """
+        Get the available annotation fields from the dataset's configuration. These are the actual
+        fields that will be available in the dictionary produced corresponding to each word.
+
+        """
+        # To make sure the fields are in the order in which they're specified, order by matching group number
+        return list(map(itemgetter(0),
+                        sorted(self.data_point_type_instance.word_re.groupindex.items(), key=itemgetter(1))))
+
     def data_ready(self):
         if not super(WordAnnotationCorpus, self).data_ready():
             return False
         # We now know at least that the data dir exists
         # Check the required formats are specified in the metadata
         try:
-            self.sentence_boundary_re
-            self.word_boundary
-            self.word_re
+            self.data_point_type_instance.sentence_boundary_re
+            self.data_point_type_instance.word_boundary
+            self.data_point_type_instance.word_re
         except DatatypeLoadError:
             return False
         else:
@@ -212,7 +223,7 @@ class AddAnnotationField(DynamicOutputDatatype):
     def get_datatype(self, module_info):
         from pimlico.core.modules.base import ModuleInfoLoadError
 
-        input_datatype = module_info.get_input_datatype(self.input_name)[1]
+        input_datatype = module_info.get_input_datatype(self.input_name)
         # Allow the special case where the input datatype is a tokenized corpus
         # Pretend it's an annotated corpus with no annotations, just words
         if issubclass(input_datatype, TokenizedCorpus):

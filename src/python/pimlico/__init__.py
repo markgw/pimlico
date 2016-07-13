@@ -20,6 +20,7 @@ JAVA_BUILD_JAR_DIR = os.path.join(PIMLICO_ROOT, "build", "jar")
 MODEL_DIR = os.path.join(PIMLICO_ROOT, "models")
 LOG_DIR = os.path.join(PIMLICO_ROOT, "log")
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
+EXAMPLES_DIR = os.path.join(PIMLICO_ROOT, "examples")
 
 
 def install_core_dependencies():

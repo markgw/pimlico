@@ -16,8 +16,8 @@ from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.threaded import threading_executor_factory
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.parse.dependency import StanfordDependencyParse
-from pimlico.datatypes.tokenized import TokenizedCorpus
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus
+from pimlico.datatypes.tokenized import TokenizedCorpus, TokenizedDocumentType
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationsDocumentType
 from pimlico.modules.corenlp import CoreNLPProcessingError
 from pimlico.modules.corenlp.wrapper import CoreNLP
 
@@ -46,10 +46,10 @@ def preprocess(executor):
 
     # By default, for a TarredCorpus or TokenizedCorpus, just pass in the document text
     executor._doc_preproc = lambda doc: doc
-    if isinstance(executor.input_corpora[0], WordAnnotationCorpus):
+    if isinstance(executor.input_corpora[0].data_point_type, WordAnnotationsDocumentType):
         # For a word annotation corpus, we need to pull out the words
         executor._doc_preproc = lambda doc: "\n".join(" ".join(word["word"] for word in sentence) for sentence in doc)
-    elif isinstance(executor.input_corpora[0], TokenizedCorpus):
+    elif isinstance(executor.input_corpora[0].data_point_type, TokenizedDocumentType):
         # Just get the raw text data, which we happen to know is tokenized
         executor.input_corpora[0].raw_data = True
 

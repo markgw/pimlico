@@ -1,6 +1,7 @@
 import struct
 from StringIO import StringIO
 
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 BYTE_FORMATS = {
@@ -26,20 +27,9 @@ def get_struct(bytes, signed, row_length):
     return struct.Struct(format_string)
 
 
-class IntegerTableDocumentCorpus(TarredCorpus):
-    """
-    Corpus of tabular integer data: each doc contains rows of ints, where each row contains the same number
-    of values. This allows a more compact representation, which doesn't require converting the ints to strings or
-    scanning for line ends, so is quite a bit quicker and results in much smaller file sizes. The downside is that
-    the files are not human-readable.
-
-    By default, the ints are stored as C longs, which use 4 bytes. If you know you don't need ints this
-    big, you can choose 1 or 2 bytes, or even 8 (long long). By default, the ints are unsigned, but they
-    may be signed.
-
-    """
-    def __init__(self, base_dir, pipeline, **kwargs):
-        super(IntegerTableDocumentCorpus, self).__init__(base_dir, pipeline, **kwargs)
+class IntegerTableDocumentType(RawDocumentType):
+    def __init__(self, options, metadata):
+        super(IntegerTableDocumentType, self).__init__(options, metadata)
         self._unpacker = None
 
     @property
@@ -77,6 +67,22 @@ class IntegerTableDocumentCorpus(TarredCorpus):
                 else:
                     raise IOError("error interpreting row: %s" % e)
             yield row
+
+
+class IntegerTableDocumentCorpus(TarredCorpus):
+    """
+    Corpus of tabular integer data: each doc contains rows of ints, where each row contains the same number
+    of values. This allows a more compact representation, which doesn't require converting the ints to strings or
+    scanning for line ends, so is quite a bit quicker and results in much smaller file sizes. The downside is that
+    the files are not human-readable.
+
+    By default, the ints are stored as C longs, which use 4 bytes. If you know you don't need ints this
+    big, you can choose 1 or 2 bytes, or even 8 (long long). By default, the ints are unsigned, but they
+    may be signed.
+
+    """
+    datatype_name = "integer_table_corpus"
+    data_point_type = IntegerTableDocumentType
 
 
 class IntegerTableDocumentCorpusWriter(TarredCorpusWriter):

@@ -272,6 +272,23 @@ def install(dep, trust_downloaded_archives=False):
                     "problems:\n%s" % (sub_dep.name, "\n".join("  - %s" % p for p in remaining_problems)))
 
 
+def install_dependencies(pipeline, modules=None, trust_downloaded_archives=True):
+    """
+    Install depedencies for pipeline modules
+
+    :param pipeline:
+    :param modules: list of module names, or None to install for all
+    :return:
+    """
+    from pimlico.core.config import get_dependencies
+
+    if modules is None:
+        modules = pipeline.modules
+
+    deps = get_dependencies(pipeline, modules)
+    check_and_install(deps, trust_downloaded_archives=trust_downloaded_archives)
+
+
 def recursive_deps(dep):
     """
     Collect all recursive dependencies of this dependency. Does a depth-first search so that everything comes

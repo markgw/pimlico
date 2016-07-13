@@ -7,9 +7,11 @@ Sentence splitting and tokenization using OpenNLP's tools.
 
 """
 import os
+
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.tar import TarredCorpus
+from pimlico.datatypes.documents import RawTextDocumentType
+from pimlico.datatypes.tar import TarredCorpusType
 from pimlico.datatypes.tokenized import TokenizedCorpus
 from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
@@ -17,7 +19,7 @@ from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_tokenizer"
     module_readable_name = "OpenNLP tokenizer"
-    module_inputs = [("text", TarredCorpus)]
+    module_inputs = [("text", TarredCorpusType(RawTextDocumentType))]
     module_outputs = [("documents", TokenizedCorpus)]
     module_options = {
         "sentence_model": {

@@ -1,10 +1,15 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
 
 __all__ = ["TokenizedCorpus", "TokenizedCorpusWriter"]
+
+
+class TokenizedDocumentType(RawDocumentType):
+    def process_document(self, doc):
+        return [sentence.split(u" ") for sentence in doc.split(u"\n")]
 
 
 class TokenizedCorpus(TarredCorpus):
@@ -17,11 +22,7 @@ class TokenizedCorpus(TarredCorpus):
 
     """
     datatype_name = "tokenized"
-
-    def process_document(self, data):
-        return [
-            sentence.split(u" ") for sentence in data.split(u"\n")
-        ]
+    data_point_type = TokenizedDocumentType
 
 
 class TokenizedCorpusWriter(TarredCorpusWriter):

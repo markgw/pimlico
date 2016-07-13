@@ -307,6 +307,14 @@ class PipelineConfig(object):
         # Provided there are no cycling dependencies, this ordering now respects the dependencies
         return module_schedule
 
+    def reset_all_modules(self):
+        """
+        Resets the execution states of all modules, restoring the output dirs as if nothing's been run.
+
+        """
+        for module_name in self.modules:
+            self[module_name].reset_execution()
+
     def path_relative_to_config(self, path):
         """
         Get an absolute path to a file/directory that's been specified relative to a config
@@ -437,6 +445,12 @@ class PipelineConfig(object):
         if "release" not in pipeline_config:
             raise PipelineConfigParseError("Pimlico release version must be specified as 'release' attribute in "
                                            "pipeline section")
+        if pipeline_config["release"] == "latest":
+            # Allow for a special case of the value "latest"
+            # Not good practice to use this in real pipelines, but handy for tests, where we always want to be using the
+            #  latest release
+            from pimlico import __version__
+            pipeline_config["release"] = __version__
         check_release(pipeline_config["release"])
 
         # Do no further checking or processing at this stage: just keep raw dictionaries for the time being
@@ -719,41 +733,64 @@ def check_for_cycles(pipeline):
 def check_release(release_str):
     from pimlico import __version__
     current_major_release, __, current_minor_release = __version__.partition(".")
-    given_major_release, __, given_minor_release = release_str.partition(".")
-    current_major_release, given_major_release = int(current_major_release), int(given_major_release)
+    required_major_release, __, required_minor_release = release_str.partition(".")
+    current_major_release, required_major_release = int(current_major_release), int(required_major_release)
 
-    if current_major_release < given_major_release:
+    if current_major_release < required_major_release:
         raise PipelineStructureError("config file was written for a later version of Pimlico than the one you're "
                                      "running. You need to update Pimlico (or check out a later release), as there "
                                      "could be backwards-incompatible changes between major versions. Running version "
                                      "%s, required version %s" % (__version__, release_str))
-    elif current_major_release > given_major_release:
+    elif current_major_release > required_major_release:
         raise PipelineStructureError("config file was written for an earlier version of Pimlico than the one you're "
                                      "running. You need to check out an earlier release, as the behaviour of Pimlico "
                                      "could be very different to when the config file was written. Running version "
                                      "%s, required version %s" % (__version__, release_str))
+
+    current_rc = current_minor_release.endswith("rc")
+    if current_rc:
+        # This is a release candidate
+        # Acceptable for minor versions below this or an identical RC, but not the (non-RC) same version
+        current_minor_release = current_minor_release[:-2]
+    given_rc = required_minor_release.endswith("rc")
+    if given_rc:
+        # RC required
+        # Allow minor versions above it, or an identical RC
+        required_minor_release = required_minor_release[:-2]
+
     # Right major version
     # Check we're not running an earlier minor version
     remaining_current = current_minor_release
-    remaining_given = given_minor_release
+    remaining_given = required_minor_release
+
+    higher_than_required = False
     while len(remaining_given):
         if len(remaining_current) == 0:
             # Given version has the same prefix, but specifies more subversions, so is a later release
             raise PipelineStructureError("config file was written for a later (minor) version of Pimlico than the "
                                          "one you're running. You need to use >= v%s to run this config "
                                          "file (and not > %s). Currently using %s" %
-                                         (release_str, given_major_release, __version__))
+                                         (release_str, required_major_release, __version__))
         current_part, __, remaining_current = remaining_current.partition(".")
         given_part, __, remaining_given = remaining_given.partition(".")
         if int(current_part) > int(given_part):
             # Using a higher minor version than required: stop checking
+            higher_than_required = True
             break
         elif int(current_part) < int(given_part):
             raise PipelineStructureError("config file was written for a later (minor) version of Pimlico than the "
                                          "one you're running. You need to use >= v%s to run this config "
                                          "file (and not > %s). Currently using %s" %
-                                         (release_str, given_major_release, __version__))
+                                         (release_str, required_major_release, __version__))
         # Otherwise using same version at this level: go down to next level and check
+
+    if not higher_than_required:
+        # Allow equal minor versions, except in the case where the supplied version is only a RC
+        if current_rc and not given_rc:
+            raise PipelineStructureError("config file was written for a later (minor) version of Pimlico than the "
+                                         "one you're running. You need to use >= v%s to run this config "
+                                         "file (and not > %s). Currently only using a release candidate, %s" %
+                                         (release_str, required_major_release, __version__))
 
 
 def check_pipeline(pipeline):

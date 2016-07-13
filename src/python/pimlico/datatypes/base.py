@@ -20,6 +20,7 @@ from importlib import import_module
 import cPickle as pickle
 
 from pimlico.core.config import PipelineStructureError
+from pimlico.datatypes.documents import RawDocumentType
 
 __all__ = [
     "PimlicoDatatype", "PimlicoDatatypeWriter", "IterableCorpus", "IterableCorpusWriter",
@@ -52,7 +53,7 @@ class PimlicoDatatype(object):
     Additional datatypes can be accessed in config files by specifying the main datatype (as a previous module,
     optionally with an output name) and the additional datatype name in the form `main_datatype->additional_name`.
     Multiple additional names may be given, causing the next name to be looked up as an additional
-    datatype of the initially loaded additional datateyp. E..g `main_datatype->additional0->additional1`.
+    datatype of the initially loaded additional datatype. E..g `main_datatype->additional0->additional1`.
 
     To avoid conflicts in the metadata between datatypes using the same directory, datatypes loaded as additional
     datatypes have their additional name available to them and use it as a prefix to the metadata filename.
@@ -205,6 +206,34 @@ class PimlicoDatatype(object):
         return dict(self.supplied_additional)[name](
             self.base_dir, self.pipeline, additional_name=additional_name, **self.options)
 
+    @classmethod
+    def check_type(cls, supplied_type):
+        """
+        Method used by datatype type-checking algorithm to determine whether a supplied datatype (given as a
+        class, which is a subclass of PimlicoDatatype) is compatible with the present datatype, which is being
+        treated as a type requirement.
+
+        Typically, the present class is a type requirement on a module input and `supplied_type` is the type provided
+        by a previous module's output.
+
+        The default implementation simply checks whether `supplied_type` is a subclass of the present class. Subclasses
+        may wish to impose different or additional checks.
+
+        :param supplied_type: type provided where the present class is required
+        :return: True if the check is successful, False otherwise
+
+        """
+        return issubclass(supplied_type, cls)
+
+    @classmethod
+    def type_checking_name(cls):
+        """
+        Supplies a name for this datatype to be used in type-checking error messages. Default implementation
+        just provides the class name. Classes that override check_supplied_type() may want to override this too.
+
+        """
+        return cls.__name__
+
 
 class DynamicOutputDatatype(object):
     """
@@ -253,6 +282,14 @@ class DynamicInputDatatypeRequirement(object):
 
     def check_type(self, supplied_type):
         raise NotImplementedError
+
+    def type_checking_name(self):
+        """
+        Supplies a name for this datatype to be used in type-checking error messages. Default implementation
+        just provides the class name. Subclasses may want to override this too.
+
+        """
+        return type(self).__name__
 
 
 class MultipleInputs(object):
@@ -309,15 +346,21 @@ class IterableCorpus(PimlicoDatatype):
     """
     Superclass of all datatypes which represent a dataset that can be iterated over document by document
     (or datapoint by datapoint - what exactly we're iterating over may vary, though documents are most common).
-    The actual type of the data depends on the subclass: it could be, e.g. coref output, etc.
+
+    The actual type of the data depends on the subclass: it could be, e.g. coref output, etc. Information about
+    the type of individual documents is provided by `document_type` and this is used in type checking.
 
     At creation time, length should be provided in the metadata, denoting how many documents are in the dataset.
 
     """
     datatype_name = "iterable_corpus"
+    data_point_type = RawDocumentType
 
     def __init__(self, *args, **kwargs):
         super(IterableCorpus, self).__init__(*args, **kwargs)
+        # Prepare the document datatype instance
+        # Pass in all the options/kwargs we've got, which include any options that the document type specifies
+        self.data_point_type_instance = self.data_point_type(self.options, self.metadata)
 
     def __iter__(self):
         """
@@ -326,7 +369,7 @@ class IterableCorpus(PimlicoDatatype):
         accessing the data.
 
         Each yielded document should consist of a pair `(name, doc)`, where `name` is an identifier for the document
-        (e.g. filename) and `doc` is the document's data, in whatever type is appropriate.
+        (e.g. filename) and `doc` is the document's data, in the appropriate type.
 
         """
         raise NotImplementedError
@@ -338,6 +381,18 @@ class IterableCorpus(PimlicoDatatype):
         return super(IterableCorpus, self).get_detailed_status() + [
             "Length: %d" % len(self)
         ]
+
+    @classmethod
+    def check_supplied_type(cls, supplied_type):
+        """
+        Override type checking to require that the supplied type have a document type that is compatible with
+        (i.e. a subclass of) the document type of this class.
+        """
+        return issubclass(supplied_type, cls) and issubclass(supplied_type.document_type, cls.data_point_type)
+
+    @classmethod
+    def type_checking_name(cls):
+        return "%s<%s>" % (cls.__name__, cls.data_point_type.__name__)
 
 
 class IterableCorpusWriter(PimlicoDatatypeWriter):
@@ -478,6 +533,27 @@ class InvalidDocument(object):
             return InvalidDocument.load(text)
         else:
             return text
+
+
+class TypeFromInput(DynamicOutputDatatype):
+    """
+    Infer output type from the type of an input. Passes the type through exactly, except where the input
+    datatype provides an `emulated_datatype`.
+
+    Input name may be given. Otherwise, the default input is used.
+
+    """
+    datatype_name = "same as input corpus"
+
+    def __init__(self, input_name=None):
+        self.input_name = input_name
+
+    def get_datatype(self, module_info):
+        datatype = module_info.get_input_datatype(self.input_name)
+        # If the input datatype emulates another, it is that other that we will produce as output
+        if datatype.emulated_datatype is not None:
+            datatype = datatype.emulated_datatype
+        return datatype
 
 
 class DatatypeLoadError(Exception):

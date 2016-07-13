@@ -18,15 +18,8 @@ a case, just put the smaller set first and don't request the optional output `do
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import DynamicOutputDatatype, StringList
+from pimlico.datatypes.base import DynamicOutputDatatype, StringList, TypeFromInput
 from pimlico.datatypes.tar import TarredCorpus
-
-
-class TypeFromInput(DynamicOutputDatatype):
-    datatype_name = "same as input corpus"
-
-    def get_datatype(self, module_info):
-        return module_info.get_input_datatype("corpus")
 
 
 class ModuleInfo(BaseModuleInfo):

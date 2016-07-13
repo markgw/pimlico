@@ -11,18 +11,21 @@ to the two (which for most purposes will be sufficient).
 
 """
 
-from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
+from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter, JsonDocumentType
 from pimlico.datatypes.tar import pass_up_invalid
 from pimlico.utils.linguistic import strip_punctuation, ENGLISH_PRONOUNS
 from pimlico.utils.strings import truncate
 
 
+class CorefDocumentType(JsonDocumentType):
+    def process_document(self, doc):
+        data = super(CorefDocumentType, self).process_document(doc)
+        return list(sorted([Entity.from_json(entity) for entity in data], key=lambda e: e.id))
+
+
 class CorefCorpus(JsonDocumentCorpus):
     datatype_name = "opennlp_coref"
-
-    def process_document(self, data):
-        data = super(CorefCorpus, self).process_document(data)
-        return list(sorted([Entity.from_json(entity) for entity in data], key=lambda e: e.id))
+    data_point_type = CorefDocumentType
 
 
 class CorefCorpusWriter(JsonDocumentCorpusWriter):

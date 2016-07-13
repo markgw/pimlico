@@ -4,6 +4,7 @@ TODO Parse tress are temporary implementations that don't actually parse the dat
 """
 import re
 
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 from . import candc
@@ -12,7 +13,14 @@ from . import dependency
 from .dependency import *
 
 
-__all__ = ["ConstituencyParseTreeCorpus", "ConstituencyParseTreeCorpusWriter"] + candc.__all__ + dependency.__all__
+__all__ = ["ConstituencyParseTreeCorpus", "ConstituencyParseTreeCorpusWriter", "TreeStringsDocumentType"] + \
+          candc.__all__ + dependency.__all__
+
+
+class TreeStringsDocumentType(RawDocumentType):
+    # TODO This should read in the parse trees and return a tree data structure
+    def process_document(self, doc):
+        return doc.split("\n\n") if doc.strip() else []
 
 
 class ConstituencyParseTreeCorpus(TarredCorpus):
@@ -22,13 +30,7 @@ class ConstituencyParseTreeCorpus(TarredCorpus):
 
     """
     datatype_name = "parse_trees"
-
-    def process_document(self, data):
-        if data.strip():
-            # TODO This should read in the parse trees and return a tree data structure
-            return data.split("\n\n")
-        else:
-            return []
+    data_point_type = TreeStringsDocumentType
 
 
 class ConstituencyParseTreeCorpusWriter(TarredCorpusWriter):

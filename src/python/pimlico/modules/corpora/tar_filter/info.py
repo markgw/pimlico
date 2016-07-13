@@ -11,9 +11,10 @@ import random
 
 import math
 
-from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.core.modules.base import BaseModuleInfo, TypeCheckError
 from pimlico.core.modules.execute import ModuleNotReadyError
-from pimlico.datatypes.base import IterableCorpus
+from pimlico.datatypes.base import IterableCorpus, DynamicOutputDatatype
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tar import TarredCorpus
 
 
@@ -75,6 +76,9 @@ class TarredCorpusFilter(TarredCorpus):
         self.input_datatype = input_datatype
         self.archive_size = archive_size
 
+        # Get our document type from the input
+        self.data_point_type = input_datatype.data_point_type
+
         self._tarballs = None
 
     def __len__(self):
@@ -133,11 +137,39 @@ class TarredCorpusFilter(TarredCorpus):
         return self.input_datatype.data_ready()
 
 
+class TarredCorpusWithDocumentTypeFromInput(DynamicOutputDatatype):
+    """
+    Dynamic datatype that produces a TarredCorpus with a document datatype that is the same as the input's
+    document/data-point type.
+
+    Should only be used when taking an IterableCorpus as input and giving a TarredCorpus as output. Otherwise,
+    you can just use a dynamic output datatype the returns the input datatype directly.
+    It's therefore only really useful for the modules that tar iterable corpora.
+
+    """
+    datatype_name = "tarred corpus with input doc type"
+
+    def get_base_datatype_class(self):
+        return TarredCorpus
+
+    def get_datatype(self, module_info):
+        # Get the document type from the input iterable corpus
+        input_document_type = module_info.get_input_datatype("documents").data_point_type
+        # Check that this is a subclass of RawDocumentType
+        # An IterableCorpus is not required to have a document type, but a tarred corpus is, so that it can read
+        #  its documents from disk
+        if not issubclass(input_document_type, RawDocumentType):
+            raise TypeCheckError("could not apply tarred corpus filter to input, which has a data-point type of %s. "
+                                 "Input data points must be subclasses of RawDocumentType" %
+                                 input_document_type.__name__)
+        return type("TarredCorpusFromIterableCorpus", (TarredCorpus,), {"data_point_type": input_document_type})
+
+
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "tar_filter"
     module_readable_name = "Tar archive grouper (filter)"
     module_inputs = [("documents", IterableCorpus)]
-    module_outputs = [("documents", TarredCorpusFilter)]
+    module_outputs = [("documents", TarredCorpusWithDocumentTypeFromInput())]
     module_options = {
         "archive_size": {
             "help": "Number of documents to include in each archive (default: 1k)",
@@ -152,8 +184,5 @@ class ModuleInfo(BaseModuleInfo):
     module_executable = False
 
     def instantiate_output_datatype(self, output_name, output_datatype):
-        if output_name == "documents":
-            return TarredCorpusFilter(self.pipeline, self.get_input("documents"), self.options["archive_size"],
-                                      archive_basename=self.options["archive_basename"])
-        else:
-            return super(ModuleInfo, self).instantiate_output_datatype(output_name, output_datatype)
+        return TarredCorpusFilter(self.pipeline, self.get_input("documents"), self.options["archive_size"],
+                                  archive_basename=self.options["archive_basename"])

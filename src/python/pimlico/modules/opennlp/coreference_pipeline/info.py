@@ -13,8 +13,9 @@ from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.coref.opennlp import CorefCorpus, CorefCorpusWriter
+from pimlico.datatypes.documents import RawTextDocumentType
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
-from pimlico.datatypes.tar import TarredCorpus
+from pimlico.datatypes.tar import TarredCorpusType
 from pimlico.datatypes.tokenized import TokenizedCorpus, TokenizedCorpusWriter
 from pimlico.datatypes.word_annotations import WordAnnotationCorpusWithFields, SimpleWordAnnotationCorpusWriter
 from pimlico.modules.opennlp.coreference.info import WORDNET_DIR
@@ -30,7 +31,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     """
     module_type_name = "opennlp_coref"
     module_readable_name = "OpenNLP coreference resolution"
-    module_inputs = [("text", TarredCorpus)]
+    module_inputs = [("text", TarredCorpusType(RawTextDocumentType))]
     module_outputs = [("coref", CorefCorpus)]
     module_optional_outputs = [
         ("tokenized", TokenizedCorpus),

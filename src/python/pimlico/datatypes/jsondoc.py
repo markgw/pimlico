@@ -3,10 +3,17 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 import json
+
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 
 __all__ = ["JsonDocumentCorpus", "JsonDocumentCorpusWriter"]
+
+
+class JsonDocumentType(RawDocumentType):
+    def process_document(self, doc):
+        return json.loads(doc)
 
 
 class JsonDocumentCorpus(TarredCorpus):
@@ -15,10 +22,7 @@ class JsonDocumentCorpus(TarredCorpus):
 
     """
     datatype_name = "json"
-
-    def process_document(self, data):
-        data = json.loads(data)
-        return super(JsonDocumentCorpus, self).process_document(data)
+    data_point_type = JsonDocumentType
 
 
 class JsonDocumentCorpusWriter(TarredCorpusWriter):

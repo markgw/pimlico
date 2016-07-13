@@ -12,13 +12,14 @@ features.
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.dictionary import Dictionary
-from pimlico.datatypes.tokenized import TokenizedCorpus
+from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.datatypes.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "vocab_builder"
     module_readable_name = "Corpus vocab builder"
-    module_inputs = [("text", TokenizedCorpus)]
+    module_inputs = [("text", TarredCorpusType(TokenizedDocumentType))]
     module_outputs = [("vocab", Dictionary)]
     module_options = {
         "threshold": {

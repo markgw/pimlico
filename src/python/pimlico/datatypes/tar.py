@@ -2,24 +2,22 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-from cStringIO import StringIO
+import cPickle as pickle
+import gzip
 import os
 import random
 import shutil
 import tarfile
+import zlib
+from cStringIO import StringIO
+from itertools import izip
 from tempfile import mkdtemp
 from traceback import format_exc
 
-import cPickle as pickle
-
-import zlib
-import gzip
-from itertools import izip
-
-from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument
+from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument, DynamicInputDatatypeRequirement
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.utils.filesystem import retry_open
 from .base import IterableCorpus
-
 
 __all__ = [
     "TarredCorpus", "TarredCorpusWriter", "AlignedTarredCorpora",
@@ -31,6 +29,7 @@ class TarredCorpus(IterableCorpus):
     datatype_name = "tar"
     # This may be overridden by subclasses to provide filters for documents applied before main doc processing
     document_preprocessors = []
+    data_point_type = RawDocumentType
 
     def __init__(self, base_dir, pipeline, raw_data=False):
         """
@@ -165,10 +164,13 @@ class TarredCorpus(IterableCorpus):
         TarredCorpus to do all the archive handling, etc, just specifying a particular way of handling
         the data within documents.
 
-        By default, just returns the data string.
+        By default, uses the document data processing provided by the document type.
+
+        Most of the time, you shouldn't need to override this, but just write a document type that does the
+        necessary processing.
 
         """
-        return data
+        return self.data_point_type_instance.process_document(data)
 
     def list_archive_iter(self):
         for tar_name, tarball_filename in zip(self.tarballs, self.tar_filenames):
@@ -293,6 +295,25 @@ class TarredCorpusWriter(IterableCorpusWriter):
             self.current_archive_tar.close()
         self.metadata["length"] = self.doc_count
         super(TarredCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
+
+
+class TarredCorpusType(DynamicInputDatatypeRequirement):
+    """
+    Input requirement for a TarredCorpus (or subclass) with a particular document type (or subclass).
+    Should generally be used in input requirements in preference to giving specific subclasses of TarredCorpus
+    that have a customized document type.
+
+    """
+    def __init__(self, *document_types):
+        self.document_types = document_types
+        self.datatype_doc_info = "TarredCorpus<%s>" % "|".join(dt.__name__ for dt in document_types)
+
+    def type_checking_name(self):
+        return self.datatype_doc_info
+
+    def check_type(self, supplied_type):
+        return issubclass(supplied_type, TarredCorpus) and \
+               issubclass(supplied_type.data_point_type, self.document_types)
 
 
 def pass_up_invalid(fn):

@@ -4,6 +4,7 @@
 
 from __future__ import absolute_import
 
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tar import TarredCorpus
 from xml.etree import ElementTree as ET
 
@@ -17,32 +18,6 @@ def _tag(name):
     return "%s%s" % (TAG_PREFIX, name)
 
 
-class CaevoCorpus(TarredCorpus):
-    """
-    Datatype for Caevo output. The output is stored exactly as it comes out from Caevo, in an XML format.
-    This datatype reads in that XML and provides easy access to its components.
-
-    Since we simply store the XML that comes from Caevo, there's no corresponding corpus writer. The data is
-    output using a :class:pimlico.datatypes.tar.TarredCorpusWriter.
-
-    """
-    def process_document(self, data):
-        ET.register_namespace("", "")
-        xml = ET.fromstring(data.encode("utf-8"))
-        # Pull out the doc name from the XML
-        doc_name = xml.attrib["name"]
-        # Read in sentences from <entry> tags
-        entries = [CaevoEntry.from_element(entry) for entry in xml.findall(_tag("entry"))]
-        # Build a dictionary of events and timexes as they're referred to in the tlinks
-        event_dict = dict(
-            [(event.eiid, event) for entry in entries for event in entry.events] +
-            [(timex.tid, timex) for entry in entries for timex in entry.timexes]
-        )
-        # Also read in <tlink> tags
-        tlinks = [TLink.from_element(tlink, event_dict) for tlink in xml.findall(_tag("tlink"))]
-        return CaevoDocument(doc_name, entries, tlinks)
-
-
 class CaevoDocument(object):
     def __init__(self, name, entries, tlinks):
         self.name = name
@@ -53,6 +28,40 @@ class CaevoDocument(object):
         return u"Doc: %s\nEntries:\n%s\nTLinks:\n%s" % (self.name,
                                                         u"\n".join(e.__unicode__(indent=2) for e in self.entries),
                                                         u"\n".join(unicode(t) for t in self.tlinks))
+
+    @staticmethod
+    def from_raw_data(raw_data):
+        ET.register_namespace("", "")
+        xml = ET.fromstring(raw_data.encode("utf-8"))
+        # Pull out the doc name from the XML
+        name = xml.attrib["name"]
+        # Read in sentences from <entry> tags
+        entries = [CaevoEntry.from_element(entry) for entry in xml.findall(_tag("entry"))]
+        # Build a dictionary of events and timexes as they're referred to in the tlinks
+        event_dict = dict(
+            [(event.eiid, event) for entry in entries for event in entry.events] +
+            [(timex.tid, timex) for entry in entries for timex in entry.timexes]
+        )
+        # Also read in <tlink> tags
+        tlinks = [TLink.from_element(tlink, event_dict) for tlink in xml.findall(_tag("tlink"))]
+        return CaevoDocument(name, entries, tlinks)
+
+
+class CaevoDocumentType(RawDocumentType):
+    def process_document(self, doc):
+        return CaevoDocument.from_raw_data(doc)
+
+
+class CaevoCorpus(TarredCorpus):
+    """
+    Datatype for Caevo output. The output is stored exactly as it comes out from Caevo, in an XML format.
+    This datatype reads in that XML and provides easy access to its components.
+
+    Since we simply store the XML that comes from Caevo, there's no corresponding corpus writer. The data is
+    output using a :class:pimlico.datatypes.tar.TarredCorpusWriter.
+
+    """
+    data_point_type = CaevoDocumentType
 
 
 class CaevoEntry(object):

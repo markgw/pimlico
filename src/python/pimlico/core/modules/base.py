@@ -547,19 +547,17 @@ class BaseModuleInfo(object):
             for (dep_module_name, output, additional_names) in input_connections:
                 # Load the dependent module
                 dep_module = self.pipeline[dep_module_name]
+                output_name = output or "default"
                 # Try to load the named output (or the default, if no name was given)
-                output_name, dep_module_output = dep_module.get_output_datatype(output_name=output,
-                                                                                additional_names=additional_names)
+                dep_module_output_name, dep_module_output = \
+                    dep_module.get_output_datatype(output_name=output, additional_names=additional_names)
 
                 # Check the output datatype is given in a suitable form
-                if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)):
-                    if isinstance(dep_module_output, type):
-                        type_name = dep_module_output.__name__
-                    else:
-                        type_name = "instance of %s" % type(dep_module_output).__name__
-                    raise PipelineStructureError("invalid output datatype from module '%s'. Must be either "
-                                                 "PimlicoDatatype subclass or an instance of a DynamicOutputDatatype "
-                                                 "subclass: got %s" % (self.module_name, type_name))
+                if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)) and \
+                        not isinstance(dep_module_output, DynamicOutputDatatype):
+                    raise PipelineStructureError("invalid output datatype from module '%s'. Must be a PimlicoDatatype "
+                                                 "subclass or a DynamicOutputDatatype subclass instance: "
+                                                 "got %s" % (self.module_name, dep_module_output.__name__))
                 try:
                     check_type(dep_module_output, input_type_requirements)
                 except TypeCheckError, e:
@@ -768,13 +766,8 @@ def check_type(provided_type, type_requirements):
         type_requirements = (type_requirements,)
     # Make sure the input type requirements are given in a suitable form
     for intype in type_requirements:
-        if isinstance(intype, type):
-            # If the type requirement is a class, it must be a PimlicoDatatype to match against
-            if not issubclass(intype, PimlicoDatatype):
-                raise TypeCheckError(
-                    "invalid input datatype requirement. Each item must be either a PimlicoDatatype subclass or "
-                    "instance of a DynamicInputDatatypeRequirement subclass: got '%s'" % intype.__name__)
-        elif not isinstance(intype, DynamicInputDatatypeRequirement):
+        if not (isinstance(intype, type) and issubclass(intype, PimlicoDatatype)) and \
+                not isinstance(intype, DynamicInputDatatypeRequirement):
             # Alternatively, it can be an instance of a dynamic datatype requirement
             raise TypeCheckError("invalid input datatype requirement. Each item must be either a PimlicoDatatype "
                                  "subclass or instance of a DynamicInputDatatypeRequirement subclass: got '%s'" %
@@ -782,18 +775,15 @@ def check_type(provided_type, type_requirements):
 
     # Check that the provided output type is a subclass of (or equal to) the required input type
     if not any(_compatible_input_type(intype, provided_type) for intype in type_requirements):
-        raise TypeCheckError("input is required to be of %s type (or a descendent), but provided type is %s" % (
-            "/".join(t.__name__ for t in type_requirements), provided_type.__name__))
+        raise TypeCheckError("required type is %s (or a descendent), but provided type is %s" % (
+            "/".join(t.type_checking_name() for t in type_requirements), provided_type.type_checking_name()))
 
 
 def _compatible_input_type(type_requirement, supplied_type):
-    if isinstance(type_requirement, type) and issubclass(type_requirement, PimlicoDatatype):
-        # If the type requirement is just a Pimlico datatype, we check whether the supplied type is a subclass of it
-        return issubclass(supplied_type, type_requirement)
-    else:
-        # Otherwise it's expected to be an instance of a DynamicInputDatatypeRequirement subclass
-        # Call check_type() on the supplied type to check whether it's compatible
-        return type_requirement.check_type(supplied_type)
+    # If the type requirement is just a Pimlico datatype, we check whether the supplied type is a subclass of it
+    # Otherwise it's expected to be an instance of a DynamicInputDatatypeRequirement subclass
+    # Call check_type() on the supplied type to check whether it's compatible
+    return type_requirement.check_type(supplied_type)
 
 
 class BaseModuleExecutor(object):

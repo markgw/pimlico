@@ -4,43 +4,28 @@
 
 from StringIO import StringIO
 
+from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.tar import TarredCorpusWriter, pass_up_invalid, TarredCorpus
 
 
 __all__ = ["CandcOutputCorpus", "CandcOutputCorpusWriter"]
 
 
-class CandcOutputCorpus(TarredCorpus):
-    datatype_name = "candc_output"
-
-    def process_document(self, data):
-        data = super(CandcOutputCorpus, self).process_document(data)
-        return CandcOutput(data)
-
-
-class CandcOutputCorpusWriter(TarredCorpusWriter):
-    @pass_up_invalid
-    def document_to_raw_data(self, doc):
-        # Data should be a CandcOutput
-        return doc.raw_data
-
-
-class CandcOutput(object):
+class CandcOutputDocumentType(RawDocumentType):
     """
     C&C output is kept as raw text, since we just want to store it as it comes out from the parser.
     We only pull it apart when it's needed.
 
     """
-    def __init__(self, raw_data):
-        self.raw_data = raw_data
-        self._sentences = None
+    def __init__(self, options, metadata):
+        super(CandcOutputDocumentType, self).__init__(options, metadata)
 
-    def __iter__(self):
-        return iter(self.sentences)
+    def process_document(self, doc):
+        return list(self.iter_sentences(doc))
 
-    def iter_sentences(self):
+    def iter_sentences(self, raw_data):
         # Remove the comments, plus the next line (which is empty) from the beginning of the file
-        s = iter(StringIO(self.raw_data))
+        s = iter(StringIO(raw_data))
         for l in s:
             if not l.startswith("#"):
                 break
@@ -52,14 +37,17 @@ class CandcOutput(object):
                 # Wrap each sentence up in an object that helps us pull it apart
                 yield CandcSentence(sentence_data)
 
-    @property
-    def sentences(self):
-        if self._sentences is None:
-            self._sentences = list(self.iter_sentences())
-        return self._sentences
 
-    def __getitem__(self, item):
-        return self.sentences[item]
+class CandcOutputCorpus(TarredCorpus):
+    datatype_name = "candc_output"
+    data_point_type = CandcOutputDocumentType
+
+
+class CandcOutputCorpusWriter(TarredCorpusWriter):
+    @pass_up_invalid
+    def document_to_raw_data(self, doc):
+        # Data should be a CandcOutput
+        return doc.raw_data
 
 
 class CandcSentence(object):

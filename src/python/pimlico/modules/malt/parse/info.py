@@ -15,20 +15,21 @@
 """
 import os
 
-from pimlico.core.external.java import DependencyCheckerError
 from pimlico.core.dependencies.java import check_java_dependency
+from pimlico.core.external.java import DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, CoNLLDependencyParseCorpus, \
-    CoNLLDependencyParseCorpusWriter
+from pimlico.datatypes.parse.dependency import CoNLLDependencyParseCorpus, \
+    CoNLLDependencyParseCorpusWriter, CoNLLDependencyParseDocumentType
+from pimlico.datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "malt"
     module_readable_name = "Malt dependency parser"
-    module_inputs = [("documents", CoNLLDependencyParseInputCorpus)]
+    module_inputs = [("documents", TarredCorpusType(CoNLLDependencyParseDocumentType))]
     module_outputs = [("parsed", CoNLLDependencyParseCorpus)]
     module_options = {
         "model": {

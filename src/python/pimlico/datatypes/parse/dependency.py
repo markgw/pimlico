@@ -4,10 +4,10 @@
 
 import json
 
-from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
+from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter, JsonDocumentType
 from pimlico.datatypes.tar import pass_up_invalid
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWriter
-
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWriter, \
+    WordAnnotationsDocumentType
 
 __all__ = [
     "StanfordDependencyParseCorpus", "StanfordDependencyParseCorpusWriter",
@@ -16,16 +16,19 @@ __all__ = [
 ]
 
 
-class StanfordDependencyParseCorpus(JsonDocumentCorpus):
-    datatype_name = "stanford_dependency_parses"
-
-    def process_document(self, data):
-        data = super(StanfordDependencyParseCorpus, self).process_document(data)
+class StanfordDependencyParseDocumentType(JsonDocumentType):
+    def process_document(self, doc):
+        data = super(StanfordDependencyParseDocumentType, self).process_document(doc)
         if data.strip():
             # Read in the dep parse trees as JSON and return a dep parse data structure
             return [StanfordDependencyParse.from_json(sentence_json) for sentence_json in data]
         else:
             return []
+
+
+class StanfordDependencyParseCorpus(JsonDocumentCorpus):
+    datatype_name = "stanford_dependency_parses"
+    data_point_type = StanfordDependencyParseDocumentType
 
 
 class StanfordDependencyParseCorpusWriter(JsonDocumentCorpusWriter):
@@ -89,20 +92,9 @@ def _noneus(field):
     return "_" if field is None else unicode(field)
 
 
-class CoNLLDependencyParseCorpus(WordAnnotationCorpus):
-    """
-    10-field CoNLL dependency parse format (conllx) -- i.e. post parsing.
-
-    Fields are:
-      id (int), word form, lemma, coarse POS, POS, features, head (int), dep relation, phead (int), pdeprel
-
-    The last two are usually not used.
-
-    """
-    datatype_name = "conll_dependency_parses"
-
-    def process_document(self, data):
-        data = super(CoNLLDependencyParseCorpus, self).process_document(data)
+class CoNLLDependencyParseDocumentType(WordAnnotationsDocumentType):
+    def process_document(self, raw_data):
+        data = super(CoNLLDependencyParseDocumentType, self).process_document(raw_data)
         return [
             [
                 {
@@ -119,6 +111,20 @@ class CoNLLDependencyParseCorpus(WordAnnotationCorpus):
                 } for token in sentence
             ] for sentence in data
         ]
+
+
+class CoNLLDependencyParseCorpus(WordAnnotationCorpus):
+    """
+    10-field CoNLL dependency parse format (conllx) -- i.e. post parsing.
+
+    Fields are:
+      id (int), word form, lemma, coarse POS, POS, features, head (int), dep relation, phead (int), pdeprel
+
+    The last two are usually not used.
+
+    """
+    datatype_name = "conll_dependency_parses"
+    data_point_type = CoNLLDependencyParseDocumentType
 
 
 class CoNLLDependencyParseCorpusWriter(WordAnnotationCorpusWriter):
@@ -153,15 +159,9 @@ class CoNLLDependencyParseCorpusWriter(WordAnnotationCorpusWriter):
         )
 
 
-class CoNLLDependencyParseInputCorpus(WordAnnotationCorpus):
-    """
-    The version of the CoNLL format (conllx) that only has the first 6 columns, i.e. no dependency parse yet annotated.
-
-    """
-    datatype_name = "conll_dependency_parse_inputs"
-
-    def process_document(self, data):
-        data = super(CoNLLDependencyParseInputCorpus, self).process_document(data)
+class CoNLLDependencyParseInputDocumentType(WordAnnotationsDocumentType):
+    def process_document(self, raw_data):
+        data = super(CoNLLDependencyParseInputDocumentType, self).process_document(raw_data)
         return [
             [
                 {
@@ -174,6 +174,15 @@ class CoNLLDependencyParseInputCorpus(WordAnnotationCorpus):
                 } for token in sentence
             ] for sentence in data
         ]
+
+
+class CoNLLDependencyParseInputCorpus(WordAnnotationCorpus):
+    """
+    The version of the CoNLL format (conllx) that only has the first 6 columns, i.e. no dependency parse yet annotated.
+
+    """
+    datatype_name = "conll_dependency_parse_inputs"
+    data_point_type = CoNLLDependencyParseInputDocumentType
 
 
 class CoNLLDependencyParseInputCorpusWriter(WordAnnotationCorpusWriter):

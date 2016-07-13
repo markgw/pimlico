@@ -9,18 +9,19 @@ provided by that.
 """
 import json
 
+from pimlico.datatypes.jsondoc import JsonDocumentType, JsonDocumentCorpus
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 
-class CorefCorpus(TarredCorpus):
-    datatype_name = "corenlp_coref"
+class CorefDocumentType(JsonDocumentType):
+    def process_document(self, doc):
+        data = super(CorefDocumentType, self).process_document(doc)
+        return [Entity(eid, [Mention.from_json(m) for m in mentions]) for (eid, mentions) in data.items()]
 
-    def process_document(self, data):
-        if data.strip():
-            return [Entity(eid, [Mention.from_json(m) for m in mentions])
-                    for (eid, mentions) in json.loads(data).items()]
-        else:
-            return []
+
+class CorefCorpus(JsonDocumentCorpus):
+    datatype_name = "corenlp_coref"
+    data_point_type = CorefDocumentType
 
 
 class CorefCorpusWriter(TarredCorpusWriter):

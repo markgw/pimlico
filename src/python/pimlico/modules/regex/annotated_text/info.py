@@ -11,13 +11,14 @@
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.features import KeyValueListCorpus, KeyValueListCorpusWriter
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus
+from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.datatypes.word_annotations import WordAnnotationsDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "annotated_text_matcher"
     module_readable_name = "Regex annotated text matcher"
-    module_inputs = [("documents", WordAnnotationCorpus)]
+    module_inputs = [("documents", TarredCorpusType(WordAnnotationsDocumentType))]
     module_outputs = [("documents", KeyValueListCorpus)]
     module_options = {
         "expr": {

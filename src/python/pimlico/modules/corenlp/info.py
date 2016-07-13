@@ -28,12 +28,14 @@ from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool
 from pimlico.datatypes.base import DynamicOutputDatatype
 from pimlico.datatypes.coref.corenlp import CorefCorpus
-from pimlico.datatypes.tokenized import TokenizedCorpus, TokenizedCorpusWriter
+from pimlico.datatypes.documents import RawTextDocumentType
 from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
 from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
 from pimlico.datatypes.parse.dependency import StanfordDependencyParseCorpus, StanfordDependencyParseCorpusWriter
-from pimlico.datatypes.tar import TarredCorpus
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter
+from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.datatypes.tokenized import TokenizedCorpus, TokenizedCorpusWriter, TokenizedDocumentType
+from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter, \
+    WordAnnotationsDocumentType
 from .deps import corenlp_dependencies
 
 
@@ -84,7 +86,9 @@ class AnnotationFieldsFromOptions(DynamicOutputDatatype):
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "corenlp"
     module_readable_name = "Stanford CoreNLP"
-    module_inputs = [("documents", (WordAnnotationCorpus, TokenizedCorpus, TarredCorpus))]
+    module_inputs = [("documents", TarredCorpusType(WordAnnotationsDocumentType,
+                                                    TokenizedDocumentType,
+                                                    RawTextDocumentType))]
     # No non-optional outputs
     module_outputs = []
     module_optional_outputs = [

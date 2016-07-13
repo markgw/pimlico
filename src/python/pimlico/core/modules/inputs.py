@@ -8,6 +8,7 @@ Base classes and utilities for input modules in a pipeline.
 """
 import copy
 
+from pimlico.datatypes.base import IterableCorpus
 from .base import BaseModuleInfo
 from pimlico.core.modules.base import BaseModuleExecutor
 
@@ -39,6 +40,11 @@ def input_module_factory(datatype):
     Create an input module class to load a given datatype.
 
     """
+    input_module_options = copy.copy(datatype.input_module_options)
+    if issubclass(datatype, IterableCorpus):
+        # Also get input options from the document type
+        input_module_options.update(datatype.input_module_options)
+
     class DatatypeInputModuleInfo(InputModuleInfo):
         module_type_name = "%s_input" % datatype.datatype_name
         module_readable_name = "%s datatype input" % datatype.datatype_name

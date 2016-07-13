@@ -19,6 +19,7 @@ import time
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.options import comma_separated_strings
 from pimlico.datatypes.base import IterableCorpus, PimlicoDatatypeWriter
+from pimlico.datatypes.documents import RawTextDocumentType
 from pimlico.utils.filesystem import retry_open
 from pimlico.utils.progress import get_progress_bar
 
@@ -51,6 +52,7 @@ class XmlDocumentIterator(IterableCorpus):
             "type": int,
         },
     }
+    data_point_type = RawTextDocumentType
 
     def __init__(self, *args, **kwargs):
         super(XmlDocumentIterator, self).__init__(*args, **kwargs)

@@ -4,7 +4,7 @@
 from textwrap import wrap
 
 from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies, get_dependencies
-from pimlico.core.dependencies.base import check_and_install
+from pimlico.core.dependencies.base import check_and_install, install_dependencies
 
 
 def check_cmd(pipeline, opts):
@@ -25,7 +25,7 @@ def check_cmd(pipeline, opts):
             # Check all modules
             modules = pipeline.modules
         else:
-            modules = pipeline.modules
+            modules = opts.modules
         passed = print_missing_dependencies(pipeline, modules)
         
         if passed:
@@ -52,5 +52,9 @@ def install_cmd(pipeline, opts):
         print "Error in basic pipeline checks, can't proceed to dependency installation until this is fixed: %s" % e
         return
 
-    deps = get_dependencies(pipeline, opts.modules)
-    check_and_install(deps, trust_downloaded_archives=opts.trust_downloaded)
+    if "all" in opts.modules:
+        # Install for all modules
+        modules = None
+    else:
+        modules = opts.modules
+    install_dependencies(pipeline, modules, trust_downloaded_archives=opts.trust_downloaded_archives)

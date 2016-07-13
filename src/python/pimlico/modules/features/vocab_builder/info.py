@@ -10,13 +10,14 @@
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.dictionary import Dictionary
-from pimlico.datatypes.features import TermFeatureListCorpus
+from pimlico.datatypes.features import TermFeatureListDocumentType
+from pimlico.datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "term_feature_vocab_builder"
     module_readable_name = "Term-feature corpus vocab builder"
-    module_inputs = [("term_features", TermFeatureListCorpus)]
+    module_inputs = [("term_features", TarredCorpusType(TermFeatureListDocumentType))]
     module_outputs = [("term_vocab", Dictionary), ("feature_vocab", Dictionary)]
     module_options = {
         "term_threshold": {

@@ -16,14 +16,12 @@
 import os
 
 from pimlico import MODEL_DIR
-from pimlico.core.external.java import DependencyCheckerError
-from pimlico.core.dependencies.java import check_java_dependency
-from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.coref.opennlp import CorefCorpus, CorefCorpusWriter
-from pimlico.datatypes.parse import ConstituencyParseTreeCorpus
+from pimlico.datatypes.parse import TreeStringsDocumentType
+from pimlico.datatypes.tar import TarredCorpusType
 from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 WORDNET_DIR = os.path.join(MODEL_DIR, "wordnet", "db-3.1")
@@ -38,7 +36,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     """
     module_type_name = "opennlp_coref"
     module_readable_name = "OpenNLP coreference resolution"
-    module_inputs = [("parses", ConstituencyParseTreeCorpus)]
+    module_inputs = [("parses", TarredCorpusType(TreeStringsDocumentType))]
     module_outputs = [("coref", CorefCorpus)]
     module_options = {
         "model": {

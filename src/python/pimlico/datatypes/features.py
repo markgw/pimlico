@@ -2,15 +2,14 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+import cPickle as pickle
 import os
 import struct
-
-import cPickle as pickle
 from operator import itemgetter
 
 from pimlico.datatypes.base import IterableCorpus, DatatypeLoadError, IterableCorpusWriter
+from pimlico.datatypes.documents import RawDocumentType, DataPointType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
-
 
 __all__ = [
     "KeyValueListCorpus", "KeyValueListCorpusWriter",
@@ -19,18 +18,16 @@ __all__ = [
 ]
 
 
-class KeyValueListCorpus(TarredCorpus):
-    datatype_name = "key_value_lists"
-
-    def __init__(self, base_dir, pipeline):
-        super(KeyValueListCorpus, self).__init__(base_dir, pipeline)
+class KeyValueListDocumentType(RawDocumentType):
+    def __init__(self, options, metadata):
+        super(KeyValueListDocumentType, self).__init__(options, metadata)
         self.separator = self.metadata.get("separator", " ")
         self.fv_separator = self.metadata.get("fv_separator", "=")
 
-    def process_document(self, data):
+    def process_document(self, doc):
         # Read a set of feature-value pairs from each line
         data_points = []
-        for line in data.splitlines():
+        for line in doc.splitlines():
             # Skip blank lines
             if line.strip():
                 # Split up the various feature assignments
@@ -46,6 +43,11 @@ class KeyValueListCorpus(TarredCorpus):
                 ]
                 data_points.append(fvs)
         return data_points
+
+
+class KeyValueListCorpus(TarredCorpus):
+    datatype_name = "key_value_lists"
+    data_point_type = KeyValueListDocumentType
 
 
 class KeyValueListCorpusWriter(TarredCorpusWriter):
@@ -80,22 +82,12 @@ class KeyValueListCorpusWriter(TarredCorpusWriter):
         ])
 
 
-class TermFeatureListCorpus(KeyValueListCorpus):
-    """
-    Special case of KeyValueListCorpus, where one special feature "term" is always present and the other
-    feature types are counts of the occurrence of a particular feature with this term in each data point.
-
-    """
-    datatype_name = "term_feature_lists"
-
-    def __init__(self, base_dir, pipeline):
-        super(TermFeatureListCorpus, self).__init__(base_dir, pipeline)
-
-    def process_document(self, data):
-        data = super(TermFeatureListCorpus, self).process_document(data)
-
+class TermFeatureListDocumentType(KeyValueListDocumentType):
+    def process_document(self, doc):
+        raw_data_points = super(TermFeatureListDocumentType, self).process_document(doc)
         data_points = []
-        for data_point in data:
+
+        for data_point in raw_data_points:
             # Pull out the special "term" feature (usually at the beginning)
             try:
                 term = (value for (feature, value) in data_point if feature == "term").next()
@@ -106,6 +98,16 @@ class TermFeatureListCorpus(KeyValueListCorpus):
             features = dict((feature, int(value)) for (feature, value) in data_point if feature != "term")
             data_points.append((term, features))
         return data_points
+
+
+class TermFeatureListCorpus(KeyValueListCorpus):
+    """
+    Special case of KeyValueListCorpus, where one special feature "term" is always present and the other
+    feature types are counts of the occurrence of a particular feature with this term in each data point.
+
+    """
+    datatype_name = "term_feature_lists"
+    data_point_type = TermFeatureListDocumentType
 
 
 class TermFeatureListCorpusWriter(KeyValueListCorpusWriter):
@@ -145,6 +147,10 @@ def get_struct(bytes, signed):
     return struct.Struct(format_string)
 
 
+class IndexedTermFeatureListDataPointType(DataPointType):
+    pass
+
+
 class IndexedTermFeatureListCorpus(IterableCorpus):
     """
     Term-feature instances, indexed by a dictionary, so that all that's stored is the indices of the terms
@@ -160,6 +166,8 @@ class IndexedTermFeatureListCorpus(IterableCorpus):
     may be signed.
 
     """
+    data_point_type = IndexedTermFeatureListDataPointType
+
     def __init__(self, *args, **kwargs):
         super(IndexedTermFeatureListCorpus, self).__init__(*args, **kwargs)
         self._term_dictionary = None
