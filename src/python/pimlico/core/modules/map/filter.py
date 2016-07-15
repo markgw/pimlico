@@ -4,11 +4,12 @@
 
 from Queue import Empty
 from time import sleep
+from traceback import print_exc, format_exc
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import load_module_executor, BaseModuleInfo
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.core.modules.map import InputQueueFeeder
+from pimlico.core.modules.map import InputQueueFeeder, DocumentMapModuleInfo
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora
 from pimlico.utils.pipes import qget
@@ -56,7 +57,7 @@ class DocumentMapOutputTypeWrapper(object):
         input_iterator = self.input_iterator
 
         # Load an executor for the module we're wrapping, so we can use some of its functionality
-        executor_cls = load_module_executor(self.wrapped_module_info)
+        executor_cls = self.wrapped_module_info.load_executor()
         executor = executor_cls(self.wrapped_module_info)
 
         # Call the set-up routine, if one's been defined
@@ -171,7 +172,8 @@ class DocumentMapOutputTypeWrapper(object):
             elif hasattr(e, "traceback"):
                 debugging = e.traceback
             else:
-                debugging = None
+                # Just include the stack trace from this process
+                debugging = format_exc()
             raise ModuleExecutionError("error in filter %s: %s" % (self.wrapped_module_info.module_name, e),
                                        cause=e, debugging_info=debugging)
         finally:
@@ -215,6 +217,23 @@ def _wrap_output(module_info_instance, inner_output_name):
 
 
 def wrap_module_info_as_filter(module_info_instance):
+    """
+    Create a filter module from a document map module so that it gets executed on the fly to provide its
+    outputs as input to later modules. Can be applied to any document map module simply by adding `filter=T`
+    to its config.
+
+    This function is called when `filter=T` is given.
+
+    :param module_info_instance: basic module info to wrap the outputs of
+    :return: a new non-executable ModuleInfo whose outputs are produced on the fly and will be identical to
+    the outputs of the wrapper module.
+    """
+    # Check that this is a document map module: otherwise it doesn't make sense to wrap it
+    if not isinstance(module_info_instance, DocumentMapModuleInfo):
+        raise PipelineStructureError("cannot create a filter from a %s module, as it's not a document map module "
+                                     "(tried to run module '%s' as a filter)" %
+                                     (module_info_instance.module_type_name, module_info_instance.module_name))
+
     # Wrap each of the output datatypes so that it executes the document processing on the fly
     wrapped_outputs = []
     for output_name in module_info_instance.output_names:

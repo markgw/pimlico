@@ -460,12 +460,18 @@ class PipelineConfig(object):
             all_filenames=all_filenames, module_docstrings=section_docstrings,
         )
 
-        # Now that we've got the pipeline instance prepared, load all the module info instances, so they've cached
+        # Now that we've got the pipeline instance prepared, load all the module info instances, so they're cached
         for module_name in module_order:
             try:
                 pipeline.load_module_info(module_name)
             except ModuleInfoLoadError, e:
                 raise PipelineConfigParseError("error loading module metadata for module '%s': %s" % (module_name, e))
+
+        try:
+            # Run all type-checking straight away so we know this is a valid pipeline
+            check_pipeline(pipeline)
+        except PipelineCheckError, e:
+            raise PipelineConfigParseError("pipeline loaded, but failed checks: %s" % e, cause=e)
 
         return pipeline
 
@@ -528,7 +534,9 @@ def var_substitute(option_val, vars):
 
 
 class PipelineConfigParseError(Exception):
-    pass
+    def __init__(self, *args, **kwargs):
+        self.cause = kwargs.pop("cause", None)
+        super(PipelineConfigParseError, self).__init__(*args, **kwargs)
 
 
 class PipelineStructureError(Exception):
@@ -796,7 +804,7 @@ def check_release(release_str):
 def check_pipeline(pipeline):
     """
     Checks a pipeline over for metadata errors, cycles and other problems.
-    Called every time a module is to be run, to check the whole pipeline's metadata is in order.
+    Called every time a pipeline is loaded, to check the whole pipeline's metadata is in order.
 
     """
     # Basic metadata has already been loaded if we've got this far

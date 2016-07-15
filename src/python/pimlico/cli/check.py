@@ -15,11 +15,6 @@ def check_cmd(pipeline, opts):
     print "Available pipeline variants: %s" % ", ".join(["main"] + pipeline.available_variants)
     print "Checking variant '%s'\n" % pipeline.variant
 
-    try:
-        check_pipeline(pipeline)
-    except PipelineCheckError, e:
-        print "Error in pipeline: %s" % e
-
     if opts.modules:
         if "all" in opts.modules:
             # Check all modules

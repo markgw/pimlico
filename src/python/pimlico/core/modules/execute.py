@@ -115,7 +115,7 @@ def execute_module(pipeline, module_name, force_rerun=False, debug=False, log=No
 
         try:
             # Get hold of an executor for this module
-            executer = load_module_executor(module)
+            executer = module.load_executor()
             # Give the module an initial in-progress status
             end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
         except ModuleInfoLoadError, e:

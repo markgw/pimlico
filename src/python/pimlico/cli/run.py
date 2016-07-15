@@ -64,18 +64,29 @@ def run_cmd(pipeline, opts):
         print >>sys.stderr, "Error loading module '%s': %s" % (module_spec, e)
     except ModuleExecutionError, e:
         if debug:
+            print >>sys.stderr, "Top-level error"
+            print >>sys.stderr, "---------------"
             print_exc()
-            if e.debugging_info is not None:
-                # Extra debugging information was provided by the exception
-                print >>sys.stderr, e.debugging_info
-            if e.cause is not None:
-                print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
+            print_execution_error(e)
         print >>sys.stderr, "Error executing module '%s': %s" % (module_spec, e)
     except KeyboardInterrupt:
         print >>sys.stderr, "Exiting before execution completed due to user interrupt"
         # Raise the exception so we see the full stack trace
         if debug:
             raise
+
+
+def print_execution_error(error):
+    print >>sys.stderr, "\nDetails of error"
+    print >>sys.stderr,   "----------------"
+    print >>sys.stderr, "".join(format_exception_only(type(error), error)).strip("\n")
+    if hasattr(error, "debugging_info") and error.debugging_info is not None:
+        # Extra debugging information was provided by the exception
+        print >>sys.stderr, "\n## Further debugging info ##"
+        print >>sys.stderr, error.debugging_info.strip("\n")
+    if hasattr(error, "cause") and error.cause is not None:
+        # Recursively print any debugging info on the cause exception
+        print_execution_error(error.cause)
 
 
 def reset_module(pipeline, opts):

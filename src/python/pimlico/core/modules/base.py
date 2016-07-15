@@ -103,6 +103,16 @@ class BaseModuleInfo(object):
     def __repr__(self):
         return "%s(%s)" % (self.module_type_name, self.module_name)
 
+    def load_executor(self):
+        """
+        Loads a ModuleExecutor for this Pimlico module. Usually, this just involves calling
+        :func:`load_module_executor`, but the default executor loading may be overridden for a particular module
+        type by overriding this function. It should always return a subclass of ModuleExecutor, unless there's
+        an error.
+
+        """
+        return load_module_executor(self)
+
     @classmethod
     def get_key_info_table(cls):
         """
@@ -848,7 +858,11 @@ class DependencyError(Exception):
 def load_module_executor(path_or_info):
     """
     Utility for loading the executor class for a module from its full path.
-    Just a wrapper around an import, with some error checking.
+    More or less just a wrapper around an import, with some error checking. Locates the executor by a standard
+    procedure that involves checking for an "execute" python module alongside the info's module.
+
+    Note that you shouldn't generally use this directly, but instead call the `load_executor()` method on a
+    module info (which will call this, unless special behaviour has been defined).
 
     :param path: path to Python package containing the module
     :return: class

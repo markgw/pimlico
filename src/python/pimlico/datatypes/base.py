@@ -99,10 +99,6 @@ class PimlicoDatatype(object):
         self.data_dir = os.path.join(self.absolute_base_dir, "data") if self.absolute_base_dir is not None else None
         self._metadata = None
 
-        # This attribute setting business is left here for backwards compatibility, but you should use the options
-        # dict by preference
-        for attr, val in kwargs.items():
-            setattr(self, attr, val)
         self.options = kwargs
 
     def _get_metadata(self):
@@ -470,13 +466,28 @@ class StringList(PimlicoDatatype):
 
     """
     datatype_name = "string_list"
+    input_module_options = {
+        "path": {
+            "help": "Path to file containing a string list with one item per line",
+            "required": True,
+        }
+    }
 
     def data_ready(self):
-        return super(StringList, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "data"))
+        return self.path is not None and os.path.exists(self.path)
+
+    @property
+    def path(self):
+        if "path" in self.options:
+            return self.options["path"]
+        elif not super(StringList, self).data_ready():
+            return None
+        else:
+            return os.path.join(self.data_dir, "data")
 
     @property
     def data(self):
-        with open(os.path.join(self.data_dir, "data"), "r") as f:
+        with open(self.path, "r") as f:
             return f.read().decode("utf-8").splitlines()
 
 

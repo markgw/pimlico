@@ -4,6 +4,7 @@ from threading import Thread
 from time import sleep
 from traceback import format_exc
 
+from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor
 from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
 from pimlico.datatypes.base import InvalidDocument
@@ -27,6 +28,18 @@ class DocumentMapModuleInfo(BaseModuleInfo):
     """
     # Most subclasses will want to override this to give a more specific datatype for the output
     module_outputs = [("documents", TarredCorpus)]
+
+    def __init__(self, module_name, pipeline, **kwargs):
+        super(DocumentMapModuleInfo, self).__init__(module_name, pipeline, **kwargs)
+        # Prepare the list of document map inputs that will be fed into the executor
+        # We may have multiple inputs, which should be aligned tarred corpora
+        # If there's only one, this also works
+        inputs = [self.get_input(input_name) for input_name in self.input_names]
+        # We also allow (additional) inputs that are not tarred corpora, which get left out of this
+        self.input_corpora = [corpus for corpus in inputs if isinstance(corpus, TarredCorpus)]
+        if len(self.input_corpora) == 0:
+            raise PipelineStructureError(
+                "document map module '%s' got no TarredCorpus instances among its inputs" % self.module_name)
 
     def get_writer(self, output_name, output_dir, append=False):
         """
@@ -69,15 +82,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     """
     def __init__(self, module_instance_info, **kwargs):
         super(DocumentMapModuleExecutor, self).__init__(module_instance_info, **kwargs)
-
-        # We may have multiple inputs, which should be aligned tarred corpora
-        # If there's only one, this also works
-        inputs = [self.info.get_input(input_name) for input_name in self.info.input_names]
-        # We also allow (additional) inputs that are not tarred corpora, which get left out of this
-        self.input_corpora = [corpus for corpus in inputs if isinstance(corpus, TarredCorpus)]
-        if len(self.input_corpora) == 0:
-            raise ModuleExecutionError(
-                "document map module '%s' got no TarredCorpus instances among its inputs" % self.info.module_name)
+        self.input_corpora = self.info.input_corpora
         self.input_iterator = AlignedTarredCorpora(self.input_corpora)
 
     def preprocess(self):
@@ -352,7 +357,7 @@ class InputQueueFeeder(Thread):
     """
     def __init__(self, input_queue, iterator, complete_callback=None):
         super(InputQueueFeeder, self).__init__()
-        self.complete_callback = staticmethod(complete_callback)
+        self.complete_callback = complete_callback
         self.daemon = True
         self.iterator = iterator
         self.input_queue = input_queue
@@ -394,7 +399,10 @@ class InputQueueFeeder(Thread):
                     while not self.exception_queue.empty():
                         self.exception_queue.get(timeout=0.1)
                     # Sometimes, a traceback from within the process is included
-                    debugging = error.traceback if hasattr(error, "traceback") else None
+                    if hasattr(error, "traceback"):
+                        debugging = "Traceback from worker process:\n%s" % error.traceback
+                    else:
+                        debugging = None
                     raise ModuleExecutionError("error in worker process: %s" % error,
                                                cause=error, debugging_info=debugging)
 
