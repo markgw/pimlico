@@ -29,8 +29,12 @@ public class TokenizerGateway {
 
     public TokenizerGateway(File sentModelFile, File tokModelFile) {
         // Load models
-        SentenceModel sentenceModel = new SentenceModelLoader().load(sentModelFile);
-        sentenceDetector = new SentenceDetectorME(sentenceModel);
+        if (sentModelFile == null)
+            sentenceDetector = null;
+        else {
+            SentenceModel sentenceModel = new SentenceModelLoader().load(sentModelFile);
+            sentenceDetector = new SentenceDetectorME(sentenceModel);
+        }
 
         TokenizerModel tokenizerModel = new TokenizerModelLoader().load(tokModelFile);
         tokenizer = new TokenizerME(tokenizerModel);
@@ -44,8 +48,15 @@ public class TokenizerGateway {
             return new String[] {""};
         } else {
             // Process the paragraph
-            // Sentence detection
-            String[] sents = sentenceDetector.sentDetect(input);
+            String[] sents;
+            if (sentenceDetector != null) {
+                // Sentence detection
+                sents = sentenceDetector.sentDetect(input);
+            } else {
+                // Not doing sentence detection
+                // Split the input on linebreaks, assuming each line is a sentence
+                sents = input.split("\n");
+            }
 
             // Tokenization
             String[] tokenizedSents = new String[sents.length];
@@ -80,10 +91,16 @@ public class TokenizerGateway {
         }
 
         String sentModelFilename = opts.getString("sent_model");
+        File sentModel;
+        if (sentModelFilename.equals("none"))
+            // Don't do sentence splitting
+            sentModel = null;
+        else
+            sentModel = new File(sentModelFilename);
         String tokModelFilename = opts.getString("tok_model");
 
         // Load the gateway instance
-        TokenizerGateway entryPoint = new TokenizerGateway(new File(sentModelFilename), new File(tokModelFilename));
+        TokenizerGateway entryPoint = new TokenizerGateway(sentModel, new File(tokModelFilename));
         // Create a gateway server, using this as an entry point
         Py4JGatewayStarter.startGateway(entryPoint, opts.getInt("port"), opts.getInt("python_port"));
     }

@@ -24,7 +24,10 @@ def process_document(worker, archive, filename, doc):
 
 def worker_set_up(worker):
     # Start a tokenizer process running in the background via Py4J
-    worker.tokenizer = Tokenizer(worker.info.sentence_model_path, worker.info.token_model_path)
+    worker.tokenizer = Tokenizer(
+        None if worker.info.options["tokenize_only"] else worker.info.sentence_model_path,
+        worker.info.token_model_path
+    )
     worker.tokenizer.start()
 
 

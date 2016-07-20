@@ -9,6 +9,7 @@ Sentence splitting and tokenization using OpenNLP's tools.
 import os
 
 from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.documents import RawTextDocumentType
 from pimlico.datatypes.tar import TarredCorpusType
@@ -22,6 +23,12 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_inputs = [("text", TarredCorpusType(RawTextDocumentType))]
     module_outputs = [("documents", TokenizedCorpus)]
     module_options = {
+        "tokenize_only": {
+            "help": "By default, sentence splitting is performed prior to tokenization. If tokenize_only is set, only "
+                    "the tokenization step is executed",
+            "type": str_to_bool,
+            "default": False,
+        },
         "sentence_model": {
             "help": "Sentence segmentation model. Specify a full path, or just a filename. If a filename is given "
                     "it is expected to be in the opennlp model directory (models/opennlp/)",
@@ -46,7 +53,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     def check_ready_to_run(self):
         problems = super(ModuleInfo, self).check_ready_to_run()
         # Check models exist
-        if not os.path.exists(self.sentence_model_path):
+        if not self.options["tokenize_only"] and not os.path.exists(self.sentence_model_path):
             problems.append(("Missing OpenNLP sentence model", "Path %s does not exist" % self.sentence_model_path))
         if not os.path.exists(self.token_model_path):
             problems.append(("Missing OpenNLP tokenization model", "Path %s does not exist" % self.token_model_path))

@@ -182,6 +182,8 @@ if __name__ == "__main__":
     status.add_argument("module_name", nargs="?",
                         help="Optionally specify a module name. More detailed status information will be outut for "
                              "this module")
+    status.add_argument("--all", "-a", action="store_true",
+                        help="Show all modules defined in the pipeline, not just those that can be executed")
     status.add_argument("--history", "-i", action="store_true",
                         help="When a module name is given, even more detailed output is given, including the full "
                              "execution history of the module")

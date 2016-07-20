@@ -7,8 +7,11 @@ from termcolor import colored
 
 
 def module_status_color(module):
-    if module.is_filter():
-        return "green"
+    if not module.module_executable:
+        if module.all_inputs_ready():
+            return "green"
+        else:
+            return "red"
     elif module.status == "COMPLETE":
         return "green"
     elif module.status == "UNEXECUTED":
@@ -40,12 +43,19 @@ def status_cmd(pipeline, opts):
 
     if opts.module_name is None:
         # Try deriving a schedule and output it, including basic status info for each module
-        print "\nModule execution schedule with statuses:"
-        for i, module_name in enumerate(pipeline.get_module_schedule(), start=1):
+        if opts.all:
+            # Show all modules, not just those that can be executed
+            print "\nAll modules in pipeline with statuses:"
+            module_names = [("-", module) for module in pipeline.modules]
+        else:
+            print "\nModule execution schedule with statuses:"
+            module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
+
+        for bullet, module_name in module_names:
             module = pipeline[module_name]
-            print colored(status_colored(module, " %d. %s" % (i, module_name)))
+            print colored(status_colored(module, " %s %s" % (bullet, module_name)))
             # Check module status (has it been run?)
-            print "       status: %s" % status_colored(module, module.status)
+            print "       status: %s" % status_colored(module, module.status if module.module_executable else "not executable")
             # Check status of each input datatypes
             for input_name in module.input_names:
                 print "       input %s: %s" % (
@@ -159,7 +169,7 @@ Output {output_name}:
 Options:
     {options}{module_details}""".format(
         title=colored(title_box("Module: %s" % module.module_name), status_color),
-        status=colored("not executable", "green") if module.is_filter() else colored(module.status, status_color),
+        status=colored("not executable", "green") if not module.module_executable else colored(module.status, status_color),
         inputs="\n".join(input_infos) if input_infos else "No inputs",
         outputs="\n".join(output_infos) if output_infos else "No outputs",
         options="\n    ".join("%s: %s" % (key, val) for (key, val) in module.options.items()),

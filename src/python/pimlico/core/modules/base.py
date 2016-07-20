@@ -510,16 +510,23 @@ class BaseModuleInfo(object):
             # Default to checking all inputs
             input_names = self.input_names
         missing = []
-        for input_name in input_names:
-            for previous_module, output_name, additional_names in \
-                    self.get_input_module_connection(input_name, always_list=True):
-                # Don't check whether additional datatypes are ready -- supposedly guaranteed if the main is
-                if not previous_module.get_output(output_name).data_ready():
-                    # If the previous module is a filter, it's more helpful to say exactly what data it's missing
-                    if previous_module.is_filter():
-                        missing.extend(previous_module.missing_data())
-                    else:
-                        missing.append("%s output '%s'" % (previous_module.module_name, output_name))
+        if self.is_input():
+            # Don't check inputs: there aren't any
+            # Instead check whether we're ready to produce our outputs
+            for output_name in self.output_names:
+                if not self.get_output(output_name).data_ready():
+                    missing.extend("%s output '%s'" % (self.module_name, output_name))
+        else:
+            for input_name in input_names:
+                for previous_module, output_name, additional_names in \
+                        self.get_input_module_connection(input_name, always_list=True):
+                    # Don't check whether additional datatypes are ready -- supposedly guaranteed if the main is
+                    if not previous_module.get_output(output_name).data_ready():
+                        # If the previous module is a filter, it's more helpful to say exactly what data it's missing
+                        if previous_module.is_filter():
+                            missing.extend(previous_module.missing_data())
+                        else:
+                            missing.append("%s output '%s'" % (previous_module.module_name, output_name))
         return missing
 
     @classmethod
