@@ -119,25 +119,27 @@ Certain class-level attributes should pretty much always be overridden:
 - ``module_inputs``: Most modules need to take input from another module (though not all)
 - ``module_outputs``: Describes the outputs that the module will produce, which may then be used as inputs to another module
 
-Inputs are given as pairs ``(name, type)``, where ``name`` is a short name to identify the input and ``type`` is the datatype
+**Inputs** are given as pairs ``(name, type)``, where ``name`` is a short name to
+identify the input and ``type`` is the datatype
 that the input is expected to have. Here, and most commonly, this is a subclass of
 cls:`~pimlico.datatypes.base.PimlicoDatatype` and Pimlico will check that a dataset supplied for this input is
 either of this type, or has a type that is a subclass of this.
 
 Here we take just a single input: a sparse matrix.
 
-Outputs are given in a similar way. It is up to the module's executor (see below) to ensure that these outputs
+**Outputs** are given in a similar way. It is up to the module's executor (see below) to ensure that these outputs
 get written, but here we describe the datatypes that will be produced, so that we can use them as input to other
 modules.
 
 Here we produce two Numpy arrays, the factorization of the input matrix.
 
+**Dependencies:**
 Since we require Scikit-learn to execute this module, we override ``get_software_dependencies()`` to specify this. As
 Scikit-learn is available through Pip, this is very easy: all we need to do is specify the Pip package name. Pimlico
 will check that Scikit-learn is installed before executing the module and, if not, allow it to be installed
 automatically.
 
-Finally, we also define some options. The values for these can be specified in the pipeline config file. When the
+Finally, we also define some **options**. The values for these can be specified in the pipeline config file. When the
 ``ModuleInfo`` is instantiated, the processed options will be available in its ``options`` attribute. So, for example,
 we can get the number of components (specified in the config file, or the default of 200) using
 ``info.options["components"]``.
@@ -181,18 +183,18 @@ might want to use in other circumstances).
 
 The ``execute()`` method defines what happens when the module is executed.
 
-The instance of the module's ``ModuleInfo``, complete with options from the pipeline config, is available as
-``self.info``. A standard Python logger is also available, as ``self.log``, and should be used to keep the user updated
+The instance of the module's ``ModuleInfo``, complete with **options** from the pipeline config, is available as
+``self.info``. A standard Python **logger** is also available, as ``self.log``, and should be used to keep the user updated
 on what's going on.
 
-Getting hold of the input data is done through the module info's ``get_input()`` method. In the case of a Scipy matrix,
+Getting hold of the **input data** is done through the module info's ``get_input()`` method. In the case of a Scipy matrix,
 here, it just provides us with the matrix as an attribute.
 
 Then we do whatever our module is designed to do. At the end, we write the output data to the appropriate output
 directory. This should always be obtained using the ``get_absolute_output_dir()`` method of the module info, since
 Pimlico takes care of the exact location for you.
 
-Most Pimlico datatypes provide a corresponding writer, ensuring that the output is written in the correct format
+Most Pimlico datatypes provide a corresponding **writer**, ensuring that the output is written in the correct format
 for it to be read by the datatype's reader. When we leave the ``with`` block, in which we give the writer the
 data it needs, this output is written to disk.
 
