@@ -108,7 +108,7 @@ Here's a sample basic ``ModuleInfo``, which we'll step through.
             return super(ModuleInfo, self).get_software_dependencies() + \
                    [PythonPackageOnPip("sklearn", "Scikit-learn")]
 
-The ``ModuleInfo`` should always be a subclass of cls:`~pimlico.core.modules.base.BaseModuleInfo`. There are
+The ``ModuleInfo`` should always be a subclass of :cls:`~pimlico.core.modules.base.BaseModuleInfo`. There are
 some subclasses that you might want to use instead (e.g., see :doc:`/guides/map_module`), but here we just use the
 basic one.
 
@@ -122,7 +122,7 @@ Certain class-level attributes should pretty much always be overridden:
 **Inputs** are given as pairs ``(name, type)``, where ``name`` is a short name to
 identify the input and ``type`` is the datatype
 that the input is expected to have. Here, and most commonly, this is a subclass of
-cls:`~pimlico.datatypes.base.PimlicoDatatype` and Pimlico will check that a dataset supplied for this input is
+:cls:`~pimlico.datatypes.base.PimlicoDatatype` and Pimlico will check that a dataset supplied for this input is
 either of this type, or has a type that is a subclass of this.
 
 Here we take just a single input: a sparse matrix.
