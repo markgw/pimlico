@@ -232,6 +232,7 @@ To make developing a new module a little quicker, here's a skeleton module info 
         module_readable_name = "READABLE NAME"
         module_inputs = [("NAME", REQUIRED_TYPE)]
         module_outputs = [("NAME", PRODUCED_TYPE)]
+        # Delete module_options if you don't need any
         module_options = {
             "OPTION_NAME": {
                 "help": "DESCRIPTION",
@@ -243,6 +244,7 @@ To make developing a new module a little quicker, here's a skeleton module info 
         def get_software_dependencies(self):
             return super(ModuleInfo, self).get_software_dependencies() + [
                 # Add your own dependencies to this list
+                # Remove this method if you don't need to add any
             ]
 
 
