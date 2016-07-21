@@ -16,10 +16,10 @@
 import json
 
 from pimlico.core.config import PipelineConfigParseError
+from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import choose_from_list
 from pimlico.datatypes.arrays import ScipySparseMatrix, NumpyArray
-from pimlico.modules.sklearn import check_sklearn_dependency
 
 
 SKLEARN_CLASSES = {
@@ -83,19 +83,16 @@ class ModuleInfo(BaseModuleInfo):
             self.init_kwargs = json.loads(json_options)
         except ValueError:
             raise PipelineConfigParseError("could not parse JSON options for scikit-learn module: %s" % json_options)
+        # Try loading the given transformer class name to check it's a valid one
+        try:
+            self.load_transformer_class()
+        except ImportError, e:
+            raise PipelineConfigParseError("Could not load decomposition class %s. Check it's available in the version "
+                                           "of scikit-learn you have installed" % self.options["class"])
 
     def load_transformer_class(self):
         from sklearn import decomposition
         return getattr(decomposition, self.options["class"])
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = check_sklearn_dependency(self.module_name) + \
-                               super(ModuleInfo, self).check_runtime_dependencies()
-        try:
-            self.load_transformer_class()
-        except ImportError, e:
-            missing_dependencies.append(("Sklearn class %s" % "sklearn.decomposition.%s" % self.options["class"],
-                                         self.module_name,
-                                         "Could not load decomposition class %s. Check it's available in the version "
-                                         "of scikit-learn you have installed" % self.options["class"]))
-        return missing_dependencies
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + [PythonPackageOnPip("sklearn", "Scikit-learn")]
