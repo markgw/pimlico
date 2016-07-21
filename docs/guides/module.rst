@@ -86,6 +86,7 @@ Here's a sample basic `ModuleInfo`, which we'll step through.
 (It's based on the Scikit-learn :py:mod:`~pimlico.modules.sklearn.matrix_factorization` module.)
 
 .. code-block:: py
+
     import json
     from pimlico.core.modules.base import BaseModuleInfo
     from pimlico.datatypes.arrays import ScipySparseMatrix, NumpyArray
@@ -145,6 +146,7 @@ Executor
 Here is a sample executor for the module info given above, placed in the file `execute.py`.
 
 .. code-block:: py
+
     from pimlico.core.modules.base import BaseModuleExecutor
     from pimlico.datatypes.arrays import NumpyArrayWriter
     from sklearn.decomposition import NMF
@@ -219,6 +221,7 @@ Skeleton new module
 To make developing a new module a little quicker, here's a skeleton module info and executor.
 
 .. code-block:: py
+
     from pimlico.core.modules.base import BaseModuleInfo
 
     class ModuleInfo(BaseModuleInfo):
@@ -241,6 +244,7 @@ To make developing a new module a little quicker, here's a skeleton module info 
 
 
 .. code-block:: py
+
     from pimlico.core.modules.base import BaseModuleExecutor
 
     class ModuleExecutor(BaseModuleExecutor):
