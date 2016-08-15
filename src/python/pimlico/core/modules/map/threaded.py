@@ -61,6 +61,8 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
                 self.tear_down()
         except Exception, e:
             # If there's any uncaught exception, make it available to the main process
+            # Include the formatted stack trace, since we can't get this later from the exception outside this process
+            e.traceback = format_exc()
             self.exception_queue.put_nowait(e)
         finally:
             # Even there was an error, set initialized so that the main process can wait on it

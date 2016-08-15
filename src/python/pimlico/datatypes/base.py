@@ -14,13 +14,13 @@ as far as possible, these should be converted into standard datatypes, or at lea
 use standard idioms for iterating, etc, early in the pipeline.
 
 """
-import os
-from importlib import import_module
-
 import cPickle as pickle
 
-from pimlico.core.config import PipelineStructureError
+from pimlico.utils.core import import_member
+import re
+import os
 from pimlico.datatypes.documents import RawDocumentType
+
 
 __all__ = [
     "PimlicoDatatype", "PimlicoDatatypeWriter", "IterableCorpus", "IterableCorpusWriter",
@@ -29,6 +29,9 @@ __all__ = [
     "DatatypeLoadError", "DatatypeWriteError",
     "load_datatype"
 ]
+
+
+_class_name_word_boundary = re.compile(r"([a-z])([A-Z])")
 
 
 class PimlicoDatatype(object):
@@ -100,6 +103,16 @@ class PimlicoDatatype(object):
         self._metadata = None
 
         self.options = kwargs
+        # Set default options from the input module options
+        # If loading as an input datatype, these will already have been set, but otherwise they might not be present
+        for opt_name, opt_dict in self.input_module_options.iteritems():
+            if opt_name not in self.options:
+                self.options[opt_name] = opt_dict.get("default", None)
+
+        # If the overriding class doesn't set datatype_name, we should default to something sensible
+        if self.datatype_name == "base_datatype" and type(self) is not PimlicoDatatype:
+            # Build a better name out of the class name
+            self.datatype_name = _class_name_word_boundary.sub(r"\1_\2", type(self).__name__).lower()
 
     def _get_metadata(self):
         if self._metadata is None:
@@ -315,12 +328,33 @@ class PimlicoDatatypeWriter(object):
         # Make sure the necessary directories exist
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
+        # Stores a set of output tasks that must be completed before the exit routine is called
+        # Subclasses can add things to this in their init and remove them as the tasks are performed
+        # The superclass exit will check that the set is empty
+        self._to_output = set()
+
+    def require_tasks(self, *tasks):
+        """
+        Add a name or multiple names to the list of output tasks that must be completed before writing is finished
+        """
+        self._to_output.update(tasks)
+
+    def task_complete(self, task):
+        if task in self._to_output:
+            self._to_output.remove(task)
 
     def __enter__(self):
+        # Store an initial version of the metadata
+        self.write_metadata()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.write_metadata()
+        if exc_type is None:
+            self.write_metadata()
+            # Check all required output tasks were completed
+            if len(self._to_output):
+                raise DatatypeWriteError("some outputs were not written for datatype %s: %s" %
+                                         (type(self).__name__, ", ".join(self._to_output)))
 
     def write_metadata(self):
         if self.additional_name is None:
@@ -581,19 +615,14 @@ def load_datatype(path):
     datatype path.
 
     """
-    mod_path, __, cls_name = path.rpartition(".")
     try:
-        mod = import_module(mod_path)
-    except ImportError:
-        raise DatatypeLoadError("could not load module %s" % mod_path)
-
-    if not hasattr(mod, cls_name):
-        raise DatatypeLoadError("could not load datatype class %s in module %s" % (cls_name, mod_path))
-    cls = getattr(mod, cls_name)
+        cls = import_member(path)
+    except ImportError, e:
+        raise DatatypeLoadError("could not load datatype class %s: %s" % (path, e))
 
     if type(cls) is not type(object):
-        raise DatatypeLoadError("tried to load datatype %s.%s, but result was not a class, it was a %s" %
-                                (mod, cls_name, type(cls).__name__))
+        raise DatatypeLoadError("tried to load datatype %s, but result was not a class, it was a %s" %
+                                (path, type(cls).__name__))
 
     if not issubclass(cls, PimlicoDatatype):
         raise DatatypeLoadError("%s is not a Pimlico datatype" % path)

@@ -211,7 +211,7 @@ if __name__ == "__main__":
                                    help="Forcibly remove an execution lock from a module. If a lock has ended up "
                                         "getting left on when execution exited prematurely, use this to remove it. "
                                         "Usually shouldn't be necessary, even if there's an error during execution")
-    unlock.set_defaults(func=unlock)
+    unlock.set_defaults(func=unlock_cmd)
     unlock.add_argument("module_name", help="The name of the module to unlock")
 
     longstore = subparsers.add_parser("longstore",

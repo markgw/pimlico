@@ -35,4 +35,11 @@ class ModuleExecutor(BaseModuleExecutor):
                 self.info.options["max_prop"],
                 self.info.options["limit"]
             )
+
+            if self.info.options["include"] is not None:
+                # Guarantee inclusion of certain terms
+                self.log.info("Guaranteeing inclusion of %s" % ", ".join(self.info.options["include"]))
+                for term in self.info.options["include"]:
+                    vocab_writer.data.add_term(term)
+
             self.log.info("Outputting vocab (%d terms)" % len(vocab_writer.data))

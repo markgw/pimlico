@@ -64,6 +64,10 @@ class TarredCorpusGrouper(object):
             self.current_archive_count += 1
         return self.current_archive_name
 
+    def __iter__(self):
+        while True:
+            yield self.next_document()
+
 
 # Subclass TarredCorpus so that inputs expecting one can accept this
 class TarredCorpusFilter(TarredCorpus):

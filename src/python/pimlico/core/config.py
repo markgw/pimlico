@@ -62,6 +62,12 @@ class PipelineConfig(object):
         Root directory of the whole project. Current assumed to always be the parent directory of `pimlico_root`.
     - `output_dir`:
         Path to output dir (usually `output` in Pimlico root).
+    - `long_term_store`:
+        Long-term store base directory being used under the current config. Can be used to link to data from
+        other pipelines run on the same system.
+    - `short_term_store`:
+        Short-term store base directory being used under the current config. Can be used to link to data from
+        other pipelines run on the same system.
 
     **Directives:**
 
@@ -333,40 +339,15 @@ class PipelineConfig(object):
         if variant is None:
             variant = "main"
 
-        if local_config is None:
-            # Use the default locations for local config file
-            # May want to add other locations here...
-            local_config = [os.path.join(os.path.expanduser("~"), ".pimlico")]
-        else:
-            local_config = [local_config]
-
-        # Load local config file(s)
-        for local_filename in local_config:
-            if os.path.exists(local_filename):
-                local_config_filename = local_filename
-                break
-        else:
-            raise PipelineConfigParseError("could not load a Pimlico configuration file to read local setup from. "
-                                           "Tried: %s" % ", ".join(local_config))
-        # Read in the local config and supply a section heading to satisfy config parser
-        with open(local_config_filename, "r") as f:
-            local_text_buffer = StringIO("[main]\n%s" % f.read())
-
-        local_config_parser = SafeConfigParser()
-        local_config_parser.readfp(local_text_buffer)
-        local_config_data = dict(local_config_parser.items("main"))
-        # Allow parameters to be overridden on the command line
-        local_config_data.update(override_local_config)
-
-        for attr in REQUIRED_LOCAL_CONFIG:
-            if attr not in local_config_data:
-                raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
+        local_config_data = PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
 
         # Special vars are available for substitution in all options, including other vars
         special_vars = {
             "project_root": PROJECT_ROOT,
             "pimlico_root": PIMLICO_ROOT,
             "output_dir": OUTPUT_DIR,
+            "long_term_store": local_config_data["long_term_store"],
+            "short_term_store": local_config_data["short_term_store"],
         }
 
         # Perform pre-processing of config file to replace includes, etc
@@ -475,10 +456,75 @@ class PipelineConfig(object):
 
         return pipeline
 
+    @staticmethod
+    def load_local_config(filename=None, override={}):
+        if filename is None:
+            # Use the default locations for local config file
+            # May want to add other locations here...
+            local_config = [os.path.join(os.path.expanduser("~"), ".pimlico")]
+        else:
+            local_config = [filename]
+
+        # Load local config file(s)
+        for local_filename in local_config:
+            if os.path.exists(local_filename):
+                local_config_filename = local_filename
+                break
+        else:
+            raise PipelineConfigParseError("could not load a Pimlico configuration file to read local setup from. "
+                                           "Tried: %s" % ", ".join(local_config))
+        # Read in the local config and supply a section heading to satisfy config parser
+        with open(local_config_filename, "r") as f:
+            local_text_buffer = StringIO("[main]\n%s" % f.read())
+
+        local_config_parser = SafeConfigParser()
+        local_config_parser.readfp(local_text_buffer)
+        local_config_data = dict(local_config_parser.items("main"))
+        # Allow parameters to be overridden on the command line
+        local_config_data.update(override)
+
+        for attr in REQUIRED_LOCAL_CONFIG:
+            if attr not in local_config_data:
+                raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
+        return local_config_data
+
+    @staticmethod
+    def empty(local_config=None, override_local_config={}, override_pipeline_config={}):
+        """
+        Used to programmatically create an empty pipeline. It will contain no modules, but provides a gateway to
+        system info, etc and can be used in place of a real Pimlico pipeline.
+
+        :param local_config:
+        :param override_local_config:
+        :return:
+        """
+        from pimlico import __version__ as current_pimlico_version
+
+        local_config_data = PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
+        name = "empty_pipeline"
+        pipeline_config = {
+            "name": name,
+            "release": current_pimlico_version,
+        }
+        pipeline_config.update(override_pipeline_config)
+
+        pipeline = PipelineConfig(
+            name, pipeline_config, local_config_data, {}, [],
+            filename=None, variant="main", available_variants=[], all_filenames=[], module_docstrings={},
+        )
+
+        try:
+            check_pipeline(pipeline)
+        except PipelineCheckError, e:
+            raise PipelineConfigParseError("empty pipeline created, but failed checks: %s" % e, cause=e)
+
+        return pipeline
+
     def find_data_path(self, path, default=None):
         """
         Given a path to a data dir/file relative to a data store, tries taking it relative to various store base
         dirs. If it exists in a store, that absolute path is returned. If it exists in no store, return None.
+        If the path is already an absolute path, nothing is done to it.
 
         The stores searched are the long-term store and the short-term store, though in the future more valid data
         storage locations may be added.
@@ -488,6 +534,8 @@ class PipelineConfig(object):
          short-term store in this case. If default="long", long-term store.
         :return: absolute path to data, or None if not found in any store
         """
+        if os.path.isabs(path):
+            return path
         try:
             return self.find_all_data_paths(path).next()
         except StopIteration:

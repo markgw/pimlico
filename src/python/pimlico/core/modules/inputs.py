@@ -7,6 +7,7 @@ Base classes and utilities for input modules in a pipeline.
 
 """
 import copy
+from pimlico.core.config import PipelineStructureError
 
 from pimlico.datatypes.base import IterableCorpus
 from .base import BaseModuleInfo
@@ -43,16 +44,33 @@ def input_module_factory(datatype):
     input_module_options = copy.copy(datatype.input_module_options)
     if issubclass(datatype, IterableCorpus):
         # Also get input options from the document type
+        # TODO This doesn't look right!
         input_module_options.update(datatype.input_module_options)
+
+    # Add a special option to allow a dir to be specified to read the data from
+    # This will become the base_dir for the datatype when instantiated
+    input_module_options["dir"] = {
+        "help": "Directory to read the data from. May be used to load a dataset from an output from another "
+                "Pimlico pipeline. If not given, the datatype's base dir will be the expected base dir within "
+                "this pipeline's data directory, which usually won't exist",
+    }
 
     class DatatypeInputModuleInfo(InputModuleInfo):
         module_type_name = "%s_input" % datatype.datatype_name
         module_readable_name = "%s datatype input" % datatype.datatype_name
         module_outputs = [("data", datatype)]
-        module_options = datatype.input_module_options
+        module_options = input_module_options
 
         def __init__(self, module_name, pipeline, **kwargs):
             super(DatatypeInputModuleInfo, self).__init__(module_name, pipeline, **kwargs)
+            self.override_base_dir = self.options["dir"]
+
+        def get_output_dir(self, output_name, short_term_store=False):
+            if self.override_base_dir is None:
+                return super(DatatypeInputModuleInfo, self).get_output_dir(output_name,
+                                                                           short_term_store=short_term_store)
+            else:
+                return self.override_base_dir
 
         def instantiate_output_datatype(self, output_name, output_datatype):
             return output_datatype.create_from_options(self.get_output_dir(output_name), self.pipeline,

@@ -26,7 +26,13 @@ if [ ! -f "$python" ]; then
 fi
 
 if [ -n "$GPU" ]; then
-    export THEANO_FLAGS='device=gpu,floatX=float32'
+    if [ "$GPU" == "1" ]; then
+        # Tell Theano we're using the GPU and let it choose which
+        export THEANO_FLAGS='device=gpu,floatX=float32'
+    else
+        # Specify a particular GPU for Theano
+        export THEANO_FLAGS='device='$GPU',floatX=float32'
+    fi
 fi
 
 if [ -n "$PROFILE" ]; then

@@ -81,3 +81,48 @@ def infinite_cycle(iterable):
     while True:
         for x in iterable:
             yield x
+
+
+def import_member(path):
+    """
+    Import a class, function, or other module member by its fully-qualified Python name.
+
+    :param path: path to member, including full package path and class/function/etc name
+    :return: cls
+    """
+    from importlib import import_module
+
+    mod_path, __, cls_name = path.rpartition(".")
+    try:
+        mod = import_module(mod_path)
+    except ImportError, e:
+        raise ImportError("class' module does not exist: %s. %s" % (mod_path, e))
+
+    if not hasattr(mod, cls_name):
+        raise ImportError("could not load class %s from module %s: name does not exist" % (cls_name, mod_path))
+    return getattr(mod, cls_name)
+
+
+def split_seq(seq, separator):
+    """
+    Iterate over a sequence and group its values into lists, separated in the original sequence by the given value.
+    If `on` is callable, it is called on each element to test whether it is a separator. Otherwise, elements that
+    are equal to `on` a treated as separators.
+
+    :param seq: sequence to divide up
+    :param separator: separator or separator test function
+    :return: iterator over subsequences
+    """
+    if not callable(separator):
+        separator = lambda x: x == separator
+
+    subsequence = []
+    for elem in seq:
+        if separator(elem):
+            # Reached a separator, return the current subsequence and start accumulating values again
+            yield subsequence
+            subsequence = []
+        else:
+            subsequence.append(elem)
+    # Yield the subsequence after the last separator, even if it's empty
+    yield subsequence

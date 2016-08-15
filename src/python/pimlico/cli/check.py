@@ -52,4 +52,4 @@ def install_cmd(pipeline, opts):
         modules = None
     else:
         modules = opts.modules
-    install_dependencies(pipeline, modules, trust_downloaded_archives=opts.trust_downloaded_archives)
+    install_dependencies(pipeline, modules, trust_downloaded_archives=opts.trust_downloaded)

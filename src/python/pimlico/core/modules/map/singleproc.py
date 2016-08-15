@@ -8,115 +8,16 @@ This module provides an equivalent set of implementations and convenience functi
 multiprocessing, but conform to the pool-based execution pattern by creating a single-thread pool.
 
 """
-import threading
-from Queue import Queue, Empty
-from traceback import format_exc
-
-from pimlico.core.modules.map import DocumentMapProcessMixin, ProcessOutput, DocumentProcessorPool, \
-    DocumentMapModuleExecutor, WorkerStartupError
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.utils.pipes import qget
+from .threaded import ThreadingMapModuleExecutor, ThreadingMapThread, ThreadingMapPool
 
 
-class SingleThreadMapWorker(threading.Thread, DocumentMapProcessMixin):
-    def __init__(self, input_queue, output_queue, exception_queue, executor):
-        threading.Thread.__init__(self)
-        DocumentMapProcessMixin.__init__(self, input_queue, output_queue, exception_queue)
-        self.executor = executor
-        self.info = executor.info
-        self.daemon = True
-        self.stopped = threading.Event()
-        self.initialized = threading.Event()
-        self.no_more_inputs = threading.Event()
-
-        self.start()
-
-    def notify_no_more_inputs(self):
-        self.no_more_inputs.set()
-
-    def run(self):
-        try:
-            # Run any startup routine that the subclass has defined
-            self.set_up()
-            # Notify waiting processes that we've finished initialization
-            self.initialized.set()
-            input_buffer = []
-            try:
-                while not self.stopped.is_set():
-                    try:
-                        # Timeout and go round the loop again to check whether we're supposed to have stopped
-                        archive, filename, docs = qget(self.input_queue, timeout=0.05)
-                    except Empty:
-                        # Don't worry if the queue is empty: just keep waiting for more until we're shut down
-                        pass
-                    else:
-                        input_buffer.append(tuple([archive, filename] + docs))
-                        if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
-                            results = self.process_documents(input_buffer)
-                            for input_tuple, result in zip(input_buffer, results):
-                                self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
-                            input_buffer = []
-            finally:
-                self.tear_down()
-        except Exception, e:
-            # If there's any uncaught exception, make it available to the main process
-            self.exception_queue.put_nowait(e)
-        finally:
-            # Even there was an error, set initialized so that the main process can wait on it
-            self.initialized.set()
-
-
-class SingleThreadMapPool(DocumentProcessorPool):
-    """
-    A base implementation of document map parallelization using a single thread.
-
-    """
-    THREAD_TYPE = None
-
-    def __init__(self, executor):
-        super(SingleThreadMapPool, self).__init__(1)
-        self.executor = executor
-        self.worker = self.start_worker()
-        # Wait until all of the workers have completed their initialization
-        self.worker.initialized.wait()
-        # Check whether the worker had an error during initialization
-        try:
-            e = self.worker.exception_queue.get_nowait()
-        except Empty:
-            # No error
-            pass
-        else:
-            raise WorkerStartupError("error in worker thread: %s" % e, cause=e)
-
-    def start_worker(self):
-        return self.THREAD_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
-
-    @staticmethod
-    def create_queue(maxsize=None):
-        return Queue(maxsize)
-
-    def shutdown(self):
-        # Tell the thread to stop
-        self.worker.stopped.set()
-        # Wait until it's stopped
-        while self.worker.is_alive():
-            # Need to clear the output queue, or else the join hangs
-            while not self.output_queue.empty():
-                self.output_queue.get_nowait()
-            self.worker.join(0.1)
-
-
-class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):
-    POOL_TYPE = None
-
+class SingleThreadMapModuleExecutor(ThreadingMapModuleExecutor):
     def create_pool(self, processes):
-        return self.POOL_TYPE(self, processes)
-
-    def postprocess(self, error=False):
-        self.pool.shutdown()
+        return super(SingleThreadMapModuleExecutor, self).create_pool(1)
 
 
-def single_process_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None):
+def single_process_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,
+                                    worker_set_up_fn=None, worker_tear_down_fn=None, batch_docs=None):
     """
     Factory function for creating an executor that uses the single-process implementations of document-map
     pools and workers. This is an easy way to implement a non-parallelized executor
@@ -134,17 +35,32 @@ def single_process_executor_factory(process_document_fn, preprocess_fn=None, pos
     with the executor as an argument and a kwarg *error* which is True if execution failed.
 
     """
-    # Define a worker thread type
-    class FactoryMadeMapThread(SingleThreadMapWorker):
-        def process_document(self, archive, filename, *docs):
-            process_document_fn(self.executor, archive, filename, *docs)
+    if isinstance(process_document_fn, type):
+        if not issubclass(process_document_fn, ThreadingMapThread):
+            raise TypeError("called threading_executor_factory with a worker type that's not a subclass of "
+                            "ThreadingMapThread: got %s" % process_document_fn.__name__)
+        worker_type = process_document_fn
+    else:
+        # Define a worker thread type
+        class FactoryMadeMapThread(ThreadingMapThread):
+            def process_document(self, archive, filename, *docs):
+                return process_document_fn(self, archive, filename, *docs)
 
-    # Define a pool type to use this worker thread type
-    class FactoryMadeMapPool(SingleThreadMapPool):
-        PROCESS_TYPE = FactoryMadeMapThread
+            def set_up(self):
+                if worker_set_up_fn is not None:
+                    worker_set_up_fn(self)
+
+            def tear_down(self):
+                if worker_tear_down_fn is not None:
+                    worker_tear_down_fn(self)
+        worker_type = FactoryMadeMapThread
+
+    # Define a pool type to use this worker process type
+    class FactoryMadeMapPool(ThreadingMapPool):
+        THREAD_TYPE = worker_type
 
     # Finally, define an executor type (subclass of DocumentMapModuleExecutor) that creates a pool of the right sort
-    class ModuleExecutor(MultiprocessingMapModuleExecutor):
+    class ModuleExecutor(SingleThreadMapModuleExecutor):
         POOL_TYPE = FactoryMadeMapPool
 
         def preprocess(self):

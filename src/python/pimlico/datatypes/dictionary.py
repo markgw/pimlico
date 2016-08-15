@@ -28,6 +28,8 @@ class Dictionary(PimlicoDatatype):
     Dictionary encapsulates the mapping between normalized words and their integer ids.
 
     """
+    datatype_name = "dictionary"
+
     def __init__(self, base_dir, pipeline, **kwargs):
         super(Dictionary, self).__init__(base_dir, pipeline, **kwargs)
 
@@ -73,7 +75,7 @@ class DictionaryData(object):
     """
     def __init__(self):
         self.token2id = {}  # token -> tokenId
-        self.id2token = {}  # reverse mapping for token2id; only formed on request, to save memory
+        self._id2token = {}  # reverse mapping for token2id; only formed on request, to save memory
         self.dfs = {}  # document frequencies: tokenId -> in how many documents this token appeared
 
         self.num_docs = 0  # number of documents processed
@@ -85,6 +87,13 @@ class DictionaryData(object):
 
     def __iter__(self):
         return iter(self.keys())
+
+    @property
+    def id2token(self):
+        # Backwards compat with old pickled objects
+        if not hasattr(self, "_id2token") or len(self._id2token) != len(self.token2id):
+            self.refresh_id2token()
+        return self._id2token
 
     def keys(self):
         """Return a list of all token ids."""
@@ -99,6 +108,19 @@ class DictionaryData(object):
     def __str__(self):
         some_keys = list(itertools.islice(self.token2id.iterkeys(), 5))
         return "Dictionary(%i unique tokens: %s%s)" % (len(self), some_keys, '...' if len(self) > 5 else '')
+
+    def refresh_id2token(self):
+        self._id2token = dict((id, token) for (token, id) in self.token2id.iteritems())
+
+    def add_term(self, term):
+        """
+        Add a term to the dictionary, without any occurrence count. Note that if you run threshold-based
+        filters after adding a term like this, it will get removed.
+
+        """
+        if term not in self.token2id:
+            self.token2id[term] = len(self.token2id)
+            self.dfs.setdefault(term, 0)
 
     def add_documents(self, documents, prune_at=2000000):
         """
@@ -230,5 +252,5 @@ class DictionaryData(object):
 
         # reassign mappings to new ids
         self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.iteritems())
-        self.id2token = {}
+        self._id2token = {}
         self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.iteritems())

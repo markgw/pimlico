@@ -51,6 +51,9 @@ class SafeProgressBar(ProgressBar):
         else:
             super(SafeProgressBar, self).update(value)
 
+    def increment(self):
+        self.update(self.currval+1)
+
 
 def slice_progress(iterable, num_items, title=None):
     pbar = get_progress_bar(num_items, title=title)

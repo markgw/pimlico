@@ -11,6 +11,7 @@ features.
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.core.modules.options import comma_separated_strings
 from pimlico.datatypes.dictionary import Dictionary
 from pimlico.datatypes.tar import TarredCorpusType
 from pimlico.datatypes.tokenized import TokenizedDocumentType
@@ -34,4 +35,9 @@ class ModuleInfo(BaseModuleInfo):
             "help": "Limit vocab size to this number of most common entries (after other filters)",
             "type": int,
         },
+        "include": {
+            "help": "Ensure that certain words are always included in the vocabulary, even if they don't make it "
+                    "past the various filters, or are never seen in the corpus. Give as a comma-separated list",
+            "type": comma_separated_strings,
+        }
     }

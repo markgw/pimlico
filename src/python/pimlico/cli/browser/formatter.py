@@ -16,6 +16,7 @@ in your custom code and refer to them by their fully qualified class name.
 """
 from pimlico.core.modules.base import check_type, TypeCheckError
 from pimlico.datatypes.base import IterableCorpus, InvalidDocument
+from pimlico.datatypes.documents import DataPointType
 
 
 class DocumentBrowserFormatter(object):
@@ -24,9 +25,10 @@ class DocumentBrowserFormatter(object):
 
     """
     """
-    Should be overridden by subclasses to specify the corpus datatype(s) that can be formatted. Given in the
-    same way as input datatypes to modules, so may be a subclass of IterableCorpus, a DynamicInputDatatypeRequirement,
-    or a tuple of requirements.
+    Should be overridden by subclasses to specify the corpus/document datatype(s) that can be formatted. Given in the
+    same way as data-point types of iterable corpora, so expected to be a subclass of DataPointType.
+    May also be an IterableCorpus subclass, in which case the corpus' data_point_type is used to check the formatted
+    dataset's type.
     """
     DATATYPE = None
 
@@ -112,17 +114,31 @@ def load_formatter(dataset, formatter_name=None, parse=True):
         try:
             fmt_path, __, fmt_cls_name = formatter_name.rpartition(".")
             fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
-            fmt_cls = getattr(fmt_mod, fmt_cls_name)
         except ImportError, e:
             raise TypeError("Could not load formatter %s: %s" % (formatter_name, e))
+        try:
+            fmt_cls = getattr(fmt_mod, fmt_cls_name)
+        except AttributeError, e:
+            raise TypeError("Could not load formatter %s" % formatter_name)
+
         # If a formatter's given, use its attribute to determine whether we get raw input
         parse = not fmt_cls.RAW_INPUT
+
         # Check that the datatype provided is compatible with the formatter's datatype
-        try:
-            check_type(type(dataset), fmt_cls.DATATYPE)
-        except TypeCheckError, e:
+        if issubclass(fmt_cls.DATATYPE, IterableCorpus):
+            # Got a corpus type: use its document type to check compatibility
+            document_type = fmt_cls.DATATYPE.data_point_type
+        elif issubclass(fmt_cls.DATATYPE, DataPointType):
+            # Was given a data-point type directly
+            document_type = fmt_cls.DATATYPE
+        else:
+            raise TypeCheckError("formatter's datatype needs to be an iterable corpus subclass or a data-point type. "
+                                 "Got %s" % fmt_cls.DATATYPE.__name__)
+
+        if not issubclass(dataset.data_point_type, document_type):
             raise TypeCheckError(
-                "formatter %s is not designed for this datatype (%s)" % (formatter_name, type(dataset).__name__)
+                "formatter %s is not designed for this data-point type (%s)" %
+                (formatter_name, dataset.data_point_type.__name__)
             )
         # Instantiate the formatter, providing it with the dataset
         formatter = fmt_cls(dataset)

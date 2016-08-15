@@ -144,3 +144,5 @@ numpy_dependency = PythonPackageSystemwideInstall("numpy", "Numpy",
 scipy_dependency = PythonPackageSystemwideInstall("scipy", "Scipy",
                                                   pip_package="scipy", yum_package="scipy", apt_package="python-scipy",
                                                   url="https://www.scipy.org/scipylib/")
+theano_dependency = PythonPackageOnPip("theano", pip_package="Theano")
+keras_dependency = PythonPackageOnPip("keras", dependencies=[theano_dependency])
