@@ -15,7 +15,7 @@
 """
 import os
 
-from pimlico.core.dependencies.java import check_java_dependency
+from pimlico.core.dependencies.java import check_java_dependency, PimlicoJavaLibrary, JavaJarsDependency
 from pimlico.core.external.java import DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
@@ -51,39 +51,31 @@ class ModuleInfo(DocumentMapModuleInfo):
         # Postprocess model option
         self.model_path = abs_path_or_model_dir_path(self.options["model"], "malt")
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
+    def get_software_dependencies(self):
+        return [
+            PimlicoJavaLibrary("Malt wrapper", classes=["pimlico.malt.ParserGateway"]),
+            JavaJarsDependency(
+                "liblinear",
+                [("liblinear-java-1.95.jar", "http://www.bwaldvogel.de/liblinear-java/liblinear-java-1.95.jar")]
+            ),
+            JavaJarsDependency(
+                "log4j",
+                [("log4j-1.2.17.jar", "http://www.us.apache.org/dist/logging/log4j/1.2.17/log4j-1.2.17.tar.gz"
+                                      "->apache-log4j-1.2.17/log4j-1.2.17.jar")]
+            ),
+            JavaJarsDependency(
+                "Malt parser",
+                [("maltparser-1.8.1.jar", "http://maltparser.org/dist/maltparser-1.8.1.tar.gz"
+                                          "->maltparser-1.8.1/maltparser-1.8.1.jar")]
+            ),
+        ]
 
-        # Make sure the model is available
+    def check_ready_to_run(self):
+        problems = super(ModuleInfo, self).check_ready_to_run()
+        # Check model exists
         if not os.path.exists(self.model_path):
-            missing_dependencies.append(
-                ("Malt parser model", self.module_name, "Parsing model file doesn't exists: %s" % self.model_path)
-            )
-
-        # Check whether the OpenNLP POS tagger is available
-        try:
-            class_name = "pimlico.malt.ParserGateway"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("Malt parser wrapper",
-                                             self.module_name,
-                                             "Couldn't load %s. Build the Malt Java wrapper module provided with "
-                                             "Pimlico ('ant malt')" % class_name))
-
-            class_name = "org.maltparser.concurrent.ConcurrentMaltParserService"
-            try:
-                check_java_dependency(class_name)
-            except DependencyError:
-                missing_dependencies.append(("Malt parser jar",
-                                             self.module_name,
-                                             "Couldn't load %s. Install Malt by running 'make malt' in Java lib dir" %
-                                             class_name))
-        except DependencyCheckerError, e:
-            missing_dependencies.append(("Java dependency checker", self.module_name, str(e)))
-
-        missing_dependencies.extend(super(ModuleInfo, self).check_runtime_dependencies())
-        return missing_dependencies
+            problems.append(("Missing Malt parser model", "Path %s does not exist" % self.model_path))
+        return problems
 
     def get_writer(self, output_name, output_dir, append=False):
         return CoNLLDependencyParseCorpusWriter(output_dir, append=append, gzip=not self.options["no_gzip"])

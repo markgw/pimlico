@@ -7,16 +7,13 @@ Reading of various types of config files, in particular a pipeline config.
 """
 import ConfigParser
 import copy
-
 import os
-from ConfigParser import SafeConfigParser, RawConfigParser
-
 import sys
+from ConfigParser import SafeConfigParser, RawConfigParser
 from cStringIO import StringIO
 from operator import itemgetter
 
 from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR
-from pimlico.core.dependencies.base import LegacyModuleDependencies, LegacyDatatypeDependencies
 from pimlico.core.modules.options import str_to_bool, ModuleOptionParseError
 from pimlico.utils.core import remove_duplicates
 from pimlico.utils.format import title_box
@@ -31,6 +28,11 @@ class PipelineConfig(object):
 
     Each section, except for `vars` and `pipeline`, defines a module instance in the pipeline. Some of these can
     be executed, others act as filters on the outputs of other modules, or input readers.
+
+    Each section that defines a module has a `type` parameter. Usually, this is a fully-qualified Python package
+    name that leads to the module type's Python code (that package containing the `info` Python module). A special
+    type is `alias`. This simply defines a module alias -- an alternative name for an already defined module. It
+    should have exactly one other parameter, `input`, specifying the name of the module we're aliasing.
 
     **Special sections:**
 
@@ -110,7 +112,8 @@ class PipelineConfig(object):
 
     """
     def __init__(self, name, pipeline_config, local_config, raw_module_configs, module_order, filename=None,
-                 variant="main", available_variants=[], log=None, all_filenames=None, module_docstrings={}):
+                 variant="main", available_variants=[], log=None, all_filenames=None, module_docstrings={},
+                 module_aliases={}):
         if log is None:
             log = get_console_logger("Pimlico")
         self.log = log
@@ -126,6 +129,7 @@ class PipelineConfig(object):
         self.filename = filename
         self.all_filenames = all_filenames or [filename]
         self.name = name
+        self.module_aliases = module_aliases
 
         # Certain standard system-wide settings, loaded from the local config
         self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name, self.variant)
@@ -209,6 +213,9 @@ class PipelineConfig(object):
         :param module_name:
         :return:
         """
+        # If the requested module name is an alias, return the aliased module
+        if module_name in self.module_aliases:
+            return self.load_module_info(self.module_aliases[module_name])
         # Cache the module info object so we can easily do repeated lookups without worrying about wasting time
         if module_name not in self._module_info_cache:
             from pimlico.core.modules.base import load_module_info
@@ -370,6 +377,20 @@ class PipelineConfig(object):
             (key, var_substitute(val, vars)) for (key, val) in config_section_dict["pipeline"].items()
         ])
 
+        # Deal with the special "alias" modules, which are not separate module, but just define new names
+        aliases = {}
+        for section, section_config in config_sections:
+            if section_config.get("type", None) == "alias":
+                if "input" not in section_config:
+                    raise PipelineConfigParseError("module alias '%s' must have an 'input' option specifying which "
+                                                   "module it is an alias for" % section)
+                aliases[section] = section_config["input"]
+                # Later, we'll check that the module referred to exists
+        # Remove the aliases from the config sections, as we don't need to process them any more
+        config_sections = [
+            (section, section_config) for section, section_config in config_sections if section not in aliases
+        ]
+
         # Parameters and inputs can be given multiple values, separated by |s
         # In this case, we need to multiply out all the alternatives, to make multiple modules
         expanded_config_sections = []
@@ -417,6 +438,11 @@ class PipelineConfig(object):
             ) for section in module_order
         ])
 
+        # Check that we have a module for every alias
+        for alias, alias_target in aliases.iteritems():
+            if alias_target not in raw_module_options:
+                raise PipelineStructureError("alias '%s' specified for undefined module '%s'" % (alias, alias_target))
+
         # Process configs to get out the core things we need
         if "name" not in pipeline_config:
             raise PipelineConfigParseError("pipeline name must be specified as 'name' attribute in pipeline section")
@@ -438,7 +464,7 @@ class PipelineConfig(object):
         pipeline = PipelineConfig(
             name, pipeline_config, local_config_data, raw_module_options, module_order,
             filename=filename, variant=variant, available_variants=list(sorted(available_variants)),
-            all_filenames=all_filenames, module_docstrings=section_docstrings,
+            all_filenames=all_filenames, module_docstrings=section_docstrings, module_aliases=aliases,
         )
 
         # Now that we've got the pipeline instance prepared, load all the module info instances, so they're cached
@@ -871,15 +897,17 @@ def check_pipeline(pipeline):
         raise PipelineCheckError(e, "Input typechecking failed: %s" % e)
 
 
-def get_dependencies(pipeline, modules):
+def get_dependencies(pipeline, modules, recursive=False):
     """
     Get a list of software dependencies required by the subset of modules given.
+
+    If recursive=True, dependencies' dependencies are added to the list too.
 
     :param pipeline:
     :param modules: list of modules to check. If None, checks all modules
     """
     if modules is None:
-        modules = pipeline.module_names
+        modules = pipeline.modules
 
     # Add to the list of modules any that will be executed along with the specified ones
     modules = remove_duplicates(
@@ -889,23 +917,20 @@ def get_dependencies(pipeline, modules):
     dependencies = []
     for module_name in modules:
         module = pipeline[module_name]
+        module_dependencies = []
         # Get any software dependencies for this module
-        dependencies.extend(module.get_software_dependencies())
+        module_dependencies.extend(module.get_software_dependencies())
         # Also get dependencies of the input datatypes
-        dependencies.extend(module.get_input_software_dependencies())
-
-        ### These legacy wrappers will be removed later ###
-        # Also wrap the module in order to check any dependencies specified in the old style, using
-        #  check_runtime_dependencies()
-        dependencies.append(LegacyModuleDependencies(module))
-        # Do the same thing with the input datatypes
-        for input_name in module.inputs.keys():
-            for input in module.get_input(input_name, always_list=True):
-                dependencies.append(LegacyDatatypeDependencies(input))
+        module_dependencies.extend(module.get_input_software_dependencies())
+        dependencies.extend(module_dependencies)
+        if recursive:
+            # Also check whether the deps we've just added have their own dependencies
+            for dep in module_dependencies:
+                dependencies.extend(dep.all_dependencies())
 
     # We may want to do something cleverer to remove duplicate dependencies, but at lest remove any duplicates
-    #  of exactly the same object
-    dependencies = remove_duplicates(dependencies, lambda x: id(x))
+    #  of exactly the same object and any that provide a comparison operator that says they're equal
+    dependencies = remove_duplicates(dependencies)
     return dependencies
 
 

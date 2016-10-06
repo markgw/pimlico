@@ -82,6 +82,12 @@ class JavaDependency(SoftwareDependency):
             sum((dep._get_classpath_components_non_recursive() for dep in java_deps), [])
         )
 
+    def __eq__(self, other):
+        return isinstance(other, JavaDependency) and \
+               set(self.classes) == set(other.classes) and \
+               set(self.jars) == set(other.jars) and \
+               set(self.class_dirs) == set(other.class_dirs)
+
 
 class JavaJarsDependency(JavaDependency):
     """

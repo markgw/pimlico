@@ -220,6 +220,7 @@ def safe_import_bs4():
     sys.modules["chardet"] = None
     # Now we can import BS
     import bs4
+    return bs4
 
 
 class TruncateNow(StopIteration):
@@ -235,4 +236,4 @@ class BeautifulSoupDependency(PythonPackageOnPip):
         super(BeautifulSoupDependency, self).__init__("bs4", pip_package="beautifulsoup4")
 
     def import_package(self):
-        safe_import_bs4()
+        return safe_import_bs4()

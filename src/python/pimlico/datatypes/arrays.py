@@ -8,6 +8,7 @@ Wrappers around Numpy arrays and Scipy sparse matrices.
 """
 import os
 
+from pimlico.core.dependencies.python import numpy_dependency, scipy_dependency
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
 
 
@@ -30,14 +31,8 @@ class NumpyArray(PimlicoDatatype):
     def data_ready(self):
         return super(NumpyArray, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "array.npy"))
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-        try:
-            import numpy
-        except ImportError:
-            missing_dependencies.append(("Numpy", "install Numpy systemwide (e.g. package 'python-numpy' on Ubuntu)"))
-        missing_dependencies.extend(super(NumpyArray, self).check_runtime_dependencies())
-        return missing_dependencies
+    def get_software_dependencies(self):
+        return super(NumpyArray, self).get_software_dependencies() + [numpy_dependency]
 
 
 class NumpyArrayWriter(PimlicoDatatypeWriter):
@@ -66,18 +61,8 @@ class ScipySparseMatrix(PimlicoDatatype):
     def data_ready(self):
         return super(ScipySparseMatrix, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "array.mtx"))
 
-    def check_runtime_dependencies(self):
-        missing_dependencies = []
-        try:
-            import numpy
-        except ImportError:
-            missing_dependencies.append(("Numpy", "install Numpy systemwide (e.g. package 'python-numpy' on Ubuntu)"))
-        try:
-            import scipy
-        except ImportError:
-            missing_dependencies.append(("Scipy", "install Scipy systemwide (e.g. package 'python-scipy' on Ubuntu)"))
-        missing_dependencies.extend(super(ScipySparseMatrix, self).check_runtime_dependencies())
-        return missing_dependencies
+    def get_software_dependencies(self):
+        return super(ScipySparseMatrix, self).get_software_dependencies() + [scipy_dependency, numpy_dependency]
 
 
 class ScipySparseMatrixWriter(PimlicoDatatypeWriter):

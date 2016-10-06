@@ -103,7 +103,7 @@ def import_member(path):
     return getattr(mod, cls_name)
 
 
-def split_seq(seq, separator):
+def split_seq(seq, separator, ignore_empty_final=False):
     """
     Iterate over a sequence and group its values into lists, separated in the original sequence by the given value.
     If `on` is callable, it is called on each element to test whether it is a separator. Otherwise, elements that
@@ -111,18 +111,50 @@ def split_seq(seq, separator):
 
     :param seq: sequence to divide up
     :param separator: separator or separator test function
+    :param ignore_empty_final: by default, if there's a separator at the end, the last sequence yielded is empty. If
+        ignore_empty_final=True, in this case the last empty sequence is dropped
     :return: iterator over subsequences
     """
     if not callable(separator):
-        separator = lambda x: x == separator
+        is_separator = lambda x: x == separator
+    else:
+        is_separator = separator
 
     subsequence = []
     for elem in seq:
-        if separator(elem):
+        if is_separator(elem):
             # Reached a separator, return the current subsequence and start accumulating values again
             yield subsequence
             subsequence = []
         else:
             subsequence.append(elem)
-    # Yield the subsequence after the last separator, even if it's empty
-    yield subsequence
+    if not ignore_empty_final or len(subsequence):
+        # Yield the subsequence after the last separator, even if it's empty, unless ignore_empty_final given
+        yield subsequence
+
+
+def split_seq_after(seq, separator):
+    """
+    Somewhat like split_seq, but starts a new subsequence after each separator, without removing the
+    separators. Each subsequence therefore ends with a separator, except the last one if there's no separator
+    at the end.
+
+    :param seq: sequence to divide up
+    :param separator: separator or separator test function
+    :return: iterator over subsequences
+    """
+    if not callable(separator):
+        is_separator = lambda x: x == separator
+    else:
+        is_separator = separator
+
+    subsequence = []
+    for elem in seq:
+        subsequence.append(elem)
+        if is_separator(elem):
+            # Reached a separator, return the current subsequence and start accumulating values again
+            yield subsequence
+            subsequence = []
+    if len(subsequence):
+        # Yield the subsequence after the last separator, unless it's empty
+        yield subsequence

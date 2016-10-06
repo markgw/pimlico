@@ -28,10 +28,10 @@ fi
 if [ -n "$GPU" ]; then
     if [ "$GPU" == "1" ]; then
         # Tell Theano we're using the GPU and let it choose which
-        export THEANO_FLAGS='device=gpu,floatX=float32'
+        export THEANO_FLAGS='device=gpu,floatX=float32,'$THEANO_FLAGS
     else
         # Specify a particular GPU for Theano
-        export THEANO_FLAGS='device='$GPU',floatX=float32'
+        export THEANO_FLAGS='device='$GPU',floatX=float32,'$THEANO_FLAGS
     fi
 fi
 

@@ -12,7 +12,7 @@ endif
 
 
 ########## OPEN NLP ##############
-opennlp : opennlp/en-sent.bin opennlp/en-token.bin opennlp/en-pos-maxent.bin opennlp/en-parser-chunking.bin opennlp-coref
+opennlp : opennlp/en-sent.bin opennlp/en-token.bin opennlp/en-pos-maxent.bin opennlp/en-parser-chunking.bin opennlp-coref opennlp/en-ner-person.bin
 
 opennlp/en-sent.bin :
 	# OpenNLP English sentence detection model
@@ -33,6 +33,11 @@ opennlp/en-parser-chunking.bin :
 	# OpenNLP English chunking parser model
 	mkdir -p opennlp
 	cd opennlp && $(FETCH) http://opennlp.sourceforge.net/models-1.5/en-parser-chunking.bin
+
+opennlp/en-ner-person.bin :
+	# OpenNLP English person name finder model
+	mkdir -p opennlp
+	cd opennlp && $(FETCH) http://opennlp.sourceforge.net/models-1.5/en-ner-person.bin
 
 opennlp-coref : wordnet/db-3.1
 	# All coref models

@@ -18,6 +18,7 @@ class KerasModelWriter(PimlicoDatatypeWriter):
     def __init__(self, base_dir, **kwargs):
         super(KerasModelWriter, self).__init__(base_dir, **kwargs)
         self.require_tasks("architecture", "weights")
+        self.weights_filename = os.path.join(self.data_dir, "weights.hdf5")
 
     def write_model(self, model):
         self.write_architecture(model)
@@ -31,7 +32,7 @@ class KerasModelWriter(PimlicoDatatypeWriter):
 
     def write_weights(self, model):
         # Store the model's weights
-        model.save_weights(os.path.join(self.data_dir, "weights.hdf5"), overwrite=True)
+        model.save_weights(self.weights_filename, overwrite=True)
         self.task_complete("weights")
 
 

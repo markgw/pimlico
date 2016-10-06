@@ -53,7 +53,26 @@ class PythonPackageDependency(SoftwareDependency):
         Should raise an `ImportError` if import fails.
 
         """
-        __import__(self.package)
+        return __import__(self.package)
+
+    def get_installed_version(self):
+        """
+        Tries to import a __version__ variable from the package, which is a standard way to define the package version.
+
+        """
+        # Import the package
+        # We're allowed to assume that available() returns True, so this import should work
+        pck = self.import_package()
+        # Try a load of different names that would denote the version string
+        possible_names = ["__version__", "__VERSION__", "__release__"]
+        for var_name in possible_names:
+            if hasattr(pck, var_name):
+                return str(getattr(pck, var_name))
+        # None of these worked: fall back to default behaviour
+        return super(PythonPackageDependency, self).get_installed_version()
+
+    def __eq__(self, other):
+        return isinstance(other, PythonPackageDependency) and self.package == other.package
 
 
 class PythonPackageSystemwideInstall(PythonPackageDependency):
@@ -132,6 +151,18 @@ class PythonPackageOnPip(PythonPackageDependency):
 
     def __repr__(self):
         return "PythonPackageOnPip<%s%s>" % (self.name, (" (%s)" % self.package) if self.package != self.name else "")
+
+    def get_installed_version(self):
+        from pip.commands.show import search_packages_info
+        # Use Pip to get the version number of the installed version
+        installed_packages = list(search_packages_info(self.pip_package))
+        if len(installed_packages):
+            # Found the Pip package info: this contains the version
+            return installed_packages[0]["version"]
+        else:
+            # Pip package not found
+            # This can happen because the package wasn't installed with Pip, but is available because it's importable
+            return super(PythonPackageOnPip, self).get_installed_version()
 
 
 ###################################

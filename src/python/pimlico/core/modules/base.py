@@ -511,11 +511,12 @@ class BaseModuleInfo(object):
             input_names = self.input_names
         missing = []
         if self.is_input():
-            # Don't check inputs: there aren't any
-            # Instead check whether we're ready to produce our outputs
+            # Don't check inputs for an input module: there aren't any
+            # However, the output datatypes might require certain files before the data preparation routine can be run
             for output_name in self.output_names:
-                if not self.get_output(output_name).data_ready():
-                    missing.extend("%s output '%s'" % (self.module_name, output_name))
+                for path in self.get_output(output_name).get_required_paths():
+                    if not os.path.exists(path):
+                        missing.append("%s (required for '%s' output '%s'" % (path, self.module_name, output_name))
         else:
             for input_name in input_names:
                 for previous_module, output_name, additional_names in \
@@ -583,44 +584,6 @@ class BaseModuleInfo(object):
                                                  "'%s%s' from module '%s': %s" %
                                                  (input_name, self.module_name, output_name, additional_name_str,
                                                   dep_module_name, e))
-
-    def check_runtime_dependencies(self):
-        """
-        Check that all software required to execute this module is installed and locatable. This is
-        separate to metadata config checks, so that you don't need to satisfy the dependencies for
-        all modules in order to be able to run one of them. You might, for example, want to run different
-        modules on different machines. This is called when a module is about to be executed.
-        
-        Returns a list of triples: (dependency short name, module name, description/error message)
-        
-        Take care when overriding this that you don't put any import statements at the top of the Python 
-        module that will make loading the ModuleInfo itself dependent on runtime dependencies.  
-        You'll want to run import checks by putting import statements within this method.
-        
-        You should also call the super method for checking previous modules' dependencies.
-
-        .. deprecated:: 0.2
-           You should provide dependency information via :method:get_software_dependencies instead. This method
-           will be called as well for backward compatibility until v1.
-
-        """
-        missing_dependencies = []
-        # Instantiate any input datatypes this module will need
-        for input_name in self.inputs.keys():
-            for input_datatype in self.get_input(input_name, always_list=True):
-                # Check the datatype's dependencies
-                missing_dependencies.extend([
-                    (name, "%s input %s datatype" % (self.module_name, input_name), desc)
-                    for (name, desc) in input_datatype.check_runtime_dependencies()
-                ])
-
-        # Check the dependencies of any previous modules that are not executable: their dependencies 
-        # also need to be satisfied when this one is run
-        for dep_module_name in self.dependencies:
-            dep_module = self.pipeline[dep_module_name]
-            if not dep_module.module_executable:
-                missing_dependencies.extend(dep_module.check_runtime_dependencies())
-        return missing_dependencies
 
     def get_software_dependencies(self):
         """

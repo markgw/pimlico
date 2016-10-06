@@ -146,6 +146,17 @@ class PimlicoDatatype(object):
         """
         return []
 
+    def get_required_paths(self):
+        """
+        Returns a list of absolute paths to files that should be available for the data to be read.
+        The base data_ready() implementation checks that these are all available and, if the datatype
+        is used as an input to a pipeline and requires a data preparation routine to be run, data
+        preparation will not be executed until these files are available.
+
+        :return: list of absolute paths
+        """
+        return []
+
     def get_software_dependencies(self):
         """
         Check that all software required to read this datatype is installed and locatable. This is
@@ -181,6 +192,10 @@ class PimlicoDatatype(object):
         checks, or even override this, if the data dir isn't needed.
 
         """
+        # Get a list of files that the datatype depends on
+        paths = self.get_required_paths()
+        if paths and not all(os.path.exists(path) for path in paths):
+            return False
         # If data_dir is None, the datatype doesn't need it
         # data_dir is None unless the data dir has been located
         return self.base_dir is None or self.data_dir is not None

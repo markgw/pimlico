@@ -29,6 +29,7 @@ class DocumentMapOutputTypeWrapper(object):
         self.raw_data = raw_data
 
         self.output_num = [name for name, type in self.wrapped_module_info.available_outputs].index(self.output_name)
+        self.multiple_outputs = len(self.wrapped_module_info.available_outputs) > 1
         self._input_iterator = None
 
         # Get hold of the outputs from the previous modules to iterate over them
@@ -142,7 +143,7 @@ class DocumentMapOutputTypeWrapper(object):
                         # Here the normal executor would write the outputs to disk
                         # Instead we simply yield the one we're interested in
                         # Use the writer to convert it from what it expects from the processing to raw text
-                        if type(result.data) is tuple:
+                        if self.multiple_outputs:
                             data = result.data[self.output_num]
                         else:
                             data = result.data

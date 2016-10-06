@@ -44,8 +44,7 @@ def input_module_factory(datatype):
     input_module_options = copy.copy(datatype.input_module_options)
     if issubclass(datatype, IterableCorpus):
         # Also get input options from the document type
-        # TODO This doesn't look right!
-        input_module_options.update(datatype.input_module_options)
+        input_module_options.update(datatype.data_point_type.input_module_options)
 
     # Add a special option to allow a dir to be specified to read the data from
     # This will become the base_dir for the datatype when instantiated

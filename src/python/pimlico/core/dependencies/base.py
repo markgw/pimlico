@@ -3,7 +3,8 @@ Base classes for defining software dependencies for module types and routines fo
 
 """
 import subprocess
-from textwrap import wrap
+
+from pimlico.core.dependencies.versions import unknown_software_version
 
 
 class SoftwareDependency(object):
@@ -83,93 +84,21 @@ class SoftwareDependency(object):
         Recursively fetch all dependencies of this dependency (not including itself).
 
         """
-        return self.dependencies() + [dep.all_dependencies() for dep in self.dependencies()]
+        return self.dependencies() + sum([dep.all_dependencies() for dep in self.dependencies()], [])
 
+    def get_installed_version(self):
+        """
+        If available() returns True, this method should return a SoftwareVersion object (or subclass) representing
+        the software's version.
 
-class LegacyModuleDependencies(SoftwareDependency):
-    """
-    Wrapper for modules that still use the old check_runtime_dependencies() method to specify their dependencies.
-    A single instance of this represents all of a module's dependencies. None of them are automatically installable,
-    but notes/installation instructions are provided.
+        The base implementation returns an object representing an unknown version number.
 
-    This will be removed when the deprecated check_runtime_dependencies() method is removed.
+        If available() returns False, the behaviour is undefined and may raise an error.
+        """
+        return unknown_software_version
 
-    """
-    def __init__(self, module):
-        super(LegacyModuleDependencies, self).__init__("dependencies for module '%s'" % module.module_name)
-        self.module = module
-
-    def problems(self):
-        probs = super(LegacyModuleDependencies, self).problems()
-        # Try calling check_runtime_dependencies() to see if anything's missing
-        missing_deps = self.module.check_runtime_dependencies()
-        for dep_name, module_name, desc in missing_deps:
-            probs.append("module '%s' is missing dependency '%s': %s" % (module_name, dep_name, desc))
-        return probs
-
-    def installable(self):
-        return False
-
-    def installation_instructions(self):
-        missing_deps = self.module.check_runtime_dependencies()
-        # Collect messages from each missing dependency
-        dep_messages = [
-            "%s (for %s):\n  %s" % (
-                dep_name, module_name, "\n  ".join(wrap(desc, width=100))
-            ) for dep_name, module_name, desc in missing_deps
-        ]
-        return """\
-Some library dependencies are missing, but do not provide automatic installation.
-
-%s
-""" % "\n\n".join(dep_messages)
-
-    def __repr__(self):
-        return "LegacyModuleDependencies<%s>" % self.module.module_name
-
-
-class LegacyDatatypeDependencies(SoftwareDependency):
-    """
-    Wrapper for datatypes that still use the old check_runtime_dependencies() method to specify their dependencies.
-    A single instance of this represents all of a datatype's dependencies. None of them are automatically installable,
-    but notes/installation instructions are provided.
-
-    Can also be applied to datatypes, which also have a check_runtime_dependencies() method.
-
-    This will be removed when the deprecated check_runtime_dependencies() method is removed.
-
-    """
-    def __init__(self, datatype):
-        super(LegacyDatatypeDependencies, self).__init__("dependencies for datatype '%s'" % datatype.datatype_name)
-        self.datatype = datatype
-
-    def problems(self):
-        probs = super(LegacyDatatypeDependencies, self).problems()
-        # Try calling check_runtime_dependencies() to see if anything's missing
-        missing_deps = self.datatype.check_runtime_dependencies()
-        for dep_name, desc in missing_deps:
-            probs.append("datatype '%s' is missing dependency '%s': %s" % (self.datatype.datatype_name, dep_name, desc))
-        return probs
-
-    def installable(self):
-        return False
-
-    def installation_instructions(self):
-        missing_deps = self.datatype.check_runtime_dependencies()
-        # Collect messages from each missing dependency
-        dep_messages = [
-            "%s (for %s):\n  %s" % (
-                dep_name, self.datatype.datatype_name, "\n  ".join(wrap(desc, width="100").splitlines())
-            ) for dep_name, desc in missing_deps
-            ]
-        return """\
-Some library dependencies are missing, but do not provide automatic installation.
-
-%s
-""" % "\n\n".join(dep_messages)
-
-    def __repr__(self):
-        return "LegacyDatatypeDependencies<%s>" % self.datatype.datatype_name
+    def __hash__(self):
+        return 0
 
 
 class SystemCommandDependency(SoftwareDependency):

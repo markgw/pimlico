@@ -14,7 +14,7 @@ import sys
 from operator import itemgetter
 from traceback import print_exc, format_exception_only
 
-from pimlico.cli.check import check_cmd, install_cmd
+from pimlico.cli.check import check_cmd, install_cmd, deps_cmd
 from pimlico.cli.status import status_cmd
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.base import ModuleInfoLoadError
@@ -250,6 +250,13 @@ if __name__ == "__main__":
                          help="If an archive file to be downloaded is found to be in the lib dir already, trust "
                               "that it is the file we're after. By default, we only reuse archives we've just "
                               "downloaded, so we know they came from the right URL, avoiding accidental name clashes")
+
+    deps = subparsers.add_parser("deps", help="List information about software dependencies: whether they're "
+                                              "available, versions, etc")
+    deps.set_defaults(func=deps_cmd)
+    deps.add_argument("modules", nargs="*",
+                         help="Check dependencies for named modules and install any that are automatically "
+                              "installable. Use 'all' to install dependencies for all modules")
 
     opts = parser.parse_args()
 
