@@ -17,6 +17,7 @@ import urllib2
 
 REPOSITORY_URL = "https://gitlab.com/markgw/pimlico/"
 RAW_URL = "%s/raw/master/" % REPOSITORY_URL
+GIT_URL = "git@gitlab.com:markgw/pimlico.git"
 
 
 def lookup_pimlico_versions():
@@ -48,7 +49,7 @@ def find_config_value(config_path, key, start_in_pipeline=False):
                 # Section heading
                 # Start looking for keys if we're in the pipeline section
                 in_pipeline = line.strip("[]") == "pipeline"
-            elif line.startswith("%% INCLUDE"):
+            elif line.upper().startswith("%% INCLUDE"):
                 # Found include directive: follow into the included file
                 filename = line[10:].strip()
                 # Get filename relative to current config file
@@ -76,7 +77,7 @@ def tar_dirname(tar_path):
         return member.name
 
 
-def bootstrap(config_file):
+def bootstrap(config_file, git=False):
     current_dir = os.path.abspath(os.path.dirname(__file__))
 
     if os.path.exists(os.path.join(current_dir, "pimlico")):
@@ -85,6 +86,9 @@ def bootstrap(config_file):
 
     # Check the config file to find the version of Pimlico we need
     version = find_config_value(config_file, "release")
+    if version is None:
+        print "Could not find Pimlico release in config file %s" % config_file
+        sys.exit(1)
     major_version = int(version.partition(".")[0])
     print "Config file requires Pimlico version %s" % version
 
@@ -97,34 +101,57 @@ def bootstrap(config_file):
         print "Bleeding edge (%s) is compatible" % bleeding_edge
         fetch_release = "master"
     else:
+        if git:
+            print "Error: tried to clone the Git repo instead of fetching a release, but config file is not " \
+                  "compatible with latest Pimlico version"
+            sys.exit(1)
         # Find the latest release that has the same major version
         compatible_tags = [t for t in tags if int(t.lstrip("v").partition(".")[0]) == major_version]
         fetch_release = compatible_tags[-1]
         print "Fetching latest release of major version %s, which is %s" % (major_version, fetch_release)
 
-    archive_url = "%srepository/archive.tar.gz?ref=%s" % (REPOSITORY_URL, fetch_release)
-    print "Downloading Pimlico source code from %s" % archive_url
-    tar_download_path = os.path.join(current_dir, "archive.tar.gz")
-    with open(tar_download_path, "wb") as archive_file:
-        archive_file.write(urllib2.urlopen(archive_url).read())
+    if git:
+        # Clone the latest version of the code from the Git repository
+        print "Cloning git repository"
+        import subprocess
+        subprocess.check_call("git clone %s" % GIT_URL, shell=True)
+    else:
+        archive_url = "%srepository/archive.tar.gz?ref=%s" % (REPOSITORY_URL, fetch_release)
+        print "Downloading Pimlico source code from %s" % archive_url
+        tar_download_path = os.path.join(current_dir, "archive.tar.gz")
+        with open(tar_download_path, "wb") as archive_file:
+            archive_file.write(urllib2.urlopen(archive_url).read())
 
-    print "Extracting source code"
-    extracted_dirname = tar_dirname(tar_download_path)
-    extract(tar_download_path)
-    # Extracted source code: remove the archive
-    os.remove(tar_download_path)
+        print "Extracting source code"
+        extracted_dirname = tar_dirname(tar_download_path)
+        extract(tar_download_path)
+        # Extracted source code: remove the archive
+        os.remove(tar_download_path)
 
-    os.rename(os.path.join(current_dir, extracted_dirname), os.path.join(current_dir, "pimlico"))
+        os.rename(os.path.join(current_dir, extracted_dirname), os.path.join(current_dir, "pimlico"))
     print "Pimlico source (%s) is now available in directory pimlico/" % fetch_release
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
 
+    if "--git" in args:
+        args.remove("--git")
+        git = True
+    else:
+        git = False
+
     if len(args) == 0:
+        print "Usage:"
+        print "  python bootstrap.py [--git] <config_file>"
+        print
         print "Specify a Pimlico config file to set up Pimlico for"
         print "If you want to start a new project, with an empty config file, use the newproject.py script"
+        print
+        print "If you specify --checkout, Pimlico will be cloned as a Git repository, rather "
+        print "than downloaded from a release. This only works on Linux and requires that Git is "
+        print "installed. Most of the time, you don't want to do this: it's only for Pimlico development"
         sys.exit(1)
     else:
         config_file = os.path.abspath(args[0])
-        bootstrap(config_file)
+        bootstrap(config_file, git=git)
