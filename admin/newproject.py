@@ -54,15 +54,31 @@ def lookup_bleeding_edge():
     except Exception, e:
         print "Could not fetch Pimlico release from %s: %s" % (RELEASE_URL, e)
         sys.exit(1)
-    return release_data.splitlines()[-1]
+    return release_data.splitlines()[-1].lstrip("v")
 
 
 def main():
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    if len(sys.argv) < 2:
+    args = sys.argv[1:]
+
+    # Allow the --git switch to pass through to bootstrap function
+    if "--git" in args:
+        args.remove("--git")
+        git = True
+    else:
+        git = False
+
+    if len(args) == 0:
         print "Specify a project name"
+        print "Usage:"
+        print "  python newproject.py [--git] <project_name>"
+        print
+        print "If you specify --checkout, Pimlico will be cloned as a Git repository, rather "
+        print "than downloaded from a release. This only works on Linux and requires that Git is "
+        print "installed. Most of the time, you don't want to do this: it's only for Pimlico development"
         sys.exit(1)
-    project_name = sys.argv[1]
+
+    project_name = args[0]
     print "Setting up new project '%s'" % project_name
 
     # Create basic directory structure in standard Pimlico layout
@@ -110,7 +126,7 @@ def main():
         print "Got bootstrap.py, but could not import it"
         sys.exit(1)
     print "\nBootstrapping project %s to fetch Pimlico and run basic setup..." % project_name
-    bootstrap(conf_filename)
+    bootstrap(conf_filename, git=git)
 
     print "Bootstrapped project: Pimlico is now available in pimlico/ dir\n"
     # Create symlink to pimlico.sh, so it's easier to run

@@ -102,8 +102,8 @@ def bootstrap(config_file, git=False):
     print "Config file requires Pimlico version %s" % version
 
     available_releases = lookup_pimlico_versions()
-    bleeding_edge = available_releases[-1]
-    tags = available_releases[:-1]
+    bleeding_edge = lookup_bleeding_edge()
+    tags = available_releases
 
     # If the bleeding edge version is compatible (same major version) just use that
     if int(bleeding_edge.lstrip("v").partition(".")[0]) == major_version:
