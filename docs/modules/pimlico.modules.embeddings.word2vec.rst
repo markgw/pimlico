@@ -20,11 +20,11 @@ This module is simply a wrapper to call `Gensim <https://radimrehurek.com/gensim
 Inputs
 ======
 
-+------+------------------------------------------------------------------------+
-| Name | Type(s)                                                                |
-+======+========================================================================+
-| text | :class:`TokenizedCorpus <pimlico.datatypes.tokenized.TokenizedCorpus>` |
-+------+------------------------------------------------------------------------+
++------+-------------------------------------+
+| Name | Type(s)                             |
++======+=====================================+
+| text | TarredCorpus<TokenizedDocumentType> |
++------+-------------------------------------+
 
 Outputs
 =======

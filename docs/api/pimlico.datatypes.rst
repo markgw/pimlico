@@ -18,11 +18,15 @@ Submodules
    pimlico.datatypes.base
    pimlico.datatypes.caevo
    pimlico.datatypes.dictionary
+   pimlico.datatypes.documents
    pimlico.datatypes.features
    pimlico.datatypes.files
+   pimlico.datatypes.ints
    pimlico.datatypes.jsondoc
+   pimlico.datatypes.keras
    pimlico.datatypes.plotting
    pimlico.datatypes.results
+   pimlico.datatypes.spans
    pimlico.datatypes.table
    pimlico.datatypes.tar
    pimlico.datatypes.tokenized

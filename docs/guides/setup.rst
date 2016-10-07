@@ -45,7 +45,7 @@ Getting started with Pimlico
 The procedure for starting a new Pimlico project, using the latest release, is very simple.
 
 Create a new, empty directory to put your project in. Download
-`newproject.py <https://gitlab.com/markgw/pimlico/raw/master/admin/newproject.py>`_ into the project directory.
+`newproject.py <https://raw.githubusercontent.com/markgw/pimlico/master/admin/newproject.py>`_ into the project directory.
 
 Choose a name for your project (e.g. `myproject`) and run:
 
