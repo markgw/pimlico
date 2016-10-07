@@ -5,11 +5,13 @@ from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
 
 PIMLICO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 
-# Fetch current version number from PIMLICO_ROOT/admin/releases.txt
-with open(os.path.join(PIMLICO_ROOT, "admin", "releases.txt"), "r") as releases_file:
+# Fetch current version number from PIMLICO_ROOT/admin/release.txt
+with open(os.path.join(PIMLICO_ROOT, "admin", "release.txt"), "r") as releases_file:
     _lines = [r.strip() for r in releases_file.read().splitlines()]
     releases = [r[1:] for r in _lines if r.startswith("v")]
-# The last listed version is not a release tag name, but the current, bleeding-edge version number
+# The last listed version is the current, bleeding-edge version number
+# This file used to contain all release numbers, but we now get them from git tags
+# The only information given in the file now is the current version
 __version__ = releases[-1]
 
 PROJECT_ROOT = os.path.abspath(os.path.join(PIMLICO_ROOT, ".."))

@@ -11,7 +11,8 @@ import urllib2
 import subprocess
 
 
-RAW_URL = "https://gitlab.com/markgw/pimlico/raw/master/"
+RAW_URL = "https://raw.githubusercontent.com/markgw/pimlico/master/"
+RELEASE_URL = "%sadmin/release.txt" % RAW_URL
 
 
 def symlink(source, link_name):
@@ -48,17 +49,12 @@ def create_directory_structure(dirs, base_dir):
 
 
 def lookup_bleeding_edge():
-    release_list_url = "%sadmin/releases.txt" % RAW_URL
     try:
-        release_data = urllib2.urlopen(release_list_url).read()
+        release_data = urllib2.urlopen(RELEASE_URL).read()
     except Exception, e:
-        print "Could not fetch Pimlico init code from %s: %s" % (release_list_url, e)
+        print "Could not fetch Pimlico release from %s: %s" % (RELEASE_URL, e)
         sys.exit(1)
-    versions = [line for line in release_data.splitlines() if not line.startswith("#")]
-    bleeding_edge = versions[-1]
-    # Strip off the 'v' at the beginning, to get just the number
-    bleeding_edge = bleeding_edge.lstrip("v")
-    return bleeding_edge
+    return release_data.splitlines()[-1]
 
 
 def main():

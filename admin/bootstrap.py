@@ -13,25 +13,34 @@ import sys
 import os
 import tarfile
 import urllib2
+import json
 
 
-REPOSITORY_URL = "https://gitlab.com/markgw/pimlico/"
-RAW_URL = "%s/raw/master/" % REPOSITORY_URL
-GIT_URL = "git@gitlab.com:markgw/pimlico.git"
+RELEASE_URL = "https://raw.githubusercontent.com/markgw/pimlico/master/admin/release.txt"
+DOWNLOAD_URL = "https://github.com/markgw/pimlico/archive/"
+GIT_URL = "https://github.com/markgw/pimlico.git"
+GITHUB_API = "https://api.github.com"
 
 
 def lookup_pimlico_versions():
-    release_list_url = "%sadmin/releases.txt" % RAW_URL
+    # Use Github API to find all tagged releases
+    tag_api_url = "%s/repos/markgw/pimlico/tags" % GITHUB_API
     try:
-        release_data = urllib2.urlopen(release_list_url).read()
+        tag_response = urllib2.urlopen(tag_api_url).read()
     except Exception, e:
-        print "Could not fetch Pimlico init code from %s: %s" % (release_list_url, e)
+        print "Could not fetch Pimlico release tags from %s: %s" % (tag_api_url, e)
         sys.exit(1)
-    return [line for line in release_data.splitlines() if not line.startswith("#")]
+    tag_data = json.loads(tag_response)
+    return [tag["name"] for tag in reversed(tag_data)]
 
 
 def lookup_bleeding_edge():
-    return lookup_pimlico_versions()[-1]
+    try:
+        release_data = urllib2.urlopen(RELEASE_URL).read()
+    except Exception, e:
+        print "Could not fetch Pimlico release from %s: %s" % (RELEASE_URL, e)
+        sys.exit(1)
+    return release_data.splitlines()[-1]
 
 
 def find_config_value(config_path, key, start_in_pipeline=False):
@@ -116,7 +125,7 @@ def bootstrap(config_file, git=False):
         import subprocess
         subprocess.check_call("git clone %s" % GIT_URL, shell=True)
     else:
-        archive_url = "%srepository/archive.tar.gz?ref=%s" % (REPOSITORY_URL, fetch_release)
+        archive_url = "%s%s.tar.gz" % (DOWNLOAD_URL, fetch_release)
         print "Downloading Pimlico source code from %s" % archive_url
         tar_download_path = os.path.join(current_dir, "archive.tar.gz")
         with open(tar_download_path, "wb") as archive_file:

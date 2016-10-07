@@ -15,7 +15,6 @@ import os
 
 from pimlico import MODEL_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.dependencies.java import argparse4j_dependency, py4j_dependency
-from pimlico.core.external.java import py4j_dependency
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
 from pimlico.datatypes.caevo import CaevoCorpus

@@ -1,6 +1,0 @@
-# This file contains a list of all available releases of Pimlico.
-# Each corresponds to a tag in the git repository, except the last, which is the release number of the bleeding edge.
-# This may subsequently become a tag, but is not guaranteed to.
-v0.2
-v0.3
-v0.5rc
