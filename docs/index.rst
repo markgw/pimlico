@@ -20,7 +20,7 @@ pipeline and checking that everything's executed in the right order.
 
 The core toolkit is written in Python. Pimlico is open source, released under the GPLv3 license. It is
 available from `its Github repository <https://github.com/markgw/pimlico>`_.
-To get started with a Pimlico project, follow the `getting-started guide <guides/setup>`.
+To get started with a Pimlico project, follow the :doc:`getting-started guide <guides/setup>`.
 
 More NLP tools will gradually be added. See :doc:`my wishlist <plans/wishlist>` for current plans.
 
