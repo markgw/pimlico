@@ -5,7 +5,7 @@ from time import sleep
 from traceback import format_exc
 
 from pimlico.core.config import PipelineStructureError
-from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor
+from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor, satisfies_typecheck
 from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
 from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora, TarredCorpusWriter
@@ -36,7 +36,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         # If there's only one, this also works
         inputs = [self.get_input(input_name) for input_name in self.input_names]
         # We also allow (additional) inputs that are not tarred corpora, which get left out of this
-        self.input_corpora = [corpus for corpus in inputs if isinstance(corpus, TarredCorpus)]
+        self.input_corpora = [corpus for corpus in inputs if satisfies_typecheck(corpus, TarredCorpus)]
         if len(self.input_corpora) == 0:
             raise PipelineStructureError(
                 "document map module '%s' got no TarredCorpus instances among its inputs" % self.module_name)

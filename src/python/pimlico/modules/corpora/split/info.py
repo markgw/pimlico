@@ -23,8 +23,8 @@ from pimlico.datatypes.tar import TarredCorpus
 
 
 class ModuleInfo(BaseModuleInfo):
-    module_type_name = "subset"
-    module_readable_name = "Corpus subset"
+    module_type_name = "split"
+    module_readable_name = "Corpus split"
     module_inputs = [("corpus", TarredCorpus)]
     module_outputs = [("set1", TypeFromInput()), ("set2", TypeFromInput()), ("doc_list1", StringList)]
     module_optional_outputs = [("doc_list2", StringList)]

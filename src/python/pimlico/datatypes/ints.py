@@ -98,3 +98,82 @@ class IntegerListsDocumentCorpusWriter(TarredCorpusWriter):
                 raise ValueError("error encoding int row %s using struct format %s: %s" %
                                  (row, self.num_struct.format, e))
         return raw_data.getvalue()
+
+
+class IntegerListDocumentType(RawDocumentType):
+    """
+    Like IntegerListsDocumentType, but each document is treated as a single list of integers.
+
+    """
+    def __init__(self, options, metadata):
+        super(IntegerListDocumentType, self).__init__(options, metadata)
+        self._unpacker = None
+
+    @property
+    def unpacker(self):
+        # Only ready when we've got metadata (data_ready() == True)
+        if self._unpacker is None:
+            # Read the metadata to prepare the reader struct
+            bytes, signed = struct.unpack("B?", self.metadata["struct_format"])
+            # Compile a struct for unpacking individual ints quickly
+            self._unpacker = get_struct(bytes, signed, 1)
+        return self._unpacker
+
+    @property
+    def int_size(self):
+        return self.unpacker.size
+
+    def process_document(self, data):
+        reader = StringIO(data)
+        return list(self.read_ints(reader))
+
+    def read_ints(self, reader):
+        while True:
+            # Read the whole document, one int at a time
+            num_string = reader.read(self.int_size)
+            if num_string == "":
+                return
+            try:
+                num = self.unpacker.unpack(num_string)[0]
+            except struct.error, e:
+                raise IOError("error interpreting int data: %s" % e)
+            yield num
+
+
+class IntegerListDocumentCorpus(TarredCorpus):
+    """
+    Corpus of integer data: each doc contains a single sequence of ints.
+
+    By default, the ints are stored as C longs, which use 4 bytes. If you know you don't need ints this
+    big, you can choose 1 or 2 bytes, or even 8 (long long). By default, the ints are unsigned, but they
+    may be signed.
+
+    """
+    datatype_name = "integer_list_corpus"
+    data_point_type = IntegerListDocumentType
+
+
+class IntegerListDocumentCorpusWriter(TarredCorpusWriter):
+    def __init__(self, base_dir, signed=False, bytes=8, **kwargs):
+        # Tell TarredCorpus not to encode/decode text data
+        kwargs["encoding"] = None
+        super(IntegerListDocumentCorpusWriter, self).__init__(base_dir, **kwargs)
+        self.signed = signed
+        self.bytes = bytes
+
+        # Prepare a struct for efficiently encoding int rows as bytes
+        self.num_struct = get_struct(bytes, signed, 1)
+        # Write the metadata to denote the representation format
+        self.metadata["struct_format"] = struct.pack("B?", bytes, signed)
+
+    @pass_up_invalid
+    def document_to_raw_data(self, doc):
+        raw_data = StringIO()
+        # Doc should be a list of ints
+        for num in doc:
+            try:
+                raw_data.write(self.num_struct.pack(num))
+            except struct.error, e:
+                raise ValueError("error encoding int data %s using struct format %s: %s" %
+                                 (num, self.num_struct.format, e))
+        return raw_data.getvalue()

@@ -16,6 +16,7 @@ from collections import defaultdict
 import itertools
 from itertools import izip
 import cPickle as pickle
+from operator import itemgetter
 
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
 
@@ -39,6 +40,26 @@ class Dictionary(PimlicoDatatype):
 
     def data_ready(self):
         return super(Dictionary, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "dictionary"))
+
+    def get_detailed_status(self):
+        data = self.get_data()
+
+        sorted_ids = list(reversed(sorted(data.dfs.items(), key=itemgetter(1))))
+        if len(sorted_ids) <= 8:
+            term_list = u"%s...%s" % ", ".join(u"'%s' (%d)" % (data.id2token[i], cnt) for (i, cnt) in sorted_ids)
+        else:
+            top_ids = sorted_ids[:4]
+            bottom_ids = sorted_ids[-4:]
+            term_list = u"%s, ..., %s" % (
+                u", ".join(u"'%s' (%d)" % (data.id2token[i], cnt) for (i, cnt) in top_ids),
+                u", ".join(u"'%s' (%d)" % (data.id2token[i], cnt) for (i, cnt) in bottom_ids)
+            )
+
+        return super(Dictionary, self).get_detailed_status() + [
+            # Add a wee sample of the items in the dictionary
+            "Terms: %s" % term_list.encode("utf8"),
+            "Vocab size: %d" % len(data)
+        ]
 
 
 class DictionaryWriter(PimlicoDatatypeWriter):

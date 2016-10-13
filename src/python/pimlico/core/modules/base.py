@@ -735,6 +735,19 @@ class BaseModuleInfo(object):
         return os.path.exists(self.lock_path)
 
 
+def satisfies_typecheck(provided_type, type_requirements):
+    """
+    Interface to Pimlico's standard type checking (see `check_type`) that returns a boolean to say whether
+    type checking succeeded or not.
+
+    """
+    try:
+        check_type(provided_type, type_requirements)
+    except TypeCheckError:
+        return False
+    return True
+
+
 def check_type(provided_type, type_requirements):
     """
     Type-checking algorithm for making sure outputs from modules connect up with inputs that they

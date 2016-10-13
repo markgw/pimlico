@@ -316,6 +316,20 @@ class TarredCorpusType(DynamicInputDatatypeRequirement):
                issubclass(supplied_type.data_point_type, self.document_types)
 
 
+def tarred_corpus_with_data_point_type(data_point_type):
+    """
+    Dynamically subclass TarredCorpus to provide a version with a given data-point type.
+    Most of the time, static subclasses are provided and set their data-point type appropriately, but occasionally
+    for type-checking purposes it can be useful to construct a new, specialized tarred corpus on the fly.
+
+    """
+    return type(
+        "%sTarredCorpus" % data_point_type.__name__,
+        (TarredCorpus,),
+        dict(data_point_type=data_point_type),
+    )
+
+
 def pass_up_invalid(fn):
     """
     Decorator for document_to_raw_data() methods of TarredCorpusWriter subclasses that detects invalid documents and

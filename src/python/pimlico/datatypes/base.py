@@ -243,11 +243,16 @@ class PimlicoDatatype(object):
         The default implementation simply checks whether `supplied_type` is a subclass of the present class. Subclasses
         may wish to impose different or additional checks.
 
-        :param supplied_type: type provided where the present class is required
+        :param supplied_type: type provided where the present class is required, or datatype instance
         :return: True if the check is successful, False otherwise
 
         """
-        return issubclass(supplied_type, cls)
+        if supplied_type.emulated_datatype is not None:
+            return cls.check_type(supplied_type.emulated_datatype)
+        if isinstance(supplied_type, type):
+            return issubclass(supplied_type, cls)
+        else:
+            return isinstance(supplied_type, cls)
 
     @classmethod
     def type_checking_name(cls):
@@ -438,6 +443,20 @@ class IterableCorpus(PimlicoDatatype):
     @classmethod
     def type_checking_name(cls):
         return "%s<%s>" % (cls.__name__, cls.data_point_type.__name__)
+
+
+def iterable_corpus_with_data_point_type(data_point_type):
+    """
+    Dynamically subclass IterableCorpus to provide a version with a given data-point type.
+    Most of the time, static subclasses are provided and set their data-point type appropriately, but occasionally
+    for type-checking purposes it can be useful to construct a new, specialized iterable corpus on the fly.
+
+    """
+    return type(
+        "%sIterableCorpus" % data_point_type.__name__,
+        (IterableCorpus,),
+        dict(data_point_type=data_point_type),
+    )
 
 
 class IterableCorpusWriter(PimlicoDatatypeWriter):
