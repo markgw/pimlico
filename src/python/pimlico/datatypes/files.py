@@ -1,6 +1,6 @@
 import os
 
-from pimlico.datatypes.base import PimlicoDatatype, IterableCorpus, PimlicoDatatypeWriter
+from pimlico.datatypes.base import PimlicoDatatype, IterableCorpus, PimlicoDatatypeWriter, InvalidDocument
 from pimlico.datatypes.documents import RawTextDocumentType
 
 
@@ -103,4 +103,10 @@ class RawTextDirectory(IterableCorpus):
             with open(file_path, "r") as f:
                 # Use the file's path within the base directory as its doc name
                 rel_path = os.path.relpath(file_path, base_path)
-                yield rel_path, self.filter_document(f.read().decode(encoding))
+                data = f.read().decode(encoding)
+                # Apply datatype-specific processing of the data
+                document = self.process_document_data_with_datatype(data)
+                # Allow subclasses to apply filters to the data
+                if not isinstance(document, InvalidDocument):
+                    document = self.filter_document(document)
+                yield rel_path, document

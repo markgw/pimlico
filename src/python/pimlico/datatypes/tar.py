@@ -132,16 +132,14 @@ class TarredCorpus(IterableCorpus):
                                 document = zlib.decompress(document)
                         if encoding is not None:
                             document = document.decode(encoding)
-                        # Catch invalid documents
-                        document = InvalidDocument.invalid_document_or_text(document)
-                        # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
-                        if not self.raw_data and type(document) is not InvalidDocument:
-                            try:
-                                document = self.process_document(document)
-                            except BaseException, e:
-                                # If there's any problem reading in the document, yield an invalid doc with the error
-                                document = InvalidDocument("datatype %s reader" % self.datatype_name,
-                                                           "%s: %s" % (e, format_exc()))
+
+                        if self.raw_data:
+                            # Catch invalid documents, but otherwise do no processing
+                            document = InvalidDocument.invalid_document_or_text(document)
+                        else:
+                            # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
+                            document = self.process_document_data_with_datatype(document)
+
                         yield tar_name, doc_name, document
                         # Remove the file once we're done with it (when we request another)
                         os.remove(os.path.join(tmp_dir, filename))

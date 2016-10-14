@@ -15,6 +15,7 @@ use standard idioms for iterating, etc, early in the pipeline.
 
 """
 import cPickle as pickle
+from traceback import format_exc
 
 from pimlico.utils.core import import_member
 import re
@@ -421,6 +422,9 @@ class IterableCorpus(PimlicoDatatype):
         Each yielded document should consist of a pair `(name, doc)`, where `name` is an identifier for the document
         (e.g. filename) and `doc` is the document's data, in the appropriate type.
 
+        You may wish to call `process_document_data_with_datatype()` on the raw content to apply the data-point
+        type's standard processing to it.
+
         """
         raise NotImplementedError
 
@@ -443,6 +447,23 @@ class IterableCorpus(PimlicoDatatype):
     @classmethod
     def type_checking_name(cls):
         return "%s<%s>" % (cls.__name__, cls.data_point_type.__name__)
+
+    def process_document_data_with_datatype(self, data):
+        """
+        Applies the corpus' datatype's process_document() method to the raw data
+        :param data:
+        :return:
+        """
+        # Catch invalid documents
+        document = InvalidDocument.invalid_document_or_text(data)
+        # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
+        if type(document) is not InvalidDocument:
+            try:
+                document = self.data_point_type_instance.process_document(document)
+            except BaseException, e:
+                # If there's any problem reading in the document, yield an invalid doc with the error
+                document = InvalidDocument("datatype %s reader" % self.datatype_name, "%s: %s" % (e, format_exc()))
+        return document
 
 
 def iterable_corpus_with_data_point_type(data_point_type):
@@ -608,7 +629,9 @@ class InvalidDocument(object):
         If the text represents an invalid document, parse it and return an InvalidDocument object.
         Otherwise, return the text as is.
         """
-        if text.startswith("***** EMPTY DOCUMENT *****"):
+        if isinstance(text, InvalidDocument):
+            return text
+        elif text.startswith("***** EMPTY DOCUMENT *****"):
             return InvalidDocument.load(text)
         else:
             return text
