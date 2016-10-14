@@ -383,7 +383,7 @@ class PimlicoDatatypeWriter(object):
             metadata_filename = "%s_corpus_metadata" % self.additional_name
 
         with open(os.path.join(self.base_dir, metadata_filename), "w") as f:
-                pickle.dump(self.metadata, f, -1)
+            pickle.dump(self.metadata, f, -1)
 
     def subordinate_additional_name(self, name):
         if self.additional_name is not None:
