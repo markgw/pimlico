@@ -1,5 +1,5 @@
-Corpus subset
-~~~~~~~~~~~~~
+Corpus split
+~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.split
 

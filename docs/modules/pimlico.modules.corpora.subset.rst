@@ -13,6 +13,9 @@ Simple filter to truncate a dataset after a given number of documents, potential
 of documents. Mainly useful for creating small subsets of a corpus for testing a pipeline before running
 on the full corpus.
 
+Can be run on an iterable corpus or a tarred corpus. If the input is a tarred corpus, the filter will
+emulate a tarred corpus with the appropriate datatype, passing through the archive names from the input.
+
 
 This is a filter module. It is not executable, so won't appear in a pipeline's list of modules that can be run. It produces its output for the next module on the fly when the next module needs it.
 
@@ -28,11 +31,11 @@ Inputs
 Outputs
 =======
 
-+-----------+----------------------------------------------------------------------+
-| Name      | Type(s)                                                              |
-+===========+======================================================================+
-| documents | :class:`same as input corpus <pimlico.datatypes.base.TypeFromInput>` |
-+-----------+----------------------------------------------------------------------+
++-----------+---------------------------------------------------------------------------------------------------------+
+| Name      | Type(s)                                                                                                 |
++===========+=========================================================================================================+
+| documents | :class:`corpus with data-point from input <pimlico.modules.corpora.subset.info.DataPointTypeFromInput>` |
++-----------+---------------------------------------------------------------------------------------------------------+
 
 Options
 =======
