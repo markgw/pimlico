@@ -67,7 +67,8 @@ class BaseModuleInfo(object):
     """
     main_module = None
 
-    def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[], docstring=""):
+    def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[], docstring="",
+                 include_outputs=[]):
         self.docstring = docstring
         self.inputs = inputs
         self.options = options
@@ -88,14 +89,11 @@ class BaseModuleInfo(object):
                 raise PipelineStructureError("module %s defines no outputs" % self.module_name)
         # The basic outputs are always available
         self.available_outputs = list(self.module_outputs)
-        # Others may be requested in the config, given to us in optional_outputs
-        # Also include those that are used as inputs to other modules
-        used_output_names = self.pipeline.used_outputs.get(self.module_name, [])
         # Replace None with the default output name (which could be an optional output if no non-optional are defined)
-        used_output_names = set([name if name is not None else self.default_output_name for name in used_output_names])
+        include_outputs = set([name if name is not None else self.default_output_name for name in include_outputs])
         # Include all of these outputs in the final output list
         self.available_outputs.extend((name, dt) for (name, dt) in self.module_optional_outputs
-                                      if name in set(optional_outputs)|used_output_names)
+                                      if name in set(optional_outputs) | include_outputs)
 
         self._metadata = None
         self._history = None

@@ -152,6 +152,22 @@ def browse_cmd_with_deps(*args):
     return browse_cmd(*args)
 
 
+def module_number_to_name(pipeline, name):
+    # Get the list of runable modules to select a name from
+    modules = pipeline.get_module_schedule()
+    # If the given name already identifies a module, don't do anything
+    if name in modules:
+        return name
+    try:
+        module_number = int(name) - 1
+    except ValueError:
+        # Wasn't an integer, just return the given value
+        # If it's a non-existent module, an error will (presumably) be output when we try to load it
+        # It could also be a special value, like "all", so we don't want to go raising errors here
+        return name
+    return modules[module_number]
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
@@ -180,8 +196,8 @@ if __name__ == "__main__":
     status = subparsers.add_parser("status", help="Output a module execution schedule for the pipeline and execution "
                                                   "status for every module")
     status.add_argument("module_name", nargs="?",
-                        help="Optionally specify a module name. More detailed status information will be outut for "
-                             "this module")
+                        help="Optionally specify a module name (or number). More detailed status information will be "
+                             "outut for this module")
     status.add_argument("--all", "-a", action="store_true",
                         help="Show all modules defined in the pipeline, not just those that can be executed")
     status.add_argument("--history", "-i", action="store_true",
@@ -191,10 +207,10 @@ if __name__ == "__main__":
 
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")
     run.set_defaults(func=run_cmd)
-    run.add_argument("module_name", help="The name of the module to run. To run a stage from a multi-stage module, "
-                                         "use 'module:stage'. Use 'status' command to see available modules. Use "
-                                         "'module:?' or 'module:help' to list available stages. If not given, defaults "
-                                         "to next incomplete module that has all its inputs ready", nargs="?")
+    run.add_argument("module_name", help="The name (or number) of the module to run. To run a stage from a multi-stage "
+                                         "module, use 'module:stage'. Use 'status' command to see available modules. "
+                                         "Use 'module:?' or 'module:help' to list available stages. If not given, "
+                                         "defaults to next incomplete module that has all its inputs ready", nargs="?")
     run.add_argument("--force-rerun", "-f", action="store_true",
                      help="Force running the module, even if it's already been run to completion")
 
@@ -204,27 +220,27 @@ if __name__ == "__main__":
     reset = subparsers.add_parser("reset",
                                   help="Delete any output from the given module and restore it to unexecuted state")
     reset.set_defaults(func=reset_module)
-    reset.add_argument("module_name", help="The name of the module to reset, or multiple separated by commas, or "
-                                           "'all' to reset the whole pipeline")
+    reset.add_argument("module_name", help="The name (or number) of the module to reset, or multiple separated by "
+                                           "commas, or 'all' to reset the whole pipeline")
 
     unlock = subparsers.add_parser("unlock",
                                    help="Forcibly remove an execution lock from a module. If a lock has ended up "
                                         "getting left on when execution exited prematurely, use this to remove it. "
                                         "Usually shouldn't be necessary, even if there's an error during execution")
     unlock.set_defaults(func=unlock_cmd)
-    unlock.add_argument("module_name", help="The name of the module to unlock")
+    unlock.add_argument("module_name", help="The name (or number) of the module to unlock")
 
     longstore = subparsers.add_parser("longstore",
                                       help="Move a particular module's output from the short-term store to the long-term "
                                            "store. It will still be found here by input readers. You might want to do "
                                            "this if your long-term store is bigger, to keep down the short-term store size")
     longstore.set_defaults(func=short_to_long)
-    longstore.add_argument("module_name", help="The name of the module whose output to move")
+    longstore.add_argument("module_name", help="The name (or number) of the module whose output to move")
 
     browse = subparsers.add_parser("browse", help="View the data output by a module")
     browse.set_defaults(func=browse_cmd_with_deps)
-    browse.add_argument("module_name", help="The name of the module whose output to look at. Use 'module:stage' for "
-                                            "multi-stage modules")
+    browse.add_argument("module_name", help="The name (or number) of the module whose output to look at. Use "
+                                            "'module:stage' for multi-stage modules")
     browse.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
                                                        "load the default output")
     browse.add_argument("--raw", "-r", action="store_true",
@@ -237,7 +253,7 @@ if __name__ == "__main__":
 
     shell = subparsers.add_parser("shell", help="Open a shell to give access to the data output by a module")
     shell.set_defaults(func=shell_cmd)
-    shell.add_argument("module_name", help="The name of the module whose output to look at")
+    shell.add_argument("module_name", help="The name (or number) of the module whose output to look at")
     shell.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
                                                       "load the default output")
 
@@ -277,5 +293,12 @@ if __name__ == "__main__":
     except PipelineConfigParseError, e:
         print >>sys.stderr, "Error reading pipeline config: %s" % e
         sys.exit(1)
+
+    # Allow numbers to be used instead of module name arguments
+    if hasattr(opts, "module_name") and opts.module_name is not None:
+        opts.module_name = module_number_to_name(pipeline, opts.module_name)
+    if hasattr(opts, "modules") and opts.modules is not None and len(opts.modules):
+        opts.modules = [module_number_to_name(pipeline, name) for name in opts.modules]
+
     # Run the function corresponding to the subcommand
     opts.func(pipeline, opts)

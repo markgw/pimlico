@@ -260,7 +260,8 @@ def multistage_module(multistage_module_type_name, module_stages):
                 self.internal_modules.append(module_info)
                 self.named_internal_modules[stage.name] = module_info
                 # Also add the module into the pipeline, with the MS module prefix, so we can make connections
-                self.pipeline.insert_module(module_info)
+                # NB I haven't tried this since I changed the way pipelines are loaded, so it could have problems
+                self.pipeline.append_module(module_info)
 
         def instantiate_output_datatype(self, output_name, output_datatype):
             # Hand over to the appropriate module that the output came from to do the instantiation
