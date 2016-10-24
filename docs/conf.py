@@ -80,7 +80,7 @@ exclude_patterns = ['_build']
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+add_module_names = False
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -251,7 +251,7 @@ texinfo_documents = [
 # -- Autosummary ----------------------
 import glob
 autosummary_generate = glob.glob("reference/*.rst")
-autodoc_member_order = 'groupwise'
+autodoc_member_order = 'bysource'
 
 todo_include_todos = True
 

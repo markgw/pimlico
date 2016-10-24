@@ -1,3 +1,9 @@
+"""
+The Pimlico Processing Toolkit (PIpelined Modular LInguistic COrpus processing) is a toolkit for building pipelines
+made up of linguistic processing tasks to run on large datasets (corpora). It provides a wrappers around many
+existing, widely used NLP (Natural Language Processing) tools.
+
+"""
 import os
 import sys
 from pimlico.core.dependencies.base import check_and_install

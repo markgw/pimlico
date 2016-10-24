@@ -34,8 +34,8 @@ Contents
    core/index
    modules/pimlico.modules
    plans/index
+   api
 
 
 * :ref:`genindex`
-* :ref:`API docs <modindex>`
 * :ref:`search`

@@ -227,7 +227,8 @@ def wrap_module_info_as_filter(module_info_instance):
 
     :param module_info_instance: basic module info to wrap the outputs of
     :return: a new non-executable ModuleInfo whose outputs are produced on the fly and will be identical to
-    the outputs of the wrapper module.
+        the outputs of the wrapper module.
+
     """
     # Check that this is a document map module: otherwise it doesn't make sense to wrap it
     if not isinstance(module_info_instance, DocumentMapModuleInfo):

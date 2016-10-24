@@ -3,7 +3,7 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-Reading of various types of config files, in particular a pipeline config.
+Reading of pipeline config from a file into the data structure used to run and manipulate the pipeline's data.
 """
 import ConfigParser
 import copy
@@ -19,6 +19,12 @@ from pimlico.utils.core import remove_duplicates
 from pimlico.utils.format import title_box
 from pimlico.utils.logging import get_console_logger
 
+__all__ = [
+    "PipelineConfig", "PipelineConfigParseError", "PipelineStructureError", "preprocess_config_file",
+    "check_for_cycles", "check_release", "check_pipeline", "get_dependencies", "print_missing_dependencies",
+    "print_dependency_leaf_problems", "PipelineCheckError",
+]
+
 REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
 
 
@@ -26,147 +32,7 @@ class PipelineConfig(object):
     """
     Main configuration for a pipeline, read in from a config file.
 
-    Each section, except for `vars` and `pipeline`, defines a module instance in the pipeline. Some of these can
-    be executed, others act as filters on the outputs of other modules, or input readers.
-
-    Each section that defines a module has a `type` parameter. Usually, this is a fully-qualified Python package
-    name that leads to the module type's Python code (that package containing the `info` Python module). A special
-    type is `alias`. This simply defines a module alias -- an alternative name for an already defined module. It
-    should have exactly one other parameter, `input`, specifying the name of the module we're aliasing.
-
-    **Special sections:**
-
-    - vars:
-        May contain any variable definitions, to be used later on in the pipeline. Further down, expressions like
-        `%(varname)s` will be expanded into the value assigned to `varname` in the vars section.
-    - pipeline:
-        Main pipeline-wide configuration. The following options are required for every pipeline:
-
-        * `name`: a single-word name for the pipeline, used to determine where files are stored
-        * `release`: the release of Pimlico for which the config file was written. It is considered compatible with
-          later minor versions of the same major release, but not with later major releases. Typically, a user
-          receiving the pipeline config will get hold of an appropriate version of the Pimlico codebase to run it
-          with.
-
-        Other optional settings:
-
-        * `python_path`: a path or paths, relative to the directory containing the config file, in which Python
-          modules/packages used by the pipeline can be found. Typically, a config file is distributed with a
-          directory of Python code providing extra modules, datatypes, etc. Multiple paths are separated by colons (:).
-
-    **Special variable substitutions**
-
-    Certain variable substitutions are always available, in addition to those defined in `vars` sections.
-
-    - `pimlico_root`:
-        Root directory of Pimlico, usually the directory `pimlico/` within the project directory.
-    - `proejct_root`:
-        Root directory of the whole project. Current assumed to always be the parent directory of `pimlico_root`.
-    - `output_dir`:
-        Path to output dir (usually `output` in Pimlico root).
-    - `long_term_store`:
-        Long-term store base directory being used under the current config. Can be used to link to data from
-        other pipelines run on the same system.
-    - `short_term_store`:
-        Short-term store base directory being used under the current config. Can be used to link to data from
-        other pipelines run on the same system.
-
-    **Directives:**
-
-    Certain special directives are processed when reading config files. They are lines that begin with `%%`, followed
-    by the directive name and any arguments.
-
-    - `variant`:
-        Allows a line to be included only when loading a particular variant of a pipeline. The variant name is
-        specified as part of the directive in the form: `variant:variant_name`. You may include the line in more
-        than one variant by specifying multiple names, separated by commas (and no spaces). You can use the default
-        variant "main", so that the line will be left out of other variants. The rest of the line, after the directive
-        and variant name(s) is the content that will be included in those variants.
-    - `novariant`:
-        A line to be included only when not loading a variant of the pipeline. Equivalent to `variant:main`.
-    - `include`:
-        Include the entire contents of another file. The filename, specified relative to the config file in which the
-        directive is found, is given after a space.
-    - `abstract`:
-        Marks a config file as being abstract. This means that Pimlico will not allow it to be loaded as a top-level
-        config file, but only allow it to be included in another config file.
-    - `copy`:
-        Copies all config settings from another module, whose name is given as the sole argument. May be used multiple
-        times in the same module and later copies will override earlier. Settings given explicitly in the module's
-        config override any copied settings. The following settings are not copied: input(s), `filter`, `outputs`,
-        `type`.
-
-    **Multiple parameter values:**
-
-    Sometimes you want to write a whole load of modules that are almost identical, varying in just one or two
-    parameters. You can give a parameter multiple values by writing them separated by vertical bars (|). The module
-    definition will be expanded to produce a separate module for each value, with all the other parameters being
-    identical.
-
-    You can even do this with multiple parameters of the same module and the expanded modules will cover all
-    combinations of the parameter assignments.
-
-    For example:
-
-    .. code-block:: ini
-       :emphasize-lines: 3,4
-
-       [my_module]
-       type=module.type.path
-       num_lines=10|50|100
-       num_chars=3|10|20
-
-    Each module will be given a distinct name, based on the varied parameters. If just one is varied, the names
-    will be of the form `module_name[param_value]`. If multiple parameters are varied at once, the names will be
-    `module_name[param_name0=param_value0~param_name1=param_value1~...]`.
-
-    The previous example will thus result in modules `my_module[num_lines=10~num_chars=3]`,
-    `my_module[num_lines=10~num_chars=10]`, etc.
-
-    If you want to specify your own identifier for the alternative parameter values, instead of using the value
-    itself (say, for example, if it's a long file path), you can specify one surrounded by curly braces at the
-    start of the value in the alternatives list. For example:
-
-    .. code-block:: ini
-       :emphasize-lines: 3
-
-       [my_module]
-       type=module.type.path
-       file_path={small}/home/me/data/corpus/small_version|{big}/home/me/data/corpus/big_version
-
-    This will result in the modules `my_module[small]` and `my_module[big]`, instead of using the whole file
-    path to distinguish them.
-
-    You can change the behaviour of alternative values using the `tie_alts` option. `tie_alts=T` will cause
-    parameters within the same module that have multiple alternatives to be expanded in parallel, rather than
-    taking the product of the alternative sets. So, if option_a has 5 values and option_b has 5 values, instead
-    of producing 25 pipeline modules, we'll only produce 5, matching up each pair of values in their alternatives.
-
-    .. code-block:: ini
-
-       [my_module]
-       type=module.type.path
-       tie_alts=T
-       option_a=1|2|3
-       option_b=one|two|three
-
-    If a module takes input from a module that has been expanded into multiple versions for alternative parameter
-    values, it too will automatically get expanded, as if all the multiple versions of the previous module had
-    been given as alternative values for the input parameter. For example, the following will result in 3 versions
-    of `my_module` (`my_module[1]`, etc) and 3 corresponding versions of `my_next_module` (`my_next_module[1]`, etc):
-
-    .. code-block:: ini
-
-       [my_module]
-       type=module.type.path
-       option_a=1|2|3
-
-       [my_next_module]
-       type=another.module.type.path
-       input=my_module
-
-    Where possible, names given to the alternative parameter values in the first module will be carried through
-    to the next.
+    For details on how to write config files that get read by this class, see :doc:`/core/config`.
 
     """
     def __init__(self, name, pipeline_config, local_config,
@@ -210,6 +76,7 @@ class PipelineConfig(object):
 
     @property
     def modules(self):
+        """ List of module names, in the order they were specified in the config file. """
         return self.module_order
 
     def __getitem__(self, item):
@@ -635,6 +502,11 @@ class PipelineConfig(object):
 
     @staticmethod
     def load_local_config(filename=None, override={}):
+        """
+        Load local config parameters. These are usually specified in a `.pimlico` file, but may be overridden
+        on the command line, or elsewhere programmatically.
+
+        """
         if filename is None:
             # Use the default locations for local config file
             # May want to add other locations here...
@@ -671,9 +543,9 @@ class PipelineConfig(object):
         Used to programmatically create an empty pipeline. It will contain no modules, but provides a gateway to
         system info, etc and can be used in place of a real Pimlico pipeline.
 
-        :param local_config:
-        :param override_local_config:
-        :return:
+        :param local_config: filename to load local config from. If not given, the default locations are searched
+        :param override_local_config: manually override certain local config parameters. Dict of parameter values
+        :return: the :class:`PipelineConfig` instance
         """
         from pimlico import __version__ as current_pimlico_version
 
@@ -759,16 +631,36 @@ def var_substitute(option_val, vars):
 
 
 class PipelineConfigParseError(Exception):
+    """ General problems interpreting pipeline config """
     def __init__(self, *args, **kwargs):
         self.cause = kwargs.pop("cause", None)
         super(PipelineConfigParseError, self).__init__(*args, **kwargs)
 
 
 class PipelineStructureError(Exception):
+    """ Fundamental structural problems in a pipeline. """
     pass
 
 
+class PipelineCheckError(Exception):
+    """ Error in the process of explicitly checking a pipeline for problems. """
+    def __init__(self, cause, *args, **kwargs):
+        super(PipelineCheckError, self).__init__(*args, **kwargs)
+        self.cause = cause
+
+
 def preprocess_config_file(filename, variant="main", initial_vars={}):
+    """
+    Workhorse of the initial part of config file reading. Deals with all of our custom stuff for pipeline
+    configs, such as preprocessing directives and includes.
+
+    :param filename: file from which to read main config
+    :param variant: name of a variant to load. The default (`main`) loads the main variant, which always exists
+    :param initial_vars: variable assignments to make available for substitution. This will be added to by any
+        `vars` sections that are read.
+    :return: tuple: raw config dict; list of variants that could be loaded; final vars dict; list of filenames
+        that were read, including included files; dict of docstrings for each config section
+    """
     copies = {}
     try:
         config_sections, available_variants, vars, all_filenames, section_docstrings, abstract = \
@@ -936,6 +828,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
 
 
 def check_for_cycles(pipeline):
+    """ Basic cyclical dependency check, always run on pipeline before use. """
     # Build a mapping representing module dependencies
     dep_map = dict(
         (module_name, pipeline[module_name].dependencies) for module_name in pipeline.modules
@@ -964,6 +857,7 @@ def check_for_cycles(pipeline):
 
 
 def check_release(release_str):
+    """ Check a release name against the current version of Pimlico to determine whether we meet the requirement. """
     from pimlico import __version__
     current_major_release, __, current_minor_release = __version__.partition(".")
     required_major_release, __, required_minor_release = release_str.partition(".")
@@ -1028,8 +922,10 @@ def check_release(release_str):
 
 def check_pipeline(pipeline):
     """
-    Checks a pipeline over for metadata errors, cycles and other problems.
+    Checks a pipeline over for metadata errors, cycles, module typing errors and other problems.
     Called every time a pipeline is loaded, to check the whole pipeline's metadata is in order.
+
+    Raises a :class:`PipelineCheckError` if anything's wrong.
 
     """
     # Basic metadata has already been loaded if we've got this far
@@ -1133,9 +1029,3 @@ def print_dependency_leaf_problems(dep):
                 print instructions
     print
     return auto_installable
-
-
-class PipelineCheckError(Exception):
-    def __init__(self, cause, *args, **kwargs):
-        super(PipelineCheckError, self).__init__(*args, **kwargs)
-        self.cause = cause

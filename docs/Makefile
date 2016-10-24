@@ -52,7 +52,7 @@ clean:
 
 api:
 	rm -rf $(APIDIR)
-	$(SPHINXAPI) -e -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH)
+	$(SPHINXAPI) -eT -d 2 -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH)
 
 modules:
 	@rm -rf $(MODULEDIR)

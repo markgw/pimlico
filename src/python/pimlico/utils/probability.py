@@ -33,7 +33,7 @@ def limited_shuffle(iterable, buffer_size):
 
 def sequential_document_sample(corpus, start=None, shuffle=None, sample_rate=None):
     """
-    Wrapper around a :cls:`pimlico.datatypes.tar.TarredCorpus` to draw infinite samples of documents
+    Wrapper around a :class:`pimlico.datatypes.tar.TarredCorpus` to draw infinite samples of documents
     from the corpus, by iterating over the corpus (looping infinitely), yielding documents at random.
     If `sample_rate` is given, it should be a float between 0 and 1, specifying the rough proportion of
     documents to sample. A lower value spreads out the documents more on average.

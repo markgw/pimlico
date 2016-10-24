@@ -9,6 +9,8 @@ through the basic setup of your project. You don't have to do everything exactly
 good starting point and follows Pimlico's recommended procedures. It steps through the setup for a very
 basic pipeline.
 
+.. _local-config:
+
 System-wide configuration
 =========================
 Pimlico needs you to specify certain parameters regarding your local system.
