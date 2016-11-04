@@ -130,6 +130,50 @@ For example:
    num_lines=10|50|100
    num_chars=3|10|20
 
+Tying alternatives
+~~~~~~~~~~~~~~~~~~
+
+You can change the behaviour of alternative values using the `tie_alts` option. `tie_alts=T` will cause
+parameters within the same module that have multiple alternatives to be expanded in parallel, rather than
+taking the product of the alternative sets. So, if `option_a` has 5 values and `option_b` has 5 values, instead
+of producing 25 pipeline modules, we'll only produce 5, matching up each pair of values in their alternatives.
+
+.. code-block:: ini
+
+   [my_module]
+   type=module.type.path
+   tie_alts=T
+   option_a=1|2|3|4|5
+   option_b=one|two|three|four|five
+
+If you want to tie together the alternative values on some parameters, but not others, you can specify groups
+of parameter names to tie using the `tie_alts` option. Each group is separated by spaces and the names of
+parameters to tie within a group are separated by `|`s. Any parameters that have alternative values but are
+not specified in one of the groups are not tied to anything else.
+
+For example, the following module config will tie together `option_a`'s alternatives with `option_b`'s, but
+produce all combinations of them with `option_c`'s alternatives, resulting in 3*2=6 versions of the module
+(`my_module[option_a=1~option_b=one~option_c=x]`, `my_module[option_a=1~option_b=one~option_c=y]`,
+`my_module[option_a=2~option_b=two~option_c=x]`, etc).
+
+.. code-block:: ini
+   :emphasize-lines: 3
+
+   [my_module]
+   type=module.type.path
+   tie_alts=option_a|option_b
+   option_a=1|2|3
+   option_b=one|two|three
+   option_c=x|y
+
+Using this method, you must give the parameter names in `tie_alts` exactly as you specify them in the config.
+For example, although for a particular module you might be able to specify a certain input (the default)
+using the name `input` or a specific name like `input_data`, these will not be recognised as being the same
+parameter in the process of expanding out the combinations of alternatives.
+
+Naming alternatives
+~~~~~~~~~~~~~~~~~~~
+
 Each module will be given a distinct name, based on the varied parameters. If just one is varied, the names
 will be of the form `module_name[param_value]`. If multiple parameters are varied at once, the names will be
 `module_name[param_name0=param_value0~param_name1=param_value1~...]`. So, the first example above will produce:
@@ -143,25 +187,26 @@ start of the value in the alternatives list. For example:
 .. code-block:: ini
    :emphasize-lines: 3
 
-   [my_module]
-   type=module.type.path
-   file_path={small}/home/me/data/corpus/small_version|{big}/home/me/data/corpus/big_version
+      [my_module]
+      type=module.type.path
+      file_path={small}/home/me/data/corpus/small_version|{big}/home/me/data/corpus/big_version
 
 This will result in the modules `my_module[small]` and `my_module[big]`, instead of using the whole file
 path to distinguish them.
 
-You can change the behaviour of alternative values using the `tie_alts` option. `tie_alts=T` will cause
-parameters within the same module that have multiple alternatives to be expanded in parallel, rather than
-taking the product of the alternative sets. So, if option_a has 5 values and option_b has 5 values, instead
-of producing 25 pipeline modules, we'll only produce 5, matching up each pair of values in their alternatives.
+An alternative approach to naming the expanded alternatives can be selected using the `alt_naming` parameter.
+The default behaviour described above corresponds to `alt_naming=full`. If you choose `alt_naming=pos`, the
+alternative parameter settings (using names where available, as above) will be distinguished like positional
+arguments, without making explicit what parameter each value corresponds to. This can make for nice concise
+names in cases where it's clear what parameters the values refer to.
 
-.. code-block:: ini
+If you specify `alt_naming=full` explicitly, you can also give a further option `alt_naming=full(inputnames)`.
+This has the effect of removing the `input_` from the start of named inputs. This often makes for
+intuitive module names, but is not the default behaviour, since there's no guarantee that the input name
+(without the initial `input_`) does not clash with an option name.
 
-   [my_module]
-   type=module.type.path
-   tie_alts=T
-   option_a=1|2|3
-   option_b=one|two|three
+Expanding alternatives down the pipeline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a module takes input from a module that has been expanded into multiple versions for alternative parameter
 values, it too will automatically get expanded, as if all the multiple versions of the previous module had

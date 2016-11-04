@@ -11,6 +11,7 @@ import os
 import sys
 from ConfigParser import SafeConfigParser, RawConfigParser
 from cStringIO import StringIO
+from collections import OrderedDict
 from operator import itemgetter
 
 from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR
@@ -241,7 +242,7 @@ class PipelineConfig(object):
 
         # All other sections of the config describe a module instance
         # Options will be further processed as the module infos are loaded
-        raw_module_options = dict(
+        raw_module_options = OrderedDict(
             (
                 section,
                 # Perform our own version of interpolation here, substituting values from the vars section into others
@@ -349,7 +350,40 @@ class PipelineConfig(object):
                 filter_type = str_to_bool(module_config.pop("filter", ""))
                 # Check for the tie_alts option, which causes us to tie together lists of alternatives instead
                 # of taking their product
-                tie_alts = str_to_bool(module_config.pop("tie_alts", ""))
+                tie_alts_raw = module_config.pop("tie_alts", "")
+                if not isinstance(tie_alts_raw, basestring) or \
+                        tie_alts_raw.lower() in ["", "0", "f", "false", "n", "no"]:
+                    # Don't tie anything: multiply out all alternatives
+                    tie_alts = []
+                elif tie_alts_raw.lower() in ["1", "t", "true", "y", "yes"]:
+                    # Tie all alternatives together
+                    tie_alts = "all"
+                else:
+                    # Otherwise, must be a specification of groups of params with alternatives that will be tied
+                    # Each group is separated by spaces
+                    # Each param name within a group is separated by |s
+                    tie_alts = [group.split("|") for group in tie_alts_raw.split(" ")]
+
+                # Also allow the specification of various options to do with how expanded alternatives are named
+                alt_naming = module_config.pop("alt_naming", "")
+                alt_name_inputname = False
+                if alt_naming == "":
+                    # Default naming scheme: fully specify param=val (with some abbreviations)
+                    pos_alt_names = False
+                elif alt_naming.startswith("full"):
+                    # Explicit full naming scheme: same as default, but allows extra options
+                    pos_alt_names = False
+                    extra_opts = alt_naming[4:].strip("()").split(",")
+                    for extra_opt in extra_opts:
+                        if extra_opt == "inputname":
+                            # Strip the "input_" from input names
+                            alt_name_inputname = True
+                        # Can add more here in future
+                        else:
+                            raise PipelineStructureError("unknown alternative naming option '%s'" % extra_opt)
+                elif alt_naming == "pos":
+                    # Positional naming
+                    pos_alt_names = True
 
                 # Parameters and inputs can be given multiple values, separated by |s
                 # In this case, we need to multiply out all the alternatives, to make multiple modules
@@ -383,9 +417,10 @@ class PipelineConfig(object):
                 expanded_module_configs = []
                 if any("|" in val for val in module_config.values()):
                     # There are alternatives in this module: expand into multiple modules
-                    params_with_alternatives = {}
+                    # Important to use an ordered dict, so that the parameters are kept in their original order
+                    params_with_alternatives = OrderedDict()
                     alternative_names = {}
-                    fixed_params = {}
+                    fixed_params = OrderedDict()
                     for key, val in module_config.items():
                         if "|" in val:
                             # Split up the alternatives and allow space around the |s
@@ -396,7 +431,7 @@ class PipelineConfig(object):
                                 (alt.partition("}")[2], alt[1:alt.index("}")]) if alt.startswith("{")  # Use given name
                                 else (alt, alt)  # Use param itself as name
                                 for alt in alts
-                                ]
+                            ]
                             params_with_alternatives[key] = param_vals
                             # Also pull out the names so we can use them
                             alternative_names[key] = [alt[1:alt.index("}")] if alt.startswith("{") else alt for alt in alts]
@@ -404,41 +439,78 @@ class PipelineConfig(object):
                             fixed_params[key] = val
 
                     if len(params_with_alternatives) > 0:
-                        if tie_alts:
-                            # Don't produce all combinations of alternative values
-                            # Instead iterate over each set of alternatives in parallel
-                            # For this, each must have the same number of alts
-                            alt_nums = [len(alts) for alts in params_with_alternatives.values()]
-                            if len(params_with_alternatives) > 1:
-                                if not all(num == alt_nums[0] for num in alt_nums):
-                                    raise PipelineStructureError("module '%s' has alternative values for multiple "
-                                                                 "parameters, but doesn't have the same number of "
-                                                                 "alternatives for each (%s): cannot use 'tie_alts' "
-                                                                 "behaviour" % ", ".join(str(n) for n in alt_nums))
-                            ordered_keys = params_with_alternatives.keys()
-                            # Step through the alternative values, picking the same one from each of the parameters
-                            alternative_configs = [
-                                [(key, params_with_alternatives[key][alt_num]) for key in ordered_keys]
-                                for alt_num in range(alt_nums[0])
-                            ]
+                        if tie_alts == "all":
+                            # Tie all params with alternatives together
+                            # Simply put them all in one group and multiply_alternatives will tie them
+                            param_alt_groups = [params_with_alternatives.items()]
                         else:
-                            # Generate all combinations of params that have alternatives
-                            alternative_configs = multiply_alternatives(params_with_alternatives.items())
+                            # First check that all the params that have been named in tying groups exist and have
+                            #  alternatives
+                            for param_name in sum(tie_alts, []):
+                                if param_name not in params_with_alternatives:
+                                    if param_name in fixed_params:
+                                        raise PipelineStructureError(
+                                            "parameter '%s' was specified in tie_alts for module '%s', "
+                                            "but doesn't have any alternative values" % (param_name, module_name)
+                                        )
+                                    else:
+                                        # Not even a specified parameter name
+                                        raise PipelineStructureError(
+                                            "parameter '%s' was specified in tie_alts for module '%s', but isn't "
+                                            "given as one of the module's parameters" % (param_name, module_name)
+                                        )
+                            # Generate all combinations of params that have alternatives, tying some if requested
+                            tied_group_dict = {}
+                            untied_groups = []
+                            for param_name, param_vals in params_with_alternatives.items():
+                                # See whether this param name is being tied
+                                try:
+                                    group_num = (
+                                        i for i, param_set in enumerate(tie_alts) if param_name in param_set).next()
+                                except StopIteration:
+                                    # No in a tied group: just add it to its own group (i.e. don't tie)
+                                    untied_groups.append([(param_name, param_vals)])
+                                else:
+                                    tied_group_dict.setdefault(group_num, []).append((param_name, param_vals))
+                            param_alt_groups = tied_group_dict.values() + untied_groups
+                        alternative_configs = multiply_alternatives(param_alt_groups)
                     else:
                         alternative_configs = [[]]
 
-                    # Generate a name for each
-                    alternative_config_names = [
-                        "%s[%s]" % (
-                            module_name,
+                    def _all_same(lst):
+                        lst = [x for x in lst if x is not None]
+                        if len(lst) < 2:
+                            return True
+                        else:
+                            return all(x == lst[0] for x in lst[1:])
+
+                    _key_name = lambda x: x
+                    if alt_name_inputname:
+                        # For inputs, just give the input name, not "input_<inputname>"
+                        # This can lead to param name clashing, which is why it has to be selected by the user
+                        _key_name = lambda x: x[6:] if x.startswith("input_") else x
+
+                    def _param_set_to_name(params_set):
+                        # Here we allow for several different behaviours, depending on options
+                        if pos_alt_names:
+                            # No param names, just positional value names
+                            # In this case, don't abbreviate where names are all the same, as it's confusing
+                            return "~".join(name for (key, (val, name)) in params_set if name is not None)
+                        elif len(params_set) == 1 or _all_same(name for (key, (val, name)) in params_set):
                             # If there's only 1 parameter that's varied, don't include the key in the name
                             # If a special name was given, use it; otherwise, this is just the param value
-                            params_set[0][1][1] if len(params_set) == 1
                             # If all the params' values happen to have the same name, just use that
                             # (This is common, if they've come from the same alternatives earlier in the pipeline
-                                or all(name == params_set[0][1][1] for (key, (val, name)) in params_set)
-                            else "~".join("%s=%s" % (key, name) for (key, (val, name)) in params_set)
-                        ) for params_set in alternative_configs
+                            return params_set[0][1][1]
+                        else:
+                            return "~".join(
+                                "%s=%s" % (_key_name(key), name)
+                                for (key, (val, name)) in params_set if name is not None
+                            )
+
+                    # Generate a name for each
+                    alternative_config_names = [
+                        "%s[%s]" % (module_name, _param_set_to_name(params_set)) for params_set in alternative_configs
                     ]
                     # Add in fixed params to them all
                     alternative_configs = [
@@ -609,16 +681,51 @@ class PipelineConfig(object):
 
 
 def multiply_alternatives(alternative_params):
+    """
+    Input is a list of lists, representing groups of tied parameters.
+
+    In the (default) untied case, each group contains a single parameter (along with its set of values).
+    In the fully tied case (tie_alts=T), there's just one group containing all the parameters that
+    have alternative values.
+
+    """
     if len(alternative_params):
-        # Pick a key
-        key, vals = alternative_params.pop()
+        # Take the first group of parameters
+        param_group = alternative_params.pop()
+
+        # Check that all params in the tied group have the same number of alternatives
+        alt_nums = [len(alts) for (param_name, alts) in param_group]
+        if not all(num == alt_nums[0] for num in alt_nums):
+            raise ParameterTyingError(
+                "parameters %s do not all have the same number of alternative values (%s): cannot tie them" % (
+                    ", ".join(name for name, alts in param_group), ", ".join(str(num) for num in alt_nums)))
+
+        # Expand the alternatives for the tied group together
+        our_alternatives = [
+            [(key, vals[i]) for (key, vals) in param_group] for i in range(alt_nums[0])
+        ]
+        # If all the params that are tied have the same names for corresponding values, we don't need to name
+        # all of them. Instead, get a more concise module name by leaving our the names for all but one here,
+        # so that we skip them when constructing the module name
+        if all(
+                (len(param_group) > 1 and
+                    all(val_name is not None and val_name == param_group[0][1][1] for param_name, (val, val_name) in param_group))
+                for param_group in our_alternatives):
+            our_alternatives = [
+                [param_group[0]] + [(key, (val, None)) for (key, (val, val_name)) in param_group[1:]]
+                for param_group in our_alternatives
+            ]
         # Recursively generate all alternatives by other keys
-        alternatives = multiply_alternatives(alternative_params)
+        sub_alternatives = multiply_alternatives(alternative_params)
         # Make a copy of each alternative combined with each val for this key
-        return [alt_params + [(key, val)] for val in vals for alt_params in alternatives]
+        return [alt_params + our_assignments for our_assignments in our_alternatives for alt_params in sub_alternatives]
     else:
         # No alternatives left, base case: return an empty list
         return [[]]
+
+
+class ParameterTyingError(Exception):
+    pass
 
 
 def var_substitute(option_val, vars):
@@ -671,7 +778,7 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     if abstract:
         raise PipelineConfigParseError("config file %s is abstract: it shouldn't be run itself, but included in "
                                        "another config file" % filename)
-    config_sections_dict = dict(config_sections)
+    config_sections_dict = OrderedDict(config_sections)
 
     # Copy config values according to copy directives
     for target_section, source_sections in copies.iteritems():
@@ -803,7 +910,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
         vars.update(sub_var)
 
     config_sections = [
-        (section, dict(config_parser.items(section))) for section in config_parser.sections() if section != "vars"
+        (section, OrderedDict(config_parser.items(section))) for section in config_parser.sections() if section != "vars"
     ]
     # Add in sections from the included configs
     for subconfig_filename, subconfig in sub_configs:
@@ -817,7 +924,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     # Config parser permits values that span multiple lines and removes indent of subsequent lines
     # This is good, but we don't want the newlines to be included in the values
     config_sections = [
-        (section, dict(
+        (section, OrderedDict(
             (key, val.replace(u"\n", u"")) for (key, val) in section_config.items()
         )) for (section, section_config) in config_sections
     ]
@@ -969,13 +1076,15 @@ def get_dependencies(pipeline, modules, recursive=False):
         module_dependencies.extend(module.get_software_dependencies())
         # Also get dependencies of the input datatypes
         module_dependencies.extend(module.get_input_software_dependencies())
+        # And dependencies of the output datatypes, since we assume they are needed to write the output
+        module_dependencies.extend(module.get_output_software_dependencies())
         dependencies.extend(module_dependencies)
         if recursive:
             # Also check whether the deps we've just added have their own dependencies
             for dep in module_dependencies:
                 dependencies.extend(dep.all_dependencies())
 
-    # We may want to do something cleverer to remove duplicate dependencies, but at lest remove any duplicates
+    # We may want to do something cleverer to remove duplicate dependencies, but at least remove any duplicates
     #  of exactly the same object and any that provide a comparison operator that says they're equal
     dependencies = remove_duplicates(dependencies)
     return dependencies
@@ -997,7 +1106,7 @@ def print_missing_dependencies(pipeline, modules):
         auto_installable = False
         for dep in missing_dependencies:
             print title_box(dep.name.capitalize())
-            auto_installable = auto_installable or print_dependency_leaf_problems(dep)
+            auto_installable = print_dependency_leaf_problems(dep) or auto_installable
             print
         if auto_installable:
             print "Use 'install' command to install all automatically installable dependencies"
@@ -1008,7 +1117,9 @@ def print_missing_dependencies(pipeline, modules):
 
 def print_dependency_leaf_problems(dep):
     auto_installable = False
-    if not all(sub_dep.available() for sub_dep in dep.dependencies()):
+    sub_deps = dep.dependencies()
+    if len(sub_deps) and not all(sub_dep.available() for sub_dep in sub_deps):
+        print "Dependency '%s' not satisfied because of problems with its own dependencies"
         # If this dependency has its own dependencies and they're not available, print their problems
         for sub_dep in dep.dependencies():
             if not sub_dep.available():
@@ -1019,13 +1130,14 @@ def print_dependency_leaf_problems(dep):
         print "Dependency '%s' not satisfied because of the following problems:" % dep.name
         for problem in dep.problems():
             print " - %s" % problem
+
+        instructions = dep.installation_instructions()
         if dep.installable():
             print "Can be automatically installed using install command"
             auto_installable = True
         else:
             print "Cannot be installed automatically"
-            instructions = dep.installation_instructions()
-            if instructions:
-                print instructions
-    print
+        # If instructions are available, print them, even if the dependency is automatically installable
+        if instructions:
+            print instructions
     return auto_installable
