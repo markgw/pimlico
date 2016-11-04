@@ -11,6 +11,11 @@ class DataPointType(object):
 
     """
     input_module_options = {}
+    #: List of (name, cls_path) pairs specifying a standard set of formatters that the user might want to choose from to
+    #: view a dataset of this type. The user is not restricted to this set, but can easily choose these by name,
+    #: instead of specifying a class path themselves.
+    #: The first in the list is the default used if no formatter is specified. Falls back to DefaultFormatter if empty
+    formatters = []
 
     def __init__(self, options, metadata):
         self.metadata = metadata

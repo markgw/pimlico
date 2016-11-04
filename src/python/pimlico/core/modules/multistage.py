@@ -109,7 +109,7 @@ class MultistageModuleInfo(BaseModuleInfo):
 def multistage_module(multistage_module_type_name, module_stages):
     """
     Factory to build a multi-stage module type out of a series of stages, each of which specifies a module type
-    for the stage.
+    for the stage. The stages should be a list of :class:`ModuleStage` objects.
 
     The outputs to the multi-stage module are given by outputs, which should be a list of (stage name, output name)
     pairs, where the stage name represents one of the stages and the output name is one of its outputs. If the outputs
@@ -123,8 +123,6 @@ def multistage_module(multistage_module_type_name, module_stages):
     main_outputs = []
     named_stages = {}
     output_stage_names = {}
-    # Like pipeline.used_outputs (and added to it when necessary)
-    used_internal_outputs = {}
 
     for stage_num, stage in enumerate(module_stages):
         # Make sure we can identify all of the module connections that provide this stage's inputs
@@ -149,9 +147,6 @@ def multistage_module(multistage_module_type_name, module_stages):
                     raise MultistageModulePreparationError(
                         "stage %s connects to an non-existent output of stage %s: %s" %
                         (stage.name, previous_stage.name, connection.output_name))
-
-                # Add to the internal module's list of used outputs
-                used_internal_outputs.setdefault(previous_stage, set([])).add(connection.output_name)
             elif type(connection) is ModuleInputConnection:
                 # Connection to multi-stage module input
                 # Get the input type for the stage input
@@ -218,11 +213,6 @@ def multistage_module(multistage_module_type_name, module_stages):
 
             """
             super(ModuleInfo, self).__init__(module_name, pipeline, **kwargs)
-            # Before instantiating internal modules, make available the list of used outputs from within the MS module
-            pipeline.used_outputs.update(dict(
-                ("%s:%s" % (self.module_name, stage_name), cntns)
-                for (stage_name, cntns) in used_internal_outputs.iteritems()
-            ))
 
             # Instantiate each internal module in turn
             for stage_num, stage in enumerate(self.stages):
@@ -318,8 +308,12 @@ class ModuleInputConnection(ModuleConnection):
     Connection of a sub-module's input to an input to the multi-stage module.
 
     If `main_input_name` is not given, the name for the input to the multistage module will be identical to the
-    stage input name. This will lead to an error if multiple inputs end up with the same name, so you can specify
-    a different name if necessary to avoid clashes.
+    stage input name. This might lead to unintended behaviour if multiple inputs end up with the same name, so you
+    can specify a different name if necessary to avoid clashes.
+
+    If multiple inputs (e.g. from different stages) are connected to the same main input name, they will take
+    input from the same previous module output. Nothing clever is done to unify the type requirements, however:
+    the first stage's type requirement is used for the main module's input.
 
     If `stage_input_name` is not given, the module's default input will be connected.
 

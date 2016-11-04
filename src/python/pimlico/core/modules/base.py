@@ -618,6 +618,27 @@ class BaseModuleInfo(object):
             for mod in self.get_input(input_name, always_list=True)
         ], [])
 
+    def get_output_software_dependencies(self):
+        """
+        Collects library dependencies from the output datatypes to this module, which will need to be satisfied
+        for the module to be run.
+
+        Unlike :meth:`get_input_software_dependencies`, it may not be the case that all of these dependencies
+        strictly need to be satisfied before the module can be run. It could be that a datatype can be written
+        without satisfying all the dependencies needed to read it. However, we assume that dependencies of all
+        output datatypes must be satisfied in order to run the module that writes them, since this is usually
+        the case, and these are checked before running the module.
+
+        Unlike :meth:`get_software_dependencies`, it shouldn't need to be overridden by subclasses,
+        since it just collects the results of getting dependencies from the datatypes.
+
+        """
+        # Instantiate any output datatypes this module will need and check the datatype's dependencies
+        return sum([
+            self.get_output(output_name).get_software_dependencies()
+            for output_name in dict(self.available_outputs).keys()
+        ], [])
+
     def check_ready_to_run(self):
         """
         Called before a module is run, or if the 'check' command is called. This will only be called after

@@ -58,6 +58,18 @@ def browse_cmd(pipeline, opts):
               (data.datatype_name, type(data).__name__)
         sys.exit(1)
 
+    # Catch the special formatter value 'help' that lists available standard formatters
+    if opts.formatter == "help":
+        standard_formatters = data.data_point_type.formatters
+        if len(standard_formatters) == 0:
+            print "\nDatatype does not define any standard formatters."
+            print "If you don't specify one, the default formatter will be used (raw data)"
+        else:
+            print "\nStandard formatters for datatype: %s" % ", ".join(name for (name, cls) in standard_formatters)
+            print "These can be selected by name using the --formatter option."
+            print "If no formatter is selected, %s will be used" % standard_formatters[0][0]
+        sys.exit(0)
+
     # Check we've got urwid installed
     try:
         import urwid

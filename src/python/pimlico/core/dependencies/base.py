@@ -53,6 +53,10 @@ class SoftwareDependency(object):
         for the user to tell them how to go about doing it themselves. Any subclass that doesn't provide an automatic
         installation routine should override this to provide instructions.
 
+        You may also provide this even if the class does provide automatic installation. For example, you might
+        want to provide instructions for other ways to install the software, like a system-wide install. This
+        instructions will be shown together with missing dependency information.
+
         """
         return ""
 
@@ -145,7 +149,8 @@ def check_and_install(deps, trust_downloaded_archives=False):
         if not dep.available():
             # Haven't got this library
             # First check whether there are recursive deps we can install
-            check_and_install(dep.dependencies(), trust_downloaded_archives=trust_downloaded_archives)
+            subdeps_uninstallable = check_and_install(dep.dependencies(), trust_downloaded_archives=trust_downloaded_archives)
+            uninstallable.extend(subdeps_uninstallable)
             # Now check again whether the library's available
             if not dep.available():
                 print "\n%s" % title_box(dep.name)

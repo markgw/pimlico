@@ -14,7 +14,6 @@ compatible with the datatype being browsed and provides a method to format each 
 in your custom code and refer to them by their fully qualified class name.
 
 """
-from pimlico.core.modules.base import check_type, TypeCheckError
 from pimlico.datatypes.base import IterableCorpus, InvalidDocument
 from pimlico.datatypes.documents import DataPointType
 
@@ -101,47 +100,68 @@ class InvalidDocumentFormatter(DocumentBrowserFormatter):
         return doc if isinstance(doc, InvalidDocument) else None
 
 
+def typecheck_formatter(formatted_doc_type, formatter_cls):
+    """
+    Check that a document type is compatible with a particular formatter.
+
+    """
+    from pimlico.core.modules.base import TypeCheckError
+    # Check that the datatype provided is compatible with the formatter's datatype
+    if issubclass(formatter_cls.DATATYPE, IterableCorpus):
+        # Got a corpus type: use its document type to check compatibility
+        document_type = formatter_cls.DATATYPE.data_point_type
+    elif issubclass(formatter_cls.DATATYPE, DataPointType):
+        # Was given a data-point type directly
+        document_type = formatter_cls.DATATYPE
+    else:
+        raise TypeCheckError("formatter's datatype needs to be an iterable corpus subclass or a data-point type. "
+                             "Got %s" % formatter_cls.DATATYPE.__name__)
+
+    if not issubclass(formatted_doc_type, document_type):
+        raise TypeCheckError(
+            "formatter %s is not designed for this data-point type (%s)" %
+            (formatter_cls.__name__, formatted_doc_type.__name__)
+        )
+
+
 def load_formatter(dataset, formatter_name=None, parse=True):
     """
     Load a formatter specified by its fully qualified Python class name. If None, loads the default formatter.
+    You may also specify a formatter by name, choosing from one of the standard ones that the formatted
+    datatype gives.
 
     :param formatter_name: class name
     :param dataset: dataset that will be formatted
     :param parse: only used if the default formatter is loaded, determines `raw_data` (`= not parse`)
     :return: instantiated formatter
     """
-    if formatter_name is not None:
-        try:
-            fmt_path, __, fmt_cls_name = formatter_name.rpartition(".")
-            fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
-        except ImportError, e:
-            raise TypeError("Could not load formatter %s: %s" % (formatter_name, e))
-        try:
-            fmt_cls = getattr(fmt_mod, fmt_cls_name)
-        except AttributeError, e:
-            raise TypeError("Could not load formatter %s" % formatter_name)
+    formatted_type = dataset.data_point_type
 
-        # If a formatter's given, use its attribute to determine whether we get raw input
-        parse = not fmt_cls.RAW_INPUT
-
-        # Check that the datatype provided is compatible with the formatter's datatype
-        if issubclass(fmt_cls.DATATYPE, IterableCorpus):
-            # Got a corpus type: use its document type to check compatibility
-            document_type = fmt_cls.DATATYPE.data_point_type
-        elif issubclass(fmt_cls.DATATYPE, DataPointType):
-            # Was given a data-point type directly
-            document_type = fmt_cls.DATATYPE
+    if formatter_name is None:
+        # See if the data point type provides a default formatter
+        if len(formatted_type.formatters):
+            formatter_name = formatted_type.formatters[0][1]
         else:
-            raise TypeCheckError("formatter's datatype needs to be an iterable corpus subclass or a data-point type. "
-                                 "Got %s" % fmt_cls.DATATYPE.__name__)
+            # Just instantiate the default formatter
+            return DefaultFormatter(dataset, raw_data=not parse)
 
-        if not issubclass(dataset.data_point_type, document_type):
-            raise TypeCheckError(
-                "formatter %s is not designed for this data-point type (%s)" %
-                (formatter_name, dataset.data_point_type.__name__)
-            )
-        # Instantiate the formatter, providing it with the dataset
-        formatter = fmt_cls(dataset)
-    else:
-        formatter = DefaultFormatter(dataset, raw_data=not parse)
+    # Check whether the name is one of the standard formatters
+    if formatter_name in dict(formatted_type.formatters):
+        formatter_name = dict(formatted_type.formatters)[formatter_name]
+
+    # Otherwise, it should be a class path/name
+    try:
+        fmt_path, __, fmt_cls_name = formatter_name.rpartition(".")
+        fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
+    except ImportError, e:
+        raise TypeError("Could not load formatter %s: %s" % (formatter_name, e))
+    try:
+        fmt_cls = getattr(fmt_mod, fmt_cls_name)
+    except AttributeError, e:
+        raise TypeError("Could not load formatter %s" % formatter_name)
+
+    typecheck_formatter(formatted_type, fmt_cls)
+    # Instantiate the formatter, providing it with the dataset
+    formatter = fmt_cls(dataset)
+
     return formatter

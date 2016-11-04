@@ -24,6 +24,7 @@ class File(PimlicoDatatype):
         except IOError:
             # Subclasses may raise an IOError while trying to compute the path: in this case it's assumed not ready
             return False
+        return True
 
     @property
     def absolute_path(self):

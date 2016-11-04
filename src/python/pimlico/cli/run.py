@@ -168,6 +168,11 @@ def module_number_to_name(pipeline, name):
     return modules[module_number]
 
 
+def visualize_cmd(pipeline, opts):
+    from pimlico.core.visualize.status import build_graph_with_status
+    build_graph_with_status(pipeline, all=opts.all)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
@@ -204,6 +209,11 @@ if __name__ == "__main__":
                         help="When a module name is given, even more detailed output is given, including the full "
                              "execution history of the module")
     status.set_defaults(func=status_cmd)
+
+    visualize = subparsers.add_parser("visualize", help="Visualize the pipeline, with status information for modules")
+    visualize.add_argument("--all", "-a", action="store_true",
+                           help="Show all modules defined in the pipeline, not just those that can be executed")
+    visualize.set_defaults(func=visualize_cmd)
 
     run = subparsers.add_parser("run", help="Execute an individual pipeline module")
     run.set_defaults(func=run_cmd)
@@ -249,7 +259,9 @@ if __name__ == "__main__":
                              "custom formatting if the datatype loaded defines one")
     browse.add_argument("--formatter", "-f",
                         help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
-                             "what to output for each document. If specified, --raw is ignored")
+                             "what to output for each document. If specified, --raw is ignored. You may also choose "
+                             "from the named standard formatters for the datatype in question. Use '-f help' to see a "
+                             "list of available formatters")
 
     shell = subparsers.add_parser("shell", help="Open a shell to give access to the data output by a module")
     shell.set_defaults(func=shell_cmd)

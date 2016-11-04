@@ -7,14 +7,18 @@ import os
 import struct
 from operator import itemgetter
 
+from decimal import Decimal
+
+from pimlico.cli.browser.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.base import IterableCorpus, DatatypeLoadError, IterableCorpusWriter
 from pimlico.datatypes.documents import RawDocumentType, DataPointType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
 
 __all__ = [
-    "KeyValueListCorpus", "KeyValueListCorpusWriter",
-    "TermFeatureListCorpus", "TermFeatureListCorpusWriter",
-    "IndexedTermFeatureListCorpus", "IndexedTermFeatureListCorpusWriter"
+    "KeyValueListCorpus", "KeyValueListCorpusWriter", "KeyValueListDocumentType",
+    "TermFeatureListCorpus", "TermFeatureListCorpusWriter", "TermFeatureListDocumentType",
+    "IndexedTermFeatureListCorpus", "IndexedTermFeatureListCorpusWriter", "IndexedTermFeatureListDataPointType",
+    "FeatureListScoreCorpus", "FeatureListScoreCorpusWriter", "FeatureListScoreDocumentType",
 ]
 
 
@@ -286,6 +290,135 @@ class IndexedTermFeatureListCorpusWriter(IterableCorpusWriter):
 
             # Keep a record of how much data we wrote so we can make the corpus length available to future modules
             self._added_data_points += 1
+
+
+class FeatureListScoreDocumentType(RawDocumentType):
+    """
+    Document type that stores a list of features, each associated with a floating-point score. The feature lists
+    are simply lists of indices to a feature set for the whole corpus that includes all feature types and which
+    is stored along with the dataset. These may be binary features (present or absent for each data point), or
+    may have a weight associated with them. If they are binary, the returned data will have a weight of 1 associated
+    with each.
+
+    A corpus of this type can be used to train, for example, a regression.
+
+    If scores and weights are passed in as Decimal objects, they will be stored as strings. If they are floats,
+    they will be converted to Decimals via their string representation (avoiding some of the oddness of converting
+    between binary and decimal representations). To avoid loss of precision, pass in all scores and weights as
+    Decimal objects.
+
+    """
+    formatters = [("features", "pimlico.datatypes.features.FeatureListScoreFormatter")]
+
+    def __init__(self, options, metadata):
+        super(FeatureListScoreDocumentType, self).__init__(options, metadata)
+        self.features = self.metadata.get("features", [])
+        self.separator = self.metadata.get("separator", ":")
+
+    def process_document(self, doc):
+        # Read a set of feature-value pairs from each line
+        data_points = []
+        for line in doc.splitlines():
+            # Skip blank lines
+            if line.strip():
+                # The score is at the start of the line, before the list of features
+                score, __, feature_str = line.partition(self.separator)
+                # The score should always be a Decimal
+                score = Decimal(score)
+                weighted_features = []
+                for feature in feature_str.strip().split(","):
+                    if "=" in feature:
+                        # This feature has a weight/count
+                        feature, __, weight = feature.partition("=")
+                        weight = Decimal(weight)
+                    else:
+                        # No weight given: default to 1
+                        weight = Decimal(1)
+                    # Features should be represented as ints: indices in feature list
+                    weighted_features.append((int(feature), weight))
+                data_points.append((score, weighted_features))
+        return data_points
+
+
+class FeatureListScoreFormatter(DocumentBrowserFormatter):
+    DATATYPE = FeatureListScoreDocumentType
+
+    def __init__(self, corpus):
+        super(FeatureListScoreFormatter, self).__init__(corpus)
+        self.feature_list = corpus.data_point_type_instance.features
+
+    def format_document(self, doc):
+        return u"\n".join(
+            u"%s: %s" % (
+                score,
+                u", ".join(
+                    self.feature_list[f] if weight == 1 else u"%s (%s)" % (self.feature_list[f], weight)
+                    for (f, weight) in features
+                )
+            ) for (score, features) in doc
+        )
+
+
+class FeatureListScoreCorpus(TarredCorpus):
+    datatype_name = "scored_weight_feature_lists"
+    data_point_type = FeatureListScoreDocumentType
+
+
+class FeatureListScoreCorpusWriter(TarredCorpusWriter):
+    """
+    Input should be a list of data points. Each is a (score, feature list) pair, where score is a
+    Decimal, or other numeric type. Feature list is a list of (feature name, weight) pairs, or just
+    feature names. If weights are not given, they will default to 1 when read in (but no weight is
+    stored).
+
+    If index_input=True, it is assumed that feature IDs will be given instead of feature names.
+    Otherwise, the feature names will be looked up in the feature list. Any features not found in the
+    feature type list will simply be skipped.
+
+    """
+    def __init__(self, base_dir, features, separator=":", index_input=False, **kwargs):
+        super(FeatureListScoreCorpusWriter, self).__init__(base_dir, **kwargs)
+        self.index_input = index_input
+        self.separator = separator
+        self.features = features
+        # Put the separators in the metadata, so we know how to read the data in again
+        self.metadata["separator"] = separator
+        self.metadata["features"] = features
+        self.write_metadata()
+
+    def _num_to_dec(self, num):
+        if isinstance(num, Decimal):
+            return num
+        elif isinstance(num, float):
+            # Convert floats to strings first, which deals with some binary weirdness, then to Decimals
+            return Decimal(str(num))
+        else:
+            # Try using Decimal's own init to convert to a Decimal
+            return Decimal(num)
+
+    @pass_up_invalid
+    def document_to_raw_data(self, doc):
+        if self.index_input:
+            # Expect indices to be given, so don't look up feature names
+            _feature_to_id = lambda x: x
+            _valid_feature = lambda x: True
+        else:
+            feature_dict = dict((feature, id) for (id, feature) in enumerate(self.features))
+            # Shouldn't got a feature that isn't in the list of feature types list, as we're skipping them
+            _feature_to_id = lambda x: feature_dict[x]
+            _valid_feature = lambda x: x[0] in feature_dict if type(x) is tuple else x in feature_dict
+
+        # One data point per line
+        return "\n".join(
+            "%s: %s" % (
+                self._num_to_dec(score),
+                ",".join(
+                    "%d=%s" % (_feature_to_id(feature[0]), self._num_to_dec(feature[1])) if type(feature) is tuple
+                    else "%d" % _feature_to_id(feature)
+                    for feature in features if _valid_feature(feature)
+                )
+            ) for (score, features) in doc
+        )
 
 
 def _read_binary_int(f, unpacker):

@@ -133,20 +133,6 @@ class PimlicoDatatype(object):
         return self._metadata
     metadata = property(_get_metadata)
 
-    def check_runtime_dependencies(self):
-        """
-        Like the similarly named method on executors, this check dependencies for using the datatype.
-        It's not called when checking basic config, but only when the datatype is needed.
-
-        Returns a list of pairs: (dependency short name, description/error message)
-
-        .. deprecated:: 0.2
-           You should provide dependency information via :meth:`get_software_dependencies` instead. This method
-           will be called as well for backward compatibility until v1.
-
-        """
-        return []
-
     def get_required_paths(self):
         """
         Returns a list of absolute paths to files that should be available for the data to be read.
@@ -555,12 +541,6 @@ class StringList(PimlicoDatatype):
 
     """
     datatype_name = "string_list"
-    input_module_options = {
-        "path": {
-            "help": "Path to file containing a string list with one item per line",
-            "required": True,
-        }
-    }
 
     def data_ready(self):
         return self.path is not None and os.path.exists(self.path)
