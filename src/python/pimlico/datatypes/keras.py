@@ -44,6 +44,7 @@ class KerasModel(PimlicoDatatype):
     This uses Keras' method of storing the model architecture as JSON and stores the weights using hdf5.
 
     """
+    datatype_name = "keras_model"
     # Override to pass in extra values in Keras' custom objects arg to model_from_json
     # May be given as string fully-qualified Python names
     custom_objects = {}

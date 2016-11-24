@@ -342,9 +342,13 @@ class BaseModuleInfo(object):
             return relative_dir
 
     def get_absolute_output_dir(self, output_name):
+        if output_name is None:
+            output_name = self.default_output_name
         return os.path.join(self.get_module_output_dir(short_term_store=True), output_name)
 
     def get_output_dir(self, output_name, short_term_store=False):
+        if output_name is None:
+            output_name = self.default_output_name
         return os.path.join(self.get_module_output_dir(short_term_store=short_term_store), output_name)
 
     def get_output_datatype(self, output_name=None, additional_names=[]):

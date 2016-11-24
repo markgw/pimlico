@@ -111,3 +111,6 @@ class RawTextDirectory(IterableCorpus):
                 if not isinstance(document, InvalidDocument):
                     document = self.filter_document(document)
                 yield rel_path, document
+
+    def get_required_paths(self):
+        return [self.options["path"]]

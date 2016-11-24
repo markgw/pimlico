@@ -675,9 +675,21 @@ class PipelineConfig(object):
                 yield path
             return
 
-        for store_base in [self.short_term_store, self.long_term_store]:
-            if os.path.exists(os.path.join(store_base, path)):
-                yield os.path.join(store_base, path)
+        for abs_path in self.get_data_search_paths(path):
+            if os.path.exists(abs_path):
+                yield abs_path
+
+    def get_data_search_paths(self, path):
+        """
+        Like `find_all_data_paths()`, but returns a list of all absolute paths which this data
+        path could correspond to, whether or not they exist.
+
+        :param path: relative path within Pimlico directory structures
+        :return: list of string
+        """
+        return [
+            os.path.join(store_base, path) for store_base in [self.short_term_store, self.long_term_store]
+        ]
 
 
 def multiply_alternatives(alternative_params):
@@ -1051,7 +1063,7 @@ def check_pipeline(pipeline):
         raise PipelineCheckError(e, "Input typechecking failed: %s" % e)
 
 
-def get_dependencies(pipeline, modules, recursive=False):
+def get_dependencies(pipeline, modules, recursive=False, sources=False):
     """
     Get a list of software dependencies required by the subset of modules given.
 
@@ -1069,6 +1081,9 @@ def get_dependencies(pipeline, modules, recursive=False):
     )
 
     dependencies = []
+    # Keep track of where the dependencies came from
+    dependency_module_sources = {}
+
     for module_name in modules:
         module = pipeline[module_name]
         module_dependencies = []
@@ -1078,16 +1093,24 @@ def get_dependencies(pipeline, modules, recursive=False):
         module_dependencies.extend(module.get_input_software_dependencies())
         # And dependencies of the output datatypes, since we assume they are needed to write the output
         module_dependencies.extend(module.get_output_software_dependencies())
-        dependencies.extend(module_dependencies)
+
         if recursive:
             # Also check whether the deps we've just added have their own dependencies
-            for dep in module_dependencies:
-                dependencies.extend(dep.all_dependencies())
+            for dep in list(module_dependencies):
+                module_dependencies.extend(dep.all_dependencies())
+
+        dependencies.extend(module_dependencies)
+        for dep in module_dependencies:
+            dependency_module_sources.setdefault(dep, []).append(module_name)
 
     # We may want to do something cleverer to remove duplicate dependencies, but at least remove any duplicates
     #  of exactly the same object and any that provide a comparison operator that says they're equal
     dependencies = remove_duplicates(dependencies)
-    return dependencies
+
+    if sources:
+        return dependencies, dependency_module_sources
+    else:
+        return dependencies
 
 
 def print_missing_dependencies(pipeline, modules):
@@ -1098,18 +1121,24 @@ def print_missing_dependencies(pipeline, modules):
     :param modules: list of modules to check. If None, checks all modules
     :return: True if no missing dependencies, False otherwise
     """
-    deps = get_dependencies(pipeline, modules)
+    deps, dep_sources = get_dependencies(pipeline, modules, sources=True)
     missing_dependencies = [dep for dep in deps if not dep.available()]
 
     if len(missing_dependencies):
         print "Some library dependencies were not satisfied\n"
         auto_installable = False
+        auto_installable_modules = []
         for dep in missing_dependencies:
             print title_box(dep.name.capitalize())
-            auto_installable = print_dependency_leaf_problems(dep) or auto_installable
+            # Print the list of problems and check at the same time whether it's auto-installable
+            mod_auto_installable = print_dependency_leaf_problems(dep)
+            if mod_auto_installable:
+                auto_installable_modules.extend(dep_sources[dep])
+            auto_installable = mod_auto_installable or auto_installable
             print
         if auto_installable:
             print "Use 'install' command to install all automatically installable dependencies"
+            print "Modules with automatically installable dependencies: %s" % ", ".join(auto_installable_modules)
         return False
     else:
         return True

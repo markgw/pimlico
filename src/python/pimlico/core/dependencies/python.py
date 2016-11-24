@@ -124,30 +124,109 @@ class PythonPackageOnPip(PythonPackageDependency):
         return True
 
     def install(self, trust_downloaded_archives=False):
-        from pip.index import PackageFinder
-        from pip.req import InstallRequirement, RequirementSet
-        from pip.locations import build_prefix, src_prefix
+        from pip import __version__
 
-        # Enable verbose output
-        # NB: This only works on old versions of Pip
-        # TODO Implement equivalent for newer versions
-        try:
-            from pip.log import logger
-            logger.add_consumers((logger.INFO, sys.stdout))
-        except:
-            pass
+        if int(__version__.split(".")[0]) >= 7:
+            # Later version of pip, need to do this differently
+            from pip.index import PackageFinder
+            from pip.req import InstallRequirement, RequirementSet
+            from pip.locations import src_prefix
+            from pip.compat import logging_dictConfig
+            from pip.utils.logging import IndentingFormatter
+            from pip.download import PipSession
+            import logging
+            from tempfile import mkdtemp
+            import shutil
 
-        # Build a requirement set containing just the package we need
-        requirement_set = RequirementSet(build_dir=build_prefix, src_dir=src_prefix, download_dir=None)
-        requirement_set.add_requirement(InstallRequirement.from_line(self.pip_package))
+            # Configure logging so we get verbose output
+            logging_dictConfig({
+                "version": 1,
+                "disable_existing_loggers": False,
+                "filters": {
+                    "exclude_warnings": {
+                        "()": "pip.utils.logging.MaxLevelFilter",
+                        "level": logging.WARNING,
+                    },
+                },
+                "formatters": {
+                    "indent": {
+                        "()": IndentingFormatter,
+                        "format": "%(message)s",
+                    },
+                },
+                "handlers": {
+                    "console": {
+                        "level": "DEBUG",
+                        "class": "pip.utils.logging.ColorizedStreamHandler",
+                        "stream": "ext://sys.stdout",
+                        "filters": ["exclude_warnings"],
+                        "formatter": "indent",
+                    },
+                    "console_errors": {
+                        "level": "WARNING",
+                        "class": "pip.utils.logging.ColorizedStreamHandler",
+                        "stream": "ext://sys.stderr",
+                        "formatter": "indent",
+                    },
+                },
+                "root": {
+                    "level": "DEBUG",
+                    "handlers": list(filter(None, [
+                        "console",
+                        "console_errors",
+                        None,
+                    ])),
+                },
+                # Disable any logging besides WARNING unless we have DEBUG level
+                # logging enabled. These use both pip._vendor and the bare names
+                # for the case where someone unbundles our libraries.
+                "loggers": dict(
+                    (name, {"level": "DEBUG"})
+                    for name in ["pip._vendor", "distlib", "requests", "urllib3"]
+                ),
+            })
 
-        install_options = []
-        global_options = []
-        finder = PackageFinder(find_links=[], index_urls=["http://pypi.python.org/simple/"])
+            session = PipSession()
 
-        requirement_set.prepare_files(finder, force_root_egg_info=False, bundle=False)
-        # Run installation
-        requirement_set.install(install_options, global_options)
+            # Create a temporary build dir
+            build_dir = mkdtemp(suffix="pip_build")
+            try:
+                requirement_set = RequirementSet(build_dir, src_prefix, None, session=session)
+                requirement_set.add_requirement(InstallRequirement.from_line(self.pip_package))
+            finally:
+                shutil.rmtree(build_dir)
+
+            install_options = []
+            global_options = []
+            finder = PackageFinder(find_links=[], index_urls=["https://pypi.python.org/simple/"], session=session)
+
+            requirement_set.prepare_files(finder)
+            # Run installation
+            requirement_set.install(install_options, global_options)
+        else:
+            from pip.index import PackageFinder
+            from pip.req import InstallRequirement, RequirementSet
+            from pip.locations import build_prefix, src_prefix
+
+            # Enable verbose output
+            # NB: This only works on old versions of Pip
+            try:
+                from pip.log import logger
+                logger.add_consumers((logger.INFO, sys.stdout))
+            except:
+                pass
+
+            # Build a requirement set containing just the package we need
+            requirement_set = RequirementSet(build_dir=build_prefix, src_dir=src_prefix, download_dir=None)
+            requirement_set.add_requirement(InstallRequirement.from_line(self.pip_package))
+
+            install_options = []
+            global_options = []
+            finder = PackageFinder(find_links=[], index_urls=["http://pypi.python.org/simple/"])
+
+            requirement_set.prepare_files(finder, force_root_egg_info=False, bundle=False)
+            # Run installation
+            requirement_set.install(install_options, global_options)
 
     def __repr__(self):
         return "PythonPackageOnPip<%s%s>" % (self.name, (" (%s)" % self.package) if self.package != self.name else "")

@@ -250,6 +250,17 @@ class PimlicoDatatype(object):
         """
         return cls.__name__
 
+    @classmethod
+    def full_datatype_name(cls):
+        """
+        Returns a string/unicode name for the datatype that includes relevant sub-type information. The
+        default implementation just uses the attribute `datatype_name`, but subclasses may have more
+        detailed information to add. For example, iterable corpus types also supply information about the
+        data-point type.
+
+        """
+        return cls.datatype_name
+
 
 class DynamicOutputDatatype(object):
     """
@@ -433,6 +444,10 @@ class IterableCorpus(PimlicoDatatype):
     @classmethod
     def type_checking_name(cls):
         return "%s<%s>" % (cls.__name__, cls.data_point_type.__name__)
+
+    @classmethod
+    def full_datatype_name(cls):
+        return "%s<%s>" % (cls.datatype_name, cls.data_point_type.__name__)
 
     def process_document_data_with_datatype(self, data):
         """

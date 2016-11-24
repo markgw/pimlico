@@ -129,6 +129,8 @@ class SystemCommandDependency(SoftwareDependency):
             subprocess.check_output(command, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError, e:
             problems.append("Command '%s' failed: %s" % (self.test_command, e.output))
+        except OSError, e:
+            problems.append("Command '%s' failed: %s" % (self.test_command, e))
         return problems
 
 

@@ -99,10 +99,10 @@ def module_status(module):
             corpus_dir = input_datatype.absolute_base_dir or "not available yet"
             # Format all the information about this input
             input_info = """\
-    Input {input_name}:
-        {status}
-        From module: {input_module} ({input_module_output} output)
-        Datatype: {input_datatype.datatype_name}""".format(
+Input {input_name}:
+    {status}
+    From module: {input_module} ({input_module_output} output)
+    Datatype: {input_datatype.datatype_name}""".format(
                 input_name=input_name,
                 status=colored("Data ready", "green") if module.input_ready(input_name) else colored("Data not ready", "red"),
                 input_module=input_module.module_name,
@@ -132,15 +132,18 @@ def module_status(module):
     output_infos = []
     for output_name in module.output_names:
         output_datatype = module.get_output(output_name)
-        corpus_dir = output_datatype.absolute_base_dir or "not available yet"
+        if module.is_filter():
+            corpus_dir = "filter module, output not stored"
+        else:
+            corpus_dir = output_datatype.absolute_base_dir or "not available yet"
         output_info = """\
 Output {output_name}:
     {status}
-    Datatype: {output_datatype.datatype_name}
+    Datatype: {output_datatype}
     Stored in: {corpus_dir}""".format(
             output_name=output_name,
             status=colored("Data available", "green") if output_datatype.data_ready() else colored("Data not available", "red"),
-            output_datatype=output_datatype,
+            output_datatype=output_datatype.full_datatype_name(),
             corpus_dir=corpus_dir,
         )
         if output_datatype.data_ready():
