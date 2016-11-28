@@ -97,23 +97,26 @@ def reset_module(pipeline, opts):
         pipeline.reset_all_modules()
     else:
         module_names = opts.module_name.split(",")
-        # Check for modules that depend on these ones: they should also be reset, since their input data will be rebuilt
-        dependent_modules = remove_duplicates(sum(
-            (pipeline.get_dependent_modules(module_name, recurse=True) for module_name in module_names), []
-        ))
-        dependent_modules = [m for m in dependent_modules if m not in module_names]
-        # Don't bother to include ones that haven't been executed anyway
-        dependent_modules = [m for m in dependent_modules if pipeline[m].status != "UNEXECUTED"]
-        if len(dependent_modules) > 0:
-            # There are additional modules that we should reset along with these,
-            # but check with the user in case they didn't intend that
-            print "The following modules depend on %s. Their execution state will be reset too if you continue." % \
-                  ", ".join(module_names)
-            print "  %s" % ", ".join(dependent_modules)
-            answer = raw_input("Do you want to continue? [y/N] ")
-            if answer.lower() != "y":
-                print "Cancelled"
-                return
+        if opts.no_deps:
+            dependent_modules = []
+        else:
+            # Check for modules that depend on these ones: they should also be reset, since their input data will be rebuilt
+            dependent_modules = remove_duplicates(sum(
+                (pipeline.get_dependent_modules(module_name, recurse=True) for module_name in module_names), []
+            ))
+            dependent_modules = [m for m in dependent_modules if m not in module_names]
+            # Don't bother to include ones that haven't been executed anyway
+            dependent_modules = [m for m in dependent_modules if pipeline[m].status != "UNEXECUTED"]
+            if len(dependent_modules) > 0:
+                # There are additional modules that we should reset along with these,
+                # but check with the user in case they didn't intend that
+                print "The following modules depend on %s. Their execution state will be reset too if you continue." % \
+                      ", ".join(module_names)
+                print "  %s" % ", ".join(dependent_modules)
+                answer = raw_input("Do you want to continue? [y/N] ")
+                if answer.lower() != "y":
+                    print "Cancelled"
+                    return
 
         for module_name in module_names + dependent_modules:
             print "Resetting execution state of module %s" % module_name
@@ -277,6 +280,9 @@ if __name__ == "__main__":
     reset.set_defaults(func=reset_module)
     reset.add_argument("module_name", help="The name (or number) of the module to reset, or multiple separated by "
                                            "commas, or 'all' to reset the whole pipeline")
+    reset.add_argument("-n", "--no-deps", action="store_true",
+                       help="Only reset the state of this module, even if it has dependent modules in an executed "
+                            "state, which could be invalidated by resetting and re-running this one")
 
     unlock = subparsers.add_parser("unlock",
                                    help="Forcibly remove an execution lock from a module. If a lock has ended up "
