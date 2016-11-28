@@ -13,7 +13,15 @@ python=$virtualenv_dir/bin/python
 # Check the virtualenv environment is set up
 if [ ! -f "$python" ]; then
     echo "Virtualenv for installing local Python software is not yet setup: running setup now"
-    python $DIR/../lib/libutils/create_virtualenv.py $virtualenv_dir
+
+    # The first time Pimlico is run, we set up a virtualenv
+    # Allow the user to specify a different python interpreter for doing this
+    if [ -n "$PYTHON_CMD" ]; then
+        PYTHON_CMD="python"
+    fi
+
+    $PYTHON_CMD $DIR/../lib/libutils/create_virtualenv.py $virtualenv_dir
+    
     if [ "$?" != "0" ]; then
         # Failed to set up virtualenv: don't carry on running
         exit 1
