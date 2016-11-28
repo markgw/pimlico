@@ -21,7 +21,7 @@ if [ ! -f "$python" ]; then
     fi
 
     $PYTHON_CMD $DIR/../lib/libutils/create_virtualenv.py $virtualenv_dir
-    
+
     if [ "$?" != "0" ]; then
         # Failed to set up virtualenv: don't carry on running
         exit 1

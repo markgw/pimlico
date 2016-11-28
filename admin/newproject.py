@@ -4,6 +4,9 @@ Script to set up a new Pimlico project, with the standard layout of directories,
 Just download this Python file into a new directory where you want your Pimlico project to live and run::
    python newproject.py project_name
 
+The Python interpreter that you use to call this script will be the one used forever more (actually wrapped
+by virtualenv) when you run Pimlico.
+
 """
 import os
 import sys
@@ -135,8 +138,13 @@ def main():
     print "Project setup complete!"
 
     print "\nRunning Pimlico for the first time to test setup and fetch basic dependencies"
+    # Make sure that Pimlico uses the same Python interpreter that we're using now
+    # This is the one that will be wrapped by virtualenv during the first run, so it will be used in later calls
+    pimlico_env = os.environ.copy()
+    pimlico_env["PYTHON_CMD"] = sys.executable
     try:
-        subprocess.check_call([os.path.join(base_dir, "pimlico.sh"), conf_filename, "check"], cwd=base_dir)
+        subprocess.check_call([os.path.join(base_dir, "pimlico.sh"), conf_filename, "check"],
+                              cwd=base_dir, env=pimlico_env)
     except subprocess.CalledProcessError:
         print "\nError running pimlico.sh for the first time"
         print "Your project setup is complete, but you need to fix the problem above before Pimlico is ready to run"
