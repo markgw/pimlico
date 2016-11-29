@@ -1,5 +1,28 @@
 #!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Wrapper around the python executable of the current Pimlico environment's virtualenv
+# First, checks that the virtualenv is set up and installs it if not
+# Then calls python, passing through any cmdline args
+#
+# Several environment variables allow you easy access to some special runtime behaviours:
+#
+# GPU=1
+#   Pass in Theano flags to enable GPU execution
+# GPU=gpuX
+#   Tell Theano to use the Xth GPU
+# PROFILE=1
+#   Run the Python script within the cProfile Python profiler
+# MEMPROFILE=1
+#   In a similar fashion, run memory profiling using the standard memory_profiler module
+# GDB=1
+#   Run the script within the GDB debugger, useful for debugging things like segfaults. GDB needs to be installed
+#
+
+# Get the directory containing this script, following any symlinks
+# Usual Bash solutions don't work across Max and Linux, so this Perl alternative is better
+THIS=$(perl -MCwd -le 'print Cwd::abs_path(shift)' "${BASH_SOURCE[0]}")
+DIR=$(dirname $THIS)
+
+# Add Pimlico-specific Python library locations
 export PYTHONPATH=$PYTHONPATH:$DIR/../src/python:$DIR/../lib/python
 
 if [ -n "$VIRTUALENV" ]; then
