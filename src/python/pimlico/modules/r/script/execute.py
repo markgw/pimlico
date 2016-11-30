@@ -47,7 +47,7 @@ class ModuleExecutor(BaseModuleExecutor):
             for line in outputter:
                 line = line.decode("utf-8")
                 output_lines.append(line)
-                print line.encode("ascii", "ignore"),
+                print line.encode("utf-8"),
 
             process.stdout.close()
             return_code = process.wait()
@@ -66,4 +66,4 @@ class ModuleExecutor(BaseModuleExecutor):
                 os.makedirs(os.path.dirname(output_path))
 
             with open(output_path, "w") as f:
-                f.write((u"\n".join(output_lines)).encode("utf-8"))
+                f.write((u"".join(output_lines)).encode("utf-8"))

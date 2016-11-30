@@ -26,6 +26,11 @@ class RTabSeparatedValuesFileWriter(PimlicoDatatypeWriter):
     If `headings` is specified, this is written as the first line of the file, so `headings=TRUE` should
     be used when reading into R.
 
+    Double quotes (") in the fields will be replaced by double-double quotes (""), which R interprets as a
+    double quote. Fields containing tabs will be surrounded by normal double quotes.
+    When you read the data into R, the default value of `quotes` (") should therefore be fine.
+    No escaping is performed on single quotes (').
+
     """
     def __init__(self, base_dir, headings=None, **kwargs):
         super(RTabSeparatedValuesFileWriter, self).__init__(base_dir, **kwargs)
@@ -67,9 +72,9 @@ class RTabSeparatedValuesFileWriter(PimlicoDatatypeWriter):
 
         row = [unicode(el) for el in row]
         # Escape any quotes in the fields
-        row = [el.replace(u"\"", u"\\\"") for el in row]
+        row = [el.replace(u'"', u'""') for el in row]
         # Put quotes around any field include a tab
-        row = [u"\"%s\"" % el if "\t" in el else el for el in row]
+        row = [u'"%s"' % el if "\t" in el else el for el in row]
 
         self.file.write((u"%s\n" % u"\t".join(row)).encode("utf-8"))
 
