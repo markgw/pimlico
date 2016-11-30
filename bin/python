@@ -39,7 +39,7 @@ if [ ! -f "$python" ]; then
 
     # The first time Pimlico is run, we set up a virtualenv
     # Allow the user to specify a different python interpreter for doing this
-    if [ -n "$PYTHON_CMD" ]; then
+    if [ -z "$PYTHON_CMD" ]; then
         PYTHON_CMD="python"
     fi
 
