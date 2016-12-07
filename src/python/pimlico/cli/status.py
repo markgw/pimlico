@@ -1,8 +1,11 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from operator import itemgetter
+
 import colorama
 
+from pimlico.cli.util import module_number_to_name
 from pimlico.utils.format import title_box
 from termcolor import colored
 
@@ -45,7 +48,27 @@ def status_cmd(pipeline, opts):
         print "Available pipeline variants: %s" % ", ".join(variants)
         print "Showing status for '%s' variant" % pipeline.variant
 
-        if opts.module_name is None:
+        module_sel = opts.module_name
+        first_module = last_module = None
+        if module_sel is not None:
+            if "..." in module_sel:
+                # A module range specifier was given to limit the modules shown
+                first_module, __, last_module = module_sel.partition("...")
+                # Allow module numbers to be given
+                if len(first_module):
+                    first_module = module_number_to_name(pipeline, first_module)
+                else:
+                    # Start from the very beginning
+                    first_module = None
+                if len(last_module):
+                    last_module = module_number_to_name(pipeline, last_module)
+                else:
+                    # Continue to the end
+                    last_module = None
+                # Show the brief version, since we're selecting a range, not just one
+                module_sel = None
+
+        if module_sel is None:
             # Try deriving a schedule and output it, including basic status info for each module
             if opts.all:
                 # Show all modules, not just those that can be executed
@@ -54,8 +77,28 @@ def status_cmd(pipeline, opts):
             else:
                 print "\nModule execution schedule with statuses:"
                 module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
+            bullets, module_names = zip(*module_names)
 
-            for bullet, module_name in module_names:
+            # Allow the range of modules to be filtered
+            if first_module is not None:
+                # Start at the given module
+                try:
+                    first_mod_idx = module_names.index(first_module)
+                except ValueError:
+                    raise ValueError("no such module in the list limit by: %s" % first_module)
+                bullets = bullets[first_mod_idx:]
+                module_names = module_names[first_mod_idx:]
+
+            if last_module is not None and last_module not in map(itemgetter(1), module_names):
+                # End at the given module
+                try:
+                    last_mod_idx = module_names.index(last_module)
+                except ValueError:
+                    raise ValueError("no such module in the list limit by: %s" % first_module)
+                bullets = bullets[:last_mod_idx+1]
+                module_names = module_names[:last_mod_idx+1]
+
+            for bullet, module_name in zip(bullets, module_names):
                 module = pipeline[module_name]
                 print colored(status_colored(module, " %s %s" % (bullet, module_name)))
                 # Check module status (has it been run?)
@@ -71,7 +114,7 @@ def status_cmd(pipeline, opts):
                     print "       locked: ongoing execution"
         else:
             # Output more detailed status information for this module
-            to_output = [opts.module_name]
+            to_output = [module_sel]
             already_output = []
 
             while len(to_output):

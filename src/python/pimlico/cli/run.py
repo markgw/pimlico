@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from pimlico.cli.util import module_number_to_name
 from pimlico.utils.core import remove_duplicates
 from pimlico.utils.logging import get_console_logger
 from pimlico.utils.system import set_proc_title
@@ -156,22 +157,6 @@ def browse_cmd_with_deps(*args):
     return browse_cmd(*args)
 
 
-def module_number_to_name(pipeline, name):
-    # Get the list of runable modules to select a name from
-    modules = pipeline.get_module_schedule()
-    # If the given name already identifies a module, don't do anything
-    if name in modules:
-        return name
-    try:
-        module_number = int(name) - 1
-    except ValueError:
-        # Wasn't an integer, just return the given value
-        # If it's a non-existent module, an error will (presumably) be output when we try to load it
-        # It could also be a special value, like "all", so we don't want to go raising errors here
-        return name
-    return modules[module_number]
-
-
 def inputs_cmd(pipeline, opts):
     module_name = opts.module_name
     print "Input locations for module '%s'" % module_name
@@ -250,7 +235,9 @@ if __name__ == "__main__":
                                                   "status for every module")
     status.add_argument("module_name", nargs="?",
                         help="Optionally specify a module name (or number). More detailed status information will be "
-                             "outut for this module")
+                             "outut for this module. Alternatively, use this arg to limit the modules whose status "
+                             "will be output to a range by specifying 'A...B', where A and B are module names or "
+                             "numbers")
     status.add_argument("--all", "-a", action="store_true",
                         help="Show all modules defined in the pipeline, not just those that can be executed")
     status.add_argument("--history", "-i", action="store_true",
