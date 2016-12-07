@@ -14,23 +14,36 @@ emulate a tarred corpus with the appropriate datatype, passing through the archi
 from itertools import islice
 
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.core.modules.options import str_to_bool
 from pimlico.datatypes.base import IterableCorpus, DynamicOutputDatatype, \
-    iterable_corpus_with_data_point_type
+    iterable_corpus_with_data_point_type, InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
 
 
 class CorpusSubsetFilter(IterableCorpus):
-    def __init__(self, pipeline, input_datatype, size, offset=0):
+    def __init__(self, pipeline, input_datatype, size, offset=0, skip_invalid=False):
         IterableCorpus.__init__(self, None, pipeline)
 
+        self.skip_invalid = skip_invalid
         self.offset = offset
         self.input_datatype = input_datatype
         self.size = size
 
         self.data_point_type = self.input_datatype.data_point_type
+        self._num_valid_docs = None
 
     def __len__(self):
-        return min(self.size, len(self.input_datatype))
+        if self.skip_invalid:
+            return min(self.size, self.num_valid_docs)
+        else:
+            return min(self.size, len(self.input_datatype))
+
+    @property
+    def num_valid_docs(self):
+        if self._num_valid_docs is None:
+            self._num_valid_docs = sum(1 for doc, doc_name in self.input_datatype
+                                       if not isinstance(doc, InvalidDocument))
+        return self._num_valid_docs
 
     def __iter__(self):
         return islice(self.input_datatype, self.offset, self.offset+self.size)
@@ -40,17 +53,29 @@ class CorpusSubsetFilter(IterableCorpus):
 
 
 class TarredCorpusSubsetFilter(TarredCorpus):
-    def __init__(self, pipeline, input_datatype, size, offset=0, **kwargs):
+    def __init__(self, pipeline, input_datatype, size, offset=0, skip_invalid=False, **kwargs):
         TarredCorpus.__init__(self, None, pipeline, **kwargs)
 
+        self.skip_invalid = skip_invalid
         self.offset = offset
         self.input_datatype = input_datatype
         self.size = size
 
         self.data_point_type = self.input_datatype.data_point_type
+        self._num_valid_docs = None
 
     def __len__(self):
-        return min(self.size, len(self.input_datatype))
+        if self.skip_invalid:
+            return min(self.size, self.num_valid_docs)
+        else:
+            return min(self.size, len(self.input_datatype))
+
+    @property
+    def num_valid_docs(self):
+        if self._num_valid_docs is None:
+            self._num_valid_docs = sum(1 for doc, doc_name in self.input_datatype
+                                       if not isinstance(doc, InvalidDocument))
+        return self._num_valid_docs
 
     def archive_iter(self, subsample=None, start_after=None, skip=None):
         skip = skip or 0
@@ -124,13 +149,21 @@ class ModuleInfo(BaseModuleInfo):
             "default": 0,
             "type": int,
         },
+        "skip_invalid": {
+            "help": "Skip over any invalid documents so that the output subset contains the chosen number of (valid) "
+                    "documents (or as many as possible) and no invalid ones. By default, invalid documents are passed "
+                    "through and counted towards the subset size",
+            "type": str_to_bool,
+        },
     }
     module_executable = False
 
     def instantiate_output_datatype(self, output_name, output_datatype):
         if issubclass(output_datatype, TarredCorpus):
             return TarredCorpusSubsetFilter(self.pipeline, self.get_input("documents"),
-                                            self.options["size"], offset=self.options["offset"])
+                                            self.options["size"], offset=self.options["offset"],
+                                            skip_invalid=self.options["skip_invalid"])
         else:
             return CorpusSubsetFilter(self.pipeline, self.get_input("documents"),
-                                      self.options["size"], offset=self.options["offset"])
+                                      self.options["size"], offset=self.options["offset"],
+                                      skip_invalid=self.options["skip_invalid"])
