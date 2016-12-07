@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+import colorama
 
 from pimlico.utils.format import title_box
 from termcolor import colored
@@ -36,54 +37,59 @@ def status_colored(module, text=None):
 
 
 def status_cmd(pipeline, opts):
-    # Main is the default pipeline config and is always available (but not included in this list)
-    variants = ["main"] + pipeline.available_variants
-    print "Available pipeline variants: %s" % ", ".join(variants)
-    print "Showing status for '%s' variant" % pipeline.variant
+    # Use colorama to control termcolor so that it only outputs colours to the terminal
+    colorama.init()
+    try:
+        # Main is the default pipeline config and is always available (but not included in this list)
+        variants = ["main"] + pipeline.available_variants
+        print "Available pipeline variants: %s" % ", ".join(variants)
+        print "Showing status for '%s' variant" % pipeline.variant
 
-    if opts.module_name is None:
-        # Try deriving a schedule and output it, including basic status info for each module
-        if opts.all:
-            # Show all modules, not just those that can be executed
-            print "\nAll modules in pipeline with statuses:"
-            module_names = [("-", module) for module in pipeline.modules]
-        else:
-            print "\nModule execution schedule with statuses:"
-            module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
+        if opts.module_name is None:
+            # Try deriving a schedule and output it, including basic status info for each module
+            if opts.all:
+                # Show all modules, not just those that can be executed
+                print "\nAll modules in pipeline with statuses:"
+                module_names = [("-", module) for module in pipeline.modules]
+            else:
+                print "\nModule execution schedule with statuses:"
+                module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
 
-        for bullet, module_name in module_names:
-            module = pipeline[module_name]
-            print colored(status_colored(module, " %s %s" % (bullet, module_name)))
-            # Check module status (has it been run?)
-            print "       status: %s" % status_colored(module, module.status if module.module_executable else "not executable")
-            # Check status of each input datatypes
-            for input_name in module.input_names:
-                print "       input %s: %s" % (
-                    input_name,
-                    colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
-                )
-            print "       outputs: %s" % ", ".join(module.output_names)
-            if module.is_locked():
-                print "       locked: ongoing execution"
-    else:
-        # Output more detailed status information for this module
-        to_output = [opts.module_name]
-        already_output = []
-
-        while len(to_output):
-            module_name = to_output.pop()
-            if module_name not in already_output:
+            for bullet, module_name in module_names:
                 module = pipeline[module_name]
-                status, more_outputs = module_status(module)
-                # Output the module's detailed status
-                print status
-                if opts.history:
-                    # Also output full execution history
-                    print "\nFull execution history:"
-                    print module.execution_history
-                already_output.append(module_name)
-                # Allow this module to request that we output further modules
-                to_output.extend(more_outputs)
+                print colored(status_colored(module, " %s %s" % (bullet, module_name)))
+                # Check module status (has it been run?)
+                print "       status: %s" % status_colored(module, module.status if module.module_executable else "not executable")
+                # Check status of each input datatypes
+                for input_name in module.input_names:
+                    print "       input %s: %s" % (
+                        input_name,
+                        colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
+                    )
+                print "       outputs: %s" % ", ".join(module.output_names)
+                if module.is_locked():
+                    print "       locked: ongoing execution"
+        else:
+            # Output more detailed status information for this module
+            to_output = [opts.module_name]
+            already_output = []
+
+            while len(to_output):
+                module_name = to_output.pop()
+                if module_name not in already_output:
+                    module = pipeline[module_name]
+                    status, more_outputs = module_status(module)
+                    # Output the module's detailed status
+                    print status
+                    if opts.history:
+                        # Also output full execution history
+                        print "\nFull execution history:"
+                        print module.execution_history
+                    already_output.append(module_name)
+                    # Allow this module to request that we output further modules
+                    to_output.extend(more_outputs)
+    finally:
+        colorama.deinit()
 
 
 def module_status(module):

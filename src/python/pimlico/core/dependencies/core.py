@@ -10,5 +10,6 @@ CORE_PIMLICO_DEPENDENCIES = [
     # Several lightweight Python libraries that we use throughout the codebase
     PythonPackageOnPip("progressbar", "Progressbar"),
     PythonPackageOnPip("tabulate", "tabulate"),
+    PythonPackageOnPip("colorama", "colorama"),
     PythonPackageOnPip("termcolor", "termcolor"),
 ]
