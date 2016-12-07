@@ -41,12 +41,31 @@ class CorpusSubsetFilter(IterableCorpus):
     @property
     def num_valid_docs(self):
         if self._num_valid_docs is None:
-            self._num_valid_docs = sum(1 for doc, doc_name in self.input_datatype
+            self._num_valid_docs = sum(1 for doc_name, doc in self.input_datatype
                                        if not isinstance(doc, InvalidDocument))
         return self._num_valid_docs
 
     def __iter__(self):
-        return islice(self.input_datatype, self.offset, self.offset+self.size)
+        if not self.skip_invalid:
+            # Simple to implement this...
+            return islice(self.input_datatype, self.offset, self.offset+self.size)
+        else:
+            return iter(self.skip_invalid_iter())
+
+    def skip_invalid_iter(self):
+        done = 0
+        for doc_num, (doc_name, doc) in enumerate(self.input_datatype):
+            if doc_num < self.offset:
+                continue
+            if isinstance(doc, InvalidDocument):
+                # Skip over invalid docs
+                continue
+
+            yield doc_name, doc
+
+            done += 1
+            if done >= self.size:
+                return
 
     def data_ready(self):
         return True
@@ -73,14 +92,13 @@ class TarredCorpusSubsetFilter(TarredCorpus):
     @property
     def num_valid_docs(self):
         if self._num_valid_docs is None:
-            self._num_valid_docs = sum(1 for doc, doc_name in self.input_datatype
+            self._num_valid_docs = sum(1 for doc_name, doc in self.input_datatype
                                        if not isinstance(doc, InvalidDocument))
         return self._num_valid_docs
 
     def archive_iter(self, subsample=None, start_after=None, skip=None):
         skip = skip or 0
         start_index = self.offset + min(skip, self.size)
-        end_index = self.offset + self.size
 
         if subsample is not None:
             raise NotImplementedError("tarred corpus subset filter doesn't implement subsampling")
@@ -88,6 +106,7 @@ class TarredCorpusSubsetFilter(TarredCorpus):
         # We can't use the base datatype's start_after functionality, as we don't know how many docs it's skipped
         # Have to implement it here instead
         started = start_after is None
+        done = 0
         for doc_num, (archive, doc_name, doc) in enumerate(self.input_datatype.archive_iter()):
             if start_after is not None and not started and (archive, doc_name) == start_after:
                 started = True
@@ -96,11 +115,17 @@ class TarredCorpusSubsetFilter(TarredCorpus):
             if doc_num < start_index:
                 # Skip this doc
                 continue
-            if doc_num >= end_index:
-                # Reached the end of the slice: stop altogether
-                return
+            if self.skip_invalid and isinstance(doc, InvalidDocument):
+                # Jump over invalid docs
+                continue
+
             # We're in the right range: pass through the doc
             yield archive, doc_name, doc
+
+            done += 1
+            if done >= self.size:
+                # Reached the end of the slice: stop altogether
+                return
 
     def data_ready(self):
         return True
