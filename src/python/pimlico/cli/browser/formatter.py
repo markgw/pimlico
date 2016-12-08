@@ -29,7 +29,7 @@ class DocumentBrowserFormatter(object):
     May also be an IterableCorpus subclass, in which case the corpus' data_point_type is used to check the formatted
     dataset's type.
     """
-    DATATYPE = None
+    DATATYPE = DataPointType
 
     """
     Whether the formatter expects to get the parsed document, according to the datatype's usual input reading
