@@ -48,8 +48,8 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
             # Load the module instance
             try:
                 module = pipeline[module_name]
-            except PipelineStructureError, e:
-                raise ModuleExecutionError("could not load module '%s': %s" % (module_name, e))
+            except KeyError, e:
+                raise ModuleExecutionError("could not load module '%s'" % module_name)
 
             # If we loaded a multi-stage module, default to executing its next unexecuted stage
             if isinstance(module, MultistageModuleInfo):

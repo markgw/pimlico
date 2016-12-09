@@ -1,7 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-from pimlico.cli.util import module_number_to_name
+from pimlico.cli.util import module_number_to_name, module_numbers_to_names
 from pimlico.utils.core import remove_duplicates
 from pimlico.utils.logging import get_console_logger
 from pimlico.utils.system import set_proc_title
@@ -103,12 +103,12 @@ def print_execution_error(error):
 
 
 def reset_module(pipeline, opts):
-    if opts.module_name == "all":
+    if "all" in opts.modules:
         # Reset every module, one by one
         print "Resetting execution state of all modules"
         pipeline.reset_all_modules()
     else:
-        module_names = opts.module_name.split(",")
+        module_names = opts.modules
         if opts.no_deps:
             dependent_modules = []
         else:
@@ -278,8 +278,8 @@ if __name__ == "__main__":
     reset = subparsers.add_parser("reset",
                                   help="Delete any output from the given module and restore it to unexecuted state")
     reset.set_defaults(func=reset_module)
-    reset.add_argument("module_name", help="The name (or number) of the module to reset, or multiple separated by "
-                                           "commas, or 'all' to reset the whole pipeline")
+    reset.add_argument("modules", nargs="*",
+                       help="The names (or numbers) of the modules to reset, or 'all' to reset the whole pipeline")
     reset.add_argument("-n", "--no-deps", action="store_true",
                        help="Only reset the state of this module, even if it has dependent modules in an executed "
                             "state, which could be invalidated by resetting and re-running this one")
@@ -378,7 +378,7 @@ if __name__ == "__main__":
     if hasattr(opts, "module_name") and opts.module_name is not None:
         opts.module_name = module_number_to_name(pipeline, opts.module_name)
     if hasattr(opts, "modules") and opts.modules is not None and len(opts.modules):
-        opts.modules = [module_number_to_name(pipeline, name) for name in opts.modules]
+        opts.modules = module_numbers_to_names(pipeline, opts.modules)
 
     # Run the function corresponding to the subcommand
     opts.func(pipeline, opts)
