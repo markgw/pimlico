@@ -6,6 +6,7 @@ Provides superclasses for Python library dependencies and a selection of commonl
 """
 import copy
 import sys
+from pkgutil import find_loader
 from traceback import format_exception_only
 
 from pimlico.core.dependencies.base import SoftwareDependency
@@ -16,6 +17,11 @@ class PythonPackageDependency(SoftwareDependency):
     Base class for Python dependencies. Provides import checks, but no installation routines. Subclasses should
     either provide install() or installation_instructions().
 
+    The import checks do not (as of 0.6rc) actually import the package, as this may have side-effects that are
+    difficult to account for, causing odd things to happen when you check multiple times, or try to import later.
+    Instead, it just checks whether the package finder is about to locate the package. This doesn't guarantee that
+    the import will succeed.
+
     """
     def __init__(self, package, name, **kwargs):
         super(PythonPackageDependency, self).__init__(name, **kwargs)
@@ -23,26 +29,10 @@ class PythonPackageDependency(SoftwareDependency):
 
     def problems(self):
         probs = super(PythonPackageDependency, self).problems()
-        # Make a fresh start on trying to import the module, removing it from sys.modules if it's already been imported
-        # If we don't do this, we might not get the same error the second time we call this
-        removed_modules = []
-        for mod_name in copy.copy(sys.modules):
-            if mod_name.startswith(self.package):
-                removed_modules.append((mod_name, sys.modules[mod_name]))
-                del sys.modules[mod_name]
-
-        try:
-            self.import_package()
-        except ImportError, e:
-            e_type, e_value, __ = sys.exc_info()
-            error = " // ".join([e.strip(" \n") for e in format_exception_only(e_type, e_value)])
-            probs.append("could not import %s (%s)" % (self.package, error))
-        finally:
-            # If we removed any modules from sys.modules before the import and they've not been added in by the import,
-            #  put them back again now
-            for mod_name, mod_val in removed_modules:
-                if mod_name not in sys.modules:
-                    sys.modules[mod_name] = mod_val
+        # To avoid having any impact on the system state during this check, we don't try actually importing the package
+        pkg_loader = find_loader(self.package)
+        if pkg_loader is None:
+            probs.append("package importer could not locate %s" % self.package)
         return probs
 
     def import_package(self):

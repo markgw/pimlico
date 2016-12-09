@@ -499,13 +499,18 @@ class BaseModuleInfo(object):
     def is_filter(cls):
         return not cls.module_executable and len(cls.module_inputs) > 0
 
-    def missing_data(self, input_names=None):
+    def missing_data(self, input_names=None, assume_executed=[]):
         """
         Check whether all the input data for this module is available. If not, return a list strings indicating
         which outputs of which modules are not available. If it's all ready, returns an empty list.
 
         To check specific inputs, give a list of input names. To check all inputs, don't specify `input_names`.
         To check the default input, give `input_names=[None]`.
+
+        If `assume_executed` is given, it should be a list of module names which may be assumed to have been
+        executed at the point when this module is executed. Any outputs from those modules will be excluded from
+        the input checks for this module, on the assumption that they will have become available, even if they're
+        not currently available, by the time they're needed.
 
         """
         if input_names is None:
@@ -523,6 +528,10 @@ class BaseModuleInfo(object):
             for input_name in input_names:
                 for previous_module, output_name, additional_names in \
                         self.get_input_module_connection(input_name, always_list=True):
+                    # If the previous module is to be assumed executed, skip checking whether its output data is
+                    # available
+                    if previous_module is assume_executed:
+                        continue
                     # Don't check whether additional datatypes are ready -- supposedly guaranteed if the main is
                     if not previous_module.get_output(output_name).data_ready():
                         # If the previous module is a filter, it's more helpful to say exactly what data it's missing

@@ -1148,7 +1148,7 @@ def print_dependency_leaf_problems(dep):
     auto_installable = False
     sub_deps = dep.dependencies()
     if len(sub_deps) and not all(sub_dep.available() for sub_dep in sub_deps):
-        print "Dependency '%s' not satisfied because of problems with its own dependencies"
+        print "Dependency '%s' not satisfied because of problems with its own dependencies" % dep.name
         # If this dependency has its own dependencies and they're not available, print their problems
         for sub_dep in dep.dependencies():
             if not sub_dep.available():

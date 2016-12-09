@@ -20,7 +20,7 @@ from pimlico.cli.check import check_cmd, install_cmd, deps_cmd
 from pimlico.cli.status import status_cmd
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.core.modules.base import ModuleInfoLoadError
-from pimlico.core.modules.execute import execute_module, ModuleExecutionError
+from pimlico.core.modules.execute import ModuleExecutionError, check_and_execute_modules
 from pimlico.utils.filesystem import copy_dir_with_progress
 from .shell.runner import shell_cmd
 from pimlico.core.modules.multistage import MultistageModuleInfo
@@ -30,7 +30,7 @@ def run_cmd(pipeline, opts):
     debug = opts.debug
     log = get_console_logger("Pimlico", debug=debug)
 
-    if opts.module_name is None:
+    if opts.modules is None or len(opts.modules) == 0:
         # No module name given: default to next one that's ready to run
         modules = [(module_name, pipeline[module_name]) for module_name in pipeline.modules]
         ready_modules = [module_name for (module_name, module) in modules
@@ -41,36 +41,47 @@ def run_cmd(pipeline, opts):
                                 "default to"
             sys.exit(1)
         else:
-            module_spec = ready_modules[0]
+            module_specs = [ready_modules[0]]
             log.info("No module name specified. Defaulting to next unexecuted, ready module: '%s'" % module_spec)
     else:
-        module_spec = opts.module_name
-        # In the case of a multi-stage module allow a list to be output of available stages
-        module_name, __, stage_name = module_spec.rpartition(":")
-        if stage_name in ["?", "help"]:
-            # Just output stage names and exit
-            module = pipeline[module_name]
-            if not isinstance(module, MultistageModuleInfo):
-                print "%s is not a multi-stage module" % module_name
-                sys.exit(1)
-            print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
-            sys.exit(0)
+        module_specs = opts.modules
+        for module_spec in module_specs:
+            # In the case of a multi-stage module allow a list to be output of available stages
+            module_name, __, stage_name = module_spec.rpartition(":")
+            if stage_name in ["?", "help"]:
+                # Just output stage names and exit
+                module = pipeline[module_name]
+                if not isinstance(module, MultistageModuleInfo):
+                    print "%s is not a multi-stage module" % module_name
+                    sys.exit(1)
+                print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
+                sys.exit(0)
+
+    pipeline_name = "'%s'" % pipeline.name if pipeline.variant == "main" else \
+        "'%s' (variant '%s')" % (pipeline.name, pipeline.variant)
+    log.info("Using pipeline %s" % pipeline_name)
 
     try:
-        execute_module(pipeline, module_spec, force_rerun=opts.force_rerun, debug=debug, log=log)
+        check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log)
     except ModuleInfoLoadError, e:
         if debug:
             print_exc()
             if e.cause is not None:
                 print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
-        print >>sys.stderr, "Error loading module '%s': %s" % (module_spec, e)
+        # See whether the problem came from a specific module
+        module_name = getattr(e, "module_name", None)
+        if module_name is not None:
+            print >>sys.stderr, "Error loading module '%s': %s" % (module_name, e)
     except ModuleExecutionError, e:
         if debug:
             print >>sys.stderr, "Top-level error"
             print >>sys.stderr, "---------------"
             print_exc()
             print_execution_error(e)
-        print >>sys.stderr, "Error executing module '%s': %s" % (module_spec, e)
+        # See whether the problem came from a specific module
+        module_name = getattr(e, "module_name", None)
+        if module_name is not None:
+            print >>sys.stderr, "Error executing module '%s': %s" % (module_spec, e)
     except KeyboardInterrupt:
         print >>sys.stderr, "Exiting before execution completed due to user interrupt"
         # Raise the exception so we see the full stack trace
@@ -250,14 +261,16 @@ if __name__ == "__main__":
                            help="Show all modules defined in the pipeline, not just those that can be executed")
     visualize.set_defaults(func=visualize_cmd)
 
-    run = subparsers.add_parser("run", help="Execute an individual pipeline module")
+    run = subparsers.add_parser("run", help="Execute an individual pipeline module, or a sequence")
     run.set_defaults(func=run_cmd)
-    run.add_argument("module_name", help="The name (or number) of the module to run. To run a stage from a multi-stage "
-                                         "module, use 'module:stage'. Use 'status' command to see available modules. "
-                                         "Use 'module:?' or 'module:help' to list available stages. If not given, "
-                                         "defaults to next incomplete module that has all its inputs ready", nargs="?")
+    run.add_argument("modules", nargs="*",
+                     help="The name (or number) of the module to run. To run a stage from a multi-stage "
+                          "module, use 'module:stage'. Use 'status' command to see available modules. "
+                          "Use 'module:?' or 'module:help' to list available stages. If not given, "
+                          "defaults to next incomplete module that has all its inputs ready. You may give "
+                          "multiple modules, in which case they will be executed in the order specified")
     run.add_argument("--force-rerun", "-f", action="store_true",
-                     help="Force running the module, even if it's already been run to completion")
+                     help="Force running the module(s), even if it's already been run to completion")
 
     variants = subparsers.add_parser("variants", help="List the available variants of a pipeline config")
     variants.set_defaults(func=list_variants)
