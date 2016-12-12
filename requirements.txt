@@ -6,3 +6,4 @@
 progressbar
 tabulate
 termcolor
+colorama
