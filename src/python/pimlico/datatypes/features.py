@@ -5,11 +5,9 @@
 import cPickle as pickle
 import os
 import struct
+from decimal import Decimal
 from operator import itemgetter
 
-from decimal import Decimal
-
-from pimlico.cli.browser.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.base import IterableCorpus, DatatypeLoadError, IterableCorpusWriter
 from pimlico.datatypes.documents import RawDocumentType, DataPointType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
@@ -308,7 +306,7 @@ class FeatureListScoreDocumentType(RawDocumentType):
     Decimal objects.
 
     """
-    formatters = [("features", "pimlico.datatypes.features.FeatureListScoreFormatter")]
+    formatters = [("features", "pimlico.datatypes.formatters.features.FeatureListScoreFormatter")]
 
     def __init__(self, options, metadata):
         super(FeatureListScoreDocumentType, self).__init__(options, metadata)
@@ -338,25 +336,6 @@ class FeatureListScoreDocumentType(RawDocumentType):
                     weighted_features.append((int(feature), weight))
                 data_points.append((score, weighted_features))
         return data_points
-
-
-class FeatureListScoreFormatter(DocumentBrowserFormatter):
-    DATATYPE = FeatureListScoreDocumentType
-
-    def __init__(self, corpus):
-        super(FeatureListScoreFormatter, self).__init__(corpus)
-        self.feature_list = corpus.data_point_type_instance.features
-
-    def format_document(self, doc):
-        return u"\n".join(
-            u"%s: %s" % (
-                score,
-                u", ".join(
-                    self.feature_list[f] if weight == 1 else u"%s (%s)" % (self.feature_list[f], weight)
-                    for (f, weight) in features
-                )
-            ) for (score, features) in doc
-        )
 
 
 class FeatureListScoreCorpus(TarredCorpus):

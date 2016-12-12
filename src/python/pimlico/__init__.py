@@ -30,7 +30,6 @@ LOG_DIR = os.path.join(PIMLICO_ROOT, "log")
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
 EXAMPLES_DIR = os.path.join(PIMLICO_ROOT, "examples")
 
-
 def install_core_dependencies():
     # Always check that core dependencies are satisfied before running anything
     unavailable = [dep for dep in CORE_PIMLICO_DEPENDENCIES if not dep.available()]

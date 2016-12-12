@@ -1,12 +1,14 @@
 # Import datatypes here to make it easier to specify their paths in config files
+from . import base
+from .base import *
+from . import documents
+from .documents import *
 from . import coref
 from .coref import *
 from . import parse
 from .parse import *
 from . import arrays
 from .arrays import *
-from . import base
-from .base import *
 from . import caevo
 from .caevo import *
 from . import dictionary
@@ -26,4 +28,5 @@ from .xml import *
 
 __all__ = \
     coref.__all__ + parse.__all__ + arrays.__all__ + base.__all__ + caevo.__all__ + dictionary.__all__ + \
-    features.__all__ + jsondoc.__all__ + tar.__all__ + tokenized.__all__ + word_annotations.__all__ + xml.__all__
+    features.__all__ + jsondoc.__all__ + tar.__all__ + tokenized.__all__ + word_annotations.__all__ + xml.__all__ + \
+    documents.__all__

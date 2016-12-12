@@ -2,6 +2,7 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
+__all__ = ["DataPointType", "RawDocumentType", "RawTextDocumentType"]
 
 
 class DataPointType(object):

@@ -3,8 +3,8 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 from textwrap import wrap
 
-from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies, get_dependencies
-from pimlico.core.dependencies.base import check_and_install, install_dependencies
+from pimlico.core.config import print_missing_dependencies, get_dependencies
+from pimlico.core.dependencies.base import install_dependencies
 from pimlico.utils.format import title_box
 
 

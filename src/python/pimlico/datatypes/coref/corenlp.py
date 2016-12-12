@@ -10,7 +10,7 @@ provided by that.
 import json
 
 from pimlico.datatypes.jsondoc import JsonDocumentType, JsonDocumentCorpus
-from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
+from pimlico.datatypes.tar import TarredCorpusWriter, pass_up_invalid
 
 
 class CorefDocumentType(JsonDocumentType):
