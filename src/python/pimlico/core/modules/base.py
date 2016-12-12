@@ -133,13 +133,7 @@ class BaseModuleInfo(object):
                 with open(self.metadata_filename, "r") as f:
                     data = f.read()
                     if data.strip("\n "):
-                        try:
-                            self._metadata = json.loads(data)
-                        except ValueError:
-                            # Couldn't parse as JSON
-                            # Include the old attribute-value format for backwards compatibility
-                            # TODO Remove this later
-                            self._metadata = dict(itemgetter(0, 2)(line.partition(": ")) for line in data.splitlines())
+                        self._metadata = json.loads(data)
         return self._metadata
 
     def set_metadata_value(self, attr, val):
