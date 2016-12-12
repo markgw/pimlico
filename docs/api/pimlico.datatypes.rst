@@ -25,7 +25,9 @@ Submodules
    pimlico.datatypes.jsondoc
    pimlico.datatypes.keras
    pimlico.datatypes.plotting
+   pimlico.datatypes.r
    pimlico.datatypes.results
+   pimlico.datatypes.sklearn
    pimlico.datatypes.spans
    pimlico.datatypes.table
    pimlico.datatypes.tar

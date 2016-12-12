@@ -9,6 +9,7 @@ Subpackages
     pimlico.core.dependencies
     pimlico.core.external
     pimlico.core.modules
+    pimlico.core.visualize
 
 Submodules
 ----------
