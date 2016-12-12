@@ -41,6 +41,7 @@ def NamedFile(name):
     """
     class _NamedFile(File):
         datatype_name = "named_file"
+        filename = name
 
         @property
         def absolute_path(self):
@@ -52,6 +53,23 @@ def NamedFile(name):
 
     _NamedFile.__name__ = 'NamedFile'
     return _NamedFile
+
+
+class NamedFileWriter(PimlicoDatatypeWriter):
+    def __init__(self, base_dir, filename, *kwargs):
+        super(NamedFileWriter, self).__init__(base_dir, *kwargs)
+        self.filename = filename
+
+    @property
+    def absolute_path(self):
+        return os.path.join(self.data_dir, self.filename)
+
+    def write_data(self, data):
+        """
+        Write the given string data to the appropriate output file
+        """
+        with open(self.absolute_path, "w") as f:
+            f.write(data)
 
 
 class RawTextDirectory(IterableCorpus):

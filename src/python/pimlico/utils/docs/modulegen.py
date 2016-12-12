@@ -163,7 +163,8 @@ def input_datatype_text(datatype):
         return ":class:`%s <%s>`" % (datatype.__name__, datatype.datatype_full_class_name())
     elif isinstance(datatype, MultipleInputs):
         # Multiple inputs, but the datatype is known: call this function to format the common type
-        return "list of %s" % input_datatype_text(datatype.datatype_requirements)
+        return ":class:`list <pimlico.datatypes.base.MultipleInputs>` of %s" % \
+               input_datatype_text(datatype.datatype_requirements)
     elif datatype.datatype_doc_info is not None:
         # Dynamic input type that gives us a name to use
         return datatype.datatype_doc_info

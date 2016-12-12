@@ -26,7 +26,6 @@ import json
 import shutil
 from datetime import datetime
 from importlib import import_module
-from operator import itemgetter
 
 import os
 import warnings
@@ -214,7 +213,7 @@ class BaseModuleInfo(object):
         return process_module_options(module_options, opt_dict, cls.module_type_name)
 
     @classmethod
-    def extract_input_options(cls, opt_dict, module_name=None, previous_module_name=None):
+    def extract_input_options(cls, opt_dict, module_name=None, previous_module_name=None, module_expansions={}):
         """
         Given the config options for a module instance, pull out the ones that specify where the
         inputs come from and match them up with the appropriate input names.
@@ -227,6 +226,10 @@ class BaseModuleInfo(object):
             isn't included in the error.
         :param previous_module_name: name of the previous module in the order given in the config file, allowing
             a single-input module to default to connecting to this if the input connection wasn't given
+        :param module_expansions: dictionary mapping module names to a list of expanded module names, where
+            expansion has been performed as a result of alternatives in the parameters. Provided here so that
+            the unexpanded names may be used to refer to the whole list of module names, where a module takes
+            multiple inputs on one input parameter
         :return: dictionary of inputs
         """
         inputs = {}
@@ -269,6 +272,12 @@ class BaseModuleInfo(object):
             # This will only work if the input datatype is a MultipleInputs
             inputs[input_name] = []
             for spec in input_spec.split(","):
+                # Check for an initial *, meaning we should expand out an expanded previous module input multiple inputs
+                if spec.startswith("*"):
+                    spec = spec[1:]
+                    expand = True
+                else:
+                    expand = False
                 # Split off any additional datatype specifiers: there could be multiple (recursive)
                 spec_parts = spec.split("->")
                 spec = spec_parts[0]
@@ -281,7 +290,23 @@ class BaseModuleInfo(object):
                     # Just a module name, using the default output
                     module_name = spec
                     output_name = None
-                inputs[input_name].append((module_name, output_name, additional_names))
+
+                if expand:
+                    # If the module name starts with a *, it should refer to one that has been expanded out according
+                    # to alternatives
+                    # If so, treat it as if it were a comma-separated list of inputs, assuming this is a MultipleInputs
+                    expanded_module_names = module_expansions.get(module_name, [])
+                    if len(expanded_module_names) < 2:
+                        # Didn't get the base name of an expanded module -- mistake in config
+                        raise ModuleInfoLoadError("input specification '%s' uses *-notation to refer to a previous "
+                                                  "module that's been expanded into alternatives, but module '%s' "
+                                                  "has not been expanded" % (input_spec, module_name))
+                else:
+                    expanded_module_names = [module_name]
+
+                # Most of the time there will only be one of these, == module_name
+                for expanded_module_name in expanded_module_names:
+                    inputs[input_name].append((expanded_module_name, output_name, additional_names))
 
         return inputs
 
@@ -299,7 +324,7 @@ class BaseModuleInfo(object):
         return []
 
     @classmethod
-    def process_config(cls, config_dict, module_name=None, previous_module_name=None):
+    def process_config(cls, config_dict, module_name=None, previous_module_name=None, module_expansions={}):
         """
         Convenience wrapper to do all config processing from a dictionary of module config.
 
@@ -311,7 +336,10 @@ class BaseModuleInfo(object):
         output_opt = options.pop("output", "")
         outputs = output_opt.split(",") if output_opt else []
         # Pull out the input options and match them up with inputs
-        inputs = cls.extract_input_options(options, module_name=module_name, previous_module_name=previous_module_name)
+        inputs = cls.extract_input_options(
+            options, module_name=module_name, previous_module_name=previous_module_name,
+            module_expansions=module_expansions
+        )
         # Process the rest of the values as module options
         options = cls.process_module_options(options)
 

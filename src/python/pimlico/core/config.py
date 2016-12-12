@@ -388,7 +388,9 @@ class PipelineConfig(object):
                 # Parameters and inputs can be given multiple values, separated by |s
                 # In this case, we need to multiply out all the alternatives, to make multiple modules
                 # Check whether any of the inputs to this module come from a previous module that's been expanded into
-                # multiple. If so, give this model alternative inputs to cover them all
+                # multiple. If so, give this model alternative inputs to cover them all.
+                # At this stage, any expanded modules specified with the *name notation (input to a MultipleInputs)
+                # will not be picked up, as they've still got the * on them
                 for input_opt in [key for key in module_config.keys() if key == "input" or key.startswith("input_")]:
                     new_alternatives = []
                     # It's possible for the value to already have alternatives, in which case we include them all
@@ -396,7 +398,9 @@ class PipelineConfig(object):
                         # If the input connection has more than just a module name, we only modify the module name
                         val_module_name, __, rest_of_val = original_val.partition(".")
                         # If the module name is unknown, this will be a problem, but leave the error handling till later
-                        if len(original_to_expanded_sections.get(val_module_name, [])) > 1:
+                        # For safety's sake, skip over anything that starts with * or is a comma-separated list
+                        if len(original_to_expanded_sections.get(val_module_name, [])) > 1 and \
+                                not val_module_name.startswith("*") and not "," in val_module_name:
                             # The previous module has been expanded: add all of the resulting modules as alternatives
                             previous_modules = original_to_expanded_sections[val_module_name]
                             # If the previous module names are already in the form module{alt_name}, take the alt_name
@@ -410,6 +414,7 @@ class PipelineConfig(object):
                             ])
                         else:
                             # Previous module this one takes input from has not been expanded: leave unchanged
+                            # Or it starts with * or includes a ,
                             new_alternatives.append(original_val)
                     module_config[input_opt] = "|".join(new_alternatives)
 
@@ -535,7 +540,9 @@ class PipelineConfig(object):
                     options_dict = dict(expanded_module_config)
                     try:
                         inputs, optional_outputs, options = module_info_class.process_config(
-                            options_dict, module_name=module_name, previous_module_name=previous_module_name)
+                            options_dict, module_name=module_name, previous_module_name=previous_module_name,
+                            module_expansions=original_to_expanded_sections
+                        )
                     except ModuleOptionParseError, e:
                         raise PipelineConfigParseError("error in '%s' options: %s" % (module_name, e))
 

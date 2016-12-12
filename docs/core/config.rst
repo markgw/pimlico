@@ -98,6 +98,9 @@ by the directive name and any arguments.
     config override any copied settings. The following settings are not copied: input(s), `filter`, `outputs`,
     `type`.
 
+
+.. _parameter-alternatives:
+
 Multiple parameter values
 -------------------------
 

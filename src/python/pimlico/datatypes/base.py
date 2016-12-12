@@ -28,7 +28,7 @@ __all__ = [
     "DynamicOutputDatatype", "DynamicInputDatatypeRequirement",
     "InvalidDocument",
     "DatatypeLoadError", "DatatypeWriteError",
-    "load_datatype"
+    "load_datatype", "MultipleInputs",
 ]
 
 
@@ -325,6 +325,12 @@ class MultipleInputs(object):
     number of inputs, all satisfying the same datatype requirements. When writing the inputs in a config file,
     they can be specified as a comma-separated list of the usual type of specification (module name, with optional
     output name). Each item in the list must point to a datatype that satisfies the type-checking.
+
+    The list may also include (or entirely consist of) a base module name from the pipeline that has been expanded
+    into multiple modules according to alternative parameters (the type separated by vertical bars,
+    see :ref:`parameter-alternatives`). Use the notation `*name`, where `name` is the base module name, to denote
+    all of the expanded module names as inputs. These are treated as if you'd written out all of the expanded module
+    names separated by commas.
 
     When get_input() is called on the module, instead of returning a single datatype, a list of datatypes is returned.
 
