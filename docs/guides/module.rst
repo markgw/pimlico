@@ -87,9 +87,10 @@ Here's a sample basic ``ModuleInfo``, which we'll step through.
 
 .. code-block:: py
 
-    import json
+    from pimlico.core.dependencies.python import PythonPackageOnPip
     from pimlico.core.modules.base import BaseModuleInfo
     from pimlico.datatypes.arrays import ScipySparseMatrix, NumpyArray
+
 
     class ModuleInfo(BaseModuleInfo):
         module_type_name = "nmf"
