@@ -184,7 +184,12 @@ def output_datatype_text(datatype):
         datatype_name = datatype.datatype_name or type(datatype).__name__
         return ":class:`%s <%s>`" % (datatype_name, datatype_class_name)
     else:
-        return ":class:`~%s`" % datatype.datatype_full_class_name()
+        class_name = datatype.datatype_full_class_name()
+        # Allow non-class datatypes to be specified in the string
+        if class_name.startswith(":"):
+            return class_name
+        else:
+            return ":class:`~%s`" % datatype.datatype_full_class_name()
 
 
 def generate_contents_page(modules, output_dir, index_name, title, content):

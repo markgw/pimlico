@@ -45,6 +45,12 @@ def NamedFile(name):
         @property
         def absolute_path(self):
             return os.path.join(self.data_dir, name)
+
+        @classmethod
+        def datatype_full_class_name(cls):
+            return ":func:`~pimlico.datatypes.files.NamedFile`"
+
+    _NamedFile.__name__ = 'NamedFile'
     return _NamedFile
 
 
