@@ -1,3 +1,5 @@
+import sys
+from traceback import format_exception_only
 
 
 def module_number_to_name(pipeline, name):
@@ -67,3 +69,16 @@ def module_numbers_to_names(pipeline, names):
             # Add this module
             module_names.append(next_module)
     return module_names
+
+
+def print_execution_error(error):
+    print >>sys.stderr, "\nDetails of error"
+    print >>sys.stderr,   "----------------"
+    print >>sys.stderr, "".join(format_exception_only(type(error), error)).strip("\n")
+    if hasattr(error, "debugging_info") and error.debugging_info is not None:
+        # Extra debugging information was provided by the exception
+        print >>sys.stderr, "\n## Further debugging info ##"
+        print >>sys.stderr, error.debugging_info.strip("\n")
+    if hasattr(error, "cause") and error.cause is not None:
+        # Recursively print any debugging info on the cause exception
+        print_execution_error(error.cause)

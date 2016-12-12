@@ -6,4 +6,4 @@ DIR=$(dirname $THIS)
 
 # In the same directory as this script, in the Pimlico codebase, lives a Python wrapper script
 # This ensures the virtualenv is set up, prepares it if not, then calls Python through the virtualenv
-$DIR/python -m pimlico.cli.run $*
+$DIR/python -m pimlico.cli.main $*
