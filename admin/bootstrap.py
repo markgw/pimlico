@@ -5,8 +5,8 @@ Distribute this with your Pimlico project code. You don't need to distribute Pim
 with your project, since it can be downloaded later. Just distribute a directory tree containing your config files,
 your own code and this Python script, which will fetch everything else it needs.
 
-Another use is to get a whole new project up and running. Simply download this script, place it in your project
-directory, and call `python bootstrap.py`.
+Another use is to get a whole new project up and running. Use the `newproject.py` script for that purpose, which
+calls this script.
 
 """
 import sys
