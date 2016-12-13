@@ -163,16 +163,33 @@ Before we can run it, there's one thing missing: three of these modules have the
 to get hold of the libraries they use. The input reader uses the Beautiful Soup python library and the tokenization 
 and POS tagging modules use OpenNLP.
 
+Checking everything's dandy
+---------------------------
+Now you can run the `status` command to check that the pipeline can be loaded and see the list of modules.
+
+.. code-block:: bash
+
+    ./pimlico.sh myproject.conf status
+
+To check that specific modules are ready to run, with all software dependencies installed, use the
+`run` command with `--dry-run` (or `--dry`) switch:
+
+.. code-block:: bash
+
+    ./pimlico.sh myproject.conf run tokenize --dry
+
+With any luck, all the checks will be successful. There might be some missing software dependencies.
+
 Fetching dependencies
 ---------------------
 All the standard modules provide easy ways to get hold of their dependencies automatically, or as close as possible.
 Most of the time, all you need to do is tell Pimlico to install them.
 
-You can use the `check` command, with a module name, to check whether a module is ready to run.
+Use the `run` command, with a module name and `--dry-run`, to check whether a module is ready to run.
 
 .. code-block:: bash
 
-    ./pimlico.sh myproject.conf check tokenize
+    ./pimlico.sh myproject.conf run tokenize --dry
 
 In this case, it will tell you that some libraries are missing, but they can be installed automatically. Simply issue
 the `install` command for the module.
@@ -198,23 +215,14 @@ Note that the modules we're using default to these standard, pre-trained models,
 use. However, if you want to use different models, e.g. for other languages or domains, you can specify them using 
 extra options in the module definition in your config file.
 
-Checking everything's dandy
----------------------------
-Now you can run the `check` command to check that the modules are ready to run. To check the whole pipeline's
-dependencies, run:
-
-.. code-block:: bash
-
-    ./pimlico.sh myproject.conf check all
-
-With any luck, all the checks will be successful. If not, you'll need to address any problems with dependencies
+If there are any other library problems shown up by the dry run, you'll need to address them
 before going any further.
 
 Running the pipeline
 ====================
 What modules to run?
 --------------------
-Pimlico can now suggest an order in which to run your modules. In our case, this is pretty obvious, seeing as our 
+Pimlico suggests an order in which to run your modules. In our case, this is pretty obvious, seeing as our
 pipeline is entirely linear &ndash; it's clear which ones need to be run before others.
 
 .. code-block:: bash

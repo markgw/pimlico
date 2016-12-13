@@ -9,6 +9,12 @@ from pimlico.utils.format import title_box
 
 
 def check_cmd(pipeline, opts):
+    print "DEPRECATED:"
+    print "The check command with modules specified is now deprecated."
+    print "Using the status command is the preferable way to a pipeline can be loaded"
+    print "Using the run command, with --dry-run switch, is the preferable way to check modules are ready to run"
+    print
+
     # Metadata has already been loaded if we've got this far
     print "All module metadata loaded successfully"
 

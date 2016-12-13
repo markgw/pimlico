@@ -18,6 +18,11 @@ def run_cmd(pipeline, opts):
     debug = opts.debug
     log = get_console_logger("Pimlico", debug=debug)
 
+    dry_run = opts.dry_run
+    if dry_run:
+        log.info("DRY RUN")
+        log.info("Running all pre-execution checks, but not executing any modules")
+
     if opts.modules is None or len(opts.modules) == 0:
         # No module name given: default to next one that's ready to run
         modules = [(module_name, pipeline[module_name]) for module_name in pipeline.modules]
@@ -50,7 +55,8 @@ def run_cmd(pipeline, opts):
     log.info("Using pipeline %s" % pipeline_name)
 
     try:
-        check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log)
+        check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,
+                                  all_deps=opts.all_deps, check_only=dry_run)
     except ModuleInfoLoadError, e:
         if debug:
             print_exc()
@@ -75,3 +81,6 @@ def run_cmd(pipeline, opts):
         # Raise the exception so we see the full stack trace
         if debug:
             raise
+    else:
+        if dry_run:
+            log.info("All checks were successful. Modules are ready to run")

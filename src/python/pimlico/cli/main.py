@@ -82,7 +82,9 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(help="Select a sub-command")
 
     check = subparsers.add_parser("check",
-                                  help="Test a pipeline config to check that it can be parsed and is valid. It is "
+                                  help="[DEPRECATED: use status command to check pipeline, or run command with "
+                                       "--dry-run to check modules instead.] "
+                                       "Test a pipeline config to check that it can be parsed and is valid. It is "
                                        "recommended that you run this before attempting to execute any modules")
     check.set_defaults(func=check_cmd)
     check.add_argument("modules", nargs="*",
@@ -120,6 +122,12 @@ if __name__ == "__main__":
                           "multiple modules, in which case they will be executed in the order specified")
     run.add_argument("--force-rerun", "-f", action="store_true",
                      help="Force running the module(s), even if it's already been run to completion")
+    run.add_argument("--all-deps", "-a", action="store_true",
+                     help="If the given module(s) has dependent modules that have not been completed, executed "
+                          "them first. This allows you to specify a module late in the pipeline and execute the full "
+                          "pipeline leading to that point")
+    run.add_argument("--dry-run", "--dry", "--check", action="store_true",
+                     help="Perform all pre-execution checks, but don't actually run the module(s)")
 
     variants = subparsers.add_parser("variants", help="List the available variants of a pipeline config")
     variants.set_defaults(func=list_variants)

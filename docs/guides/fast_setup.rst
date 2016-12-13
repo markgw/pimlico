@@ -50,6 +50,12 @@ For guides to doing that, see the :doc:`the longer setup guide <setup>` and indi
 
 Running Pimlico
 ===============
+Check the pipeline can be loaded and take a look at the list of modules you've configured:
+
+.. code-block:: bash
+
+    ./pimlico.sh myproject.conf status
+
 Tell the modules to fetch all the dependencies you need:
 
 .. code-block:: bash
@@ -58,17 +64,11 @@ Tell the modules to fetch all the dependencies you need:
 
 If there's anything that can't be installed automatically, this should output instructions for manual installation.
 
-Check the pipeline's ready to run:
+Check the pipeline's ready to run a module that you want to run:
 
 .. code-block:: bash
 
-    ./pimlico.sh myproject.conf check all
-
-Take a look at the list of modules you've configured:
-
-.. code-block:: bash
-
-    ./pimlico.sh myproject.conf status
+    ./pimlico.sh myproject.conf run MODULE --dry-run
 
 To run the next unexecuted module in the list, use:
 

@@ -13,12 +13,13 @@ from tarfile import TarFile
 from textwrap import wrap
 
 from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies, PipelineStructureError
-from pimlico.core.modules.base import ModuleInfoLoadError
+from pimlico.core.modules.base import ModuleInfoLoadError, collect_unexecuted_dependencies
 from pimlico.core.modules.multistage import MultistageModuleInfo
 from pimlico.utils.logging import get_console_logger
 
 
-def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=False, log=None):
+def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=False, log=None, all_deps=False,
+                              check_only=False):
     """
     Main method called by the `run` command that first checks a pipeline, checks all pre-execution requirements
     of the modules to be executed and then executes each of them. The most common case is to execute just one
@@ -29,6 +30,8 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
     :param force_rerun: execute modules, even if they're already marked as complete
     :param debug: output debugging info
     :param log: logger, if you have one you want to reuse
+    :param all_deps: also include unexecuted dependencies of the given modules
+    :param check_only: run all checks, but stop before executing. Used for `check` command
     :return:
     """
     if log is None:
@@ -67,11 +70,26 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
             # Reraise the exception to be caught higher up
             raise
 
+    if all_deps:
+        # For each module requested, also include any unexecuted dependencies recursively as far back as necessary
+        requested_modules = [m.module_name for m in modules]
+        modules = collect_unexecuted_dependencies(modules)
+        if len(modules) > len(requested_modules):
+            log.info("Added unexecuted dependent modules to the execution list")
+            log.info("Resulting list: %s" % ", ".join(
+                # Mark added modules with a *
+                ("*" if m.module_name not in requested_modules else "") + m.module_name for m in modules
+            ))
+
     # Check that the module is ready to run
     # If anything fails, an exception is raised
     check_modules_ready(pipeline, modules, log, force_rerun=force_rerun)
-    # Checks passed: run the module
-    execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug)
+
+    if check_only:
+        log.info("All checks passed")
+    else:
+        # Checks passed: run the module
+        execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug)
 
 
 def check_modules_ready(pipeline, modules, log, force_rerun=False):

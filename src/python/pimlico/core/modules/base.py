@@ -545,22 +545,26 @@ class BaseModuleInfo(object):
             for output_name in self.output_names:
                 for path in self.get_output(output_name).get_required_paths():
                     if not os.path.exists(path):
-                        missing.append("%s (required for '%s' output '%s'" % (path, self.module_name, output_name))
+                        output_text = "default output" if output_name is None else ("output '%s'" % output_name)
+                        missing.append("%s (required for '%s' (%s)" % (path, self.module_name, output_text))
         else:
             for input_name in input_names:
                 for previous_module, output_name, additional_names in \
                         self.get_input_module_connection(input_name, always_list=True):
                     # If the previous module is to be assumed executed, skip checking whether its output data is
                     # available
-                    if previous_module is assume_executed:
+                    if previous_module.module_name in assume_executed:
                         continue
                     # Don't check whether additional datatypes are ready -- supposedly guaranteed if the main is
                     if not previous_module.get_output(output_name).data_ready():
                         # If the previous module is a filter, it's more helpful to say exactly what data it's missing
                         if previous_module.is_filter():
-                            missing.extend(previous_module.missing_data())
+                            missing.extend(previous_module.missing_data(assume_executed=assume_executed))
                         else:
-                            missing.append("%s output '%s'" % (previous_module.module_name, output_name))
+                            if output_name is None:
+                                missing.append("%s (default output)" % previous_module.module_name)
+                            else:
+                                missing.append("%s output '%s'" % (previous_module.module_name, output_name))
         return missing
 
     @classmethod
@@ -787,6 +791,43 @@ class BaseModuleInfo(object):
         :return: True is the module is currently locked from execution
         """
         return os.path.exists(self.lock_path)
+
+
+def collect_unexecuted_dependencies(modules):
+    """
+    Given a list of modules, checks through all the modules that they depend on to put together a list of
+    modules that need to be executed so that the given list will be left in an executed state. The list
+    includes the modules themselves, if they're not fully executed, and unexecuted dependencies of any
+    unexecuted modules (recursively).
+
+    :param modules: list of ModuleInfo instances
+    :return: list of ModuleInfo instances that need to be executed
+    """
+    modules_to_execute = []
+
+    def _tree_to_module_list(t):
+        # Check the module itself
+        if t[0].status != "COMPLETE":
+            # Recurse to any modules this one depends on
+            for __, __, subtree in t[1]:
+                for x in _tree_to_module_list(subtree):
+                    yield x
+            # After deps, include the module itself (only if it's executable)
+            if t[0].module_executable:
+                # Include this module
+                yield t[0]
+
+    for module in modules:
+        # Get the full tree of dependencies for this module
+        tree = module.get_execution_dependency_tree()
+        # Get the module names to be executed by depth-first search
+        # This can include duplicates
+        modules_to_execute.extend(_tree_to_module_list(tree))
+
+    # If we now remove duplicates, including the first occurrence of each module,
+    # we guarantee that each module comes after all its dependencies
+    modules_to_execute = remove_duplicates(modules_to_execute, key=lambda m: m.module_name)
+    return modules_to_execute
 
 
 def satisfies_typecheck(provided_type, type_requirements):
