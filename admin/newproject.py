@@ -18,24 +18,6 @@ RAW_URL = "https://raw.githubusercontent.com/markgw/pimlico/master/"
 RELEASE_URL = "%sadmin/release.txt" % RAW_URL
 
 
-def symlink(source, link_name):
-    """
-    Symlink creator that works on Windows.
-
-    """
-    os_symlink = getattr(os, "symlink", None)
-    if callable(os_symlink):
-        os_symlink(source, link_name)
-    else:
-        import ctypes
-        csl = ctypes.windll.kernel32.CreateSymbolicLinkW
-        csl.argtypes = (ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32)
-        csl.restype = ctypes.c_ubyte
-        flags = 1 if os.path.isdir(source) else 0
-        if csl(link_name, source, flags) == 0:
-            raise ctypes.WinError()
-
-
 def create_directory_structure(dirs, base_dir):
     for content in dirs:
         if type(content) is tuple:
@@ -132,9 +114,6 @@ def main():
     bootstrap(conf_filename, git=git)
 
     print "Bootstrapped project: Pimlico is now available in pimlico/ dir\n"
-    # Create symlink to pimlico.sh, so it's easier to run
-    print "Creating symlink pimlico.sh for running Pimlico"
-    symlink(os.path.join("pimlico", "bin", "pimlico.sh"), "pimlico.sh")
     print "Project setup complete!"
 
     print "\nRunning Pimlico for the first time to test setup and fetch basic dependencies"

@@ -86,6 +86,24 @@ def tar_dirname(tar_path):
         return member.name
 
 
+def symlink(source, link_name):
+    """
+    Symlink creator that works on Windows.
+
+    """
+    os_symlink = getattr(os, "symlink", None)
+    if callable(os_symlink):
+        os_symlink(source, link_name)
+    else:
+        import ctypes
+        csl = ctypes.windll.kernel32.CreateSymbolicLinkW
+        csl.argtypes = (ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32)
+        csl.restype = ctypes.c_ubyte
+        flags = 1 if os.path.isdir(source) else 0
+        if csl(link_name, source, flags) == 0:
+            raise ctypes.WinError()
+
+
 def bootstrap(config_file, git=False):
     current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -139,6 +157,9 @@ def bootstrap(config_file, git=False):
 
         os.rename(os.path.join(current_dir, extracted_dirname), os.path.join(current_dir, "pimlico"))
     print "Pimlico source (%s) is now available in directory pimlico/" % fetch_release
+    # Create symlink to pimlico.sh, so it's easier to run
+    print "Creating symlink pimlico.sh for running Pimlico"
+    symlink(os.path.join("pimlico", "bin", "pimlico.sh"), "pimlico.sh")
 
 
 if __name__ == "__main__":
