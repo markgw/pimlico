@@ -803,31 +803,36 @@ def collect_unexecuted_dependencies(modules):
     :param modules: list of ModuleInfo instances
     :return: list of ModuleInfo instances that need to be executed
     """
-    modules_to_execute = []
+    if len(modules) == 0:
+        return []
+    else:
+        pipeline = modules[0].pipeline
 
-    def _tree_to_module_list(t):
-        # Check the module itself
-        if t[0].status != "COMPLETE":
-            # Recurse to any modules this one depends on
-            for __, __, subtree in t[1]:
-                for x in _tree_to_module_list(subtree):
-                    yield x
-            # After deps, include the module itself (only if it's executable)
-            if t[0].module_executable:
-                # Include this module
-                yield t[0]
+        def _get_deps(mod):
+            # If it's not executable, don't add it, but do recurse
+            # If it's not completed, recurse and add
+            if not mod.module_executable or mod.status != "COMPLETE":
+                unex_mods = []
+                # Add all of this module's unexecuted deps to the list first
+                for dep_name in mod.dependencies:
+                    dep = pipeline[dep_name]
+                    unex_mods.extend(_get_deps(dep))
+                if mod.module_executable:
+                    # Now add the module itself
+                    unex_mods.append(mod)
+                return unex_mods
+            else:
+                # Executable module that's been fully executed
+                return []
 
-    for module in modules:
-        # Get the full tree of dependencies for this module
-        tree = module.get_execution_dependency_tree()
-        # Get the module names to be executed by depth-first search
+        # Get the full tree of dependencies for this module by depth-first search
         # This can include duplicates
-        modules_to_execute.extend(_tree_to_module_list(tree))
+        modules_to_execute = sum((_get_deps(m) for m in modules), [])
 
-    # If we now remove duplicates, including the first occurrence of each module,
-    # we guarantee that each module comes after all its dependencies
-    modules_to_execute = remove_duplicates(modules_to_execute, key=lambda m: m.module_name)
-    return modules_to_execute
+        # If we now remove duplicates, including the first occurrence of each module,
+        # we guarantee that each module comes after all its dependencies
+        modules_to_execute = remove_duplicates(modules_to_execute, key=lambda m: m.module_name)
+        return modules_to_execute
 
 
 def satisfies_typecheck(provided_type, type_requirements):
