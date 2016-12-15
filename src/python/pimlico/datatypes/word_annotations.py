@@ -112,8 +112,8 @@ class WordAnnotationCorpus(TarredCorpus):
     #  which fields will be in it
     annotation_fields = None
 
-    def __init__(self, base_dir, pipeline):
-        super(WordAnnotationCorpus, self).__init__(base_dir, pipeline)
+    def __init__(self, base_dir, pipeline, **kwargs):
+        super(WordAnnotationCorpus, self).__init__(base_dir, pipeline, **kwargs)
         self._sentence_boundary_re = None
         self._word_re = None
         self._word_boundary = None

@@ -8,6 +8,7 @@ Reading of pipeline config from a file into the data structure used to run and m
 import ConfigParser
 import copy
 import os
+import re
 import sys
 from ConfigParser import SafeConfigParser, RawConfigParser
 from cStringIO import StringIO
@@ -303,6 +304,8 @@ class PipelineConfig(object):
         # Construct a mapping from the section names as written to expanded sections and the other way
         original_to_expanded_sections = {}
         expanded_to_original_sections = {}
+        expanded_sections = {}  # This one stores None for non-expanded sections, or the original name if expanded
+        expanded_param_settings = {}  # And the settings used in the expansions
 
         for module_name in module_order:
             try:
@@ -346,8 +349,13 @@ class PipelineConfig(object):
                         # By default, connect to the default output from the previous module
                         module_config[input_key] = previous_module_name
 
+                ############## Special parameters ####################
+                # Various types of special parameters, which apply to all module types, are processed here
+                # And removed from the config so that they're not passed through to the ModuleInfo constructor
+
                 # Allow document map types to be used as filters simply by specifying filter=T
                 filter_type = str_to_bool(module_config.pop("filter", ""))
+
                 # Check for the tie_alts option, which causes us to tie together lists of alternatives instead
                 # of taking their product
                 tie_alts_raw = module_config.pop("tie_alts", "")
@@ -384,6 +392,16 @@ class PipelineConfig(object):
                 elif alt_naming == "pos":
                     # Positional naming
                     pos_alt_names = True
+
+                # Module variable parameters
+                modvar_params = [(key, val) for (key, val) in module_config.iteritems() if key.startswith("modvar_")]
+                for modvar_key, modvar_val in modvar_params:
+                    module_config.pop(modvar_key)
+                modvar_params = [(key[7:], val) for (key, val) in modvar_params]
+                # Don't do any more processing of these yet, but come back to them once we've expanded alts
+
+                # End of special parameter processing
+                #########################################################
 
                 # Parameters and inputs can be given multiple values, separated by |s
                 # In this case, we need to multiply out all the alternatives, to make multiple modules
@@ -517,6 +535,9 @@ class PipelineConfig(object):
                     alternative_config_names = [
                         "%s[%s]" % (module_name, _param_set_to_name(params_set)) for params_set in alternative_configs
                     ]
+                    for exp_name, params_set in zip(alternative_config_names, alternative_configs):
+                        expanded_param_settings[exp_name] = params_set
+
                     # Add in fixed params to them all
                     alternative_configs = [
                         dict([(key, val) for (key, (val, name)) in params_set], **copy.deepcopy(fixed_params))
@@ -527,11 +548,14 @@ class PipelineConfig(object):
                     original_to_expanded_sections[module_name] = alternative_config_names
                     for exp_name in alternative_config_names:
                         expanded_to_original_sections[exp_name] = module_name
+                        expanded_sections[exp_name] = module_name
                 else:
                     # No alternatives
                     expanded_module_configs.append((module_name, module_config))
                     original_to_expanded_sections[module_name] = [module_name]
                     expanded_to_original_sections[module_name] = module_name
+                    expanded_sections[module_name] = None
+                    expanded_param_settings[module_name] = []
 
                 # Now we create a module info for every expanded module config
                 # Often this will just be one, but it could be many, if there are several options with alternatives
@@ -541,10 +565,29 @@ class PipelineConfig(object):
                     try:
                         inputs, optional_outputs, options = module_info_class.process_config(
                             options_dict, module_name=module_name, previous_module_name=previous_module_name,
-                            module_expansions=original_to_expanded_sections
+                            module_expansions=original_to_expanded_sections,
                         )
                     except ModuleOptionParseError, e:
                         raise PipelineConfigParseError("error in '%s' options: %s" % (module_name, e))
+
+                    # Check that all the modules that feed into this one's inputs have been defined already
+                    input_module_names = []
+                    for input_name, input_specs in inputs.iteritems():
+                        input_module_group = []
+                        for input_spec in input_specs:
+                            if input_spec[0] not in pipeline:
+                                raise PipelineStructureError("unknown module '%s' in inputs to '%s'" %
+                                                             (input_spec[0], expanded_module_name))
+                            # Note all the modules that provide input to this one
+                            input_module_group.append(input_spec[0])
+                        input_module_names.append((input_name, input_module_group))
+                    input_modules = [
+                        (group_name, [pipeline[mod_name] for mod_name in img])
+                        for (group_name, img) in input_module_names
+                    ]
+                    module_variables = update_module_variables(input_modules, modvar_params,
+                                                               expanded_param_settings[expanded_module_name],
+                                                               options_dict)
 
                     # Instantiate the module info
                     module_info = module_info_class(
@@ -552,6 +595,11 @@ class PipelineConfig(object):
                         optional_outputs=optional_outputs, docstring=section_docstrings.get(module_name, ""),
                         # Make sure that the module info includes any optional outputs that are used by other modules
                         include_outputs=used_outputs.get(module_name, []),
+                        # Store the name of the module this was expanded from
+                        alt_expanded_from=expanded_sections[expanded_module_name],
+                        # Also store the parameter settings that this alternative used
+                        alt_param_settings=expanded_param_settings[expanded_module_name],
+                        module_variables=module_variables,
                     )
 
                     # If we're loading as a filter, wrap the module info
@@ -741,6 +789,171 @@ def multiply_alternatives(alternative_params):
     else:
         # No alternatives left, base case: return an empty list
         return [[]]
+
+
+def update_module_variables(input_modules, modvar_params, expanded_params, module_config):
+    """
+    Given the ModuleInfo instances that provide input to a module and the parsed module variable update
+    parameters (all those starting 'modvar_'), collect module variables from the inputs that this module
+    should inherit and update them according to the parameters.
+
+    .. todo ::
+
+       Write the user documentation for using this module variable feature
+
+    :param input_modules: list of ModuleInfos that the module gets input from
+    :param modvar_params: list of modvar params
+    :return: module variables dict for the new module
+    """
+    # First go through the input modules to inherit all their mod vars
+    module_variables = {}
+    # Also keep track of what values we inherited from specific inputs
+    inherited_variables = {}
+
+    for input_name, module_group in input_modules:
+        group_variables = {}
+        for module in module_group:
+            for var_name, var_val in module.module_variables.iteritems():
+                # If this conflicts with a value we've already got within the same group (multiple inputs), conjoin
+                if var_name in group_variables:
+                    group_variables[var_name] += " & %s" % var_val
+                else:
+                    # Simply inherit the value
+                    group_variables[var_name] = var_val
+        # Name clashes not within the same group just get overwritten by later values
+        module_variables.update(group_variables)
+        inherited_variables[input_name] = group_variables
+
+    # Apply all specified updates to the variables
+    modvar_params_to_modvars(modvar_params, module_variables, expanded_params, module_config, inherited_variables)
+    return module_variables
+
+
+def modvar_params_to_modvars(params, vars, expanded_params, module_config, variables_from_inputs):
+    """
+    Parse modvar_* params to work out what a module's module variables should be.
+
+    """
+    for key, val in params:
+        # Preprocess to remove line breaks and surrounding space
+        val = val.replace("\n", " ").strip()
+        if val in ["none", "undefined"]:
+            # Remove the variable
+            del vars[key]
+        else:
+            try:
+                vars[key], rest = _parse_modvar_param(val, vars, expanded_params, module_config, variables_from_inputs)
+                # After we've parsed everything we can, nothing else is allowed
+                if len(rest.strip()):
+                    raise ValueError("unexpected string: %s" % rest.strip())
+            except ValueError, e:
+                raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
+
+
+def _parse_modvar_param(param, vars, expanded_params, module_config, variables_from_inputs):
+    if param.startswith('"'):
+        # Start of a quoted string
+        # Look for the next quote
+        if '"' not in param[1:]:
+            raise ValueError("unmatched quote at '%s'" % param[:10])
+        val, __, rest = param[1:].partition('"')
+    elif param.startswith("altname("):
+        # Take the value of the alt name for a given parameter
+        inner, __, rest = param[8:].partition(")")
+        inner = inner.strip()
+        # This should be a parameter name that's been specified for the module and must be one that was expanded
+        # with alternatives
+        if inner not in module_config:
+            raise ValueError("parameter '%s' is not among those specified for the module, so we can't take a variable "
+                             "value from the name of its alternative ('altname()')" % inner)
+        # Look up the parameter name in the expanded params
+        exp_param = dict(expanded_params).get(inner, None)
+        if exp_param is None:
+            raise ValueError("parameter '%s' did not have alternative values, so we can't take a variable value from "
+                             "the name of its alternative ('altname()')" % inner)
+        alt_value, alt_name = exp_param
+        # If the alternative was given a name, use it; otherwise use its value
+        val = alt_name if alt_name is not None else alt_value
+    elif param.startswith("map("):
+        rest = param[4:].strip()
+        # The first argument should be a value to apply the map to, which may be a variable, or any other value
+        to_map_val, rest = _parse_modvar_param(rest, vars, expanded_params, module_config, variables_from_inputs)
+        # It could end up being a list of values, in which case we apply to map to each
+        rest = rest.strip()
+        if not rest.startswith(","):
+            raise ValueError("map(val, mapping) must take two arguments: the second is the mapping to apply")
+        rest = rest[1:].strip()
+        # A map is specified as the argument
+        # Parse it incrementally
+        var_map = {}
+        default_mapping = None
+        while True:
+            rest = rest.strip()
+            if rest.startswith(")"):
+                # Closing bracket: end of map
+                rest = rest[1:]
+                break
+            # The next bit defines the value we're mapping from
+            # Usually it will be a literal (quoted) string, but it doesn't have to be
+            # Allow for a special '*' value to denote a default case
+            if rest.startswith("*"):
+                rest = rest[1:].strip()
+                from_val = None
+            else:
+                from_val, rest = _parse_modvar_param(rest, vars, expanded_params, module_config, variables_from_inputs)
+                rest = rest.strip()
+            # This should be followed by a "->"
+            if not rest.startswith("->"):
+                raise ValueError("syntax error in map: expected '->', but got '%s'" % rest)
+            rest = rest[2:].strip()
+            # The next bit is the value we map to
+            to_val, rest = _parse_modvar_param(rest, vars, expanded_params, module_config, variables_from_inputs)
+
+            if from_val is None:
+                default_mapping = to_val
+            else:
+                # The normal case
+                var_map[from_val] = to_val
+            rest = rest.strip()
+            # Next we just go on to the following mapping, without any separator
+
+        # Now we apply the mapping
+        if to_map_val not in var_map:
+            # Don't know what to map this to
+            if default_mapping is not None:
+                # Use the specified default
+                val = default_mapping
+            else:
+                # No default value
+                raise ValueError("mapping got unknown input value '%s' and has no default ('*') mapping" % to_map_val)
+        else:
+            val = var_map[to_map_val]
+    else:
+        var_name_re = re.compile(r'^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)?')
+        # Not any of the special values / functions, must be a variable name
+        match = var_name_re.search(param)
+        if match is None:
+            raise ValueError("could not parse variable name at start of '%s'" % param)
+        var_name = param[:match.end()]
+        rest = param[match.end():]
+        # Allow this to be in the form 'input_name.variable_name'
+        if "." in var_name:
+            input_name, __, var_name = var_name.partition(".")
+            if input_name not in variables_from_inputs:
+                raise ValueError("tried to get variable '%s' from input '%s', but could not find that input. "
+                                 "Available inputs are: %s" %
+                                 (var_name, input_name, ", ".join(variables_from_inputs.keys())))
+            elif var_name not in variables_from_inputs[input_name]:
+                raise ValueError("tried to get variable '%s' from input '%s', but the input module doesn't have a "
+                                 "variable of that name" %
+                                 (var_name, input_name))
+            val = variables_from_inputs[input_name][var_name]
+        else:
+            if var_name not in vars:
+                raise ValueError("unknown module variable '%s'" % var_name)
+            val = vars[var_name]
+
+    return val, rest
 
 
 class ParameterTyingError(Exception):

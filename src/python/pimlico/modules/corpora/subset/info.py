@@ -21,8 +21,8 @@ from pimlico.datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_ty
 
 
 class CorpusSubsetFilter(IterableCorpus):
-    def __init__(self, pipeline, input_datatype, size, offset=0, skip_invalid=False):
-        IterableCorpus.__init__(self, None, pipeline)
+    def __init__(self, pipeline, input_datatype, size, offset=0, skip_invalid=False, **kwargs):
+        IterableCorpus.__init__(self, None, pipeline, **kwargs)
 
         self.skip_invalid = skip_invalid
         self.offset = offset
@@ -187,8 +187,10 @@ class ModuleInfo(BaseModuleInfo):
         if issubclass(output_datatype, TarredCorpus):
             return TarredCorpusSubsetFilter(self.pipeline, self.get_input("documents"),
                                             self.options["size"], offset=self.options["offset"],
-                                            skip_invalid=self.options["skip_invalid"])
+                                            skip_invalid=self.options["skip_invalid"],
+                                            module=self)
         else:
             return CorpusSubsetFilter(self.pipeline, self.get_input("documents"),
                                       self.options["size"], offset=self.options["offset"],
-                                      skip_invalid=self.options["skip_invalid"])
+                                      skip_invalid=self.options["skip_invalid"],
+                                      module=self)

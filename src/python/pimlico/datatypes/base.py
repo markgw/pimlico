@@ -65,6 +65,11 @@ class PimlicoDatatype(object):
     If `use_main_metadata=True` on an additional datatype, the same metadata will be read as for the main
     datatype to which this is an additional datatype.
 
+    `module` is the ModuleInfo instance for the pipeline module that this datatype was produced by. It may
+    be None, if the datatype wasn't instantiated by a module. It is not required to be set if you're
+    instantiating a datatype in some context other than module output. It should generally be set for
+    input datatypes, though, since they are treated as being created by a special input module.
+
     """
     datatype_name = "base_datatype"
     requires_data_preparation = False
@@ -93,7 +98,7 @@ class PimlicoDatatype(object):
     """
     emulated_datatype = None
 
-    def __init__(self, base_dir, pipeline, additional_name=None, use_main_metadata=False, **kwargs):
+    def __init__(self, base_dir, pipeline, module=None, additional_name=None, use_main_metadata=False, **kwargs):
         self.use_main_metadata = use_main_metadata
         self.additional_name = additional_name
         self.pipeline = pipeline
@@ -101,6 +106,7 @@ class PimlicoDatatype(object):
         # Search for an absolute path to the base dir that exists
         self.absolute_base_dir = pipeline.find_data_path(base_dir) if self.base_dir is not None else None
         self.data_dir = os.path.join(self.absolute_base_dir, "data") if self.absolute_base_dir is not None else None
+        self.module = module
         self._metadata = None
 
         self.options = kwargs
@@ -168,8 +174,8 @@ class PimlicoDatatype(object):
         return
 
     @classmethod
-    def create_from_options(cls, base_dir, pipeline, options={}):
-        return cls(base_dir, pipeline, **options)
+    def create_from_options(cls, base_dir, pipeline, options={}, module=None):
+        return cls(base_dir, pipeline, module=module, **options)
 
     def data_ready(self):
         """
@@ -215,7 +221,7 @@ class PimlicoDatatype(object):
 
         """
         return dict(self.supplied_additional)[name](
-            self.base_dir, self.pipeline, additional_name=additional_name, **self.options)
+            self.base_dir, self.pipeline, additional_name=additional_name, module=self.module, **self.options)
 
     @classmethod
     def check_type(cls, supplied_type):

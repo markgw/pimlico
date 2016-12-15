@@ -73,8 +73,8 @@ class TarredCorpusGrouper(object):
 class TarredCorpusFilter(TarredCorpus):
     emulated_datatype = TarredCorpus
 
-    def __init__(self, pipeline, input_datatype, archive_size, archive_basename="archive"):
-        IterableCorpus.__init__(self, None, pipeline)
+    def __init__(self, pipeline, input_datatype, archive_size, archive_basename="archive", **kwargs):
+        IterableCorpus.__init__(self, None, pipeline, **kwargs)
 
         self.archive_basename = archive_basename
         self.input_datatype = input_datatype
@@ -189,4 +189,4 @@ class ModuleInfo(BaseModuleInfo):
 
     def instantiate_output_datatype(self, output_name, output_datatype):
         return TarredCorpusFilter(self.pipeline, self.get_input("documents"), self.options["archive_size"],
-                                  archive_basename=self.options["archive_basename"])
+                                  archive_basename=self.options["archive_basename"], module=self)

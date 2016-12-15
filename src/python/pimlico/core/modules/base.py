@@ -29,6 +29,7 @@ from importlib import import_module
 
 import os
 import warnings
+
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
 from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
@@ -67,12 +68,20 @@ class BaseModuleInfo(object):
     main_module = None
 
     def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[], docstring="",
-                 include_outputs=[]):
+                 include_outputs=[], alt_expanded_from=None, alt_param_settings=[], module_variables={}):
         self.docstring = docstring
         self.inputs = inputs
         self.options = options
         self.module_name = module_name
         self.pipeline = pipeline
+        self.module_variables = module_variables
+        # If this module instance was created by expanded a module section in the config according to alternative
+        # parameter values, this attribute stores the name of the expanded module
+        self.alt_expanded_from = alt_expanded_from
+        # For alt-expanded modules, this stores a list of tuples (key, (val, name)) representing the values that
+        # were assigned to the parameters for this expansion
+        # key is the parameter name, val the assigned value and name the name associated with the alternative, if any
+        self.alt_param_settings = alt_param_settings
 
         self.default_output_name = (self.module_outputs+self.module_optional_outputs)[0][0]
 
@@ -409,7 +418,7 @@ class BaseModuleInfo(object):
         particular outputs' datatypes.
 
         """
-        return output_datatype(self.get_output_dir(output_name), self.pipeline)
+        return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self)
 
     def get_output(self, output_name=None, additional_names=None):
         """

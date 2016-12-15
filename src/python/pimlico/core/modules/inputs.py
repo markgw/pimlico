@@ -73,7 +73,7 @@ def input_module_factory(datatype):
 
         def instantiate_output_datatype(self, output_name, output_datatype):
             return output_datatype.create_from_options(self.get_output_dir(output_name), self.pipeline,
-                                                       copy.deepcopy(self.options))
+                                                       copy.deepcopy(self.options), module=self)
 
     if datatype.requires_data_preparation:
         # This module needs to be executed

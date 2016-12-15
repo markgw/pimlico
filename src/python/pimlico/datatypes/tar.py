@@ -31,12 +31,12 @@ class TarredCorpus(IterableCorpus):
     document_preprocessors = []
     data_point_type = RawDocumentType
 
-    def __init__(self, base_dir, pipeline, raw_data=False):
+    def __init__(self, base_dir, pipeline, raw_data=False, **kwargs):
         """
         If raw_data=True, post-processing of documents (as defined by subclasses) is not applied. Each
         document's text is just returned as read in from the file.
         """
-        super(TarredCorpus, self).__init__(base_dir, pipeline)
+        super(TarredCorpus, self).__init__(base_dir, pipeline, **kwargs)
         if self.data_dir is not None:
             self.tar_filenames = [f for f in
                                   [os.path.join(root, filename) for root, dirs, files in os.walk(self.data_dir)
