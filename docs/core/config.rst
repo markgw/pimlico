@@ -230,7 +230,7 @@ Where possible, names given to the alternative parameter values in the first mod
 to the next.
 
 Module variables: passing information through the pipeline
-==========================================================
+----------------------------------------------------------
 
 When a pipeline is read in, each module instance has a set of *module variables* associated with it. In your
 config file, you may specify assignments to the variables for a particular module. Each module inherits all
