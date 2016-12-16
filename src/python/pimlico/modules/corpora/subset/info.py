@@ -68,7 +68,7 @@ class CorpusSubsetFilter(IterableCorpus):
                 return
 
     def data_ready(self):
-        return True
+        return self.input_datatype.data_ready()
 
 
 class TarredCorpusSubsetFilter(TarredCorpus):
@@ -128,7 +128,7 @@ class TarredCorpusSubsetFilter(TarredCorpus):
                 return
 
     def data_ready(self):
-        return True
+        return self.input_datatype.data_ready()
 
 
 class DataPointTypeFromInput(DynamicOutputDatatype):
