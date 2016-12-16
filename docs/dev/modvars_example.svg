@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="modvars_example.svg">
+   sodipodi:docname="modvars_example.svg"
+   inkscape:export-filename="/home/magranro/code/langsim/pimlico/docs/_static/modvars_example.png"
+   inkscape:export-xdpi="37.400002"
+   inkscape:export-ydpi="37.400002">
   <defs
      id="defs4">
     <marker
@@ -285,8 +288,8 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="297.53782"
+     inkscape:zoom="1.6969954"
+     inkscape:cx="601.65161"
      inkscape:cy="296.00866"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
