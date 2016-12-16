@@ -797,10 +797,6 @@ def update_module_variables(input_modules, modvar_params, expanded_params, modul
     parameters (all those starting 'modvar_'), collect module variables from the inputs that this module
     should inherit and update them according to the parameters.
 
-    .. todo ::
-
-       Write the user documentation for using this module variable feature
-
     :param input_modules: list of ModuleInfos that the module gets input from
     :param modvar_params: list of modvar params
     :return: module variables dict for the new module

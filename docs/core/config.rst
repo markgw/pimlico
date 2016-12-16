@@ -228,3 +228,115 @@ of `my_module` (`my_module[1]`, etc) and 3 corresponding versions of `my_next_mo
 
 Where possible, names given to the alternative parameter values in the first module will be carried through
 to the next.
+
+Passing information through the pipeline: module variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When a pipeline is read in, each module instance has a set of *module variables* associated with it. In your
+config file, you may specify assignments to the variables for a particular module. Each module inherits all
+of the variable assignments from modules that it receives its inputs from.
+
+The main reason for having module variables it to be able to do things in later modules that depend on what
+path through the pipeline an input came from.
+
+Module variables are set by including parameters in a module's config of the form `modvar_<name> = <value>`. This
+will assign `value` to the variable `name` for this module. The simplest form of assignment is just a string literal,
+enclosed in double quotes:
+
+.. code-block:: ini
+
+   [my_module]
+   type=module.type.path
+   modvar_myvar = "Value of my variable"
+
+Say we have a simple pipeline that has a single source
+of data, with different versions of the dataset for different languages (English and Swedish).
+A series of modules process each language
+in an identical way and, at the end, outputs from all languages are collected by a single `summary` module.
+This final
+module may need to know what language each of its incoming datasets represents, so that it can output something
+that we can understand.
+
+The two languages are given as alternative values for a parameter `path`, and the whole pipeline gets
+automatically expanded into two paths for the two alternatives:
+
+.. image:: modvars_example.png
+
+The `summary` module gets its two inputs for the two different languages as a multiple-input: this means we could
+expand this pipeline to as many languages as we want, just by adding to the `input_src` module's `path` parameter.
+
+However, as far as `summary` is concerned, this is just a list of datasets -- it doesn't know that one of them is
+English and one is Swedish. But let's say we want it to output a table of results. We're going to need some labels
+to identify the languages.
+
+The solution is to add a module variable to the first module that takes different values when it gets expanded
+into two modules. For this, we can use the `altname` function in a modvar assignment: this assigns the name of
+the expanded module's alternative for a given parameter that has alternatives in the config.
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   modvar_lang=altname(path)
+
+Now the expanded module `input_src[en]` will have the module variable `lang="en"` and the Swedish version `lang="sv"`.
+This value gets passed from module to module down the two paths in the pipeline.
+The `summary` module can retrieve this information from the `module_variables` attribute of the module-info
+(for `process2`) associated with the input dataset.
+
+.. code-block:: py
+
+   # Code in executor
+   # This is a MultipleInput-type input, so we get a list of datasets
+   datasets = self.info.get_input()
+   for d in datasets:
+       language = d.module.module_variables["lang"]
+
+A further function `map` allows you to apply a mapping to a value, rather like a Python dictionary lookup. Its
+first argument is the value to be mapped (or anything that expands to a value, using modvar assignment syntax).
+The second is the mapping. This is simply a space-separated list of source-target mappings of the form
+`source -> target`. Typically both the sources and targets will be string literals.
+
+Now we can give our languages legible names. (Here we're splitting the definition over multiple indented lines, as
+permitted by config file syntax, which makes the mapping easier to read.)
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   modvar_lang=map(
+       altname(path),
+       "en" -> "English"
+       "sv" -> "Svenska")
+
+The assignments may also reference variable names, including those previously assigned to in the same module and
+those received from the input modules.
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   modvar_lang=altname(path)
+   modvar_lang_name=map(
+       lang,
+       "en" -> "English"
+       "sv" -> "Svenska")
+
+If a module gets two values for the same variable from multiple inputs, the first value will simply be overridden
+by the second. Sometimes it's useful to map module variables from specific inputs to different modvar names.
+For example, if we're combining two different languages, we might need to keep track of what the two languages
+we combined were. We can do this using the notation `input_name.var_name`, which refers to the value of module
+variable `var_name` that was received from input `input_name`.
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   modvar_lang=altname(path)
+
+   [combiner]
+   type=my.language.combiner
+   input_lang_a=lang_data
+   input_lang_b=lang_data
+   modvar_first_lang=lang_a.lang
+   modvar_second_lang=lang_b.lang
