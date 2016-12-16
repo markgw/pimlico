@@ -229,8 +229,8 @@ of `my_module` (`my_module[1]`, etc) and 3 corresponding versions of `my_next_mo
 Where possible, names given to the alternative parameter values in the first module will be carried through
 to the next.
 
-Passing information through the pipeline: module variables
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Module variables: passing information through the pipeline
+==========================================================
 
 When a pipeline is read in, each module instance has a set of *module variables* associated with it. In your
 config file, you may specify assignments to the variables for a particular module. Each module inherits all
@@ -238,6 +238,9 @@ of the variable assignments from modules that it receives its inputs from.
 
 The main reason for having module variables it to be able to do things in later modules that depend on what
 path through the pipeline an input came from.
+
+Basic assignment
+~~~~~~~~~~~~~~~~
 
 Module variables are set by including parameters in a module's config of the form `modvar_<name> = <value>`. This
 will assign `value` to the variable `name` for this module. The simplest form of assignment is just a string literal,
@@ -248,6 +251,9 @@ enclosed in double quotes:
    [my_module]
    type=module.type.path
    modvar_myvar = "Value of my variable"
+
+Names of alternatives
+~~~~~~~~~~~~~~~~~~~~~
 
 Say we have a simple pipeline that has a single source
 of data, with different versions of the dataset for different languages (English and Swedish).
@@ -281,6 +287,10 @@ the expanded module's alternative for a given parameter that has alternatives in
 
 Now the expanded module `input_src[en]` will have the module variable `lang="en"` and the Swedish version `lang="sv"`.
 This value gets passed from module to module down the two paths in the pipeline.
+
+Usage in module code
+~~~~~~~~~~~~~~~~~~~~
+
 The `summary` module can retrieve this information from the `module_variables` attribute of the module-info
 (for `process2`) associated with the input dataset.
 
@@ -291,6 +301,9 @@ The `summary` module can retrieve this information from the `module_variables` a
    datasets = self.info.get_input()
    for d in datasets:
        language = d.module.module_variables["lang"]
+
+Other assignment syntax
+~~~~~~~~~~~~~~~~~~~~~~~
 
 A further function `map` allows you to apply a mapping to a value, rather like a Python dictionary lookup. Its
 first argument is the value to be mapped (or anything that expands to a value, using modvar assignment syntax).
