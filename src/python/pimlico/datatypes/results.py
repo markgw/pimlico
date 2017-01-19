@@ -13,6 +13,8 @@ class NumericResult(PimlicoDatatype):
     For example, allows results to be plotted by passing them into a graph plotting module.
 
     """
+    datatype_name = "numeric_result"
+
     def __init__(self, base_dir, pipeline, **kwargs):
         super(NumericResult, self).__init__(base_dir, pipeline, **kwargs)
         self._data_cache = None
