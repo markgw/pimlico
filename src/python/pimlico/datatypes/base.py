@@ -15,7 +15,7 @@ as far as possible, these should be converted into standard datatypes like
 
 .. note::
 
-   The following classes were moved to :mod:`~.core` in version 0.6rc
+   The following classes were moved to :mod:`~pimlico.datatypes.core` in version 0.6rc
 
 """
 import cPickle as pickle
