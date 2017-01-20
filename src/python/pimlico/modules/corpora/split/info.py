@@ -18,7 +18,8 @@ a case, just put the smaller set first and don't request the optional output `do
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import DynamicOutputDatatype, StringList, TypeFromInput
+from pimlico.datatypes.base import DynamicOutputDatatype, TypeFromInput
+from pimlico.datatypes.core import StringList
 from pimlico.datatypes.tar import TarredCorpus
 
 

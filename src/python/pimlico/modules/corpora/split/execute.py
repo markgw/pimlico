@@ -1,7 +1,7 @@
 import random
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.base import StringListWriter
+from pimlico.datatypes.core import StringListWriter
 from pimlico.datatypes.tar import TarredCorpusWriter
 from pimlico.utils.progress import get_progress_bar
 

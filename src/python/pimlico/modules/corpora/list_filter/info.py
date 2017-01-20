@@ -8,7 +8,8 @@ according to a given list of documents, putting those in the list in one set and
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import StringList, TypeFromInput
+from pimlico.datatypes.base import TypeFromInput
+from pimlico.datatypes.core import StringList
 from pimlico.datatypes.tar import TarredCorpus
 
 
