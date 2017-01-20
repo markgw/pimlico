@@ -611,6 +611,17 @@ class BaseModuleInfo(object):
             [module_name for input_connections in self.inputs.values()
              for (module_name, output_name, additional_names) in input_connections])
 
+    def get_transitive_dependencies(self):
+        """
+        Transitive closure of `dependencies`.
+
+        :return: list of names of modules that this one recursively (transitively) depends on for its inputs.
+        """
+        deps = self.dependencies
+        for dep in deps:
+            deps.extend(self.pipeline[dep].get_transitive_dependencies())
+        return remove_duplicates(deps)
+
     def typecheck_inputs(self):
         if self.is_input() or len(self.module_inputs) == 0:
             # Nothing to check

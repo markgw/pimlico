@@ -105,6 +105,10 @@ if __name__ == "__main__":
     status.add_argument("--history", "-i", action="store_true",
                         help="When a module name is given, even more detailed output is given, including the full "
                              "execution history of the module")
+    status.add_argument("--deps-of", "-d",
+                        help="Restrict to showing only the named/numbered module and any that are (transitive) "
+                             "dependencies of it. That is, show the whole tree of modules that lead through "
+                             "the pipeline to the given module")
     status.set_defaults(func=status_cmd)
 
     visualize = subparsers.add_parser("visualize", help="Visualize the pipeline, with status information for modules")

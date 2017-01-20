@@ -75,8 +75,17 @@ def status_cmd(pipeline, opts):
                 print "\nAll modules in pipeline with statuses:"
                 module_names = [("-", module) for module in pipeline.modules]
             else:
-                print "\nModule execution schedule with statuses:"
                 module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
+
+                # If the --deps-of option is given, filter the modules we show to only those that lead to the given one
+                if opts.deps_of is not None:
+                    dest_module = module_number_to_name(pipeline, opts.deps_of)
+                    print "\nRestricting status view to dependencies of module '%s'" % dest_module
+                    # Check through the pipeline to find all dependent modules
+                    include_mods = [dest_module] + pipeline[dest_module].get_transitive_dependencies()
+                    module_names = [(title, module) for (title, module) in module_names if module in include_mods]
+                else:
+                    print "\nModule execution schedule with statuses:"
             bullets, module_names = zip(*module_names)
 
             # Allow the range of modules to be filtered
