@@ -373,13 +373,34 @@ class BaseModuleInfo(object):
             return relative_dir
 
     def get_absolute_output_dir(self, output_name):
-        if output_name is None:
-            output_name = self.default_output_name
-        return os.path.join(self.get_module_output_dir(short_term_store=True), output_name)
+        """
+        The simplest way to get hold of the directory to use to output data to for a given output. This is
+        the usual way to get an output directory for an output writer.
+
+        The directory is an absolute path to a location in the Pimlico short-term store.
+
+        :param output_name: the name of an output
+        :return: the absolute path to the output directory to use for the named output
+        """
+        return self.get_output_dir(output_name, short_term_store=True)
 
     def get_output_dir(self, output_name, short_term_store=False):
+        """
+        :param short_term_store: return an absolute path in the short-term store. If False (default), return a
+        relative path, specified relative to the root of the Pimlico store used. This allows multiple stores
+        to be searched for output
+        :param output_name: the name of an output
+        :return: the path to the output directory to use for the named output, which may be relative to the root
+        of the Pimlico store in use (default) or an absolute path in the short-term store, depending on
+        `short_term_store`
+        """
         if output_name is None:
             output_name = self.default_output_name
+
+        if output_name not in self.output_names:
+            raise PipelineStructureError("%s module does not have an output named '%s'. Available outputs: %s" %
+                                         (self.module_type_name, output_name, ", ".join(self.output_names)))
+
         return os.path.join(self.get_module_output_dir(short_term_store=short_term_store), output_name)
 
     def get_output_datatype(self, output_name=None, additional_names=[]):
