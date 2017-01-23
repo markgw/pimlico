@@ -31,7 +31,9 @@ class ModuleInfo(BaseModuleInfo):
     module_optional_outputs = [("doc_list2", StringList)]
     module_options = {
         "set1_size": {
-            "help": "Proportion of the corpus to put in the first set, float between 0.0 and 1.0. Default: 0.2",
+            "help": "Proportion of the corpus to put in the first set, float between 0.0 and 1.0. "
+                    "If an integer >1 is given, this is treated as the absolute number of documents to put in the "
+                    "first set, rather than a proportion. Default: 0.2 (20%)",
             "type": float,
             "default": 0.2,
         },

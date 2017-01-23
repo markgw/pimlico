@@ -18,7 +18,18 @@ class ModuleExecutor(BaseModuleExecutor):
         set2_list = []
         output_set2_list = "doc_list2" in self.info.output_names
         # Track how many more docs are yet to be output to each set
-        set1_remaining = len(input_corpus) * self.info.options["set1_size"]
+        if self.info.options["set1_size"] > 1.:
+            # A number of documents was given
+            set1_remaining = int(self.info.options["set1_size"])
+            if set1_remaining > len(input_corpus):
+                # We tried to create a split that's bigger than the whole corpus
+                # Put everything in set1, but output a warning, as it probably wasn't intended this way
+                self.log.warn("Requested size of corpus split 1 (%d) is greater than the total size (%d). Split 2 "
+                              "will be empty" % (set1_remaining, len(input_corpus)))
+                set1_remaining = len(input_corpus)
+        else:
+            # A proportion of the dataset was given
+            set1_remaining = len(input_corpus) * self.info.options["set1_size"]
         set2_remaining = len(input_corpus) - set1_remaining
 
         pbar = get_progress_bar(len(input_corpus), title="Splitting")

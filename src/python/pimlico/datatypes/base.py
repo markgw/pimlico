@@ -421,6 +421,7 @@ class IterableCorpus(PimlicoDatatype):
     data_point_type = RawDocumentType
 
     def __init__(self, *args, **kwargs):
+        self.raw_data = kwargs.pop("raw_data", False)
         super(IterableCorpus, self).__init__(*args, **kwargs)
         # Prepare the document datatype instance
         # Pass in all the options/kwargs we've got, which include any options that the document type specifies
@@ -474,7 +475,7 @@ class IterableCorpus(PimlicoDatatype):
         # Catch invalid documents
         document = InvalidDocument.invalid_document_or_text(data)
         # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
-        if type(document) is not InvalidDocument:
+        if type(document) is not InvalidDocument and not self.raw_data:
             try:
                 document = self.data_point_type_instance.process_document(document)
             except BaseException, e:

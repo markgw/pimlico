@@ -132,7 +132,7 @@ class RawTextDirectory(IterableCorpus):
                 # Apply datatype-specific processing of the data
                 document = self.process_document_data_with_datatype(data)
                 # Allow subclasses to apply filters to the data
-                if not isinstance(document, InvalidDocument):
+                if not isinstance(document, InvalidDocument) and not self.raw_data:
                     document = self.filter_document(document)
                 yield rel_path, document
 

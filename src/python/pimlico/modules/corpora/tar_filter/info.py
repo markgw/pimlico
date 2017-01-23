@@ -112,6 +112,9 @@ class TarredCorpusFilter(TarredCorpus):
             # Start after we've hit this (archive, doc name)
             started = False
 
+        # Pass through the raw_data attribute to the input corpus before we start iterating
+        self.input_datatype.raw_data = self.raw_data
+
         for doc_name, doc in self.input_datatype:
             # Update the archive name, perhaps moving on to the next one
             archive_name = grouper.next_document()

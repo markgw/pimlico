@@ -56,6 +56,7 @@ class PipelineConfig(object):
         # Pipeline is empty to start with
         self.module_infos = {}
         self.module_order = []
+        self.expanded_modules = {}
 
         # Certain standard system-wide settings, loaded from the local config
         self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name, self.variant)
@@ -126,6 +127,9 @@ class PipelineConfig(object):
         self.module_order.append(module_info.module_name)
         # Check that the moduleinfo knows what pipeline it's in (it's usually already set by this point)
         module_info.pipeline = self
+        # Keep a dictionary of expanded modules
+        if module_info.alt_expanded_from is not None:
+            self.expanded_modules.setdefault(module_info.alt_expanded_from, []).append(module_info.module_name)
 
     def get_module_schedule(self):
         """
@@ -421,10 +425,14 @@ class PipelineConfig(object):
                                 not val_module_name.startswith("*") and not "," in val_module_name:
                             # The previous module has been expanded: add all of the resulting modules as alternatives
                             previous_modules = original_to_expanded_sections[val_module_name]
-                            # If the previous module names are already in the form module{alt_name}, take the alt_name
+                            # Include the rest of the input specifier (generally an output name)
+                            previous_modules = [
+                                "%s.%s" % (mod, rest_of_val) if rest_of_val else mod for mod in previous_modules
+                            ]
+                            # If the previous module names are already in the form module[alt_name], take the alt_name
                             # from there
                             previous_module_alt_names = [
-                                mod[mod.index("[")+1:-1] if "[" in mod else None for mod in previous_modules
+                                mod[mod.index("[")+1:mod.index("]")] if "[" in mod else None for mod in previous_modules
                             ]
                             new_alternatives.extend([
                                 "{%s}%s" % (alt_name, mod) if alt_name is not None else mod

@@ -31,7 +31,7 @@ class TarredCorpus(IterableCorpus):
     document_preprocessors = []
     data_point_type = RawDocumentType
 
-    def __init__(self, base_dir, pipeline, raw_data=False, **kwargs):
+    def __init__(self, base_dir, pipeline, **kwargs):
         """
         If raw_data=True, post-processing of documents (as defined by subclasses) is not applied. Each
         document's text is just returned as read in from the file.
@@ -47,7 +47,6 @@ class TarredCorpus(IterableCorpus):
         else:
             self.tar_filenames = []
             self.tarballs = []
-        self.raw_data = raw_data
 
     def extract_file(self, archive_name, filename):
         """
