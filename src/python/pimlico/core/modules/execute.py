@@ -75,10 +75,9 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
         requested_modules = [m.module_name for m in modules]
         modules = collect_unexecuted_dependencies(modules)
         if len(modules) > len(requested_modules):
-            log.info("Added unexecuted dependent modules to the execution list")
-            log.info("Resulting list: %s" % ", ".join(
-                # Mark added modules with a *
-                ("*" if m.module_name not in requested_modules else "") + m.module_name for m in modules
+            # Report which modules we added
+            log.info("Added unexecuted dependent modules to the execution list: %s" % ", ".join(
+                m.module_name for m in modules if m.module_name not in requested_modules
             ))
 
     # Check that the module is ready to run
@@ -103,12 +102,12 @@ def check_modules_ready(pipeline, modules, log, force_rerun=False):
     :return:
     """
     already_run = []
+    log.info("Checking dependencies and inputs for module%s" % ("s" if len(modules) > 1 else ""))
 
     for module in modules:
         module_name = module.module_name
 
         try:
-            log.info("Checking dependencies and inputs for module '%s'" % module_name)
             # Run checks for runtime dependencies of this module and any others that will be run
             dep_checks_passed = print_missing_dependencies(pipeline, [module_name])
             if not dep_checks_passed:

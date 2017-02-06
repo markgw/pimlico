@@ -21,6 +21,7 @@ as far as possible, these should be converted into standard datatypes like
 import cPickle as pickle
 import os
 import re
+from pandas import json
 from traceback import format_exc
 
 from pimlico.datatypes.documents import RawDocumentType
@@ -111,7 +112,7 @@ class PimlicoDatatype(object):
         self.absolute_base_dir = pipeline.find_data_path(base_dir) if self.base_dir is not None else None
         self.data_dir = os.path.join(self.absolute_base_dir, "data") if self.absolute_base_dir is not None else None
         self.module = module
-        self._metadata = None
+        self._metadata_filename = None
 
         self.options = kwargs
         # Set default options from the input module options
@@ -126,21 +127,39 @@ class PimlicoDatatype(object):
             self.datatype_name = _class_name_word_boundary.sub(r"\1_\2", type(self).__name__).lower()
 
     def _get_metadata(self):
-        if self._metadata is None:
+        """
+        Read in metadata from a file in the corpus directory.
+
+        Note that this is no longer cached in memory. We need to be sure that the metadata values returned are
+        always up to date with what is on disk, so always re-read the file when we need to get a value from
+        the metadata. Since the file is typically small, this is unlikely to cause a problem. If we decide to
+        return to cacheing the metadata dictionary in future, we will need to make sure that we can never run into
+        problems with out-of-date metadata being returned.
+
+        """
+        if self._metadata_filename is None and self.absolute_base_dir is not None:
+            # Not previously been able to access metadata, but corpus dir appears to be available now
             if self.additional_name is None or self.use_main_metadata:
                 metadata_filename = "corpus_metadata"
             else:
                 metadata_filename = "%s_corpus_metadata" % self.additional_name
 
-            if self.absolute_base_dir is not None and \
-                    os.path.exists(os.path.join(self.absolute_base_dir, metadata_filename)):
-                # Load dictionary of metadata
-                with open(os.path.join(self.absolute_base_dir, metadata_filename), "r") as f:
-                    self._metadata = pickle.load(f)
-            else:
-                # No metadata written: data may not have been written yet
-                self._metadata = {}
-        return self._metadata
+            self._metadata_filename = os.path.join(self.absolute_base_dir, metadata_filename)
+
+        if self._metadata_filename is not None and os.path.exists(self._metadata_filename):
+            # Load dictionary of metadata
+            with open(self._metadata_filename, "r") as f:
+                raw_data = f.read()
+                try:
+                    # In later versions of Pimlico, we store metadata as JSON, so that it can be read in the file
+                    return json.loads(raw_data)
+                except ValueError:
+                    # If the metadata was written by an earlier Pimlico version, we fall back to the old system:
+                    # it's a pickled dictionary
+                    return pickle.loads(raw_data)
+        else:
+            # No metadata written: data may not have been written yet
+            return {}
     metadata = property(_get_metadata)
 
     def get_required_paths(self):
@@ -397,7 +416,12 @@ class PimlicoDatatypeWriter(object):
             metadata_filename = "%s_corpus_metadata" % self.additional_name
 
         with open(os.path.join(self.base_dir, metadata_filename), "w") as f:
-            pickle.dump(self.metadata, f, -1)
+            # We used to pickle the metadata dictionary, but now we store it as JSON, so it's readable
+            json.dump(self.metadata, f)
+            # Make sure that the file doesn't get buffered anywhere, but is fully written to disk now
+            # We need to be sure that the up-to-date metadata is available immediately
+            f.flush()
+            os.fsync(f.fileno())
 
     def subordinate_additional_name(self, name):
         if self.additional_name is not None:
@@ -443,7 +467,12 @@ class IterableCorpus(PimlicoDatatype):
         raise NotImplementedError
 
     def __len__(self):
-        return self.metadata["length"]
+        try:
+            return self.metadata["length"]
+        except KeyError:
+            raise DatatypeLoadError("no length found in metadata for %s corpus. It is an iterable corpus, so if it "
+                                    "is ready to use, the length should have been stored. Metadata keys found: %s" %
+                                    (self.datatype_name, self.metadata.keys()))
 
     def get_detailed_status(self):
         return super(IterableCorpus, self).get_detailed_status() + [
