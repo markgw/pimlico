@@ -109,6 +109,10 @@ if __name__ == "__main__":
                         help="Restrict to showing only the named/numbered module and any that are (transitive) "
                              "dependencies of it. That is, show the whole tree of modules that lead through "
                              "the pipeline to the given module")
+    status.add_argument("--no-color", "--nc", action="store_true",
+                        help="Don't include terminal color characters, even if the terminal appears to support them. "
+                             "This can be useful if the automatic detection of color terminals doesn't work and the "
+                             "status command displays lots of horrible escape characters")
     status.set_defaults(func=status_cmd)
 
     visualize = subparsers.add_parser("visualize", help="Visualize the pipeline, with status information for modules")

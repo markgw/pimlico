@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+import os
 from operator import itemgetter
 
 import colorama
@@ -40,6 +41,9 @@ def status_colored(module, text=None):
 
 
 def status_cmd(pipeline, opts):
+    # If the colour output has been disabled by a switch, use the standard env var to disable it
+    if opts.no_color:
+        os.environ["ANSI_COLORS_DISABLED"] = "1"
     # Use colorama to control termcolor so that it only outputs colours to the terminal
     colorama.init()
     try:
