@@ -1,10 +1,8 @@
-import traceback
-from operator import itemgetter
-
 import os
-from cmd import Cmd
-
 import readline
+import traceback
+from cmd import Cmd
+from operator import itemgetter
 
 from pimlico import LOG_DIR
 from pimlico.utils.core import is_identifier
@@ -50,16 +48,24 @@ class DataShell(Cmd):
                 self.commands[command_str] = command
         # Add help method for each command
         for command_name in self.commands:
+            # We can only do this with command names that are valid Python identifiers
             if is_identifier(command_name):
                 def _help_cmd():
                     print self.commands[command_name].help_text
                 setattr(self, "help_%s" % command_name, _help_cmd)
+                def _do_cmd(line):
+                    self._run_command(command_name, line.split())
+                setattr(self, "do_%s" % command_name, _do_cmd)
 
         # Environment for executing Python commands
         # May get updated as time goes on
         self.env = {
             "data": self.data,
         }
+
+    def get_names(self):
+        # Overridden so it allows our help methods to be added dynamically
+        return dir(self)
 
     def do_EOF(self, line):
         """ Exits the shell """
@@ -73,25 +79,31 @@ class DataShell(Cmd):
 
     def postloop(self):
         # Save shell history
+        if not os.path.exists(os.path.dirname(HISTORY_FILE)):
+            os.makedirs(os.path.dirname(HISTORY_FILE))
         readline.write_history_file(HISTORY_FILE)
 
     def emptyline(self):
         """ Don't repeat the last command (default): ignore empty lines """
         return
 
+    def _run_command(self, cmd_name, parts):
+        cmd = self.commands[cmd_name]
+        # Process the rest of the line to get args and kwargs
+        kwargs = dict(itemgetter(0, 2)(arg.partition("=")) for arg in parts if "=" in arg)
+        args = [arg for arg in parts if "=" not in arg]
+        cmd.execute(self, *args, **kwargs)
+
     def default(self, line):
         """
-        We use this to handle most commands, including the default fallback, which is to execute Python
+        We use this to handle commands that can't be handled using the do_ pattern.
+        Also handles the default fallback, which is to execute Python.
 
         """
         parts = line.split()
         if len(parts):
             if parts[0] in self.commands:
-                cmd = self.commands[parts[0]]
-                # Process the rest of the line to get args and kwargs
-                kwargs = dict(itemgetter(0, 2)(arg.partition("=")) for arg in parts[1:] if "=" in arg)
-                args = [arg for arg in parts[1:] if "=" not in arg]
-                cmd.execute(self, *args, **kwargs)
+                self._run_command(parts[0], parts[1:])
             else:
                 # If this isn't recognised as a command, try executing with Python interpreter
                 exec line in self.env

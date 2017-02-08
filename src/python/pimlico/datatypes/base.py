@@ -150,6 +150,9 @@ class PimlicoDatatype(object):
             # Load dictionary of metadata
             with open(self._metadata_filename, "r") as f:
                 raw_data = f.read()
+                if len(raw_data) == 0:
+                    # Empty metadata file: return empty metadata no matter what
+                    return {}
                 try:
                     # In later versions of Pimlico, we store metadata as JSON, so that it can be read in the file
                     return json.loads(raw_data)
