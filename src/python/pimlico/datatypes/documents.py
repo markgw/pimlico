@@ -43,4 +43,8 @@ class RawTextDocumentType(RawDocumentType):
     not used subclasses of this type, so they will not be considered compatible if this type is used as a
     requirement.
 
+    Text is assumed to be UTF-8 encoded.
+
     """
+    def process_document(self, doc):
+        return doc.decode("utf-8")
