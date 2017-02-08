@@ -21,7 +21,7 @@ as far as possible, these should be converted into standard datatypes like
 import cPickle as pickle
 import os
 import re
-from pandas import json
+import json
 from traceback import format_exc
 
 from pimlico.datatypes.documents import RawDocumentType
