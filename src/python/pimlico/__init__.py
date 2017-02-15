@@ -32,11 +32,13 @@ EXAMPLES_DIR = os.path.join(PIMLICO_ROOT, "examples")
 
 def install_core_dependencies():
     # Always check that core dependencies are satisfied before running anything
-    unavailable = [dep for dep in CORE_PIMLICO_DEPENDENCIES if not dep.available()]
+    # Core dependencies are not allowed to depend on the local config, as we can't get to it at this point
+    # We just pass in an empty dictionary
+    unavailable = [dep for dep in CORE_PIMLICO_DEPENDENCIES if not dep.available({})]
     if len(unavailable):
         print >>sys.stderr, "Some core Pimlico dependencies are not available: %s\n" % \
                             ", ".join(dep.name for dep in unavailable)
-        uninstalled = check_and_install(CORE_PIMLICO_DEPENDENCIES)
+        uninstalled = check_and_install(CORE_PIMLICO_DEPENDENCIES, {})
         if len(uninstalled):
             print >>sys.stderr, "Unable to install all core dependencies: exiting"
             sys.exit(1)

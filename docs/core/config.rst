@@ -237,7 +237,9 @@ config file, you may specify assignments to the variables for a particular modul
 of the variable assignments from modules that it receives its inputs from.
 
 The main reason for having module variables it to be able to do things in later modules that depend on what
-path through the pipeline an input came from.
+path through the pipeline an input came from. Once you have defined the sequence of processing steps that
+pass module variables through the pipeline, apply mappings to them, etc, you can use them in the parameters
+passed into modules.
 
 Basic assignment
 ~~~~~~~~~~~~~~~~
@@ -287,20 +289,6 @@ the expanded module's alternative for a given parameter that has alternatives in
 
 Now the expanded module `input_src[en]` will have the module variable `lang="en"` and the Swedish version `lang="sv"`.
 This value gets passed from module to module down the two paths in the pipeline.
-
-Usage in module code
-~~~~~~~~~~~~~~~~~~~~
-
-The `summary` module can retrieve this information from the `module_variables` attribute of the module-info
-(for `process2`) associated with the input dataset.
-
-.. code-block:: py
-
-   # Code in executor
-   # This is a MultipleInput-type input, so we get a list of datasets
-   datasets = self.info.get_input()
-   for d in datasets:
-       language = d.module.module_variables["lang"]
 
 Other assignment syntax
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -353,3 +341,75 @@ variable `var_name` that was received from input `input_name`.
    input_lang_b=lang_data
    modvar_first_lang=lang_a.lang
    modvar_second_lang=lang_b.lang
+
+Use in module parameters
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To make something in a module's execution
+dependent on its module variables, you can insert them into module parameters.
+
+For example, say we want one of the module's parameters to make use of the `lang` variable we defined above:
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   modvar_lang=altname(path)
+   some_param=$(lang)
+
+Note the difference to other variable substitutions, which use the `%(varname)s` notation. For modvars, we
+use the notation `$(varname)`.
+
+We can also put the value in the middle of other text:
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   modvar_lang=altname(path)
+   some_param=myval-$(lang)-continues
+
+The modvar processing to compute a particular module's set of variable assignments is performed before the
+substitution. This means that you can do any modvar processing specific to the module instance, in the various
+ways defined above, and use the resulting value in other parameters. For example:
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   modvar_lang=altname(path)
+   modvar_mapped_lang=map(lang,
+         "en" -> "eng"
+         "sv" -> "swe"
+      )
+   some_param=$(mapped_lang)
+
+You can also place in the `$(...)` construct any of the variable processing operations shown above for assignments
+to module variables. This is a little more concise than first assigning values to modvars, if you don't need
+to use the variables again anywhere else. For example:
+
+.. code-block:: ini
+
+   [input_src]
+   path={en}/to/english | {sv}/to/swedish
+   some_param=$(map(altname(path)),
+         "en" -> "eng"
+         "sv" -> "swe"
+      ))
+
+
+Usage in module code
+~~~~~~~~~~~~~~~~~~~~
+
+A module's executor can also retrieve the values assigned to module variables from the `module_variables`
+attribute of the module-info associated with the input dataset. Sometimes this can be useful when you are
+writing your own module code, though the above usage to pass values from (or dependent on) module variables
+into module parameters is more flexible, so should generally be preferred.
+
+.. code-block:: py
+
+   # Code in executor
+   # This is a MultipleInput-type input, so we get a list of datasets
+   datasets = self.info.get_input()
+   for d in datasets:
+       language = d.module.module_variables["lang"]

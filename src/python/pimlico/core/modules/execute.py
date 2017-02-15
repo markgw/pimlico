@@ -82,7 +82,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
 
     # Check that the module is ready to run
     # If anything fails, an exception is raised
-    check_modules_ready(pipeline, modules, log, force_rerun=force_rerun)
+    check_modules_ready(pipeline, modules, log)
 
     if check_only:
         log.info("All checks passed")
@@ -91,7 +91,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
         execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug)
 
 
-def check_modules_ready(pipeline, modules, log, force_rerun=False):
+def check_modules_ready(pipeline, modules, log):
     """
     Check that a module is ready to be executed. Always called before execution begins.
 
@@ -135,13 +135,6 @@ def check_modules_ready(pipeline, modules, log, force_rerun=False):
                     "module is locked: is it currently being executed? If not, remove the lock using "
                     "the 'unlock' command")
 
-            # Check the status of the module, so we don't accidentally overwrite module output that's already complete
-            if module.status == "COMPLETE":
-                # Allow rerunning an already run module
-                if not force_rerun:
-                    raise ModuleAlreadyCompletedError("module '%s' has already been run to completion. Use --force-rerun "
-                                                      "if you want to run it again and overwrite the output" % module_name)
-
             # For following modules, assume this one's been run
             already_run.append(module_name)
         except Exception, e:
@@ -158,6 +151,13 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False):
 
     for module in modules:
         module_name = module.module_name
+
+        # Check the status of the module, so we don't accidentally overwrite module output that's already complete
+        if module.status == "COMPLETE" and not force_rerun:
+            # Don't allow rerunning an already run module, unless --force-rerun was given
+            log.warning("module '%s' has already been run to completion. Use --force-rerun if you want to run "
+                        "it again and overwrite the output. Rerun not forced, so skipping module" % module_name)
+            continue
 
         try:
             # If running multiple modules, output something between them so it's clear where they start and end

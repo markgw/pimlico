@@ -73,9 +73,9 @@ class CandcParserDependency(SoftwareDependency):
     def __init__(self):
         super(CandcParserDependency, self).__init__("candc")
 
-    def problems(self):
+    def problems(self, local_config):
         binaries = [os.path.join(CANDC_BINARY_DIR, binary) for binary in ["soap_server", "soap_client"]]
-        return super(CandcParserDependency, self).problems() + [
+        return super(CandcParserDependency, self).problems(local_config) + [
             "missing binary %s" % binary for binary in binaries if not os.path.exists(binary)
         ]
 

@@ -14,6 +14,7 @@ from ConfigParser import SafeConfigParser, RawConfigParser
 from cStringIO import StringIO
 from collections import OrderedDict
 from operator import itemgetter
+from socket import gethostname
 
 from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR
 from pimlico.datatypes.base import load_datatype, DatatypeLoadError
@@ -39,7 +40,7 @@ class PipelineConfig(object):
     """
     def __init__(self, name, pipeline_config, local_config,
                  filename=None, variant="main", available_variants=[], log=None, all_filenames=None,
-                 module_aliases={}):
+                 module_aliases={}, local_config_sources=None):
         if log is None:
             log = get_console_logger("Pimlico")
         self.log = log
@@ -52,6 +53,8 @@ class PipelineConfig(object):
         self.all_filenames = all_filenames or [filename]
         self.name = name
         self.module_aliases = module_aliases
+        # For debugging purposes, so we can trace where config was loaded from
+        self.local_config_sources = local_config_sources
 
         # Pipeline is empty to start with
         self.module_infos = {}
@@ -184,7 +187,9 @@ class PipelineConfig(object):
         Main function that loads a pipeline from a config file.
 
         :param filename: file to read config from
-        :param local_config: location of local config file, where we'll read system-wide config
+        :param local_config: location of local config file, where we'll read system-wide config.
+            Usually not specified, in which case standard locations are
+            searched. When loading programmatically, you might want to give this
         :param variant: pipeline variant to load
         :param override_local_config: extra configuration values to override the system-wide config
         :return:
@@ -199,7 +204,8 @@ class PipelineConfig(object):
         if variant is None:
             variant = "main"
 
-        local_config_data = PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
+        local_config_data, used_config_sources = \
+            PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
 
         # Special vars are available for substitution in all options, including other vars
         special_vars = {
@@ -299,7 +305,7 @@ class PipelineConfig(object):
         pipeline = PipelineConfig(
             name, pipeline_config, local_config_data,
             filename=filename, variant=variant, available_variants=list(sorted(available_variants)),
-            all_filenames=all_filenames, module_aliases=aliases
+            all_filenames=all_filenames, module_aliases=aliases, local_config_sources=used_config_sources,
         )
 
         # Now we're ready to try loading each of the module infos in turn
@@ -319,14 +325,15 @@ class PipelineConfig(object):
                 previous_module_name = loaded_modules[-1] if len(loaded_modules) else None
 
                 # Load the module info class for the declared type of the module in the config
-                if "type" not in module_config:
+                module_type_name = module_config.pop("type", None)
+                if module_type_name is None:
                     raise PipelineConfigParseError("module %s does not specify a type" % module_name)
                 try:
                     # First see if this is a datatype
-                    datatype_class = load_datatype(module_config["type"])
+                    datatype_class = load_datatype(module_type_name)
                 except DatatypeLoadError:
                     # Not a datatype
-                    module_info_class = load_module_info(module_config["type"])
+                    module_info_class = load_module_info(module_type_name)
                 else:
                     # Get an input module info class for this datatype
                     module_info_class = input_module_factory(datatype_class)
@@ -570,13 +577,21 @@ class PipelineConfig(object):
                 for expanded_module_name, expanded_module_config in expanded_module_configs:
                     # Pass in all other options to the info constructor
                     options_dict = dict(expanded_module_config)
+
                     try:
-                        inputs, optional_outputs, options = module_info_class.process_config(
+                        # Pull out the output option if it's there, to specify optional outputs
+                        output_opt = options_dict.pop("output", "")
+                        outputs = output_opt.split(",") if output_opt else []
+                        # Pull out the input options and match them up with inputs
+                        inputs = module_info_class.extract_input_options(
                             options_dict, module_name=module_name, previous_module_name=previous_module_name,
-                            module_expansions=original_to_expanded_sections,
+                            module_expansions=original_to_expanded_sections
                         )
                     except ModuleOptionParseError, e:
                         raise PipelineConfigParseError("error in '%s' options: %s" % (module_name, e))
+
+                    # Now, before processing all the module parameters, perform any module variable substitution
+                    # on the raw strings
 
                     # Check that all the modules that feed into this one's inputs have been defined already
                     input_module_names = []
@@ -593,9 +608,24 @@ class PipelineConfig(object):
                         (group_name, [pipeline[mod_name] for mod_name in img])
                         for (group_name, img) in input_module_names
                     ]
-                    module_variables = update_module_variables(input_modules, modvar_params,
-                                                               expanded_param_settings[expanded_module_name],
-                                                               options_dict)
+
+                    # Update the module variables on the basis of any assignments made in the parameters
+                    module_variables, inherited_variables = \
+                        update_module_variables(input_modules, modvar_params,
+                                                expanded_param_settings[expanded_module_name])
+
+                    # Allow modvar values to be substituted into module parameters
+                    substitute_modvars(
+                        options_dict, module_variables, expanded_param_settings[expanded_module_name],
+                        inherited_variables
+                    )
+
+                    # We're now ready to do the main parameter processing, which is dependent on the module
+                    options = module_info_class.process_module_options(options_dict)
+
+                    # Get additional outputs to be included on the basis of the options, according to module
+                    # type's own logic
+                    optional_outputs = set(outputs) | set(module_info_class.get_extra_outputs_from_options(options_dict))
 
                     # Instantiate the module info
                     module_info = module_info_class(
@@ -638,39 +668,75 @@ class PipelineConfig(object):
     @staticmethod
     def load_local_config(filename=None, override={}):
         """
-        Load local config parameters. These are usually specified in a `.pimlico` file, but may be overridden
-        on the command line, or elsewhere programmatically.
+        Load local config parameters. These are usually specified in a `.pimlico` file, but may be overridden by
+        other config locations, on the command line, or elsewhere programmatically.
 
         """
         if filename is None:
+            home_dir = os.path.expanduser("~")
             # Use the default locations for local config file
-            # May want to add other locations here...
-            local_config = [os.path.join(os.path.expanduser("~"), ".pimlico")]
+            # First, look for the basic config, which must always exist
+            basic_config_filename = os.path.join(home_dir, ".pimlico")
+            if not os.path.exists(basic_config_filename):
+                raise PipelineConfigParseError("basic Pimlico local config file does not exist. Looked for: %s" %
+                                               basic_config_filename)
+            local_config = [basic_config_filename]
+
+            # Allow other files to override the settings in this basic one
+            # Look for any files matching the pattern .pimlico_*
+            alt_config_files = [f for f in os.listdir(home_dir) if f.startswith(".pimlico_")]
+
+            # You may specify config files for specific hosts
+            hostname = gethostname()
+            if hostname is not None and len(hostname) > 0:
+                for alt_config_filename in alt_config_files:
+                    suffix = alt_config_filename[9:]
+                    if hostname == suffix:
+                        # Our hostname matches a hostname-specific config file .pimlico_<hostname>
+                        local_config.append(os.path.join(home_dir, alt_config_filename))
+                        # Only allow one host-specific config file
+                        break
+                    elif suffix.endswith("-") and hostname.startswith(suffix[:-1]):
+                        # Hostname match hostname-prefix-specific config file .pimlico_<hostname_prefix>-
+                        local_config.append(os.path.join(home_dir, alt_config_filename))
+                        break
         else:
             local_config = [filename]
 
-        # Load local config file(s)
-        for local_filename in local_config:
-            if os.path.exists(local_filename):
-                local_config_filename = local_filename
-                break
-        else:
-            raise PipelineConfigParseError("could not load a Pimlico configuration file to read local setup from. "
-                                           "Tried: %s" % ", ".join(local_config))
-        # Read in the local config and supply a section heading to satisfy config parser
-        with open(local_config_filename, "r") as f:
-            local_text_buffer = StringIO("[main]\n%s" % f.read())
+        def _load_config_file(fn):
+            # Read in the local config and supply a section heading to satisfy config parser
+            with open(fn, "r") as f:
+                local_text_buffer = StringIO("[main]\n%s" % f.read())
+            # User config parser to interpret file contents
+            local_config_parser = SafeConfigParser()
+            local_config_parser.readfp(local_text_buffer)
+            # Get a dictionary of settings from the file
+            return dict(local_config_parser.items("main"))
 
-        local_config_parser = SafeConfigParser()
-        local_config_parser.readfp(local_text_buffer)
-        local_config_data = dict(local_config_parser.items("main"))
-        # Allow parameters to be overridden on the command line
-        local_config_data.update(override)
+        # Keep a record of where we got config from, for debugging purposes
+        used_config_sources = []
 
+        local_config_data = {}
+        # Process each file, loading config data from it
+        for local_config_filename in local_config:
+            local_config_file_data = _load_config_file(local_config_filename)
+            if local_config_file_data:
+                # Override previous local config data
+                local_config_data.update(local_config_file_data)
+                # Mark this source as used (for debugging)
+                used_config_sources.append("file %s" % local_config_filename)
+
+        if override:
+            # Allow parameters to be overridden on the command line
+            local_config_data.update(override)
+            used_config_sources.append("command-line overrides")
+
+        # Check we've got all the essentials from somewhere
         for attr in REQUIRED_LOCAL_CONFIG:
             if attr not in local_config_data:
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
-        return local_config_data
+
+        return local_config_data, used_config_sources
 
     @staticmethod
     def empty(local_config=None, override_local_config={}, override_pipeline_config={}):
@@ -684,7 +750,8 @@ class PipelineConfig(object):
         """
         from pimlico import __version__ as current_pimlico_version
 
-        local_config_data = PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
+        local_config_data, used_config_sources = \
+            PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
         name = "empty_pipeline"
         pipeline_config = {
             "name": name,
@@ -799,7 +866,7 @@ def multiply_alternatives(alternative_params):
         return [[]]
 
 
-def update_module_variables(input_modules, modvar_params, expanded_params, module_config):
+def update_module_variables(input_modules, modvar_params, expanded_params):
     """
     Given the ModuleInfo instances that provide input to a module and the parsed module variable update
     parameters (all those starting 'modvar_'), collect module variables from the inputs that this module
@@ -829,11 +896,11 @@ def update_module_variables(input_modules, modvar_params, expanded_params, modul
         inherited_variables[input_name] = group_variables
 
     # Apply all specified updates to the variables
-    modvar_params_to_modvars(modvar_params, module_variables, expanded_params, module_config, inherited_variables)
-    return module_variables
+    modvar_params_to_modvars(modvar_params, module_variables, expanded_params, inherited_variables)
+    return module_variables, inherited_variables
 
 
-def modvar_params_to_modvars(params, vars, expanded_params, module_config, variables_from_inputs):
+def modvar_params_to_modvars(params, vars, expanded_params, variables_from_inputs):
     """
     Parse modvar_* params to work out what a module's module variables should be.
 
@@ -846,7 +913,7 @@ def modvar_params_to_modvars(params, vars, expanded_params, module_config, varia
             del vars[key]
         else:
             try:
-                vars[key], rest = _parse_modvar_param(val, vars, expanded_params, module_config, variables_from_inputs)
+                vars[key], rest = _parse_modvar_param(val, vars, expanded_params, variables_from_inputs)
                 # After we've parsed everything we can, nothing else is allowed
                 if len(rest.strip()):
                     raise ValueError("unexpected string: %s" % rest.strip())
@@ -854,7 +921,7 @@ def modvar_params_to_modvars(params, vars, expanded_params, module_config, varia
                 raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
 
 
-def _parse_modvar_param(param, vars, expanded_params, module_config, variables_from_inputs):
+def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
     if param.startswith('"'):
         # Start of a quoted string
         # Look for the next quote
@@ -867,21 +934,19 @@ def _parse_modvar_param(param, vars, expanded_params, module_config, variables_f
         inner = inner.strip()
         # This should be a parameter name that's been specified for the module and must be one that was expanded
         # with alternatives
-        if inner not in module_config:
-            raise ValueError("parameter '%s' is not among those specified for the module, so we can't take a variable "
-                             "value from the name of its alternative ('altname()')" % inner)
         # Look up the parameter name in the expanded params
         exp_param = dict(expanded_params).get(inner, None)
         if exp_param is None:
-            raise ValueError("parameter '%s' did not have alternative values, so we can't take a variable value from "
-                             "the name of its alternative ('altname()')" % inner)
+            raise ValueError("parameter '%s' either was not specified for the module or did not have alternative "
+                             "values, so we can't take a variable value from the name of its alternative ('altname()')"
+                             % inner)
         alt_value, alt_name = exp_param
         # If the alternative was given a name, use it; otherwise use its value
         val = alt_name if alt_name is not None else alt_value
     elif param.startswith("map("):
         rest = param[4:].strip()
         # The first argument should be a value to apply the map to, which may be a variable, or any other value
-        to_map_val, rest = _parse_modvar_param(rest, vars, expanded_params, module_config, variables_from_inputs)
+        to_map_val, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
         # It could end up being a list of values, in which case we apply to map to each
         rest = rest.strip()
         if not rest.startswith(","):
@@ -904,14 +969,14 @@ def _parse_modvar_param(param, vars, expanded_params, module_config, variables_f
                 rest = rest[1:].strip()
                 from_val = None
             else:
-                from_val, rest = _parse_modvar_param(rest, vars, expanded_params, module_config, variables_from_inputs)
+                from_val, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
                 rest = rest.strip()
             # This should be followed by a "->"
             if not rest.startswith("->"):
                 raise ValueError("syntax error in map: expected '->', but got '%s'" % rest)
             rest = rest[2:].strip()
             # The next bit is the value we map to
-            to_val, rest = _parse_modvar_param(rest, vars, expanded_params, module_config, variables_from_inputs)
+            to_val, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
 
             if from_val is None:
                 default_mapping = to_val
@@ -958,6 +1023,32 @@ def _parse_modvar_param(param, vars, expanded_params, module_config, variables_f
             val = vars[var_name]
 
     return val, rest
+
+
+def substitute_modvars(options, modvars, expanded_params, variables_from_inputs):
+    for key, val in options.iteritems():
+        # Note that we may have multiple modvar expressions in the same option
+        while "$(" in val:
+            before_modvar, __, modvar_onwards = val.partition("$(")
+
+            # Replace the modvar expression by processing it in the standard way
+            # This should process everything up to the end of the substitution
+            try:
+                modvar_result, rest = _parse_modvar_param(
+                    modvar_onwards, modvars, expanded_params, variables_from_inputs
+                )
+            except ValueError, e:
+                raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
+            # The next thing should be the closing bracket after the substitution expression
+            # i.e. the closer of $(...)
+            rest = rest.lstrip()
+            if rest[0] != ")":
+                raise PipelineConfigParseError("expected closing bracket after modvar substitution $(...), but "
+                                               "got '%s' in parameter: %s" % (rest[0], val))
+            # Include everything that comes after the closing bracket as well
+            val = "%s%s%s" % (before_modvar, modvar_result, rest[1:])
+        # Make the substitution in the parameters
+        options[key] = val
 
 
 class ParameterTyingError(Exception):
@@ -1346,7 +1437,7 @@ def print_missing_dependencies(pipeline, modules):
     :return: True if no missing dependencies, False otherwise
     """
     deps, dep_sources = get_dependencies(pipeline, modules, sources=True)
-    missing_dependencies = [dep for dep in deps if not dep.available()]
+    missing_dependencies = [dep for dep in deps if not dep.available(pipeline.local_config)]
 
     if len(missing_dependencies):
         print "Some library dependencies were not satisfied\n"
@@ -1355,7 +1446,7 @@ def print_missing_dependencies(pipeline, modules):
         for dep in missing_dependencies:
             print title_box(dep.name.capitalize())
             # Print the list of problems and check at the same time whether it's auto-installable
-            mod_auto_installable = print_dependency_leaf_problems(dep)
+            mod_auto_installable = print_dependency_leaf_problems(dep, pipeline.local_config)
             if mod_auto_installable:
                 auto_installable_modules.extend(dep_sources[dep])
             auto_installable = mod_auto_installable or auto_installable
@@ -1368,20 +1459,20 @@ def print_missing_dependencies(pipeline, modules):
         return True
 
 
-def print_dependency_leaf_problems(dep):
+def print_dependency_leaf_problems(dep, local_config):
     auto_installable = False
     sub_deps = dep.dependencies()
-    if len(sub_deps) and not all(sub_dep.available() for sub_dep in sub_deps):
+    if len(sub_deps) and not all(sub_dep.available(local_config) for sub_dep in sub_deps):
         print "Dependency '%s' not satisfied because of problems with its own dependencies" % dep.name
         # If this dependency has its own dependencies and they're not available, print their problems
         for sub_dep in dep.dependencies():
-            if not sub_dep.available():
+            if not sub_dep.available(local_config):
                 print "'%s' depends on '%s', which is not available" % (dep.name, sub_dep.name)
-                auto_installable = auto_installable or print_dependency_leaf_problems(sub_dep)
+                auto_installable = auto_installable or print_dependency_leaf_problems(sub_dep, local_config)
     else:
         # The problems are generated by this dependency, not its own dependencies
         print "Dependency '%s' not satisfied because of the following problems:" % dep.name
-        for problem in dep.problems():
+        for problem in dep.problems(local_config):
             print " - %s" % problem
 
         instructions = dep.installation_instructions()

@@ -17,15 +17,15 @@ class SoftwareDependency(object):
         self.name = name
         self._dependencies = dependencies or []
 
-    def available(self):
+    def available(self, local_config):
         """
         Return True if the dependency is satisfied, meaning that the software/library is installed and ready to
         use.
 
         """
-        return len(self.problems()) == 0
+        return len(self.problems(local_config)) == 0
 
-    def problems(self):
+    def problems(self, local_config):
         """
         Returns a list of problems standing in the way of the dependency being available. If the list is empty,
         the dependency is taken to be installed and ready to use.
@@ -33,7 +33,7 @@ class SoftwareDependency(object):
         Overriding methods should call super method.
 
         """
-        return sum([dep.problems() for dep in self.dependencies()], [])
+        return sum([dep.problems(local_config) for dep in self.dependencies()], [])
 
     def installable(self):
         """
@@ -90,7 +90,7 @@ class SoftwareDependency(object):
         """
         return self.dependencies() + sum([dep.all_dependencies() for dep in self.dependencies()], [])
 
-    def get_installed_version(self):
+    def get_installed_version(self, local_config):
         """
         If available() returns True, this method should return a SoftwareVersion object (or subclass) representing
         the software's version.
@@ -121,8 +121,8 @@ class SystemCommandDependency(SoftwareDependency):
         """
         return False
 
-    def problems(self):
-        problems = super(SystemCommandDependency, self).problems()
+    def problems(self, local_config):
+        problems = super(SystemCommandDependency, self).problems(local_config)
         # Try running the test command
         command = self.test_command.split()
         try:
@@ -138,7 +138,7 @@ class InstallationError(Exception):
     pass
 
 
-def check_and_install(deps, trust_downloaded_archives=False):
+def check_and_install(deps, local_config, trust_downloaded_archives=False):
     """
     Check whether dependencies are available and try to install those that aren't. Returns a list of dependencies
     that can't be installed.
@@ -148,13 +148,13 @@ def check_and_install(deps, trust_downloaded_archives=False):
     uninstallable = []
     installed = []
     for dep in deps:
-        if not dep.available():
+        if not dep.available(local_config):
             # Haven't got this library
             # First check whether there are recursive deps we can install
-            subdeps_uninstallable = check_and_install(dep.dependencies(), trust_downloaded_archives=trust_downloaded_archives)
+            subdeps_uninstallable = check_and_install(dep.dependencies(), local_config, trust_downloaded_archives=trust_downloaded_archives)
             uninstallable.extend(subdeps_uninstallable)
             # Now check again whether the library's available
-            if not dep.available():
+            if not dep.available(local_config):
                 print "\n%s" % title_box(dep.name)
                 if dep.installable():
                     try:
@@ -222,7 +222,7 @@ def install_dependencies(pipeline, modules=None, trust_downloaded_archives=True)
         modules = pipeline.modules
 
     deps = get_dependencies(pipeline, modules)
-    check_and_install(deps, trust_downloaded_archives=trust_downloaded_archives)
+    check_and_install(deps, pipeline.local_config, trust_downloaded_archives=trust_downloaded_archives)
 
 
 def recursive_deps(dep):

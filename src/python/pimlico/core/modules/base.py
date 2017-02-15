@@ -332,31 +332,6 @@ class BaseModuleInfo(object):
         """
         return []
 
-    @classmethod
-    def process_config(cls, config_dict, module_name=None, previous_module_name=None, module_expansions={}):
-        """
-        Convenience wrapper to do all config processing from a dictionary of module config.
-
-        """
-        options = dict(config_dict)
-        # Remove the "type" option if it's still in there
-        options.pop("type", None)
-        # Pull out the output option if it's there, to specify optional outputs
-        output_opt = options.pop("output", "")
-        outputs = output_opt.split(",") if output_opt else []
-        # Pull out the input options and match them up with inputs
-        inputs = cls.extract_input_options(
-            options, module_name=module_name, previous_module_name=previous_module_name,
-            module_expansions=module_expansions
-        )
-        # Process the rest of the values as module options
-        options = cls.process_module_options(options)
-
-        # Get additional outputs to be included on the basis of the options, according to module type's own logic
-        outputs = set(outputs) | set(cls.get_extra_outputs_from_options(options))
-
-        return inputs, outputs, options
-
     def get_module_output_dir(self, short_term_store=False):
         """
         Gets the path to the base output dir to be used by this module, relative to the storage base dir.

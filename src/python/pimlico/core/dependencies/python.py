@@ -27,8 +27,8 @@ class PythonPackageDependency(SoftwareDependency):
         super(PythonPackageDependency, self).__init__(name, **kwargs)
         self.package = package
 
-    def problems(self):
-        probs = super(PythonPackageDependency, self).problems()
+    def problems(self, local_config):
+        probs = super(PythonPackageDependency, self).problems(local_config)
         # To avoid having any impact on the system state during this check, we don't try actually importing the package
         pkg_loader = find_loader(self.package)
         if pkg_loader is None:
@@ -45,7 +45,7 @@ class PythonPackageDependency(SoftwareDependency):
         """
         return __import__(self.package)
 
-    def get_installed_version(self):
+    def get_installed_version(self, local_config):
         """
         Tries to import a __version__ variable from the package, which is a standard way to define the package version.
 
@@ -59,7 +59,7 @@ class PythonPackageDependency(SoftwareDependency):
             if hasattr(pck, var_name):
                 return str(getattr(pck, var_name))
         # None of these worked: fall back to default behaviour
-        return super(PythonPackageDependency, self).get_installed_version()
+        return super(PythonPackageDependency, self).get_installed_version(local_config)
 
     def __eq__(self, other):
         return isinstance(other, PythonPackageDependency) and self.package == other.package
@@ -221,7 +221,7 @@ class PythonPackageOnPip(PythonPackageDependency):
     def __repr__(self):
         return "PythonPackageOnPip<%s%s>" % (self.name, (" (%s)" % self.package) if self.package != self.name else "")
 
-    def get_installed_version(self):
+    def get_installed_version(self, local_config):
         from pip.commands.show import search_packages_info
         # Use Pip to get the version number of the installed version
         installed_packages = list(search_packages_info(self.pip_package))
@@ -231,7 +231,7 @@ class PythonPackageOnPip(PythonPackageDependency):
         else:
             # Pip package not found
             # This can happen because the package wasn't installed with Pip, but is available because it's importable
-            return super(PythonPackageOnPip, self).get_installed_version()
+            return super(PythonPackageOnPip, self).get_installed_version(local_config)
 
 
 ###################################

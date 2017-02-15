@@ -36,8 +36,8 @@ class JavaDependency(SoftwareDependency):
         self.jars = jars
         self.classes = classes
 
-    def problems(self):
-        probs = super(JavaDependency, self).problems()
+    def problems(self, local_config):
+        probs = super(JavaDependency, self).problems(local_config)
         # Check that class dirs and jar files exist
         for dir in self.class_dirs:
             dir_path = os.path.join(JAVA_LIB_DIR, dir)

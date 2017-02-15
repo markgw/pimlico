@@ -9,26 +9,18 @@ through the basic setup of your project. You don't have to do everything exactly
 good starting point and follows Pimlico's recommended procedures. It steps through the setup for a very
 basic pipeline.
 
-.. _local-config:
-
 System-wide configuration
 =========================
-Pimlico needs you to specify certain parameters regarding your local system.
+Pimlico needs you to specify certain parameters regarding your local system. In the simplest case, this is just
+a file in your home directory called `.pimlico`. See :ref:`local-config` for more details.
 
 It needs to
 know where to put output files as it executes. Settings are given in a config file in your home directory and
 apply to all Pimlico pipelines you run. Note that Pimlico will make sure that different pipelines don't interfere 
 with each other's output (provided you give them different names).
 
-There are two locations you need to specify: **short-term** and **long-term storage**.
-
-The **short-term store** should be on a disk that's as fast as possible to write to. For example, avoid using an NFS
-disk. It needs to be large enough to store output between pipeline stages, though you can easily move
-output from earlier stages into the long-term store as you go along.
-
-The **long-term store** is where things are typically put at the end of
-a pipeline. It therefore doesn't need to be super-fast to access, but you may want it to be in a location that gets 
-backed up, so you don't lose your valuable output.
+There are two locations you need to specify: **short-term** and **long-term storage**. For more details, see
+:ref:`data-stores`.
 
 For a simple setup, these could be just two subdirectories of the same directory. However, it can be
 useful to distinguish them.

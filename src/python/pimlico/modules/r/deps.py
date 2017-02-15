@@ -14,10 +14,10 @@ class RDependency(SystemCommandDependency):
         super(RDependency, self).__init__("R", "R -h", **kwargs)
         self.libraries = libraries
 
-    def problems(self):
+    def problems(self, local_config):
         import subprocess
 
-        probs = super(RDependency, self).problems()
+        probs = super(RDependency, self).problems(local_config)
         if len(probs) == 0 and len(self.libraries):
             # R itself can be loaded
             # Try loading required libraries
@@ -35,7 +35,7 @@ class RDependency(SystemCommandDependency):
 
     def installation_instructions(self):
         # Check whether availability check failed because R isn't installed, or libraries
-        if len(super(RDependency, self).problems()):
+        if len(super(RDependency, self).problems({})):
             return """\
 Perform a system-wide installation of R. You may be able to do this using a
 package manager, depending on your operating system. For example, on Ubuntu,
