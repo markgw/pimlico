@@ -31,15 +31,24 @@ class DocumentMapModuleInfo(BaseModuleInfo):
 
     def __init__(self, module_name, pipeline, **kwargs):
         super(DocumentMapModuleInfo, self).__init__(module_name, pipeline, **kwargs)
+        # Load all the input datatypes now in order to perform typechecking
+        # Note that we don't store these now, but reload them when we start execution, as it's important
+        # that they've been freshly instantiated prior to execution
+        # Otherwise they can end up cacheing things that get changed by other modules executed first
+        self._load_inputs()
+
+    def _load_inputs(self):
         # Prepare the list of document map inputs that will be fed into the executor
         # We may have multiple inputs, which should be aligned tarred corpora
         # If there's only one, this also works
         inputs = [self.get_input(input_name) for input_name in self.input_names]
         # We also allow (additional) inputs that are not tarred corpora, which get left out of this
-        self.input_corpora = [corpus for corpus in inputs if satisfies_typecheck(corpus, TarredCorpus)]
-        if len(self.input_corpora) == 0:
+        datasets = [corpus for corpus in inputs if satisfies_typecheck(corpus, TarredCorpus)]
+        if len(datasets) == 0:
             raise PipelineStructureError(
                 "document map module '%s' got no TarredCorpus instances among its inputs" % self.module_name)
+        return datasets
+    input_corpora = property(_load_inputs)
 
     def get_writer(self, output_name, output_dir, append=False):
         """
