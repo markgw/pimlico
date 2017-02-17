@@ -71,6 +71,11 @@ class StatusCmd(PimlicoCLISubcommand):
                         last_module = None
                     # Show the non-detailed version, since we're selecting a range, not just one
                     module_sel = None
+                elif module_sel in pipeline.expanded_modules:
+                    # If an expanded module's base name is specified, treat it as a range covering all the modules
+                    first_module = pipeline.expanded_modules[module_sel][0]
+                    last_module = pipeline.expanded_modules[module_sel][-1]
+                    module_sel = None
 
             if module_sel is None:
                 # Try deriving a schedule and output it, including basic status info for each module
@@ -117,12 +122,10 @@ class StatusCmd(PimlicoCLISubcommand):
                     # Show super-short version of the status
                     # Group module names by status
                     status_lists = {}
-                    for module_num, module_name in zip(module_numbers, module_names):
+                    for bullet, module_name in zip(bullets, module_names):
                         module = pipeline[module_name]
-                        # Only show the bullets if they're module numbers, not just bullets
-                        show_name = ("%s (%d)" % (module_name, module_num)) if module_num is not None else module_name
                         # Add this module to the list for its status
-                        status_lists.setdefault(module.status, []).append(show_name)
+                        status_lists.setdefault(module.status, []).append("%s %s" % (bullet, module_name))
 
                     for status in sorted(status_lists):
                         print "\n%s:" % status
