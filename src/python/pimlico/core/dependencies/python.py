@@ -114,7 +114,12 @@ class PythonPackageOnPip(PythonPackageDependency):
         return True
 
     def install(self, local_config, trust_downloaded_archives=False):
-        from pip import __version__
+        try:
+            from pip import __version__
+        except ImportError:
+            # Very very old versions don't define this
+            import pkg_resources
+            __version__ = pkg_resources.get_distribution('pip').version
 
         if int(__version__.split(".")[0]) >= 7:
             # Later version of pip, need to do this differently
