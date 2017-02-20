@@ -113,7 +113,7 @@ class PythonPackageOnPip(PythonPackageDependency):
     def installable(self):
         return True
 
-    def install(self, trust_downloaded_archives=False):
+    def install(self, local_config, trust_downloaded_archives=False):
         from pip import __version__
 
         if int(__version__.split(".")[0]) >= 7:

@@ -21,7 +21,7 @@ class CaevoDependency(JavaDependency):
     def installable(self):
         return True
 
-    def install(self, trust_downloaded_archives=False):
+    def install(self, local_config, trust_downloaded_archives=False):
         # We know that Maven is available
         src_dir = os.path.join(JAVA_LIB_DIR, "caevo_src")
         if not os.path.exists(src_dir) or not trust_downloaded_archives:

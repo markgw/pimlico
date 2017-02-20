@@ -69,7 +69,7 @@ class SoftwareDependency(object):
         """
         return self._dependencies
 
-    def install(self, trust_downloaded_archives=False):
+    def install(self, local_config, trust_downloaded_archives=False):
         """
         Should be overridden by any subclasses whose library is automatically installable. Carries out the actual
         installation.
@@ -158,7 +158,7 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
                 print "\n%s" % title_box(dep.name)
                 if dep.installable():
                     try:
-                        install(dep, trust_downloaded_archives=trust_downloaded_archives)
+                        install(dep, local_config, trust_downloaded_archives=trust_downloaded_archives)
                     except InstallationError, e:
                         print "Could not install %s:\n%s" % (dep.name, e)
                         uninstallable.append(dep)
@@ -180,14 +180,14 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
     return uninstallable
 
 
-def install(dep, trust_downloaded_archives=False):
+def install(dep, local_config, trust_downloaded_archives=False):
     if not dep.installable():
         raise InstallationError("%s is not installable" % dep.name)
     # Collect any recursive dependencies that need to be installed first
     all_deps = recursive_deps(dep)
     all_deps.append(dep)
     # Only need to include deps not already available
-    to_install = [dep for dep in all_deps if not dep.available()]
+    to_install = [dep for dep in all_deps if not dep.available(local_config)]
     # Check everything is installable
     uninstallable = [dep for dep in to_install if not dep.installable()]
     if uninstallable:
@@ -196,12 +196,12 @@ def install(dep, trust_downloaded_archives=False):
     # Install each of the prerequisites
     for sub_dep in to_install:
         # Check that this is still not available, in case installing one of the others has provided incidentally
-        if not sub_dep.available():
+        if not sub_dep.available(local_config):
             extra_message = "" if sub_dep is dep else " (prerequisite for %s)" % dep.name
             print "Installing %s%s" % (sub_dep.name, extra_message)
-            sub_dep.install(trust_downloaded_archives=trust_downloaded_archives)
+            sub_dep.install(local_config, trust_downloaded_archives=trust_downloaded_archives)
             # Check the installation worked
-            remaining_problems = sub_dep.problems()
+            remaining_problems = sub_dep.problems(local_config)
             if remaining_problems:
                 raise InstallationError(
                     "Ran installation routine for %s, but it's still not available due to the following " \

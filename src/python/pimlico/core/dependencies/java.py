@@ -105,7 +105,7 @@ class JavaJarsDependency(JavaDependency):
         self.jar_urls = jar_urls
         super(JavaJarsDependency, self).__init__(name, jars=[j for (j, url) in jar_urls], **kwargs)
 
-    def install(self, trust_downloaded_archives=False):
+    def install(self, local_config, trust_downloaded_archives=False):
         downloaded_archives = {}
         archive_files = {}
         archives_to_download = []
@@ -290,7 +290,7 @@ class Py4JSoftwareDependency(JavaDependency):
     def installable(self):
         return True
 
-    def install(self, trust_downloaded_archives=False):
+    def install(self, local_config, trust_downloaded_archives=False):
         # We know Py4J (Python component) is already installed
         # If it's installed system-wide, this is tricky, as we don't know where it is
         jar_name = self.jars[0]
