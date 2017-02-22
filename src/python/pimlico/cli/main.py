@@ -127,7 +127,7 @@ class VisualizeCmd(PimlicoCLISubcommand):
 
 
 SUBCOMMANDS = [
-    StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, ResetCmd, UnlockCmd, DumpCmd, LoadCmd,
+    StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, ResetCmd, LongStoreCmd, UnlockCmd, DumpCmd, LoadCmd,
     DepsCmd, InstallCmd, InputsCmd, OutputCmd, VisualizeCmd
 ]
 
@@ -139,9 +139,14 @@ if __name__ == "__main__":
     parser.add_argument("--variant", "-v", help="Load a particular variant of a pipeline. For a list of available "
                                                 "variants, use the 'variants' command", default="main")
     parser.add_argument("--override-local-config", "--local", "-l",
-                        help="Override a parameter set in the local config files (usually ~/.pimlico.conf). For just "
+                        help="Override a parameter set in the local config files (usually ~/.pimlico). For just "
                              "this execution. Specify as param=value. Use this option multiple times to override "
                              "more than one parameter", action="append")
+    parser.add_argument("--local-config", "--lc",
+                        help="Load local config from a given config file, instead of from the default location, "
+                             "~/.pimlico. Command-line overrides (see --override-local-config) will still be "
+                             "applied, but the standard config file will not be loaded, nor any hostname-specific "
+                             "config files")
     parser.add_argument("--processes", "-p",
                         help="Set the number of processes to use for this run, where parallelization is available. "
                              "Overrides the local config setting. Equivalent to '-l processes=P'", type=int)
@@ -176,7 +181,8 @@ if __name__ == "__main__":
     # Read in the pipeline config from the given file
     try:
         pipeline = PipelineConfig.load(opts.pipeline_config, variant=opts.variant,
-                                       override_local_config=override_local)
+                                       override_local_config=override_local,
+                                       local_config=opts.local_config)
     except PipelineConfigParseError, e:
         print >>sys.stderr, "Error reading pipeline config: %s" % e
         sys.exit(1)
