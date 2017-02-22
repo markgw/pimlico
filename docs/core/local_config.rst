@@ -56,6 +56,16 @@ For example:
 
 If you want to override multiple settings, simply use the option multiple times.
 
+Custom location
+---------------
+If the above solutions don't work for you, you can also explicitly specify on the command line an alternative
+location from which to load the local config file that Pimlico typically expects to find in `~/.pimlico`.
+
+Use the `--local-config` parameter to give a filename to use instead of the `~/.pimlico`.
+
+For example, if your home directory is shared across servers and the above hostname-specific config solution
+doesn't work in your case, you can fall back to pointing Pimlico at your own host-specific config file.
+
 .. _data-stores:
 
 Long-term and short-term stores

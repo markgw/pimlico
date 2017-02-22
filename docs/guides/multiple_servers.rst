@@ -76,3 +76,15 @@ Then on `server_b`:
 .. code-block:: sh
 
    $ ./pimlico.sh pipeline.conf load ~/modules/*
+
+Other issues
+============
+
+Aside from getting data between the servers, there are certain issues that often arise when running a pipeline
+across multiple servers.
+
+- **Shared Pimlico codebase**. If you share the directory that contains Pimlico's code across servers
+   (e.g. NFS or `rsync`), you can have problems resulting from sharing the libraries it installs.
+   See :ref:`instructions for using multiple virtualenvs <virtualenv-for-deps>` for the solution.
+- **Shared home directory**. If you share your home directory across servers, using the same `.pimlico` local
+   config file might be a problem. See :ref:`local-config` for various possible solutions.
