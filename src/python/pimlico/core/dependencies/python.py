@@ -4,10 +4,8 @@ Tools for Python library dependencies.
 Provides superclasses for Python library dependencies and a selection of commonly used dependency instances.
 
 """
-import copy
 import sys
 from pkgutil import find_loader
-from traceback import format_exception_only
 
 from pimlico.core.dependencies.base import SoftwareDependency
 
