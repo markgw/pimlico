@@ -15,7 +15,7 @@ except ImportError:
     print "Urwid is not installed: installing now"
     from pimlico.core.dependencies.python import PythonPackageOnPip
     urwid_dep = PythonPackageOnPip("urwid")
-    urwid_dep.install()
+    urwid_dep.install({})
 
     try:
         import urwid
@@ -25,6 +25,8 @@ except ImportError:
 
 from pimlico.cli.browser.formatter import load_formatter
 from pimlico.datatypes.base import InvalidDocument
+
+urwid.set_encoding("UTF-8")
 
 PALETTE = [
     ('reversed', 'standout', ''),
@@ -111,7 +113,7 @@ def browse_data(data, formatter, parse=False):
     ]
 
     # Middle: content
-    body_text = urwid.Text("")
+    body_text = urwid.Text(u"")
     #body = [body_text, urwid.Divider()]
     content_scrollbox = urwid.ListBox(urwid.SimpleListWalker([body_text]))
 
@@ -168,7 +170,7 @@ def browse_data(data, formatter, parse=False):
                 doc = formatter.format_document(doc_data)
             except:
                 doc = "Error formatting datatype %s for display:\n%s" % (type(doc_data).__name__, format_exc())
-            body_text.set_text(doc.encode("ascii", "replace").replace("\t", "    "))
+            body_text.set_text(unicode(doc).replace(u"\t", u"    "))
 
     def _keypress(key):
         if key == "esc" or key == "q":
