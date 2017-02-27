@@ -808,6 +808,25 @@ class BaseModuleInfo(object):
         """
         return os.path.exists(self.lock_path)
 
+    def get_new_log_filename(self, name="error"):
+        """
+        Returns an absolute path that can be used to output a log file for this module. This is used for
+        outputting error logs. It will always return a filename that doesn't currently exist, so can be used
+        multiple times to output multiple logs.
+
+        """
+        dir_name = self.get_module_output_dir(short_term_store=True)
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+
+        # Search for a filename that doesn't already exist
+        pattern = "%s%03d.log"
+        module_files = os.listdir(dir_name)
+        file_number = 0
+        while pattern % (name, file_number) in module_files:
+            file_number += 1
+        return os.path.join(dir_name, pattern % (name, file_number))
+
 
 def collect_unexecuted_dependencies(modules):
     """

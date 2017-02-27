@@ -1,3 +1,4 @@
+from cStringIO import StringIO
 import sys
 from traceback import format_exception_only
 
@@ -83,14 +84,28 @@ def module_numbers_to_names(pipeline, names):
     return module_names
 
 
-def print_execution_error(error):
-    print >>sys.stderr, "\nDetails of error"
-    print >>sys.stderr,   "----------------"
-    print >>sys.stderr, "".join(format_exception_only(type(error), error)).strip("\n")
+def format_execution_error(error):
+    """
+    Produce a string with lots of error output to help debug a module execution error.
+
+    :param error: the exception raised (ModuleExecutionError)
+    :return: formatted output
+    """
+    output = StringIO()
+    print >>output, "\nDetails of error"
+    print >>output,   "----------------"
+    print >>output, "".join(format_exception_only(type(error), error)).strip("\n")
     if hasattr(error, "debugging_info") and error.debugging_info is not None:
         # Extra debugging information was provided by the exception
-        print >>sys.stderr, "\n## Further debugging info ##"
-        print >>sys.stderr, error.debugging_info.strip("\n")
+        print >>output, "\n## Further debugging info ##"
+        print >>output, error.debugging_info.strip("\n")
+    output_str = output.getvalue()
+
     if hasattr(error, "cause") and error.cause is not None:
         # Recursively print any debugging info on the cause exception
-        print_execution_error(error.cause)
+        output_str = "%s\n%s" % (output_str, format_execution_error(error.cause))
+    return output_str
+
+
+def print_execution_error(error):
+    print >>sys.stderr, format_execution_error(error)

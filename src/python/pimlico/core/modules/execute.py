@@ -9,22 +9,28 @@ It is used by the `run` command.
 """
 
 import os
+import sys
+from cStringIO import StringIO
 from tarfile import TarFile
 from textwrap import wrap
+from traceback import format_exc
 
-from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies, PipelineStructureError
+from pimlico.cli.util import format_execution_error
+from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies
 from pimlico.core.modules.base import ModuleInfoLoadError, collect_unexecuted_dependencies
 from pimlico.core.modules.multistage import MultistageModuleInfo
 from pimlico.utils.logging import get_console_logger
 
 
 def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=False, log=None, all_deps=False,
-                              check_only=False):
+                              check_only=False, exit_on_error=False):
     """
     Main method called by the `run` command that first checks a pipeline, checks all pre-execution requirements
     of the modules to be executed and then executes each of them. The most common case is to execute just one
     module, but a sequence may be given.
 
+    :param exit_on_error: drop out if a ModuleExecutionError occurs in any individual module, instead of continuing
+        to the next module that can be run
     :param pipeline: loaded PipelineConfig
     :param module_names: list of names of modules to execute in the order they should be run
     :param force_rerun: execute modules, even if they're already marked as complete
@@ -88,7 +94,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
         log.info("All checks passed")
     else:
         # Checks passed: run the module
-        execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug)
+        execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug, exit_on_error=exit_on_error)
 
 
 def check_modules_ready(pipeline, modules, log):
@@ -144,13 +150,28 @@ def check_modules_ready(pipeline, modules, log):
             raise
 
 
-def execute_modules(pipeline, modules, log, force_rerun=False, debug=False):
+def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit_on_error=False):
     # We assume that all checks have been run and that the modules are ready to be executed
     if len(modules) > 1:
         log.info("Executing a sequence of modules: %s" % ", ".join(mod.module_name for mod in modules))
 
+    error_modules = []
+    success_modules = []
+
     for module in modules:
         module_name = module.module_name
+        module_error = False
+
+        if error_modules:
+            # Check (again) whether the module's ready
+            # If a previous module failed, we might be unable to run this one, even though it passed the checks
+            # when we assumed the previous one had been run
+            missing_inputs = module.missing_data()
+            if missing_inputs:
+                log.warning("Cannot execute module '%s', since its inputs are not all ready (%s), "
+                            "after previous modules failed: %s" %
+                            (module_name, ", ".join(missing_inputs), ", ".join(error_modules)))
+                continue
 
         # Check the status of the module, so we don't accidentally overwrite module output that's already complete
         if module.status == "COMPLETE" and not force_rerun:
@@ -224,11 +245,37 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False):
                     end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
                 except ModuleInfoLoadError, e:
                     module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
-                    raise
+                    end_status = "FAILED"
+                    module_error = True
                 except ModuleExecutionError, e:
                     # If there's any error, note in the history that execution didn't complete
                     module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
-                    raise
+                    log.error("Error executing module '%s': %s" % (module_name, e))
+
+                    debug_mess = StringIO()
+                    print >>debug_mess, "Top-level error"
+                    print >>debug_mess, "---------------"
+                    print >>debug_mess, format_exc()
+                    print >>debug_mess, format_execution_error(e)
+                    debug_mess = debug_mess.getvalue()
+
+                    # Put the whole error info into a file so we can see what went wrong
+                    error_filename = module.get_new_log_filename()
+                    with open(error_filename, "w") as error_file:
+                        error_file.write(debug_mess)
+
+                    if debug or exit_on_error:
+                        # In debug mode, also output the full info to the terminal
+                        # Do this also if we're dropping out after encountering an error
+                        print >>sys.stderr, debug_mess
+                    else:
+                        log.error("Full debug info output to %s" % error_filename)
+
+                    module.add_execution_history_record("Debugging output in %s" % error_filename)
+                    # Allow a different end status to be pass up in the exception
+                    # If the exception origin didn't specify anything, we just say the module failed
+                    end_status = e.end_status or "FAILED"
+                    module_error = True
                 except KeyboardInterrupt:
                     module.add_execution_history_record("Execution of %s halted by user" % module_name)
                     raise
@@ -248,6 +295,27 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False):
             # Reraise the exception to be caught higher up
             raise
 
+        if module_error:
+            # Module failed in one way or another
+            error_modules.append(module_name)
+            if exit_on_error:
+                # Don't carry on to the next module
+                break
+        else:
+            success_modules.append(module_name)
+
+    # Output a summary of what we succeeded and failed on
+    if error_modules:
+        if success_modules:
+            log.error("Execution failed on %d modules: %s" % (len(error_modules), ", ".join(error_modules)))
+            log.info("Execution succeeded on %d modules: %s" % (len(success_modules), ", ".join(success_modules)))
+        elif len(error_modules) == 1:
+            log.error("Execution of %s failed" % error_modules[0])
+        else:
+            log.error("Execution failed on all modules (%s)" % ", ".join(error_modules))
+    else:
+        log.info("Successfully executed all modules: %s" % ", ".join(success_modules))
+
 
 def format_execution_dependency_tree(tree):
     module, inputs = tree
@@ -265,6 +333,7 @@ class ModuleExecutionError(Exception):
     def __init__(self, *args, **kwargs):
         self.cause = kwargs.pop("cause", None)
         self.debugging_info = kwargs.pop("debugging_info", None)
+        self.end_status = kwargs.pop("end_status", None)
         super(ModuleExecutionError, self).__init__(*args, **kwargs)
 
 

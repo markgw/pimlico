@@ -243,6 +243,14 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                             next_document = input_feeder.get_next_output_document()
                     pbar.finish()
             complete = True
+        except ModuleExecutionError, e:
+            if self.info.status == "PARTIALLY_PROCESSED":
+                self.log.info("Processed documents recorded: restart processing where you left off by calling run "
+                              "again once you've fixed the problem (%d docs processed in this run, %d processed in "
+                              "total)" % (docs_completed_now, docs_completed_before+docs_completed_now))
+                # Set the end status so that the top-level routine doesn't replace it with a generic failure status
+                e.end_status = self.info.status
+            raise
         finally:
             # Call the finishing-off routine, if one's been defined
             if complete:
@@ -250,11 +258,6 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
             else:
                 self.log.info("Document mapping failed. Finishing off")
             self.postprocess(error=not complete)
-
-            if not complete and self.info.status == "PARTIALLY_PROCESSED":
-                self.log.info("Processed documents recorded: restart processing where you left off by calling run "
-                              "again once you've fixed the problem (%d docs processed in this run, %d processed in "
-                              "total)" % (docs_completed_now, docs_completed_before+docs_completed_now))
 
 
 def skip_invalid(fn):
@@ -319,6 +322,8 @@ def invalid_doc_on_error(fn):
                 return InvalidDocument("datatype:%s[%s]" % (self.datatype_name, self.base_dir),
                                        "%s\n%s" % (e, format_exc()))
             else:
+                # This covers the case of wrapping a process_document() function for a map factory,
+                # since the first argument is always the worker process
                 return InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))
     return _fn
 

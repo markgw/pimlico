@@ -34,6 +34,11 @@ class RunCmd(PimlicoCLISubcommand):
                                  "full pipeline leading to that point")
         parser.add_argument("--dry-run", "--dry", "--check", action="store_true",
                             help="Perform all pre-execution checks, but don't actually run the module(s)")
+        parser.add_argument("--exit-on-error", "-e", action="store_true",
+                            help="If an error is encountered while executing a module that causes the whole module "
+                                 "execution to fail, output the error and exit. By default, Pimlico will send "
+                                 "error output to a file (or print it in debug mode) and continue to execute the "
+                                 "next module that can be executed, if any")
 
     def run_command(self, pipeline, opts):
         debug = opts.debug
@@ -80,7 +85,7 @@ class RunCmd(PimlicoCLISubcommand):
 
         try:
             check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,
-                                      all_deps=opts.all_deps, check_only=dry_run)
+                                      all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error)
         except ModuleInfoLoadError, e:
             if debug:
                 print_exc()
@@ -90,16 +95,6 @@ class RunCmd(PimlicoCLISubcommand):
             module_name = getattr(e, "module_name", None)
             if module_name is not None:
                 print >>sys.stderr, "Error loading module '%s': %s" % (module_name, e)
-        except ModuleExecutionError, e:
-            if debug:
-                print >>sys.stderr, "Top-level error"
-                print >>sys.stderr, "---------------"
-                print_exc()
-                print_execution_error(e)
-            # See whether the problem came from a specific module
-            module_name = getattr(e, "module_name", None)
-            if module_name is not None:
-                print >>sys.stderr, "Error executing module '%s': %s" % (module_name, e)
         except KeyboardInterrupt:
             print >>sys.stderr, "Exiting before execution completed due to user interrupt"
             # Raise the exception so we see the full stack trace

@@ -5,6 +5,8 @@
 from contextlib import contextmanager
 from threading import Timer
 
+import time
+
 
 @contextmanager
 def timeout_process(proc, timeout):
@@ -24,6 +26,39 @@ def timeout_process(proc, timeout):
     finally:
         # Cancel the timer now, if it's still running
         timer.cancel()
+
+
+def terminate_process(proc, kill_time=None):
+    """
+    Ends a process started with subprocess.
+    Tries killing, then falls back on terminating if it doesn't work.
+
+    :param kill_time: time to allow the process to be killed before falling back on terminating
+    :param proc: Popen instance
+    :return:
+    """
+    if proc.poll() is None:
+        # Process is still running
+        # Try killing it
+        proc.kill()
+        if proc.poll() is None:
+            # Not dead yet: give it a moment
+            if kill_time:
+                time.sleep(kill_time)
+            if proc.poll() is None:
+                # Still not dead: terminate
+                proc.terminate()
+                if proc.poll() is None:
+                    # STILL not dead! Give it another moment
+                    if kill_time:
+                        time.sleep(kill_time)
+                        if proc.poll() is None:
+                            # This process really doesn't want to die. Give up
+                            return False
+                    else:
+                        return False
+    return True
+
 
 
 class StreamCommunicationPacket(object):
