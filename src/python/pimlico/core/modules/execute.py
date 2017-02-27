@@ -86,6 +86,22 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
                 m.module_name for m in modules if m.module_name not in requested_modules
             ))
 
+    if not force_rerun:
+        # Check the status of the module, so as not to rerun already complete modules
+        # By checking this now (even though there's also a check for it in execute_modules), we can remove it
+        # from the list at this stage, saving on verbose output later on
+        complete_modules = [
+            module.module_name for module in modules if module.status == "COMPLETE"
+        ]
+        log.warning("Removing modules already run to completion: %s" % ", ".join(complete_modules))
+        log.info("Use --force-rerun if you want to run modules again and overwrite their output")
+        # Remove from the execution list
+        modules = [m for m in modules if m.module_name not in complete_modules]
+        # This might leave us with no modules to run
+        if len(modules) == 0:
+            log.warning("No modules left to run!")
+            return
+
     # Check that the module is ready to run
     # If anything fails, an exception is raised
     check_modules_ready(pipeline, modules, log)
