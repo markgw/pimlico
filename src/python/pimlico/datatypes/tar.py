@@ -4,6 +4,7 @@
 
 import cPickle as pickle
 import gzip
+import json
 import os
 import random
 import shutil
@@ -221,7 +222,16 @@ class TarredCorpusWriter(IterableCorpusWriter):
                 metadata_path = os.path.join(self.base_dir, "corpus_metadata")
                 if os.path.exists(metadata_path):
                     with open(metadata_path, "r") as f:
-                        self.metadata["length"] = pickle.load(f).get("length", 0)
+                        raw_data = f.read()
+                        if len(raw_data) != 0:
+                            # If empty metadata file, assume empty metadata
+                            try:
+                                # In later versions of Pimlico, we store metadata as JSON
+                                data = json.loads(raw_data)
+                            except ValueError:
+                                # If the metadata was written by an earlier Pimlico version, it's a pickled dictionary
+                                data = pickle.loads(raw_data)
+                            self.metadata["length"] = data.get("length", 0)
             else:
                 # Can't rely on the metadata: count up docs in archive to get initial length
                 for root, dirs, files in os.walk(self.data_dir):
