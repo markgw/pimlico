@@ -13,7 +13,6 @@ import zlib
 from cStringIO import StringIO
 from itertools import izip
 from tempfile import mkdtemp
-from traceback import format_exc
 
 from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument, DynamicInputDatatypeRequirement
 from pimlico.datatypes.documents import RawDocumentType

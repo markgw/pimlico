@@ -43,19 +43,25 @@ class DataShell(Cmd):
 
         # Index commands by their command strings for easy lookup
         self.commands = {}
-        for command in commands:
-            for command_str in command.commands:
-                self.commands[command_str] = command
+        for command_obj in commands:
+            for command_str in command_obj.commands:
+                self.commands[command_str] = command_obj
         # Add help method for each command
         for command_name in self.commands:
             # We can only do this with command names that are valid Python identifiers
             if is_identifier(command_name):
-                def _help_cmd():
-                    print self.commands[command_name].help_text
-                setattr(self, "help_%s" % command_name, _help_cmd)
-                def _do_cmd(line):
-                    self._run_command(command_name, line.split())
-                setattr(self, "do_%s" % command_name, _do_cmd)
+                # Use closures to bind the command name
+                def _get_help_cmd(slf, name):
+                    def _help_cmd():
+                        print slf.commands[name].help_text
+                    return _help_cmd
+                setattr(self, "help_%s" % command_name, _get_help_cmd(self, command_name))
+
+                def _get_do_cmd(slf, name):
+                    def _do_cmd(line):
+                        slf._run_command(name, line.split())
+                    return _do_cmd
+                setattr(self, "do_%s" % command_name, _get_do_cmd(self, command_name))
 
         # Environment for executing Python commands
         # May get updated as time goes on

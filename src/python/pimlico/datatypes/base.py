@@ -24,9 +24,10 @@ import re
 import json
 from traceback import format_exc
 
+from pimlico.cli.shell.base import ShellCommand
 from pimlico.datatypes.documents import RawDocumentType
 from pimlico.utils.core import import_member
-
+from pimlico.utils.progress import get_progress_bar
 
 __all__ = [
     "PimlicoDatatype", "PimlicoDatatypeWriter", "IterableCorpus", "IterableCorpusWriter",
@@ -433,6 +434,24 @@ class PimlicoDatatypeWriter(object):
             return name
 
 
+
+class CountInvalidCmd(ShellCommand):
+    """
+    Data shell command to count up the number of invalid docs in a tarred corpus. Applies to any iterable corpus.
+
+    """
+    commands = ["invalid"]
+    help_text = "Count the number of invalid documents in this dataset"
+
+    def execute(self, shell, *args, **kwargs):
+        corpus = shell.data
+        pbar = get_progress_bar(len(corpus), title="Counting")
+        invalids = sum(
+            (1 if isinstance(doc, InvalidDocument) else 0) for __, doc in pbar(corpus)
+        )
+        print "%d / %d documents are invalid" % (invalids, len(corpus))
+
+
 class IterableCorpus(PimlicoDatatype):
     """
     Superclass of all datatypes which represent a dataset that can be iterated over document by document
@@ -446,6 +465,7 @@ class IterableCorpus(PimlicoDatatype):
     """
     datatype_name = "iterable_corpus"
     data_point_type = RawDocumentType
+    shell_commands = PimlicoDatatype.shell_commands + [CountInvalidCmd()]
 
     def __init__(self, *args, **kwargs):
         self.raw_data = kwargs.pop("raw_data", False)
