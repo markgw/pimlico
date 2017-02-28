@@ -526,7 +526,7 @@ class BaseModuleInfo(object):
     def is_filter(cls):
         return not cls.module_executable and len(cls.module_inputs) > 0
 
-    def missing_data(self, input_names=None, assume_executed=[]):
+    def missing_data(self, input_names=None, assume_executed=[], assume_failed=[]):
         """
         Check whether all the input data for this module is available. If not, return a list strings indicating
         which outputs of which modules are not available. If it's all ready, returns an empty list.
@@ -538,6 +538,16 @@ class BaseModuleInfo(object):
         executed at the point when this module is executed. Any outputs from those modules will be excluded from
         the input checks for this module, on the assumption that they will have become available, even if they're
         not currently available, by the time they're needed.
+
+        If `assume_executed` is given, it should be a list of module names which should be assumed to have failed.
+        If we rely on data from the output of one of them, instead of checking whether it's available we simply
+        assume it's not.
+
+        Why do this? When running multiple modules in sequence, if one fails it is possible that its output datasets
+        look like complete datasets. For example, a partially written iterable corpus may look like a perfectly
+        valid corpus, which happens to be smaller than it should be. After the execution failure, we may check other
+        modules to see whether it's possible to run them. Then we need to know not to trust the output data from the
+        failed module, even if it looks valid.
 
         """
         if input_names is None:
@@ -570,6 +580,11 @@ class BaseModuleInfo(object):
                                 missing.append("%s (default output)" % previous_module.module_name)
                             else:
                                 missing.append("%s output '%s'" % (previous_module.module_name, output_name))
+                    elif previous_module.module_name in assume_failed:
+                        # If previous module is assumed failed, assume its output data is not ready,
+                        # even when it looks ready
+                        missing.append("%s module failed, so we assume  output '%s' is not complete" %
+                                       (previous_module.module_name, output_name))
         return missing
 
     @classmethod

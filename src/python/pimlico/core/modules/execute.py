@@ -173,6 +173,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
 
     error_modules = []
     success_modules = []
+    skipped_modules = []
 
     for module in modules:
         module_name = module.module_name
@@ -182,11 +183,12 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
             # Check (again) whether the module's ready
             # If a previous module failed, we might be unable to run this one, even though it passed the checks
             # when we assumed the previous one had been run
-            missing_inputs = module.missing_data()
+            missing_inputs = module.missing_data(assume_failed=error_modules)
             if missing_inputs:
                 log.warning("Cannot execute module '%s', since its inputs are not all ready (%s), "
                             "after previous modules failed: %s" %
-                            (module_name, ", ".join(missing_inputs), ", ".join(error_modules)))
+                            (module_name, ", ".join(missing_inputs), "; ".join(error_modules)))
+                error_modules.append(module_name)
                 continue
 
         # Check the status of the module, so we don't accidentally overwrite module output that's already complete
@@ -194,6 +196,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
             # Don't allow rerunning an already run module, unless --force-rerun was given
             log.warning("module '%s' has already been run to completion. Use --force-rerun if you want to run "
                         "it again and overwrite the output. Rerun not forced, so skipping module" % module_name)
+            skipped_modules.append(module_name)
             continue
 
         try:
@@ -211,15 +214,12 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
 
             # Check the status of the module, so we don't accidentally overwrite module output that's already complete
             if module.status == "COMPLETE":
-                if force_rerun:
-                    log.info("module '%s' already fully run, but forcing rerun" % module_name)
-                    # If rerunning, delete the old data first so we make a fresh start
-                    module.reset_execution()
-                    module.status = "STARTED"
-                else:
-                    # Should have been caught by pre-execution checks, but check again
-                    raise ModuleAlreadyCompletedError("module '%s' has already been run to completion. Use --force-rerun if "
-                                                      "you want to run it again and overwrite the output" % module_name)
+                # Should only get here in the case of force rerun
+                assert force_rerun
+                log.info("module '%s' already fully run, but forcing rerun" % module_name)
+                # If rerunning, delete the old data first so we make a fresh start
+                module.reset_execution()
+                module.status = "STARTED"
             elif module.status == "UNEXECUTED":
                 # Not done anything on this yet
                 module.status = "STARTED"
@@ -331,6 +331,8 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
             log.error("Execution failed on all modules (%s)" % ", ".join(error_modules))
     else:
         log.info("Successfully executed all modules: %s" % ", ".join(success_modules))
+    if skipped_modules:
+        log.info("Skipped modules: %s" % ", ".join(skipped_modules))
 
 
 def format_execution_dependency_tree(tree):
