@@ -90,7 +90,12 @@ class RawTextDirectory(IterableCorpus):
             "help": "Encoding used to store the text. Should be given as an encoding name known to Python. By "
                     "default, assumed to be 'utf8'",
             "default": "utf8",
-        }
+        },
+        "encoding_errors": {
+            "help": "What to do in the case of invalid characters in the input while decoding (e.g. illegal utf-8 "
+                    "chars). Select 'strict' (default), 'ignore', 'replace'. See Python's str.decode() for details",
+            "default": "strict",
+        },
     }
     data_point_type = RawTextDocumentType
     requires_data_preparation = True
@@ -123,12 +128,13 @@ class RawTextDirectory(IterableCorpus):
     def __iter__(self):
         base_path = self.options["path"]
         encoding = self.options["encoding"]
+        errors = self.options["encoding_errors"]
 
         for file_path in self.walk():
             with open(file_path, "r") as f:
                 # Use the file's path within the base directory as its doc name
                 rel_path = os.path.relpath(file_path, base_path)
-                data = f.read().decode(encoding)
+                data = f.read().decode(encoding, errors=errors)
                 # Apply datatype-specific processing of the data
                 document = self.process_document_data_with_datatype(data)
                 # Allow subclasses to apply filters to the data
