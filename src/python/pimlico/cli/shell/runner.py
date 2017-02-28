@@ -33,9 +33,14 @@ commands specific to the sort of data they contain.
 For help on using any of the commands, use the 'help' command, with the
 command name as an argument.
 
-You can also run arbitrary Python commands, operating on the dataset using
+You can run arbitrary one-line Python commands, operating on the dataset using
 the name 'data'. The shell will try to execute anything you type that it
 doesn't recognise as an available command in this way.
+
+For more a comprehensive Python interpreter, with the dataset and environment
+available, use the 'py' command.
+
+Type Ctrl+D to exit.
 """
         launch_shell(data)
 
