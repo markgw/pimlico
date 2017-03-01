@@ -93,14 +93,15 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
         complete_modules = [
             module.module_name for module in modules if module.status == "COMPLETE"
         ]
-        log.warning("Removing modules already run to completion: %s" % ", ".join(complete_modules))
-        log.info("Use --force-rerun if you want to run modules again and overwrite their output")
-        # Remove from the execution list
-        modules = [m for m in modules if m.module_name not in complete_modules]
-        # This might leave us with no modules to run
-        if len(modules) == 0:
-            log.warning("No modules left to run!")
-            return
+        if complete_modules:
+            log.warning("Removing modules already run to completion: %s" % ", ".join(complete_modules))
+            log.info("Use --force-rerun if you want to run modules again and overwrite their output")
+            # Remove from the execution list
+            modules = [m for m in modules if m.module_name not in complete_modules]
+            # This might leave us with no modules to run
+            if len(modules) == 0:
+                log.warning("No modules left to run!")
+                return
 
     # Check that the module is ready to run
     # If anything fails, an exception is raised
@@ -124,7 +125,8 @@ def check_modules_ready(pipeline, modules, log):
     :return:
     """
     already_run = []
-    log.info("Checking dependencies and inputs for module%s" % ("s" if len(modules) > 1 else ""))
+    log.info("Checking dependencies and inputs for module%s: %s" %
+             ("s" if len(modules) > 1 else "", ", ".join(m.module_name for m in modules)))
 
     for module in modules:
         module_name = module.module_name
