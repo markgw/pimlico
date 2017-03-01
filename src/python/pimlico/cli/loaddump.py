@@ -43,8 +43,19 @@ class DumpCmd(PimlicoCLISubcommand):
         for module_name in opts.modules:
             print "== Dumping data for '%s' ==" % module_name
             module = pipeline[module_name]
+
             # Get the output dir for the module
-            module_output_dir = module.get_module_output_dir(short_term_store=True)
+            module_rel_output_dir = module.get_module_output_dir()
+            # See if it exists in the short-term store
+            module_output_dir = os.path.join(pipeline.short_term_store, module_rel_output_dir)
+            if not os.path.exists(module_output_dir):
+                # Try the long-term store
+                module_output_dir = os.path.join(pipeline.long_term_store, module_rel_output_dir)
+                if not os.path.exists(module_output_dir):
+                    print "ERROR: Could not dump module %s, as its output dir (%s) doesn't exist in either the " \
+                          "long-term or short-term store" % (module_name, module_rel_output_dir)
+                    continue
+
             # Work out where to put the output
             tarball_path = os.path.join(output_dir, "%s.tar.gz" % module_name)
             print "Dumping to %s" % tarball_path
@@ -80,8 +91,13 @@ class LoadCmd(PimlicoCLISubcommand):
 
     def add_arguments(self, parser):
         parser.add_argument("paths", nargs="*", help="Paths to dump files (tarballs) to load into the pipeline")
+        parser.add_argument("--force-overwrite", "-f", action="store_true",
+                            help="If data already exists for a module being imported, overwrite without asking. "
+                                 "By default, the user will be prompted to check whether they want to overwrite")
 
     def run_command(self, pipeline, opts):
+        force_overwrite = opts.force_overwrite
+
         for dump_path in opts.paths:
             dump_path = os.path.abspath(dump_path)
 
@@ -109,11 +125,12 @@ class LoadCmd(PimlicoCLISubcommand):
                 print "Extracting module data to %s" % module_output_dir
                 # If the output dir already exists, delete it first
                 if os.path.exists(module_output_dir):
-                    # In this case, check we're happy to overwrite
-                    sure = raw_input("Module output dir already exists. Overwrite? [y/N] ")
-                    if sure.lower() != "y":
-                        print "Skipping %s" % module_name
-                        continue
+                    if not force_overwrite:
+                        # In this case, check we're happy to overwrite
+                        sure = raw_input("Module output dir already exists. Overwrite? [y/N] ")
+                        if sure.lower() != "y":
+                            print "Skipping %s" % module_name
+                            continue
 
                     shutil.rmtree(module_output_dir)
 
