@@ -261,14 +261,19 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                     executer = module.load_executor()
                     # Give the module an initial in-progress status
                     end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
-                except ModuleInfoLoadError, e:
-                    module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
-                    end_status = "FAILED"
-                    module_error = True
-                except ModuleExecutionError, e:
-                    # If there's any error, note in the history that execution didn't complete
-                    module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
-                    log.error("Error executing module '%s': %s" % (module_name, e))
+                except (ModuleInfoLoadError, ModuleExecutionError), e:
+                    if type(e) is ModuleExecutionError:
+                        # If there's any error, note in the history that execution didn't complete
+                        module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
+                        log.error("Error executing module '%s': %s" % (module_name, e))
+                        # Allow a different end status to be pass up in the exception
+                        # If the exception origin didn't specify anything, we just say the module failed
+                        end_status = e.end_status or "FAILED"
+                    else:
+                        module.add_execution_history_record("Error loading %s for execution: %s" % (module_name, e))
+                        log.error("Error loading %s for execution: %s" % (module_name, e))
+                        # If the module didn't even load, use unstarted status
+                        end_status = "UNEXECUTED"
 
                     debug_mess = StringIO()
                     print >>debug_mess, "Top-level error"
@@ -290,9 +295,6 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         log.error("Full debug info output to %s" % error_filename)
 
                     module.add_execution_history_record("Debugging output in %s" % error_filename)
-                    # Allow a different end status to be pass up in the exception
-                    # If the exception origin didn't specify anything, we just say the module failed
-                    end_status = e.end_status or "FAILED"
                     module_error = True
                 except KeyboardInterrupt:
                     module.add_execution_history_record("Execution of %s halted by user" % module_name)

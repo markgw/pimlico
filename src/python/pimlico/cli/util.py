@@ -88,7 +88,7 @@ def format_execution_error(error):
     """
     Produce a string with lots of error output to help debug a module execution error.
 
-    :param error: the exception raised (ModuleExecutionError)
+    :param error: the exception raised (ModuleExecutionError or ModuleInfoLoadError)
     :return: formatted output
     """
     output = StringIO()
