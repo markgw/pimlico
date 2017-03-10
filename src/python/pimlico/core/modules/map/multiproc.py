@@ -18,6 +18,7 @@ from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor, WorkerStartupError, WorkerShutdownError
+from pimlico.core.modules.map.threaded import ThreadingMapThread
 from pimlico.utils.pipes import qget
 
 
@@ -88,6 +89,8 @@ class MultiprocessingMapPool(DocumentProcessorPool):
 
     """
     PROCESS_TYPE = None
+    # Can specify an alternative implementation of the process type when we only need a single process
+    SINGLE_PROCESS_TYPE = None
 
     def __init__(self, executor, processes):
         super(MultiprocessingMapPool, self).__init__(processes)
@@ -111,7 +114,10 @@ class MultiprocessingMapPool(DocumentProcessorPool):
                                          debugging_info=debugging_info)
 
     def start_worker(self):
-        return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
+        if self.processes == 1 and self.SINGLE_PROCESS_TYPE is not None:
+            return self.SINGLE_PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
+        else:
+            return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
 
     @staticmethod
     def create_queue(maxsize=None):
@@ -144,7 +150,8 @@ class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):
 
 
 def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,
-                                     worker_set_up_fn=None, worker_tear_down_fn=None, batch_docs=None):
+                                     worker_set_up_fn=None, worker_tear_down_fn=None, batch_docs=None,
+                                     multiprocessing_single_process=False):
     """
     Factory function for creating an executor that uses the multiprocessing-based implementations of document-map
     pools and worker processes.
@@ -177,6 +184,10 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
     `docs_per_batch` is set on the worker processes, so that the given number of docs are collected from the input
     and passed into `process_documents()` at once.
 
+    By default, if only a single process is needed, we use the threaded implementation of a map process instead of
+    multiprocessing. If this doesn't work out in your case, for some reason, specify
+    `multiprocessing_single_process=True` and a mutiprocessing process will be used even when only creating one.
+
     """
     if isinstance(process_document_fn, type):
         if not issubclass(process_document_fn, MultiprocessingMapProcess):
@@ -204,9 +215,33 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
             FactoryMadeMapProcess.process_document = process_document_fn
         worker_type = FactoryMadeMapProcess
 
+        if multiprocessing_single_process:
+            # Don't define a special single-process case
+            single_worker_type = None
+        else:
+            # Also define a different worker thread type for use when we only need a single process
+            class FactoryMadeMapSingleProcess(ThreadingMapThread):
+                def process_document(self, archive, filename, *docs):
+                    return process_document_fn(self, archive, filename, *docs)
+
+                def set_up(self):
+                    if worker_set_up_fn is not None:
+                        worker_set_up_fn(self)
+
+                def tear_down(self):
+                    if worker_tear_down_fn is not None:
+                        worker_tear_down_fn(self)
+
+            if batch_docs is not None:
+                FactoryMadeMapSingleProcess.process_documents = process_document_fn
+            else:
+                FactoryMadeMapSingleProcess.process_document = process_document_fn
+            single_worker_type = FactoryMadeMapSingleProcess
+
     # Define a pool type to use this worker process type
     class FactoryMadeMapPool(MultiprocessingMapPool):
         PROCESS_TYPE = worker_type
+        SINGLE_PROCESS_TYPE = single_worker_type
 
     # Finally, define an executor type (subclass of DocumentMapModuleExecutor) that creates a pool of the right sort
     class ModuleExecutor(MultiprocessingMapModuleExecutor):
