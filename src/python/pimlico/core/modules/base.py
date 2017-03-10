@@ -526,7 +526,7 @@ class BaseModuleInfo(object):
     def is_filter(cls):
         return not cls.module_executable and len(cls.module_inputs) > 0
 
-    def missing_data(self, input_names=None, assume_executed=[], assume_failed=[]):
+    def missing_data(self, input_names=None, assume_executed=[], assume_failed=[], allow_preliminary=False):
         """
         Check whether all the input data for this module is available. If not, return a list strings indicating
         which outputs of which modules are not available. If it's all ready, returns an empty list.
@@ -549,6 +549,10 @@ class BaseModuleInfo(object):
         modules to see whether it's possible to run them. Then we need to know not to trust the output data from the
         failed module, even if it looks valid.
 
+        If `allow_preliminary=True`, for any inputs that are multiple inputs and have multiple connections to
+        previous modules, consider them to be satisfied if at least one of their inputs is ready. The normal
+        behaviour is to require all of them to be ready, but in a preliminary run this requirement is relaxed.
+
         """
         if input_names is None:
             # Default to checking all inputs
@@ -564,8 +568,10 @@ class BaseModuleInfo(object):
                         missing.append("%s (required for '%s' (%s)" % (path, self.module_name, output_text))
         else:
             for input_name in input_names:
-                for previous_module, output_name, additional_names in \
-                        self.get_input_module_connection(input_name, always_list=True):
+                input_connections = self.get_input_module_connection(input_name, always_list=True)
+                missing_for_input = []
+
+                for previous_module, output_name, additional_names in input_connections:
                     # If the previous module is to be assumed executed, skip checking whether its output data is
                     # available
                     if previous_module.module_name in assume_executed:
@@ -574,17 +580,31 @@ class BaseModuleInfo(object):
                     if not previous_module.get_output(output_name).data_ready():
                         # If the previous module is a filter, it's more helpful to say exactly what data it's missing
                         if previous_module.is_filter():
-                            missing.extend(previous_module.missing_data(assume_executed=assume_executed))
+                            missing_for_input.extend(previous_module.missing_data(assume_executed=assume_executed))
                         else:
                             if output_name is None:
-                                missing.append("%s (default output)" % previous_module.module_name)
+                                missing_for_input.append("%s (default output)" % previous_module.module_name)
                             else:
-                                missing.append("%s output '%s'" % (previous_module.module_name, output_name))
+                                missing_for_input.append("%s output '%s'" % (previous_module.module_name, output_name))
                     elif previous_module.module_name in assume_failed:
                         # If previous module is assumed failed, assume its output data is not ready,
                         # even when it looks ready
-                        missing.append("%s module failed, so we assume  output '%s' is not complete" %
-                                       (previous_module.module_name, output_name))
+                        missing_for_input.append("%s module failed, so we assume  output '%s' is not complete" %
+                                                 (previous_module.module_name, output_name))
+
+                if allow_preliminary and len(input_connections) > 1:
+                    # For multiple inputs, be satisfied with at least one ready
+                    if len(missing_for_input) < len(input_connections):
+                        # At least one has no problem: this will do
+                        continue
+                    else:
+                        # Add all of the individual problems
+                        missing.extend([
+                            "preliminary run requires at least one input ready: %s" % mess for mess in missing_for_input
+                        ])
+                else:
+                    # Normal behaviour: report all input problems
+                    missing.extend(missing_for_input)
         return missing
 
     @classmethod

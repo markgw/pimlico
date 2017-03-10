@@ -23,7 +23,7 @@ from pimlico.utils.logging import get_console_logger
 
 
 def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=False, log=None, all_deps=False,
-                              check_only=False, exit_on_error=False):
+                              check_only=False, exit_on_error=False, preliminary=False):
     """
     Main method called by the `run` command that first checks a pipeline, checks all pre-execution requirements
     of the modules to be executed and then executes each of them. The most common case is to execute just one
@@ -105,16 +105,20 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
 
     # Check that the module is ready to run
     # If anything fails, an exception is raised
-    check_modules_ready(pipeline, modules, log)
+    preliminary_ignored_problems = check_modules_ready(pipeline, modules, log, preliminary=preliminary)
+    # Set preliminary only if requested and there were problems that would have prevented running otherwise
+    # If preliminary is set by the user, but all inputs are ready anyway, we unset it here
+    execute_preliminary = preliminary and len(preliminary_ignored_problems) > 0
 
     if check_only:
         log.info("All checks passed")
     else:
         # Checks passed: run the module
-        execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug, exit_on_error=exit_on_error)
+        execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug, exit_on_error=exit_on_error,
+                        preliminary=execute_preliminary)
 
 
-def check_modules_ready(pipeline, modules, log):
+def check_modules_ready(pipeline, modules, log, preliminary=False):
     """
     Check that a module is ready to be executed. Always called before execution begins.
 
@@ -122,9 +126,11 @@ def check_modules_ready(pipeline, modules, log):
     :param modules: loaded ModuleInfo instances, given in the order they're going to be executed.
         For each module, it's assumed that those before it in the list have already been run when it is run.
     :param log: logger to output to
-    :return:
+    :return: If `preliminary=True`, list of problems that were ignored by allowing preliminary run. Otherwise,
+        None -- we raise an exception when we first encounter a problem
     """
     already_run = []
+    non_prelim_missing_inputs = []
     log.info("Checking dependencies and inputs for module%s: %s" %
              ("s" if len(modules) > 1 else "", ", ".join(m.module_name for m in modules)))
 
@@ -147,11 +153,16 @@ def check_modules_ready(pipeline, modules, log):
                     raise ModuleExecutionError("runtime checks failed for module '%s'" % module_name)
 
             # Check that previous modules have been completed and input data is ready for us to use
-            missing_inputs = module.missing_data(assume_executed=already_run)
+            missing_inputs = module.missing_data(assume_executed=already_run, allow_preliminary=preliminary)
             if missing_inputs:
                 extra_message = ". Assuming %s already run" % ", ".join(already_run) if already_run else ""
                 raise ModuleNotReadyError("cannot execute module '%s', since its inputs are not all ready: %s%s" %
                                           (module_name, ", ".join(missing_inputs), extra_message))
+
+            if preliminary:
+                # If we've passed the checks while doing a preliminary run, check whether we'd have passed them
+                # under normal circumstances
+                non_prelim_missing_inputs.extend(module.missing_data(assume_executed=already_run))
 
             # Check that we're allowed to execute the module
             if module.is_locked():
@@ -167,8 +178,11 @@ def check_modules_ready(pipeline, modules, log):
             # Reraise the exception to be caught higher up
             raise
 
+    if preliminary:
+        return non_prelim_missing_inputs
 
-def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit_on_error=False):
+
+def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit_on_error=False, preliminary=False):
     # We assume that all checks have been run and that the modules are ready to be executed
     if len(modules) > 1:
         log.info("Executing a sequence of modules: %s" % ", ".join(mod.module_name for mod in modules))
@@ -303,9 +317,13 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                 # Always remove the lock at the end, even if something goes wrong
                 module.unlock()
 
-            if end_status is None:
+            if end_status is None or end_status == "COMPLETE":
                 # Update the module status so we know it's been completed
-                module.status = "COMPLETE"
+                if preliminary:
+                    # Don't set status to COMPLETE if we were just doing a preliminary run, to avoid confusion
+                    module.status = "COMPLETE_PRELIMINARY"
+                else:
+                    module.status = "COMPLETE"
             else:
                 # Custom status was given
                 module.status = end_status

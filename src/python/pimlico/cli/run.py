@@ -4,7 +4,7 @@ from traceback import print_exc, format_exception_only
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.cli.util import print_execution_error
 from pimlico.core.modules.base import ModuleInfoLoadError
-from pimlico.core.modules.execute import check_and_execute_modules, ModuleExecutionError
+from pimlico.core.modules.execute import check_and_execute_modules, ModuleExecutionError, ModuleNotReadyError
 from pimlico.core.modules.multistage import MultistageModuleInfo
 from pimlico.utils.logging import get_console_logger
 
@@ -34,6 +34,10 @@ class RunCmd(PimlicoCLISubcommand):
                                  "full pipeline leading to that point")
         parser.add_argument("--dry-run", "--dry", "--check", action="store_true",
                             help="Perform all pre-execution checks, but don't actually run the module(s)")
+        parser.add_argument("--preliminary", "--pre", action="store_true",
+                            help="Perform a preliminary run of any modules that take multiple datasets into one of "
+                                 "their inputs. This means that we will run the module even if not all the datasets "
+                                 "are yet available (but at least one is) and mark it as preliminarily completed")
         parser.add_argument("--exit-on-error", "-e", action="store_true",
                             help="If an error is encountered while executing a module that causes the whole module "
                                  "execution to fail, output the error and exit. By default, Pimlico will send "
@@ -48,6 +52,10 @@ class RunCmd(PimlicoCLISubcommand):
         if dry_run:
             log.info("DRY RUN")
             log.info("Running all pre-execution checks, but not executing any modules")
+        preliminary = opts.preliminary
+        if preliminary:
+            log.info("PRELIMINARY RUN")
+            log.info("Allowing modules with multiple-dataset inputs to execute even if not all the datasets are ready")
 
         if opts.modules is None or len(opts.modules) == 0:
             # No module name given: default to next one that's ready to run
@@ -85,16 +93,23 @@ class RunCmd(PimlicoCLISubcommand):
 
         try:
             check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,
-                                      all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error)
-        except ModuleInfoLoadError, e:
+                                      all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error,
+                                      preliminary=preliminary)
+        except (ModuleInfoLoadError, ModuleNotReadyError), e:
             if debug:
                 print_exc()
-                if e.cause is not None:
+                if hasattr(e, "cause") and e.cause is not None:
                     print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
             # See whether the problem came from a specific module
             module_name = getattr(e, "module_name", None)
             if module_name is not None:
-                print >>sys.stderr, "Error loading module '%s': %s" % (module_name, e)
+                error_type = ("Error loading module info for %s" % module_name) if type(e) is ModuleInfoLoadError else \
+                    ("Error: module '%s' not ready to run" % module_name)
+                print >>sys.stderr, "%s: %s" % (error_type, e)
+            else:
+                error_type = "Error loading module info" if type(e) is ModuleInfoLoadError else \
+                    "Error: module not ready to run"
+                print >>sys.stderr, "%s: %s" % (error_type, e)
         except KeyboardInterrupt:
             print >>sys.stderr, "Exiting before execution completed due to user interrupt"
             # Raise the exception so we see the full stack trace
