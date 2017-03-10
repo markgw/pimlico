@@ -1152,9 +1152,10 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
         # ConfigParser can read directly from a file, but we need to pre-process the text
         for line in f:
             line = line.rstrip("\n")
-            if line.startswith("%% "):
+            if line.startswith("%%"):
                 # Directive: process this now
-                directive, __, rest = line[3:].partition(" ")
+                directive, __, rest = line[2:].strip().partition(" ")
+                directive = directive.lower()
                 if directive.lower() == "novariant":
                     # Include this line only if loading the main variant
                     if variant == "main":
