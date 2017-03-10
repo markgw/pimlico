@@ -1156,6 +1156,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
             line = line.rstrip("\n")
             if line.startswith("%%"):
                 # Directive: process this now
+
                 dir_match = directive_re.match(line)
                 if dir_match is None:
                     raise PipelineConfigParseError("invalid directive line: %s" % line)
@@ -1165,6 +1166,15 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                 directive = dir_match.groupdict()["dir"]
                 rest = dir_match.groupdict()["rest"] or ""
                 directive = directive.lower()
+
+                # Special notation for variants to make config files more concise/readable
+                if directive[0] == "(":
+                    # Treat (x) as equivalent to variant:x
+                    # Transform it to share processing with canonical version below
+                    if directive[-1] != ")":
+                        raise PipelineConfigParseError("unmatched bracket in bracket notation for variant directive: "
+                                                       "'%s' (in line: %s)" % (directive, line))
+                    directive = "variant:%s" % directive[1:-1]
 
                 if directive.lower() == "novariant":
                     # Include this line only if loading the main variant

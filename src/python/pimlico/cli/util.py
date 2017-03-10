@@ -45,7 +45,8 @@ def module_numbers_to_names(pipeline, names):
             next_module = module_number_to_name(pipeline, name)
             # Check whether this is an unexpanded module name
             if next_module in pipeline.expanded_modules:
-                next_modules = pipeline.expanded_modules[next_module]
+                # If we're adding multiple modules (expanded), make sure they're in the schedule order
+                next_modules = [mod for mod in modules if mod in pipeline.expanded_modules[next_module]]
             else:
                 next_modules = [next_module]
 
@@ -79,8 +80,7 @@ def module_numbers_to_names(pipeline, names):
                 module_names.extend(modules[previous_module_num+1:next_module_num])
                 fill_next = False
             # Add this module, or modules
-            # If we're adding multiple modules (expanded), make sure they're in the schedule order
-            module_names.extend([mod for mod in modules if mod in next_modules])
+            module_names.extend(next_modules)
     return module_names
 
 

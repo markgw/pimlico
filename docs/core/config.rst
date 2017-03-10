@@ -75,6 +75,17 @@ by the directive name and any arguments.
        %%variant:main size=52
        %%variant:smaller size=7
 
+   An alternative notation for the variant directive is provided to make config files more readable. Instead of
+   `variant:variant_name`, you can write `(variant_name)`. So the above example becomes:
+
+    .. code-block:: ini
+       :emphasize-lines: 3,4
+
+          [my_module]
+          type=path.to.module
+          %%(main) size=52
+          %%(smaller) size=7
+
 - `novariant`:
     A line to be included only when not loading a variant of the pipeline. Equivalent to `variant:main`.
 
