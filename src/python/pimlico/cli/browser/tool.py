@@ -94,10 +94,10 @@ def browse_cmd(pipeline, opts):
         # Otherwise (default formatter), use the cmd-line option
         parse = not opts.raw
 
-    browse_data(data, formatter, parse=parse)
+    browse_data(data, formatter, parse=parse, skip_invalid=opts.skip_invalid)
 
 
-def browse_data(data, formatter, parse=False):
+def browse_data(data, formatter, parse=False, skip_invalid=False):
     if not parse:
         data.raw_data = True
     if not data.data_ready():
@@ -156,7 +156,12 @@ def browse_data(data, formatter, parse=False):
             doc_line.set_text("%s  ---  Doc %d / %d" % (state.current_doc_name, state.doc_num+1, state.total_docs))
             if main_loop.screen.started:
                 main_loop.draw_screen()
+
             doc_data = formatter.filter_document(state.current_doc_data)
+
+            if skip_invalid and isinstance(doc_data, InvalidDocument):
+                doc_data = None
+                continue
 
         if isinstance(doc_data, InvalidDocument):
             body_text.set_text(
