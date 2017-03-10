@@ -1148,23 +1148,33 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     # File will be marked abstract if an abstract directive is encountered
     abstract = False
 
+    directive_re = re.compile(r"^%%\s*(?P<dir>\S+)(\s(?P<rest>.*))?$")
+
     with open(filename, "r") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
         for line in f:
             line = line.rstrip("\n")
             if line.startswith("%%"):
                 # Directive: process this now
-                directive, __, rest = line[2:].strip().partition(" ")
+                dir_match = directive_re.match(line)
+                if dir_match is None:
+                    raise PipelineConfigParseError("invalid directive line: %s" % line)
+
+                # Don't strip whitespace from the remainder of the line, as it may be needed
+                # The first space after the directive is, however, ignored, seeing as it's needed to end the dir
+                directive = dir_match.groupdict()["dir"]
+                rest = dir_match.groupdict()["rest"]
                 directive = directive.lower()
+
                 if directive.lower() == "novariant":
                     # Include this line only if loading the main variant
                     if variant == "main":
-                        config_lines.append(rest.lstrip())
+                        config_lines.append(rest)
                 elif directive.lower().startswith("variant:"):
                     variant_conds = directive[8:].strip().split(",")
                     # Line conditional on a specific variant: include only if we're loading that variant
                     if variant in variant_conds:
-                        config_lines.append(rest.lstrip())
+                        config_lines.append(rest)
                     # Keep a list of all available variants
                     available_variants.update(variant_conds)
                 elif directive.lower().startswith("variant"):
