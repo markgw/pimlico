@@ -29,6 +29,7 @@ from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.utils.filesystem import copy_dir_with_progress
 from pimlico.utils.system import set_proc_title
 from .shell.runner import ShellCLICmd
+from .pyshell import PythonShellCmd
 
 
 class VariantsCmd(PimlicoCLISubcommand):
@@ -101,6 +102,9 @@ class BrowseCmd(PimlicoCLISubcommand):
                             help="Don't parse the data using the output datatype (i.e. just read the raw text). If not "
                                  "set, we output the result of applying unicode() to the parsed data structure, or a "
                                  "custom formatting if the datatype loaded defines one")
+        parser.add_argument("--skip-invalid", action="store_true",
+                            help="Skip over invalid documents, instead of showing the error that caused them to be "
+                                 "invalid")
         parser.add_argument("--formatter", "-f",
                             help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
                                  "what to output for each document. If specified, --raw is ignored. You may also choose "
@@ -127,8 +131,8 @@ class VisualizeCmd(PimlicoCLISubcommand):
 
 
 SUBCOMMANDS = [
-    StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, ResetCmd, LongStoreCmd, UnlockCmd, DumpCmd, LoadCmd,
-    DepsCmd, InstallCmd, InputsCmd, OutputCmd, VisualizeCmd
+    StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, LongStoreCmd, UnlockCmd,
+    DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, VisualizeCmd
 ]
 
 
