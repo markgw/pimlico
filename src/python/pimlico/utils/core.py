@@ -6,6 +6,8 @@ from contextlib import contextmanager
 import sys
 import ast
 
+import math
+
 
 @contextmanager
 def multiwith(*managers):
@@ -158,3 +160,12 @@ def split_seq_after(seq, separator):
     if len(subsequence):
         # Yield the subsequence after the last separator, unless it's empty
         yield subsequence
+
+
+def chunk_list(lst, length):
+    """
+    Divides a list into chunks of max `length` length.
+    """
+    return [
+        lst[i*length:(i+1)*length] for i in range(int(math.ceil(float(len(lst)) / length)))
+    ]
