@@ -1163,7 +1163,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                 # Don't strip whitespace from the remainder of the line, as it may be needed
                 # The first space after the directive is, however, ignored, seeing as it's needed to end the dir
                 directive = dir_match.groupdict()["dir"]
-                rest = dir_match.groupdict()["rest"]
+                rest = dir_match.groupdict()["rest"] or ""
                 directive = directive.lower()
 
                 if directive.lower() == "novariant":
