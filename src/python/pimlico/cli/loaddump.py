@@ -68,6 +68,7 @@ class DumpCmd(PimlicoCLISubcommand):
                     # Just so we know where this came from...
                     "dumped": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "hostname": socket.gethostname(),
+                    "variant": pipeline.variant,
                 }, indent=4)
                 meta_info = tarfile.TarInfo("dump_metadata.json")
                 meta_info.size = len(dump_meta)
@@ -117,6 +118,15 @@ class LoadCmd(PimlicoCLISubcommand):
                 if pipeline.name != dump_meta["pipeline_name"]:
                     print >>sys.stderr, "Error: the dumped data came from a pipeline called '%s', but you're trying to " \
                                         "load it into '%s'" % (dump_meta["pipeline_name"], pipeline.name)
+                    sys.exit(1)
+                # Also check we've loaded the correct variant of the pipeline
+                # Would be nice to just load the right one automatically, but it's tricky to go back and load it again
+                # Instead, just output an error, so the user can load the right one
+                dump_variant = dump_meta.get("variant", "main")
+                if pipeline.variant != dump_variant:
+                    print >>sys.stderr, "Error: the dumped data came from the '%s' variant of the pipeline, " \
+                                        "but you're trying to load it into '%s'. Load the correct variant with '-v'" % \
+                                        (dump_variant, pipeline.variant)
                     sys.exit(1)
 
                 module = pipeline[module_name]

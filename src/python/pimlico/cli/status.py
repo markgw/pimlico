@@ -83,10 +83,8 @@ class StatusCmd(PimlicoCLISubcommand):
                     # Show all modules, not just those that can be executed
                     print "\nAll modules in pipeline with statuses:"
                     module_names = [("-", module) for module in pipeline.modules]
-                    module_numbers = [None for x in module_names]
                 else:
                     module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
-                    module_numbers = list(range(1, len(module_names)+1))
 
                     # If the --deps-of option is given, filter modules shown to only those that lead to the given one
                     if opts.deps_of is not None:
@@ -284,7 +282,9 @@ Type: {type}
 {inputs}
 {outputs}{lock_status}
 Options:
-    {options}{module_details}""".format(
+    {options}
+Module variables:
+    {modvars}{module_details}""".format(
         title=colored(title_box("Module: %s" % module.module_name), status_color),
         status=colored("not executable", "green") if not module.module_executable else colored(module.status, status_color),
         inputs="\n".join(input_infos) if input_infos else "No inputs",
@@ -294,5 +294,6 @@ Options:
         lock_status="" if not module.is_locked() else "\nLocked: ongoing execution",
         docstring=docstring,
         type="%s -- %s" % (module.module_type_name, module.module_readable_name)
-                if module.module_readable_name else module.module_type_name
+                if module.module_readable_name else module.module_type_name,
+        modvars="\n    ".join("%s: %s" % (var, val) for (var, val) in module.module_variables.items())
     ), also_output

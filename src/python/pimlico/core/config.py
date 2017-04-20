@@ -11,7 +11,7 @@ import os
 import re
 import sys
 from ConfigParser import SafeConfigParser, RawConfigParser
-from cStringIO import StringIO
+from StringIO import StringIO
 from collections import OrderedDict
 from operator import itemgetter
 from socket import gethostname
@@ -79,6 +79,7 @@ class PipelineConfig(object):
         self._module_schedule = None
 
         self._dependency_cache = None
+        self._dependent_cache = None
 
     @property
     def modules(self):
@@ -105,19 +106,51 @@ class PipelineConfig(object):
             )
         return self._dependency_cache
 
-    def get_dependent_modules(self, module_name, recurse=False):
+    @property
+    def module_dependents(self):
+        """
+        Opposite of module_dependencies. Returns a mapping from module names to a list of modules the depend
+        on the module.
+        """
+        if self._dependent_cache is None:
+            self._dependent_cache = {}
+            # Use the module_dependencies mapping by simply reversing it
+            for module_name, dependencies in self.module_dependencies.iteritems():
+                for dep in dependencies:
+                    self._dependent_cache.setdefault(dep, []).append(module_name)
+        return self._dependent_cache
+
+    def get_dependent_modules(self, module_name, recurse=False, exclude=[]):
         """
         Return a list of the names of modules that depend on the named module for their inputs.
 
+        If `exclude` is given, we don't perform a recursive call on any of the modules in the list.
+        For each item we recurse on, we extend the exclude list in the recursive call
+        to include everything found so far (in other recursive calls). This avoids unnecessary recursion in
+        complex pipelines.
+
+        If `exclude=None`, it is also passed through to recursive calls as None. Its default value of `[]` avoids
+        excessive recursion from the top-level call, by allowing things to be added to the exclusion list for
+        recursive calls.
+
         :param recurse: include all transitive dependents, not just those that immediately depend on the module.
         """
-        dependents = [mod for (mod, dependencies) in self.module_dependencies.items() if module_name in dependencies]
+        dependents = self.module_dependents.get(module_name, [])
         if recurse:
             # Fetch the dependents of each of the dependents of this module
             # This should never result in an infinite loop, since we check for cycles in the graph
             # If the check hasn't been run, things might go bad!
             for dep_mod in dependents:
-                dependents.extend(self.get_dependent_modules(dep_mod, recurse=True))
+                if exclude is not None:
+                    # Don't recurse if module is in the exclude list
+                    if dep_mod in exclude:
+                        continue
+                    else:
+                        rec_exclude = list(set(exclude + dependents))
+                else:
+                    rec_exclude = None
+
+                dependents.extend(self.get_dependent_modules(dep_mod, recurse=True, exclude=rec_exclude))
         return remove_duplicates(dependents)
 
     def append_module(self, module_info):
@@ -595,14 +628,21 @@ class PipelineConfig(object):
 
                     # Check that all the modules that feed into this one's inputs have been defined already
                     input_module_names = []
+                    modvar_dependent_inputs = []
                     for input_name, input_specs in inputs.iteritems():
                         input_module_group = []
-                        for input_spec in input_specs:
-                            if input_spec[0] not in pipeline:
+                        for input_spec_num, input_spec in enumerate(input_specs):
+                            if "$(" in input_spec[0]:
+                                # Input module names are allowed to be dependent on module variables, but if they
+                                # are we can't inherit modvars from their input modules (cart before horse).
+                                # We leave them out here and come back and fill in the modvar later
+                                modvar_dependent_inputs.append((input_name, input_spec_num))
+                            elif input_spec[0] not in pipeline:
                                 raise PipelineStructureError("unknown module '%s' in inputs to '%s'" %
                                                              (input_spec[0], expanded_module_name))
-                            # Note all the modules that provide input to this one
-                            input_module_group.append(input_spec[0])
+                            else:
+                                # Note all the modules that provide input to this one
+                                input_module_group.append(input_spec[0])
                         input_module_names.append((input_name, input_module_group))
                     input_modules = [
                         (group_name, [pipeline[mod_name] for mod_name in img])
@@ -619,6 +659,12 @@ class PipelineConfig(object):
                         options_dict, module_variables, expanded_param_settings[expanded_module_name],
                         inherited_variables
                     )
+                    # Allow modvar values also to be used in input names (which were held out when inheriting modvars)
+                    for input_name, input_spec_num in modvar_dependent_inputs:
+                        inputs[input_name][input_spec_num] = tuple([substitute_modvars_in_value(
+                            input_name, inputs[input_name][input_spec_num][0], module_variables,
+                            expanded_param_settings[expanded_module_name], inherited_variables
+                        )] + list(inputs[input_name][input_spec_num][1:]))
 
                     # We're now ready to do the main parameter processing, which is dependent on the module
                     options = module_info_class.process_module_options(options_dict)
@@ -1027,28 +1073,33 @@ def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
 
 def substitute_modvars(options, modvars, expanded_params, variables_from_inputs):
     for key, val in options.iteritems():
-        # Note that we may have multiple modvar expressions in the same option
-        while "$(" in val:
-            before_modvar, __, modvar_onwards = val.partition("$(")
-
-            # Replace the modvar expression by processing it in the standard way
-            # This should process everything up to the end of the substitution
-            try:
-                modvar_result, rest = _parse_modvar_param(
-                    modvar_onwards, modvars, expanded_params, variables_from_inputs
-                )
-            except ValueError, e:
-                raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
-            # The next thing should be the closing bracket after the substitution expression
-            # i.e. the closer of $(...)
-            rest = rest.lstrip()
-            if rest[0] != ")":
-                raise PipelineConfigParseError("expected closing bracket after modvar substitution $(...), but "
-                                               "got '%s' in parameter: %s" % (rest[0], val))
-            # Include everything that comes after the closing bracket as well
-            val = "%s%s%s" % (before_modvar, modvar_result, rest[1:])
+        val = substitute_modvars_in_value(key, val, modvars, expanded_params, variables_from_inputs)
         # Make the substitution in the parameters
         options[key] = val
+
+
+def substitute_modvars_in_value(key, val, modvars, expanded_params, variables_from_inputs):
+    # Note that we may have multiple modvar expressions in the same option
+    while "$(" in val:
+        before_modvar, __, modvar_onwards = val.partition("$(")
+
+        # Replace the modvar expression by processing it in the standard way
+        # This should process everything up to the end of the substitution
+        try:
+            modvar_result, rest = _parse_modvar_param(
+                modvar_onwards, modvars, expanded_params, variables_from_inputs
+            )
+        except ValueError, e:
+            raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
+        # The next thing should be the closing bracket after the substitution expression
+        # i.e. the closer of $(...)
+        rest = rest.lstrip()
+        if rest[0] != ")":
+            raise PipelineConfigParseError("expected closing bracket after modvar substitution $(...), but "
+                                           "got '%s' in parameter: %s" % (rest[0], val))
+        # Include everything that comes after the closing bracket as well
+        val = "%s%s%s" % (before_modvar, modvar_result, rest[1:])
+    return val
 
 
 class ParameterTyingError(Exception):
@@ -1153,7 +1204,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     with open(filename, "r") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
         for line in f:
-            line = line.rstrip("\n")
+            line = line.decode("utf8").rstrip(u"\n")
             if line.startswith("%%"):
                 # Directive: process this now
 
@@ -1221,16 +1272,16 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     raise PipelineConfigParseError("unknown directive '%s' used in config file" % directive)
                 comment_memory = []
             else:
-                if line.startswith("["):
+                if line.startswith(u"["):
                     # Track what section we're in at any time
-                    current_section = line.strip("[] \n")
+                    current_section = line.strip(u"[] \n")
                     # Take the recent comments to be a docstring for the section
-                    section_docstrings[current_section] = "\n".join(comment_memory)
+                    section_docstrings[current_section] = u"\n".join(comment_memory)
                     comment_memory = []
-                elif line.startswith("#"):
+                elif line.startswith(u"#"):
                     # Don't need to filter out comments, because the config parser handles them, but grab any that
                     # were just before a section to use as a docstring
-                    comment_memory.append(line.lstrip("#").strip(" \n"))
+                    comment_memory.append(line.lstrip(u"#").strip(u" \n"))
                 else:
                     # Reset the comment memory for anything other than comments
                     comment_memory = []
@@ -1239,16 +1290,16 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     # Parse the result as a config file
     config_parser = RawConfigParser()
     try:
-        config_parser.readfp(StringIO("\n".join(config_lines)))
+        config_parser.readfp(StringIO(u"\n".join(config_lines)))
     except ConfigParser.Error, e:
         raise PipelineConfigParseError("could not parse config file %s. %s" % (filename, e))
 
     # If there's a "vars" section in this config file, remove it now and return it separately
-    if config_parser.has_section("vars"):
+    if config_parser.has_section(u"vars"):
         # Do variable substitution within the vars, using the initial vars and allowing vars to substitute into
         #  subsequent ones
         vars = copy.copy(initial_vars)
-        for key, val in config_parser.items("vars"):
+        for key, val in config_parser.items(u"vars"):
             key, val = key, var_substitute(val, vars)
             vars[key] = val
     else:
@@ -1258,7 +1309,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
         vars.update(sub_var)
 
     config_sections = [
-        (section, OrderedDict(config_parser.items(section))) for section in config_parser.sections() if section != "vars"
+        (section, OrderedDict(config_parser.items(section))) for section in config_parser.sections() if section != u"vars"
     ]
     # Add in sections from the included configs
     for subconfig_filename, subconfig in sub_configs:
