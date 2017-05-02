@@ -89,6 +89,7 @@ class KerasModelBuilderClassWriter(PimlicoDatatypeWriter):
         with open(os.path.join(self.data_dir, "build_params.json"), "w") as f:
             json.dump(self.build_params, f, indent=4)
         self.task_complete("architecture")
+        return self
 
     def write_weights(self, model):
         # Store the model's weights
@@ -118,7 +119,11 @@ class KerasModelBuilderClass(PimlicoDatatype):
     """
     def __init__(self, base_dir, pipeline, **kwargs):
         super(KerasModelBuilderClass, self).__init__(base_dir, pipeline, **kwargs)
-        self.weights_filename = os.path.join(self.data_dir, "weights.hdf5")
+
+    @property
+    def weights_filename(self):
+        if self.data_dir is not None:
+            return os.path.join(self.data_dir, "weights.hdf5")
 
     def load_build_params(self):
         with open(os.path.join(self.data_dir, "build_params.json"), "r") as f:
@@ -142,5 +147,5 @@ class KerasModelBuilderClass(PimlicoDatatype):
         """
         builder = self.create_builder_class()
         # Set the stored parameters
-        builder.model.set_weights(self.weights_filename)
+        builder.model.load_weights(self.weights_filename)
         return builder
