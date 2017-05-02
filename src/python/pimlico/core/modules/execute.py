@@ -232,9 +232,10 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
             if module.status == "COMPLETE":
                 # Should only get here in the case of force rerun
                 assert force_rerun
-                log.info("module '%s' already fully run, but forcing rerun" % module_name)
-                # If rerunning, delete the old data first so we make a fresh start
-                module.reset_execution()
+                log.info("module '%s' already fully run, but forcing rerun. If you want to be sure of clearing old "
+                         "data, use the 'reset' command" % module_name)
+                # We're rerunning, but don't delete old data (i.e. reset module), as there may be something there
+                # that the user wants to keep, e.g. caches. They can, of course, reset the module manually if they want
                 module.status = "STARTED"
             elif module.status == "UNEXECUTED":
                 # Not done anything on this yet
