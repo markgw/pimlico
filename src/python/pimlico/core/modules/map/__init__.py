@@ -380,6 +380,8 @@ class InputQueueFeeder(Thread):
         self.feeding_complete = threading.Event()
         self.exception_queue = Queue(1)
         self.start()
+        # Accumulate a count of invalid docs that have been fed, just for information
+        self.invalid_docs = 0
 
     def get_next_output_document(self):
         while True:
@@ -424,6 +426,8 @@ class InputQueueFeeder(Thread):
         try:
             # Keep feeding inputs onto the queue as long as we've got more
             for i, (archive, filename, docs) in enumerate(self.iterator):
+                if any(type(doc) is InvalidDocument for doc in docs):
+                    self.invalid_docs += 1
                 # If the queue is full, this will block until there's room to put the next one on
                 self.input_queue.put((archive, filename, docs))
                 # Record that we've sent this one off, so we can write the results out in the right order
