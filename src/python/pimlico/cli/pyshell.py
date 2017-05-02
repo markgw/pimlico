@@ -7,6 +7,7 @@ class PythonShellCmd(PimlicoCLISubcommand):
 
     def add_arguments(self, parser):
         parser.add_argument("script", nargs="?", help="Script file to execute. Omit to enter interpreter")
+        parser.add_argument("-i", action="store_true", help="Enter interactive shell after running script")
 
     def run_command(self, pipeline, opts):
         from code import interact
@@ -17,6 +18,7 @@ class PythonShellCmd(PimlicoCLISubcommand):
         if opts.script:
             # Script given on the command line, execute it
             execfile(opts.script, local)
-        else:
+
+        if not opts.script or opts.i:
             # Enter the interpreter
             interact(local=local)
