@@ -135,10 +135,12 @@ class DocumentMapOutputTypeWrapper(object):
                         )
 
                     # Next document processed: yield the result
-                    if type(result) is InvalidDocument:
+                    if type(result) is InvalidDocument or \
+                            (self.multiple_outputs and type(result.data[self.output_num]) is InvalidDocument) or \
+                            (not self.multiple_outputs and type(result.data) is InvalidDocument):
                         invalid_outputs += 1
                         # Just got a single invalid document out
-                        yield result.archive, result.filename, result
+                        yield result.archive, result.filename, result.data
                     else:
                         # Here the normal executor would write the outputs to disk
                         # Instead we simply yield the one we're interested in
@@ -161,6 +163,8 @@ class DocumentMapOutputTypeWrapper(object):
                 # We get a None next_document if there's an error in the input feeder at the beginning
                 # Check whether this has happened
                 input_feeder.check_for_error()
+                # Check how many invalid docs were fed in
+                invalid_inputs = input_feeder.invalid_docs
 
                 complete = True
         except Exception, e:
