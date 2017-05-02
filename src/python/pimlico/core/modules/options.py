@@ -78,9 +78,12 @@ def comma_separated_list(item_type=str):
     """
     @opt_type_help("comma-separated list of %s" % format_option_type(item_type))
     def _fn(string):
-        return [
-            item_type(val.strip()) for val in string.split(",")
-        ]
+        if string.strip():
+            return [
+                item_type(val.strip()) for val in string.split(",")
+            ]
+        else:
+            return []
     return _fn
 
 
