@@ -253,10 +253,13 @@ def wrap_module_info_as_filter(module_info_instance):
         module_optional_outputs = []
         module_executable = False
 
-    return ModuleInfo(
+    info = ModuleInfo(
         module_info_instance.module_name,
         module_info_instance.pipeline,
         inputs=module_info_instance.inputs,
         options={},
         optional_outputs=[]
     )
+    # Pass through module variables
+    info.module_variables = module_info_instance.module_variables
+    return info
