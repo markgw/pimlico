@@ -660,11 +660,33 @@ class PipelineConfig(object):
                         inherited_variables
                     )
                     # Allow modvar values also to be used in input names (which were held out when inheriting modvars)
+                    add_after = {}
                     for input_name, input_spec_num in modvar_dependent_inputs:
-                        inputs[input_name][input_spec_num] = tuple([substitute_modvars_in_value(
+                        # Doing modvar substitution can result in a single value (input source) being expanded out
+                        # into multiple, by a modvar evaluating to a list
+                        new_input_names = substitute_modvars_in_value(
                             input_name, inputs[input_name][input_spec_num][0], module_variables,
-                            expanded_param_settings[expanded_module_name], inherited_variables
-                        )] + list(inputs[input_name][input_spec_num][1:]))
+                            expanded_param_settings[expanded_module_name], inherited_variables,
+                            list_action="expand"
+                        )
+                        if type(new_input_names) is not list:
+                            new_input_names = [new_input_names]
+                        new_input_specs = [
+                            tuple([iname] + list(inputs[input_name][input_spec_num][1:])) for iname in new_input_names
+                        ]
+                        # In the simple and most common case that there's only one resulting input spec, just use that
+                        inputs[input_name][input_spec_num] = new_input_specs[0]
+                        if len(new_input_specs) > 1:
+                            # If there are multiple, we need to come back and add the rest at the end, so as not to
+                            # spoil the item numbering
+                            add_after.setdefault(input_name, []).append((input_spec_num, new_input_specs[1:]))
+                    # Go back and fill in the extra input specs we need
+                    for input_name, to_add in add_after.iteritems():
+                        added = 0
+                        for original_spec_num, new_specs in to_add:
+                            for offset, new_spec in enumerate(new_specs):
+                                inputs[input_name].insert(original_spec_num + 1 + offset + added, new_spec)
+                            added += len(new_specs)
 
                     # We're now ready to do the main parameter processing, which is dependent on the module
                     options = module_info_class.process_module_options(options_dict)
@@ -931,9 +953,12 @@ def update_module_variables(input_modules, modvar_params, expanded_params):
         group_variables = {}
         for module in module_group:
             for var_name, var_val in module.module_variables.iteritems():
-                # If this conflicts with a value we've already got within the same group (multiple inputs), conjoin
+                # If we get multiple values for the same module variable within a group (that is, on a multiple input
+                #  to the same module input), we need to preserve them all, so we turn the modvar into a list
                 if var_name in group_variables:
-                    group_variables[var_name] += " & %s" % var_val
+                    if type(group_variables[var_name]) is not list:
+                        group_variables[var_name] = [group_variables[var_name]]
+                    group_variables[var_name].append(var_val)
                 else:
                     # Simply inherit the value
                     group_variables[var_name] = var_val
@@ -965,6 +990,10 @@ def modvar_params_to_modvars(params, vars, expanded_params, variables_from_input
                     raise ValueError("unexpected string: %s" % rest.strip())
             except ValueError, e:
                 raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
+
+
+var_name_re = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)?')
+int_literal_re = re.compile(r'^\d+')
 
 
 def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
@@ -1025,48 +1054,93 @@ def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
             to_val, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
 
             if from_val is None:
+                # Set what the default mapping is, if the given value doesn't match any of the other mappings
                 default_mapping = to_val
             else:
                 # The normal case
-                var_map[from_val] = to_val
+                # Allow the LHS of the mapping to be a list and match each of its elements
+                if type(from_val) is not list:
+                    from_val = [from_val]
+                for from_val_item in from_val:
+                    var_map[from_val_item] = to_val
             rest = rest.strip()
             # Next we just go on to the following mapping, without any separator
 
         # Now we apply the mapping
-        if to_map_val not in var_map:
-            # Don't know what to map this to
-            if default_mapping is not None:
-                # Use the specified default
-                val = default_mapping
+        # If the input we're applying to is a list, map each item in the list and return a list
+        def _do_map(v):
+            if v not in var_map:
+                # Don't know what to map this to
+                if default_mapping is not None:
+                    # Use the specified default
+                    return default_mapping
+                else:
+                    # No default value
+                    raise ValueError("mapping got unknown input value '%s' and has no default ('*') mapping" % v)
             else:
-                # No default value
-                raise ValueError("mapping got unknown input value '%s' and has no default ('*') mapping" % to_map_val)
+                return var_map[v]
+
+        if type(to_map_val) is list:
+            val = [_do_map(item) for item in to_map_val]
         else:
-            val = var_map[to_map_val]
+            val = _do_map(to_map_val)
     else:
-        var_name_re = re.compile(r'^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)?')
-        # Not any of the special values / functions, must be a variable name
-        match = var_name_re.search(param)
-        if match is None:
-            raise ValueError("could not parse variable name at start of '%s'" % param)
-        var_name = param[:match.end()]
-        rest = param[match.end():]
-        # Allow this to be in the form 'input_name.variable_name'
-        if "." in var_name:
-            input_name, __, var_name = var_name.partition(".")
-            if input_name not in variables_from_inputs:
-                raise ValueError("tried to get variable '%s' from input '%s', but could not find that input. "
-                                 "Available inputs are: %s" %
-                                 (var_name, input_name, ", ".join(variables_from_inputs.keys())))
-            elif var_name not in variables_from_inputs[input_name]:
-                raise ValueError("tried to get variable '%s' from input '%s', but the input module doesn't have a "
-                                 "variable of that name" %
-                                 (var_name, input_name))
-            val = variables_from_inputs[input_name][var_name]
+        match = int_literal_re.search(param)
+        if match:
+            # Int literals are not actually returned as ints, just as strings
+            # However, so we don't require them to be surrounded by quotes, we catch them here, before var processing
+            val = param[:match.end()]
+            rest = param[match.end():]
         else:
-            if var_name not in vars:
-                raise ValueError("unknown module variable '%s'" % var_name)
-            val = vars[var_name]
+            # Not any of the special values / functions, must be a variable name
+            match = var_name_re.search(param)
+            if match is None:
+                raise ValueError("could not parse variable name at start of '%s'" % param)
+            var_name = param[:match.end()]
+            rest = param[match.end():]
+            # Allow this to be in the form 'input_name.variable_name'
+            if "." in var_name:
+                input_name, __, var_name = var_name.partition(".")
+                if input_name not in variables_from_inputs:
+                    raise ValueError("tried to get variable '%s' from input '%s', but could not find that input. "
+                                     "Available inputs are: %s" %
+                                     (var_name, input_name, ", ".join(variables_from_inputs.keys())))
+                elif var_name not in variables_from_inputs[input_name]:
+                    raise ValueError("tried to get variable '%s' from input '%s', but the input module doesn't have a "
+                                     "variable of that name" %
+                                     (var_name, input_name))
+                var_val = variables_from_inputs[input_name][var_name]
+            else:
+                if var_name not in vars:
+                    raise ValueError("unknown module variable '%s'" % var_name)
+                var_val = vars[var_name]
+
+            # If it's followed by a '[', the var's value should be a list, which we select an item from
+            if rest.startswith("["):
+                if type(var_val) is not list:
+                    raise ValueError("[]-expression can only be applied to list-type modvar expressions")
+
+                rest = rest[1:].lstrip()
+                # Parse the next bit, allowing the list item specifier itself to be an expression
+                list_item_spec, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
+                rest = rest.lstrip()
+                # Expect a closing bracket after the specifier
+                if not rest.startswith("]"):
+                    raise ValueError("expected closing ] after list-item specifier")
+                rest = rest[1:]
+
+                if type(list_item_spec) is list:
+                    raise ValueError("cannot use a list to select an item from a list")
+                # The value should be an int (in string form)
+                try:
+                    list_item_spec = int(list_item_spec)
+                except ValueError:
+                    raise ValueError("list-item specifier must be an integer: got '%s'" % list_item_spec)
+
+                val = var_val[list_item_spec]
+            else:
+                # Use the result of the expression as the value to return
+                val = var_val
 
     return val, rest
 
@@ -1078,10 +1152,15 @@ def substitute_modvars(options, modvars, expanded_params, variables_from_inputs)
         options[key] = val
 
 
-def substitute_modvars_in_value(key, val, modvars, expanded_params, variables_from_inputs):
+def substitute_modvars_in_value(key, val, modvars, expanded_params, variables_from_inputs, list_action="error"):
+    # list_action specifies what happens if we try to substitute a modvar expression that evaluates to a list
+    # The default behaviour 'error' simply raises an error
+    # Use 'expand' to expand the result into a list, covering all the alternatives
+    val_parts = [val]
+
     # Note that we may have multiple modvar expressions in the same option
-    while "$(" in val:
-        before_modvar, __, modvar_onwards = val.partition("$(")
+    while "$(" in val_parts[-1]:
+        before_modvar, __, modvar_onwards = val_parts[-1].partition("$(")
 
         # Replace the modvar expression by processing it in the standard way
         # This should process everything up to the end of the substitution
@@ -1090,16 +1169,39 @@ def substitute_modvars_in_value(key, val, modvars, expanded_params, variables_fr
                 modvar_onwards, modvars, expanded_params, variables_from_inputs
             )
         except ValueError, e:
-            raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
+            raise PipelineConfigParseError("could not parse module variable expression '%s = %s': %s" % (key, val, e))
         # The next thing should be the closing bracket after the substitution expression
         # i.e. the closer of $(...)
         rest = rest.lstrip()
         if rest[0] != ")":
             raise PipelineConfigParseError("expected closing bracket after modvar substitution $(...), but "
                                            "got '%s' in parameter: %s" % (rest[0], val))
-        # Include everything that comes after the closing bracket as well
-        val = "%s%s%s" % (before_modvar, modvar_result, rest[1:])
-    return val
+        # Modvar expressions can evaluate to lists, but we can't use them in substitutions
+        if type(modvar_result) is list:
+            if list_action == "expand":
+                # Expanding now is inefficient
+                # Instead, perform all var substs and then expand all the lists
+                val_parts.pop()
+                val_parts.extend([before_modvar, modvar_result, rest[1:]])
+            else:
+                raise PipelineConfigParseError("tried to substitute a modvar expression that evaluates to a list of "
+                                               "values into a string: %s" % ", ".join(modvar_result))
+        else:
+            # Include everything that comes after the closing bracket as well
+            val_parts[-1] = "%s%s%s" % (before_modvar, modvar_result, rest[1:])
+
+    if list_action == "expand":
+        # Expand out all combinations of list values
+        def _expand(prts):
+            if len(prts) == 0:
+                return [""]
+            elif type(prts[0]) is list:
+                return ["%s%s" % (part0, rec) for part0 in prts[0] for rec in _expand(prts[1:])]
+            else:
+                return ["%s%s" % (prts[0], rec) for rec in _expand(prts[1:])]
+        return _expand(val_parts)
+    else:
+        return "".join(val_parts)
 
 
 class ParameterTyingError(Exception):
