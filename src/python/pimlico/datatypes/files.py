@@ -100,9 +100,6 @@ class RawTextDirectory(IterableCorpus):
     data_point_type = RawTextDocumentType
     requires_data_preparation = True
 
-    def data_ready(self):
-        return super(RawTextDirectory, self).data_ready() and os.path.exists(self.options["path"])
-
     def prepare_data(self, output_dir, log):
         log.info("Counting files in input directory")
         # Walk over the entire subdirectory structure at the given path
