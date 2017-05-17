@@ -232,6 +232,27 @@ reads the data out of a corpus on disk, there's not quite enough information in 
 module to collect a little bit of metadata from an initial pass over the corpus. Some input types need this, others
 not. In this case, all we're lacking is a count of the total number of documents in the corpus.
 
+.. note::
+
+   To make running your pipeline even simpler, you can abbreviate the command by using a **shebang** in the
+   config file. Add a line at the top of `myproject.conf` like this:
+
+   .. code-block:: ini
+
+      #!./pimlico.sh
+
+   Then make the conf file executable by running (on Linux):
+
+   .. code-block:: bash
+
+      chmod ug+x myproject.conf
+
+   Now you can run Pimlico for your pipeline by using the config file as an executable command:
+
+   .. code-block:: bash
+
+      ./myproject.conf status
+
 Running the modules
 -------------------
 The modules can be run using the `run` command and specifying the module by name. We do this manually for each module. 

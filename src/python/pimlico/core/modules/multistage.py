@@ -268,11 +268,11 @@ class ModuleStage(object):
     If no explicit input connections are given, the default input to this module is connected to the default
     output from the previous.
 
-    Connections can be given as a list of `ModuleConnection`s.
+    Connections can be given as a list of `ModuleConnection` s.
 
     Output connections specify that one of this module's outputs should be used as an output from the multi-stage
     module. Optional outputs for the multi-stage module are not currently supported (though could in theory be
-    added later). This should be a list of `ModuleOutputConnection`s. If none are given for any of the stages,
+    added later). This should be a list of `ModuleOutputConnection` s. If none are given for any of the stages,
     the module will have a single output, which is the default output from the last stage.
 
     """

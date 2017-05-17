@@ -102,7 +102,7 @@ class DataShell(Cmd):
 
     def default(self, line):
         """
-        We use this to handle commands that can't be handled using the do_ pattern.
+        We use this to handle commands that can't be handled using the `do_` pattern.
         Also handles the default fallback, which is to execute Python.
 
         """

@@ -162,11 +162,11 @@ of producing 25 pipeline modules, we'll only produce 5, matching up each pair of
 
 If you want to tie together the alternative values on some parameters, but not others, you can specify groups
 of parameter names to tie using the `tie_alts` option. Each group is separated by spaces and the names of
-parameters to tie within a group are separated by `|`s. Any parameters that have alternative values but are
+parameters to tie within a group are separated by `|` s. Any parameters that have alternative values but are
 not specified in one of the groups are not tied to anything else.
 
 For example, the following module config will tie together `option_a`'s alternatives with `option_b`'s, but
-produce all combinations of them with `option_c`'s alternatives, resulting in 3*2=6 versions of the module
+produce all combinations of them with `option_c` 's alternatives, resulting in 3*2=6 versions of the module
 (`my_module[option_a=1~option_b=one~option_c=x]`, `my_module[option_a=1~option_b=one~option_c=y]`,
 `my_module[option_a=2~option_b=two~option_c=x]`, etc).
 

@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     pimlico.datatypes.coref
+    pimlico.datatypes.formatters
     pimlico.datatypes.parse
 
 Submodules
@@ -17,10 +18,12 @@ Submodules
    pimlico.datatypes.arrays
    pimlico.datatypes.base
    pimlico.datatypes.caevo
+   pimlico.datatypes.core
    pimlico.datatypes.dictionary
    pimlico.datatypes.documents
    pimlico.datatypes.features
    pimlico.datatypes.files
+   pimlico.datatypes.floats
    pimlico.datatypes.ints
    pimlico.datatypes.jsondoc
    pimlico.datatypes.keras

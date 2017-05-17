@@ -1,5 +1,8 @@
 """Visualization of pipelines using Graphviz.
 
+This is not fully implemented yet. In fact, I've barely started. But you'll find some indication of where
+I'm going with it on the :doc:`/plans/wishlist`.
+
 .. note::
 
    Do not import anything from subpackages unless you're doing graph visualization, as they will trigger

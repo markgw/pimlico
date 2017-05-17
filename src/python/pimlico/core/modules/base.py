@@ -362,12 +362,13 @@ class BaseModuleInfo(object):
     def get_output_dir(self, output_name, short_term_store=False):
         """
         :param short_term_store: return an absolute path in the short-term store. If False (default), return a
-        relative path, specified relative to the root of the Pimlico store used. This allows multiple stores
-        to be searched for output
+            relative path, specified relative to the root of the Pimlico store used. This allows multiple stores
+            to be searched for output
         :param output_name: the name of an output
         :return: the path to the output directory to use for the named output, which may be relative to the root
-        of the Pimlico store in use (default) or an absolute path in the short-term store, depending on
-        `short_term_store`
+            of the Pimlico store in use (default) or an absolute path in the short-term store, depending on
+            `short_term_store`
+
         """
         if output_name is None:
             output_name = self.default_output_name

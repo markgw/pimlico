@@ -4,7 +4,10 @@
 
 .. todo::
 
-   Write a guide to building document map modules
+   Write a guide to building document map modules.
+
+   For now, the skeletons below are a useful starting point, but there should be a more fulsome explanation here
+   of what document map modules are all about and how to use them.
 
 
 Skeleton new module

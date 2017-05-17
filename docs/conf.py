@@ -252,6 +252,8 @@ texinfo_documents = [
 import glob
 autosummary_generate = glob.glob("reference/*.rst")
 autodoc_member_order = 'bysource'
+# pygraphviz: optional import used by visualization
+autodoc_mock_imports = ["pygraphviz"]
 
 todo_include_todos = True
 
