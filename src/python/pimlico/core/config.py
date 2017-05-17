@@ -1084,6 +1084,26 @@ def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
             val = [_do_map(item) for item in to_map_val]
         else:
             val = _do_map(to_map_val)
+    elif param.startswith("join("):
+        # Allows list variables to be joined on an arbitrary joiner
+        rest = param[5:]
+        # The first argument should be a string to be used as the joiner
+        joiner, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
+        if type(joiner) is list:
+            raise ValueError("first argument to join() function should be a string to use as the joiner. Got a list")
+        rest = rest.lstrip()
+        if not rest.startswith(","):
+            raise ValueError("join() expects 2 arguments: a joiner and a list to join")
+        rest = rest[1:].lstrip()
+        join_list, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
+        if not type(join_list) is list:
+            raise ValueError("second argument to join() function must be a list. Got: %s" % join_list)
+        rest = rest.lstrip()
+        if not rest.startswith(")"):
+            raise ValueError("expected closing ) after join's args")
+        rest = rest[1:]
+        # Now perform the actual join
+        val = joiner.join(join_list)
     else:
         match = int_literal_re.search(param)
         if match:
