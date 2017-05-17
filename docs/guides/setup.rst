@@ -215,7 +215,7 @@ Running the pipeline
 What modules to run?
 --------------------
 Pimlico suggests an order in which to run your modules. In our case, this is pretty obvious, seeing as our
-pipeline is entirely linear &ndash; it's clear which ones need to be run before others.
+pipeline is entirely linear -- it's clear which ones need to be run before others.
 
 .. code-block:: bash
 
@@ -223,7 +223,7 @@ pipeline is entirely linear &ndash; it's clear which ones need to be run before 
 
 The output also tells you the current status of each module. At the moment, all the modules are `UNEXECUTED`.
 
-You'll notice that the `tar-grouper` module doesn't feature in the list. This is because it's a filter &ndash; 
+You'll notice that the `tar-grouper` module doesn't feature in the list. This is because it's a filter --
 it's run on the fly while reading output from the previous module (i.e. the input), so doesn't have anything to 
 run itself.
 
