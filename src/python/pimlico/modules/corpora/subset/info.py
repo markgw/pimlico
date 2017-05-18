@@ -85,15 +85,22 @@ class TarredCorpusSubsetFilter(TarredCorpus):
 
     def __len__(self):
         if self.skip_invalid:
-            return min(self.size, self.num_valid_docs)
+            # If we have as many as `size` docs, we can stop counting
+            return self.count_valid_docs(self.size)
         else:
-            return min(self.size, len(self.input_datatype))
+            return min(self.size, len(self.input_datatype) - self.offset)
 
-    @property
-    def num_valid_docs(self):
+    def count_valid_docs(self, stop_after=None):
         if self._num_valid_docs is None:
-            self._num_valid_docs = sum(1 for doc_name, doc in self.input_datatype
-                                       if not isinstance(doc, InvalidDocument))
+            if stop_after is not None:
+                # Don't need to count the full thing, just to check if it's smaller than a given size
+                # We cache this, which becomes invalid if self.size changes, but that shouldn't happen
+                self._num_valid_docs = sum(1 for __ in self.archive_iter())
+            else:
+                # Have to count the full set: no shortcuts
+                # Cache it for next time
+                self._num_valid_docs = sum(islice((1 for doc_name, doc in self.input_datatype
+                                                   if not isinstance(doc, InvalidDocument)), self.offset, None))
         return self._num_valid_docs
 
     def archive_iter(self, subsample=None, start_after=None, skip=None):
