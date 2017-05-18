@@ -17,7 +17,7 @@ from operator import itemgetter
 from socket import gethostname
 
 from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR
-from pimlico.cli.debug import enable_step_for_pipeline
+from pimlico.cli.debug.stepper import enable_step_for_pipeline
 from pimlico.datatypes.base import load_datatype, DatatypeLoadError
 from pimlico.utils.core import remove_duplicates
 from pimlico.utils.format import title_box
