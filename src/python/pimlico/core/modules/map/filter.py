@@ -73,6 +73,7 @@ class DocumentMapOutputTypeWrapper(object):
         complete = False
         invalid_inputs = 0
         invalid_outputs = 0
+        input_feeder = None
         try:
             # Prepare a corpus writer for the output
             with self.wrapped_module_info.get_writer(self.output_name, output_dir) as writer:
@@ -139,6 +140,9 @@ class DocumentMapOutputTypeWrapper(object):
                             (self.multiple_outputs and type(result.data[self.output_num]) is InvalidDocument) or \
                             (not self.multiple_outputs and type(result.data) is InvalidDocument):
                         invalid_outputs += 1
+                        # Check whether the document was also invalid in the input
+                        if input_feeder.check_invalid(result.archive, result.filename):
+                            invalid_inputs += 1
                         # Just got a single invalid document out
                         yield result.archive, result.filename, result.data
                     else:
@@ -166,8 +170,6 @@ class DocumentMapOutputTypeWrapper(object):
                 # We get a None next_document if there's an error in the input feeder at the beginning
                 # Check whether this has happened
                 input_feeder.check_for_error()
-                # Check how many invalid docs were fed in
-                invalid_inputs = input_feeder.invalid_docs
 
                 complete = True
         except Exception, e:
@@ -182,6 +184,7 @@ class DocumentMapOutputTypeWrapper(object):
             else:
                 # Just include the stack trace from this process
                 debugging = format_exc()
+
             raise ModuleExecutionError("error in filter %s: %s" % (self.wrapped_module_info.module_name, e),
                                        cause=e, debugging_info=debugging)
         finally:
@@ -189,6 +192,10 @@ class DocumentMapOutputTypeWrapper(object):
             executor.postprocess(error=not complete)
             executor.log.info("[%s filter] Input contained %d invalid documents, output contained %d" %
                               (self.wrapped_module_info.module_name, invalid_inputs, invalid_outputs))
+            if input_feeder is not None:
+                input_feeder.check_for_error()
+                input_feeder.cancel()
+                input_feeder.empty_all_queues()
 
     def data_ready(self):
         """

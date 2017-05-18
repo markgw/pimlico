@@ -153,6 +153,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         complete = False
         result_buffer = {}
 
+        input_feeder = None
         docs_completed_now = 0
         docs_completed_before, start_after = self.retrieve_processing_status()
         total_to_process = len(self.input_iterator) - docs_completed_before
@@ -258,6 +259,9 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
             else:
                 self.log.info("Document mapping failed. Finishing off")
             self.postprocess(error=not complete)
+            if input_feeder is not None:
+                input_feeder.cancel()
+                input_feeder.empty_all_queues()
 
 
 def skip_invalid(fn):
@@ -378,10 +382,12 @@ class InputQueueFeeder(Thread):
         self._docs_processing = Queue()
         self.started = threading.Event()
         self.feeding_complete = threading.Event()
+        self.cancelled = threading.Event()
         self.exception_queue = Queue(1)
+        # Accumulate a list of invalid docs that have been fed, just for information
+        self.invalid_docs = Queue()
+        self._invalid_docs_list = []
         self.start()
-        # Accumulate a count of invalid docs that have been fed, just for information
-        self.invalid_docs = 0
 
     def get_next_output_document(self):
         while True:
@@ -392,6 +398,9 @@ class InputQueueFeeder(Thread):
                     return self._docs_processing.get_nowait()
                 except Empty:
                     return None
+            elif self.cancelled.is_set():
+                # Not finished feeding, but cancelled, so don't return a doc
+                return None
             else:
                 # Possible that docs_processing is empty, if we're waiting for the feeder
                 # Wait until we know what the next document to come out is to be
@@ -422,12 +431,29 @@ class InputQueueFeeder(Thread):
                     raise ModuleExecutionError("error in worker process: %s" % error,
                                                cause=error, debugging_info=debugging)
 
+    def check_invalid(self, archive, filename):
+        """
+        Checks whether a given document was invalid in the input. Once the check has been performed, the
+        item is removed from the list, for efficiency, so this should only be called once per document.
+        """
+        # Update the invalid docs list from the queue
+        while not self.invalid_docs.empty():
+            self._invalid_docs_list.append(self.invalid_docs.get_nowait())
+        self._invalid_docs_list = [d for d in self._invalid_docs_list if d is not None]
+        if (archive, filename) in self._invalid_docs_list:
+            self._invalid_docs_list.remove((archive, filename))
+            return True
+        return False
+
     def run(self):
         try:
             # Keep feeding inputs onto the queue as long as we've got more
             for i, (archive, filename, docs) in enumerate(self.iterator):
+                if self.cancelled.is_set():
+                    # Stop feeding right away
+                    return
                 if any(type(doc) is InvalidDocument for doc in docs):
-                    self.invalid_docs += 1
+                    self.invalid_docs.put((archive, filename))
                 # If the queue is full, this will block until there's room to put the next one on
                 self.input_queue.put((archive, filename, docs))
                 # Record that we've sent this one off, so we can write the results out in the right order
@@ -467,6 +493,18 @@ class InputQueueFeeder(Thread):
             else:
                 debugging = None
             raise ModuleExecutionError("error in input iterator: %s" % error, cause=error, debugging_info=debugging)
+
+    def cancel(self):
+        # Tell the thread to stop feeding
+        self.cancelled.set()
+        # Empty the queue of anything we've already fed
+        while not self.input_queue.empty():
+            self.input_queue.get_nowait()
+
+    def empty_all_queues(self):
+        for q in [self.input_queue, self._docs_processing, self.exception_queue, self.invalid_docs]:
+            while not q.empty():
+                q.get_nowait()
 
 
 class DocumentProcessorPool(object):
