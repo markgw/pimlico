@@ -34,6 +34,11 @@ class RunCmd(PimlicoCLISubcommand):
                                  "full pipeline leading to that point")
         parser.add_argument("--dry-run", "--dry", "--check", action="store_true",
                             help="Perform all pre-execution checks, but don't actually run the module(s)")
+        parser.add_argument("--step", action="store_true",
+                            help="Enabled super-verbose debugging mode, which steps through a module's processing "
+                                 "outputting a lot of information and allowing you to control the output as it goes. "
+                                 "Useful for working out what's going on inside a module if it's mysteriously not "
+                                 "producing the output you expected")
         parser.add_argument("--preliminary", "--pre", action="store_true",
                             help="Perform a preliminary run of any modules that take multiple datasets into one of "
                                  "their inputs. This means that we will run the module even if not all the datasets "
@@ -56,6 +61,11 @@ class RunCmd(PimlicoCLISubcommand):
         if preliminary:
             log.info("PRELIMINARY RUN")
             log.info("Allowing modules with multiple-dataset inputs to execute even if not all the datasets are ready")
+        step = opts.step
+        if step:
+            log.info("STEP MODE")
+            log.info("Running the module(s) in super-verbose, interactive step-mode to debug")
+            pipeline.enable_step()
 
         if opts.modules is None or len(opts.modules) == 0:
             # No module name given: default to next one that's ready to run

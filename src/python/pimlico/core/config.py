@@ -17,6 +17,7 @@ from operator import itemgetter
 from socket import gethostname
 
 from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR
+from pimlico.cli.debug import enable_step_for_pipeline
 from pimlico.datatypes.base import load_datatype, DatatypeLoadError
 from pimlico.utils.core import remove_duplicates
 from pimlico.utils.format import title_box
@@ -75,6 +76,9 @@ class PipelineConfig(object):
                                 self.pipeline_config["python_path"].split(":") if path]
             # Add these paths for the python path, so later code will be able to import things from them
             sys.path.extend(additional_paths)
+
+        # Step mode is disabled by default: see method enable_step()
+        self._stepper = None
 
         self._module_schedule = None
 
@@ -888,6 +892,22 @@ class PipelineConfig(object):
         return [
             os.path.join(store_base, path) for store_base in [self.short_term_store, self.long_term_store]
         ]
+
+    @property
+    def step(self):
+        return self._stepper is not None
+
+    def enable_step(self):
+        """
+        Enable super-verbose, interactive step mode.
+
+        ::seealso::
+
+           Module :mod:pimlico.cli.debug
+              The debug module defines the behaviour of step mode.
+
+        """
+        enable_step_for_pipeline(self)
 
 
 def multiply_alternatives(alternative_params):

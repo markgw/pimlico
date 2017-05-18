@@ -215,6 +215,10 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
             skipped_modules.append(module_name)
             continue
 
+        # Give some information to the stepper if we're in step mode
+        if pipeline.step:
+            pipeline._stepper.executing = True
+
         try:
             # If running multiple modules, output something between them so it's clear where they start and end
             if len(modules) > 1:
@@ -342,6 +346,10 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                 break
         else:
             success_modules.append(module_name)
+
+    # Give some information to the stepper if we're in step mode
+    if pipeline.step:
+        pipeline._stepper.executing = False
 
     # Output a summary of what we succeeded and failed on
     if error_modules:
