@@ -149,13 +149,16 @@ class DocumentMapOutputTypeWrapper(object):
                             data = result.data[self.output_num]
                         else:
                             data = result.data
-                        data = writer.document_to_raw_data(data)
-                        if not self.raw_data:
-                            # If not outputting raw data, now use the output datatype to convert back from raw text
-                            # It may seem a waste of time to convert to and from text, but sometimes the conversions
-                            #  are not symmetrical: e.g. the output writer might produce raw output and not process
-                            #  it before writing to disk
-                            data = dummy_reader.process_document(data)
+                        # If we're outputting raw data, use the writer to convert the data structure to raw data
+                        if self.raw_data:
+                            data = writer.document_to_raw_data(data)
+                        # Historical note:
+                        #  Previously, we did a little process here where we converted the doc to raw data and then
+                        #  back into the data structure required. This was to allow for writers that aren't symmetrical:
+                        #  they expect datatype A, convert it to raw data and write it, but the corresponding reader
+                        #  reads the raw data into datatype B. This is a stupid thing to do most of the time. It's
+                        #  also stupid to slow down the execution of almost every pipeline to allow for this niche
+                        #  case, so I've stopped doing it
                         yield result.archive, result.filename, data
                     # Check what document we're waiting for now
                     next_document = input_feeder.get_next_output_document()
