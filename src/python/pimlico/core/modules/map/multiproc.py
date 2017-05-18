@@ -127,12 +127,48 @@ class MultiprocessingMapPool(DocumentProcessorPool):
         # Tell all the threads to stop
         for worker in self.workers:
             worker.stopped.set()
-        # Need to clear the output queue to help with shutdown
+
+        # Now wait until all processes have shut down
+        still_alive = []
+        for worker in self.workers:
+            worker.join(5.)
+            if worker.is_alive():
+                # Extreme case: 5 seconds without the worker closing down
+                still_alive.append(worker)
+        for worker in still_alive:
+            # Output something so we know that it's the worker shutdown that's holding things up
+            self.executor.log.warn("Worker process %s taking a long time to shut down: you may need to forcibly kill "
+                                   "everything" % worker)
+            worker.join()
+
+        # Clear the output queue now, as something might have appeared there since we told the process to shutdown
         while not self.output_queue.empty():
             self.output_queue.get_nowait()
-        # Don't wait until the processes have actually stopped as some might not die until the exception queue
-        #  is emptied, but we don't want to do that yet
-        # They're all daemon processes anyway
+
+        # Also need to clear the exception queue
+        errors = []
+        while not self.exception_queue.empty():
+            error = self.exception_queue.get_nowait()
+            if error is not None:
+                errors.append(error)
+
+        if errors:
+            # Hopefully, this shouldn't happen, as errors should already have been handled further up
+            error = errors[0]
+            if hasattr(error, "debugging_info"):
+                # We've already attached debugging info at some lower level: just use it
+                debugging = error.debugging_info
+            elif hasattr(error, "traceback"):
+                debugging = error.traceback
+            else:
+                debugging = None
+            if len(errors) > 1:
+                extra_mess = " (%d further unhandled errors received from worker processes)" % (len(errors)-1)
+            else:
+                extra_mess = ""
+
+            self.executor.log.error("error in worker process received while shutting down pool: %s%s" %
+                                    (error, extra_mess), cause=error, debugging_info=debugging)
 
     def notify_no_more_inputs(self):
         for worker in self.workers:
