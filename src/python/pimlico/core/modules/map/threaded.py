@@ -68,6 +68,18 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
 
+    def shutdown(self, timeout=3.):
+        # This may have been done by the pool, but it doesn't hurt to set it again
+        self.stopped.set()
+        # Now wait for the process to shut down
+        self.join(timeout=timeout)
+        if self.is_alive():
+            # Join timed out
+            self.executor.log.warn("Multiprocessing document map worker process has taken a long time to shut down, "
+                                   "giving up waiting. You may need to forcibly kill the main process")
+            return False
+        return True
+
 
 class ThreadingMapPool(DocumentProcessorPool):
     THREAD_TYPE = None
@@ -97,15 +109,19 @@ class ThreadingMapPool(DocumentProcessorPool):
 
     def shutdown(self):
         # Tell all the threads to stop
+        # Although the worker's shutdown does this too, do it to all now so they can be finishing up in the background
         for worker in self.workers:
             worker.stopped.set()
-        for worker in self.workers:
-            # Wait until it's stopped
-            while worker.is_alive():
-                # Need to clear the output queue, or else the join hangs
-                while not self.output_queue.empty():
-                    self.output_queue.get_nowait()
-                worker.join(0.1)
+        self.empty_all_queues()
+        # Now try to shut down every worker
+        # Don't keep trying indefinitely: if we fail 5 times, just give up
+        tries = 0
+        while tries <= 5 and any(w.is_alive() for w in self.workers):
+            for worker in self.workers:
+                if worker.is_alive():
+                    # This could fail, in which case we try again in a moment
+                    worker.shutdown()
+            tries += 1
 
 
 class ThreadingMapModuleExecutor(DocumentMapModuleExecutor):

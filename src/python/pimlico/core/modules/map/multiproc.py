@@ -16,6 +16,10 @@ import multiprocessing
 from Queue import Empty
 from traceback import format_exc
 
+import time
+
+import signal
+
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor, WorkerStartupError, WorkerShutdownError
 from pimlico.core.modules.map.threaded import ThreadingMapThread
@@ -39,6 +43,7 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
         self.stopped = multiprocessing.Event()
         self.initialized = multiprocessing.Event()
         self.no_more_inputs = multiprocessing.Event()
+        self.ended = multiprocessing.Event()
 
         self.start()
 
@@ -46,6 +51,8 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
         self.no_more_inputs.set()
 
     def run(self):
+        # Tell the worker process to ignore SIGINT (KeyboardInterrupt) and let the pool deal with stopping things
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
         try:
             # Run any startup routine that the subclass has defined
             self.set_up()
@@ -81,6 +88,7 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
         finally:
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
+            self.ended.set()
 
 
 class MultiprocessingMapPool(DocumentProcessorPool):
@@ -121,58 +129,49 @@ class MultiprocessingMapPool(DocumentProcessorPool):
 
     @staticmethod
     def create_queue(maxsize=None):
-        return multiprocessing.Queue(maxsize)
+        q = multiprocessing.Queue(maxsize)
+        q.cancel_join_thread()
+        return q
 
     def shutdown(self):
         # Tell all the threads to stop
+        # Although the worker's shutdown does this too, do it to all now so they can be finishing up in the background
         for worker in self.workers:
             worker.stopped.set()
-
-        # Now wait until all processes have shut down
-        still_alive = []
+        # Wait until all workers have got to the end of their execution
         for worker in self.workers:
-            worker.join(5.)
+            # Ideally, wait now until the process ends of its own accord
+            # Add a timeout in case it doesn't
+            worker.ended.wait(3.)
+            if not worker.ended.is_set():
+                self.executor.log.warn("Worker process did not end when asked to: it might have got stuck")
+        # Empty the pool's queues, so they don't cause threads not to shut down
+        self.empty_all_queues()
+        # They've all reached the end of execution (unless a warning was output above), but sometimes they
+        #  don't exit straight away. I'm not sure why that is, since they queues have been emptied, but they
+        #  tend to respond to termination, so we do that now
+        # TODO There's a slightly odd interaction between closing down the input feeder and the ending the workers
+        # TODO Return to this to make it get handled neatly. For now, this process does the job
+        for worker in self.workers:
             if worker.is_alive():
-                # Extreme case: 5 seconds without the worker closing down
-                still_alive.append(worker)
-        for worker in still_alive:
-            # Output something so we know that it's the worker shutdown that's holding things up
-            self.executor.log.warn("Worker process %s taking a long time to shut down: you may need to forcibly kill "
-                                   "everything" % worker)
-            worker.join()
-
-        # Clear the output queue now, as something might have appeared there since we told the process to shutdown
-        while not self.output_queue.empty():
-            self.output_queue.get_nowait()
-
-        # Also need to clear the exception queue
-        errors = []
-        while not self.exception_queue.empty():
-            error = self.exception_queue.get_nowait()
-            if error is not None:
-                errors.append(error)
-
-        if errors:
-            # Hopefully, this shouldn't happen, as errors should already have been handled further up
-            error = errors[0]
-            if hasattr(error, "debugging_info"):
-                # We've already attached debugging info at some lower level: just use it
-                debugging = error.debugging_info
-            elif hasattr(error, "traceback"):
-                debugging = error.traceback
-            else:
-                debugging = None
-            if len(errors) > 1:
-                extra_mess = " (%d further unhandled errors received from worker processes)" % (len(errors)-1)
-            else:
-                extra_mess = ""
-
-            self.executor.log.error("error in worker process received while shutting down pool: %s%s" %
-                                    (error, extra_mess), cause=error, debugging_info=debugging)
+                worker.terminate()
+        for worker in self.workers:
+            # The workers should have stopped now: join to be sure
+            worker.join(timeout=3.)
+            if worker.is_alive():
+                # Join timed out: the worker is determined not to die
+                self.executor.log.warn("Multiprocessing document map worker process has taken a long time to shut "
+                                       "down, even after being terminated: giving up waiting. "
+                                       "You may need to forcibly kill the main process")
 
     def notify_no_more_inputs(self):
         for worker in self.workers:
             worker.notify_no_more_inputs()
+
+    def empty_all_queues(self):
+        for q in self._queues:
+            q.close()
+        super(MultiprocessingMapPool, self).empty_all_queues()
 
 
 class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):

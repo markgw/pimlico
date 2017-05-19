@@ -194,8 +194,9 @@ class DocumentMapOutputTypeWrapper(object):
                               (self.wrapped_module_info.module_name, invalid_inputs, invalid_outputs))
             if input_feeder is not None:
                 input_feeder.check_for_error()
-                input_feeder.cancel()
-                input_feeder.empty_all_queues()
+                input_feeder.shutdown()
+            # Also shut down the executor's worker pool
+            executor.pool.shutdown()
 
     def data_ready(self):
         """

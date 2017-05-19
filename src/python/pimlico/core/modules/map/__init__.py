@@ -1,5 +1,6 @@
 import threading
-from Queue import Queue, Empty
+import warnings
+from Queue import Queue, Empty, Full
 from threading import Thread
 from time import sleep
 from traceback import format_exc
@@ -260,8 +261,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                 self.log.info("Document mapping failed. Finishing off")
             self.postprocess(error=not complete)
             if input_feeder is not None:
-                input_feeder.cancel()
-                input_feeder.empty_all_queues()
+                input_feeder.shutdown()
 
 
 def skip_invalid(fn):
@@ -383,6 +383,7 @@ class InputQueueFeeder(Thread):
         self.started = threading.Event()
         self.feeding_complete = threading.Event()
         self.cancelled = threading.Event()
+        self.ended = threading.Event()
         self.exception_queue = Queue(1)
         # Accumulate a list of invalid docs that have been fed, just for information
         self.invalid_docs = Queue()
@@ -455,7 +456,17 @@ class InputQueueFeeder(Thread):
                 if any(type(doc) is InvalidDocument for doc in docs):
                     self.invalid_docs.put((archive, filename))
                 # If the queue is full, this will block until there's room to put the next one on
-                self.input_queue.put((archive, filename, docs))
+                # It also blocks if the queue is closed/destroyed/something similar, so we need to check now and
+                #  again that we've not been asked to give up
+                while True:
+                    try:
+                        self.input_queue.put((archive, filename, docs), timeout=0.1)
+                    except Full:
+                        if self.cancelled.is_set():
+                            return
+                        # Otherwise try putting again
+                    else:
+                        break
                 # Record that we've sent this one off, so we can write the results out in the right order
                 self._docs_processing.put((archive, filename))
                 # As soon as something's been fed, the output processor can get going
@@ -471,6 +482,7 @@ class InputQueueFeeder(Thread):
         finally:
             # Just in case there aren't any inputs
             self.started.set()
+            self.ended.set()
 
     def check_for_error(self):
         """
@@ -494,17 +506,46 @@ class InputQueueFeeder(Thread):
                 debugging = None
             raise ModuleExecutionError("error in input iterator: %s" % error, cause=error, debugging_info=debugging)
 
-    def cancel(self):
-        # Tell the thread to stop feeding
-        self.cancelled.set()
-        # Empty the queue of anything we've already fed
-        while not self.input_queue.empty():
-            self.input_queue.get_nowait()
+    def shutdown(self, timeout=3.):
+        """
+        Cancel the feeder, if it's still feeding and stop the thread. Call only after you're sure
+        you no longer need anything from any of the queues. Waits for the thread to end.
 
-    def empty_all_queues(self):
+        Call from the main thread (that created the feeder) only.
+
+        :type timeout: wait this long for the thread to stop, then give up, outputting a warning. Set to None
+            to wait indefinitely
+
+        """
+        # Tell the thread to stop feeding, in case it still is
+        self.cancelled.set()
+        # Wait for the thread to finish executing
+        self.ended.wait(timeout=3.)
+        if not self.ended.is_set():
+            warnings.warn("Input feeding thread didn't close down nicely when asked. You may need to kill "
+                          "the application forcibly")
+        # Empty all queues, in case there's anything still sitting in any of them
         for q in [self.input_queue, self._docs_processing, self.exception_queue, self.invalid_docs]:
-            while not q.empty():
-                q.get_nowait()
+            while True:
+                try:
+                    q.get_nowait()
+                except Empty:
+                    break
+            if hasattr(q, "task_done"):
+                while True:
+                    try:
+                        q.task_done()
+                    except ValueError:
+                        # No more undone tasks left
+                        break
+        # Wait for thread to shut down
+        self.join(timeout=timeout)
+        # Check whether the join timed out
+        if self.is_alive():
+            warnings.warn("Input feeding thread took too long to shut down, giving up waiting. You may need to kill "
+                          "the application forcibly")
+            return False
+        return True
 
 
 class DocumentProcessorPool(object):
@@ -520,6 +561,7 @@ class DocumentProcessorPool(object):
         self.input_queue = self.create_queue(2*processes)
         self.exception_queue = self.create_queue()
         self.processes = processes
+        self._queues = [self.output_queue, self.input_queue, self.exception_queue]
 
     def notify_no_more_inputs(self):
         pass
@@ -532,6 +574,19 @@ class DocumentProcessorPool(object):
 
         """
         return Queue(maxsize=maxsize)
+
+    def shutdown(self):
+        # Subclasses should override this to shut down all workers
+        pass
+
+    def empty_all_queues(self):
+        for q in self._queues:
+            # Don't rely on q.empty(), which can be wrong in the case of multiprocessing
+            while True:
+                try:
+                    q.get_nowait()
+                except Empty:
+                    break
 
 
 class DocumentMapProcessMixin(object):
