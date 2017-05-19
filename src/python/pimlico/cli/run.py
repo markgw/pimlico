@@ -13,8 +13,6 @@ class RunCmd(PimlicoCLISubcommand):
     """
     Main command for executing Pimlico modules from the command line `run` command.
 
-    :param pipeline: PipelineConfig instance
-    :param opts: cmd line opts
     """
     command_name = "run"
     command_help = "Execute an individual pipeline module, or a sequence"
