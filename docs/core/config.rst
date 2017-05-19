@@ -40,6 +40,7 @@ Special variable substitutions
 ------------------------------
 
 Certain variable substitutions are always available, in addition to those defined in `vars` sections.
+Use them anywhere in your config file with an expression like `%(varname)s` (note the `s` at the end).
 
 - `pimlico_root`:
     Root directory of Pimlico, usually the directory `pimlico/` within the project directory.
@@ -54,6 +55,12 @@ Certain variable substitutions are always available, in addition to those define
     Short-term store base directory being used under the current config. Can be used to link to data from
     other pipelines run on the same system. This is the value specified in the :ref:`local config file <local-config>`.
 
+For example, to point a parameter to a file located within the project root:
+
+.. code-block:: ini
+
+   param=%(project_root)s/data/myfile.txt
+
 Directives
 ----------
 
@@ -61,7 +68,10 @@ Certain special directives are processed when reading config files. They are lin
 by the directive name and any arguments.
 
 - `variant`:
-    Allows a line to be included only when loading a particular variant of a pipeline. The variant name is
+    Allows a line to be included only when loading a particular variant of a pipeline. For more detail on
+    pipeline variants, see :doc:`/core/variants`.
+
+    The variant name is
     specified as part of the directive in the form: `variant:variant_name`. You may include the line in more
     than one variant by specifying multiple names, separated by commas (and no spaces). You can use the default
     variant "main", so that the line will be left out of other variants. The rest of the line, after the directive
@@ -109,6 +119,23 @@ by the directive name and any arguments.
     config override any copied settings. The following settings are not copied: input(s), `filter`, `outputs`,
     `type`.
 
+    For example, to reuse all the parameters from `module1` in `module2`, only specifying them once:
+
+    .. code-block:: ini
+       :emphasize-lines: 4,5,6,12
+
+       [module1]
+       type=some.module.type
+       input=moduleA
+       param1=56
+       param2=never
+       param3=0.75
+
+       [module2]
+       type=some.module.type
+       input=moduleB
+       # Copy all params from module1
+       %%copy module1
 
 .. _parameter-alternatives:
 
