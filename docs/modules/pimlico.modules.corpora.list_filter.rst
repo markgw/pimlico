@@ -21,7 +21,7 @@ Inputs
 +========+============================================================+
 | corpus | :class:`TarredCorpus <pimlico.datatypes.tar.TarredCorpus>` |
 +--------+------------------------------------------------------------+
-| list   | :class:`StringList <pimlico.datatypes.base.StringList>`    |
+| list   | :class:`StringList <pimlico.datatypes.core.StringList>`    |
 +--------+------------------------------------------------------------+
 
 Outputs
