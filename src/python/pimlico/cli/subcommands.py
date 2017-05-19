@@ -12,7 +12,7 @@ class PimlicoCLISubcommand(object):
     command_help = None
 
     def add_arguments(self, parser):
-        raise NotImplementedError
+        pass
 
     def run_command(self, pipeline, opts):
         raise NotImplementedError

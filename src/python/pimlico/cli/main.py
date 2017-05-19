@@ -8,6 +8,7 @@ Provides access to many subcommands, acting as the primary interface to Pimlico'
 
 """
 from pimlico.cli.subcommands import PimlicoCLISubcommand
+from pimlico.cli.testemail import EmailCmd
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
@@ -132,7 +133,7 @@ class VisualizeCmd(PimlicoCLISubcommand):
 
 SUBCOMMANDS = [
     StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, LongStoreCmd, UnlockCmd,
-    DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, VisualizeCmd
+    DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, VisualizeCmd, EmailCmd
 ]
 
 

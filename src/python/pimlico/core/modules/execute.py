@@ -10,20 +10,24 @@ It is used by the `run` command.
 
 import os
 import sys
+import socket
 from cStringIO import StringIO
 from tarfile import TarFile
 from textwrap import wrap
 from traceback import format_exc
 
+from datetime import datetime
+
 from pimlico.cli.util import format_execution_error
 from pimlico.core.config import check_pipeline, PipelineCheckError, print_missing_dependencies
 from pimlico.core.modules.base import ModuleInfoLoadError, collect_unexecuted_dependencies
 from pimlico.core.modules.multistage import MultistageModuleInfo
+from pimlico.utils.email import send_pimlico_email
 from pimlico.utils.logging import get_console_logger
 
 
 def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=False, log=None, all_deps=False,
-                              check_only=False, exit_on_error=False, preliminary=False):
+                              check_only=False, exit_on_error=False, preliminary=False, email=None):
     """
     Main method called by the `run` command that first checks a pipeline, checks all pre-execution requirements
     of the modules to be executed and then executes each of them. The most common case is to execute just one
@@ -115,7 +119,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
     else:
         # Checks passed: run the module
         execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug, exit_on_error=exit_on_error,
-                        preliminary=execute_preliminary)
+                        preliminary=execute_preliminary, email=email)
 
 
 def check_modules_ready(pipeline, modules, log, preliminary=False):
@@ -182,10 +186,12 @@ def check_modules_ready(pipeline, modules, log, preliminary=False):
         return non_prelim_missing_inputs
 
 
-def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit_on_error=False, preliminary=False):
+def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit_on_error=False, preliminary=False,
+                    email=None):
     # We assume that all checks have been run and that the modules are ready to be executed
     if len(modules) > 1:
         log.info("Executing a sequence of modules: %s" % ", ".join(mod.module_name for mod in modules))
+    start_time = datetime.now()
 
     error_modules = []
     success_modules = []
@@ -278,14 +284,21 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                 try:
                     # Get hold of an executor for this module
                     executer = module.load_executor()
-                    # Give the module an initial in-progress status
-                    end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
+                    try:
+                        # Give the module an initial in-progress status
+                        end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
+                    except Exception, e:
+                        # Catch all exceptions that occur within the executor and wrap them in a ModuleExecutionError
+                        # so they can be nicely handled by the error reporting below
+                        # Ideally, most expected exceptions will be one of these two types anyway, but of course
+                        # unexpected things can go wrong!
+                        raise ModuleExecutionError(cause=e)
                 except (ModuleInfoLoadError, ModuleExecutionError), e:
                     if type(e) is ModuleExecutionError:
                         # If there's any error, note in the history that execution didn't complete
                         module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
                         log.error("Error executing module '%s': %s" % (module_name, e))
-                        # Allow a different end status to be pass up in the exception
+                        # Allow a different end status to be passed up in the exception
                         # If the exception origin didn't specify anything, we just say the module failed
                         end_status = e.end_status or "FAILED"
                     else:
@@ -312,6 +325,12 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         print >>sys.stderr, debug_mess
                     else:
                         log.error("Full debug info output to %s" % error_filename)
+
+                    # Only send email error report if this was an execution error, not a load error
+                    if type(e) is ModuleExecutionError and email == "modend":
+                        # Finer-grained email notifications have been requested
+                        # Send an error report now
+                        send_module_report_email(pipeline, module, str(e), debug_mess)
 
                     module.add_execution_history_record("Debugging output in %s" % error_filename)
                     module_error = True
@@ -347,7 +366,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
         else:
             success_modules.append(module_name)
 
-    # Give some information to the stepper if we're in step mode
+    # Notify the stepper (if we're debugging) that we're not executing any more
     if pipeline.step:
         pipeline._stepper.executing = False
 
@@ -365,6 +384,14 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
     if skipped_modules:
         log.info("Skipped modules: %s" % ", ".join(skipped_modules))
 
+    if email:
+        # If we're emailing a status report, do so now
+        # Don't do this if only a few seconds have passed since we started: i.e. something went wrong straight away
+        if (datetime.now() - start_time).total_seconds() > 20.:
+            send_final_report_email(pipeline, error_modules, success_modules, skipped_modules, modules)
+        else:
+            log.warn("Not sending email, since we failed so quickly")
+
 
 def format_execution_dependency_tree(tree):
     module, inputs = tree
@@ -376,6 +403,61 @@ def format_execution_dependency_tree(tree):
         input_lines = ["|- %s.%s" % (input_lines[0], output_name)] + ["|  %s" % line for line in input_lines[1:]]
         lines.extend(input_lines)
     return lines
+
+
+def send_final_report_email(pipeline, error_modules, success_modules, skipped_modules, all_modules):
+    subject = "[Pimlico] Execution of '%s' completed: final report" % pipeline.name
+
+    # Put together a report
+    lines = [
+        "Pimlico execution report for pipeline: %s" % pipeline.name,
+        "Execution completed at %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Running on %s" % socket.gethostname(),
+        "",
+        "Execution of modules: %s" % ", ".join(m.module_name for m in all_modules),
+        "\n",
+    ]
+    # Output a summary of what we succeeded and failed on
+    # This is very similar to the little report we output to the log at the end of execution
+    if error_modules:
+        if success_modules:
+            lines.append("Execution failed on %d modules: %s" % (len(error_modules), ", ".join(error_modules)))
+            lines.append("Execution succeeded on %d modules: %s" % (len(success_modules), ", ".join(success_modules)))
+        elif len(error_modules) == 1:
+            lines.append("Execution of %s failed" % error_modules[0])
+        else:
+            lines.append("Execution failed on all modules (%s)" % ", ".join(error_modules))
+    else:
+        lines.append("Successfully executed all modules:")
+        lines.append(", ".join(success_modules))
+    if skipped_modules:
+        lines.append("Skipped modules: %s" % ", ".join(skipped_modules))
+
+    content = "\n".join(lines)
+
+    # Send email report
+    send_pimlico_email(subject, content, pipeline.local_config, pipeline.log)
+
+
+def send_module_report_email(pipeline, module, short_error, long_error):
+    subject = "[Pimlico] Module '%s' failed in pipeline '%s'" % (module.module_name, pipeline.name)
+
+    # Put together a report
+    lines = [
+        "Pimlico execution report for pipeline: %s" % pipeline.name,
+        "Running on %s" % socket.gethostname(),
+        "Module '%s' failed at %s" % (module.module_name, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+        "",
+        "Error: %s" % short_error,
+        "\n",
+        "Longer error report:",
+        # This is the same as what gets logged to a file
+        long_error,
+    ]
+
+    content = "\n".join(lines)
+    # Send email report
+    send_pimlico_email(subject, content, pipeline.local_config, pipeline.log)
 
 
 class ModuleExecutionError(Exception):

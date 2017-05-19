@@ -48,6 +48,12 @@ class RunCmd(PimlicoCLISubcommand):
                                  "execution to fail, output the error and exit. By default, Pimlico will send "
                                  "error output to a file (or print it in debug mode) and continue to execute the "
                                  "next module that can be executed, if any")
+        parser.add_argument("--email", choices=["modend", "end"],
+                            help="Send email notifications when processing is complete, including information about "
+                                 "the outcome. Choose from: 'modend' (send notification after module execution if it "
+                                 "fails and a summary at the end of everything), 'end' "
+                                 "(send only the final summary). Email sending must be configured: "
+                                 "see 'email' command to test")
 
     def run_command(self, pipeline, opts):
         debug = opts.debug
@@ -104,7 +110,7 @@ class RunCmd(PimlicoCLISubcommand):
         try:
             check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,
                                       all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error,
-                                      preliminary=preliminary)
+                                      preliminary=preliminary, email=opts.email)
         except (ModuleInfoLoadError, ModuleNotReadyError), e:
             if debug:
                 print_exc()
