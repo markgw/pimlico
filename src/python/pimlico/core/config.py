@@ -890,8 +890,18 @@ class PipelineConfig(object):
         :return: list of string
         """
         return [
-            os.path.join(store_base, path) for store_base in [self.short_term_store, self.long_term_store]
+            os.path.join(store_base, path) for store_base in self.get_storage_roots()
         ]
+
+    def get_storage_roots(self):
+        """
+        Returns a list of all the (pipeline-specific) storage root locations known to the pipeline.
+
+        Currently, this is always `[self.short_term_store, self.long_term_store]`, but in future we may
+        have a more flexible system that allows an unbounded number of storage locations.
+
+        """
+        return [self.short_term_store, self.long_term_store]
 
     @property
     def step(self):
