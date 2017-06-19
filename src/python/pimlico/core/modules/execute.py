@@ -14,7 +14,7 @@ import socket
 from cStringIO import StringIO
 from tarfile import TarFile
 from textwrap import wrap
-from traceback import format_exc
+from traceback import format_exc, format_tb
 
 from datetime import datetime
 
@@ -292,7 +292,12 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         # so they can be nicely handled by the error reporting below
                         # Ideally, most expected exceptions will be one of these two types anyway, but of course
                         # unexpected things can go wrong!
-                        raise ModuleExecutionError(cause=e)
+                        #
+                        # Get traceback for the exception currently being handled
+                        # Include the formatted traceback as debugging info for the reraised exception
+                        debugging_info = "Uncaught exception in executor. Traceback from original exception: \n%s" % \
+                                         "".join(format_tb(sys.exc_info()[2]))
+                        raise ModuleExecutionError(repr(e), cause=e, debugging_info=debugging_info)
                 except (ModuleInfoLoadError, ModuleExecutionError), e:
                     if type(e) is ModuleExecutionError:
                         # If there's any error, note in the history that execution didn't complete
