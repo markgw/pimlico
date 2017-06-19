@@ -69,15 +69,15 @@ Multistage module-info
 
 With our component modules that constitute the stages defined, we now just need to tie them together. We do this
 by defining a module-info for the multistage module in its `info.py`. Instead of subclassing
-:cls:~`pimlico.core.modules.BaseModuleInfo`, as usual, we create the `ModuleInfo` class using the factory function
-:fn:~`pimlico.core.modules.multistage.multistage_module`.
+:class:`~pimlico.core.modules.BaseModuleInfo`, as usual, we create the `ModuleInfo` class using the factory function
+:func:`~pimlico.core.modules.multistage.multistage_module`.
 
 In other respects, this module-info works in the same way as usual: it's a class (return by the factory) called
 `ModuleInfo` in the `info.py`.
 
-:fn:~`pimlico.core.modules.multistage.multistage_module` takes two arguments: a module name (equivalent to
+:func:`~pimlico.core.modules.multistage.multistage_module` takes two arguments: a module name (equivalent to
 the `module_name` attribute of a normal module-info) and a list of instances of
-:cls:~`pimlico.core.modules.multistage.ModuleStage`.
+:class:`~pimlico.core.modules.multistage.ModuleStage`.
 
 Connecting inputs and outputs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,7 +86,7 @@ Connections between the outputs and inputs of the stages work in a very similar 
 module instances in a pipeline. The same type checking system is employed and data is passed between the stages
 (i.e. between consecutive executions) as if the stages were separate modules.
 
-Each stage is defined as an instance of :cls:~`pimlico.core.modules.multistage.ModuleStage`:
+Each stage is defined as an instance of :class:`~pimlico.core.modules.multistage.ModuleStage`:
 
 .. code-block:: py
 
@@ -101,7 +101,7 @@ connected to the default output from the previous one in the list.
 
 There are two classes you can use to define input connections.
 
-:cls:~`pimlico.core.modules.multistage.InternalModuleConnection`
+:class:`~pimlico.core.modules.multistage.InternalModuleConnection`
    This makes an explicit connection to the output of another stage.
 
    You must specify the name of the input (to this stage) that you're connecting. You may specify the
@@ -119,7 +119,7 @@ There are two classes you can use to define input connections.
          ModuleStage("stage3", ThirdInfo, connections=[InternalModuleConnection("data", "corpus", "stage1")]),
       ]
 
-:cls:~`pimlico.core.modules.multistage.ModuleInputConnection`:
+:class:`~pimlico.core.modules.multistage.ModuleInputConnection`:
    This makes a connection to an input to the whole multistage module.
 
    Note that you don't have to explicitly define the multistage module's inputs anywhere: you just mark certain
@@ -178,7 +178,7 @@ By default, the multistage module has just a single output: the default output o
 You can specify any of the outputs of any of the stages to be provided as an output to the multistage module.
 Use the `output_connections` parameter when defining the stage.
 
-This parameter should be a list of instances of :cls:~`pimlico.core.modules.multistage.ModuleOutputConnection`.
+This parameter should be a list of instances of :class:`~pimlico.core.modules.multistage.ModuleOutputConnection`.
 Just like with input connections, if you don't specify otherwise, the multistage module's output will have the
 same name as the output from the stage module. But you can override this when giving the output connection.
 
