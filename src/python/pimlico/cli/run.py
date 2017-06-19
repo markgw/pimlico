@@ -86,8 +86,10 @@ class RunCmd(PimlicoCLISubcommand):
                 log.info("No module name specified. Defaulting to next unexecuted, ready module: '%s'" %
                          module_specs[0])
         else:
-            module_specs = opts.modules
-            for module_spec in module_specs:
+            orig_module_specs = opts.modules
+
+            module_specs = []
+            for module_spec in orig_module_specs:
                 # In the case of a multi-stage module allow a list to be output of available stages
                 module_name, __, stage_name = module_spec.rpartition(":")
                 if stage_name in ["?", "help"]:
@@ -98,6 +100,18 @@ class RunCmd(PimlicoCLISubcommand):
                         sys.exit(1)
                     print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
                     sys.exit(0)
+                elif stage_name in ["*", "all"]:
+                    # Execute all stages at once, by expanding the list of modules to include all this one's stages
+                    module = pipeline[module_name]
+                    # Only makes sense with a multistage module
+                    if not isinstance(module, MultistageModuleInfo):
+                        print "%s is not a multi-stage module: tried to execute all stages (%s)" % (module_name, module_spec)
+                        sys.exit(1)
+                    module_specs.extend(["%s:%s" % (module_name, stage.name) for stage in module.stages])
+                else:
+                    # Pass through unchanged
+                    # If this has a stage specifier, fine: the pipeline makes the stage module available by that name
+                    module_specs.append(module_spec)
 
         pipeline_name = "'%s'" % pipeline.name if pipeline.variant == "main" else \
             "'%s' (variant '%s')" % (pipeline.name, pipeline.variant)

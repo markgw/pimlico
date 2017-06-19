@@ -111,11 +111,6 @@ def multistage_module(multistage_module_type_name, module_stages):
     Factory to build a multi-stage module type out of a series of stages, each of which specifies a module type
     for the stage. The stages should be a list of :class:`ModuleStage` objects.
 
-    The outputs to the multi-stage module are given by outputs, which should be a list of (stage name, output name)
-    pairs, where the stage name represents one of the stages and the output name is one of its outputs. If the outputs
-    are not pairs, but just strings, they are taken to refer to the last stage. If no outputs are given, the
-    default output of the last stage is the multi-stage module's output.
-
     """
     # First we check that the whole mini-pipeline fits together
     # Note that this check is done at compile-time, so we'll get errors straight away if we define an invalid MS module

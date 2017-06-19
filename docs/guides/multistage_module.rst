@@ -1,264 +1,258 @@
-===========================
-  Writing Pimlico modules
-===========================
+======================
+  Multistage modules
+======================
 
-Pimlico comes with a fairly large number of :mod:`module types <pimlico.modules>`
-that you can use to run many standard NLP, data processing
-and ML tools over your datasets.
+Multistage modules are used to encapsulate a module than is executed in several consecutive runs. You can think
+of each stage as being its own module, but where the whole sequence of modules is always executed together.
+The multistage module simply chains together these individual modules so that you only include a single
+module instance in your pipeline definition.
 
-For some projects, this is all you need to do. However, often you'll want to mix standard tools with
-your own code, for example, using the output from the tools. And, of course, there are many more tools you might
-want to run that aren't built into Pimlico: you can still benefit from Pimlico's framework for
-data handling, config files and so on.
+One common example of a use case for multistage modules is where some fairly time-consuming preprocessing needs
+to be done on an input dataset. If you put all of the processing into a single module, you can end up in an
+irritating situation where the lengthy data preprocessing succeeds, but something goes wrong in the main execution
+code. You then fix the problem and have to run all the preprocessing again.
 
-For a detailed description of the structure of a Pimlico module, see :doc:`/core/module_structure`. This guide takes
-you through building a simple module.
+Most obvious solution to this is to separate the preprocessing and main execution into two separate modules. But
+then, if you want to reuse you module sometime in the future, you have to remember to always put the preprocessing
+module before the main one in your pipeline (or infer this from the datatypes!). And if you have more than these
+two modules (say, a sequence of several, or preprocessing of several inputs) this starts to make pipeline
+development frustrating.
 
-.. note::
+A multistage module groups these internal modules into one logical unit, allowing them to be used together by
+including a single module instance and also to share parameters.
 
-   In any case where a module will process a corpus one document at a time, you should write a
-   :doc:`document map module <map_module>`, which takes care of a lot of things for you, so you only need
-   to say what to do with each document.
+Defining a multistage module
+============================
 
-Code layout
-===========
-If you've followed the :doc:`basic project setup guide <setup>`, you'll have a project with a directory structure
-like this::
+Component stages
+----------------
 
-   myproject/
-       pipeline.conf
-       pimlico/
-           bin/
-           lib/
-           src/
-           ...
-       src/
-           python/
+The first step in defining a multistage module is to define its individual stages.
+These are actually defined in exactly the same way as normal modules.
+(This means that they can also be used separately.)
 
-If you've not already created the ``src/python`` directory, do that now.
+If you're writing these modules specifically to provide the stages of your multistage module (rather than tying
+together already existing modules for convenience), you probably want to put them all in subpackages.
 
-This is where your custom Python code
-will live. You can put all of your custom module types and datatypes in there and use them in the same way
-as you use the Pimlico core modules and datatypes.
-
-Add this option to the ``[pipeline]`` section of your config file, so Pimlico knows where to find your code:
-
-.. code-block:: ini
-
-    python_path=src/python
-
-To follow the conventions used in Pimlico's codebase, we'll create the following package structure in ``src/python``::
-
-    src/python/myproject/
-        __init__.py
-        modules/
-            __init__.py
-        datatypes/
-            __init__.py
-
-Write a module
-==============
-A Pimlico module consists of a Python package with a special layout. Every module has a file
-``info.py``. This contains the definition of the module's metadata: its inputs, outputs, options, etc.
-
-Most modules also have a file ``execute.py``, which defines the routine that's called when it's run. You should take
-care when writing ``info.py`` not to import any non-standard Python libraries or have any time-consuming operations
-that get run when it gets imported.
-
-``execute.py``, on the other hand, will only get imported when the module is to be run, after dependency checks.
-
-For the example below, let's assume we're writing a module called ``nmf`` and create the following directory structure
-for it::
+For an ordinary module, :ref:`we used the directory structure <guides/module>`::
 
     src/python/myproject/modules/
         __init__.py
-        nmf/
+        mymodule/
             __init__.py
             info.py
             execute.py
 
-Metadata
---------
-Module metadata (everything apart from what happens when it's actually run) is defined in ``info.py`` as a class called
-``ModuleInfo``.
+Now, we'll use something like this::
 
-Here's a sample basic ``ModuleInfo``, which we'll step through.
-(It's based on the Scikit-learn :mod:`~pimlico.modules.sklearn.matrix_factorization` module.)
+    src/python/myproject/modules/
+        __init__.py
+        my_ms_module/
+            __init__.py
+            info.py
+            module1/
+                __init__.py
+                info.py
+                execute.py
+            module2/
+                __init__.py
+                info.py
+                execute.py
 
-.. code-block:: py
+Note that `module1` and `module2` both have the typical structure of a module definition: an `info.py` to define
+the module-info, and an `execute.py` to define the executor. At the top level, we've just got an `info.py`. It's
+in here that we'll define the multistage module. We don't need an `execute.py` for that, since it just ties together
+the other modules, using their executors at execution time.
 
-    from pimlico.core.dependencies.python import PythonPackageOnPip
-    from pimlico.core.modules.base import BaseModuleInfo
-    from pimlico.datatypes.arrays import ScipySparseMatrix, NumpyArray
+Multistage module-info
+----------------------
 
+With our component modules that constitute the stages defined, we now just need to tie them together. We do this
+by defining a module-info for the multistage module in its `info.py`. Instead of subclassing
+:cls:`~pimlico.core.modules.BaseModuleInfo`, as usual, we create the `ModuleInfo` class using the factory function
+:fn:`~pimlico.core.modules.multistage.multistage_module`.
 
-    class ModuleInfo(BaseModuleInfo):
-        module_type_name = "nmf"
-        module_readable_name = "Sklearn non-negative matrix factorization"
-        module_inputs = [("matrix", ScipySparseMatrix)]
-        module_outputs = [("w", NumpyArray), ("h", NumpyArray)]
-        module_options = {
-            "components": {
-                "help": "Number of components to use for hidden representation",
-                "type": int,
-                "default": 200,
-            },
-        }
+In other respects, this module-info works in the same way as usual: it's a class (return by the factory) called
+`ModuleInfo` in the `info.py`.
 
-        def get_software_dependencies(self):
-            return super(ModuleInfo, self).get_software_dependencies() + \
-                   [PythonPackageOnPip("sklearn", "Scikit-learn")]
+:fn:`~pimlico.core.modules.multistage.multistage_module` takes two arguments: a module name (equivalent to
+the `module_name` attribute of a normal module-info) and a list of instances of
+:cls:`~pimlico.core.modules.multistage.ModuleStage`.
 
-The ``ModuleInfo`` should always be a subclass of :class:`~pimlico.core.modules.base.BaseModuleInfo`. There are
-some subclasses that you might want to use instead (e.g., see :doc:`/guides/map_module`), but here we just use the
-basic one.
+Connecting inputs and outputs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Certain class-level attributes should pretty much always be overridden:
+Connections between the outputs and inputs of the stages work in a very similar way to connections between
+module instances in a pipeline. The same type checking system is employed and data is passed between the stages
+(i.e. between consecutive executions) as if the stages were separate modules.
 
-- ``module_type_name``: A name used to identify the module internally
-- ``module_readable_name``: A human-readable short description of the module
-- ``module_inputs``: Most modules need to take input from another module (though not all)
-- ``module_outputs``: Describes the outputs that the module will produce, which may then be used as inputs to another module
-
-**Inputs** are given as pairs ``(name, type)``, where ``name`` is a short name to
-identify the input and ``type`` is the datatype
-that the input is expected to have. Here, and most commonly, this is a subclass of
-:class:`~pimlico.datatypes.base.PimlicoDatatype` and Pimlico will check that a dataset supplied for this input is
-either of this type, or has a type that is a subclass of this.
-
-Here we take just a single input: a sparse matrix.
-
-**Outputs** are given in a similar way. It is up to the module's executor (see below) to ensure that these outputs
-get written, but here we describe the datatypes that will be produced, so that we can use them as input to other
-modules.
-
-Here we produce two Numpy arrays, the factorization of the input matrix.
-
-**Dependencies:**
-Since we require Scikit-learn to execute this module, we override ``get_software_dependencies()`` to specify this. As
-Scikit-learn is available through Pip, this is very easy: all we need to do is specify the Pip package name. Pimlico
-will check that Scikit-learn is installed before executing the module and, if not, allow it to be installed
-automatically.
-
-Finally, we also define some **options**. The values for these can be specified in the pipeline config file. When the
-``ModuleInfo`` is instantiated, the processed options will be available in its ``options`` attribute. So, for example,
-we can get the number of components (specified in the config file, or the default of 200) using
-``info.options["components"]``.
-
-Executor
---------
-Here is a sample executor for the module info given above, placed in the file ``execute.py``.
+Each stage is defined as an instance of :cls:`~pimlico.core.modules.multistage.ModuleStage`:
 
 .. code-block:: py
 
-    from pimlico.core.modules.base import BaseModuleExecutor
-    from pimlico.datatypes.arrays import NumpyArrayWriter
-    from sklearn.decomposition import NMF
+   [
+       ModuleStage("stage_name", TheModuleInfoClass, connections=[...], output_connections=[...])
+   ]
 
-    class ModuleExecutor(BaseModuleExecutor):
-        def execute(self):
-            input_matrix = self.info.get_input("matrix").array
-            self.log.info("Loaded input matrix: %s" % str(input_matrix.shape))
+The parameter `connections` defines how the stage's inputs are connected up to either the outputs of previous stages
+or inputs to the multistage module.
+Just like in pipeline config files, if no explicit input connections are given, the default input to a stage is
+connected to the default output from the previous one in the list.
 
-            # Convert input matrix to CSR
-            input_matrix = input_matrix.tocsr()
-            # Initialize the transformation
-            components = self.info.options["components"]
-            self.log.info("Initializing NMF with %d components" % components)
-            nmf = NMF(components)
+There are two classes you can use to define input connections.
 
-            # Apply transformation to the matrix
-            self.log.info("Fitting NMF transformation on input matrix" % transform_type)
-            transformed_matrix = transformer.fit_transform(input_matrix)
+:cls:`~pimlico.core.modules.multistage.InternalModuleConnection`
+   This makes an explicit connection to the output of another stage.
 
-            self.log.info("Fitting complete: storing H and W matrices")
-            # Use built-in Numpy array writers to output results in an appropriate format
-            with NumpyArrayWriter(self.info.get_absolute_output_dir("w")) as w_writer:
-                w_writer.set_array(transformed_matrix)
-            with NumpyArrayWriter(self.info.get_absolute_output_dir("h")) as h_writer:
-                h_writer.set_array(transformer.components_)
+   You must specify the name of the input (to this stage) that you're connecting. You may specify the
+   name of the output to connect it to (defaults to the default output). You may also give the name of the stage that
+   the output comes from (defaults to the previous one).
 
-The executor is always defined as a class in ``execute.py`` called ``ModuleExecutor``. It should always be a subclass
-of ``BaseModuleExecutor`` (though, again, note that there are more specific subclasses and class factories that we
-might want to use in other circumstances).
+   .. code-block:: py
 
-The ``execute()`` method defines what happens when the module is executed.
+      [
+          ModuleStage("stage1", FirstInfo),
+          # FirstInfo has an output called "corpus", which we connect explicitly to the next stage
+          # We could leave out the "corpus" here, if it's the default output from FirstInfo
+          ModuleStage("stage2", SecondInfo, connections=[InternalModuleConnection("data", "corpus")]),
+          # We connect the same output from stage1 to stage3
+         ModuleStage("stage3", ThirdInfo, connections=[InternalModuleConnection("data", "corpus", "stage1")]),
+      ]
 
-The instance of the module's ``ModuleInfo``, complete with **options** from the pipeline config, is available as
-``self.info``. A standard Python **logger** is also available, as ``self.log``, and should be used to keep the user updated
-on what's going on.
+:cls:`~pimlico.core.modules.multistage.ModuleInputConnection`:
+   This makes a connection to an input to the whole multistage module.
 
-Getting hold of the **input data** is done through the module info's ``get_input()`` method. In the case of a Scipy matrix,
-here, it just provides us with the matrix as an attribute.
+   Note that you don't have to explicitly define the multistage module's inputs anywhere: you just mark certain
+   inputs to certain stages as coming from outside the multistage module, using this class.
 
-Then we do whatever our module is designed to do. At the end, we write the output data to the appropriate output
-directory. This should always be obtained using the ``get_absolute_output_dir()`` method of the module info, since
-Pimlico takes care of the exact location for you.
+   .. code-block:: py
 
-Most Pimlico datatypes provide a corresponding **writer**, ensuring that the output is written in the correct format
-for it to be read by the datatype's reader. When we leave the ``with`` block, in which we give the writer the
-data it needs, this output is written to disk.
+      [
+          ModuleStage("stage1", FirstInfo,  [ModuleInputConnection("raw_data")]),
+          ModuleStage("stage2", SecondInfo, [InternalModuleConnection("data", "corpus")]),
+          ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1")]),
+      ]
 
-Pipeline config
-===============
-Our module is now ready to use and we can refer to it in a pipeline config file. We'll assume we've prepared a suitable
-Scipy sparse matrix earlier in the pipeline, available as the default output of a module called ``matrix``. Then we
-can add section like this to use our new module:
+   Here, the module type `FirstInfo` has an input called `raw_data`. We've specified that this needs to come in
+   directly as an input to the multistage module -- when we use the multistage module in a pipeline, it must be
+   connected up with some earlier module.
+
+   The multistage module's input created by doing this will also have the name `raw_data` (specified using a parameter
+   `input_raw_data` in the config file). You can override this, if you want to use a different name:
+
+   .. code-block:: py
+
+      [
+          ModuleStage("stage1", FirstInfo,  [ModuleInputConnection("raw_data", "data")]),
+          ModuleStage("stage2", SecondInfo, [InternalModuleConnection("data", "corpus")]),
+          ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1")]),
+      ]
+
+   This would be necessary if two stages both had inputs called `raw_data`, which you want to come from different
+   data sources. You would then simply connect them to different inputs to the multistage module:
+
+   .. code-block:: py
+
+      [
+          ModuleStage("stage1", FirstInfo,  [ModuleInputConnection("raw_data", "first_data")]),
+          ModuleStage("stage2", SecondInfo, [ModuleInputConnection("raw_data", "second_data")]),
+          ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1")]),
+      ]
+
+   Conversely, you might deliberately connect the inputs from two stages to the same input to the multistage module,
+   by using the same multistage input name twice. (Of course, the two stages are not required to have overlapping input
+   names for this to work.)
+   This will result in the multistage just requiring one input, which get used by both stages.
+
+   .. code-block:: py
+
+      [
+          ModuleStage("stage1", FirstInfo,
+                      [ModuleInputConnection("raw_data", "first_data"), ModuleInputConnection("dict", "vocab")]),
+          ModuleStage("stage2", SecondInfo,
+                      [ModuleInputConnection("raw_data", "second_data"), ModuleInputConnection("vocabulary", "vocab")]),
+          ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1")]),
+      ]
+
+By default, the multistage module has just a single output: the default output of the last stage in the list.
+You can specify any of the outputs of any of the stages to be provided as an output to the multistage module.
+Use the `output_connections` parameter when defining the stage.
+
+This parameter should be a list of instances of :cls:`~pimlico.core.modules.multistage.ModuleOutputConnection`.
+Just like with input connections, if you don't specify otherwise, the multistage module's output will have the
+same name as the output from the stage module. But you can override this when giving the output connection.
+
+.. code-block:: py
+
+   [
+       ModuleStage("stage1", FirstInfo, [ModuleInputConnection("raw_data", "first_data")]),
+       ModuleStage("stage2", SecondInfo, [ModuleInputConnection("raw_data", "second_data")],
+                   output_connections=[ModuleOutputConnection("model")]),   # This output will just be called "model"
+       ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1"),
+                   output_connections=[ModuleOutputConnection("model", "stage3_model")]),
+   ]
+
+Module options
+~~~~~~~~~~~~~~
+
+The parameters of the multistage module that can be specified when it is used in a pipeline config (those usually
+defined in the `module_options` attribute) include all of the options to all of the stages. The option names are
+simply `<stage_name>_<option_name>`.
+
+So, in the above example, if `FirstInfo` has an option called `threshold`, the multistage module will have an
+option `stage1_threshold`, which gets passed through to `stage1` when it is run.
+
+.. note::
+
+   There is a desirable possible feature here, which I have not got round to implementing yet.
+
+   Often you might wish to specify one parameter to the multistage module that gets used by several stages.
+   Say `stage2` had a `cutoff` parameter and we always wanted to use the same value as the `threshold` for `stage1`.
+   Right now, you have to specify `stage1_threshold` and `stage2_cutoff` in you config file.
+
+   It would be nice to have a way to declare in the multistage module creation that the multistage module should
+   have a parameter `threshold`, which gets used as `stage1_threshold` and `stage2_cutoff`.
+
+Running
+=======
+
+To run a multistage module once you've used it in your pipeline config,
+you run one stage at a time, as if they were separate module instances.
+
+Say we've used the above multistage module in a pipeline like so:
 
 .. code-block:: ini
 
-    [matrix]
-    ...(Produces sparse matrix output)...
+   [model_train]
+   type=myproject.modules.my_ms_module
+   stage1_threshold=10
+   stage2_cutoff=10
 
-    [factorize]
-    type=myproject.modules.nmf
-    components=300
-    input=matrix
+The normal way to run this module would be to use the `run` command with the module name:
 
-Note that, since there's only one input, we don't need to give its name. If we had defined multiple inputs, we'd
-need to specify this one as ``input_matrix=matrix``.
+.. code-block:: bash
 
-You can now run the module as part of your pipeline in the usual ways.
+   ./pimlico.sh mypipeline.conf run model_train
 
-Skeleton new module
-===================
-To make developing a new module a little quicker, here's a skeleton module info and executor.
+If we do this, Pimlico will choose the next unexecuted stage that's ready to run (presumably `stage1` at this point).
+Once that's done, you can run the same command again to execute `stage2`.
 
-.. code-block:: py
+You can also select a specific stage to execute by using the module name `<ms_module_name>:<stage_name>`, e.g.
+`model_train:stage2`. (Note that `stage2` doesn't actually depend on `stage1`, so it's perfectly plausible that
+we might want to execute them in a different order.)
 
-    from pimlico.core.modules.base import BaseModuleInfo
+If you want to execute multiple stages at once, just use this scheme to specify each of them as a module name
+for the run command. Remember, Pimlico can take any number of modules and execute them in sequence:
 
-    class ModuleInfo(BaseModuleInfo):
-        module_type_name = "NAME"
-        module_readable_name = "READABLE NAME"
-        module_inputs = [("NAME", REQUIRED_TYPE)]
-        module_outputs = [("NAME", PRODUCED_TYPE)]
-        # Delete module_options if you don't need any
-        module_options = {
-            "OPTION_NAME": {
-                "help": "DESCRIPTION",
-                "type": TYPE,
-                "default": VALUE,
-            },
-        }
+.. code-block:: bash
 
-        def get_software_dependencies(self):
-            return super(ModuleInfo, self).get_software_dependencies() + [
-                # Add your own dependencies to this list
-                # Remove this method if you don't need to add any
-            ]
+   ./pimlico.sh mypipeline.conf run model_train:stage1 model_train:stage2
 
+Or, if you want to execute all of them, you can use the stage name `*` or `all` as a shorthand:
 
-.. code-block:: py
+.. code-block:: bash
 
-    from pimlico.core.modules.base import BaseModuleExecutor
+   ./pimlico.sh mypipeline.conf run model_train:all
 
-    class ModuleExecutor(BaseModuleExecutor):
-        def execute(self):
-            input_data = self.info.get_input("NAME")
-            self.log.info("MESSAGES")
-
-            # DO STUFF
-
-            with SOME_WRITER(self.info.get_absolute_output_dir("NAME")) as writer:
-                # Do what the writer requires
+Finally, if you're not sure what stages a multistage module has, use the module name `<ms_module_name>:?`. The run
+command will then just output a list of stages and exit.
