@@ -59,21 +59,21 @@ Now, we'll use something like this::
                 info.py
                 execute.py
 
-Note that `module1` and `module2` both have the typical structure of a module definition: an `info.py` to define
-the module-info, and an `execute.py` to define the executor. At the top level, we've just got an `info.py`. It's
-in here that we'll define the multistage module. We don't need an `execute.py` for that, since it just ties together
+Note that ``module1`` and ``module2`` both have the typical structure of a module definition: an ``info.py`` to define
+the module-info, and an ``execute.py`` to define the executor. At the top level, we've just got an ``info.py``. It's
+in here that we'll define the multistage module. We don't need an ``execute.py`` for that, since it just ties together
 the other modules, using their executors at execution time.
 
 Multistage module-info
 ----------------------
 
 With our component modules that constitute the stages defined, we now just need to tie them together. We do this
-by defining a module-info for the multistage module in its `info.py`. Instead of subclassing
-:class:`~pimlico.core.modules.BaseModuleInfo`, as usual, we create the `ModuleInfo` class using the factory function
+by defining a module-info for the multistage module in its ``info.py``. Instead of subclassing
+:class:`~pimlico.core.modules.BaseModuleInfo`, as usual, we create the ``ModuleInfo`` class using the factory function
 :func:`~pimlico.core.modules.multistage.multistage_module`.
 
 In other respects, this module-info works in the same way as usual: it's a class (return by the factory) called
-`ModuleInfo` in the `info.py`.
+``ModuleInfo`` in the ``info.py``.
 
 :func:`~pimlico.core.modules.multistage.multistage_module` takes two arguments: a module name (equivalent to
 the `module_name` attribute of a normal module-info) and a list of instances of
@@ -94,7 +94,7 @@ Each stage is defined as an instance of :class:`~pimlico.core.modules.multistage
        ModuleStage("stage_name", TheModuleInfoClass, connections=[...], output_connections=[...])
    ]
 
-The parameter `connections` defines how the stage's inputs are connected up to either the outputs of previous stages
+The parameter ``connections`` defines how the stage's inputs are connected up to either the outputs of previous stages
 or inputs to the multistage module.
 Just like in pipeline config files, if no explicit input connections are given, the default input to a stage is
 connected to the default output from the previous one in the list.
@@ -133,12 +133,12 @@ There are two classes you can use to define input connections.
           ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1")]),
       ]
 
-   Here, the module type `FirstInfo` has an input called `raw_data`. We've specified that this needs to come in
+   Here, the module type ``FirstInfo`` has an input called ``raw_data``. We've specified that this needs to come in
    directly as an input to the multistage module -- when we use the multistage module in a pipeline, it must be
    connected up with some earlier module.
 
-   The multistage module's input created by doing this will also have the name `raw_data` (specified using a parameter
-   `input_raw_data` in the config file). You can override this, if you want to use a different name:
+   The multistage module's input created by doing this will also have the name ``raw_data`` (specified using a parameter
+   ``input_raw_data`` in the config file). You can override this, if you want to use a different name:
 
    .. code-block:: py
 
@@ -148,7 +148,7 @@ There are two classes you can use to define input connections.
           ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1")]),
       ]
 
-   This would be necessary if two stages both had inputs called `raw_data`, which you want to come from different
+   This would be necessary if two stages both had inputs called ``raw_data``, which you want to come from different
    data sources. You would then simply connect them to different inputs to the multistage module:
 
    .. code-block:: py
@@ -176,7 +176,7 @@ There are two classes you can use to define input connections.
 
 By default, the multistage module has just a single output: the default output of the last stage in the list.
 You can specify any of the outputs of any of the stages to be provided as an output to the multistage module.
-Use the `output_connections` parameter when defining the stage.
+Use the ``output_connections`` parameter when defining the stage.
 
 This parameter should be a list of instances of :class:`~pimlico.core.modules.multistage.ModuleOutputConnection`.
 Just like with input connections, if you don't specify otherwise, the multistage module's output will have the
@@ -196,22 +196,22 @@ Module options
 ~~~~~~~~~~~~~~
 
 The parameters of the multistage module that can be specified when it is used in a pipeline config (those usually
-defined in the `module_options` attribute) include all of the options to all of the stages. The option names are
-simply `<stage_name>_<option_name>`.
+defined in the ``module_options`` attribute) include all of the options to all of the stages. The option names are
+simply ``<stage_name>_<option_name>``.
 
-So, in the above example, if `FirstInfo` has an option called `threshold`, the multistage module will have an
-option `stage1_threshold`, which gets passed through to `stage1` when it is run.
+So, in the above example, if ``FirstInfo`` has an option called ``threshold``, the multistage module will have an
+option ``stage1_threshold``, which gets passed through to ``stage1`` when it is run.
 
 .. note::
 
    There is a desirable possible feature here, which I have not got round to implementing yet.
 
    Often you might wish to specify one parameter to the multistage module that gets used by several stages.
-   Say `stage2` had a `cutoff` parameter and we always wanted to use the same value as the `threshold` for `stage1`.
-   Right now, you have to specify `stage1_threshold` and `stage2_cutoff` in you config file.
+   Say ``stage2`` had a ``cutoff`` parameter and we always wanted to use the same value as the ``threshold`` for ``stage1``.
+   Right now, you have to specify ``stage1_threshold`` and ``stage2_cutoff`` in you config file.
 
    It would be nice to have a way to declare in the multistage module creation that the multistage module should
-   have a parameter `threshold`, which gets used as `stage1_threshold` and `stage2_cutoff`.
+   have a parameter ``threshold``, which gets used as ``stage1_threshold`` and ``stage2_cutoff``.
 
 Running
 =======
@@ -228,17 +228,17 @@ Say we've used the above multistage module in a pipeline like so:
    stage1_threshold=10
    stage2_cutoff=10
 
-The normal way to run this module would be to use the `run` command with the module name:
+The normal way to run this module would be to use the ``run`` command with the module name:
 
 .. code-block:: bash
 
    ./pimlico.sh mypipeline.conf run model_train
 
-If we do this, Pimlico will choose the next unexecuted stage that's ready to run (presumably `stage1` at this point).
-Once that's done, you can run the same command again to execute `stage2`.
+If we do this, Pimlico will choose the next unexecuted stage that's ready to run (presumably ``stage1`` at this point).
+Once that's done, you can run the same command again to execute ``stage2``.
 
-You can also select a specific stage to execute by using the module name `<ms_module_name>:<stage_name>`, e.g.
-`model_train:stage2`. (Note that `stage2` doesn't actually depend on `stage1`, so it's perfectly plausible that
+You can also select a specific stage to execute by using the module name ``<ms_module_name>:<stage_name>``, e.g.
+``model_train:stage2``. (Note that ``stage2`` doesn't actually depend on ``stage1``, so it's perfectly plausible that
 we might want to execute them in a different order.)
 
 If you want to execute multiple stages at once, just use this scheme to specify each of them as a module name
@@ -248,11 +248,11 @@ for the run command. Remember, Pimlico can take any number of modules and execut
 
    ./pimlico.sh mypipeline.conf run model_train:stage1 model_train:stage2
 
-Or, if you want to execute all of them, you can use the stage name `*` or `all` as a shorthand:
+Or, if you want to execute all of them, you can use the stage name ``*`` or ``all`` as a shorthand:
 
 .. code-block:: bash
 
    ./pimlico.sh mypipeline.conf run model_train:all
 
-Finally, if you're not sure what stages a multistage module has, use the module name `<ms_module_name>:?`. The run
+Finally, if you're not sure what stages a multistage module has, use the module name ``<ms_module_name>:?``. The run
 command will then just output a list of stages and exit.
