@@ -72,6 +72,14 @@ by defining a module-info for the multistage module in its ``info.py``. Instead 
 :class:`~pimlico.core.modules.BaseModuleInfo`, as usual, we create the ``ModuleInfo`` class using the factory function
 :func:`~pimlico.core.modules.multistage.multistage_module`.
 
+.. code-block:: py
+
+   ModuleInfo = multistage_module("module_name",
+       [
+           # Stages to be defined here...
+       ]
+   )
+
 In other respects, this module-info works in the same way as usual: it's a class (return by the factory) called
 ``ModuleInfo`` in the ``info.py``.
 
@@ -116,7 +124,7 @@ There are two classes you can use to define input connections.
           # We could leave out the "corpus" here, if it's the default output from FirstInfo
           ModuleStage("stage2", SecondInfo, connections=[InternalModuleConnection("data", "corpus")]),
           # We connect the same output from stage1 to stage3
-         ModuleStage("stage3", ThirdInfo, connections=[InternalModuleConnection("data", "corpus", "stage1")]),
+          ModuleStage("stage3", ThirdInfo, connections=[InternalModuleConnection("data", "corpus", "stage1")]),
       ]
 
 :class:`~pimlico.core.modules.multistage.ModuleInputConnection`:
@@ -202,16 +210,31 @@ simply ``<stage_name>_<option_name>``.
 So, in the above example, if ``FirstInfo`` has an option called ``threshold``, the multistage module will have an
 option ``stage1_threshold``, which gets passed through to ``stage1`` when it is run.
 
-.. note::
+Often you might wish to specify one parameter to the multistage module that gets used by several stages.
+Say ``stage2`` had a ``cutoff`` parameter and we always wanted to use the same value as the ``threshold`` for ``stage1``.
+Instead of having to specify ``stage1_threshold`` and ``stage2_cutoff`` every time in your config file, you can
+assign a single name to an option (say ``threshold``)
+for the multistage module, whose value gets passed through to the appropriate options of the stages.
 
-   There is a desirable possible feature here, which I have not got round to implementing yet.
+Do this by specifying a dictionary as the ``option_connections`` parameter to
+:class:`~pimlico.core.modules.multistage.ModuleStage`, whose keys are names of the stage module type's options and
+whose values are the new option names for the multistage module that you want to map to those stage options.
+You can use the same multistage module option name multiple times, which will cause only a single option to be
+added to the multistage module (using the definition from the first stage), which gets mapped to multiple stage options.
 
-   Often you might wish to specify one parameter to the multistage module that gets used by several stages.
-   Say ``stage2`` had a ``cutoff`` parameter and we always wanted to use the same value as the ``threshold`` for ``stage1``.
-   Right now, you have to specify ``stage1_threshold`` and ``stage2_cutoff`` in you config file.
+To implement that above example, you would give:
 
-   It would be nice to have a way to declare in the multistage module creation that the multistage module should
-   have a parameter ``threshold``, which gets used as ``stage1_threshold`` and ``stage2_cutoff``.
+.. code-block:: py
+
+   [
+       ModuleStage("stage1", FirstInfo, [ModuleInputConnection("raw_data", "first_data")],
+                   option_connections={"threshold": "threshold"}),
+       ModuleStage("stage2", SecondInfo, [ModuleInputConnection("raw_data", "second_data")],
+                   [ModuleOutputConnection("model")],
+                   option_connections={"cutoff": "threshold"}),
+       ModuleStage("stage3", ThirdInfo,  [InternalModuleConnection("data", "corpus", "stage1"),
+                   [ModuleOutputConnection("model", "stage3_model")]),
+   ]
 
 Running
 =======

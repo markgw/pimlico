@@ -118,6 +118,9 @@ def multistage_module(multistage_module_type_name, module_stages):
     main_outputs = []
     named_stages = {}
     output_stage_names = {}
+    # Keep the options in the order of the modules, to make the help more readable
+    option_mapping = OrderedDict()
+    option_mapping_by_stage = {}
 
     for stage_num, stage in enumerate(module_stages):
         # Make sure we can identify all of the module connections that provide this stage's inputs
@@ -171,6 +174,27 @@ def multistage_module(multistage_module_type_name, module_stages):
                 main_outputs.append((main_output_name, output_type))
                 output_stage_names[main_output_name] = (stage.name, stage_output_name)
 
+        stage_mapped_options = []
+        # Store a separate mapping for each stage, to make processing easier later
+        option_mapping_by_stage[stage.name] = {}
+        if stage.option_connections is not None:
+            for stage_option_name, main_option_name in stage.option_connections.iteritems():
+                # Main options can map to multiple stage options
+                option_mapping.setdefault(main_option_name, []).append((stage.name, stage_option_name))
+                # Note that we've got a mapping for this stage option
+                stage_mapped_options.append(stage_option_name)
+                # No particular reason to disallow two options in the same stage being mapped to the same main option
+                # Therefore, this also needs to be a list
+                option_mapping_by_stage[stage.name].setdefault(main_option_name, []).append(stage_option_name)
+        # All stage options must be accessible as multistage module options, so we use a default mapping for any
+        # not explicitly mapped
+        for stage_option_name in stage.module_info_cls.module_options.keys():
+            if stage_option_name not in stage_mapped_options:
+                main_option_name = "%s_%s" % (stage.name, stage_option_name)
+                # Add prefix to option name to distinguish from those of other stages
+                option_mapping.setdefault(main_option_name, []).append((stage.name, stage_option_name))
+                option_mapping_by_stage[stage.name].setdefault(main_option_name, []).append(stage_option_name)
+
         named_stages[stage.name] = stage
 
     # If no inputs were specified, use the default
@@ -190,6 +214,12 @@ def multistage_module(multistage_module_type_name, module_stages):
     # We take the type, though, from the first one
     main_inputs = remove_duplicates(main_inputs, key=lambda (input_name, itype): input_name)
 
+    main_module_options = OrderedDict(
+        # If a main option is connected to multiple stage options, use the first one's definition
+        (main_option_name, named_stages[stg_opts[0][0]].module_info_cls.module_options[stg_opts[0][1]])
+        for (main_option_name, stg_opts) in option_mapping.iteritems()
+    )
+
     # Define a ModuleInfo for the multi-stage module
     class ModuleInfo(MultistageModuleInfo):
         module_readable_name = multistage_module_type_name
@@ -197,9 +227,7 @@ def multistage_module(multistage_module_type_name, module_stages):
         module_inputs = main_inputs
         module_outputs = main_outputs
         # Module options for the MS module includes all of the internal modules' options, with prefixes
-        # Keep the options in the order of the modules, to make the help more readable
-        module_options = OrderedDict(("%s_%s" % (stage.name, opt_name), opt_def) for stage in module_stages
-                                     for (opt_name, opt_def) in stage.module_info_cls.module_options.iteritems())
+        module_options = main_module_options
         stages = module_stages
 
         def __init__(self, module_name, pipeline, **kwargs):
@@ -211,9 +239,14 @@ def multistage_module(multistage_module_type_name, module_stages):
 
             # Instantiate each internal module in turn
             for stage_num, stage in enumerate(self.stages):
-                # Get the sub-module's options by removing prefixes
-                sub_options = dict((opt_name.partition("%s_" % stage.name)[2], opt_val)
-                                   for (opt_name, opt_val) in self.options.iteritems())
+                # Get the sub-module's options by mapping the names of the appropriate main module options
+                sub_options = {}
+                for opt_name, opt_val in self.options.iteritems():
+                    if opt_name in option_mapping_by_stage[stage.name]:
+                        # This main option could even map to multiple stage options (slightly niche use case)
+                        for stage_option_name in option_mapping_by_stage[stage.name][opt_name]:
+                            # Pass the opt val straight through to the stage's module info
+                            sub_options[stage_option_name] = opt_val
                 # Get a list of inputs suitable to instantiate the module info
                 sub_inputs = {}
                 for connection in stage.connections:
@@ -263,15 +296,27 @@ class ModuleStage(object):
     If no explicit input connections are given, the default input to this module is connected to the default
     output from the previous.
 
-    Connections can be given as a list of `ModuleConnection` s.
+    Connections can be given as a list of ``ModuleConnection`` s.
 
     Output connections specify that one of this module's outputs should be used as an output from the multi-stage
     module. Optional outputs for the multi-stage module are not currently supported (though could in theory be
-    added later). This should be a list of `ModuleOutputConnection` s. If none are given for any of the stages,
+    added later). This should be a list of ``ModuleOutputConnection`` s. If none are given for any of the stages,
     the module will have a single output, which is the default output from the last stage.
 
+    Option connections allow you to specify the names that are used for the multistage module's options that
+    get passed through to this stage's module options. Simply specify a dict for ``option_connections`` where the
+    keys are names module options for this stage and the values are the names that should be used for the multistage
+    module's options.
+
+    You may map multiple options from different stages to the same option name for the multistage module. This will
+    result in the same option value being passed through to both stages. Note that help text, option type, option
+    processing, etc will be taken from the first stage's option (in case the two options aren't identical).
+
+    Options not explicitly mapped to a name will use the name ``<stage_name>_<option_name>``.
+
     """
-    def __init__(self, name, module_info_cls, connections=None, output_connections=None):
+    def __init__(self, name, module_info_cls, connections=None, output_connections=None, option_connections=None):
+        self.option_connections = option_connections
         self.output_connections = output_connections
         self.connections = connections
         self.name = name
