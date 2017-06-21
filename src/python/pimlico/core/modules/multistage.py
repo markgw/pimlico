@@ -106,7 +106,7 @@ class MultistageModuleInfo(BaseModuleInfo):
             return module.is_locked()
 
 
-def multistage_module(multistage_module_type_name, module_stages):
+def multistage_module(multistage_module_type_name, module_stages, use_stage_option_names=False):
     """
     Factory to build a multi-stage module type out of a series of stages, each of which specifies a module type
     for the stage. The stages should be a list of :class:`ModuleStage` objects.
@@ -124,6 +124,19 @@ def multistage_module(multistage_module_type_name, module_stages):
 
     for stage_num, stage in enumerate(module_stages):
         # Make sure we can identify all of the module connections that provide this stage's inputs
+        if stage.connections is None:
+            # If connections is not given, we default to just connecting this stage's inputs to the default output of
+            # the previous stage
+            if stage_num == 0:
+                # In this case, we create external connections for each input
+                stage.connections = [
+                    ModuleInputConnection(mod_input[0]) for mod_input in stage.module_info_cls.module_inputs
+                ]
+            else:
+                stage.connections = [
+                    InternalModuleConnection(mod_input[0]) for mod_input in stage.module_info_cls.module_inputs
+                ]
+
         for connection in stage.connections:
             if type(connection) is InternalModuleConnection:
                 if stage_num == 0:
@@ -190,8 +203,12 @@ def multistage_module(multistage_module_type_name, module_stages):
         # not explicitly mapped
         for stage_option_name in stage.module_info_cls.module_options.keys():
             if stage_option_name not in stage_mapped_options:
-                main_option_name = "%s_%s" % (stage.name, stage_option_name)
-                # Add prefix to option name to distinguish from those of other stages
+                if stage.use_stage_option_names or use_stage_option_names:
+                    # We've been explicitly instructed to directly use the stage's option names
+                    main_option_name = stage_option_name
+                else:
+                    # Add prefix to option name to distinguish from those of other stages
+                    main_option_name = "%s_%s" % (stage.name, stage_option_name)
                 option_mapping.setdefault(main_option_name, []).append((stage.name, stage_option_name))
                 option_mapping_by_stage[stage.name].setdefault(main_option_name, []).append(stage_option_name)
 
@@ -313,9 +330,15 @@ class ModuleStage(object):
     processing, etc will be taken from the first stage's option (in case the two options aren't identical).
 
     Options not explicitly mapped to a name will use the name ``<stage_name>_<option_name>``.
+    If ``use_stage_option_names=True``, this prefix will not be added: the stage's option names will be used
+    directly as the option name of the multistage module. Note that there is a danger of clashing option names
+    with this behaviour, so only do it if you know the stages have distinct option names (or should share their
+    values where the names overlap).
 
     """
-    def __init__(self, name, module_info_cls, connections=None, output_connections=None, option_connections=None):
+    def __init__(self, name, module_info_cls, connections=None, output_connections=None, option_connections=None,
+                 use_stage_option_names=False):
+        self.use_stage_option_names = use_stage_option_names
         self.option_connections = option_connections
         self.output_connections = output_connections
         self.connections = connections

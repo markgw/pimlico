@@ -236,6 +236,14 @@ To implement that above example, you would give:
                    [ModuleOutputConnection("model", "stage3_model")]),
    ]
 
+If you know that the different stages have distinct option name, or that they should always tie their values together
+where their option names overlap, you can set ``use_stage_option_names=True`` on the stages. This will cause the
+stage-name prefix not to be added to the option name when connecting it to the multistage module's option.
+
+You can also force this behaviour for all stages by setting ``use_stage_option_names=True`` when you call
+:func:`~pimlico.core.modules.multistage.multistage_module`. Any explicit option name mappings you provide via
+``option_connections`` will override this.
+
 Running
 =======
 
