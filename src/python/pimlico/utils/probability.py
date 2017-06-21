@@ -4,7 +4,7 @@ import itertools
 from pimlico.utils.core import infinite_cycle
 
 
-def limited_shuffle(iterable, buffer_size):
+def limited_shuffle(iterable, buffer_size, rand_generator=None):
     """
     Some algorithms require the order of data to be randomized. An obvious solution is to put it all in
     a list and shuffle, but if you don't want to load it all into memory that's not an option. This method
@@ -13,22 +13,58 @@ def limited_shuffle(iterable, buffer_size):
     to the buffer size.
 
     """
+    if rand_generator is None:
+        # Default random generator just uses Python's randint to pick a random item from the buffer
+        def get_rand():
+            while True:
+                yield random.randint(0, buffer_size-1)
+        rand_generator = iter(get_rand())
+
     buffer = []
     try:
+        # Fill up the buffer
         while len(buffer) < buffer_size:
             buffer.append(iterable.next())
 
         for next_val in iterable:
             # Pick a random item from the buffer to remove
-            index = random.randint(0, len(buffer)-1)
+            index = next(rand_generator)
             yield buffer.pop(index)
             # Add the new value to the buffer to replace the old one
             buffer.append(next_val)
     except StopIteration:
         # No more to take in, just return the rest in a random order
+        # Here we don't use the given rand_generator, since it shouldn't generally take long anyway
         random.shuffle(buffer)
         for v in buffer:
             yield v
+
+
+def limited_shuffle_numpy(iterable, buffer_size, randint_buffer_size=1000):
+    """
+    Identical behaviour to :func:`limited_shuffle`, but uses Numpy's random sampling routines to generate a large
+    number of random integers at once. This can make execution a bit bursty, but overall tends to speed things up,
+    as we get the random sampling over in one big call to Numpy.
+
+    """
+    return limited_shuffle(iterable, buffer_size,
+                           rand_generator=batched_randint(buffer_size, batch_size=randint_buffer_size))
+
+
+def batched_randint(low, high=None, batch_size=1000):
+    """
+    Infinite iterable that produces random numbers in the given range by calling Numpy now and then to generate
+    lots of random numbers at once and then yielding them one by one. Faster than sampling one at a time.
+
+    :param a: lowest number in range
+    :param b: highest number in range
+    :param batch_size: number of ints to generate in one go
+    """
+    from numpy import random
+    while True:
+        randints = random.randint(low, high, size=batch_size)
+        for i in randints:
+            yield i
 
 
 def sequential_document_sample(corpus, start=None, shuffle=None, sample_rate=None):
