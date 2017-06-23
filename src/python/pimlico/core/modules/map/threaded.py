@@ -29,6 +29,7 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
         self.stopped = threading.Event()
         self.initialized = threading.Event()
         self.no_more_inputs = threading.Event()
+        self.ended = threading.Event()
 
         self.start()
 
@@ -67,6 +68,7 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
         finally:
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
+            self.ended.set()
 
     def shutdown(self, timeout=3.):
         # This may have been done by the pool, but it doesn't hurt to set it again
