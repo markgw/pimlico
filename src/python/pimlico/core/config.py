@@ -251,6 +251,7 @@ class PipelineConfig(object):
             "output_dir": OUTPUT_DIR,
             "long_term_store": local_config_data["long_term_store"],
             "short_term_store": local_config_data["short_term_store"],
+            "home": os.path.expanduser("~"),
         }
 
         # Perform pre-processing of config file to replace includes, etc
