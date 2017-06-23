@@ -919,7 +919,6 @@ def collect_runnable_modules(pipeline, preliminary=False):
     runnable_modules = []
 
     # Go through the modules in order: modules can't depend on modules later in the pipeline
-    print pipeline.modules
     for module_name in pipeline.modules:
         module = pipeline[module_name]
         if module.module_executable and module.status != "COMPLETE":

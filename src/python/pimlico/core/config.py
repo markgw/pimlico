@@ -172,7 +172,7 @@ class PipelineConfig(object):
                 self.append_module(int_mod)
         else:
             self.module_order.append(module_info.module_name)
-            
+
         self.module_infos[module_info.module_name] = module_info
         # Check that the moduleinfo knows what pipeline it's in (it's usually already set by this point)
         module_info.pipeline = self
