@@ -13,10 +13,10 @@ Pimlico's source code is available on `on Github <https://github.com/markgw/piml
 
 Manual setup
 ============
-If for some reason you don't want to use the `newproject.py` script, you can set up a project yourself.
+If for some reason you don't want to use the ``newproject.py` script, you can set up a project yourself.
 Download Pimlico `from Github <https://github.com/markgw/pimlico>`_.
 
-Simply download the whole source code as a `.zip` or `.tar.gz` file and uncompress it. This will produce a directory
-called `pimlico`, followed by a long incomprehensible string, which you can rename simply `pimlico`.
+Simply download the whole source code as a ``.zip`` or ``.tar.gz`` file and uncompress it. This will produce a directory
+called ``pimlico``, followed by a long incomprehensible string, which you can rename simply ``pimlico``.
 
 Pimlico has a few basic dependencies, but these will be automatically downloaded the first time you load it.

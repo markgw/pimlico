@@ -10,9 +10,9 @@ First, make sure Python is installed.
 System-wide configuration
 =========================
 Choose a location on your file system where Pimlico will store all the output from pipeline modules. For example,
-`/home/me/.pimlico_store/`.
+``/home/me/.pimlico_store/``.
 
-Create a file in your home directory called `.pimlico` that looks like this:
+Create a file in your home directory called ``.pimlico`` that looks like this:
 
 .. code-block:: ini
 
@@ -38,11 +38,11 @@ this directory and run it:
    wget https://raw.githubusercontent.com/markgw/pimlico/master/admin/newproject.py
    python newproject.py myproject
 
-This fetches the latest Pimlico codebase (in `pimlico/`) and creates a template pipeline (`myproject.conf`).
+This fetches the latest Pimlico codebase (in ``pimlico/``) and creates a template pipeline (``myproject.conf``).
 
 Customizing the pipeline
 ========================
-You've got a basic pipeline config file now (`myproject.conf`).
+You've got a basic pipeline config file now (``myproject.conf``).
 
 Add sections to it to configure modules that make up your pipeline.
 

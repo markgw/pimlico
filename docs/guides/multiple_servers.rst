@@ -32,38 +32,38 @@ Pimlico is designed to handle this situation nicely.
 
 Copying data between computers
 ==============================
-Let's assume you've got your pipeline set up, with identical config files, on two computers: `server_a` and
-`server_b`. You've run the first module in your pipeline, `module1`, on `server_a` and want to run the
-next, `module2`, which takes input from `module1`, on `server_b`.
+Let's assume you've got your pipeline set up, with identical config files, on two computers: ``server_a`` and
+``server_b``. You've run the first module in your pipeline, ``module1``, on ``server_a`` and want to run the
+next, ``module2``, which takes input from ``module1``, on ``server_b``.
 
 The procedure is as follows:
 
-- **Dump** the data from the pipeline on `server_a`. This packages up the output data for a module in a
+- **Dump** the data from the pipeline on ``server_a``. This packages up the output data for a module in a
   single file.
-- **Copy** the dumped file from `server_a` to `server_b`, in whatever way is most convenient, e.g., using
-  `scp`.
-- **Load** the dumped file into the pipeline on `server_b`. This unpacks the data directory for the file
+- **Copy** the dumped file from ``server_a`` to ``server_b``, in whatever way is most convenient, e.g., using
+  ``scp``.
+- **Load** the dumped file into the pipeline on ``server_b``. This unpacks the data directory for the file
   and puts it in Pimlico's data directory for the module.
 
-For example, on `server_a`:
+For example, on ``server_a``:
 
 .. code-block:: sh
 
    $ ./pimlico.sh pipeline.conf dump module1
    $ scp ~/module1.tar.gz server_b:~/
 
-Note that the `dump` command created a `.tar.gz` file in your home directory. If you want to put it somewhere
-else, use the `--output` option to specify a directory. The file is named after the module that you're dumping.
+Note that the ``dump`` command created a ``.tar.gz`` file in your home directory. If you want to put it somewhere
+else, use the ``--output`` option to specify a directory. The file is named after the module that you're dumping.
 
-Now, log into `server_b` and load the data.
+Now, log into ``server_b`` and load the data.
 
 .. code-block:: sh
 
    $ ./pimlico.sh pipeline.conf load ~/module1.tar.gz
 
-Now `module1`'s output data is in the right place and ready for use by `module2`.
+Now ``module1``'s output data is in the right place and ready for use by ``module2``.
 
-The `dump` and `load` commands can also process data for multiple modules at once. For example:
+The ``dump`` and ``load`` commands can also process data for multiple modules at once. For example:
 
 .. code-block:: sh
 
@@ -71,7 +71,7 @@ The `dump` and `load` commands can also process data for multiple modules at onc
    $ ./pimlico.sh pipeline.conf dump module1 ... module10 --output ~/modules
    $ scp -r ~/modules server_b:~/
 
-Then on `server_b`:
+Then on ``server_b``:
 
 .. code-block:: sh
 
@@ -84,7 +84,7 @@ Aside from getting data between the servers, there are certain issues that often
 across multiple servers.
 
 - **Shared Pimlico codebase**. If you share the directory that contains Pimlico's code across servers
-   (e.g. NFS or `rsync`), you can have problems resulting from sharing the libraries it installs.
+   (e.g. NFS or ``rsync``), you can have problems resulting from sharing the libraries it installs.
    See :ref:`instructions for using multiple virtualenvs <virtualenv-for-deps>` for the solution.
-- **Shared home directory**. If you share your home directory across servers, using the same `.pimlico` local
+- **Shared home directory**. If you share your home directory across servers, using the same ``.pimlico`` local
    config file might be a problem. See :ref:`local-config` for various possible solutions.

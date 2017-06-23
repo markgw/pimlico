@@ -25,7 +25,7 @@ Pimlico runs some checks to try to make sure that all of these are available.
 If some of them are not, it may be possible to install them automatically, straight from Pimlico. In particular,
 many Python packages can be very easily installed using `Pip <https://pypi.python.org/pypi/pip>`_. If this is
 the case for one of the missing dependencies, Pimlico will tell you in the error output, and you can install
-them using the `install` command (with the module name/number as an argument).
+them using the ``install`` command (with the module name/number as an argument).
 
 .. _virtualenv-for-deps:
 
@@ -52,15 +52,15 @@ with the system-wide software on the other.
 The following procedure sets up an alternative virtualenv, which you can use on your second
 machine.
 
-Open a terminal and `cd` into your project directory (Pimlico should be in the `pimlico` subdirectory).
+Open a terminal and ``cd`` into your project directory (Pimlico should be in the ``pimlico`` subdirectory).
 
 .. code:: sh
 
    $ python pimlico/lib/libutils/create_virtualenv.py pimlico/lib/myenv
 
-Replace `myenv` with a name that better reflects its use (e.g. name of the server).
+Replace ``myenv`` with a name that better reflects its use (e.g. name of the server).
 
-Every time you run Pimlico on that server, set the `VIRTUALENV` environment variable to
+Every time you run Pimlico on that server, set the ``VIRTUALENV`` environment variable to
 point to the virtualenv directory that you just created. For example:
 
 .. code:: sh
@@ -85,4 +85,4 @@ Some examples
 
 .. rubric:: Footnotes
 
-.. [#env_loc] If you're interested, it lives in `pimlico/lib/python_env`
+.. [#env_loc] If you're interested, it lives in ``pimlico/lib/python_env``

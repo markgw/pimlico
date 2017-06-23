@@ -12,7 +12,7 @@ basic pipeline.
 System-wide configuration
 =========================
 Pimlico needs you to specify certain parameters regarding your local system. In the simplest case, this is just
-a file in your home directory called `.pimlico`. See :ref:`local-config` for more details.
+a file in your home directory called ``.pimlico``. See :ref:`local-config` for more details.
 
 It needs to
 know where to put output files as it executes. Settings are given in a config file in your home directory and
@@ -25,7 +25,7 @@ There are two locations you need to specify: **short-term** and **long-term stor
 For a simple setup, these could be just two subdirectories of the same directory. However, it can be
 useful to distinguish them.
 
-Create a file `~/.pimlico` that looks like this:
+Create a file ``~/.pimlico`` that looks like this:
 
 .. code-block:: ini
 
@@ -41,13 +41,13 @@ The procedure for starting a new Pimlico project, using the latest release, is v
 Create a new, empty directory to put your project in. Download
 `newproject.py <https://raw.githubusercontent.com/markgw/pimlico/master/admin/newproject.py>`_ into the project directory.
 
-Choose a name for your project (e.g. `myproject`) and run:
+Choose a name for your project (e.g. ``myproject``) and run:
 
 .. code-block:: bash
 
     python newproject.py myproject
 
-This fetches the latest version of Pimlico (now in the `pimlico/` directory) and creates a basic config file template,
+This fetches the latest version of Pimlico (now in the ``pimlico/`` directory) and creates a basic config file template,
 which will define your pipeline.
 
 It also retrieves some libraries that Pimlico needs to run. Other libraries required by specific pipeline modules will
@@ -55,7 +55,7 @@ be installed as necessary when you use the modules.
 
 Building the pipeline
 =====================
-You've now got a config file in `myproject.conf`. This already includes a `pipeline` section, which gives the
+You've now got a config file in ``myproject.conf``. This already includes a ``pipeline`` section, which gives the
 basic pipeline setup. It will look something like this:
 
 .. code-block:: ini
@@ -65,10 +65,10 @@ basic pipeline setup. It will look something like this:
     release=<release number>
     python_path=%(project_root)s/src/python
 
-The `name` needs to be distinct from any other pipelines that you run &ndash; it's what distinguishes the storage 
+The ``name`` needs to be distinct from any other pipelines that you run &ndash; it's what distinguishes the storage
 locations.
 
-`release` is the release of Pimlico that you're using: it's automatically set to the latest one, which has
+``release`` is the release of Pimlico that you're using: it's automatically set to the latest one, which has
 been downloaded.
 
 If you later 
@@ -78,7 +78,7 @@ need to update your config file, ensuring it plays nicely with the later Pimlico
 
 Getting input
 -------------
-Now we add our first module to the pipeline. This reads input from XML files and iterates of `<doc>` tags to get 
+Now we add our first module to the pipeline. This reads input from XML files and iterates of ``<doc>`` tags to get
 documents. This is how the Gigaword corpus is stored, so if you have Gigaword, just set the path to point to it.
 
 .. todo::
@@ -109,7 +109,7 @@ storing each batch in a tar archive, containing a file for every document. This 
 where having every document as a separate file would cause filesystem difficulties and having all documents in the 
 same file would result in a frustratingly large file.
 
-We can do the grouping on the fly as we read data from the input corpus. The `tar_filter` module groups
+We can do the grouping on the fly as we read data from the input corpus. The ``tar_filter`` module groups
 documents together and subsequent modules will all use the same grouping to store their output, making it easy to 
 align the datasets they produce.
 
@@ -157,14 +157,14 @@ and POS tagging modules use OpenNLP.
 
 Checking everything's dandy
 ---------------------------
-Now you can run the `status` command to check that the pipeline can be loaded and see the list of modules.
+Now you can run the ``status`` command to check that the pipeline can be loaded and see the list of modules.
 
 .. code-block:: bash
 
     ./pimlico.sh myproject.conf status
 
 To check that specific modules are ready to run, with all software dependencies installed, use the
-`run` command with `--dry-run` (or `--dry`) switch:
+``run`` command with ``--dry-run`` (or ``--dry``) switch:
 
 .. code-block:: bash
 
@@ -177,14 +177,14 @@ Fetching dependencies
 All the standard modules provide easy ways to get hold of their dependencies automatically, or as close as possible.
 Most of the time, all you need to do is tell Pimlico to install them.
 
-Use the `run` command, with a module name and `--dry-run`, to check whether a module is ready to run.
+Use the ``run`` command, with a module name and ``--dry-run``, to check whether a module is ready to run.
 
 .. code-block:: bash
 
     ./pimlico.sh myproject.conf run tokenize --dry
 
 In this case, it will tell you that some libraries are missing, but they can be installed automatically. Simply issue
-the `install` command for the module.
+the ``install`` command for the module.
 
 .. code-block:: bash
 
@@ -221,13 +221,13 @@ pipeline is entirely linear -- it's clear which ones need to be run before other
 
     ./pimlico.sh myproject.conf status
 
-The output also tells you the current status of each module. At the moment, all the modules are `UNEXECUTED`.
+The output also tells you the current status of each module. At the moment, all the modules are ``UNEXECUTED``.
 
-You'll notice that the `tar-grouper` module doesn't feature in the list. This is because it's a filter --
+You'll notice that the ``tar-grouper`` module doesn't feature in the list. This is because it's a filter --
 it's run on the fly while reading output from the previous module (i.e. the input), so doesn't have anything to 
 run itself.
 
-You might be surprised to see that `input-text` *does* feature in the list. This is because, although it just
+You might be surprised to see that ``input-text`` *does* feature in the list. This is because, although it just
 reads the data out of a corpus on disk, there's not quite enough information in the corpus, so we need to run the 
 module to collect a little bit of metadata from an initial pass over the corpus. Some input types need this, others
 not. In this case, all we're lacking is a count of the total number of documents in the corpus.
@@ -235,7 +235,7 @@ not. In this case, all we're lacking is a count of the total number of documents
 .. note::
 
    To make running your pipeline even simpler, you can abbreviate the command by using a **shebang** in the
-   config file. Add a line at the top of `myproject.conf` like this:
+   config file. Add a line at the top of ``myproject.conf`` like this:
 
    .. code-block:: ini
 
@@ -255,7 +255,7 @@ not. In this case, all we're lacking is a count of the total number of documents
 
 Running the modules
 -------------------
-The modules can be run using the `run` command and specifying the module by name. We do this manually for each module. 
+The modules can be run using the ``run`` command and specifying the module by name. We do this manually for each module.
 
 .. code-block:: bash
 
@@ -269,16 +269,16 @@ Most likely, for your project you need to do some processing not covered by the 
 point, you can start implementing your own modules, which you can distribute along with the config file so that 
 people can replicate what you did.
 
-The `newproject.py` script has already created a directory where our custom source code will live: `src/python`,
+The ``newproject.py`` script has already created a directory where our custom source code will live: ``src/python``,
 with some subdirectories according to the standard code layout, with module types and datatypes in separate
 packages.
 
-The template pipeline also already has an option `python_path` pointing to this directory, so that Pimlico knows where to
+The template pipeline also already has an option ``python_path`` pointing to this directory, so that Pimlico knows where to
 find your code. Note that
 the code's in a subdirectory of that containing the pipeline config and we specify the custom code path relative to 
 the config file, so it's easy to distribute the two together.
 
-Now you can create Python modules or packages in `src/python`, following the same conventions as the built-in modules
+Now you can create Python modules or packages in ``src/python``, following the same conventions as the built-in modules
 and overriding the standard base classes, as they do. The following articles tell you more about how to do this:
 
  - :doc:`/guides/module`

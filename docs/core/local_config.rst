@@ -26,7 +26,7 @@ Settings are specified with the following order of precedence (those later overr
    local config file < host-specific config file < cmd-line overrides
 
 Most often, you'll just specify all settings in the main local config file. This is a file in your home directory
-named `.pimlico`. This must exist for Pimlico to be able to run at all.
+named ``.pimlico``. This must exist for Pimlico to be able to run at all.
 
 Host-specific config
 --------------------
@@ -34,20 +34,20 @@ If you share your home directory between different computers (e.g. a networked f
 cause a problem, as you may need a different local config on the different computers. Pimlico allows you to
 have special config files that only get read on machines will a particular hostname.
 
-For example, say I have two computers, `localbox` and `remotebox`, which share a home directory. I've created my
-`.pimlico` local config file on `localbox`, but need to specify a different storage location on `remotebox`.
-I simply create another config file called `.pimlico_remotebox`[#hostname]_. Pimlico will load first the
-basic local config in `.pimlico` and then override those settings with what it reads from the host-specific
+For example, say I have two computers, ``localbox`` and ``remotebox``, which share a home directory. I've created my
+``.pimlico`` local config file on ``localbox``, but need to specify a different storage location on ``remotebox``.
+I simply create another config file called ``.pimlico_remotebox``[#hostname]_. Pimlico will load first the
+basic local config in ``.pimlico`` and then override those settings with what it reads from the host-specific
 config file.
 
 You can also specify a hostname prefix to match. Say I've got a whole load of computers I want to be able to
-run on, with hostnames `remotebox1`, `remotebox2`, etc. If I create a config file called `.pimlico_remotebox-`,
+run on, with hostnames ``remotebox1``, ``remotebox2``, etc. If I create a config file called ``.pimlico_remotebox-``,
 it will be used on all of these hosts.
 
 Command-line overrides
 ----------------------
 Occasionally, you might want to specify a local config setting just for one run of Pimlico. Use the
-`--override-local-config` (or `-l`) to specify a value for an individual setting in the form `setting=value`.
+``--override-local-config`` (or ``-l``) to specify a value for an individual setting in the form ``setting=value``.
 For example:
 
 .. code:: sh
@@ -59,9 +59,9 @@ If you want to override multiple settings, simply use the option multiple times.
 Custom location
 ---------------
 If the above solutions don't work for you, you can also explicitly specify on the command line an alternative
-location from which to load the local config file that Pimlico typically expects to find in `~/.pimlico`.
+location from which to load the local config file that Pimlico typically expects to find in ``~/.pimlico``.
 
-Use the `--local-config` parameter to give a filename to use instead of the `~/.pimlico`.
+Use the ``--local-config`` parameter to give a filename to use instead of the ``~/.pimlico``.
 
 For example, if your home directory is shared across servers and the above hostname-specific config solution
 doesn't work in your case, you can fall back to pointing Pimlico at your own host-specific config file.
@@ -116,6 +116,6 @@ There aren't any yet, but they will be listed here as they arise.
 
 .. rubric:: Footnotes:
 
-.. [#hostname] This relies on Python being aware of the hostname of the computer. Pimlico uses `socket.gethostname()`
-               to find out the current machine's hostname, which in this example should return `remotebox`. On Linux,
-               you can check what this is using the `hostname` command.
+.. [#hostname] This relies on Python being aware of the hostname of the computer. Pimlico uses ``socket.gethostname()``
+               to find out the current machine's hostname, which in this example should return ``remotebox``. On Linux,
+               you can check what this is using the ``hostname`` command.
