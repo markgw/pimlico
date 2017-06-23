@@ -163,8 +163,17 @@ class PipelineConfig(object):
         config file.
 
         """
+        from pimlico.core.modules.multistage import MultistageModuleInfo
+
+        if isinstance(module_info, MultistageModuleInfo):
+            # For multistage modules, add each their internal modules (stages)
+            # Also make the main module available in the module info dict, but not in the module order
+            for int_mod in module_info.internal_modules:
+                self.append_module(int_mod)
+        else:
+            self.module_order.append(module_info.module_name)
+            
         self.module_infos[module_info.module_name] = module_info
-        self.module_order.append(module_info.module_name)
         # Check that the moduleinfo knows what pipeline it's in (it's usually already set by this point)
         module_info.pipeline = self
         # Keep a dictionary of expanded modules

@@ -3,7 +3,7 @@ from traceback import print_exc, format_exception_only
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.cli.util import print_execution_error
-from pimlico.core.modules.base import ModuleInfoLoadError
+from pimlico.core.modules.base import ModuleInfoLoadError, collect_runnable_modules
 from pimlico.core.modules.execute import check_and_execute_modules, ModuleExecutionError, ModuleNotReadyError
 from pimlico.core.modules.multistage import MultistageModuleInfo
 from pimlico.utils.logging import get_console_logger
@@ -30,6 +30,9 @@ class RunCmd(PimlicoCLISubcommand):
                             help="If the given module(s) has dependent modules that have not been completed, executed "
                                  "them first. This allows you to specify a module late in the pipeline and execute the "
                                  "full pipeline leading to that point")
+        parser.add_argument("--all", action="store_true",
+                            help="Run all currently unexecuted modules that have their inputs ready, or will have "
+                                 "by the time previous modules are run. (List of modules will be ignored)")
         parser.add_argument("--dry-run", "--dry", "--check", action="store_true",
                             help="Perform all pre-execution checks, but don't actually run the module(s)")
         parser.add_argument("--step", action="store_true",
@@ -70,6 +73,19 @@ class RunCmd(PimlicoCLISubcommand):
             log.info("STEP MODE")
             log.info("Running the module(s) in super-verbose, interactive step-mode to debug")
             pipeline.enable_step()
+
+        if opts.all:
+            opts.all_deps = False
+            if opts.modules:
+                log.warn("Ignoring modules specified and running all that can be run")
+
+            # Find all modules that can be run now
+            opts.modules = collect_runnable_modules(pipeline, preliminary=preliminary)
+            if opts.modules:
+                log.info("Found %d runnable, unexecuted modules" % len(opts.modules))
+            else:
+                log.error("None of the unexecuted modules are ready to run")
+                sys.exit(1)
 
         if opts.modules is None or len(opts.modules) == 0:
             # No module name given: default to next one that's ready to run

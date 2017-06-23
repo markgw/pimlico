@@ -9,8 +9,8 @@ It is used by the `run` command.
 """
 
 import os
-import sys
 import socket
+import sys
 from cStringIO import StringIO
 from tarfile import TarFile
 from textwrap import wrap

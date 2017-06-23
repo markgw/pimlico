@@ -906,6 +906,31 @@ def collect_unexecuted_dependencies(modules):
         return modules_to_execute
 
 
+def collect_runnable_modules(pipeline, preliminary=False):
+    """
+    Look for all unexecuted modules in the pipeline to find any that are ready to be executed. Keep
+    collecting runnable modules, including those that will become runnable once we've run earlier ones
+    in the list, to produce a list of a sequence of modules that could be set running now.
+
+    :param pipeline: pipeline config
+    :return: ordered list of runable modules. Note that it must be run in this order, as some might
+        depend on earlier ones in the list
+    """
+    runnable_modules = []
+
+    # Go through the modules in order: modules can't depend on modules later in the pipeline
+    print pipeline.modules
+    for module_name in pipeline.modules:
+        module = pipeline[module_name]
+        if module.module_executable and module.status != "COMPLETE":
+            # Executable module that's not been completed yet
+            # See whether it's ready to run
+            if not module.missing_data(assume_executed=runnable_modules, allow_preliminary=preliminary):
+                # This module's ready, or will be by the time we get here
+                runnable_modules.append(module_name)
+    return runnable_modules
+
+
 def satisfies_typecheck(provided_type, type_requirements):
     """
     Interface to Pimlico's standard type checking (see `check_type`) that returns a boolean to say whether
