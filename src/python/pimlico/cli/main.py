@@ -30,8 +30,8 @@ from pimlico.cli.util import module_number_to_name, module_numbers_to_names
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError
 from pimlico.utils.filesystem import copy_dir_with_progress
 from pimlico.utils.system import set_proc_title
-from .shell.runner import ShellCLICmd
-from .pyshell import PythonShellCmd
+from pimlico.cli.shell.runner import ShellCLICmd
+from pimlico.cli.pyshell import PythonShellCmd
 
 
 class VariantsCmd(PimlicoCLISubcommand):
