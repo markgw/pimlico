@@ -130,7 +130,7 @@ def load_formatter(dataset, formatter_name=None, parse=True):
     You may also specify a formatter by name, choosing from one of the standard ones that the formatted
     datatype gives.
 
-    :param formatter_name: class name
+    :param formatter_name: class name, or class
     :param dataset: dataset that will be formatted
     :param parse: only used if the default formatter is loaded, determines `raw_data` (`= not parse`)
     :return: instantiated formatter
@@ -145,20 +145,24 @@ def load_formatter(dataset, formatter_name=None, parse=True):
             # Just instantiate the default formatter
             return DefaultFormatter(dataset, raw_data=not parse)
 
-    # Check whether the name is one of the standard formatters
-    if formatter_name in dict(formatted_type.formatters):
-        formatter_name = dict(formatted_type.formatters)[formatter_name]
+    if type(formatter_name) is type:
+        # Allow formatters to be specified by class directly as well as by path
+        fmt_cls = formatter_name
+    else:
+        # Check whether the name is one of the standard formatters
+        if formatter_name in dict(formatted_type.formatters):
+            formatter_name = dict(formatted_type.formatters)[formatter_name]
 
-    # Otherwise, it should be a class path/name
-    try:
-        fmt_path, __, fmt_cls_name = formatter_name.rpartition(".")
-        fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
-    except ImportError, e:
-        raise TypeError("Could not load formatter %s: %s" % (formatter_name, e))
-    try:
-        fmt_cls = getattr(fmt_mod, fmt_cls_name)
-    except AttributeError, e:
-        raise TypeError("Could not load formatter %s" % formatter_name)
+        # Otherwise, it should be a class path/name
+        try:
+            fmt_path, __, fmt_cls_name = formatter_name.rpartition(".")
+            fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
+        except ImportError, e:
+            raise TypeError("Could not load formatter %s: %s" % (formatter_name, e))
+        try:
+            fmt_cls = getattr(fmt_mod, fmt_cls_name)
+        except AttributeError, e:
+            raise TypeError("Could not load formatter %s" % formatter_name)
 
     typecheck_formatter(formatted_type, fmt_cls)
     # Instantiate the formatter, providing it with the dataset
