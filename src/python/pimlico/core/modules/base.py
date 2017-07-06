@@ -409,21 +409,25 @@ class BaseModuleInfo(object):
 
         return output_name, datatype
 
-    def instantiate_output_datatype(self, output_name, output_datatype):
+    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
         """
         Subclasses may want to override this to provide special behaviour for instantiating
         particular outputs' datatypes.
 
-        """
-        return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self)
+        Additional kwargs will be pass through to the datatype's init.
 
-    def get_output(self, output_name=None, additional_names=None):
+        """
+        return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self, **kwargs)
+
+    def get_output(self, output_name=None, additional_names=None, **kwargs):
         """
         Get a datatype instance corresponding to one of the outputs of the module.
 
+        Additional kwargs will be pass through to the datatype's init.
+
         """
         output_name, datatype = self.get_output_datatype(output_name=output_name)
-        output_datatype_instance = self.instantiate_output_datatype(output_name, datatype)
+        output_datatype_instance = self.instantiate_output_datatype(output_name, datatype, **kwargs)
         if additional_names:
             # Use the main output datatype to fetch additional datatype(s)
             for i in range(len(additional_names)):
@@ -487,7 +491,7 @@ class BaseModuleInfo(object):
         ]
         return datatypes if always_list or self.is_multiple_input(input_name) else datatypes[0]
 
-    def get_input(self, input_name=None, always_list=False):
+    def get_input(self, input_name=None, always_list=False, **kwargs):
         """
         Get a datatype instances corresponding to one of the inputs to the module.
         Looks up the corresponding output from another module and uses that module's metadata to
@@ -498,9 +502,11 @@ class BaseModuleInfo(object):
         of inputs, this is a list. Otherwise, it's a single datatype instance.
         If always_list=True, in this latter case we return a single-item list.
 
+        Additional kwargs will be passed through to the datatype's init call.
+
         """
         inputs = [
-            previous_module.get_output(output_name, additional_names=additional_names)
+            previous_module.get_output(output_name, additional_names=additional_names, **kwargs)
             for previous_module, output_name, additional_names in
             self.get_input_module_connection(input_name, always_list=True)
         ]
