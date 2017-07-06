@@ -10,6 +10,7 @@ Provides access to many subcommands, acting as the primary interface to Pimlico'
 from pimlico.cli.clean import CleanCmd
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.cli.testemail import EmailCmd
+from pimlico.core.modules.options import ModuleOptionParseError
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
@@ -191,6 +192,9 @@ if __name__ == "__main__":
                                        local_config=opts.local_config)
     except PipelineConfigParseError, e:
         print >>sys.stderr, "Error reading pipeline config: %s" % e
+        sys.exit(1)
+    except ModuleOptionParseError, e:
+        print >>sys.stderr, "Error in module options specified in config file: %s" % e
         sys.exit(1)
 
     # Allow numbers to be used instead of module name arguments
