@@ -6,6 +6,7 @@
 Utilities and type processors for module options.
 
 """
+from pimlico.utils.strings import sorted_by_similarity
 
 
 def opt_type_help(help_text):
@@ -104,7 +105,10 @@ def process_module_options(opt_def, opt_dict, module_type_name):
     options = {}
     for name, value in opt_dict.items():
         if name not in opt_def:
-            raise ModuleOptionParseError("invalid option for %s module: '%s'" % (module_type_name, name))
+            # Look for similar option names to suggest
+            available_opts = sorted_by_similarity(opt_def.keys(), name)
+            raise ModuleOptionParseError("invalid option for %s module: '%s'. Available options: %s" %
+                                         (module_type_name, name, ", ".join("'%s'" % opt for opt in available_opts)))
         # Postprocess the option value
         opt_config = opt_def[name]
         if "type" in opt_config:
