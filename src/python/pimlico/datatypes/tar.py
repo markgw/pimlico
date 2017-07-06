@@ -81,9 +81,16 @@ class TarredCorpus(IterableCorpus):
 
         try:
             for tar_name, tarball_filename in zip(self.tarballs, self.tar_filenames):
-                if not started and start_after is not None and start_after[0] != tar_name:
-                    # If we're waiting for a particular archive/file, we can skip archives until we're in the right one
-                    continue
+                if not started and start_after is not None:
+                    if start_after[0] == tar_name and start_after[1] is None:
+                        # Asked to start after an archive, but not given specific filename
+                        # Skip the whole archive and start at the beginning of the next one
+                        # Cancel the start_after requirement, but don't start yet, as we might still skip
+                        start_after = None
+                        continue
+                    elif start_after[0] != tar_name:
+                        # If we're waiting for a particular archive/file, skip archives until we're in the right one
+                        continue
 
                 # Extract the tarball to the temp dir
                 with tarfile.open(tarball_filename, fileobj=retry_open(tarball_filename, mode="r")) as tarball:
@@ -94,7 +101,14 @@ class TarredCorpus(IterableCorpus):
 
                         # Allow the first portion of the corpus to be skipped
                         if not started:
-                            if skip is not None:
+                            if start_after is not None:
+                                # We know we're in the right archive now, skip until we get to the requested file
+                                if start_after[1] == filename:
+                                    # We've hit the condition for starting
+                                    # Skip this doc and start on the next (or after we've satisfied "skip")
+                                    start_after = None
+                                continue
+                            elif skip is not None:
                                 if skipped >= skip:
                                     # Skipped enough now: stop skipping
                                     started = True
@@ -103,12 +117,8 @@ class TarredCorpus(IterableCorpus):
                                     skipped += 1
                                     continue
                             else:
-                                # We know we're in the right archive now, skip until we get to the requested file
-                                if start_after[1] == filename:
-                                    # We've hit the condition for starting
-                                    # Skip this doc and start on the next
-                                    started = True
-                                continue
+                                # No more skipping requirements left
+                                started = True
 
                         # If subsampling, decide whether to extract this file
                         if subsample is not None and random.random() > subsample:
