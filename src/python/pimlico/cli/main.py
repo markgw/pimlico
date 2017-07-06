@@ -198,10 +198,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Allow numbers to be used instead of module name arguments
-    if hasattr(opts, "module_name") and opts.module_name is not None:
-        opts.module_name = module_number_to_name(pipeline, opts.module_name)
-    if hasattr(opts, "modules") and opts.modules is not None and len(opts.modules):
-        opts.modules = module_numbers_to_names(pipeline, opts.modules)
+    try:
+        if hasattr(opts, "module_name") and opts.module_name is not None:
+            opts.module_name = module_number_to_name(pipeline, opts.module_name)
+        if hasattr(opts, "modules") and opts.modules is not None and len(opts.modules):
+            opts.modules = module_numbers_to_names(pipeline, opts.modules)
+    except ValueError, e:
+        print >>sys.stderr, "Error in module specification: %s" % e
+        sys.exit(1)
 
     # Run the function corresponding to the subcommand
     opts.func(pipeline, opts)

@@ -16,6 +16,8 @@ def module_number_to_name(pipeline, name):
         # If it's a non-existent module, an error will (presumably) be output when we try to load it
         # It could also be a special value, like "all", so we don't want to go raising errors here
         return name
+    if not (0 <= module_number < len(modules)):
+        raise ValueError("invalid module number: %d. The pipeline has %d modules" % (module_number+1, len(modules)))
     return modules[module_number]
 
 
