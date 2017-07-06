@@ -6,6 +6,7 @@ from pimlico.cli.util import print_execution_error
 from pimlico.core.modules.base import ModuleInfoLoadError, collect_runnable_modules
 from pimlico.core.modules.execute import check_and_execute_modules, ModuleExecutionError, ModuleNotReadyError
 from pimlico.core.modules.multistage import MultistageModuleInfo
+from pimlico.utils.email import EmailConfig, EmailError
 from pimlico.utils.logging import get_console_logger
 
 
@@ -134,6 +135,15 @@ class RunCmd(PimlicoCLISubcommand):
         log.info("Using pipeline %s" % pipeline_name)
         if pipeline.local_config_sources:
             log.info("Loaded local config from: %s" % ", ".join(pipeline.local_config_sources))
+
+        # If email report has been requested, check now before we begin that email sending is configured
+        try:
+            EmailConfig.from_local_config(pipeline.local_config)
+        except EmailError, e:
+            print >>sys.stderr, "Email sending requested, but local email config is not ready:"
+            print >>sys.stderr, str(e)
+            print >>sys.stderr, "Please fix in local config file to use email reports"
+            sys.exit(1)
 
         try:
             check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,

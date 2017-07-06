@@ -30,6 +30,45 @@ from email.mime.text import MIMEText
 from smtplib import SMTPHeloError, SMTPAuthenticationError, SMTPException
 
 
+class EmailConfig(object):
+    def __init__(self, sender=None, recipients=None, host=None, username=None, password=None):
+        self.password = password
+        self.username = username
+        self.host = host
+
+        if isinstance(recipients, basestring):
+            recipients = [recipients]
+        self.recipients = recipients
+        self.sender = sender
+
+        if username is not None and password is None:
+            raise EmailError("username was supplied for SMTP, but no password")
+
+    @classmethod
+    def from_local_config(cls, local_config):
+        # Expect to find a list of recipients in the local config
+        if "email_recipients" not in local_config:
+            raise EmailError("no recipient(s) specified in the local config. You should "
+                             "set 'email_recipients' field in your local config file")
+        recipients = local_config["email_recipients"].split(",")
+
+        if "email_sender" not in local_config:
+            raise EmailError("no sender specified in the local config. You should "
+                             "set 'email_sender' field in your local config file")
+        sender = local_config["email_sender"]
+
+        # Fall back to default of localhost
+        host = local_config.get("email_host", "localhost")
+
+        # Allow a username to be supplied
+        # Otherwise, we assume no authentication is needed
+        username = local_config.get("email_username", None)
+        # Same with the password
+        password = local_config.get("email_password", None)
+
+        return EmailConfig(sender=sender, recipients=recipients, host=host, username=username, password=password)
+
+
 def send_pimlico_email(subject, content, local_config, log):
     """
     Primary method for sending emails from Pimlico. Tries to send an email with the given content, using
@@ -42,7 +81,9 @@ def send_pimlico_email(subject, content, local_config, log):
     :param log: logger to log errors to (and info if the sending works)
     """
     try:
-        data = send_text_email(subject, local_config, content=content)
+        # Read email config from the local config
+        config = EmailConfig.from_local_config(local_config)
+        data = send_text_email(config, subject, content=content)
     except Exception, e:
         log.error("Could not send email: %s" % e)
         return {"success": False}
@@ -52,8 +93,7 @@ def send_pimlico_email(subject, content, local_config, log):
         return data
 
 
-def send_text_email(subject, local_config, content=None, sender=None, recipients=None, host=None,
-                    username=None, password=None):
+def send_text_email(email_config, subject, content=None):
     # Encode unicode content as utf-8
     if content is None:
         content = ""
@@ -63,70 +103,43 @@ def send_text_email(subject, local_config, content=None, sender=None, recipients
     msg = MIMEText(body)
 
     # Allow a single recipient to be given
-    if recipients is None:
-        # No explicit recipient given: expect to find a list in the local config
-        if "email_recipients" not in local_config:
-            raise EmailError("no recipient(s) specified for email and none found in the local config. You should "
-                             "set 'email_recipients' field in your local config file")
-        recipients = local_config["email_recipients"].split(",")
+    if email_config.recipients is None:
+        raise EmailError("email recipient(s) must be specified")
 
-    if isinstance(recipients, basestring):
-        recipients = [recipients]
-
-    if sender is None:
-        # No explicit sender: expect one in the local config
-        if "email_sender" not in local_config:
-            raise EmailError("no sender specified for email and none found in the local config. You should "
-                             "set 'email_sender' field in your local config file")
-        sender = local_config["email_sender"]
-
-    if host is None:
-        # Allow host to be overridden by kwarg, then check for one in the local config
-        # Otherwise, fall back to default of localhost
-        host = local_config.get("email_host", "localhost")
-
-    if username is None:
-        # Allow a username to be supplied as a kwarg, or via local config
-        # Otherwise, we assume no authentication is needed
-        username = local_config.get("email_username", None)
-    if password is None:
-        # Same with the password
-        password = local_config.get("email_password", None)
-    if username is not None and password is None:
-        raise EmailError("username was supplied for SMTP, but no password. Set using 'email_password' field in local "
-                         "config file")
+    if email_config.sender is None:
+        raise EmailError("email sender must be specified")
 
     # Set the important headers
     msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = ", ".join(recipients)
+    msg['From'] = email_config.sender
+    msg['To'] = ", ".join(email_config.recipients)
 
     # Send the email, via the SMTP server
-    s = smtplib.SMTP(host)
-    if username is not None:
+    s = smtplib.SMTP(email_config.host)
+    if email_config.username is not None:
         # Login details have been supplied, so authenticate with SMTP server
         try:
-            s.login(username, password)
+            s.login(email_config.username, email_config.password)
         except SMTPHeloError, e:
             raise EmailError("invalid HELO response from SMTP server: %s" % e)
         except SMTPAuthenticationError, e:
             raise EmailError("could not authenticate with SMTP server (host '%s' using username '%s'): %s" % (
-                host, username, e
+                email_config.host, email_config.username, e
             ))
         except SMTPException, e:
             raise EmailError("could not find a suitable SMTP authentication method: %s" % e)
 
     # Send the message
     email_content = msg.as_string()
-    s.sendmail(sender, recipients, email_content)
+    s.sendmail(email_config.sender, email_config.recipients, email_content)
     s.quit()
 
     # Return the sending details we used
     return {
         "subject": subject,
-        "recipients": recipients,
-        "sender": sender,
-        "username": username,
+        "recipients": email_config.recipients,
+        "sender": email_config.sender,
+        "username": email_config.username,
         "content": email_content,
     }
 
