@@ -13,6 +13,8 @@ def limited_shuffle(iterable, buffer_size, rand_generator=None):
     to the buffer size.
 
     """
+    it = iter(iterable)
+
     if rand_generator is None:
         # Default random generator just uses Python's randint to pick a random item from the buffer
         def get_rand():
@@ -24,9 +26,9 @@ def limited_shuffle(iterable, buffer_size, rand_generator=None):
     try:
         # Fill up the buffer
         while len(buffer) < buffer_size:
-            buffer.append(iterable.next())
+            buffer.append(next(it))
 
-        for next_val in iterable:
+        for next_val in it:
             # Pick a random item from the buffer to remove
             index = next(rand_generator)
             yield buffer.pop(index)
