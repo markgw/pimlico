@@ -1,5 +1,5 @@
 import struct
-from StringIO import StringIO
+from cStringIO import StringIO
 
 from pimlico.datatypes.documents import RawDocumentType
 from pimlico.datatypes.table import get_struct
@@ -12,6 +12,7 @@ class IntegerListsDocumentType(RawDocumentType):
         self._unpacker = None
         self.length_unpacker = get_struct(2, False, 1)
         self.length_size = self.length_unpacker.size
+        self._int_size = None
 
     @property
     def unpacker(self):
@@ -21,17 +22,27 @@ class IntegerListsDocumentType(RawDocumentType):
             bytes, signed = struct.unpack("B?", self.metadata["struct_format"])
             # Compile a struct for unpacking individual ints quickly
             self._unpacker = get_struct(bytes, signed, 1)
+            self._int_size = self._unpacker.size
         return self._unpacker
-
-    @property
-    def int_size(self):
-        return self.unpacker.size
 
     def process_document(self, data):
         reader = StringIO(data)
         return list(self.read_rows(reader))
 
     def read_rows(self, reader):
+        unpacker = self.unpacker
+        int_size = self._int_size
+
+        def _read_row(length):
+            for i in range(length):
+                num_string = reader.read(int_size)
+                if num_string == "":
+                    raise IOError("file ended mid-row")
+                try:
+                    yield unpacker.unpack(num_string)[0]
+                except struct.error, e:
+                    raise IOError("error interpreting int data: %s" % e)
+
         while True:
             # First read an int that tells us how long the row is
             row_length_string = reader.read(self.length_size)
@@ -39,19 +50,8 @@ class IntegerListsDocumentType(RawDocumentType):
                 # Reached end of file
                 break
             row_length = self.length_unpacker.unpack(row_length_string)[0]
-
             # Read the whole row, one int at a time
-            row = []
-            for i in range(row_length):
-                num_string = reader.read(self.int_size)
-                if num_string == "":
-                    raise IOError("file ended mid-row")
-                try:
-                    num = self.unpacker.unpack(num_string)[0]
-                except struct.error, e:
-                    raise IOError("error interpreting int data: %s" % e)
-                row.append(num)
-            yield row
+            yield list(_read_row(row_length))
 
 
 class IntegerListsDocumentCorpus(TarredCorpus):
