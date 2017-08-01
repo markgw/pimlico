@@ -80,8 +80,30 @@ def remove_duplicates(lst, key=lambda x: x):
 
 
 def infinite_cycle(iterable):
+    """
+    Iterate infinitely over the given iterable.
+
+    Watch out for calling this on a generator or iter: they can only be iterated over once, so
+    you'll get stuck in an infinite loop with no more items yielded once you've gone over it once.
+
+    You may also specify a callable, in which case it will be called each time to get a new
+    iterable/iterator. This is useful in the case of generator functions.
+
+    :param iterable: iterable or generator to loop over indefinitely
+    """
+    from types import GeneratorType
+    # Check whether iterable is a generator, and don't allow it, as it will lead to an infinite loop
+    if isinstance(iterable, GeneratorType):
+        raise TypeError("called infinite_cycle() on a generator: this will lead to getting stuck in an "
+                        "infinite loop after the first full iteration")
+
+    # Make a non-callable (i.e. simple iterable) into a callable so we can treat them in the same way
+    if not callable(iterable):
+        simple_iterable = iterable
+        iterable = lambda: simple_iterable
+
     while True:
-        for x in iterable:
+        for x in iterable():
             yield x
 
 
