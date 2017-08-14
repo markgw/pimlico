@@ -297,7 +297,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         # Include the formatted traceback as debugging info for the reraised exception
                         debugging_info = "Uncaught exception in executor. Traceback from original exception: \n%s" % \
                                          "".join(format_tb(sys.exc_info()[2]))
-                        raise ModuleExecutionError(repr(e), cause=e, debugging_info=debugging_info)
+                        raise ModuleExecutionError(str(e), cause=e, debugging_info=debugging_info)
                 except (ModuleInfoLoadError, ModuleExecutionError), e:
                     if type(e) is ModuleExecutionError:
                         # If there's any error, note in the history that execution didn't complete
