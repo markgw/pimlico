@@ -71,20 +71,23 @@ def choose_from_list(options, name=None):
     return _fn
 
 
-def comma_separated_list(item_type=str):
+def comma_separated_list(item_type=str, length=None):
     """
     Option processor type that accepts comma-separated lists of strings. Each value is then parsed according to the
     given item_type (default: string).
 
     """
-    @opt_type_help("comma-separated list of %s" % format_option_type(item_type))
+    @opt_type_help("comma-separated list of %s%ss" % ("" if length is None else "%d " % length, format_option_type(item_type)))
     def _fn(string):
         if string.strip():
-            return [
+            result = [
                 item_type(val.strip()) for val in string.split(",")
             ]
         else:
-            return []
+            result = []
+        if length is not None and len(result) != length:
+            raise ValueError("list must contain %d values, got %d" % (length, len(result)))
+        return result
     return _fn
 
 
