@@ -668,9 +668,12 @@ class BaseModuleInfo(object):
                 # Check the output datatype is given in a suitable form
                 if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)) and \
                         not isinstance(dep_module_output, DynamicOutputDatatype):
-                    raise PipelineStructureError("invalid output datatype from module '%s'. Must be a PimlicoDatatype "
+                    raise PipelineStructureError("invalid output datatype from output '%s' of module '%s'. "
+                                                 "Must be a PimlicoDatatype "
                                                  "subclass or a DynamicOutputDatatype subclass instance: "
-                                                 "got %s" % (self.module_name, dep_module_output.__name__))
+                                                 "got %s" % (
+                        dep_module_output_name, dep_module_name, dep_module_output.__name__
+                    ))
                 try:
                     check_type(dep_module_output, input_type_requirements)
                 except TypeCheckError, e:

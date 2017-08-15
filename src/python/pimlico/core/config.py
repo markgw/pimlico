@@ -1604,12 +1604,12 @@ def check_pipeline(pipeline):
         raise PipelineCheckError(e, "cycle check failed")
 
     # Check the types of all the output->input connections
-    try:
-        for module in pipeline.modules:
-            mod = pipeline[module]
+    for module in pipeline.modules:
+        mod = pipeline[module]
+        try:
             mod.typecheck_inputs()
-    except PipelineStructureError, e:
-        raise PipelineCheckError(e, "Input typechecking failed: %s" % e)
+        except PipelineStructureError, e:
+            raise PipelineCheckError(e, "Input typechecking for module '%s' failed: %s" % (module, e))
 
 
 def get_dependencies(pipeline, modules, recursive=False, sources=False):
