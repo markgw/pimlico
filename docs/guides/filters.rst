@@ -39,6 +39,9 @@ had a different datatype. However, it is possible to do more sophisticated proce
 the implementation is a little more tricky (:mod:`tar_filter <pimlico.modules.corpora.tar_filter>` is an example
 of this).
 
+Defining
+--------
+
 Define a filter module something like this:
 
 .. code-block:: py
@@ -54,4 +57,19 @@ Define a filter module something like this:
            # Here we produce the desired output datatype, using the inputs acquired from self.get_input(name)
            return MyOutputDatatype()
 
+You don't need to create an ``execute.py`` for this, since it's not executable, so Pimlico will not try to load
+a module executor. Any processing you need to do should be put in the ``instantiate_output_datatype()`` method
+(or called from there), or somehow built into the iteration routines for the datatype.
+
+A trick that can be useful in the latter case is to define a new datatype that does the necessary processing on
+the fly and to set its class attribute ``emulated_datatype`` to point to a datatype class that should be used
+instead of it for the purposes of type checking. The built-in :mod:`tar_filter <pimlico.modules.corpora.tar_filter>`
+module uses this trick.
+
+Either way, you should **take care with imports**.
+Remember that the ``execute.py`` of executable modules is only imported
+when a module is to be run, meaning that we can load the pipeline, perform type checking, etc., without importing
+any dependencies needed to run the module. If you put processing in ``instatiate_output_datatype()`` or in a
+specially defined datatype class that has dependencies, make sure that they're not imported at the top of ``info.py``,
+but only when the datatype is instantiated or used (e.g. import within the ``instantiate_output_datatype()`` method).
 
