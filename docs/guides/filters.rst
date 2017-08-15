@@ -58,10 +58,12 @@ Define a filter module something like this:
            return MyOutputDatatype()
 
 You don't need to create an ``execute.py``, since it's not executable, so Pimlico will not try to load
-a module executor. Any processing you need to do should be put in the ``instantiate_output_datatype()`` method
-(or called from there), or somehow built into the iteration routines for the datatype.
+a module executor. Any processing you need to do should be put inside the datatype, so that it's performed
+when the datatype is used (e.g. when iterating over it), but not when ``instatiate_output_datatype()`` is
+called or when the datatype is instantiated, as these happen every time the pipeline is loaded.
 
-A trick that can be useful in the latter case is to define a new datatype that does the necessary processing on
+A trick that can be useful to wrap up functionality in a filter datatype
+is to define a new datatype that does the necessary processing on
 the fly and to set its class attribute ``emulated_datatype`` to point to a datatype class that should be used
 instead for the purposes of type checking. The built-in :mod:`tar_filter <pimlico.modules.corpora.tar_filter>`
 module uses this trick.
@@ -69,7 +71,7 @@ module uses this trick.
 Either way, you should **take care with imports**.
 Remember that the ``execute.py`` of executable modules is only imported
 when a module is to be run, meaning that we can load the pipeline config without importing
-any dependencies needed to run the module. If you put processing in ``instatiate_output_datatype()`` or in a
-specially defined datatype class that has dependencies, make sure that they're not imported at the top of ``info.py``,
-but only when the datatype is instantiated or used (e.g. within the ``instantiate_output_datatype()`` method).
+any dependencies needed to run the module. If you put processing in a specially defined datatype class that has
+dependencies, make sure that they're not imported at the top of ``info.py``,
+but only when the datatype is used.
 
