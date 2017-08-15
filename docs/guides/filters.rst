@@ -46,7 +46,7 @@ Define a filter module something like this:
 .. code-block:: py
 
    class ModuleInfo(BaseModuleInfo):
-       module_name = "my_module_name"
+       module_type_name = "my_module_name"
        module_executable = False  # This is the crucial instruction to treat this as a filter
        module_inputs = []         # Define inputs
        module_outputs = []        # Define at least one output, which we'll produce as needed
