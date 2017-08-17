@@ -83,7 +83,8 @@ class BaseModuleInfo(object):
         # key is the parameter name, val the assigned value and name the name associated with the alternative, if any
         self.alt_param_settings = alt_param_settings
 
-        self.default_output_name = (self.module_outputs+self.module_optional_outputs)[0][0]
+        # Allow the module's list of outputs to be expanded at this point, depending on options and inputs
+        self.module_outputs = self.module_outputs + self.provide_further_outputs()
 
         # Work out what outputs this module will make available
         if len(self.module_outputs + self.module_optional_outputs) == 0:
@@ -94,7 +95,12 @@ class BaseModuleInfo(object):
                     % (self.module_name, ", ".join(name for name, dt in self.module_optional_outputs))
                 )
             else:
-                raise PipelineStructureError("module %s defines no outputs" % self.module_name)
+                raise PipelineStructureError("module %s defines no outputs. This could be a problem with the "
+                                             "module definition, or with the config, if the module's outputs depend "
+                                             "on its configuration" % self.module_name)
+
+        self.default_output_name = (self.module_outputs+self.module_optional_outputs)[0][0]
+
         # The basic outputs are always available
         self.available_outputs = list(self.module_outputs)
         # Replace None with the default output name (which could be an optional output if no non-optional are defined)
@@ -326,8 +332,19 @@ class BaseModuleInfo(object):
         config file, plus any outputs that get used by subsequent modules. By overriding this method, module
         types can add extra outputs into the list of those to be included, conditional on other options.
 
+        It also receives the processed dictionary of inputs, so that the additional outputs can depend on
+        what is fed into the input.
+
         E.g. the corenlp module include the 'annotations' output if annotators are specified, so that the
         user doesn't need to give both options.
+
+        """
+        return []
+
+    def provide_further_outputs(self):
+        """
+        Called during instantiation, once inputs and options are available, to add a further list of module
+        outputs that are dependent on inputs or options.
 
         """
         return []

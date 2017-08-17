@@ -28,7 +28,7 @@ from pimlico.cli.reset import ResetCmd
 from pimlico.cli.run import RunCmd
 from pimlico.cli.status import StatusCmd
 from pimlico.cli.util import module_number_to_name, module_numbers_to_names
-from pimlico.core.config import PipelineConfig, PipelineConfigParseError
+from pimlico.core.config import PipelineConfig, PipelineConfigParseError, PipelineStructureError
 from pimlico.utils.filesystem import copy_dir_with_progress
 from pimlico.utils.system import set_proc_title
 from pimlico.cli.shell.runner import ShellCLICmd
@@ -190,7 +190,7 @@ if __name__ == "__main__":
         pipeline = PipelineConfig.load(opts.pipeline_config, variant=opts.variant,
                                        override_local_config=override_local,
                                        local_config=opts.local_config)
-    except PipelineConfigParseError, e:
+    except (PipelineConfigParseError, PipelineStructureError), e:
         print >>sys.stderr, "Error reading pipeline config: %s" % e
         sys.exit(1)
     except ModuleOptionParseError, e:

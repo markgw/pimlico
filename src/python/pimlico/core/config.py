@@ -430,33 +430,15 @@ class PipelineConfig(object):
                     # Each param name within a group is separated by |s
                     tie_alts = [group.split("|") for group in tie_alts_raw.split(" ")]
 
-                # Also allow the specification of various options to do with how expanded alternatives are named
-                alt_naming = module_config.pop("alt_naming", "")
-                alt_name_inputname = False
-                if alt_naming == "":
-                    # Default naming scheme: fully specify param=val (with some abbreviations)
-                    pos_alt_names = False
-                elif alt_naming.startswith("full"):
-                    # Explicit full naming scheme: same as default, but allows extra options
-                    pos_alt_names = False
-                    extra_opts = alt_naming[4:].strip("()").split(",")
-                    for extra_opt in extra_opts:
-                        if extra_opt == "inputname":
-                            # Strip the "input_" from input names
-                            alt_name_inputname = True
-                        # Can add more here in future
-                        else:
-                            raise PipelineStructureError("unknown alternative naming option '%s'" % extra_opt)
-                elif alt_naming == "pos":
-                    # Positional naming
-                    pos_alt_names = True
-
                 # Module variable parameters
                 modvar_params = [(key, val) for (key, val) in module_config.iteritems() if key.startswith("modvar_")]
                 for modvar_key, modvar_val in modvar_params:
                     module_config.pop(modvar_key)
                 modvar_params = [(key[7:], val) for (key, val) in modvar_params]
                 # Don't do any more processing of these yet, but come back to them once we've expanded alts
+
+                # Remove the alt_naming parameter now, which we use later on
+                alt_naming = module_config.pop("alt_naming", "")
 
                 # End of special parameter processing
                 #########################################################
@@ -558,9 +540,40 @@ class PipelineConfig(object):
                                 else:
                                     tied_group_dict.setdefault(group_num, []).append((param_name, param_vals))
                             param_alt_groups = tied_group_dict.values() + untied_groups
-                        alternative_configs = multiply_alternatives(param_alt_groups)
+                        try:
+                            alternative_configs = multiply_alternatives(param_alt_groups)
+                        except ParameterTyingError, e:
+                            raise PipelineStructureError("could not tie parameters to %s: %s" % (module_name, e))
                     else:
                         alternative_configs = [[]]
+
+                    # Also allow the specification of various options to do with how expanded alternatives are named
+                    alt_name_inputname = False
+                    alt_name_from_option = None
+                    if alt_naming == "":
+                        # Default naming scheme: fully specify param=val (with some abbreviations)
+                        pos_alt_names = False
+                    elif alt_naming.startswith("full"):
+                        # Explicit full naming scheme: same as default, but allows extra options
+                        pos_alt_names = False
+                        extra_opts = alt_naming[4:].strip("()").split(",")
+                        for extra_opt in extra_opts:
+                            if extra_opt == "inputname":
+                                # Strip the "input_" from input names
+                                alt_name_inputname = True
+                            # Can add more here in future
+                            else:
+                                raise PipelineStructureError("unknown alternative naming option '%s'" % extra_opt)
+                    elif alt_naming == "pos":
+                        # Positional naming
+                        pos_alt_names = True
+                    elif alt_naming.startswith("option"):
+                        # Take the names just from the alt names on a particular option
+                        # In many cases, this will lead to clashes, but not always: for example, if tying alts
+                        alt_name_from_option = alt_naming[6:].strip("()")
+                    else:
+                        raise PipelineConfigParseError("could not interpret alt_naming option to %s: %s" %
+                                                       (module_name, alt_naming))
 
                     def _all_same(lst):
                         lst = [x for x in lst if x is not None]
@@ -577,7 +590,15 @@ class PipelineConfig(object):
 
                     def _param_set_to_name(params_set):
                         # Here we allow for several different behaviours, depending on options
-                        if pos_alt_names:
+                        if alt_name_from_option is not None:
+                            try:
+                                val, name = dict(params_set)[alt_name_from_option]
+                            except KeyError:
+                                raise PipelineConfigParseError("tried to take alt name from option '%s' for module %s, "
+                                                               "but that option either doesn't exist or doesn't have "
+                                                               "alternative values")
+                            return name
+                        elif pos_alt_names:
                             # No param names, just positional value names
                             # In this case, don't abbreviate where names are all the same, as it's confusing
                             return "~".join(name for (key, (val, name)) in params_set if name is not None)

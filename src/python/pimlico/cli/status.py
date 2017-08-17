@@ -79,10 +79,12 @@ class StatusCmd(PimlicoCLISubcommand):
 
             if module_sel is None:
                 # Try deriving a schedule and output it, including basic status info for each module
+                available_module_names = pipeline.modules
                 if opts.all:
                     # Show all modules, not just those that can be executed
                     print "\nAll modules in pipeline with statuses:"
-                    module_names = [("-", module) for module in pipeline.modules]
+                    module_names = list(pipeline.modules)
+                    bullets = ["-"]*len(module_names)
                 else:
                     module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
 
@@ -94,8 +96,15 @@ class StatusCmd(PimlicoCLISubcommand):
                         include_mods = [dest_module] + pipeline[dest_module].get_transitive_dependencies()
                         module_names = [(title, module) for (title, module) in module_names if module in include_mods]
                     else:
-                        print "\nModule execution schedule with statuses:"
-                bullets, module_names = zip(*module_names)
+                        bullets, module_names = zip(*module_names)
+
+                        # Fall back to "all" mode if a specific module has been requested that's not in execution schedule
+                        if (first_module is not None and first_module not in module_names and first_module in available_module_names) \
+                                or (last_module is not None and last_module not in module_names and last_module in available_module_names):
+                            module_names = list(pipeline.modules)
+                            bullets = ["-"]*len(module_names)
+                        else:
+                            print "\nModule execution schedule with statuses:"
 
                 # Allow the range of modules to be filtered
                 if first_module is not None:
@@ -103,7 +112,7 @@ class StatusCmd(PimlicoCLISubcommand):
                     try:
                         first_mod_idx = module_names.index(first_module)
                     except ValueError:
-                        raise ValueError("no such module in the list limit by: %s" % first_module)
+                        raise ValueError("tried to limit module list by '%s': no such module" % first_module)
                     bullets = bullets[first_mod_idx:]
                     module_names = module_names[first_mod_idx:]
 
@@ -112,7 +121,7 @@ class StatusCmd(PimlicoCLISubcommand):
                     try:
                         last_mod_idx = module_names.index(last_module)
                     except ValueError:
-                        raise ValueError("no such module in the list limit by: %s" % first_module)
+                        raise ValueError("tried to limit module list by '%s': no such module" % last_module)
                     bullets = bullets[:last_mod_idx+1]
                     module_names = module_names[:last_mod_idx+1]
 

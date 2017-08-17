@@ -248,6 +248,14 @@ This has the effect of removing the ``input_`` from the start of named inputs. T
 intuitive module names, but is not the default behaviour, since there's no guarantee that the input name
 (without the initial ``input_``) does not clash with an option name.
 
+Another possibility, which is occasionally appropriate, is ``alt_naming=option(<name>)``, where ``<name>`` is the
+name of an option that has alternatives. In this case, the names of the alternatives for the whole module will
+be taken directly from the alternative names on that option only. (E.g. specified by ``{name}`` or inherited
+from a previous module, see below). If there's only one option with alternatives, this is equivalent to
+``alt_naming=pos``. If there are multiple, it might often lead to name clashes. The circumstance in which this is
+most commonly appropriate is where you use ``tie_alts=T``, so it's sufficient to distinguish the alternatives by
+the name associated with just one option.
+
 Expanding alternatives down the pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
