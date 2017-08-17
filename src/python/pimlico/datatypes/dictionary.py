@@ -83,7 +83,7 @@ class DictionaryWriter(PimlicoDatatypeWriter):
             threshold = 0
         if no_above is None:
             no_above = 1.
-        self.data.filter_extremes(no_below=threshold, no_above=no_above, keep_n=limit)
+        return self.data.filter_extremes(no_below=threshold, no_above=no_above, keep_n=limit)
 
 
 class DictionaryData(object):
@@ -232,8 +232,11 @@ class DictionaryData(object):
         good_ids = sorted(good_ids, key=self.dfs.get, reverse=True)
         if keep_n is not None:
             good_ids = good_ids[:keep_n]
+        # Keep a record of what items we remove, along with their counts
+        removed = [(token, id, self.dfs[id]) for (token, id) in self.token2id.iteritems() if id not in good_ids]
         # do the actual filtering, then rebuild dictionary to remove gaps in ids
         self.filter_tokens(good_ids=good_ids)
+        return removed
 
     def filter_tokens(self, bad_ids=None, good_ids=None):
         """
