@@ -140,8 +140,12 @@ class DictionaryData(object):
 
         """
         if term not in self.token2id:
-            self.token2id[term] = len(self.token2id)
-            self.dfs.setdefault(term, 0)
+            new_id = len(self.token2id)
+            self.token2id[term] = new_id
+            self.dfs.setdefault(new_id, 0)
+            return new_id
+        else:
+            return self.token2id[term]
 
     def add_documents(self, documents, prune_at=2000000):
         """
