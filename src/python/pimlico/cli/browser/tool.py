@@ -5,7 +5,7 @@
 """
 Tool for browsing datasets, reading from the data output by pipeline modules.
 """
-
+import os
 import sys
 from traceback import format_exc
 
@@ -119,10 +119,23 @@ def browse_data(data, formatter, parse=False, skip_invalid=False):
 
     # Bottom: footer
     footer_text = urwid.Text("", align='right')
-    bottom_row = [urwid.Text("Navigation: up, down = scroll | n/space = next doc | s = skip docs | esc/q = exit"), footer_text]
+    bottom_row = [urwid.Text("Navigation: up, down = scroll | n/space = next doc | s = skip docs | esc/q = exit "
+                             "| w = write (save) doc"), footer_text]
 
     # Management of current document, navigation
     corpus_state = CorpusState(data)
+
+    # Main layout
+    main = urwid.LineBox(
+        urwid.Frame(
+            content_scrollbox,
+            header=urwid.Pile(top_widgets),
+            footer=urwid.Pile([urwid.Divider(), urwid.Columns(bottom_row)])
+        )
+    )
+
+    def message(text):
+        return MessagePopupLauncher(main, text).open_pop_up()
 
     def skip_docs(value_box, *args):
         skip = value_box.value()
@@ -133,15 +146,18 @@ def browse_data(data, formatter, parse=False, skip_invalid=False):
             footer_text.set_text("Reached end of corpus. Exiting")
             _exit()
 
-    # Main layout
-    main = urwid.LineBox(
-        urwid.Frame(
-            content_scrollbox,
-            header=urwid.Pile(top_widgets),
-            footer=urwid.Pile([urwid.Divider(), urwid.Columns(bottom_row)])
-        )
-    )
-    skip_launcher = SkipPopupLauncher(main, "Skip docs", callback=skip_docs)
+    def save_doc(value_box, *args):
+        filename = os.path.abspath(value_box.get_edit_text())
+        try:
+            with open(filename, "w") as f:
+                f.write(formatter.format_document(corpus_state.current_doc_data).encode("utf8"))
+        except IOError, e:
+            message("Could not save file:\n%s" % e)
+        else:
+            message("Output formatted document to %s" % filename)
+
+    skip_launcher = skip_popup_launcher(main, "Skip docs", callback=skip_docs)
+    save_launcher = save_popup_launcher(skip_launcher, "Output document to file", callback=save_doc)
 
     def next_document(state):
         doc_data = None
@@ -184,8 +200,10 @@ def browse_data(data, formatter, parse=False, skip_invalid=False):
             next_document(corpus_state)
         elif key == "s" or key == "S":
             skip_launcher.open_pop_up()
+        elif key == "w" or key == "W":
+            save_launcher.open_pop_up()
 
-    main_loop = urwid.MainLoop(skip_launcher, palette=PALETTE, unhandled_input=_keypress, pop_ups=True)
+    main_loop = urwid.MainLoop(save_launcher, palette=PALETTE, unhandled_input=_keypress, pop_ups=True)
 
     # Move onto the first doc to start with
     next_document(corpus_state)
@@ -219,16 +237,16 @@ def _exit(*args):
     raise urwid.ExitMainLoop()
 
 
-class SkipDialog(urwid.WidgetWrap):
-    """A dialog that appears with an int input """
+class InputDialog(urwid.WidgetWrap):
+    """A dialog that appears with an input """
     signals = ["close", "cancel"]
 
-    def __init__(self, text, default=None):
+    def __init__(self, text, input_edit):
+        self.value_box = input_edit
         close_button = urwid.Button("OK", lambda button: self._emit("close"))
         cancel_button = urwid.Button("Cancel", lambda button: self._emit("cancel"))
         buttons = [close_button, cancel_button]
 
-        self.value_box = urwid.IntEdit(default=default)
         w = urwid.Pile([
             urwid.Text(text),
             self.value_box,
@@ -237,7 +255,7 @@ class SkipDialog(urwid.WidgetWrap):
         ])
         w = urwid.LineBox(urwid.Filler(w))
 
-        super(SkipDialog, self).__init__(urwid.AttrWrap(w, 'popbg'))
+        super(InputDialog, self).__init__(urwid.AttrWrap(w, 'popbg'))
 
     def keypress(self, size, k):
         if k == "enter":
@@ -247,7 +265,7 @@ class SkipDialog(urwid.WidgetWrap):
         elif k == "esc":
             self._emit("cancel")
             return
-        super(SkipDialog, self).keypress(size, k)
+        super(InputDialog, self).keypress(size, k)
 
 
 class MessageDialog(urwid.WidgetWrap):
@@ -258,15 +276,15 @@ class MessageDialog(urwid.WidgetWrap):
         super(MessageDialog, self).__init__(urwid.AttrWrap(w, 'popbg'))
 
 
-class SkipPopupLauncher(urwid.PopUpLauncher):
-    def __init__(self, original_widget, text, default=None, callback=None):
-        super(SkipPopupLauncher, self).__init__(original_widget)
+class InputPopupLauncher(urwid.PopUpLauncher):
+    def __init__(self, original_widget, text, input_edit, callback=None):
+        super(InputPopupLauncher, self).__init__(original_widget)
+        self.input_edit = input_edit
         self.callback = callback
         self.text = text
-        self.default = default
 
     def create_pop_up(self):
-        pop_up = SkipDialog(self.text, default=self.default)
+        pop_up = InputDialog(self.text, self.input_edit)
         if self.callback is not None:
             urwid.connect_signal(pop_up, "close", self.callback, user_args=[pop_up.value_box])
         urwid.connect_signal(pop_up, "close", lambda button: self.close_pop_up())
@@ -278,6 +296,16 @@ class SkipPopupLauncher(urwid.PopUpLauncher):
         height = len(lines) + 6
         width = max(25, max(len(l) for l in lines) + 4)
         return {'left': 5, 'top': 5, 'overlay_width': width, 'overlay_height': height}
+
+
+def skip_popup_launcher(original_widget, text, default=None, callback=None):
+    return InputPopupLauncher(original_widget, text, urwid.IntEdit(default=default), callback=callback)
+
+
+def save_popup_launcher(original_widget, text, default=None, callback=None):
+    if default is None:
+        default = os.path.join(os.path.expanduser("~"), "")
+    return InputPopupLauncher(original_widget, text, urwid.Edit(edit_text=default), callback=callback)
 
 
 class MessagePopupLauncher(urwid.PopUpLauncher):
