@@ -174,6 +174,10 @@ htmlhelp_basename = 'Pimlicodoc'
 
 # Use our beautiful custom logo
 html_logo = 'logo_site.svg'
+html_theme_options = {
+    'logo_only': True,
+    'display_version': False,
+}
 
 
 # -- Options for LaTeX output --------------------------------------------------
