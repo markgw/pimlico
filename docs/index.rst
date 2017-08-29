@@ -2,7 +2,7 @@
   Pimlico Documentation
 =========================
 
-.. image:: logo_p_site.svg
+.. image:: _static/logo_p_site.svg
    :width: 150px
    :alt: Pimlico logo
    :align: right
