@@ -172,6 +172,9 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Pimlicodoc'
 
+# Use our beautiful custom logo
+html_logo = 'logo_site.svg'
+
 
 # -- Options for LaTeX output --------------------------------------------------
 
