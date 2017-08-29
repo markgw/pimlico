@@ -314,11 +314,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.1200163"
-     inkscape:cx="-14.70694"
-     inkscape:cy="83.295925"
+     inkscape:zoom="2.2061847"
+     inkscape:cx="37.530008"
+     inkscape:cy="69.499781"
      inkscape:document-units="px"
-     inkscape:current-layer="layer4"
+     inkscape:current-layer="text5716"
      showgrid="false"
      inkscape:snap-bbox="true"
      inkscape:bbox-paths="true"
@@ -444,18 +444,15 @@
        id="path4140"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
-    <text
-       xml:space="preserve"
+    <g
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#a8af29;fill-opacity:1;stroke:#000000;stroke-width:1.70000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       x="165.64198"
-       y="145.5817"
-       id="text4136"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan4138"
-         x="165.64198"
-         y="145.5817"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:125px;font-family:Junegull;-inkscape-font-specification:Junegull;fill:#a8af29;fill-opacity:1;stroke:#000000;stroke-width:1.70000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">P</tspan></text>
+       id="text4136">
+      <path
+         d="m 190.76698,134.9567 q 0,10.625 -10.375,10.625 -5.25,0 -7.875,-2.625 -2.5,-2.75 -2.5,-7.75 l 0,-54.000004 q 0,-10.375 10,-10.375 l 21,0 q 6.75,0 11.625,2.125 5,2 8.125,5.375 3.25,3.375 4.75,7.75 1.625,4.25 1.625,8.75 0,4.5 -1.5,8.750004 -1.375,4.25 -4.25,7.625 -2.75,3.25 -6.875,5.375 -4,2 -9.25,2 l -3.375,0 q -9.375,0 -9.375,-8.375 0,-3 1.125,-4.5 1.125,-1.625 2.875,-2.375 1.75,-0.875 3.75,-1.125 2,-0.375 3.75,-0.875 1.75,-0.625 3,-1.750004 1.25,-1.125 1.375,-3.5 0,-5.625 -6.5,-5.625 l -11.125,0 0,44.500004 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:125px;font-family:Junegull;-inkscape-font-specification:Junegull;fill:#a8af29;fill-opacity:1;stroke:#000000;stroke-width:1.70000005;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="path8171"
+         inkscape:connector-curvature="0" />
+    </g>
     <path
        sodipodi:nodetypes="czc"
        inkscape:connector-curvature="0"
