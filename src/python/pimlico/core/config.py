@@ -495,7 +495,7 @@ class PipelineConfig(object):
                             # The alternatives may provide names to identify them by, rather than the param val itself
                             # Get rid of these from the param vals
                             param_vals = [
-                                (alt.partition("}")[2], alt[1:alt.index("}")]) if alt.startswith("{")  # Use given name
+                                (alt.partition("}")[2].strip(), alt[1:alt.index("}")]) if alt.startswith("{")  # Use given name
                                 else (alt, alt)  # Use param itself as name
                                 for alt in alts
                             ]
@@ -596,7 +596,7 @@ class PipelineConfig(object):
                             except KeyError:
                                 raise PipelineConfigParseError("tried to take alt name from option '%s' for module %s, "
                                                                "but that option either doesn't exist or doesn't have "
-                                                               "alternative values")
+                                                               "alternative values" % (alt_name_from_option, module_name))
                             return name
                         elif pos_alt_names:
                             # No param names, just positional value names
