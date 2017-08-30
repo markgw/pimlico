@@ -36,13 +36,15 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :titlesonly:
 
    guides/index
    core/index
    modules/pimlico.modules
-   plans/index
+   commands/index
    api
+   plans/index
 
 
 * :ref:`genindex`

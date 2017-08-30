@@ -26,6 +26,7 @@ class CleanCmd(PimlicoCLISubcommand):
     command_help = "Remove all module directories that do not correspond to a module in the pipeline " \
                    "in all storage locations. This is useful when modules have been renamed or removed and output " \
                    "directories have got left behind. Note that it is specific to the selected variant"
+    command_desc = "Remove all module output directories that do not correspond to a module in the pipeline"
 
     def run_command(self, pipeline, opts):
         to_clean = []

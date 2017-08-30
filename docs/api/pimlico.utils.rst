@@ -15,6 +15,7 @@ Submodules
 
    pimlico.utils.communicate
    pimlico.utils.core
+   pimlico.utils.email
    pimlico.utils.filesystem
    pimlico.utils.format
    pimlico.utils.linguistic

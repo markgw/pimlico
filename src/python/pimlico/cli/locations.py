@@ -7,6 +7,7 @@ class InputsCmd(PimlicoCLISubcommand):
     command_help = "Show the locations of the inputs of a given module. If the input datasets " \
                    "are available, their actual location is shown. Otherwise, all directories " \
                    "in which the data is being checked for are shown"
+    command_desc = "Show the (expected) locations of the inputs of a given module"
 
     def add_arguments(self, parser):
         parser.add_argument("module_name", help="The name (or number) of the module to display input locations for")

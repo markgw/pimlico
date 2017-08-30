@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     pimlico.cli.browser
+    pimlico.cli.debug
     pimlico.cli.shell
 
 Submodules
@@ -15,6 +16,7 @@ Submodules
 .. toctree::
 
    pimlico.cli.check
+   pimlico.cli.clean
    pimlico.cli.loaddump
    pimlico.cli.locations
    pimlico.cli.main
@@ -23,6 +25,7 @@ Submodules
    pimlico.cli.run
    pimlico.cli.status
    pimlico.cli.subcommands
+   pimlico.cli.testemail
    pimlico.cli.util
 
 Module contents

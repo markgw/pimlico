@@ -54,6 +54,7 @@ class LongStoreCmd(PimlicoCLISubcommand):
     command_help = "Move a particular module's output from the short-term store to the long-term " \
                    "store. It will still be found here by input readers. You might want to do " \
                    "this if your long-term store is bigger, to keep down the short-term store size"
+    command_desc = "Move a particular module's output from the short-term store to the long-term store"
 
     def add_arguments(self, parser):
         parser.add_argument("modules", nargs="*", help="The names (or numbers) of the module whose output to move")
@@ -75,10 +76,24 @@ class LongStoreCmd(PimlicoCLISubcommand):
 
 
 class UnlockCmd(PimlicoCLISubcommand):
+    """
+    Forcibly remove an execution lock from a module. If a lock has ended up
+    getting left on when execution exited prematurely, use this to remove it.
+
+    When a module starts running, it is locked to avoid making a mess of your output
+    data by running the same module from another terminal, or some other silly mistake
+    (I know, for some of us this sort of behaviour is frustratingly common).
+
+    Usually shouldn't be necessary, even if there's an error during execution, since the
+    module should be unlocked when Pimlico exits, but occasionally (e.g. if you have to
+    forcibly kill Pimlico during execution) the lock gets left on.
+
+    """
     command_name = "unlock"
     command_help = "Forcibly remove an execution lock from a module. If a lock has ended up " \
                    "getting left on when execution exited prematurely, use this to remove it. " \
                    "Usually shouldn't be necessary, even if there's an error during execution"
+    command_desc = "Forcibly remove an execution lock from a module"
 
     def add_arguments(self, parser):
         parser.add_argument("module_name", help="The name (or number) of the module to unlock")
@@ -123,6 +138,7 @@ class BrowseCmd(PimlicoCLISubcommand):
 class VisualizeCmd(PimlicoCLISubcommand):
     command_name = "visualize"
     command_help = "(Not yet fully implemented!) Visualize the pipeline, with status information for modules"
+    command_desc = "Comming soon...visualize the pipeline in a pretty way"
 
     def add_arguments(self, parser):
         parser.add_argument("--all", "-a", action="store_true",

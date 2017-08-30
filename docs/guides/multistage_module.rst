@@ -34,7 +34,7 @@ These are actually defined in exactly the same way as normal modules.
 If you're writing these modules specifically to provide the stages of your multistage module (rather than tying
 together already existing modules for convenience), you probably want to put them all in subpackages.
 
-For an ordinary module, :ref:`we used the directory structure <guides/module>`::
+For an ordinary module, :doc:`we used the directory structure <module>`::
 
     src/python/myproject/modules/
         __init__.py

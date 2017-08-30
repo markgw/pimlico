@@ -16,7 +16,18 @@ from pimlico.cli.subcommands import PimlicoCLISubcommand
 
 class DumpCmd(PimlicoCLISubcommand):
     """
-    Command to dump the output data from a given pipeline module to a tarball.
+    Dump the entire available output data from a given pipeline module to a
+    tarball, so that it can easily be loaded into the same pipeline on another
+    system. This is primarily to support spreading the execution of a pipeline
+    between multiple machines, so that the output from a module can easily be
+    transferred and loaded into a pipeline.
+
+    Dump to a tarball using this command, transfer the file between machines and
+    then run the :doc:`load command </commands/load>` to import it there.
+
+    .. seealso::
+
+       :doc:`/guides/multiple_servers`: for a more detailed guide to transferring data across servers
 
     """
     command_name = "dump"
@@ -25,6 +36,7 @@ class DumpCmd(PimlicoCLISubcommand):
                    "system. This is primarily to support spreading the execution of a pipeline " \
                    "between multiple machines, so that the output from a module can easily be " \
                    "transferred and loaded into a pipeline"
+    command_desc = "Dump the entire available output data from a given pipeline module to a tarball"
 
     def add_arguments(self, parser):
         parser.add_argument("modules", nargs="*",
@@ -80,8 +92,19 @@ class DumpCmd(PimlicoCLISubcommand):
 
 class LoadCmd(PimlicoCLISubcommand):
     """
-    Command to load the output data for a given pipeline module from a tarball previously created by the
+    Load the output data for a given pipeline module from a tarball previously created by the
     `dump` command (typically on another machine).
+    This is primarily to support spreading the execution of a pipeline
+    between multiple machines, so that the output from a module can easily be
+    transferred and loaded into a pipeline.
+
+    Dump to a tarball using the :doc:`dump command </commands/dump>`,
+    transfer the file between machines and
+    then run this command to import it there.
+
+    .. seealso::
+
+       :doc:`/guides/multiple_servers`: for a more detailed guide to transferring data across servers
 
     """
     command_name = "load"
@@ -89,6 +112,7 @@ class LoadCmd(PimlicoCLISubcommand):
                    "command, usually on a different system. This will overwrite any output data " \
                    "the module already has completely, including metadata, run history, etc. " \
                    "You may load multiple modules' data at once"
+    command_desc = "Load a module's output data from a tarball previously created by the dump command"
 
     def add_arguments(self, parser):
         parser.add_argument("paths", nargs="*", help="Paths to dump files (tarballs) to load into the pipeline")
