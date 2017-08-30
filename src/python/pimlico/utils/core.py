@@ -191,3 +191,27 @@ def chunk_list(lst, length):
     return [
         lst[i*length:(i+1)*length] for i in range(int(math.ceil(float(len(lst)) / length)))
     ]
+
+
+class cached_property(object):
+    """
+    A property that is only computed once per instance and then replaces itself
+    with an ordinary attribute. Deleting the attribute resets the property.
+
+    Often useful in Pimlico datatypes, where it can be time-consuming to load data,
+    but we can't do it once when the datatype is first loaded, since the data might
+    not be ready at that point. Instead, we can access the data, or particular
+    parts of it, using properties and easily cache the result.
+
+    Taken from: https://github.com/bottlepy/bottle
+
+    """
+    def __init__(self, func):
+        self.__doc__ = getattr(func, '__doc__')
+        self.func = func
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        value = obj.__dict__[self.func.__name__] = self.func(obj)
+        return value
