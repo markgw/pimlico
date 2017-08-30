@@ -56,8 +56,8 @@ def NamedFile(name):
 
 
 class NamedFileWriter(PimlicoDatatypeWriter):
-    def __init__(self, base_dir, filename, *kwargs):
-        super(NamedFileWriter, self).__init__(base_dir, *kwargs)
+    def __init__(self, base_dir, filename, **kwargs):
+        super(NamedFileWriter, self).__init__(base_dir, **kwargs)
         self.filename = filename
 
     @property
