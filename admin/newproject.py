@@ -122,17 +122,24 @@ def main():
     pimlico_env = os.environ.copy()
     pimlico_env["PYTHON_CMD"] = sys.executable
     try:
-        subprocess.check_call([os.path.join(base_dir, "pimlico.sh"), conf_filename, "check"],
+        # Call the status command to check the pipeline is loadable
+        # We don't need to check the output of this, just check that it returns successfully
+        subprocess.check_call([os.path.join(base_dir, "pimlico.sh"), conf_filename, "status"],
                               cwd=base_dir, env=pimlico_env)
     except subprocess.CalledProcessError:
+        # If the status command doesn't work, there's either a problem running Pimlico at all (e.g.
+        # unsatisfied basic dependencies) or it couldn't read the config file. The latter shouldn't
+        # be the case, since it's our pre-defined skeleton pipeline we're loading
         print "\nError running pimlico.sh for the first time"
         print "Your project setup is complete, but you need to fix the problem above before Pimlico is ready to run"
-        print "When you've done that, you can just run the Pimlico 'check' command again to complete dependency " \
-              "resolution:"
-        print "  ./pimlico.sh %s check" % conf_filename
+        print "When you've done that, you can just run the Pimlico 'status' command to check that Pimlico works " \
+              "and your pipeline is loadable:"
+        print "  ./pimlico.sh %s status" % conf_filename
     else:
-        print "\nPimlico setup is complete"
-        print "Edit the skeletal pipeline config in %s to start building your pipeline" % conf_filename
+        print "\nPimlico setup is complete and Pimlico loads successfully"
+        print "Edit the skeletal pipeline config in %s to start building your pipeline." % conf_filename
+        print "Then you can run Pimlico on your pipeline using:"
+        print "  ./pimlico.sh %s status" % conf_filename
 
     # Get rid of the scripts themselves used to set up the project
     def _rem(filename):
