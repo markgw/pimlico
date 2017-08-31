@@ -117,7 +117,7 @@ class RunCmd(PimlicoCLISubcommand):
                         sys.exit(1)
                     print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
                     sys.exit(0)
-                elif stage_name in ["*", "all"]:
+                elif module_name and stage_name in ["*", "all"]:
                     # Execute all stages at once, by expanding the list of modules to include all this one's stages
                     module = pipeline[module_name]
                     # Only makes sense with a multistage module
