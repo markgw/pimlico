@@ -1,3 +1,7 @@
+
+
+<img align="right" src="https://raw.githubusercontent.com/markgw/pimlico/master/docs/_static/logo_name_500.png" alt="Logo" />
+
 The Pimlico Processing Toolkit
 ==============================
 
