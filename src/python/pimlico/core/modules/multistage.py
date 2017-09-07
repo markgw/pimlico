@@ -240,7 +240,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
 
     # Define a ModuleInfo for the multi-stage module
     class ModuleInfo(MultistageModuleInfo):
-        module_readable_name = multistage_module_readable_name or multistage_module_type_name
+        module_readable_name = multistage_module_readable_name
         module_type_name = multistage_module_type_name
         module_inputs = main_inputs
         module_outputs = main_outputs
