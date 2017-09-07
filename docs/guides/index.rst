@@ -14,3 +14,4 @@ Step-by-step guides through common tasks while using Pimlico.
    filters
    multistage_module
    multiple_servers
+   docs
