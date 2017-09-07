@@ -106,7 +106,7 @@ class MultistageModuleInfo(BaseModuleInfo):
             return module.is_locked()
 
 
-def multistage_module(multistage_module_type_name, module_stages, use_stage_option_names=False):
+def multistage_module(multistage_module_type_name, module_stages, use_stage_option_names=False, module_readable_name=None):
     """
     Factory to build a multi-stage module type out of a series of stages, each of which specifies a module type
     for the stage. The stages should be a list of :class:`ModuleStage` objects.
@@ -121,6 +121,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
     # Keep the options in the order of the modules, to make the help more readable
     option_mapping = OrderedDict()
     option_mapping_by_stage = {}
+    multistage_module_readable_name = module_readable_name
 
     for stage_num, stage in enumerate(module_stages):
         # Make sure we can identify all of the module connections that provide this stage's inputs
@@ -239,7 +240,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
 
     # Define a ModuleInfo for the multi-stage module
     class ModuleInfo(MultistageModuleInfo):
-        module_readable_name = multistage_module_type_name
+        module_readable_name = multistage_module_readable_name or multistage_module_type_name
         module_type_name = multistage_module_type_name
         module_inputs = main_inputs
         module_outputs = main_outputs
