@@ -129,23 +129,26 @@ class KerasModelBuilderClass(PimlicoDatatype):
         with open(os.path.join(self.data_dir, "build_params.json"), "r") as f:
             return json.load(f)
 
-    def create_builder_class(self):
+    def create_builder_class(self, override_params=None):
         params = self.load_build_params()
         builder_class_path = params.pop("builder_class_path")
+        # Allow some params to be overridden at load time, so they're not the same ones the model was trained with
+        if override_params is not None:
+            params.update(override_params)
         # Try to import the class that builds the model
         cls = import_member(builder_class_path)
         # Instantiate the builder class with the build params
         model_builder = cls(build_params=params)
         return model_builder
 
-    def load_model(self):
+    def load_model(self, override_params=None):
         """
         Instantiate the model builder class with the stored parameters and set the weights on the model to those
         stored.
 
         :return: model builder instance (keras model in attribute `model`
         """
-        builder = self.create_builder_class()
+        builder = self.create_builder_class(override_params=override_params)
         # Set the stored parameters
         builder.model.load_weights(self.weights_filename)
         return builder
