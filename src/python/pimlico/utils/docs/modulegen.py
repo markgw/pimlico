@@ -34,19 +34,33 @@ def generate_docs_for_pymod(module, output_dir):
     submodules = dict((modname, (importer, is_package)) for (importer, modname, is_package) in
                       iter_modules(module.__path__, prefix="%s." % module_name))
 
+    # If not a Pimlico module, recurse into subpackages to find modules
+    # Even if it is a Pimlico module, there could be other modules in the subpackages
+    all_generated = []
+    all_pimlico_modules = []
+    all_children = []
+    for modname, (importer, is_package) in sorted(submodules.items()):
+        if is_package:
+            # Import the module (package) so we can recurse on it
+            submod = importer.find_module(modname).load_module(modname)
+            is_pim_submod, sub_pim_mods = generate_docs_for_pymod(submod, output_dir)
+            all_generated.append(submod.__name__)
+            all_pimlico_modules.extend(sub_pim_mods)
+            if is_pim_submod:
+                all_children.append(submod.__name__)
+
+    is_pimlico_module = False
+
     if "%s.info" % module_name in submodules and not submodules["%s.info" % module_name][1]:
         # This looks like a Pimlico module
-        # Don't recurse to submodules, but trying building module docs for this one
-        generate_docs_for_pimlico_mod(module_name, output_dir)
-    else:
-        # Not a Pimlico module: recurse into subpackages
-        all_generated = []
-        for modname, (importer, is_package) in sorted(submodules.items()):
-            if is_package:
-                # Import the module (package) so we can recurse on it
-                submod = importer.find_module(modname).load_module(modname)
-                generate_docs_for_pymod(submod, output_dir)
-                all_generated.append(submod.__name__)
+        # Try building module docs for this one
+        # If there were submodules, they should be included in the module doc in a TOC
+        generate_docs_for_pimlico_mod(module_name, output_dir, all_generated)
+        is_pimlico_module = True
+        all_pimlico_modules.append(module_name)
+    elif all_generated:
+        # This was just a package, not a Pimlico module, but it included Pimlico modules
+        # Generate a contents page for the submodules
         # If the submodule has a docstring, it goes onto the index page
         if module.__doc__ is not None and module.__doc__.strip("\n "):
             # By convention, the first line is used as a title
@@ -57,8 +71,11 @@ def generate_docs_for_pymod(module, output_dir):
         # Generate an index for this submodule
         generate_contents_page(all_generated, output_dir, module_name, module_title, module_doc)
 
+    # If no Pimlico modules were found anywhere in this package, don't generate anything
+    return is_pimlico_module, all_pimlico_modules
 
-def generate_docs_for_pimlico_mod(module_path, output_dir):
+
+def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
     print "Building docs for %s" % module_path
     # Import the info pymodule so we can get the ModuleInfo class
     info = import_module("%s.info" % module_path)  # We know this exists
@@ -75,6 +92,13 @@ def generate_docs_for_pimlico_mod(module_path, output_dir):
         ["Path", module_path],
         ["Executable", "yes" if ModuleInfo.module_executable else "no"],
     ] + ModuleInfo.get_key_info_table()
+    # Try using the module's readable name as the document title
+    module_title = ModuleInfo.module_readable_name
+    if module_title is None or module_title == "":
+        # No readable name given: make one out of the internal name
+        module_title = ModuleInfo.module_type_name
+        module_title = module_title[0].capitalize() + module_title[1:]
+        module_title = module_title.replace("_", " ")
     input_table = [
         [input_name, input_datatype_list(input_types)] for input_name, input_types in ModuleInfo.module_inputs
     ]
@@ -109,7 +133,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir):
     filename = os.path.join(output_dir, "%s.rst" % module_path)
     with open(filename, "w") as output_file:
         # Make a page heading
-        output_file.write(format_heading(0, ModuleInfo.module_readable_name or ModuleInfo.module_type_name))
+        output_file.write(format_heading(0, module_title))
         # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
         output_file.write(".. py:module:: %s\n\n" % module_path)
         # Output a summary table of key information
@@ -145,6 +169,13 @@ def generate_docs_for_pimlico_mod(module_path, output_dir):
         if options_table:
             output_file.write(format_heading(1, "Options"))
             output_file.write("%s\n" % make_table(options_table, header=["Name", "Description", "Type"]))
+
+        if submodules:
+            # Generate a TOC for the nested modules
+            output_file.write(format_heading(1, "Submodules"))
+            output_file.write(".. toctree::\n   :titlesonly:\n\n   ")
+            output_file.write("\n   ".join(submodules))
+            output_file.write("\n")
     return ModuleInfo
 
 
