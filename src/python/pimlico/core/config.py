@@ -85,6 +85,12 @@ class PipelineConfig(object):
         self._dependency_cache = None
         self._dependent_cache = None
 
+    def __repr__(self):
+        return u"<PipelineConfig '%s'%s>" % (
+            self.name,
+            u", variant '%s'" % self.variant if self.variant != "main" else ""
+        )
+
     @property
     def modules(self):
         """ List of module names, in the order they were specified in the config file. """
