@@ -1,0 +1,5 @@
+# Local config file to be used in Pimlico tests, so that we don't rely on having one on the system where Pimlico is run
+
+# These paths should be overridden by the tests to point to a temporary directory
+long_term_store=/path/should/be/overridden
+short_term_store=/path/should/be/overridden
