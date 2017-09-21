@@ -3,14 +3,14 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-.. todo::
+Provides a simple interface to `Scikit-Learn's <http://scikit-learn.org/stable/>`_ various matrix factorization
+models.
 
-   Document this module
-
-
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
+Since they provide a consistent training interface, you can simply choose the class name of the method you
+want to use and specify options relevant to that method in the ``options`` option. For available options,
+take a look at the table of parameters in the
+`Scikit-Learn documentation <http://scikit-learn.org/stable/modules/classes.html#module-sklearn.decomposition>`_
+for each class.
 
 """
 import json
