@@ -40,6 +40,8 @@ command line.
 +------------------+----------------------------------------------------------------------------------------------+
 | :doc:`longstore` | Move a particular module's output from the short-term store to the long-term store           |
 +------------------+----------------------------------------------------------------------------------------------+
+| :doc:`newmodule` | Create a new module type                                                                     |
++------------------+----------------------------------------------------------------------------------------------+
 | :doc:`output`    | Show the location where the given module's output data will be (or has been) stored          |
 +------------------+----------------------------------------------------------------------------------------------+
 | :doc:`python`    | Load the pipeline config and enter a Python interpreter with access to it in the environment |
@@ -81,5 +83,6 @@ command line.
    install
    inputs
    output
+   newmodule
    visualize
    email

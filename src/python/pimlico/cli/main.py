@@ -7,10 +7,7 @@ Main command-line script for running Pimlico, typically called from `pimlico.sh`
 Provides access to many subcommands, acting as the primary interface to Pimlico's functionality.
 
 """
-from pimlico.cli.clean import CleanCmd
-from pimlico.cli.subcommands import PimlicoCLISubcommand
-from pimlico.cli.testemail import EmailCmd
-from pimlico.core.modules.options import ModuleOptionParseError
+from pimlico.cli.newmodule import NewModuleCmd
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
@@ -22,17 +19,21 @@ import sys
 from operator import itemgetter
 
 from pimlico.cli.check import InstallCmd, DepsCmd
+from pimlico.cli.clean import CleanCmd
 from pimlico.cli.loaddump import DumpCmd, LoadCmd
 from pimlico.cli.locations import InputsCmd, OutputCmd
+from pimlico.cli.pyshell import PythonShellCmd
 from pimlico.cli.reset import ResetCmd
 from pimlico.cli.run import RunCmd
+from pimlico.cli.shell.runner import ShellCLICmd
 from pimlico.cli.status import StatusCmd
+from pimlico.cli.subcommands import PimlicoCLISubcommand
+from pimlico.cli.testemail import EmailCmd
 from pimlico.cli.util import module_number_to_name, module_numbers_to_names
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError, PipelineStructureError
+from pimlico.core.modules.options import ModuleOptionParseError
 from pimlico.utils.filesystem import copy_dir_with_progress
 from pimlico.utils.system import set_proc_title
-from pimlico.cli.shell.runner import ShellCLICmd
-from pimlico.cli.pyshell import PythonShellCmd
 
 
 class VariantsCmd(PimlicoCLISubcommand):
@@ -151,7 +152,7 @@ class VisualizeCmd(PimlicoCLISubcommand):
 
 SUBCOMMANDS = [
     StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd, LongStoreCmd, UnlockCmd,
-    DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, VisualizeCmd, EmailCmd
+    DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, NewModuleCmd, VisualizeCmd, EmailCmd
 ]
 
 

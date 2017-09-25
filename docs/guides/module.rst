@@ -77,6 +77,16 @@ for it::
             info.py
             execute.py
 
+Easy start
+----------
+To help you get started, Pimlico provides a wizard in the :ref:`command_newmodule` command.
+
+This will ask you a series of questions, guiding you through the most common tasks in creating a new module.
+At the end, it will generate a template to get you started with your module's code. You then just need to fill
+in the gaps and write the code for what the module actually does.
+
+Read on to learn more about the structure of modules, including things not covered by the wizard.
+
 Metadata
 --------
 Module metadata (everything apart from what happens when it's actually run) is defined in ``info.py`` as a class called
