@@ -1,4 +1,5 @@
 import os
+from textwrap import wrap
 
 from pimlico import PROJECT_ROOT
 from pimlico.cli.subcommands import PimlicoCLISubcommand
@@ -60,8 +61,7 @@ class NewModuleCmd(PimlicoCLISubcommand):
 
         # Ask some questions that apply to all module categories
         module_type_name = module_path.split(".")[-1]
-        module_readable_name = ask("Enter readable name "
-                                   "(short description, e.g. 'Take numeric input and multiply it'): ")
+        module_readable_name = ask("Enter readable name (short, e.g. 'Number multiplier'): ")
 
         print "\nCreate module options"
         print "====================="
@@ -146,19 +146,9 @@ class NewModuleCmd(PimlicoCLISubcommand):
                 # Escape any double quotes
                 option_help = option_help.replace('"', '\\"')
                 # Apply word-wrap to help text so the code isn't messy
-                if len(option_help) > 55:
-                    rmng = option_help
-                    help_lines = []
-                    while len(rmng):
-                        if " " not in rmng:
-                            # No spaces, just split
-                            line = rmng[:55]
-                            rmng = rmng[55:]
-                        else:
-                            line = rmng[:54].rpartition(" ")[0] + " "
-                            rmng = rmng[len(line):]
-                        help_lines.append(line)
-                    option_help = '"%s"' % '"\n                     "'.join(help_lines)
+                if len(option_help) > 95:
+                    help_lines = wrap(option_help, width=95)
+                    option_help = '"%s"' % '"\n                    "'.join(help_lines)
                 else:
                     option_help = '"%s"' % option_help
                 option_def.append(("help", option_help))
