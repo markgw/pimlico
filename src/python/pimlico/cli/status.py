@@ -88,6 +88,9 @@ class StatusCmd(PimlicoCLISubcommand):
                 else:
                     module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
 
+                    if len(module_names) == 0:
+                        print "\nPipeline loaded successfully, but it does not contain any modules"
+
                     # If the --deps-of option is given, filter modules shown to only those that lead to the given one
                     if opts.deps_of is not None:
                         dest_module = module_number_to_name(pipeline, opts.deps_of)
