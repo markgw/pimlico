@@ -7,6 +7,9 @@ Just download this Python file into a new directory where you want your Pimlico 
 The Python interpreter that you use to call this script will be the one used forever more (actually wrapped
 by virtualenv) when you run Pimlico.
 
+If you plan to contribute to Pimlico, you can use the --git switch to set up this new project by cloning
+Pimlico's git repository, instead of downloading a release.
+
 """
 import os
 import sys
@@ -58,7 +61,7 @@ def main():
         print "Usage:"
         print "  python newproject.py [--git] <project_name>"
         print
-        print "If you specify --checkout, Pimlico will be cloned as a Git repository, rather "
+        print "If you specify --git, Pimlico will be cloned as a Git repository, rather "
         print "than downloaded from a release. This only works on Linux and requires that Git is "
         print "installed. Most of the time, you don't want to do this: it's only for Pimlico development"
         sys.exit(1)
