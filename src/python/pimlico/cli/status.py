@@ -90,6 +90,7 @@ class StatusCmd(PimlicoCLISubcommand):
 
                     if len(module_names) == 0:
                         print "\nPipeline loaded successfully, but it does not contain any modules"
+                        return
 
                     # If the --deps-of option is given, filter modules shown to only those that lead to the given one
                     if opts.deps_of is not None:
@@ -98,6 +99,7 @@ class StatusCmd(PimlicoCLISubcommand):
                         # Check through the pipeline to find all dependent modules
                         include_mods = [dest_module] + pipeline[dest_module].get_transitive_dependencies()
                         module_names = [(title, module) for (title, module) in module_names if module in include_mods]
+                        bullets, module_names = zip(*module_names)
                     else:
                         bullets, module_names = zip(*module_names)
 
