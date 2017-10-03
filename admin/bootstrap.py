@@ -178,7 +178,7 @@ if __name__ == "__main__":
         print "Specify a Pimlico config file to set up Pimlico for"
         print "If you want to start a new project, with an empty config file, use the newproject.py script"
         print
-        print "If you specify --checkout, Pimlico will be cloned as a Git repository, rather "
+        print "If you specify --git, Pimlico will be cloned as a Git repository, rather "
         print "than downloaded from a release. This only works on Linux and requires that Git is "
         print "installed. Most of the time, you don't want to do this: it's only for Pimlico development"
         sys.exit(1)
