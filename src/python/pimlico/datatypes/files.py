@@ -6,10 +6,14 @@ from pimlico.datatypes.documents import RawTextDocumentType
 
 class File(PimlicoDatatype):
     """
-    Simple datatype that supplies a single file, providing the path to it.
+    Simple datatype that supplies a single file, providing the path to it. Use ``FileCollection`` with a
+    single file where possible.
 
     This is an abstract class: subclasses need to provide a way of getting to (e.g. storing) the filename in
     question.
+
+    This overlaps somewhat with ``FileCollection``, but is mainly here for backwards compatibility. Future datatypes
+    should prefer the use of ``FileCollection``.
 
     """
     datatype_name = "file"
@@ -31,21 +35,117 @@ class File(PimlicoDatatype):
         raise NotImplementedError
 
 
+class FileCollection(PimlicoDatatype):
+    """
+    Abstract base datatype for datatypes that store a fixed collection of files, which have fixed names
+    (or at least names that can be determined from the class). Very many datatypes fall into this category.
+    Overriding this base class provides them with some common functionality, including the possibility of
+    creating a union of multiple datatypes.
+
+    The attribute ``filenames`` should specify a list of filenames contained by the datatype.
+
+    All files are contained in the datatypes data directory. If files are stored in subdirectories, this may
+    be specified in the list of filenames using ``/``s. (Always use forward slashes, regardless of the operating
+    system.)
+
+    """
+    datatype_name = "file_collection"
+    filenames = []
+
+    def data_ready(self):
+        if not super(FileCollection, self).data_ready():
+            return False
+        try:
+            for filename in self.filenames:
+                # Allow subdirectories of the data dir to be specified with /s
+                # Check that the file that the path points to exists
+                if not os.path.exists(os.path.join(self.data_dir, filename)):
+                    return False
+        except IOError:
+            # Subclasses may raise an IOError while trying to compute the path: in this case it's assumed not ready
+            return False
+        return True
+
+
+class FileCollectionWriter(PimlicoDatatypeWriter):
+    filenames = []
+
+    def __init__(self, base_dir):
+        super(FileCollectionWriter, self).__init__(base_dir)
+        # Make sure every file gets written
+        for filename in self.filenames:
+            self.require_tasks("write_%s" % filename)
+
+    def write_file(self, filename, data):
+        if filename not in self.filenames:
+            raise ValueError("filename '%s' is not among the file collection's filenames" % filename)
+        with open(os.path.join(self.data_dir, filename), "w") as f:
+            f.write(data)
+        self.task_complete("write_%s" % filename)
+
+
+def file_collection_union(*file_collection_classes, **kwargs):
+    """
+    Takes a number of subclasses of ``FileCollection`` and produces a new datatype that shares the functionality
+    of all of them and is constituted of the union of the filenames.
+
+    The datatype name of the result will be produced automatically from the inputs, unless the kwargs ``name``
+    is given to specify a new one.
+
+    Note that the input classes' ``__init__``s will each be called once, with the standard ``PimlicoDatatype``
+    args. If this behaviour does not suit the datatypes you're using, override the init or define the
+    union some other way.
+
+    """
+    from collections import Counter
+
+    if not all(issubclass(c, FileCollection) for c in file_collection_classes):
+        raise TypeError("cannot create file collection union type of %s, since they are not all FileCollection "
+                        "subclasses" % ", ".join(c.__name__ for c in file_collection_classes))
+
+    union_datatype_name = kwargs.get("name", "U(%s)" % ",".join(d.datatype_name for d in file_collection_classes))
+    filenames_union = sum((d.filenames for d in file_collection_classes), [])
+    # Check there's no overlap between the filenames from the inputs
+    dup_names = [name for (name, count) in Counter(filenames_union).items() if count > 1]
+    if len(dup_names):
+        raise TypeError("cannot produce union file collection datatype %s, since some filenames overlap between "
+                        "input types: %s" % (union_datatype_name, ", ".join(dup_names)))
+
+    def __init__(self, *args, **kwargs):
+        super(_FileCollectionUnion, self).__init__(*args, **kwargs)
+        for d in file_collection_classes:
+            d.__init__(self, *args, **kwargs)
+
+    def __getattr__(self, item):
+        # Try getting this attr from each of the classes in the union
+        for d in file_collection_classes:
+            if hasattr(d, item):
+                return getattr(d, item)
+        # None of the classes has such an attribute
+        # Pass up to the super to process this: either it will find the attr on this class or raise
+        return getattr(super(_FileCollectionUnion, self), item)
+
+    _FileCollectionUnion = type("_FileCollectionUnion", file_collection_classes, {
+        "datatype_name": union_datatype_name,
+        "filenames": filenames_union,
+        "__init__": __init__,
+        "__getattr__": __getattr__,
+    })
+
+    return _FileCollectionUnion
+
+
 def NamedFile(name):
     """
-    Datatype factory that produces something like a `File` datatype, pointing to a single file, but doesn't store
+    Datatype factory that produces something like a ``File`` datatype, pointing to a single file, but doesn't store
     its path, just refers to a particular file in the data dir.
 
     :param name: name of the file
     :return: datatype class
     """
-    class _NamedFile(File):
+    class _NamedFile(FileCollection):
         datatype_name = "named_file"
-        filename = name
-
-        @property
-        def absolute_path(self):
-            return os.path.join(self.data_dir, name)
+        filenames = [name]
 
         @classmethod
         def datatype_full_class_name(cls):

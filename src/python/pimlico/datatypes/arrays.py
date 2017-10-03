@@ -10,12 +10,15 @@ import os
 
 from pimlico.core.dependencies.python import numpy_dependency, scipy_dependency
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
-
+from pimlico.datatypes.files import FileCollection
 
 __all__ = ["NumpyArray", "NumpyArrayWriter", "ScipySparseMatrix", "ScipySparseMatrixWriter"]
 
 
-class NumpyArray(PimlicoDatatype):
+class NumpyArray(FileCollection):
+    datatype_name = "numpy_array"
+    filenames = ["array.npy"]
+
     def __init__(self, base_dir, pipeline, **kwargs):
         super(NumpyArray, self).__init__(base_dir, pipeline, **kwargs)
         self._array = None
@@ -27,9 +30,6 @@ class NumpyArray(PimlicoDatatype):
             with open(os.path.join(self.data_dir, "array.npy"), "r") as f:
                 self._array = numpy.load(f)
         return self._array
-
-    def data_ready(self):
-        return super(NumpyArray, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "array.npy"))
 
     def get_software_dependencies(self):
         return super(NumpyArray, self).get_software_dependencies() + [numpy_dependency]
@@ -47,6 +47,9 @@ class ScipySparseMatrix(PimlicoDatatype):
     to something else before using it. See scipy docs on sparse matrix conversions.
 
     """
+    datatype_name = "scipy_sparse_array"
+    filenames = ["array.mtx"]
+
     def __init__(self, base_dir, pipeline, **kwargs):
         super(ScipySparseMatrix, self).__init__(base_dir, pipeline, **kwargs)
         self._array = None
@@ -57,9 +60,6 @@ class ScipySparseMatrix(PimlicoDatatype):
             from scipy import io
             self._array = io.mmread(os.path.join(self.data_dir, "array.mtx"))
         return self._array
-
-    def data_ready(self):
-        return super(ScipySparseMatrix, self).data_ready() and os.path.exists(os.path.join(self.data_dir, "array.mtx"))
 
     def get_software_dependencies(self):
         return super(ScipySparseMatrix, self).get_software_dependencies() + [scipy_dependency, numpy_dependency]
