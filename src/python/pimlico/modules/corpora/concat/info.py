@@ -33,8 +33,9 @@ def _common_data_point_type(types):
 
 class CorpusConcatFilter(IterableCorpus):
     def __init__(self, pipeline, input_datatypes, data_point_type, **kwargs):
-        IterableCorpus.__init__(self, None, pipeline, **kwargs)
+        self._master_raw_data = False
         self.input_datatypes = input_datatypes
+        IterableCorpus.__init__(self, None, pipeline, **kwargs)
         self.data_point_type = data_point_type
 
     def __len__(self):
@@ -46,12 +47,35 @@ class CorpusConcatFilter(IterableCorpus):
     def data_ready(self):
         return all(d.data_ready() for d in self.input_datatypes)
 
+    def _set_raw_data(self, val):
+        self._master_raw_data = val
+        # Set on all the datasets
+        for d in self.input_datatypes:
+            d.raw_data = val
+
+    def _get_raw_data(self):
+        return self._master_raw_data
+
+    raw_data = property(_get_raw_data, _set_raw_data)
+
 
 class TarredCorpusConcatFilter(TarredCorpus):
     def __init__(self, pipeline, input_datatypes, data_point_type, **kwargs):
-        TarredCorpus.__init__(self, None, pipeline, **kwargs)
+        self._master_raw_data = False
         self.input_datatypes = input_datatypes
+        TarredCorpus.__init__(self, None, pipeline, **kwargs)
         self.data_point_type = data_point_type
+
+    def _set_raw_data(self, val):
+        self._master_raw_data = val
+        # Set on all the datasets
+        for d in self.input_datatypes:
+            d.raw_data = val
+
+    def _get_raw_data(self):
+        return self._master_raw_data
+
+    raw_data = property(_get_raw_data, _set_raw_data)
 
     def extract_file(self, archive_name, filename):
         raise NotImplementedError("cannot extract file from concatenation of corpora")
