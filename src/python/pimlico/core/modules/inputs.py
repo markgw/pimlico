@@ -31,7 +31,7 @@ class InputModuleInfo(BaseModuleInfo):
     module_type_name = "input"
     module_executable = False
 
-    def instantiate_output_datatype(self, output_name, output_datatype):
+    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
         raise NotImplementedError("input module type (%s) must implement its own datatype instantiator" %
                                   self.module_type_name)
 
@@ -66,12 +66,20 @@ def input_module_factory(datatype):
 
         def get_output_dir(self, output_name, short_term_store=False):
             if self.override_base_dir is None:
-                return super(DatatypeInputModuleInfo, self).get_output_dir(output_name,
-                                                                           short_term_store=short_term_store)
+                if datatype.requires_data_preparation:
+                    # During data preparation, this directly will be created and some data stored there
+                    # The data is only ready once we pass data_ready() in the normal way
+                    return super(DatatypeInputModuleInfo, self).get_output_dir(output_name,
+                                                                               short_term_store=short_term_store)
+                else:
+                    # No data preparation required, which means that this input datatype never stores anything
+                    # It therefore has a None base_dir, which causes the datatype to be satisfied without it,
+                    # providing any further checks provided by its data_ready() are satisfied
+                    return None
             else:
                 return self.override_base_dir
 
-        def instantiate_output_datatype(self, output_name, output_datatype):
+        def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
             return output_datatype.create_from_options(self.get_output_dir(output_name), self.pipeline,
                                                        copy.deepcopy(self.options), module=self)
 
