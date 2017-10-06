@@ -17,13 +17,14 @@ grouping will be preserved as the corpus passes through the pipeline.
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.base import IterableCorpus
 from pimlico.datatypes.tar import TarredCorpus
+from pimlico.modules.corpora.tar_filter.info import TarredCorpusWithDocumentTypeFromInput
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "tar"
     module_readable_name = "Tar archive grouper"
     module_inputs = [("documents", IterableCorpus)]
-    module_outputs = [("documents", TarredCorpus)]
+    module_outputs = [("documents", TarredCorpusWithDocumentTypeFromInput())]
     module_options = {
         "archive_size": {
             "help": "Number of documents to include in each archive (default: 1k)",
