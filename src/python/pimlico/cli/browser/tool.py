@@ -101,7 +101,14 @@ def browse_data(data, formatter, parse=False, skip_invalid=False):
     if not parse:
         data.raw_data = True
     if not data.data_ready():
-        print "Data not available from module output: perhaps it hasn't been run? (base dir: %s)" % data.base_dir
+        if data.module is not None:
+            if data.module.module_executable:
+                print "Data not available from module output (%s): perhaps it hasn't been run? (base dir: %s)" % \
+                      (data.module.module_name, data.base_dir)
+            else:
+                print "Data not available from non-executable module's output (%s)" % data.module.module_name
+        else:
+            print "Data not ready: cannot browse it"
         sys.exit(1)
 
     # Top of the screen
