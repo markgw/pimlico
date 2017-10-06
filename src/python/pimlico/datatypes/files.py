@@ -1,5 +1,7 @@
 import os
+from glob import iglob, glob
 
+from pimlico.core.modules.options import comma_separated_list, comma_separated_strings
 from pimlico.datatypes.base import PimlicoDatatype, IterableCorpus, PimlicoDatatypeWriter, InvalidDocument
 from pimlico.datatypes.documents import RawTextDocumentType
 
@@ -35,7 +37,7 @@ class File(PimlicoDatatype):
         raise NotImplementedError
 
 
-class FileCollection(PimlicoDatatype):
+class NamedFileCollection(PimlicoDatatype):
     """
     Abstract base datatype for datatypes that store a fixed collection of files, which have fixed names
     (or at least names that can be determined from the class). Very many datatypes fall into this category.
@@ -53,7 +55,7 @@ class FileCollection(PimlicoDatatype):
     filenames = []
 
     def data_ready(self):
-        if not super(FileCollection, self).data_ready():
+        if not super(NamedFileCollection, self).data_ready():
             return False
         try:
             for filename in self.filenames:
@@ -67,11 +69,11 @@ class FileCollection(PimlicoDatatype):
         return True
 
 
-class FileCollectionWriter(PimlicoDatatypeWriter):
+class NamedFileCollectionWriter(PimlicoDatatypeWriter):
     filenames = []
 
     def __init__(self, base_dir):
-        super(FileCollectionWriter, self).__init__(base_dir)
+        super(NamedFileCollectionWriter, self).__init__(base_dir)
         # Make sure every file gets written
         for filename in self.filenames:
             self.require_tasks("write_%s" % filename)
@@ -84,7 +86,7 @@ class FileCollectionWriter(PimlicoDatatypeWriter):
         self.task_complete("write_%s" % filename)
 
 
-def file_collection_union(*file_collection_classes, **kwargs):
+def named_file_collection_union(*file_collection_classes, **kwargs):
     """
     Takes a number of subclasses of ``FileCollection`` and produces a new datatype that shares the functionality
     of all of them and is constituted of the union of the filenames.
@@ -99,7 +101,7 @@ def file_collection_union(*file_collection_classes, **kwargs):
     """
     from collections import Counter
 
-    if not all(issubclass(c, FileCollection) for c in file_collection_classes):
+    if not all(issubclass(c, NamedFileCollection) for c in file_collection_classes):
         raise TypeError("cannot create file collection union type of %s, since they are not all FileCollection "
                         "subclasses" % ", ".join(c.__name__ for c in file_collection_classes))
 
@@ -111,28 +113,224 @@ def file_collection_union(*file_collection_classes, **kwargs):
         raise TypeError("cannot produce union file collection datatype %s, since some filenames overlap between "
                         "input types: %s" % (union_datatype_name, ", ".join(dup_names)))
 
-    def __init__(self, *args, **kwargs):
-        super(_FileCollectionUnion, self).__init__(*args, **kwargs)
-        for d in file_collection_classes:
-            d.__init__(self, *args, **kwargs)
+    class _FileCollectionUnion(NamedFileCollection):
+        datatype_name = union_datatype_name
+        filenames = filenames_union
 
-    def __getattr__(self, item):
-        # Try getting this attr from each of the classes in the union
-        for d in file_collection_classes:
-            if hasattr(d, item):
-                return getattr(d, item)
-        # None of the classes has such an attribute
-        # Pass up to the super to process this: either it will find the attr on this class or raise
-        return getattr(super(_FileCollectionUnion, self), item)
+        def __init__(self, *args, **kwargs):
+            super(_FileCollectionUnion, self).__init__(*args, **kwargs)
+            # Instantiate each of the collection types using the same directory
+            self.collection_instances = [
+                d(*args, **kwargs) for d in file_collection_classes
+            ]
 
-    _FileCollectionUnion = type("_FileCollectionUnion", file_collection_classes, {
-        "datatype_name": union_datatype_name,
-        "filenames": filenames_union,
-        "__init__": __init__,
-        "__getattr__": __getattr__,
-    })
+        def __getattr__(self, item):
+            # First try getting the attr from the main class
+            try:
+                return getattr(super(_FileCollectionUnion, self), item)
+            except AttributeError:
+                # No such attribute on the main class, try getting it from each of the collection classes
+                for d in self.collection_instances:
+                    if hasattr(d, item):
+                        return getattr(d, item)
+                raise AttributeError("no attr '%s' on file collection instance or any of the instances in the "
+                                     "collection" % item)
 
     return _FileCollectionUnion
+
+
+def filename_with_range(val):
+    """ Option processor for file paths with an optional start and end line at the end. """
+    if ":" in val:
+        path, __, range = val.rpartition(":")
+        if "-" not in range:
+            raise ValueError("invalid line range specifier '%s' in file path" % range)
+        start, __, end = range.partition("-")
+        if len(start) == 0:
+            start = 0
+        if len(end) == 0:
+            end = -1
+
+        try:
+            start = int(start)
+            end = int(end)
+        except ValueError:
+            raise ValueError("invalid line range specifier '%s' in file path" % range)
+        return path, start, end
+    else:
+        return val, 0, -1
+
+
+comma_separated_paths = comma_separated_list(filename_with_range)
+
+
+class UnnamedFileCollection(IterableCorpus):
+    """
+    A file collection that's just a bunch of files with arbitrary names. The names are not necessarily
+    known until the data is ready. They may be specified as a list in the metadata, or through
+    datatype options, in the case of input datatypes.
+
+    This datatype is particularly useful for loading individual files or sets of files at the start of a
+    pipeline. If you just want the raw data from each file, you can use this class as it is. It's an
+    ``IterableCorpus`` with a raw data type. If you want to apply some special processing to each file,
+    do so by overriding this class and specifying the ``data_point_type``, providing a ``DataPointType``
+    subclass that does the necessary processing.
+
+    When using it as an input datatype to load arbitrary files, specify a list of absolute paths to the
+    files you want to use. They must be absolute paths, but remember that you can make use of various
+    :doc:`special substitutions in the config file </core/config>` to give paths relative to your project
+    root, or other locations.
+
+    The file paths may use `globs <https://docs.python.org/2/library/glob.html>`_ to match multiple files.
+    By default, it is assumed that every filename should exist and every glob should match at least one
+    file. If this does not hold, the dataset is assumed to be not ready. You can override this by placing
+    a ``?`` at the start of a filename/glob, indicating that it will be included if it exists, but is
+    not depended on for considering the data ready to use.
+
+    The same postprocessing will be applied to every file. In cases where you need to apply different
+    processing to different subsets of the files, define multiple input modules, with different data
+    point types, for example, and then combine them using :mod:`pimlico.modules.corpora.concat`.
+
+    """
+    datatype_name = "unnamed_file_collection"
+    input_module_options = {
+        "files": {
+            "help": "Comma-separated list of absolute paths to files to include in the collection. Paths may include "
+                    "globs. Place a '?' at the start of a filename to indicate that it's optional. You can specify "
+                    "a line range for the file by adding ':X-Y' to the end of the path, where X is the first line "
+                    "and Y the last to be included. Either X or Y may be left empty. (Line numbers are 1-indexed.)",
+            "type": comma_separated_paths,
+            "required": True,
+        },
+        "exclude": {
+            "help": "A list of files to exclude. Specified in the same way as `files` (except without line ranges). "
+                    "This allows you to specify a glob in `files` and then exclude individual files from it (you "
+                    "can use globs here too)",
+            "type": comma_separated_strings,
+        },
+    }
+
+    def data_ready(self):
+        if not super(UnnamedFileCollection, self).data_ready():
+            return False
+        # Get the list of paths, either from the options or the metadata
+        try:
+            self.get_paths(error_on_missing=True)
+        except IOError:
+            return False
+        return True
+
+    def get_paths(self, error_on_missing=False):
+        if self.options.get("files", None) is not None:
+            # Input datatype, specifying its files as a list of absolute paths
+            paths = self.get_paths_from_options(error_on_missing=error_on_missing)
+        else:
+            # Stored datatype, specifying its files as a list in a text file
+            # Read in the text file to get the list of paths
+            paths = self.metadata.get("file_list", [])
+            paths = [fn if os.path.abspath(fn) else os.path.join(self.data_dir, fn) for fn in paths]
+            # Add dummy start and end lines
+            paths = [(fn, 0, -1) for fn in paths]
+            # If asked to error on missing files, check the files exist
+            if error_on_missing and not all(os.path.exists(p) for (p, s, e) in paths):
+                raise IOError("non-existent files in stored file_list: %s" %
+                              ", ".join(p for (p, s, e) in paths if not os.path.exists(p)))
+        return paths
+
+    def get_paths_from_options(self, error_on_missing=False):
+        """
+        Get a list of paths to all the files specified in the ``files`` option. If ``error_on_missing=True``,
+        non-optional paths or globs that do not correspond to an existing file cause an IOError to be raised.
+
+        """
+        input_fns = self.options["files"]
+        paths = []
+        for input_fn, s, e in input_fns:
+            optional = False
+            if input_fn.startswith("?"):
+                # Optional path, don't error if the file doesn't exist
+                optional = True
+                input_fn = input_fn[1:]
+            # Interpret the path as a glob
+            # If it's not a glob, it will just give us one path
+            matching_paths = glob(input_fn)
+            # Only interested in files, not directories
+            matching_paths = [p for p in matching_paths if os.path.isfile(p)]
+            # Sort matching paths alphabetically, to be sure that they're always in the same order
+            matching_paths.sort()
+            # If no paths match, either the path was a glob that didn't match anything or a non-existent file
+            if len(matching_paths) == 0 and not optional and error_on_missing:
+                raise IOError("path '%s' does not exist, or is a glob that matches nothing" % input_fn)
+            paths.extend([(p, s, e) for p in matching_paths])
+
+        if self.options["exclude"] is not None:
+            for excl_path in self.options["exclude"]:
+                # Treat this as a glob too
+                excl_matching_paths = glob(excl_path)
+                paths = [(p, s, e) for (p, s, e) in paths if p not in excl_matching_paths]
+        return paths
+
+    def __iter__(self):
+        # Use the file basenames as doc names where possible, but make sure they're unique
+        used_doc_names = set()
+        paths = self.get_paths()
+        if len(paths):
+            for path, start, end in paths:
+                basename = os.path.basename(path)
+                doc_name = basename
+                distinguish_id = 0
+                # Keep increasing the distinguishing ID until we have a unique name
+                while doc_name in used_doc_names:
+                    base, ext = os.path.splitext(basename)
+                    doc_name = "%s-%d%s" % (base, distinguish_id, ext)
+                    distinguish_id += 1
+                used_doc_names.add(doc_name)
+
+                with open(path, "r") as f:
+                    data = f.read()
+
+                if start != 0 or end != -1:
+                    # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
+                    if start != 0:
+                        # Otherwise, shift down to account for 1-indexing
+                        start -= 1
+                    if end != -1:
+                        end -= 1
+
+                    lines = data.split("\n")
+                    if end == -1:
+                        data = "\n".join(lines[start:])
+                    else:
+                        data = "\n".join(lines[start:end+1])
+
+                yield doc_name, self.process_document_data_with_datatype(data)
+
+    def __len__(self):
+        return len(self.get_paths())
+
+
+class UnnamedFileCollectionWriter(PimlicoDatatypeWriter):
+    """
+    Use as a context manager to write a bag of files out to the output directory.
+
+    Provide each file's raw data and a filename to use to the function `write_file()` within the `with`
+    statement. The writer will keep track of what files you've output and store the list.
+
+    """
+    def __init__(self, *args, **kwargs):
+        super(UnnamedFileCollectionWriter, self).__init__(*args, **kwargs)
+        self.written_filenames = []
+
+    def write_file(self, filename, data):
+        with open(os.path.join(self.data_dir, filename), "w") as f:
+            f.write(data)
+        self.written_filenames.append(filename)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None:
+            # Put the list of written files in the metadata, so it gets written out
+            self.metadata["file_list"] = self.written_filenames
+        super(UnnamedFileCollectionWriter, self).__exit__(exc_type, exc_val, exc_tb)
 
 
 def NamedFile(name):
@@ -143,7 +341,7 @@ def NamedFile(name):
     :param name: name of the file
     :return: datatype class
     """
-    class _NamedFile(FileCollection):
+    class _NamedFile(NamedFileCollection):
         datatype_name = "named_file"
         filenames = [name]
 

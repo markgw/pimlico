@@ -15,10 +15,10 @@ Some basic core datatypes that are commonly used for simple datatypes, file type
 import os
 
 from pimlico.datatypes import PimlicoDatatype, PimlicoDatatypeWriter
-from pimlico.datatypes.files import FileCollection
+from pimlico.datatypes.files import NamedFileCollection
 
 
-class SingleTextDocument(FileCollection):
+class SingleTextDocument(NamedFileCollection):
     datatype_name = "single_doc"
     filenames = ["data.txt"]
 
@@ -43,7 +43,7 @@ class SingleTextDocumentWriter(PimlicoDatatypeWriter):
                 f.write(data)
 
 
-class Dict(FileCollection):
+class Dict(NamedFileCollection):
     """
     Simply stores a Python dict, pickled to disk.
 

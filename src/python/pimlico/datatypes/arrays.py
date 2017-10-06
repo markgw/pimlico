@@ -10,12 +10,12 @@ import os
 
 from pimlico.core.dependencies.python import numpy_dependency, scipy_dependency
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
-from pimlico.datatypes.files import FileCollection
+from pimlico.datatypes.files import NamedFileCollection
 
 __all__ = ["NumpyArray", "NumpyArrayWriter", "ScipySparseMatrix", "ScipySparseMatrixWriter"]
 
 
-class NumpyArray(FileCollection):
+class NumpyArray(NamedFileCollection):
     datatype_name = "numpy_array"
     filenames = ["array.npy"]
 
