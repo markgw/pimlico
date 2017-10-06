@@ -105,6 +105,9 @@ class JavaJarsDependency(JavaDependency):
         self.jar_urls = jar_urls
         super(JavaJarsDependency, self).__init__(name, jars=[j for (j, url) in jar_urls], **kwargs)
 
+    def installable(self):
+        return True
+
     def install(self, local_config, trust_downloaded_archives=False):
         downloaded_archives = {}
         archive_files = {}
