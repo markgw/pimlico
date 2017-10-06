@@ -190,7 +190,7 @@ class ModuleInfo(BaseModuleInfo):
     }
     module_executable = False
 
-    def instantiate_output_datatype(self, output_name, output_datatype):
+    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
         if issubclass(output_datatype, TarredCorpus):
             return TarredCorpusSubsetFilter(self.pipeline, self.get_input("documents"),
                                             self.options["size"], offset=self.options["offset"],
