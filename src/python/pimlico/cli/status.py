@@ -144,6 +144,7 @@ class StatusCmd(PimlicoCLISubcommand):
                         print "\n".join(status_lists[status])
                 else:
                     for bullet, module_name in zip(bullets, module_names):
+                        # Short summary for each module
                         module = pipeline[module_name]
                         print colored(status_colored(module, " %s %s" % (bullet, module_name)))
                         # Show the type of the module
@@ -156,7 +157,10 @@ class StatusCmd(PimlicoCLISubcommand):
                                 input_name,
                                 colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
                             )
-                        print "       outputs: %s" % ", ".join(module.output_names)
+                        print "       outputs: %s" % ", ".join([
+                            colored(name, "green") if module.get_output(name).data_ready() else colored(name, "red")
+                            for name in module.output_names
+                        ])
                         if module.is_locked():
                             print "       locked: ongoing execution"
             else:
@@ -212,6 +216,10 @@ def status_colored(module, text=None):
 
 
 def module_status(module):
+    """
+    Detailed module status, shown when a specific module's status is requested.
+
+    """
     also_output = []
     status_color = module_status_color(module)
 
@@ -259,6 +267,10 @@ Input {input_name}:
         output_datatype = module.get_output(output_name)
         if module.is_filter():
             corpus_dir = "filter module, output not stored"
+        elif output_datatype.base_dir is None:
+            # A None base_dir indicates that the dir in the Pimlico storage is not required
+            # This happens with input datatypes that require no preparation
+            corpus_dir = "nothing to be stored"
         else:
             corpus_dir = output_datatype.absolute_base_dir or "not available yet"
         output_info = """\
