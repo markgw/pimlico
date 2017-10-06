@@ -2,6 +2,7 @@ import json
 from collections import Counter
 
 from pimlico.core.modules.base import BaseModuleExecutor
+from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.files import NamedFileWriter
 from pimlico.utils.progress import get_progress_bar
 
@@ -12,7 +13,8 @@ class ModuleExecutor(BaseModuleExecutor):
 
         self.log.info("Counting tokens")
         pbar = get_progress_bar(len(corpus), title="Counting")
-        token_count = Counter(token for doc_name, doc in pbar(corpus) for sent in doc for token in sent)
+        token_count = Counter(token for doc_name, doc in pbar(corpus) if type(doc) is not InvalidDocument
+                              for sent in doc for token in sent)
 
         types = len(token_count)
         tokens = sum(token_count.values())
@@ -22,7 +24,7 @@ class ModuleExecutor(BaseModuleExecutor):
 
         self.log.info("Counting sentences")
         pbar = get_progress_bar(len(corpus), title="Counting")
-        sent_count = sum(len(doc) for doc_name, doc in pbar(corpus))
+        sent_count = sum(len(doc) for doc_name, doc in pbar(corpus) if type(doc) is not InvalidDocument)
 
         self.log.info("{:,} sentences".format(sent_count))
 
