@@ -164,6 +164,17 @@ class RunCmd(PimlicoCLISubcommand):
                 error_type = "Error loading module info" if type(e) is ModuleInfoLoadError else \
                     "Error: module not ready to run"
                 print >>sys.stderr, "%s: %s" % (error_type, e)
+        except ModuleExecutionError, e:
+            if debug:
+                print_exc()
+                if hasattr(e, "cause") and e.cause is not None:
+                    print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
+            # See whether the problem came from a specific module
+            module_name = getattr(e, "module_name", None)
+            if module_name is not None:
+                print >>sys.stderr, "Error running module '%s': %s" % (module_name, e)
+            else:
+                print >>sys.stderr, "Error running modules: %s" % e
         except KeyboardInterrupt:
             print >>sys.stderr, "Exiting before execution completed due to user interrupt"
             # Raise the exception so we see the full stack trace
