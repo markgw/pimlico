@@ -13,6 +13,8 @@ Base modules for reading input from textual corpora.
    :maxdepth: 2
    :titlesonly:
 
+   pimlico.modules.corpora.concat
+   pimlico.modules.corpora.corpus_stats
    pimlico.modules.corpora.format
    pimlico.modules.corpora.list_filter
    pimlico.modules.corpora.split
