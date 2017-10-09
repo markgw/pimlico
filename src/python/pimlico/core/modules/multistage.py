@@ -300,7 +300,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
 
         def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
             # Hand over to the appropriate module that the output came from to do the instantiation
-            return self.pipeline["%s:%s" % (self.module_name, output_stage_names[output_name][0])].\
+            return self.pipeline["%s:%s" % (self.module_name, output_stage_names[output_name][0])]. \
                 instantiate_output_datatype(output_stage_names[output_name][1], output_datatype)
 
     return ModuleInfo
