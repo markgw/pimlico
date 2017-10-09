@@ -270,18 +270,20 @@ class UnnamedFileCollection(IterableCorpus):
                 paths = [(p, s, e) for (p, s, e) in paths if p not in excl_matching_paths]
         return paths
 
+    def path_name_to_doc_name(self, path):
+        return os.path.basename(path)
+
     def __iter__(self):
         # Use the file basenames as doc names where possible, but make sure they're unique
         used_doc_names = set()
         paths = self.get_paths()
         if len(paths):
             for path, start, end in paths:
-                basename = os.path.basename(path)
-                doc_name = basename
+                doc_name = self.path_name_to_doc_name(path)
                 distinguish_id = 0
                 # Keep increasing the distinguishing ID until we have a unique name
                 while doc_name in used_doc_names:
-                    base, ext = os.path.splitext(basename)
+                    base, ext = os.path.splitext(doc_name)
                     doc_name = "%s-%d%s" % (base, distinguish_id, ext)
                     distinguish_id += 1
                 used_doc_names.add(doc_name)
