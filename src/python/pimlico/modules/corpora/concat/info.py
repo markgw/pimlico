@@ -32,11 +32,10 @@ def _common_data_point_type(types):
 
 
 class CorpusConcatFilter(IterableCorpus):
-    def __init__(self, pipeline, input_datatypes, data_point_type, **kwargs):
+    def __init__(self, pipeline, input_datatypes, **kwargs):
         self._master_raw_data = False
         self.input_datatypes = input_datatypes
         IterableCorpus.__init__(self, None, pipeline, **kwargs)
-        self.data_point_type = data_point_type
 
     def __len__(self):
         return sum((len(d) for d in self.input_datatypes), 0)
@@ -60,11 +59,10 @@ class CorpusConcatFilter(IterableCorpus):
 
 
 class TarredCorpusConcatFilter(TarredCorpus):
-    def __init__(self, pipeline, input_datatypes, data_point_type, **kwargs):
+    def __init__(self, pipeline, input_datatypes, **kwargs):
         self._master_raw_data = False
         self.input_datatypes = input_datatypes
         TarredCorpus.__init__(self, None, pipeline, **kwargs)
-        self.data_point_type = data_point_type
 
     def _set_raw_data(self, val):
         self._master_raw_data = val
@@ -135,6 +133,18 @@ class TarredCorpusConcatFilter(TarredCorpus):
         return all(d.data_ready() for d in self.input_datatypes)
 
 
+def tarred_corpus_concat_filter_dp_type(dp_type):
+    class TarredCorpusConcatFilterSubtype(TarredCorpusConcatFilter):
+        data_point_type = dp_type
+    return TarredCorpusConcatFilterSubtype
+
+
+def corpus_concat_filter_dp_type(dp_type):
+    class CorpusConcatFilterSubtype(CorpusConcatFilter):
+        data_point_type = dp_type
+    return CorpusConcatFilterSubtype
+
+
 class DataPointTypeFromInputs(DynamicOutputDatatype):
     """
     Infer output corpus' data-point type from the type of an input.
@@ -177,6 +187,8 @@ class ModuleInfo(BaseModuleInfo):
         dp_type = _common_data_point_type([d.data_point_type for d in datatypes])
 
         if issubclass(output_datatype, TarredCorpus):
-            return TarredCorpusConcatFilter(self.pipeline, datatypes, dp_type, module=self)
+            filter_type = tarred_corpus_concat_filter_dp_type(dp_type)
         else:
-            return CorpusConcatFilter(self.pipeline, datatypes, dp_type, module=self)
+            filter_type = corpus_concat_filter_dp_type(dp_type)
+
+        return filter_type(self.pipeline, datatypes, module=self)

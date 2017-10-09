@@ -80,9 +80,6 @@ class TarredCorpusFilter(TarredCorpus):
         self.input_datatype = input_datatype
         self.archive_size = archive_size
 
-        # Get our document type from the input
-        self.data_point_type = input_datatype.data_point_type
-
         self._tarballs = None
 
     def __len__(self):
@@ -144,6 +141,12 @@ class TarredCorpusFilter(TarredCorpus):
         return self.input_datatype.data_ready()
 
 
+def filter_with_subtype(dp_type):
+    class FilterWithSubtype(TarredCorpusFilter):
+        data_point_type = dp_type
+    return FilterWithSubtype
+
+
 class TarredCorpusWithDocumentTypeFromInput(DynamicOutputDatatype):
     """
     Dynamic datatype that produces a TarredCorpus with a document datatype that is the same as the input's
@@ -190,6 +193,8 @@ class ModuleInfo(BaseModuleInfo):
     }
     module_executable = False
 
-    def instantiate_output_datatype(self, output_name, output_datatype):
-        return TarredCorpusFilter(self.pipeline, self.get_input("documents"), self.options["archive_size"],
-                                  archive_basename=self.options["archive_basename"], module=self)
+    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
+        input_corpus = self.get_input("documents")
+        filter_type = filter_with_subtype(input_corpus.data_point_type)
+        return filter_type(self.pipeline, self.get_input("documents"), self.options["archive_size"],
+                           archive_basename=self.options["archive_basename"], module=self)
