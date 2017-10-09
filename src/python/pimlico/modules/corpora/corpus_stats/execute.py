@@ -11,6 +11,12 @@ class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         corpus = self.info.get_input("corpus")
 
+        self.log.info("Counting characters")
+        pbar = get_progress_bar(len(corpus), title="Counting")
+        characters = sum(sum(len(token) for token in sent) + len(sent)
+                         for doc_name, doc in pbar(corpus) if type(doc) is not InvalidDocument for sent in doc)
+        self.log.info("{:,} characters".format(characters))
+
         self.log.info("Counting tokens")
         pbar = get_progress_bar(len(corpus), title="Counting")
         token_count = Counter(token for doc_name, doc in pbar(corpus) if type(doc) is not InvalidDocument
@@ -27,11 +33,14 @@ class ModuleExecutor(BaseModuleExecutor):
         sent_count = sum(len(doc) for doc_name, doc in pbar(corpus) if type(doc) is not InvalidDocument)
 
         self.log.info("{:,} sentences".format(sent_count))
+        self.log.info("{:.2f} characters per sentence".format(float(characters) / sent_count))
+        self.log.info("{:.2f} tokens per sentence".format(float(tokens) / sent_count))
 
         data = {
             "types": types,
             "tokens": tokens,
             "sentences": sent_count,
+            "characters": characters,
         }
 
         with NamedFileWriter(self.info.get_absolute_output_dir("stats"), "stats.json") as writer:
