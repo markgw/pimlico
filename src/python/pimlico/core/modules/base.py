@@ -1137,8 +1137,8 @@ def load_module_info(path):
     info_path = "%s.info" % path
     try:
         mod = import_module(info_path)
-    except ImportError:
-        raise ModuleInfoLoadError("module type '%s' could not be found (could not import %s)" % (path, info_path))
+    except ImportError, e:
+        raise ModuleInfoLoadError("module type '%s' could not be found (could not import %s: %s)" % (path, info_path, e))
 
     if not hasattr(mod, "ModuleInfo"):
         raise ModuleInfoLoadError("invalid module type code: could not load class %s.ModuleInfo" % info_path)
