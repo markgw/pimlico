@@ -29,7 +29,7 @@ class CleanCmd(PimlicoCLISubcommand):
     command_desc = "Remove all module output directories that do not correspond to a module in the pipeline"
 
     def run_command(self, pipeline, opts):
-        to_clean = []
+        to_clean = set()
         for root_dir in pipeline.get_storage_roots():
             if os.path.exists(root_dir):
                 for dirname in os.listdir(root_dir):
@@ -37,7 +37,7 @@ class CleanCmd(PimlicoCLISubcommand):
                         # Check whether this dir name corresponds to a module in the pipeline
                         if dirname not in pipeline:
                             # No module called by this name: this dir probably shouldn't be here
-                            to_clean.append(os.path.join(root_dir, dirname))
+                            to_clean.add(os.path.join(root_dir, dirname))
 
         if len(to_clean) == 0:
             print "Found no directories to clean"
