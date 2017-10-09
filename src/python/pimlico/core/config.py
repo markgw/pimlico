@@ -1335,7 +1335,7 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     :return: tuple: raw config dict; list of variants that could be loaded; final vars dict; list of filenames
         that were read, including included files; dict of docstrings for each config section
     """
-    copies = {}
+    copies = OrderedDict()
     try:
         config_sections, available_variants, vars, all_filenames, section_docstrings, abstract = \
             _preprocess_config_file(filename, variant=variant, copies=copies, initial_vars=initial_vars)
@@ -1357,14 +1357,13 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
                                                (target_section, source_section))
             # Accumulate values to the copied into target section
             copy_values.update(config_sections_dict[source_section])
-        # Remove certain keys that shouldn't be copied
-        copy_values = dict((key, val) for (key, val) in copy_values.iteritems()
-                           if key not in ["filter", "outputs", "type"] and not key.startswith("input"))
         # Values set in section itself take precedence over those copied
         copy_values.update(config_sections_dict[target_section])
         # Replace the settings for this module
         config_sections = [(sect, copy_values) if sect == target_section else (sect, settings)
                            for (sect, settings) in config_sections]
+        # Udpate the sections dict so we can subsequently copy from this module
+        config_sections_dict = OrderedDict(config_sections)
 
     if "pipeline" in section_docstrings:
         del section_docstrings["pipeline"]
