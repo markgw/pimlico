@@ -235,12 +235,13 @@ def module_status(module):
 Input {input_name}:
     {status}
     From module: {input_module} ({input_module_output} output)
-    Datatype: {input_datatype.datatype_name}""".format(
+    Datatype: {datatype_name}""".format(
                 input_name=input_name,
                 status=colored("Data ready", "green") if module.input_ready(input_name) else colored("Data not ready", "red"),
                 input_module=input_module.module_name,
                 input_module_output=input_module_output or "default",
                 input_datatype=input_datatype,
+                datatype_name=input_datatype.full_datatype_name(),
             )
             if input_module.module_executable:
                 # Executable module: if it's been executed, we get data from there
