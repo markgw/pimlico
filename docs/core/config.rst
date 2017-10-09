@@ -118,13 +118,19 @@ by the directive name and any arguments.
 - ``copy``:
     Copies all config settings from another module, whose name is given as the sole argument. May be used multiple
     times in the same module and later copies will override earlier. Settings given explicitly in the module's
-    config override any copied settings. The following settings are not copied: input(s), ``filter``, ``outputs``,
-    ``type``.
+    config override any copied settings.
+
+    All parameters are copied, including things like ``type``. Any parameter can be overridden in the copying
+    module instance.
+
+    The directive even allows you to copy parameters from multiple modules by using the directive multiple times,
+    though this is not very often useful. In this case, the values are copied (and overridden) in the order of
+    the directives.
 
     For example, to reuse all the parameters from ``module1`` in ``module2``, only specifying them once:
 
     .. code-block:: ini
-       :emphasize-lines: 4,5,6,12
+       :emphasize-lines: 4,5,6,10,12
 
        [module1]
        type=some.module.type
@@ -134,10 +140,10 @@ by the directive name and any arguments.
        param3=0.75
 
        [module2]
-       type=some.module.type
-       input=moduleB
        # Copy all params from module1
        %%copy module1
+       # Override the input module
+       input=moduleB
 
 .. _parameter-alternatives:
 
