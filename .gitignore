@@ -15,4 +15,4 @@ models/*
 !models/Makefile
 docs/_build/*
 log/
-
+lib/test_env/

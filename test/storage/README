@@ -1,0 +1,3 @@
+Empty directory that will be used for pipeline output when test pipelines are run.
+
+Any files and directories other than this README can be deleted.

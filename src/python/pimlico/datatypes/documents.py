@@ -2,6 +2,7 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
+
 __all__ = ["DataPointType", "RawDocumentType", "RawTextDocumentType"]
 
 
@@ -44,3 +45,12 @@ class RawTextDocumentType(RawDocumentType):
     requirement.
 
     """
+    input_module_options = {
+        "encoding": {
+            "help": "Encoding to assume for input files. Default: utf8",
+            "default": "utf8",
+        },
+    }
+
+    def process_document(self, doc):
+        return doc.decode(self.options.get("encoding", "utf8"))

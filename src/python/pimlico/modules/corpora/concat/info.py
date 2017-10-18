@@ -64,6 +64,9 @@ class TarredCorpusConcatFilter(TarredCorpus):
         self.input_datatypes = input_datatypes
         TarredCorpus.__init__(self, None, pipeline, **kwargs)
 
+    def __len__(self):
+        return sum((len(d) for d in self.input_datatypes), 0)
+
     def _set_raw_data(self, val):
         self._master_raw_data = val
         # Set on all the datasets

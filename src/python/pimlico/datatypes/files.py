@@ -372,6 +372,20 @@ class NamedFileWriter(PimlicoDatatypeWriter):
             f.write(data)
 
 
+class RawTextFiles(UnnamedFileCollection):
+    """
+    Essentially the same as RawTextDirectory, but more flexible. Should generally be used in preference to
+    RawTextDirectory.
+
+    Basic datatype for reading in all the files in a collection as raw text documents.
+
+    Generally, this may be appropriate to use as the input datatype at the start of a pipeline. You'll then
+    want to pass it through a tarred corpus filter to get it into a suitable form for input to other modules.
+
+    """
+    data_point_type = RawTextDocumentType
+
+
 class RawTextDirectory(IterableCorpus):
     """
     Basic datatype for reading in all the files in a directory and its subdirectories as raw text documents.

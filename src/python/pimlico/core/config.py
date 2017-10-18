@@ -16,7 +16,7 @@ from collections import OrderedDict
 from operator import itemgetter
 from socket import gethostname
 
-from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR
+from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR, TEST_DATA_DIR
 from pimlico.cli.debug.stepper import enable_step_for_pipeline
 from pimlico.datatypes.base import load_datatype, DatatypeLoadError
 from pimlico.utils.core import remove_duplicates
@@ -267,6 +267,7 @@ class PipelineConfig(object):
             "long_term_store": local_config_data["long_term_store"],
             "short_term_store": local_config_data["short_term_store"],
             "home": os.path.expanduser("~"),
+            "test_data_dir": TEST_DATA_DIR,
         }
 
         # Perform pre-processing of config file to replace includes, etc

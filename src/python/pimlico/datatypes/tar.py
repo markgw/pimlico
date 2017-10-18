@@ -15,7 +15,7 @@ from itertools import izip
 from tempfile import mkdtemp
 
 from pimlico.datatypes.base import IterableCorpusWriter, InvalidDocument, DynamicInputDatatypeRequirement
-from pimlico.datatypes.documents import RawDocumentType
+from pimlico.datatypes.documents import RawDocumentType, RawTextDocumentType
 from pimlico.utils.filesystem import retry_open
 from .base import IterableCorpus
 
@@ -311,6 +311,11 @@ class TarredCorpusWriter(IterableCorpusWriter):
             self.current_archive_tar.close()
         self.metadata["length"] = self.doc_count
         super(TarredCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
+
+
+class RawTextTarredCorpus(TarredCorpus):
+    datatype_name = "raw_text_tarred_corpus"
+    data_point_type = RawTextDocumentType
 
 
 class TarredCorpusType(DynamicInputDatatypeRequirement):

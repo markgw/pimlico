@@ -56,6 +56,9 @@ Use them anywhere in your config file with an expression like ``%(varname)s`` (n
     other pipelines run on the same system. This is the value specified in the :ref:`local config file <local-config>`.
 - ``home``:
     Running user's home directory (on Unix and Windows, see Python's ``os.path.expanduser()``).
+- ``test_data_dir``:
+    Directory in Pimlico distribution where test data is stored (``test/data`` in Pimlico root). Used in test pipelines,
+    which take all their input data from this directory.
 
 For example, to point a parameter to a file located within the project root:
 

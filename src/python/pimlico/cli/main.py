@@ -7,8 +7,6 @@ Main command-line script for running Pimlico, typically called from `pimlico.sh`
 Provides access to many subcommands, acting as the primary interface to Pimlico's functionality.
 
 """
-from pimlico.cli.newmodule import NewModuleCmd
-
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
     install_core_dependencies()
@@ -18,6 +16,7 @@ import os
 import sys
 from operator import itemgetter
 
+from pimlico.cli.newmodule import NewModuleCmd
 from pimlico.cli.check import InstallCmd, DepsCmd
 from pimlico.cli.clean import CleanCmd
 from pimlico.cli.loaddump import DumpCmd, LoadCmd
