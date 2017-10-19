@@ -41,6 +41,6 @@ Options
 +=============+=============================================================================================================================================+========+
 | target_name | Name to rename the target file to. If not given, it will have the same name as the source file. Ignored if there's more than one input file | string |
 +-------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------+
-| target_dir  | (required)                                                                                                                                  | string |
+| target_dir  | (required) Path to directory into which the file should be copied. Will be created if it doesn't exist                                      | string |
 +-------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------+
 

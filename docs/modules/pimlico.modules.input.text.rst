@@ -1,5 +1,5 @@
-Package pimlico.modules.input.text
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Text corpora
+~~~~~~~~~~~~
 
 
 .. py:module:: pimlico.modules.input.text

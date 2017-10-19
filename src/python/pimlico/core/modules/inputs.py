@@ -141,7 +141,7 @@ class ReaderOutputType(IterableCorpus):
         raise NotImplementedError()
 
 
-def iterable_input_reader_factory(input_module_options, output_type, module_type_name=None):
+def iterable_input_reader_factory(input_module_options, output_type, module_type_name=None, module_readable_name=None):
     """
     Factory for creating an input reader module type. This is a non-executable module that has no
     inputs. It reads its data from some external location, using the given module options. The resulting
@@ -164,10 +164,11 @@ def iterable_input_reader_factory(input_module_options, output_type, module_type
     """
     dp_type = output_type.data_point_type
     mt_name = module_type_name or "reader_for_{}".format(dp_type.__name__)
+    mr_name = module_readable_name or "Input reader for {} iterable corpus".format(dp_type.__name__)
 
     class IterableInputReaderModuleInfo(InputModuleInfo):
         module_type_name = mt_name
-        module_readable_name = "Input reader for {} iterable corpus".format(dp_type.__name__)
+        module_readable_name = mr_name
         module_outputs = [("corpus", output_type)]
         module_options = input_module_options
 

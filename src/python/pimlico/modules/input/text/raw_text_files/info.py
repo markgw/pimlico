@@ -27,10 +27,11 @@ import os
 from glob import glob
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory, ReaderOutputType
-from pimlico.core.modules.options import comma_separated_strings, comma_separated_list
+from pimlico.core.modules.options import comma_separated_strings, comma_separated_list, opt_type_help
 from pimlico.datatypes.documents import RawTextDocumentType
 
 
+@opt_type_help("(line range-limited) file path")
 def filename_with_range(val):
     """ Option processor for file paths with an optional start and end line at the end. """
     if ":" in val:
@@ -182,5 +183,6 @@ ModuleInfo = iterable_input_reader_factory(
         },
     },
     OutputType, 
-    module_type_name="raw_text_files_reader"
+    module_type_name="raw_text_files_reader",
+    module_readable_name="Raw text files",
 )
