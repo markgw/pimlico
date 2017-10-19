@@ -124,7 +124,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
     options_table = [
         [
             option_name,
-            "(required) " if d.get("required", False) else "" + d.get("help", ""),
+            ("(required) " if d.get("required", False) else "") + d.get("help", ""),
             format_option_type(d.get("type", str)),
         ]
         for (option_name, d) in ModuleInfo.module_options.items()
@@ -151,7 +151,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
         if input_table:
             output_file.write("%s\n" % make_table(input_table, header=["Name", "Type(s)"]))
         else:
-            output_file.write("No inputs\n")
+            output_file.write("No inputs\n\n")
 
         # Table of outputs
         output_file.write(format_heading(1, "Outputs"))
