@@ -96,3 +96,63 @@ def input_module_factory(datatype):
         DatatypeInputModuleInfo.module_executor_override = DataPreparationExecutor
 
     return DatatypeInputModuleInfo
+
+
+def iterable_input_reader_factory(input_module_options, data_point_type, len_function, iterator_function,
+                                  data_ready_function, module_type_name=None):
+    """
+    Factory for creating an input reader module type. This is a non-executable module that has no
+    inputs. It reads its data from some external location, using the given module options. The resulting
+    dataset is an IterableCorpus subtype, with the given document type.
+
+    **How is this different from ``input_module_factory``?** This method is used in your module code
+    to prepare a ModuleInfo class for reading a particular type of input data and presenting it as a
+    Pimlico dataset of the given type. ``input_module_factory``, on the other hand, is used by Pimlico
+    when you specify a datatype as a module type in a config file.
+
+    Note that, in future versions, reading datasets output by another Pimlico pipeline will be the only
+    purpose for that special notation. The possibility of specifying ``input_module_options`` to create
+    an input reader will disappear, so the use of ``input_module_options`` should be phased out and replaced
+    with input reader modules, such as those created by this factory.
+
+    ``len_function`` should be a function that takes the processed input module options and returns
+    the length of the corpus (number of documents).
+
+    ``iterator_function`` should take the processed input module options and return an iterator over the
+    corpus' documents (e.g. a generator function). Each item yielded should be a pair ``(doc_name, data)``
+    and ``data`` should be in the appropriate internal format associated with the document type.
+
+    ``data_ready_function`` should take the processed input module options and return True if the data
+    is ready to be read in.
+
+    """
+    dp_type = data_point_type
+    mt_name = module_type_name or "reader_for_{}".format(dp_type.__name__)
+
+    class OutputType(IterableCorpus):
+        datatype_name = "reader_iterator"
+        data_point_type = dp_type
+
+        def __init__(self, reader_options, pipeline, **kwargs):
+            super(OutputType, self).__init__(None, pipeline, **kwargs)
+            self.reader_options = reader_options
+
+        def __len__(self):
+            return len_function(self.reader_options)
+
+        def __iter__(self):
+            return iterator_function(self.reader_options)
+
+        def data_ready(self):
+            return data_ready_function(self.reader_options)
+
+    class IterableInputReaderModuleInfo(InputModuleInfo):
+        module_type_name = mt_name
+        module_readable_name = "Input reader for {} iterable corpus".format(dp_type.__name__)
+        module_outputs = [("corpus", OutputType)]
+        module_options = input_module_options
+
+        def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
+            return OutputType(self.options, self.pipeline)
+
+    return IterableInputReaderModuleInfo

@@ -166,6 +166,12 @@ comma_separated_paths = comma_separated_list(filename_with_range)
 
 class UnnamedFileCollection(IterableCorpus):
     """
+    .. note::
+
+       Datatypes used for reading input data are being phased out and replaced by input reader modules.
+       Use :mod:`pimlico.modules.input.text.raw_text_files` instead of this for reading raw text files
+       at the start of your pipeline.
+
     A file collection that's just a bunch of files with arbitrary names. The names are not necessarily
     known until the data is ready. They may be specified as a list in the metadata, or through
     datatype options, in the case of input datatypes.

@@ -230,7 +230,7 @@ class PimlicoDatatype(object):
                     elif not os.path.exists(os.path.join(self.data_dir, path)):
                         # Data dir is ready, but the file within it doesn't exist
                         return False
-        # If data_dir is None, the datatype doesn't need it
+        # If base_dir is None, the datatype doesn't need it
         # data_dir is None unless the data dir has been located
         return self.base_dir is None or self.data_dir is not None
 
