@@ -136,7 +136,7 @@ class OutputType(ReaderOutputType):
                 used_doc_names.add(doc_name)
 
                 with open(path, "r") as f:
-                    data = f.read().decode(encoding)
+                    data = f.read().decode(encoding, errors=options["encoding_errors"])
 
                 if start != 0 or end != -1:
                     # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
@@ -174,6 +174,11 @@ ModuleInfo = iterable_input_reader_factory(
         "encoding": {
             "help": "Encoding to assume for input files. Default: utf8",
             "default": "utf8",
+        },
+        "encoding_errors": {
+            "help": "What to do in the case of invalid characters in the input while decoding (e.g. illegal utf-8 "
+                    "chars). Select 'strict' (default), 'ignore', 'replace'. See Python's str.decode() for details",
+            "default": "strict",
         },
     },
     OutputType, 

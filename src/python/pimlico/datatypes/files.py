@@ -51,7 +51,7 @@ class NamedFileCollection(PimlicoDatatype):
     The attribute ``filenames`` should specify a list of filenames contained by the datatype.
 
     All files are contained in the datatypes data directory. If files are stored in subdirectories, this may
-    be specified in the list of filenames using ``/``s. (Always use forward slashes, regardless of the operating
+    be specified in the list of filenames using ``/`` s. (Always use forward slashes, regardless of the operating
     system.)
 
     """

@@ -448,7 +448,6 @@ class PimlicoDatatypeWriter(object):
             return name
 
 
-
 class CountInvalidCmd(ShellCommand):
     """
     Data shell command to count up the number of invalid docs in a tarred corpus. Applies to any iterable corpus.

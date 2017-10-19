@@ -20,6 +20,7 @@ many applications.
    pimlico.modules.corpora
    pimlico.modules.embeddings
    pimlico.modules.features
+   pimlico.modules.input
    pimlico.modules.malt
    pimlico.modules.opennlp
    pimlico.modules.r

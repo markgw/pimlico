@@ -9,6 +9,7 @@ Subpackages
     pimlico.cli
     pimlico.core
     pimlico.datatypes
+    pimlico.test
     pimlico.utils
 
 Module contents
