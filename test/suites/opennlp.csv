@@ -1,5 +1,5 @@
-pipelines/input/raw_text_files.conf, europarl
-pipelines/corpora/tar_filter.conf, output
-pipelines/corpora/concat.conf, output
-pipelines/corpora/subset.conf, output
-pipelines/corpora/split.conf, split
+# Before running these test, you need to go to Pimlico's models dir and run the following commands:
+#  make opennlp/en-token.bin
+#  make opennlp/en-sent.bin
+#
+pipelines/opennlp/tokenize.conf, tokenize
