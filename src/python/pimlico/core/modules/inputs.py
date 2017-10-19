@@ -135,6 +135,8 @@ def iterable_corpus_reader_datatype_factory(data_point_type, len_function, itera
         def data_ready(self):
             return data_ready_function(self.reader_options)
 
+    return OutputType
+
 
 def iterable_input_reader_factory(input_module_options, output_type, module_type_name=None):
     """
