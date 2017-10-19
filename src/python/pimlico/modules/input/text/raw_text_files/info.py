@@ -23,8 +23,9 @@ not depended on for considering the data ready to use.
       by this input reader.
 
 """
+import fnmatch
 import os
-from glob import glob
+from glob import glob, iglob
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory, ReaderOutputType
 from pimlico.core.modules.options import comma_separated_strings, comma_separated_list, opt_type_help
@@ -91,6 +92,40 @@ def get_paths_from_options(options, error_on_missing=False):
     return paths
 
 
+def check_paths_from_options(options):
+    """
+    Like get_paths_from_options, but faster (in some cases), as it just checks whether there are
+    any file for each path/glob.
+
+    """
+    input_fns = options["files"]
+    exclude = options["exclude"] or []
+    # Make sure we get at least one file, even if everything is optional
+    got_something = False
+    for input_fn, s, e in input_fns:
+        if input_fn.startswith("?"):
+            # Optional path, no need to check this
+            continue
+        # Interpret the path as a glob
+        # If it's not a glob, it will just give us one path
+        matching_paths = iglob(input_fn)
+        # Only interested in files, not directories
+        glob_matched = False
+        for path in matching_paths:
+            if os.path.isfile(path):
+                # Check this doesn't match an exclude pattern
+                if not any(fnmatch.fnmatch(path, excl_path) for excl_path in exclude):
+                    # Existing path, now we've got at least something
+                    got_something = True
+                    # At least one thing matched this glob: don't carry on checking
+                    glob_matched = True
+                    break
+        if not glob_matched:
+            # The glob matched no actual files: these paths are not satisfied, give up now
+            return False
+    return got_something
+
+
 class OutputType(ReaderOutputType):
     """
     Output type used by reader to read the documents straight from external files using the input
@@ -107,12 +142,7 @@ class OutputType(ReaderOutputType):
         return data
 
     def data_ready(self):
-        try:
-            get_paths_from_options(self.reader_options, error_on_missing=True)
-        except IOError:
-            return False
-        else:
-            return True
+        return check_paths_from_options(self.reader_options)
 
     def __len__(self):
         # Should only be called after data_read() == True
