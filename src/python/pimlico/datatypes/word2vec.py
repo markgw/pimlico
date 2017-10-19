@@ -110,4 +110,4 @@ class Word2VecModelWriter(PimlicoDatatypeWriter):
     def __exit__(self, exc_type, exc_val, exc_tb):
         super(Word2VecModelWriter, self).__exit__(exc_type, exc_val, exc_tb)
         if self.word2vec_model is not None:
-            self.word2vec_model.save_word2vec_format(os.path.join(self.data_dir, "vectors.bin"), binary=True)
+            self.word2vec_model.wv.save_word2vec_format(os.path.join(self.data_dir, "vectors.bin"), binary=True)
