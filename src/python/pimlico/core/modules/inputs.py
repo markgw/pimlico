@@ -98,44 +98,47 @@ def input_module_factory(datatype):
     return DatatypeInputModuleInfo
 
 
-def iterable_corpus_reader_datatype_factory(data_point_type, len_function, iterator_function, data_ready_function):
+class ReaderOutputType(IterableCorpus):
     """
-    Creates a datatype for reading in input according to input module options and allowing it to
+    A datatype for reading in input according to input module options and allowing it to
     be iterated over by other modules.
 
-    Typically used together with `iterable_input_reader_factory()`.
+    Typically used together with `iterable_input_reader_factory()` as the output datatype.
 
-    ``len_function`` should be a function that takes the processed input module options and returns
+    ``__len__`` should be overridden to take the processed input module options and return
     the length of the corpus (number of documents).
 
-    ``iterator_function`` should take the processed input module options and return an iterator over the
+    ``__iter__`` should use the processed input module options and return an iterator over the
     corpus' documents (e.g. a generator function). Each item yielded should be a pair ``(doc_name, data)``
     and ``data`` should be in the appropriate internal format associated with the document type.
 
-    ``data_ready_function`` should take the processed input module options and return True if the data
+    ``data_ready`` should be overridden to use the processed input module options and return True if the data
     is ready to be read in.
 
+    In all cases, the input options are available as ``self.reader_options``.
+
     """
-    dp_type = data_point_type
+    datatype_name = "reader_iterator"
+    #: Must be overridden by subclasses
+    data_point_type = None
+    #: Subclass information should be ignored for type checking. Should be treated exactly as an IterableCorpus
+    emulated_datatype = IterableCorpus
 
-    class OutputType(IterableCorpus):
-        datatype_name = "reader_iterator"
-        data_point_type = dp_type
+    def __init__(self, reader_options, pipeline, **kwargs):
+        super(ReaderOutputType, self).__init__(None, pipeline, **kwargs)
+        self.reader_options = reader_options
 
-        def __init__(self, reader_options, pipeline, **kwargs):
-            super(OutputType, self).__init__(None, pipeline, **kwargs)
-            self.reader_options = reader_options
+    def data_ready(self):
+        # Override to compute determine whether data is ready, using self.reader_options
+        raise NotImplementedError()
 
-        def __len__(self):
-            return len_function(self.reader_options)
+    def __len__(self):
+        # Override to compute length using self.reader_options
+        raise NotImplementedError()
 
-        def __iter__(self):
-            return iterator_function(self.reader_options)
-
-        def data_ready(self):
-            return data_ready_function(self.reader_options)
-
-    return OutputType
+    def __iter__(self):
+        # Override to iterate over documents using self.reader_options
+        raise NotImplementedError()
 
 
 def iterable_input_reader_factory(input_module_options, output_type, module_type_name=None):
@@ -145,8 +148,8 @@ def iterable_input_reader_factory(input_module_options, output_type, module_type
     dataset is an IterableCorpus subtype, with the given document type.
 
     ``output_type`` is a datatype that performs the actual iteration over the data and is instantiated
-    with the processed options as its first argument. This is typically created using
-    `iterable_corpus_reader_datatype_factory()`.
+    with the processed options as its first argument. This is typically created by subclassing ReaderOutputType
+    and providing len, iter and data_ready methods.
 
     **How is this different from ``input_module_factory``?** This method is used in your module code
     to prepare a ModuleInfo class for reading a particular type of input data and presenting it as a

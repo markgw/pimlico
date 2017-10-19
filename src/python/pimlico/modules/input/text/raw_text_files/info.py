@@ -26,7 +26,7 @@ not depended on for considering the data ready to use.
 import os
 from glob import glob
 
-from pimlico.core.modules.inputs import iterable_input_reader_factory, iterable_corpus_reader_datatype_factory
+from pimlico.core.modules.inputs import iterable_input_reader_factory, ReaderOutputType
 from pimlico.core.modules.options import comma_separated_strings, comma_separated_list
 from pimlico.datatypes.documents import RawTextDocumentType
 
@@ -90,57 +90,69 @@ def get_paths_from_options(options, error_on_missing=False):
     return paths
 
 
-def data_ready(options):
-    try:
-        get_paths_from_options(options, error_on_missing=True)
-    except IOError:
-        return False
-    else:
-        return True
+class OutputType(ReaderOutputType):
+    """
+    Output type used by reader to read the documents straight from external files using the input
+    options.
 
+    May be overridden to provide readers that do some processing of the text, by overriding
+    ``filter_text()``
 
-def corpus_len(options):
-    # Should only be called after data_read() == True
-    return len(get_paths_from_options(options))
+    """
+    data_point_type = RawTextDocumentType
 
+    def filter_text(self, data):
+        """ May be overridden by subclasses to perform postprocessing of document data """
+        return data
 
-def corpus_iterator(options):
-    encoding = options["encoding"]
-    # Use the file basenames as doc names where possible, but make sure they're unique
-    used_doc_names = set()
-    paths = get_paths_from_options(options)
-    if len(paths):
-        for path, start, end in paths:
-            doc_name = os.path.basename(path)
-            distinguish_id = 0
-            # Keep increasing the distinguishing ID until we have a unique name
-            while doc_name in used_doc_names:
-                base, ext = os.path.splitext(doc_name)
-                doc_name = "%s-%d%s" % (base, distinguish_id, ext)
-                distinguish_id += 1
-            used_doc_names.add(doc_name)
+    def data_ready(self):
+        try:
+            get_paths_from_options(self.reader_options, error_on_missing=True)
+        except IOError:
+            return False
+        else:
+            return True
 
-            with open(path, "r") as f:
-                data = f.read().decode(encoding)
+    def __len__(self):
+        # Should only be called after data_read() == True
+        return len(get_paths_from_options(self.reader_options))
 
-            if start != 0 or end != -1:
-                # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
-                if start != 0:
-                    # Otherwise, shift down to account for 1-indexing
-                    start -= 1
-                if end != -1:
-                    end -= 1
+    def __iter__(self):
+        options = self.reader_options
 
-                lines = data.split("\n")
-                if end == -1:
-                    data = u"\n".join(lines[start:])
-                else:
-                    data = u"\n".join(lines[start:end+1])
+        encoding = options["encoding"]
+        # Use the file basenames as doc names where possible, but make sure they're unique
+        used_doc_names = set()
+        paths = get_paths_from_options(options)
+        if len(paths):
+            for path, start, end in paths:
+                doc_name = os.path.basename(path)
+                distinguish_id = 0
+                # Keep increasing the distinguishing ID until we have a unique name
+                while doc_name in used_doc_names:
+                    base, ext = os.path.splitext(doc_name)
+                    doc_name = "%s-%d%s" % (base, distinguish_id, ext)
+                    distinguish_id += 1
+                used_doc_names.add(doc_name)
 
-            yield doc_name, data
+                with open(path, "r") as f:
+                    data = f.read().decode(encoding)
 
+                if start != 0 or end != -1:
+                    # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
+                    if start != 0:
+                        # Otherwise, shift down to account for 1-indexing
+                        start -= 1
+                    if end != -1:
+                        end -= 1
 
-OutputType = iterable_corpus_reader_datatype_factory(RawTextDocumentType, corpus_len, corpus_iterator, data_ready)
+                    lines = data.split("\n")
+                    if end == -1:
+                        data = u"\n".join(lines[start:])
+                    else:
+                        data = u"\n".join(lines[start:end+1])
+
+                yield doc_name, self.filter_text(data)
 
 
 ModuleInfo = iterable_input_reader_factory(
