@@ -67,7 +67,7 @@ class TestPipeline(object):
         return PipelineConfig.load(path, override_local_config=local_config)
 
     def get_uninstalled_dependencies(self):
-        deps = get_dependencies(self.pipeline, self.to_run)
+        deps = get_dependencies(self.pipeline, self.to_run, recursive=True)
         return [d for d in deps if not d.available(self.pipeline.local_config)]
 
     def test_all_modules(self):
@@ -125,30 +125,46 @@ def run_test_pipeline(path, module_names, log, no_clean=False):
     if not no_clean:
         clear_storage_dir()
 
-    # Load the pipeline config
     try:
-        pipeline = TestPipeline.load_pipeline(path, TEST_STORAGE_DIR)
-        test_pipeline = TestPipeline(pipeline, module_names, log)
-    except Exception, e:
-        raise TestPipelineRunError("could not load test pipeline {}: {}".format(path, e))
+        # Load the pipeline config
+        try:
+            pipeline = TestPipeline.load_pipeline(path, TEST_STORAGE_DIR)
+            test_pipeline = TestPipeline(pipeline, module_names, log)
+        except Exception, e:
+            raise TestPipelineRunError("could not load test pipeline {}: {}".format(path, e))
 
-    # Check for uninstalled dependencies
-    dep_problems = []
-    for dep in test_pipeline.get_uninstalled_dependencies():
-        if dep.installable():
-            log.info("Installing {}".format(dep.name))
-            try:
-                dep.install()
-            except InstallationError, e:
-                dep_problems.append("Could not install dependency '{}': {}".format(dep.name, e))
-        else:
-            dep_problems.append("Dependency '{}' is not automatically installable. Install it manually before running "
-                                "this test: \n{}".format(dep.name, dep.installation_instructions()))
+        # Check for uninstalled dependencies
+        dep_problems = []
+        for dep in test_pipeline.get_uninstalled_dependencies():
+            # Make sure the dependency is still not available when we get to it
+            if dep.available(pipeline.local_config):
+                continue
+            if dep.installable():
+                log.info("Installing {}".format(dep.name))
+                try:
+                    dep.install(pipeline.local_config)
+                except InstallationError, e:
+                    dep_problems.append("Could not install dependency '{}': {}".format(dep.name, e))
+            else:
+                instructions = dep.installation_instructions()
+                problems = dep.problems(pipeline.local_config)
+                dep_problems.append("Dependency '{}' is not automatically installable. {}"
+                                    "Install it manually before running this test{}".format(
+                    dep.name,
+                    "{}. ".format(", ".join(problems)) if len(problems) else "",
+                    "\n{}".format(instructions) if instructions else ""
+                ))
+        if dep_problems:
+            log.error("Cannot run test as there are dependency problems:")
+            for dep_prob in dep_problems:
+                log.error(dep_prob)
+            raise TestPipelineRunError("unresolved dependency problems: see above for details")
 
-    test_pipeline.test_all_modules()
+        test_pipeline.test_all_modules()
 
-    if not no_clean:
-        clear_storage_dir()
+    finally:
+        if not no_clean:
+            clear_storage_dir()
 
 
 def run_test_suite(pipelines_and_modules, log, no_clean=False):
@@ -196,7 +212,7 @@ if __name__ == "__main__":
     log = get_console_logger("Test")
 
     with open(opts.suite_file, "r") as f:
-        rows = [row.split(",") for row in f.read().splitlines()]
+        rows = [row.split(",") for row in f.read().splitlines() if not row.startswith("#") and len(row.strip())]
     pipelines_and_modules = [(row[0].strip(), [m.strip() for m in row[1:]]) for row in rows]
     log.info("Running {} test pipelines".format(len(pipelines_and_modules)))
 

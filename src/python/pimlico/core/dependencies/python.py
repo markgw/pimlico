@@ -224,6 +224,9 @@ class PythonPackageOnPip(PythonPackageDependency):
             requirement_set.prepare_files(finder, force_root_egg_info=False, bundle=False)
             # Run installation
             requirement_set.install(install_options, global_options)
+        # Refresh sys.path so we can import the installed package
+        import site
+        reload(site)
 
     def __repr__(self):
         return "PythonPackageOnPip<%s%s>" % (self.name, (" (%s)" % self.package) if self.package != self.name else "")

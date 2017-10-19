@@ -92,7 +92,8 @@ class SoftwareDependency(object):
         Recursively fetch all dependencies of this dependency (not including itself).
 
         """
-        return self.dependencies() + sum([dep.all_dependencies() for dep in self.dependencies()], [])
+        immediate_deps = self.dependencies()
+        return sum([dep.all_dependencies() for dep in immediate_deps], []) + immediate_deps
 
     def get_installed_version(self, local_config):
         """

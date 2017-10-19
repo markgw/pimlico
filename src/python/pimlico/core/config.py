@@ -1673,7 +1673,8 @@ def get_dependencies(pipeline, modules, recursive=False, sources=False):
         if recursive:
             # Also check whether the deps we've just added have their own dependencies
             for dep in list(module_dependencies):
-                module_dependencies.extend(dep.all_dependencies())
+                # These need to be installed before the above
+                module_dependencies = dep.all_dependencies() + module_dependencies
 
         dependencies.extend(module_dependencies)
         for dep in module_dependencies:
