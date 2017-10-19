@@ -22,7 +22,7 @@ not depended on for considering the data ready to use.
 import os
 from glob import glob
 
-from pimlico.core.modules.inputs import iterable_input_reader_factory
+from pimlico.core.modules.inputs import iterable_input_reader_factory, iterable_corpus_reader_datatype_factory
 from pimlico.core.modules.options import comma_separated_strings, comma_separated_list
 from pimlico.datatypes.documents import RawTextDocumentType
 
@@ -136,6 +136,9 @@ def corpus_iterator(options):
             yield doc_name, data
 
 
+OutputType = iterable_corpus_reader_datatype_factory(RawTextDocumentType, corpus_len, corpus_iterator, data_ready)
+
+
 ModuleInfo = iterable_input_reader_factory(
     {
         "files": {
@@ -157,9 +160,6 @@ ModuleInfo = iterable_input_reader_factory(
             "default": "utf8",
         },
     },
-    RawTextDocumentType,
-    corpus_len,
-    corpus_iterator,
-    data_ready,
+    OutputType, 
     module_type_name="raw_text_files_reader"
 )
