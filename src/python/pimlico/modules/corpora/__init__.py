@@ -1,6 +1,6 @@
 """
-Corpus-reading
+Corpus manipulation
 
-Base modules for reading input from textual corpora.
+Core modules for generic manipulation of mainly iterable corpora.
 
 """
