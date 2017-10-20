@@ -14,3 +14,4 @@ Modules for plotting and suchlike
    :titlesonly:
 
    pimlico.modules.visualization.bar_chart
+   pimlico.modules.visualization.word2vec_plot

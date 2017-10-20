@@ -1,11 +1,11 @@
-Corpus-reading
-~~~~~~~~~~~~~~
+Corpus manipulation
+~~~~~~~~~~~~~~~~~~~
 
 
 .. py:module:: pimlico.modules.corpora
 
 
-Base modules for reading input from textual corpora.
+Core modules for generic manipulation of mainly iterable corpora.
 
 
 

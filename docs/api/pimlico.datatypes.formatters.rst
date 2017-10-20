@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    pimlico.datatypes.formatters.features
+   pimlico.datatypes.formatters.tokenized
 
 Module contents
 ---------------
