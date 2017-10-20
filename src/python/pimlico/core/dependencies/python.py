@@ -166,19 +166,22 @@ class PythonPackageOnPip(PythonPackageDependency):
                         "formatter": "indent",
                     },
                 },
-                "root": {
-                    "level": "DEBUG",
-                    "handlers": list(filter(None, [
-                        "console",
-                        "console_errors",
-                        None,
-                    ])),
-                },
+                # Previously, got super-verbose debugging by configuring root logger as follows
+                # However, this had a horrible effect on later logging
+                # Could possibly be solved by removing these handlers after installation. Simplest to stop doing this
+                #"root": {
+                #    "level": "DEBUG",
+                #    "handlers": list(filter(None, [
+                #        "console",
+                #        "console_errors",
+                #        None,
+                #    ])),
+                #},
                 # Disable any logging besides WARNING unless we have DEBUG level
                 # logging enabled. These use both pip._vendor and the bare names
                 # for the case where someone unbundles our libraries.
                 "loggers": dict(
-                    (name, {"level": "DEBUG"})
+                    (name, {"level": "DEBUG", "handlers": ["console", "console_errors"]})
                     for name in ["pip._vendor", "distlib", "requests", "urllib3"]
                 ),
             })
