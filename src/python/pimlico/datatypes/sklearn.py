@@ -10,7 +10,7 @@ from __future__ import absolute_import
 
 import os
 
-from pimlico.core.dependencies.python import PythonPackageOnPip
+from pimlico.core.dependencies.python import PythonPackageOnPip, sklearn_dependency
 from pimlico.datatypes.base import PimlicoDatatypeWriter, PimlicoDatatype
 
 
@@ -40,7 +40,8 @@ class SklearnModel(PimlicoDatatype):
         self.model_filename = os.path.join(self.data_dir, "model.pkl") if self.data_dir else None
 
     def get_software_dependencies(self):
-        return super(SklearnModel, self).get_software_dependencies() + [PythonPackageOnPip("joblib")]
+        return super(SklearnModel, self).get_software_dependencies() + \
+               [sklearn_dependency, PythonPackageOnPip("joblib")]
 
     def load_model(self):
         import joblib

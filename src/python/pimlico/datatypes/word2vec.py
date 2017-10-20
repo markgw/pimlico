@@ -3,6 +3,7 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 import os
+
 from pimlico.cli.shell.base import ShellCommand, ShellError
 
 from pimlico.core.dependencies.python import PythonPackageOnPip
@@ -83,8 +84,8 @@ class Word2VecModel(PimlicoDatatype):
 
     def load_model(self):
         if self._model is None:
-            from gensim.models.word2vec import Word2Vec
-            self._model = Word2Vec.load_word2vec_format(os.path.join(self.data_dir, "vectors.bin"), binary=True)
+            from gensim.models.keyedvectors import KeyedVectors
+            self._model = KeyedVectors.load_word2vec_format(os.path.join(self.data_dir, "vectors.bin"), binary=True)
         return self._model
 
     @property

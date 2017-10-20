@@ -258,3 +258,6 @@ theano_dependency = PythonPackageOnPip("theano", pip_package="Theano")
 # We usually need h5py for reading/storing models
 h5py_dependency = PythonPackageOnPip("h5py", pip_package="h5py")
 keras_dependency = PythonPackageOnPip("keras", dependencies=[theano_dependency, h5py_dependency])
+sklearn_dependency = PythonPackageOnPip(
+    "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
+)
