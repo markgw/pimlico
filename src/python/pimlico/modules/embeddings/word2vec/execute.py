@@ -4,6 +4,7 @@
 
 from gensim.models.word2vec import Word2Vec
 from pimlico.core.modules.base import BaseModuleExecutor
+from pimlico.datatypes.base import InvalidDocument
 from pimlico.datatypes.word2vec import Word2VecModel, Word2VecModelWriter
 from pimlico.utils.progress import get_progress_bar
 
@@ -35,5 +36,6 @@ class SentenceIterator(object):
     def __iter__(self):
         pbar = get_progress_bar(len(self.tokenized_corpus), title="Iterating over sentences", counter=True)
         for doc_name, doc in pbar(self.tokenized_corpus):
-            for sentence in doc:
-                yield sentence
+            if type(doc) is not InvalidDocument:
+                for sentence in doc:
+                    yield sentence
