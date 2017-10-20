@@ -9,6 +9,8 @@ lib/java/*
 lib/python/*
 !lib/python/Makefile
 lib/python_env*
+lib/virtualenv
+!lib/virtualenv/README
 lib/bin/*
 !lib/bin/README*
 models/*

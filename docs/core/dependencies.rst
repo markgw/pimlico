@@ -49,23 +49,23 @@ you're running your pipeline over different servers, but have the pipeline and P
 network drive. Then you can find that the software installed in the virtualenv on one machine is incompatible
 with the system-wide software on the other.
 
-The following procedure sets up an alternative virtualenv, which you can use on your second
-machine.
-
-Open a terminal and ``cd`` into your project directory (Pimlico should be in the ``pimlico`` subdirectory).
+You can specify a name for a custom virtualenv using the environment variable ``PIMENV``. The first time
+you run Pimlico with this set, it will automatically create the new virtualenv.
 
 .. code:: sh
 
-   $ python pimlico/lib/libutils/create_virtualenv.py pimlico/lib/myenv
+   $ PIMENV=myenv ./pimlico.sh mypipeline.conf status
 
 Replace ``myenv`` with a name that better reflects its use (e.g. name of the server).
 
-Every time you run Pimlico on that server, set the ``VIRTUALENV`` environment variable to
-point to the virtualenv directory that you just created. For example:
+Every time you run Pimlico on that server, set the ``PIMENV`` environment variable in the same way.
 
-.. code:: sh
+In case you want to get to the virtualenv itself, you can find it in ``pimlico/lib/virtualenv/myenv``.
 
-   $ VIRTUALENV=pimlico/lib/myenv ./pimlico.sh mypipeline.conf status
+.. note::
+
+   Pimlico previously used another environment variable ``VIRTUALENV``, which gave a path to the
+   virtualenv. You can still use this, but, unless you have a good reason to, it's easier to use ``PIMENV``.
 
 Defining module dependencies
 ============================
@@ -85,4 +85,4 @@ Some examples
 
 .. rubric:: Footnotes
 
-.. [#env_loc] If you're interested, it lives in ``pimlico/lib/python_env``
+.. [#env_loc] If you're interested, it lives in ``pimlico/lib/virtualenv/default``

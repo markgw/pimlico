@@ -177,6 +177,8 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
                         print "\n".join("  %s" % line for line in instructions.splitlines())
                     uninstallable.append(dep)
                 print
+            else:
+                print "%s became available while installing sub-dependencies" % dep.name
 
     if installed:
         print "Installed: %s" % ", ".join(installed)

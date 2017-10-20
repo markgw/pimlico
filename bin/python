@@ -25,11 +25,16 @@ DIR=$(dirname $THIS)
 # Add Pimlico-specific Python library locations
 export PYTHONPATH=$PYTHONPATH:$DIR/../src/python:$DIR/../lib/python
 
-if [ -n "$VIRTUALENV" ]; then
+if [ -n "$PIMENV" ]; then
+    # This is the new, less verbose way of specifying which virtualenv to use: just the virtualenv name, not path
+    echo "Using Pimlico virtualenv $PIMENV"
+    virtualenv_dir=$DIR/../lib/virtualenv/$PIMENV
+elif [ -n "$VIRTUALENV" ]; then
+    # This was the old way of specifying virtualenvs, which was more laborious
     echo "Using virtualenv dir $VIRTUALENV"
     virtualenv_dir=$VIRTUALENV
 else
-    virtualenv_dir=$DIR/../lib/python_env
+    virtualenv_dir=$DIR/../lib/virtualenv/default
 fi
 python=$virtualenv_dir/bin/python
 
