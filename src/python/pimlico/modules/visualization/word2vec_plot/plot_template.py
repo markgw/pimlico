@@ -37,6 +37,6 @@ ax = fig.add_subplot(111)
 plt.scatter(xs, ys, s=1)
 
 for x, y, label in zip(xs, ys, labels):
-    plt.text(x, y, label, horizontalalignment="center")
+    plt.text(x, y, label.decode("utf8"), horizontalalignment="center")
 
 plt.savefig("plot.pdf", transparent=True)

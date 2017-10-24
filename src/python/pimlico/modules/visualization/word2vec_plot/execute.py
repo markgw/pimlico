@@ -48,7 +48,7 @@ class ModuleExecutor(BaseModuleExecutor):
             io = StringIO()
             csv_writer = csv.writer(io)
             for label, value in zip(vocab, red_vecs):
-                csv_writer.writerow([str(label), str(float(value[0])), str(float(value[1]))])
+                csv_writer.writerow([unicode(label).encode("utf8"), str(float(value[0])), str(float(value[1]))])
             writer.data = io.getvalue()
 
             # Use a standard template plot python file

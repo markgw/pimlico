@@ -102,13 +102,20 @@ class Word2VecModel(PimlicoDatatype):
 class Word2VecModelWriter(PimlicoDatatypeWriter):
     def __init__(self, base_dir, verb_only=False, **kwargs):
         super(Word2VecModelWriter, self).__init__(base_dir, **kwargs)
+        # Provide writing by setting self.word2vec_model for backwards compatibility
         self.word2vec_model = None
         self.metadata["verb_only"] = verb_only
+        self.require_tasks("vectors")
 
-    def __enter__(self):
-        return self
+    def write_word2vec_model(self, model):
+        self.write_keyed_vectors(model.wv)
+
+    def write_keyed_vectors(self, vectors):
+        vectors.save_word2vec_format(os.path.join(self.data_dir, "vectors.bin"), binary=True)
+        self.task_complete("vectors")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         super(Word2VecModelWriter, self).__exit__(exc_type, exc_val, exc_tb)
-        if self.word2vec_model is not None:
+        # Provide writing by setting self.word2vec_model for backwards compatibility
+        if "vectors" in self.incomplete_tasks and self.word2vec_model is not None:
             self.word2vec_model.wv.save_word2vec_format(os.path.join(self.data_dir, "vectors.bin"), binary=True)

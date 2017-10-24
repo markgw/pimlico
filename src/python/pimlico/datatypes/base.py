@@ -414,6 +414,10 @@ class PimlicoDatatypeWriter(object):
         if task in self._to_output:
             self._to_output.remove(task)
 
+    @property
+    def incomplete_tasks(self):
+        return list(self._to_output)
+
     def __enter__(self):
         # Store an initial version of the metadata
         self.write_metadata()
