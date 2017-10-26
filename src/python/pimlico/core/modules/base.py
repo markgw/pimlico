@@ -544,11 +544,25 @@ class BaseModuleInfo(object):
 
         :return: True if all input datatypes are ready to be used
         """
-        return len(self.missing_data()) == 0
+        return len(self.missing_data()) == 0 and len(self.missing_module_data()) == 0
 
     @classmethod
     def is_filter(cls):
         return not cls.module_executable and len(cls.module_inputs) > 0
+
+    def missing_module_data(self):
+        """
+        Reports missing data not associated with an input dataset.
+
+        Calling `missing_data()` reports any problems with input data associated with a particular input to
+        this module. However, modules may also rely on data that does not come from one of their inputs. This
+        happens primarily (perhaps solely) when a module option points to a data source. This might be the
+        case with any module, but is particularly common among input reader modules, which have no inputs, but
+        read data according to their options.
+
+        :return: list of problems
+        """
+        return []
 
     def missing_data(self, input_names=None, assume_executed=[], assume_failed=[], allow_preliminary=False):
         """
@@ -556,7 +570,8 @@ class BaseModuleInfo(object):
         which outputs of which modules are not available. If it's all ready, returns an empty list.
 
         To check specific inputs, give a list of input names. To check all inputs, don't specify `input_names`.
-        To check the default input, give `input_names=[None]`.
+        To check the default input, give `input_names=[None]`. If not checking a specific input, also checks
+        non-input data (see `missing_module_data()`).
 
         If `assume_executed` is given, it should be a list of module names which may be assumed to have been
         executed at the point when this module is executed. Any outputs from those modules will be excluded from
@@ -578,10 +593,12 @@ class BaseModuleInfo(object):
         behaviour is to require all of them to be ready, but in a preliminary run this requirement is relaxed.
 
         """
+        missing = []
         if input_names is None:
             # Default to checking all inputs
             input_names = self.input_names
-        missing = []
+            # Also check module data (non-input data)
+            missing.extend(self.missing_module_data())
         if self.is_input():
             # Don't check inputs for an input module: there aren't any
             # However, the output datatypes might require certain files before the data preparation routine can be run
