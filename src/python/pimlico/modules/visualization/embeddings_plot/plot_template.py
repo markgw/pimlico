@@ -19,13 +19,12 @@ import numpy
 import csv
 
 bar_width = 0.5
-COLOURS = ['g', 'b', 'y', 'm', 'c', '#B1C7CA', '#90F0A0']
 
 # Read in the input data
 with open("data.csv", "r") as f:
     csv_reader = csv.reader(f)
     # Should be two values in each row
-    labels, xs, ys = zip(*csv_reader)
+    labels, xs, ys, colours = zip(*csv_reader)
 
 xs = numpy.array([float(v) for v in xs])
 ys = numpy.array([float(v) for v in ys])
@@ -36,7 +35,7 @@ ax = fig.add_subplot(111)
 
 plt.scatter(xs, ys, s=1)
 
-for x, y, label in zip(xs, ys, labels):
-    plt.text(x, y, label.decode("utf8"), horizontalalignment="center")
+for x, y, label, c in zip(xs, ys, labels, colours):
+    plt.text(x, y, label.decode("utf8"), horizontalalignment="center", color=c)
 
 plt.savefig("plot.pdf", transparent=True)

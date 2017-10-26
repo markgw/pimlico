@@ -6,6 +6,8 @@
 Utilities and type processors for module options.
 
 """
+import json
+
 from pimlico.utils.strings import sorted_by_similarity
 
 
@@ -93,6 +95,14 @@ def comma_separated_list(item_type=str, length=None):
 
 # For convenience, name the common case where the values are not parsed at all
 comma_separated_strings = comma_separated_list()
+
+
+@opt_type_help("JSON string")
+def json_string(string):
+    try:
+        return json.loads(string)
+    except ValueError, e:
+        raise ValueError("error parsing JSON string: {}".format(e))
 
 
 def process_module_options(opt_def, opt_dict, module_type_name):

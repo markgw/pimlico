@@ -10,21 +10,33 @@ Uses scikit-learn to perform the MDS reduction.
 """
 from pimlico.core.dependencies.python import sklearn_dependency
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.core.modules.options import json_string, choose_from_list
+from pimlico.datatypes.embeddings import Embeddings
 from pimlico.datatypes.plotting import PlotOutput
-from pimlico.datatypes.word2vec import Word2VecModel
 from pimlico.modules.visualization import matplotlib_dependency
 
 
 class ModuleInfo(BaseModuleInfo):
-    module_type_name = "word2vec_plot"
-    module_readable_name = "Gensim word2vec plotter"
-    module_inputs = [("vectors", Word2VecModel)]
+    module_type_name = "embeddings_plot"
+    module_readable_name = "Embedding space plotter"
+    module_inputs = [("vectors", Embeddings)]
     module_outputs = [("plot", PlotOutput)]
     module_options = {
         "words": {
             "help": "Number of most frequent words to plot. Default: 50",
             "default": 50,
             "type": int,
+        },
+        "cmap": {
+            "help": "Mapping from word prefixes to matplotlib plotting colours. Every word beginning with the given "
+                    "prefix has the prefix removed and is plotted in the corresponding colour. Specify as a JSON "
+                    "dictionary mapping prefix strings to colour strings",
+            "type": json_string,
+        },
+        "metric": {
+            "help": "Distance metric to use. Choose from 'cosine', 'euclidean', 'manhattan'. Default: 'cosine'",
+            "type": choose_from_list(["cosine", "euclidean", "manhattan"]),
+            "default": "cosine",
         },
     }
 

@@ -13,6 +13,7 @@ lib/virtualenv
 !lib/virtualenv/README
 lib/bin/*
 !lib/bin/README*
+lib/faiss
 models/*
 !models/Makefile
 docs/_build/*

@@ -71,6 +71,17 @@ class SimilarityCommand(ShellCommand):
 
 
 class Word2VecModel(PimlicoDatatype):
+    """
+    Datatype for storing Gensim-trained word2vec embeddings.
+
+    .. seealso::
+
+       Datatype :class:`pimlico.datatypes.embeddings.Embeddings`
+           Another, more generic way, to write the same data, which should generally be used in preference
+           to this one. ``Embeddings`` does not depend on Gensim, but can be converted to Gensim's data structure
+           easily.
+
+    """
     shell_commands = [NearestNeighboursCommand(), VectorCommand(), SimilarityCommand()]
 
     def __init__(self, base_dir, pipeline, **kwargs):
@@ -100,6 +111,13 @@ class Word2VecModel(PimlicoDatatype):
 
 
 class Word2VecModelWriter(PimlicoDatatypeWriter):
+    """
+    .. note::
+
+       Generally, it's preferable to use :class:`pimlico.datatypes.embeddings.Embeddings`, which is more
+       generic, so easier to connect up with general vector/embedding-handling modules.
+
+    """
     def __init__(self, base_dir, verb_only=False, **kwargs):
         super(Word2VecModelWriter, self).__init__(base_dir, **kwargs)
         # Provide writing by setting self.word2vec_model for backwards compatibility

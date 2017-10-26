@@ -13,16 +13,16 @@ This module is simply a wrapper to call `Gensim <https://radimrehurek.com/gensim
 """
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.datatypes.embeddings import Embeddings
 from pimlico.datatypes.tar import TarredCorpusType
 from pimlico.datatypes.tokenized import TokenizedDocumentType
-from pimlico.datatypes.word2vec import Word2VecModel
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "word2vec"
     module_readable_name = "Word2vec embedding trainer"
     module_inputs = [("text", TarredCorpusType(TokenizedDocumentType))]
-    module_outputs = [("model", Word2VecModel)]
+    module_outputs = [("model", Embeddings)]
     module_options = {
         "min_count": {
             "help": "word2vec's min_count option: prunes the dictionary of words that appear fewer than this number "

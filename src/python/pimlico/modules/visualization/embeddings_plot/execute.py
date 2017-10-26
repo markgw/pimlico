@@ -6,7 +6,7 @@ import csv
 import os
 from cStringIO import StringIO
 from sklearn.manifold.mds import MDS
-from sklearn.metrics.pairwise import cosine_distances
+from sklearn.metrics.pairwise import cosine_distances, euclidean_distances, manhattan_distances
 
 import numpy
 
@@ -17,38 +17,56 @@ from pimlico.datatypes.plotting import PlotOutputWriter
 class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         num_words = self.info.options["words"]
+        cmap = self.info.options["cmap"]
+        metric = self.info.options["metric"]
 
         # Get values and labels from the inputs
         self.log.info("Loading vectors")
-        word2vec_model = self.info.get_input("vectors").load_model()
-        vocab = word2vec_model.index2word
+        embeddings = self.info.get_input("vectors")
+        vocab = embeddings.index2word
         self.log.info("Loaded vectors for {} words".format(len(vocab)))
 
         if len(vocab) > num_words:
             # Don't need all these vectors
             # Just take the most frequent words
             self.log.info("Limiting to {} most frequent".format(num_words))
-            vocab.sort(key=lambda w: word2vec_model.vocab[w].count, reverse=True)
+            vocab.sort(key=lambda w: embeddings.vocab[w].count, reverse=True)
             vocab = vocab[:num_words]
 
-        vecs = word2vec_model[vocab]
+        vecs = embeddings[vocab]
         # Compute cosine distances, since TSNE only offers euclidean as built-in
-        sims = cosine_distances(vecs)
+        if metric == "euclidean":
+            distances = euclidean_distances(vecs)
+        elif metric == "manhattan":
+            distances = manhattan_distances(vecs)
+        else:
+            distances = cosine_distances(vecs)
         # Deal with any slight negatives
-        sims[numpy.where(sims < 0.)] = 0.
+        distances[numpy.where(distances < 0.)] = 0.
 
         # Run MDS reduction
         self.log.info("Running MDS reduction to 2D")
         mds = MDS(n_components=2, dissimilarity="precomputed")
-        red_vecs = mds.fit_transform(sims)
+        red_vecs = mds.fit_transform(distances)
+
+        if cmap is not None:
+            # A colour map has been supplied: process the labels to apply colouring
+            def word2col(s):
+                for prefix, cname in cmap.items():
+                    if s.startswith(prefix):
+                        return s[len(prefix):], cname
+                return s, "b"
+            vocab, colours = zip(*map(word2col, vocab))
+        else:
+            colours = ["b" for __ in vocab]
 
         self.log.info("Outputting data and plotting code")
         with PlotOutputWriter(self.info.get_absolute_output_dir("plot")) as writer:
             # Prepare data to go to CSV file
             io = StringIO()
             csv_writer = csv.writer(io)
-            for label, value in zip(vocab, red_vecs):
-                csv_writer.writerow([unicode(label).encode("utf8"), str(float(value[0])), str(float(value[1]))])
+            for label, value, c in zip(vocab, red_vecs, colours):
+                csv_writer.writerow([unicode(label).encode("utf8"), str(float(value[0])), str(float(value[1])), c])
             writer.data = io.getvalue()
 
             # Use a standard template plot python file
