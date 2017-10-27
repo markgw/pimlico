@@ -264,3 +264,4 @@ keras_dependency = PythonPackageOnPip("keras", dependencies=[theano_dependency, 
 sklearn_dependency = PythonPackageOnPip(
     "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
 )
+gensim_dependency = PythonPackageOnPip("gensim", "Gensim", dependencies=[numpy_dependency, scipy_dependency])
