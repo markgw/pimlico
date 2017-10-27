@@ -105,6 +105,23 @@ def json_string(string):
         raise ValueError("error parsing JSON string: {}".format(e))
 
 
+def _enhanced_int(val):
+    """
+    Used as a replacement for the builtin int for converting strings to ints.
+
+    Allows spaces and commas to be included in ints to make them more readable.
+
+    Also allows the use of suffixes ``k`` and ``m``, for thousands and millions
+    """
+    val = val.replace(" ", "")
+    val = val.replace(",", "")
+    if val.lower().endswith("k"):
+        val = "{}000".format(val[:-1])
+    elif val.lower().endswith("m"):
+        val = "{}000000".format(val[:-1])
+    return int(val)
+
+
 def process_module_options(opt_def, opt_dict, module_type_name):
     """
     Utility for processing runtime module options. Called from module base class.
@@ -125,8 +142,12 @@ def process_module_options(opt_def, opt_dict, module_type_name):
         # Postprocess the option value
         opt_config = opt_def[name]
         if "type" in opt_config:
+            type_conv = opt_config["type"]
+            if type_conv is int:
+                # Drop-in replacement for int to allow for more readable formatting
+                type_conv = _enhanced_int
             try:
-                value = opt_config["type"](value)
+                value = type_conv(value)
             except Exception, e:
                 raise ModuleOptionParseError("error processing option value '%s' for %s option in %s module: %s" %
                                              (value, name, module_type_name, e))
