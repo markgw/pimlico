@@ -46,6 +46,13 @@ class Embeddings(PimlicoDatatype):
             return numpy.load(f)
 
     @cached_property
+    def normed_vectors(self):
+        import numpy
+        vectors = self.vectors
+        vectors /= numpy.sqrt((vectors ** 2.).sum(axis=1))[:, numpy.newaxis]
+        return vectors
+
+    @cached_property
     def vector_size(self):
         return self.vectors.shape[1]
 
@@ -64,6 +71,9 @@ class Embeddings(PimlicoDatatype):
     def vocab(self):
         # Build the vocab by indexing the vocab items (in index2word) by word
         return dict((v.word, v) for v in self.index2vocab)
+
+    def __len__(self):
+        return len(self.index2vocab)
 
     def word_vec(self, word):
         """

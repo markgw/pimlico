@@ -14,6 +14,14 @@ class ModuleInfo(BaseModuleInfo):
     `pre-trained embeddings <https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md>`_
     offered by Facebook AI.
 
+    Currently only reads the text format (``.vec``), not the binary format (``.bin``).
+
+    .. seealso::
+
+       :mod:`pimlico.modules.input.embeddings.fasttext_gensim`:
+          An alternative reader that uses Gensim's FastText format reading code and permits reading from the
+          binary format, which contains more information.
+
     """
     module_type_name = "fasttext_embedding_reader"
     module_readable_name = "FastText embedding reader"

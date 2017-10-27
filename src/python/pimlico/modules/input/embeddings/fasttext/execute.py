@@ -45,7 +45,7 @@ class ModuleExecutor(BaseModuleExecutor):
                 vectors[i] = vector
 
         # We don't know word counts, so just set them to a descending count, so that they get ordered correctly
-        word_counts = [(word, len(words)-1-i) for word, i in enumerate(words)]
+        word_counts = [(word, len(words)-1-i) for i, word in enumerate(words)]
 
         output_dir = self.info.get_absolute_output_dir("embeddings")
         self.log.info("Writing embeddings to {}".format(output_dir))
