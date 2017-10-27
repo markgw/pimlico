@@ -38,4 +38,5 @@ plt.scatter(xs, ys, s=1)
 for x, y, label, c in zip(xs, ys, labels, colours):
     plt.text(x, y, label.decode("utf8"), horizontalalignment="center", color=c)
 
+plt.title("<TITLE>")
 plt.savefig("plot.pdf", transparent=True)
