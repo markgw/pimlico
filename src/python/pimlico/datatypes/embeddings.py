@@ -61,7 +61,7 @@ class Embeddings(PimlicoDatatype):
         import csv
         with open(os.path.join(self.data_dir, "vocab.csv"), "r") as f:
             reader = csv.reader(f)
-            return [Vocab(row[0].decode("utf8"), i, int(row[1])) for i, row in enumerate(reader)]
+            return [Vocab(row[0].decode("utf8"), i, count=int(row[1])) for i, row in enumerate(reader)]
 
     @cached_property
     def index2word(self):
