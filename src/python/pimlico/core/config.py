@@ -557,7 +557,7 @@ class PipelineConfig(object):
 
                     # Also allow the specification of various options to do with how expanded alternatives are named
                     alt_name_inputname = False
-                    alt_name_from_option = None
+                    alt_name_from_options = None
                     if alt_naming == "":
                         # Default naming scheme: fully specify param=val (with some abbreviations)
                         pos_alt_names = False
@@ -578,7 +578,7 @@ class PipelineConfig(object):
                     elif alt_naming.startswith("option"):
                         # Take the names just from the alt names on a particular option
                         # In many cases, this will lead to clashes, but not always: for example, if tying alts
-                        alt_name_from_option = alt_naming[6:].strip("()")
+                        alt_name_from_options = map(lambda x: x.strip(), alt_naming[6:].strip("()").split(","))
                     else:
                         raise PipelineConfigParseError("could not interpret alt_naming option to %s: %s" %
                                                        (module_name, alt_naming))
@@ -598,14 +598,17 @@ class PipelineConfig(object):
 
                     def _param_set_to_name(params_set):
                         # Here we allow for several different behaviours, depending on options
-                        if alt_name_from_option is not None:
-                            try:
-                                val, name = dict(params_set)[alt_name_from_option]
-                            except KeyError:
-                                raise PipelineConfigParseError("tried to take alt name from option '%s' for module %s, "
-                                                               "but that option either doesn't exist or doesn't have "
-                                                               "alternative values" % (alt_name_from_option, module_name))
-                            return name
+                        if alt_name_from_options is not None:
+                            alt_name_parts = []
+                            for alt_name_source in alt_name_from_options:
+                                try:
+                                    val, name = dict(params_set)[alt_name_source]
+                                except KeyError:
+                                    raise PipelineConfigParseError("tried to take alt name from option '%s' for module %s, "
+                                                                   "but that option either doesn't exist or doesn't have "
+                                                                   "alternative values" % (alt_name_source, module_name))
+                                alt_name_parts.append(name)
+                            return "~".join(alt_name_parts)
                         elif pos_alt_names:
                             # No param names, just positional value names
                             # In this case, don't abbreviate where names are all the same, as it's confusing
@@ -623,8 +626,15 @@ class PipelineConfig(object):
                             )
 
                     # Generate a name for each
+                    module_alt_names = [_param_set_to_name(params_set) for params_set in alternative_configs]
+                    # Check that the names are valid alt names
+                    for n in module_alt_names:
+                        try:
+                            _check_valid_alt_name(n)
+                        except ValueError, e:
+                            raise PipelineConfigParseError("invalid alt name for module {}: {}".format(module_name, e))
                     alternative_config_names = [
-                        "%s[%s]" % (module_name, _param_set_to_name(params_set)) for params_set in alternative_configs
+                        "%s[%s]" % (module_name, alt_name) for alt_name in module_alt_names
                     ]
                     for exp_name, params_set in zip(alternative_config_names, alternative_configs):
                         expanded_param_settings[exp_name] = params_set
@@ -1523,6 +1533,16 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     return config_sections, available_variants, vars, all_filenames, section_docstrings, abstract
 
 
+def _check_valid_alt_name(name):
+    """ Check that the given string doesn't contain substrings disallowed in names of module alternatives """
+    for disallowed in ["[", "]", ",", "|", "\n"]:
+        if disallowed in name:
+            if disallowed == "\n":
+                disallowed = "newline"
+            raise ValueError("module alternative name '{}' is invalid: alt names may not "
+                             "include '{}'".format(name, disallowed))
+
+
 def check_for_cycles(pipeline):
     """ Basic cyclical dependency check, always run on pipeline before use. """
     # Build a mapping representing module dependencies
@@ -1763,5 +1783,8 @@ def print_dependency_leaf_problems(dep, local_config):
             print "Cannot be installed automatically"
         # If instructions are available, print them, even if the dependency is automatically installable
         if instructions:
-            print instructions
+            instructions = instructions.strip(" \n")
+            print "\nInstallation instructions:\n{}\n".format(
+                "\n".join("  {}".format(line) for line in instructions.splitlines())
+            )
     return auto_installable

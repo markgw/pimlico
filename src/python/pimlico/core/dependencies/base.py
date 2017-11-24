@@ -174,7 +174,10 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
                     print "%s cannot be installed automatically" % dep.name
                     instructions = dep.installation_instructions()
                     if instructions:
+                        print "Installation instructions:\n"
                         print "\n".join("  %s" % line for line in instructions.splitlines())
+                    else:
+                        print "No installation instructions are available"
                     uninstallable.append(dep)
                 print
             else:
