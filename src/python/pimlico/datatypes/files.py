@@ -361,6 +361,10 @@ def NamedFile(name):
         def datatype_full_class_name(cls):
             return ":func:`~pimlico.datatypes.files.NamedFile`"
 
+        @property
+        def filename(self):
+            return self.filenames[0]
+
     _NamedFile.__name__ = 'NamedFile'
     return _NamedFile
 
