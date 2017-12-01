@@ -103,4 +103,4 @@ class ModuleExecutor(BaseModuleExecutor):
         plot_output.plot()
 
         self.log.info("Plot output to %s" % plot_output.pdf_path)
-        self.log.info("Customize plot by editing %s and recompiling (python ploy.py)" % plot_output.script_path)
+        self.log.info("Customize plot by editing %s and recompiling (python plot.py)" % plot_output.script_path)
