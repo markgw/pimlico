@@ -2,8 +2,11 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 """
-Plot vectors from word2vec embeddings trained by :mod:`pimlico.modules.embeddings.word2vec` in a 2D space
+Plot vectors from embeddings, trained by some other module, in a 2D space
 using a MDS reduction and Matplotlib.
+
+They might, for example, come from :mod:`pimlico.modules.embeddings.word2vec`. The embeddings are
+read in using Pimlico's generic word embedding storage type.
 
 Uses scikit-learn to perform the MDS/TSNE reduction.
 
