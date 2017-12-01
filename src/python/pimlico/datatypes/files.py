@@ -72,6 +72,13 @@ class NamedFileCollection(PimlicoDatatype):
             return False
         return True
 
+    def get_absolute_path(self, filename):
+        if self.data_dir is None:
+            return None
+        if filename not in self.filenames:
+            raise ValueError("'{}' is not a filename in the file collection".format(filename))
+        return os.path.join(self.data_dir, filename)
+
 
 class NamedFileCollectionWriter(PimlicoDatatypeWriter):
     filenames = []
@@ -83,11 +90,17 @@ class NamedFileCollectionWriter(PimlicoDatatypeWriter):
             self.require_tasks("write_%s" % filename)
 
     def write_file(self, filename, data):
-        if filename not in self.filenames:
-            raise ValueError("filename '%s' is not among the file collection's filenames" % filename)
-        with open(os.path.join(self.data_dir, filename), "w") as f:
+        path = self.get_absolute_path(filename)
+        with open(path, "w") as f:
             f.write(data)
         self.task_complete("write_%s" % filename)
+
+    def get_absolute_path(self, filename):
+        if self.data_dir is None:
+            return None
+        if filename not in self.filenames:
+            raise ValueError("'{}' is not a filename in the file collection".format(filename))
+        return os.path.join(self.data_dir, filename)
 
 
 def named_file_collection_union(*file_collection_classes, **kwargs):
