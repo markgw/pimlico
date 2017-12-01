@@ -1,5 +1,5 @@
-pimlico.utils.docs package
-==========================
+pimlico\.utils\.docs package
+============================
 
 Submodules
 ----------

@@ -1,5 +1,5 @@
-pimlico.datatypes.parse.dependency module
-=========================================
+pimlico\.datatypes\.parse\.dependency module
+============================================
 
 .. automodule:: pimlico.datatypes.parse.dependency
     :members:

@@ -1,5 +1,5 @@
-pimlico.datatypes.sklearn module
-================================
+pimlico\.datatypes\.sklearn module
+==================================
 
 .. automodule:: pimlico.datatypes.sklearn
     :members:

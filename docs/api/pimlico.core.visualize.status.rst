@@ -1,5 +1,5 @@
-pimlico.core.visualize.status module
-====================================
+pimlico\.core\.visualize\.status module
+=======================================
 
 .. automodule:: pimlico.core.visualize.status
     :members:

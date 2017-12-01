@@ -1,5 +1,5 @@
-pimlico.core.dependencies package
-=================================
+pimlico\.core\.dependencies package
+===================================
 
 Submodules
 ----------

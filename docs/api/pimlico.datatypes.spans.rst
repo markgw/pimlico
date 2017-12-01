@@ -1,5 +1,5 @@
-pimlico.datatypes.spans module
-==============================
+pimlico\.datatypes\.spans module
+================================
 
 .. automodule:: pimlico.datatypes.spans
     :members:

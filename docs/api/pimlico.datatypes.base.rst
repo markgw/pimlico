@@ -1,5 +1,5 @@
-pimlico.datatypes.base module
-=============================
+pimlico\.datatypes\.base module
+===============================
 
 .. automodule:: pimlico.datatypes.base
     :members:

@@ -1,5 +1,5 @@
-pimlico.utils.logging module
-============================
+pimlico\.utils\.logging module
+==============================
 
 .. automodule:: pimlico.utils.logging
     :members:

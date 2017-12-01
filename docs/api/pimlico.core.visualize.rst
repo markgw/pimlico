@@ -1,5 +1,5 @@
-pimlico.core.visualize package
-==============================
+pimlico\.core\.visualize package
+================================
 
 Submodules
 ----------

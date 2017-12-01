@@ -1,5 +1,5 @@
-pimlico.datatypes.keras module
-==============================
+pimlico\.datatypes\.keras module
+================================
 
 .. automodule:: pimlico.datatypes.keras
     :members:

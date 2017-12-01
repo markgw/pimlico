@@ -1,5 +1,5 @@
-pimlico.core.modules.map.multiproc module
-=========================================
+pimlico\.core\.modules\.map\.multiproc module
+=============================================
 
 .. automodule:: pimlico.core.modules.map.multiproc
     :members:

@@ -1,5 +1,5 @@
-pimlico.utils.pos module
-========================
+pimlico\.utils\.pos module
+==========================
 
 .. automodule:: pimlico.utils.pos
     :members:

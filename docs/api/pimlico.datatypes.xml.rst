@@ -1,5 +1,5 @@
-pimlico.datatypes.xml module
-============================
+pimlico\.datatypes\.xml module
+==============================
 
 .. automodule:: pimlico.datatypes.xml
     :members:

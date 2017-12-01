@@ -1,5 +1,5 @@
-pimlico.datatypes.table module
-==============================
+pimlico\.datatypes\.table module
+================================
 
 .. automodule:: pimlico.datatypes.table
     :members:

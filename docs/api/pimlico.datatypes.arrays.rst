@@ -1,5 +1,5 @@
-pimlico.datatypes.arrays module
-===============================
+pimlico\.datatypes\.arrays module
+=================================
 
 .. automodule:: pimlico.datatypes.arrays
     :members:

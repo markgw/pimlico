@@ -1,5 +1,5 @@
-pimlico.utils package
-=====================
+pimlico\.utils package
+======================
 
 Subpackages
 -----------

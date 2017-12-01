@@ -1,5 +1,5 @@
-pimlico.cli.browser package
-===========================
+pimlico\.cli\.browser package
+=============================
 
 Submodules
 ----------

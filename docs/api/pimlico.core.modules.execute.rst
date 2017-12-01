@@ -1,5 +1,5 @@
-pimlico.core.modules.execute module
-===================================
+pimlico\.core\.modules\.execute module
+======================================
 
 .. automodule:: pimlico.core.modules.execute
     :members:

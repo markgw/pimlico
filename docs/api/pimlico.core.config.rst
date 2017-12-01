@@ -1,5 +1,5 @@
-pimlico.core.config module
-==========================
+pimlico\.core\.config module
+============================
 
 .. automodule:: pimlico.core.config
     :members:

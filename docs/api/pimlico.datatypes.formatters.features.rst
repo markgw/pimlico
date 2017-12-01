@@ -1,5 +1,5 @@
-pimlico.datatypes.formatters.features module
-============================================
+pimlico\.datatypes\.formatters\.features module
+===============================================
 
 .. automodule:: pimlico.datatypes.formatters.features
     :members:

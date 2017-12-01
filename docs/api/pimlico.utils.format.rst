@@ -1,5 +1,5 @@
-pimlico.utils.format module
-===========================
+pimlico\.utils\.format module
+=============================
 
 .. automodule:: pimlico.utils.format
     :members:

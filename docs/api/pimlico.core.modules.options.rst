@@ -1,5 +1,5 @@
-pimlico.core.modules.options module
-===================================
+pimlico\.core\.modules\.options module
+======================================
 
 .. automodule:: pimlico.core.modules.options
     :members:

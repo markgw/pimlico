@@ -1,5 +1,5 @@
-pimlico.datatypes.parse package
-===============================
+pimlico\.datatypes\.parse package
+=================================
 
 Submodules
 ----------

@@ -1,5 +1,5 @@
-pimlico.utils.docs.commandgen module
-====================================
+pimlico\.utils\.docs\.commandgen module
+=======================================
 
 .. automodule:: pimlico.utils.docs.commandgen
     :members:

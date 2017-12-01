@@ -1,5 +1,5 @@
-pimlico.cli.clean module
-========================
+pimlico\.cli\.clean module
+==========================
 
 .. automodule:: pimlico.cli.clean
     :members:

@@ -1,5 +1,5 @@
-pimlico.utils.network module
-============================
+pimlico\.utils\.network module
+==============================
 
 .. automodule:: pimlico.utils.network
     :members:

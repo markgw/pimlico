@@ -1,5 +1,5 @@
-pimlico.datatypes.results module
-================================
+pimlico\.datatypes\.results module
+==================================
 
 .. automodule:: pimlico.datatypes.results
     :members:

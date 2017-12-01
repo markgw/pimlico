@@ -1,5 +1,5 @@
-pimlico.core.modules.map.singleproc module
-==========================================
+pimlico\.core\.modules\.map\.singleproc module
+==============================================
 
 .. automodule:: pimlico.core.modules.map.singleproc
     :members:

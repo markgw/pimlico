@@ -1,5 +1,5 @@
-pimlico.core.external package
-=============================
+pimlico\.core\.external package
+===============================
 
 Submodules
 ----------

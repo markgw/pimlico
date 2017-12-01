@@ -1,5 +1,5 @@
-pimlico.cli.testemail module
-============================
+pimlico\.cli\.testemail module
+==============================
 
 .. automodule:: pimlico.cli.testemail
     :members:

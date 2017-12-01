@@ -1,5 +1,5 @@
-pimlico.utils.pipes module
-==========================
+pimlico\.utils\.pipes module
+============================
 
 .. automodule:: pimlico.utils.pipes
     :members:

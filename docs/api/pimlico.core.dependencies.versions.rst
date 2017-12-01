@@ -1,5 +1,5 @@
-pimlico.core.dependencies.versions module
-=========================================
+pimlico\.core\.dependencies\.versions module
+============================================
 
 .. automodule:: pimlico.core.dependencies.versions
     :members:

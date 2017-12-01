@@ -1,5 +1,5 @@
-pimlico.cli.subcommands module
-==============================
+pimlico\.cli\.subcommands module
+================================
 
 .. automodule:: pimlico.cli.subcommands
     :members:

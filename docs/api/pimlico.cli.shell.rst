@@ -1,5 +1,5 @@
-pimlico.cli.shell package
-=========================
+pimlico\.cli\.shell package
+===========================
 
 Submodules
 ----------

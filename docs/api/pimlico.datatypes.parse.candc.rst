@@ -1,5 +1,5 @@
-pimlico.datatypes.parse.candc module
-====================================
+pimlico\.datatypes\.parse\.candc module
+=======================================
 
 .. automodule:: pimlico.datatypes.parse.candc
     :members:

@@ -1,5 +1,5 @@
-pimlico.datatypes.ints module
-=============================
+pimlico\.datatypes\.ints module
+===============================
 
 .. automodule:: pimlico.datatypes.ints
     :members:

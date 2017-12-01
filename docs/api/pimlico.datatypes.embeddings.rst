@@ -1,7 +1,7 @@
-pimlico\.core\.visualize\.deps module
+pimlico\.datatypes\.embeddings module
 =====================================
 
-.. automodule:: pimlico.core.visualize.deps
+.. automodule:: pimlico.datatypes.embeddings
     :members:
     :undoc-members:
     :show-inheritance:

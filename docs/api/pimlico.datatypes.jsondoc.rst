@@ -1,5 +1,5 @@
-pimlico.datatypes.jsondoc module
-================================
+pimlico\.datatypes\.jsondoc module
+==================================
 
 .. automodule:: pimlico.datatypes.jsondoc
     :members:

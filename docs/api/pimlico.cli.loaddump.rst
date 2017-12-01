@@ -1,5 +1,5 @@
-pimlico.cli.loaddump module
-===========================
+pimlico\.cli\.loaddump module
+=============================
 
 .. automodule:: pimlico.cli.loaddump
     :members:

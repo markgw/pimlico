@@ -1,5 +1,5 @@
-pimlico.datatypes.coref.opennlp module
-======================================
+pimlico\.datatypes\.coref\.opennlp module
+=========================================
 
 .. automodule:: pimlico.datatypes.coref.opennlp
     :members:

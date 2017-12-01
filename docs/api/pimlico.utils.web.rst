@@ -1,5 +1,5 @@
-pimlico.utils.web module
-========================
+pimlico\.utils\.web module
+==========================
 
 .. automodule:: pimlico.utils.web
     :members:

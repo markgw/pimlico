@@ -1,5 +1,5 @@
-pimlico.datatypes.plotting module
-=================================
+pimlico\.datatypes\.plotting module
+===================================
 
 .. automodule:: pimlico.datatypes.plotting
     :members:

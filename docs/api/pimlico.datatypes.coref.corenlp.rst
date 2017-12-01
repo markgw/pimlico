@@ -1,5 +1,5 @@
-pimlico.datatypes.coref.corenlp module
-======================================
+pimlico\.datatypes\.coref\.corenlp module
+=========================================
 
 .. automodule:: pimlico.datatypes.coref.corenlp
     :members:

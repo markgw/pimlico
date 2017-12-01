@@ -31,4 +31,5 @@ corpus type.
    :maxdepth: 2
    :titlesonly:
 
+   pimlico.modules.input.embeddings
    pimlico.modules.input.text

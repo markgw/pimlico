@@ -1,5 +1,5 @@
-pimlico.datatypes.caevo module
-==============================
+pimlico\.datatypes\.caevo module
+================================
 
 .. automodule:: pimlico.datatypes.caevo
     :members:

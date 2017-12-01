@@ -1,5 +1,5 @@
-pimlico.datatypes.word2vec module
-=================================
+pimlico\.datatypes\.word2vec module
+===================================
 
 .. automodule:: pimlico.datatypes.word2vec
     :members:

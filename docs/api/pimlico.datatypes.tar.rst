@@ -1,5 +1,5 @@
-pimlico.datatypes.tar module
-============================
+pimlico\.datatypes\.tar module
+==============================
 
 .. automodule:: pimlico.datatypes.tar
     :members:

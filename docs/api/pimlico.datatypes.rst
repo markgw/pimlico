@@ -1,5 +1,5 @@
-pimlico.datatypes package
-=========================
+pimlico\.datatypes package
+==========================
 
 Subpackages
 -----------
@@ -21,6 +21,7 @@ Submodules
    pimlico.datatypes.core
    pimlico.datatypes.dictionary
    pimlico.datatypes.documents
+   pimlico.datatypes.embeddings
    pimlico.datatypes.features
    pimlico.datatypes.files
    pimlico.datatypes.floats

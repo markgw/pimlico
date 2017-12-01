@@ -1,5 +1,5 @@
-pimlico.datatypes.r module
-==========================
+pimlico\.datatypes\.r module
+============================
 
 .. automodule:: pimlico.datatypes.r
     :members:

@@ -1,5 +1,5 @@
-pimlico.core.modules.base module
-================================
+pimlico\.core\.modules\.base module
+===================================
 
 .. automodule:: pimlico.core.modules.base
     :members:

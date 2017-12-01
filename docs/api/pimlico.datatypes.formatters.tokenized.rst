@@ -1,5 +1,5 @@
-pimlico.datatypes.formatters.tokenized module
-=============================================
+pimlico\.datatypes\.formatters\.tokenized module
+================================================
 
 .. automodule:: pimlico.datatypes.formatters.tokenized
     :members:

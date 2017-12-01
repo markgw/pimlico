@@ -1,5 +1,5 @@
-pimlico.datatypes.formatters package
-====================================
+pimlico\.datatypes\.formatters package
+======================================
 
 Submodules
 ----------

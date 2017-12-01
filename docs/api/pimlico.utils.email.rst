@@ -1,5 +1,5 @@
-pimlico.utils.email module
-==========================
+pimlico\.utils\.email module
+============================
 
 .. automodule:: pimlico.utils.email
     :members:

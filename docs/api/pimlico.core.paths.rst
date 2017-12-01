@@ -1,5 +1,5 @@
-pimlico.core.paths module
-=========================
+pimlico\.core\.paths module
+===========================
 
 .. automodule:: pimlico.core.paths
     :members:

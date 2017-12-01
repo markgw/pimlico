@@ -1,5 +1,5 @@
-pimlico.cli.debug package
-=========================
+pimlico\.cli\.debug package
+===========================
 
 Submodules
 ----------

@@ -1,5 +1,5 @@
-pimlico.cli.shell.runner module
-===============================
+pimlico\.cli\.shell\.runner module
+==================================
 
 .. automodule:: pimlico.cli.shell.runner
     :members:

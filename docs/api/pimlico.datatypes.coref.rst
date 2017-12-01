@@ -1,5 +1,5 @@
-pimlico.datatypes.coref package
-===============================
+pimlico\.datatypes\.coref package
+=================================
 
 Submodules
 ----------

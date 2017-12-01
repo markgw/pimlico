@@ -1,5 +1,5 @@
-pimlico.core.modules.map package
-================================
+pimlico\.core\.modules\.map package
+===================================
 
 Submodules
 ----------

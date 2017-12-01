@@ -1,5 +1,5 @@
-pimlico.core.logs module
-========================
+pimlico\.core\.logs module
+==========================
 
 .. automodule:: pimlico.core.logs
     :members:

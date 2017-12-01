@@ -1,5 +1,5 @@
-pimlico.datatypes.tokenized module
-==================================
+pimlico\.datatypes\.tokenized module
+====================================
 
 .. automodule:: pimlico.datatypes.tokenized
     :members:

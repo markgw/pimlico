@@ -1,5 +1,5 @@
-pimlico.datatypes.floats module
-===============================
+pimlico\.datatypes\.floats module
+=================================
 
 .. automodule:: pimlico.datatypes.floats
     :members:
