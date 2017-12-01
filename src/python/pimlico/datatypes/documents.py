@@ -57,4 +57,8 @@ class RawTextDocumentType(RawDocumentType):
     }
 
     def process_document(self, doc):
-        return doc.decode(self.options.get("encoding", "utf8"))
+        if type(doc) is unicode:
+            # Decoding's already been done
+            return doc
+        else:
+            return doc.decode(self.options.get("encoding", "utf8"))
