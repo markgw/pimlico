@@ -41,12 +41,13 @@ class RawDocumentType(DataPointType):
         return doc
 
 
-class RawTextDocumentType(RawDocumentType):
+class TextDocumentType(RawDocumentType):
     """
-    Subclass of RawDocumentType used to indicate that the document represents text (not just any old raw data)
-    and that it hasn't been processed (tokenized, etc). Note that text that has been tokenized, parsed, etc does
-    not used subclasses of this type, so they will not be considered compatible if this type is used as a
-    requirement.
+    Documents that contain text, most often human-readable documents from a textual
+    corpus. Most often used as a superclass for other, more specific, document types.
+    Indicates that documents represent text (not just any old raw data).
+
+    Handles text encoding.
 
     """
     input_module_options = {
@@ -62,3 +63,13 @@ class RawTextDocumentType(RawDocumentType):
             return doc
         else:
             return doc.decode(self.options.get("encoding", "utf8"))
+
+
+class RawTextDocumentType(RawDocumentType):
+    """
+    Subclass of TextDocumentType used to indicate that the text hasn't been
+    processed (tokenized, etc). Note that text that has been tokenized, parsed, etc does
+    not used subclasses of this type, so they will not be considered compatible if this type is used as a
+    requirement.
+
+    """

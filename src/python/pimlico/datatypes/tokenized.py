@@ -1,13 +1,13 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-from pimlico.datatypes.documents import RawDocumentType
+from pimlico.datatypes.documents import RawDocumentType, TextDocumentType
 from pimlico.datatypes.tar import TarredCorpus, TarredCorpusWriter
 
 __all__ = ["TokenizedCorpus", "TokenizedCorpusWriter"]
 
 
-class TokenizedDocumentType(RawDocumentType):
+class TokenizedDocumentType(TextDocumentType):
     formatters = [("tokenized_doc", "pimlico.datatypes.formatters.tokenized.TokenizedDocumentFormatter")]
 
     def process_document(self, doc):
