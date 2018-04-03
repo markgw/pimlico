@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+import sys
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.utils.core import remove_duplicates
@@ -19,7 +20,11 @@ class InputsCmd(PimlicoCLISubcommand):
     def run_command(self, pipeline, opts):
         module_name = opts.module_name
         print "Input locations for module '%s'" % module_name
-        module = pipeline[module_name]
+        try:
+            module = pipeline[module_name]
+        except KeyError:
+            print >>sys.stderr, "Error: module '{}' does not exist".format(module_name)
+            sys.exit(1)
 
         # Display info for each input to this module
         for input_name in module.input_names:
@@ -61,7 +66,11 @@ class OutputCmd(PimlicoCLISubcommand):
 
     def run_command(self, pipeline, opts):
         module_name = opts.module_name
-        module = pipeline[module_name]
+        try:
+            module = pipeline[module_name]
+        except KeyError:
+            print >>sys.stderr, "Error: module '{}' does not exist".format(module_name)
+            sys.exit(1)
         # Get the output dir for the module
         module_output_dir = module.get_module_output_dir(short_term_store=True)
         print "Output location for module '%s': %s" % (module_name, module_output_dir)

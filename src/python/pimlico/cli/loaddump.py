@@ -54,7 +54,11 @@ class DumpCmd(PimlicoCLISubcommand):
 
         for module_name in opts.modules:
             print "== Dumping data for '%s' ==" % module_name
-            module = pipeline[module_name]
+            try:
+                module = pipeline[module_name]
+            except KeyError:
+                print >>sys.stderr, "Error: module '{}' does not exist".format(module_name)
+                continue
 
             # Get the output dir for the module
             module_rel_output_dir = module.get_module_output_dir()
@@ -153,7 +157,13 @@ class LoadCmd(PimlicoCLISubcommand):
                                         (dump_variant, pipeline.variant)
                     sys.exit(1)
 
-                module = pipeline[module_name]
+                try:
+                    module = pipeline[module_name]
+                except KeyError:
+                    print >>sys.stderr, \
+                        "Error: module with name '{}' does not exist in the pipeline".format(module_name)
+                    continue
+
                 # Get the output dir for the module
                 module_output_dir = module.get_module_output_dir(short_term_store=True)
                 print "Extracting module data to %s" % module_output_dir
