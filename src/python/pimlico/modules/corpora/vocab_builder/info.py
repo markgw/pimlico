@@ -39,5 +39,11 @@ class ModuleInfo(BaseModuleInfo):
             "help": "Ensure that certain words are always included in the vocabulary, even if they don't make it "
                     "past the various filters, or are never seen in the corpus. Give as a comma-separated list",
             "type": comma_separated_strings,
-        }
+        },
+        "oov": {
+            "help": "Use the final index the represent chars that will be out of vocabulary after applying "
+                    "threshold/limit filters. Applied even if the count is 0. "
+                    "Represent OOVs using the given string in the vocabulary",
+            "type": str,
+        },
     }

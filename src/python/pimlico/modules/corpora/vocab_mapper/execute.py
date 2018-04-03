@@ -12,8 +12,13 @@ def preprocess(executor):
 
 def process_document(worker, archive_name, doc_name, doc):
     vocab = worker.executor.vocab
-    # Use the next unused ID after the vocab to represent OOV words
-    oov = len(vocab)
+
+    oov_token = worker.info.options["oov"]
+    if oov_token is not None:
+        oov = vocab.token2id[oov_token]
+    else:
+        # Use the next unused ID after the vocab to represent OOV words
+        oov = len(vocab)
 
     # Map all words to their IDs, or OOV if they're not in the vocab
     int_data = [
