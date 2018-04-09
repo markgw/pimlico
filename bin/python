@@ -58,7 +58,14 @@ if [ ! -f "$python" ]; then
         echo "Virtualenv setup seemed to work, but Python interpreter $python is still not available"
         exit 1
     fi
-    echo "Successfully set up virtualenv for running Pimlico"
+    echo "Successfully set up virtualenv for running Pimlico. Running basic Pimlico setup"
+
+    # If we've just installed the virtualenv then there'll be basic setup to be done
+    # Run Pimlico in its special first-run setup mode that doesn't require loading a pipeline
+    $python -m pimlico.cli.main setup
+
+    # If the command-line args only requested this setup command anyway, it will get run again below,
+    #  but that isn't a problem, as (if all has succeeded) it will just exit quietly
 fi
 
 if [ -n "$GPU" ]; then

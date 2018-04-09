@@ -156,6 +156,14 @@ SUBCOMMANDS = [
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "setup":
+        # Special case that doesn't require loading a pipeline
+        # Don't complain about missing arguments, but just exit
+        # If we've got this far, we've already been through the core dependency checks/installation, so they've
+        #  already reported any problems or actions
+        # This allows you to run Pimlico once after installation and perform basic setup without doing anything else
+        sys.exit(0)
+
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
     parser.add_argument("--debug", "-d", help="Output verbose debugging info", action="store_true")

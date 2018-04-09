@@ -152,8 +152,16 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
     from pimlico.utils.format import title_box
     uninstallable = []
     installed = []
+
+    # Remove any dependencies that are already available at the beginning
+    # We should silently pass over them
+    deps = [d for d in deps if not d.available(local_config)]
+
     for dep in deps:
-        if not dep.available(local_config):
+        print ", ".join("%s (%s)" % (d.name, "Y" if d.available(local_config) else "N") for d in deps)
+        if dep.available(local_config):
+            print "%s became available while installing other dependencies" % dep.name
+        else:
             # Haven't got this library
             # First check whether there are recursive deps we can install
             subdeps_uninstallable = check_and_install(dep.dependencies(), local_config, trust_downloaded_archives=trust_downloaded_archives)
@@ -187,6 +195,7 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
         print "Installed: %s" % ", ".join(installed)
     if uninstallable:
         print "Could not install: %s" % ", ".join(dep.name for dep in uninstallable)
+    print
     return uninstallable
 
 

@@ -12,8 +12,8 @@ CORE_PIMLICO_DEPENDENCIES = [
     # Virtualenv must be installed so that we can install other packages in the local Pimlico environment
     PythonPackageSystemwideInstall("virtualenv", "Virtualenv"),
     # Several lightweight Python libraries that we use throughout the codebase
-    PythonPackageOnPip("progressbar", "Progressbar"),
-    PythonPackageOnPip("tabulate", "tabulate"),
     PythonPackageOnPip("colorama", "colorama"),
     PythonPackageOnPip("termcolor", "termcolor"),
+    PythonPackageOnPip("tabulate", "tabulate"),
+    PythonPackageOnPip("progressbar", "Progressbar"),
 ]
