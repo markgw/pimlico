@@ -9,14 +9,15 @@ lib/java/*
 lib/python/*
 !lib/python/Makefile
 lib/python_env*
-lib/virtualenv
-!lib/virtualenv/README
+lib/virtualenv/*
+!lib/virtualenv/README.md
 lib/bin/*
 !lib/bin/README*
 lib/faiss
 lib/word2vecf
 models/*
 !models/Makefile
+!models/README.md
 docs/_build/*
 log/
 lib/test_env/
