@@ -138,8 +138,12 @@ class OutputType(ReaderOutputType):
     data_point_type = RawTextDocumentType
 
     def filter_text(self, data):
-        """ May be overridden by subclasses to perform postprocessing of document data """
-        return data
+        """
+        May be overridden by subclasses to perform postprocessing of document data.
+        Otherwise, the document type's process_document() method is used.
+
+        """
+        return self.data_point_type_instance.process_document(data)
 
     def data_ready(self):
         return check_paths_from_options(self.reader_options)
@@ -147,6 +151,17 @@ class OutputType(ReaderOutputType):
     def __len__(self):
         # Should only be called after data_read() == True
         return len(get_paths_from_options(self.reader_options))
+
+    def iter_docs_in_file(self, f):
+        """
+        Subclasses may want to provide a way to split a file into multiple docs.
+        This implementation just reads in the whole file as a single doc.
+
+        Note that, if you override this with something that (might) split the files into
+        multiple docs, you should also override __len__() to give the correct doc count.
+
+        """
+        yield f.read()
 
     def __iter__(self):
         options = self.reader_options
@@ -167,23 +182,25 @@ class OutputType(ReaderOutputType):
                 used_doc_names.add(doc_name)
 
                 with open(path, "r") as f:
-                    data = f.read().decode(encoding, errors=options["encoding_errors"])
+                    for data in self.iter_docs_in_file(f):
+                        if not type(data) is unicode:
+                            data = data.decode(encoding, errors=options["encoding_errors"])
 
-                if start != 0 or end != -1:
-                    # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
-                    if start != 0:
-                        # Otherwise, shift down to account for 1-indexing
-                        start -= 1
-                    if end != -1:
-                        end -= 1
+                        if start != 0 or end != -1:
+                            # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
+                            if start != 0:
+                                # Otherwise, shift down to account for 1-indexing
+                                start -= 1
+                            if end != -1:
+                                end -= 1
 
-                    lines = data.split("\n")
-                    if end == -1:
-                        data = u"\n".join(lines[start:])
-                    else:
-                        data = u"\n".join(lines[start:end+1])
+                            lines = data.split("\n")
+                            if end == -1:
+                                data = u"\n".join(lines[start:])
+                            else:
+                                data = u"\n".join(lines[start:end+1])
 
-                yield doc_name, self.filter_text(data)
+                        yield doc_name, self.filter_text(data)
 
 
 ModuleInfo = iterable_input_reader_factory(
