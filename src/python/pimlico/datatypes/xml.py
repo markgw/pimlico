@@ -3,9 +3,11 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-Input module for extracting documents from XML files. Gigaword, for example, is stored in this way.
+Input datatype for extracting documents from XML files. Gigaword, for example, is stored in this way.
 
 Depends on BeautifulSoup (see "bs4" target in lib dir Makefile).
+
+DEPRECATED: Use input module :mod:`pimlico.modules.input.xml` instead. Input datatypes are being phased out.
 
 """
 import gzip
