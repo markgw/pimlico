@@ -522,11 +522,22 @@ class BaseModuleInfo(object):
         Additional kwargs will be passed through to the datatype's init call.
 
         """
+        from pimlico.datatypes.base import IterableCorpus
         inputs = [
             previous_module.get_output(output_name, additional_names=additional_names, **kwargs)
             for previous_module, output_name, additional_names in
             self.get_input_module_connection(input_name, always_list=True)
         ]
+        # For IterableCorpora, we may need to let the corpus know what datapoint type was required,
+        # in case the provided type needs to be cast
+        # Find out what type requirement was met (by each input)
+        satisfied = self.typecheck_input(input_name)
+        for input, satisfied_req in zip(inputs, satisfied):
+            # TODO This is really difficult: we need to know what document type was required of this
+            # corpus, but it's impossible to get this in a neat, reliable way, as it could be some
+            # arbitrary typechecking routine, or several allowed document types
+            # Leaving this for now: I think we fundamentally need a whole new way to deal with doc types
+            pass
         return inputs if always_list or self.is_multiple_input(input_name) else inputs[0]
 
     def input_ready(self, input_name=None):
@@ -673,49 +684,75 @@ class BaseModuleInfo(object):
             deps.extend(self.pipeline[dep].get_transitive_dependencies())
         return remove_duplicates(deps)
 
+    def get_input_type_requirements(self, input_name=None):
+        if input_name is None:
+            input_name = self.module_inputs[0][0]
+        # Get the type requirements given by the module info definition for this input
+        input_type_requirements = dict(self.module_inputs)[input_name]
+        if isinstance(input_type_requirements, MultipleInputs):
+            # Type requirements are the same for all inputs
+            input_type_requirements = input_type_requirements.datatype_requirements
+        return input_type_requirements
+
     def typecheck_inputs(self):
         if self.is_input() or len(self.module_inputs) == 0:
             # Nothing to check
             return
 
-        module_inputs = dict(self.module_inputs)
-        for input_name, input_connections in self.inputs.items():
+        for input_name in self.inputs.keys():
             # Check the type of each input in turn
-            input_type_requirements = module_inputs[input_name]
+            # This raises an exception if typechecking fails, which we let get passed up
+            self.typecheck_input(input_name)
 
-            if isinstance(input_type_requirements, MultipleInputs):
-                # Type requirements are the same for all inputs
-                input_type_requirements = input_type_requirements.datatype_requirements
-            elif len(input_connections) > 1:
-                # Doesn't accept multiple datatypes on a single input, so shouldn't have more than one
-                raise PipelineStructureError("input %s on module '%s' does not accept multiple inputs, but %d were "
-                                             "given" % (input_name, self.module_name, len(input_connections)))
+    def typecheck_input(self, input_name):
+        """
+        Typecheck a single input. ``typecheck_inputs()`` calls this and is used for
+        typechecking of a pipeline. This method returns the (or the first) satisfied input
+        requirement, or raises an exception if typechecking failed, so can be handy separately to
+        establish which requirement was met.
 
-            for (dep_module_name, output, additional_names) in input_connections:
-                # Load the dependent module
-                dep_module = self.pipeline[dep_module_name]
-                output_name = output or "default"
-                # Try to load the named output (or the default, if no name was given)
-                dep_module_output_name, dep_module_output = \
-                    dep_module.get_output_datatype(output_name=output, additional_names=additional_names)
+        The result is always a list, but will contain only one item unless the input is a multiple
+        input.
 
-                # Check the output datatype is given in a suitable form
-                if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)) and \
-                        not isinstance(dep_module_output, DynamicOutputDatatype):
-                    raise PipelineStructureError("invalid output datatype from output '%s' of module '%s'. "
-                                                 "Must be a PimlicoDatatype "
-                                                 "subclass or a DynamicOutputDatatype subclass instance: "
-                                                 "got %s" % (
-                        dep_module_output_name, dep_module_name, dep_module_output.__name__
-                    ))
-                try:
-                    check_type(dep_module_output, input_type_requirements)
-                except TypeCheckError, e:
-                    additional_name_str = "".join("->%s" % an for an in additional_names)
-                    raise PipelineStructureError("type-checking error matching input '%s' to module '%s' with output "
-                                                 "'%s%s' from module '%s': %s" %
-                                                 (input_name, self.module_name, output_name, additional_name_str,
-                                                  dep_module_name, e))
+        """
+        input_connections = self.inputs[input_name]
+        input_type_requirements = dict(self.module_inputs)[input_name]
+
+        if isinstance(input_type_requirements, MultipleInputs):
+            # Type requirements are the same for all inputs
+            input_type_requirements = input_type_requirements.datatype_requirements
+        elif len(input_connections) > 1:
+            # Doesn't accept multiple datatypes on a single input, so shouldn't have more than one
+            raise PipelineStructureError("input %s on module '%s' does not accept multiple inputs, but %d were "
+                                         "given" % (input_name, self.module_name, len(input_connections)))
+
+        first_satisfied = []
+        for (dep_module_name, output, additional_names) in input_connections:
+            # Load the dependent module
+            dep_module = self.pipeline[dep_module_name]
+            output_name = output or "default"
+            # Try to load the named output (or the default, if no name was given)
+            dep_module_output_name, dep_module_output = \
+                dep_module.get_output_datatype(output_name=output, additional_names=additional_names)
+
+            # Check the output datatype is given in a suitable form
+            if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)) and \
+                    not isinstance(dep_module_output, DynamicOutputDatatype):
+                raise PipelineStructureError("invalid output datatype from output '%s' of module '%s'. "
+                                             "Must be a PimlicoDatatype "
+                                             "subclass or a DynamicOutputDatatype subclass instance: "
+                                             "got %s" % (
+                                                 dep_module_output_name, dep_module_name, dep_module_output.__name__
+                                             ))
+            try:
+                first_satisfied.append(check_type(dep_module_output, input_type_requirements))
+            except TypeCheckError, e:
+                additional_name_str = "".join("->%s" % an for an in additional_names)
+                raise PipelineStructureError("type-checking error matching input '%s' to module '%s' with output "
+                                             "'%s%s' from module '%s': %s" %
+                                             (input_name, self.module_name, output_name, additional_name_str,
+                                              dep_module_name, e))
+        return first_satisfied
 
     def get_software_dependencies(self):
         """
@@ -1005,9 +1042,13 @@ def check_type(provided_type, type_requirements):
                                  type(intype).__name__)
 
     # Check that the provided output type is a subclass of (or equal to) the required input type
-    if not any(_compatible_input_type(intype, provided_type) for intype in type_requirements):
-        raise TypeCheckError("required type is %s (or a descendent), but provided type is %s" % (
-            "/".join(t.type_checking_name() for t in type_requirements), provided_type.type_checking_name()))
+    for intype in type_requirements:
+        if _compatible_input_type(intype, provided_type):
+            # Return the requirement that was met, which is handy in some circumstances
+            return intype
+    # No requirement was met
+    raise TypeCheckError("required type is %s (or a descendent), but provided type is %s" % (
+        "/".join(t.type_checking_name() for t in type_requirements), provided_type.type_checking_name()))
 
 
 def _compatible_input_type(type_requirement, supplied_type):

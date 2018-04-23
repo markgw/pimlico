@@ -36,6 +36,18 @@ class RawDocumentType(DataPointType):
     be appropriate to use subclasses to provide more information and processing operations specific to the
     datatype.
 
+    The ``process_document()`` method produces a data structure in the internal format appropriate for
+    the data point type.
+
+    # A problem
+
+    If a subclassed type produces an internal data structure that does not work as a sub-type (using
+    duck-typing-style inheritance principles) of its parent type, we can run into problems.
+    See [this comment](https://github.com/markgw/pimlico/issues/1#issuecomment-383620759) for discussion
+    of a solution to be introduced.
+
+    I therefore am not going to solve this now: you just need to work around it.
+
     """
     def process_document(self, doc):
         return doc
@@ -65,7 +77,7 @@ class TextDocumentType(RawDocumentType):
             return doc.decode(self.options.get("encoding", "utf8"))
 
 
-class RawTextDocumentType(RawDocumentType):
+class RawTextDocumentType(TextDocumentType):
     """
     Subclass of TextDocumentType used to indicate that the text hasn't been
     processed (tokenized, etc). Note that text that has been tokenized, parsed, etc does
@@ -73,3 +85,7 @@ class RawTextDocumentType(RawDocumentType):
     requirement.
 
     """
+
+
+class DataPointTypeConversionError(Exception):
+    pass

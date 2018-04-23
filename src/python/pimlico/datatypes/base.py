@@ -486,6 +486,7 @@ class IterableCorpus(PimlicoDatatype):
 
     def __init__(self, *args, **kwargs):
         self.raw_data = kwargs.pop("raw_data", False)
+        self.as_type = kwargs.pop("as_type", None)
         super(IterableCorpus, self).__init__(*args, **kwargs)
         # Prepare the document datatype instance
         # Pass in all the options/kwargs we've got, which include any options that the document type specifies
@@ -520,12 +521,17 @@ class IterableCorpus(PimlicoDatatype):
         ]
 
     @classmethod
-    def check_supplied_type(cls, supplied_type):
+    def check_type(cls, supplied_type):
         """
         Override type checking to require that the supplied type have a document type that is compatible with
         (i.e. a subclass of) the document type of this class.
+
         """
-        return issubclass(supplied_type, cls) and issubclass(supplied_type.document_type, cls.data_point_type)
+        if isinstance(supplied_type, type):
+            main_type_check = issubclass(supplied_type, IterableCorpus)
+        else:
+            main_type_check = isinstance(supplied_type, IterableCorpus)
+        return main_type_check and issubclass(supplied_type.data_point_type, cls.data_point_type)
 
     @classmethod
     def type_checking_name(cls):

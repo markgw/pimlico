@@ -176,6 +176,9 @@ class TarredCorpus(IterableCorpus):
         Most of the time, you shouldn't need to override this, but just write a document type that does the
         necessary processing.
 
+        I think we should remove this once the new (forthcoming) datatype system is ready, but
+        we'll need to check that there's not still a use case for it.
+
         """
         return self.data_point_type_instance.process_document(data)
 
@@ -333,8 +336,11 @@ class TarredCorpusType(DynamicInputDatatypeRequirement):
         return self.datatype_doc_info
 
     def check_type(self, supplied_type):
-        return issubclass(supplied_type, TarredCorpus) and \
-               issubclass(supplied_type.data_point_type, self.document_types)
+        if isinstance(supplied_type, type):
+            main_type_check = issubclass(supplied_type, TarredCorpus)
+        else:
+            main_type_check = isinstance(supplied_type, TarredCorpus)
+        return main_type_check and issubclass(supplied_type.data_point_type, self.document_types)
 
 
 def tarred_corpus_with_data_point_type(data_point_type):
