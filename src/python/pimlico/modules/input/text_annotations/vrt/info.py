@@ -25,8 +25,7 @@ class VRTOutputType(RawTextOuputType):
     """
     data_point_type = VRTDocumentType
 
-    @cached_property
-    def num_docs(self):
+    def count_documents(self):
         """
         Counts length of corpus. Each file can contain an arbitrary number of documents.
         Should only be called after data_ready() == True.
@@ -42,10 +41,6 @@ class VRTOutputType(RawTextOuputType):
                         if line.startswith(u"<text "):
                             count += 1
         return count
-
-    def __len__(self):
-        # Should only be called after data_read() == True
-        return self.num_docs
 
     def iter_docs_in_file(self, f):
         # Use the super method to iterate over files
@@ -75,4 +70,5 @@ ModuleInfo = iterable_input_reader_factory(
     VRTOutputType,
     module_type_name="vrt_files_reader",
     module_readable_name="VRT annotated text files",
+    execute_count=True,
 )
