@@ -114,10 +114,11 @@ def browse_data(data, formatter, parse=False, skip_invalid=False):
     # Top of the screen
     doc_line = urwid.Text("")
     top_widgets = [
-        urwid.Text("Documents in %s" % data.base_dir),
         doc_line,
         urwid.Divider(),
     ]
+    if data.base_dir is not None:
+        top_widgets.insert(0, urwid.Text("Documents in %s" % data.base_dir))
 
     # Middle: content
     body_text = urwid.Text(u"")
