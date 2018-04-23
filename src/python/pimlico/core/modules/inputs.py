@@ -7,11 +7,13 @@ Base classes and utilities for input modules in a pipeline.
 
 """
 import copy
-from pimlico.core.config import PipelineStructureError
 
+from pimlico.datatypes.base import IterableCorpusWriter
+
+from pimlico.core.modules.base import BaseModuleExecutor
+from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.datatypes.base import IterableCorpus
 from .base import BaseModuleInfo
-from pimlico.core.modules.base import BaseModuleExecutor
 
 
 class InputModuleInfo(BaseModuleInfo):
@@ -124,8 +126,8 @@ class ReaderOutputType(IterableCorpus):
     #: Subclass information should be ignored for type checking. Should be treated exactly as an IterableCorpus
     emulated_datatype = IterableCorpus
 
-    def __init__(self, reader_options, pipeline, **kwargs):
-        super(ReaderOutputType, self).__init__(None, pipeline, **kwargs)
+    def __init__(self, reader_options, base_dir, pipeline, **kwargs):
+        super(ReaderOutputType, self).__init__(base_dir, pipeline, **kwargs)
         self.reader_options = reader_options
 
     def data_ready(self):
@@ -133,15 +135,50 @@ class ReaderOutputType(IterableCorpus):
         raise NotImplementedError()
 
     def __len__(self):
-        # Override to compute length using self.reader_options
-        raise NotImplementedError()
+        # Override to compute length using self.reader_options, unless you use execute_count
+        return super(ReaderOutputType, self).__len__()
 
     def __iter__(self):
         # Override to iterate over documents using self.reader_options
         raise NotImplementedError()
 
 
-def iterable_input_reader_factory(input_module_options, output_type, module_type_name=None, module_readable_name=None):
+class DocumentCounterModuleExecutor(BaseModuleExecutor):
+    """
+    An executor that just calls the __len__ method to count documents and stores the result
+
+    """
+    def execute(self):
+        # Instantiate the output corpus so we can count the docs
+        output_corpus = self.info.get_output("corpus")
+
+        if not hasattr(output_corpus, "count_documents"):
+            raise ModuleExecutionError("input reader '{}' was defined as having a document count execution "
+                                       "phase, but does not implement a count_documents() method")
+        self.log.info("Counting documents in corpus")
+        num_docs = output_corpus.count_documents()
+
+        self.log.info("Corpus contains {} docs. Storing count".format(num_docs))
+        with IterableCorpusWriter(self.info.get_absolute_output_dir("corpus")) as writer:
+            writer.metadata["length"] = num_docs
+
+
+def decorate_require_stored_len(obj):
+    """
+    Decorator for a data_ready() function that requires the data's length to have been computed.
+    Used when execute_count==True.
+    """
+    old_data_ready = obj.data_ready
+    def new_data_ready():
+        if "length" not in obj.metadata:
+            return False
+        else:
+            return old_data_ready
+    obj.data_ready = new_data_ready
+
+
+def iterable_input_reader_factory(input_module_options, output_type, module_type_name=None, module_readable_name=None,
+                                  software_dependencies=None, execute_count=False):
     """
     Factory for creating an input reader module type. This is a non-executable module that has no
     inputs. It reads its data from some external location, using the given module options. The resulting
@@ -150,6 +187,18 @@ def iterable_input_reader_factory(input_module_options, output_type, module_type
     ``output_type`` is a datatype that performs the actual iteration over the data and is instantiated
     with the processed options as its first argument. This is typically created by subclassing ReaderOutputType
     and providing len, iter and data_ready methods.
+
+    ``software_dependencies`` may be a list of software dependencies that the module-info will return
+    when ``get_software_dependencies()`` is called, or a function that takes the module-info instance and
+    returns such a list. If left blank, no dependencies are returned.
+
+    If ``execute_count==True``, the module will be an executable module and the execution will simply count
+    the number of documents in the corpus and store the count. This should be used if counting the documents
+    in the dataset is not completely trivial and quick (e.g. if you need to read through the data itself,
+    rather than something like counting files in a directory or checking metedata).
+    It is common for this to be the only processing that needs to be done on the dataset before using it.
+    The ``output_type`` should then implement a ``count_documents()`` method.
+    The ``__len__`` method then simply use the computed and stored value. There is no need to override it.
 
     **How is this different from ``input_module_factory``?** This method is used in your module code
     to prepare a ModuleInfo class for reading a particular type of input data and presenting it as a
@@ -172,7 +221,29 @@ def iterable_input_reader_factory(input_module_options, output_type, module_type
         module_outputs = [("corpus", output_type)]
         module_options = input_module_options
 
+        # Special behaviour if we're making this an executable module in order to count the data
+        module_executable = execute_count
+        module_executor_override = DocumentCounterModuleExecutor if execute_count else None
+
         def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-            return output_type(self.options, self.pipeline)
+            base_dir = None
+            if execute_count:
+                # If executing to provide a length, we need the corpus to have a base dir so it finds the count
+                base_dir = self.get_output_dir("corpus")
+
+            corpus = output_type(self.options, base_dir, self.pipeline)
+
+            if execute_count:
+                # Wrap the data_ready() in a decorator that checks the length has been counted
+                decorate_require_stored_len(corpus)
+            return corpus
+
+        def get_software_dependencies(self):
+            if software_dependencies is None:
+                return []
+            elif type(software_dependencies) is list:
+                return software_dependencies
+            else:
+                return software_dependencies(self)
 
     return IterableInputReaderModuleInfo
