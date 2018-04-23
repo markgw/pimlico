@@ -16,8 +16,6 @@ import multiprocessing
 from Queue import Empty
 from traceback import format_exc
 
-import time
-
 import signal
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
