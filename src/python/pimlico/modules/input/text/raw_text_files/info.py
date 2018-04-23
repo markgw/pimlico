@@ -149,8 +149,12 @@ class OutputType(ReaderOutputType):
         return check_paths_from_options(self.reader_options)
 
     def __len__(self):
-        # Should only be called after data_read() == True
-        return len(get_paths_from_options(self.reader_options))
+        # Should only be called after data_ready() == True
+        if "length" in self.metadata:
+            # If the length has been stored, use that
+            return self.metadata["length"]
+        else:
+            return len(get_paths_from_options(self.reader_options))
 
     def iter_docs_in_file(self, f):
         """
