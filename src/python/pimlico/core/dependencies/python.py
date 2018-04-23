@@ -265,3 +265,34 @@ sklearn_dependency = PythonPackageOnPip(
     "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
 )
 gensim_dependency = PythonPackageOnPip("gensim", "Gensim", dependencies=[numpy_dependency, scipy_dependency])
+
+
+### Special behaviour for bs4
+
+def safe_import_bs4():
+    """
+    BS can go very slowly if it tries to use chardet to detect input encoding
+    Remove chardet and cchardet from the Python modules, so that import fails and it doesn't try to use them
+    This prevents it getting stuck on reading long input files
+
+    """
+    import sys
+    sys.modules["cchardet"] = None
+    sys.modules["chardet"] = None
+    # Now we can import BS
+    import bs4
+    return bs4
+
+
+class BeautifulSoupDependency(PythonPackageOnPip):
+    """
+    Test import with special BS import behaviour.
+
+    """
+    def __init__(self):
+        super(BeautifulSoupDependency, self).__init__("bs4", pip_package="beautifulsoup4", name="Beautiful Soup")
+
+    def import_package(self):
+        return safe_import_bs4()
+
+beautiful_soup_dependency = BeautifulSoupDependency()
