@@ -26,5 +26,6 @@ many applications.
    pimlico.modules.r
    pimlico.modules.regex
    pimlico.modules.sklearn
+   pimlico.modules.text
    pimlico.modules.utility
    pimlico.modules.visualization

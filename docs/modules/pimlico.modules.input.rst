@@ -33,3 +33,5 @@ corpus type.
 
    pimlico.modules.input.embeddings
    pimlico.modules.input.text
+   pimlico.modules.input.text_annotations
+   pimlico.modules.input.xml

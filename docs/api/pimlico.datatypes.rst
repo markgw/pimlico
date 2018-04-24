@@ -36,6 +36,7 @@ Submodules
    pimlico.datatypes.table
    pimlico.datatypes.tar
    pimlico.datatypes.tokenized
+   pimlico.datatypes.vrt
    pimlico.datatypes.word2vec
    pimlico.datatypes.word_annotations
    pimlico.datatypes.xml
