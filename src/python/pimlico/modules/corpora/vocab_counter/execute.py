@@ -13,7 +13,7 @@ from pimlico.utils.progress import get_progress_bar
 class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         corpus = self.info.get_input("corpus")
-        vocab = self.info.get_input("vocab")
+        vocab = self.info.get_input("vocab").get_data()
         dist_len = len(vocab)+1 if self.info.options["oov_excluded"] else len(vocab)
 
         self.log.info("Counting token frequencies in corpus")

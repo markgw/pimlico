@@ -17,8 +17,7 @@ so that OOVs are represented by the ID vocab_size+1, instead of having a
 special token).
 
 """
-from pimlico.datatypes import NumpyArray
-
+from pimlico.datatypes.arrays import NumpyArray
 from pimlico.core.dependencies.python import numpy_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool
@@ -30,7 +29,7 @@ from pimlico.datatypes.tar import TarredCorpusType
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "vocab_counter"
     module_readable_name = "Token frequency counter"
-    module_inputs = [("text", TarredCorpusType(IntegerListsDocumentType)), ("vocab", Dictionary)]
+    module_inputs = [("corpus", TarredCorpusType(IntegerListsDocumentType)), ("vocab", Dictionary)]
     module_outputs = [("distribution", NumpyArray)]
     module_options = {
         "oov_excluded": {
