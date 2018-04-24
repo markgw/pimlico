@@ -248,9 +248,7 @@ Input {input_name}:
                 if module.input_ready(input_name):
                     input_info += "\n    Stored in: {corpus_dir}".format(corpus_dir=corpus_dir)
             elif input_module.is_filter():
-                # Filter module: output further information about where it gets its inputs from
                 input_info += "\n    Input module is a filter"
-                also_output.append(input_module.module_name)
             else:
                 # Input module
                 input_info += "\n    Pipeline input"
@@ -261,6 +259,10 @@ Input {input_name}:
                     # Indent the lines
                     input_info = "%s\n%s" % (input_info, "\n".join("    %s" % line for line in datatype_details))
             input_infos.append(input_info)
+
+            # If filter module: output further information about where it gets its inputs from
+            if module.is_filter():
+                also_output.append(input_module)
 
     # Do the same thing for the outputs
     output_infos = []
