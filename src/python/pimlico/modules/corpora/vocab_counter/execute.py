@@ -26,12 +26,12 @@ class ModuleExecutor(BaseModuleExecutor):
         # Put the result in a numpy array
         dist = numpy.array([counts.get(i, 0) for i in range(dist_len)])
 
-        # Output most and least frequent tokens
-        ordered_ids = numpy.argsort(dist)[0]
-        _id2token = lambda i: "OOV" if i >= len(vocab) else vocab.id2token[i]
-        _fmt_ids = lambda ids: u", ".join(u"{} ({})".format(_id2token(i), dist[i]) for i in ids)
-        self.log.info(u"{}, ..., {}".format(_fmt_ids(ordered_ids[:5]), _fmt_ids(ordered_ids[-5:])))
-
         # Store the output array
         with NumpyArrayWriter(self.info.get_absolute_output_dir("distribution")) as writer:
             writer.set_array(dist)
+
+        # Output most and least frequent tokens
+        ordered_ids = list(reversed(numpy.argsort(dist)))
+        _id2token = lambda i: "OOV" if i >= len(vocab) else vocab.id2token[i]
+        _fmt_ids = lambda ids: u", ".join(u"{} ({})".format(_id2token(i), dist[i]) for i in ids)
+        self.log.info(u"{}, ..., {}".format(_fmt_ids(ordered_ids[:5]), _fmt_ids(ordered_ids[-5:])))
