@@ -413,6 +413,13 @@ class BaseModuleInfo(object):
         if isinstance(datatype, DynamicOutputDatatype):
             # Call the get_datatype() method to build the actual datatype
             datatype = datatype.get_datatype(self)
+        # An output datatype should never be a DynamicInputDatatypeRequirement, which should only be used for inputs
+        # If this happens, it's an error in the module info definition
+        # Since it's an easy mistake to make, check for it here
+        if isinstance(datatype, DynamicInputDatatypeRequirement):
+            raise PipelineStructureError("error in module info definition for module type '{}': dynamic "
+                                         "input type requirement as output type on output '{}'".format(
+                self.module_type_name, output_name))
 
         # Recursively retrieve additional datatypes from this one
         additional_names = additional_names or []
