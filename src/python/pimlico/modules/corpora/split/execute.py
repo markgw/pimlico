@@ -3,6 +3,7 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 import random
+from copy import copy
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.datatypes.core import StringListWriter
@@ -40,8 +41,14 @@ class ModuleExecutor(BaseModuleExecutor):
 
         # Use a generic TarredCorpusWriter, since we're just passing through the encoded data from the input
         with TarredCorpusWriter(self.info.get_absolute_output_dir("set1"), gzip=gzip, encoding=encoding) as set1_writer:
+            # Copy over the corpus metadata from the input to start with
+            # The writer will replace some values, but anything specific to the datatype should be copied
+            set1_writer.metadata = copy(input_corpus.metadata)
+
             with TarredCorpusWriter(self.info.get_absolute_output_dir("set2"),
                                     gzip=gzip, encoding=encoding) as set2_writer:
+                set2_writer.metadata = copy(input_corpus.metadata)
+
                 for archive_name, doc_name, doc_data in pbar(input_corpus.archive_iter()):
                     if set1_remaining == 0:
                         # Must be set 2
