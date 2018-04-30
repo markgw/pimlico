@@ -262,7 +262,7 @@ Input {input_name}:
 
             # If filter module: output further information about where it gets its inputs from
             if module.is_filter():
-                also_output.append(input_module)
+                also_output.append(input_module.module_name)
 
     # Do the same thing for the outputs
     output_infos = []
