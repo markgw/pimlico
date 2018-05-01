@@ -1579,17 +1579,6 @@ def check_release(release_str):
     required_major_release, __, required_minor_release = release_str.partition(".")
     current_major_release, required_major_release = int(current_major_release), int(required_major_release)
 
-    if current_major_release < required_major_release:
-        raise PipelineStructureError("config file was written for a later version of Pimlico than the one you're "
-                                     "running. You need to update Pimlico (or check out a later release), as there "
-                                     "could be backwards-incompatible changes between major versions. Running version "
-                                     "%s, required version %s" % (__version__, release_str))
-    elif current_major_release > required_major_release:
-        raise PipelineStructureError("config file was written for an earlier version of Pimlico than the one you're "
-                                     "running. You need to check out an earlier release, as the behaviour of Pimlico "
-                                     "could be very different to when the config file was written. Running version "
-                                     "%s, required version %s" % (__version__, release_str))
-
     current_rc = current_minor_release.endswith("rc")
     if current_rc:
         # This is a release candidate
@@ -1600,6 +1589,17 @@ def check_release(release_str):
         # RC required
         # Allow minor versions above it, or an identical RC
         required_minor_release = required_minor_release[:-2]
+
+    if current_major_release < required_major_release:
+        raise PipelineStructureError("config file was written for a later version of Pimlico than the one you're "
+                                     "running. You need to update Pimlico (or check out a later release), as there "
+                                     "could be backwards-incompatible changes between major versions. Running version "
+                                     "%s, required version %s" % (__version__, release_str))
+    elif current_major_release > required_major_release:
+        raise PipelineStructureError("config file was written for an earlier version of Pimlico than the one you're "
+                                     "running. You need to check out an earlier release, as the behaviour of Pimlico "
+                                     "could be very different to when the config file was written. Running version "
+                                     "%s, required version %s" % (__version__, release_str))
 
     # Right major version
     # Check we're not running an earlier minor version
@@ -1614,8 +1614,10 @@ def check_release(release_str):
                                          "one you're running. You need to use >= v%s to run this config "
                                          "file (and not > %s). Currently using %s" %
                                          (release_str, required_major_release, __version__))
+
         current_part, __, remaining_current = remaining_current.partition(".")
         given_part, __, remaining_given = remaining_given.partition(".")
+
         if int(current_part) > int(given_part):
             # Using a higher minor version than required: stop checking
             higher_than_required = True
@@ -1627,13 +1629,17 @@ def check_release(release_str):
                                          (release_str, required_major_release, __version__))
         # Otherwise using same version at this level: go down to next level and check
 
+    if len(remaining_current) > 0:
+        # Given version has the same prefix, but current version has more subversions, so is a later release
+        higher_than_required = True
+
     if not higher_than_required:
         # Allow equal minor versions, except in the case where the supplied version is only a RC
         if current_rc and not given_rc:
-            raise PipelineStructureError("config file was written for a later (minor) version of Pimlico than the "
-                                         "one you're running. You need to use >= v%s to run this config "
-                                         "file (and not > %s). Currently only using a release candidate, %s" %
-                                         (release_str, required_major_release, __version__))
+            raise PipelineStructureError("config file was written for the version of Pimlico you're running, but "
+                                         "not a release candidate. Require %s. "
+                                         "Currently only using a release candidate, %s" %
+                                         (release_str, __version__))
 
 
 def check_pipeline(pipeline):
