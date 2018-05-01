@@ -3,11 +3,13 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 import os
-from glob import iglob, glob
+from glob import glob
 
 from pimlico.core.modules.options import comma_separated_list, comma_separated_strings
-from pimlico.datatypes.base import PimlicoDatatype, IterableCorpus, PimlicoDatatypeWriter, InvalidDocument
+from pimlico.datatypes.base import PimlicoDatatype, IterableCorpus, PimlicoDatatypeWriter, InvalidDocument, \
+    DynamicInputDatatypeRequirement
 from pimlico.datatypes.documents import RawTextDocumentType
+from pimlico.utils.core import cached_property
 
 
 class File(PimlicoDatatype):
@@ -78,6 +80,20 @@ class NamedFileCollection(PimlicoDatatype):
         if filename not in self.filenames:
             raise ValueError("'{}' is not a filename in the file collection".format(filename))
         return os.path.join(self.data_dir, filename)
+
+    @cached_property
+    def absolute_filenames(self):
+        return [self.get_absolute_path(f) for f in self.filenames]
+
+    def read_file(self, filename=None, mode="r"):
+        # By default, read the first file in the collection
+        if filename is None:
+            filename = self.filenames[0]
+        with open(self.get_absolute_path(filename), mode=mode) as f:
+            return f.read()
+
+    def read_files(self, mode="r"):
+        return [self.read_file(f, mode=mode) for f in self.filenames]
 
 
 class NamedFileCollectionWriter(PimlicoDatatypeWriter):
@@ -378,8 +394,35 @@ def NamedFile(name):
         def filename(self):
             return self.filenames[0]
 
+        @classmethod
+        def check_type(cls, supplied_type):
+            """
+            A NamedFile may be used as a type requirement, in which case the supplied type must
+            be a NamedFileCollection with at least the given filename among its supplied files.
+            """
+            return super(_NamedFile, cls).check_type(supplied_type) and \
+                   cls.filenames[0] in supplied_type.filenames
+
     _NamedFile.__name__ = 'NamedFile'
     return _NamedFile
+
+
+class FilesInput(DynamicInputDatatypeRequirement):
+    datatype_doc_info = "A file collection containing at least one file (or a given specific number). " \
+                        "No constraint is put on the name of the file(s). Typically, the module will just " \
+                        "use whatever the first file(s) in the collection is"
+
+    def __init__(self, min_files=1):
+        self.min_files = min_files
+
+    def check_type(self, supplied_type):
+        return issubclass(supplied_type, NamedFileCollection) and len(supplied_type.filenames) >= self.min_files
+
+
+# Alias FilesInput as FileInput: the default min no. files is 1, so this makes sense, but is easier to read
+# if only one file is expected
+
+FileInput = FilesInput
 
 
 class NamedFileWriter(PimlicoDatatypeWriter):
