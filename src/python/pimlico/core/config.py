@@ -1363,12 +1363,18 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     for target_section, source_sections in copies.iteritems():
         # There may be multiple source sections: process in order of directives, so later ones override earlier
         copy_values = {}
-        for source_section in source_sections:
+        for source_section, exceptions in source_sections:
             if source_section not in config_sections_dict:
                 raise PipelineConfigParseError("copy directive in [%s] referred to unknown module '%s'" %
                                                (target_section, source_section))
+            source_settings = copy.copy(config_sections_dict[source_section])
+            for exception in exceptions:
+                if exception not in source_settings:
+                    raise PipelineConfigParseError("copy directive exception referred to parameter that wasn't "
+                                                   "in the source section: %s" % exception)
+                del source_settings[exception]
             # Accumulate values to the copied into target section
-            copy_values.update(config_sections_dict[source_section])
+            copy_values.update(source_settings)
         # Values set in section itself take precedence over those copied
         copy_values.update(config_sections_dict[target_section])
         # Replace the settings for this module
@@ -1463,8 +1469,10 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                 elif directive == "copy":
                     # Copy config values from another section
                     # For now, just store a list of sections to copy from: we'll do the copying later
-                    source_section = rest.strip()
-                    copies.setdefault(current_section, []).append(source_section)
+                    source_section, __, rest = rest.partition(" ")
+                    # The directive might also specify settings that shouldn't be copied
+                    exceptions = rest.strip().split()
+                    copies.setdefault(current_section, []).append((source_section, exceptions))
                 elif directive == "abstract":
                     # Mark this file as being abstract (must be included)
                     abstract = True

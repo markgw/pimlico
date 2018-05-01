@@ -124,7 +124,8 @@ by the directive name and any arguments.
     config override any copied settings.
 
     All parameters are copied, including things like ``type``. Any parameter can be overridden in the copying
-    module instance.
+    module instance. Any parameter can be excluded from the copy by naming it after the module name. Separate
+    multiple exclusions with spaces.
 
     The directive even allows you to copy parameters from multiple modules by using the directive multiple times,
     though this is not very often useful. In this case, the values are copied (and overridden) in the order of
