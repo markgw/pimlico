@@ -1756,7 +1756,12 @@ def print_missing_dependencies(pipeline, modules):
                 "All" if len(missing_dependencies) == len(auto_installable_deps) else "Some",
                 ", ".join(dep.name for dep in auto_installable_deps)
             )
-            install_now = raw_input("Do you want to install these now? [y/N] ").lower().strip() == "y"
+            try:
+                install_now = raw_input("Do you want to install these now? [y/N] ").lower().strip() == "y"
+            except EOFError:
+                # We get an EOF if the user enters it, or if we're not running in interactive mode
+                install_now = False
+            
             if install_now:
                 uninstalled = check_and_install(auto_installable_deps, pipeline.local_config)
                 if len(uninstalled):
