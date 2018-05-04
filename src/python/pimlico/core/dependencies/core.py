@@ -3,14 +3,18 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """ Basic Pimlico core dependencies """
-from pimlico.core.dependencies.python import PythonPackageSystemwideInstall, PythonPackageOnPip
+from pimlico.core.dependencies.python import PythonPackageOnPip, PythonPackageSystemwideInstall
 
 #: Core dependencies required by the basic Pimlico installation, regardless of what pipeline is being processed.
 #: These will be checked when Pimlico is run, using the same dependency-checking mechanism that Pimlico modules
 #: use, and installed automatically if they're not found.
 CORE_PIMLICO_DEPENDENCIES = [
+    # Without Pip, we can't install anything else, so we need that to be installed first
+    PythonPackageSystemwideInstall("pip", "Pip"),
     # Virtualenv must be installed so that we can install other packages in the local Pimlico environment
-    PythonPackageSystemwideInstall("virtualenv", "Virtualenv"),
+    # Note that, even within a running virtualenv, the virtualenv Python package might not be installed
+    # In this case, it can be installed using Pip
+    PythonPackageOnPip("virtualenv"),
     # Several lightweight Python libraries that we use throughout the codebase
     PythonPackageOnPip("colorama", "colorama"),
     PythonPackageOnPip("termcolor", "termcolor"),

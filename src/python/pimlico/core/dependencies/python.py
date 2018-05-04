@@ -117,7 +117,7 @@ class PythonPackageOnPip(PythonPackageDependency):
 
     def install(self, local_config, trust_downloaded_archives=False):
         import subprocess
-        
+
         # Use subprocess to call Pip: the recommended way to use it programmatically
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.pip_package])
 
