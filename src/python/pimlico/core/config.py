@@ -1761,7 +1761,7 @@ def print_missing_dependencies(pipeline, modules):
             except EOFError:
                 # We get an EOF if the user enters it, or if we're not running in interactive mode
                 install_now = False
-            
+
             if install_now:
                 uninstalled = check_and_install(auto_installable_deps, pipeline.local_config)
                 if len(uninstalled):
