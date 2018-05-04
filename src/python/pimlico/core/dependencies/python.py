@@ -116,6 +116,25 @@ class PythonPackageOnPip(PythonPackageDependency):
         return True
 
     def install(self, local_config, trust_downloaded_archives=False):
+        import subprocess
+        
+        # Use subprocess to call Pip: the recommended way to use it programmatically
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.pip_package])
+
+        # Refresh sys.path so we can import the installed package
+        import site
+        reload(site)
+
+    def _old_install(self, local_config, trust_downloaded_archives=False):
+        """
+        This is an old approach to installing programmatically using Pip. Technically, this
+        way of using Pip is unsupported and, sure enough, you end up running into horrible
+        errors with differing versions of Pip.
+
+        An alternative, more supported approach is now implemented, but this is left
+        here in case we need to incorporate anything from it.
+
+        """
         try:
             from pip import __version__
         except ImportError:
