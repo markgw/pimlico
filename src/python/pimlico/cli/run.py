@@ -149,11 +149,13 @@ class RunCmd(PimlicoCLISubcommand):
             print >>sys.stderr, "Please fix in local config file to use email reports"
             sys.exit(1)
 
+        exit_status = 0
         try:
             check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,
                                       all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error,
                                       preliminary=preliminary, email=opts.email)
         except (ModuleInfoLoadError, ModuleNotReadyError), e:
+            exit_status = 1
             if debug:
                 print_exc()
                 if hasattr(e, "cause") and e.cause is not None:
@@ -169,6 +171,7 @@ class RunCmd(PimlicoCLISubcommand):
                     "Error: module not ready to run"
                 print >>sys.stderr, "%s: %s" % (error_type, e)
         except ModuleExecutionError, e:
+            exit_status = 1
             if debug:
                 print_exc()
                 if hasattr(e, "cause") and e.cause is not None:
@@ -187,3 +190,4 @@ class RunCmd(PimlicoCLISubcommand):
         else:
             if dry_run:
                 log.info("All checks were successful. Modules are ready to run")
+        sys.exit(exit_status)
