@@ -5,8 +5,8 @@
 import sys
 from traceback import print_exc, format_exception_only
 
+from pimlico import cfg
 from pimlico.cli.subcommands import PimlicoCLISubcommand
-from pimlico.cli.util import print_execution_error
 from pimlico.core.modules.base import ModuleInfoLoadError, collect_runnable_modules
 from pimlico.core.modules.execute import check_and_execute_modules, ModuleExecutionError, ModuleNotReadyError
 from pimlico.core.modules.multistage import MultistageModuleInfo
@@ -78,6 +78,9 @@ class RunCmd(PimlicoCLISubcommand):
             log.info("STEP MODE")
             log.info("Running the module(s) in super-verbose, interactive step-mode to debug")
             pipeline.enable_step()
+
+        if cfg.NON_INTERACTIVE_MODE:
+            log.info("NON-INTERACTIVE MODE: dynamic output like progress bars will be skipped in many cases")
 
         if opts.all:
             opts.all_deps = False

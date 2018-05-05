@@ -32,16 +32,6 @@ EXAMPLES_DIR = os.path.join(PIMLICO_ROOT, "examples")
 TEST_DATA_DIR = os.path.join(PIMLICO_ROOT, "test", "data")
 TEST_STORAGE_DIR = os.path.join(PIMLICO_ROOT, "test", "storage")
 
-# By default, we run in interative mode, assuming the user's at a terminal
-# This switch tells interface components that they can't expect input from a user
-# This should mean, for example, that we don't display progress bars, whose output looks
-#  bad when piped to a file
-# The parameter can be set using the environment variable PIM_NON_INT to 1,
-#  or the cmd line switch --non-interactive
-# TODO Add this to the documentation
-# TODO Use this to hide progress bars, etc
-# TODO Allow this to be set on the cmd line
-NON_INTERACTIVE_MODE = len(os.environ.get("PIM_NON_INT", "")) > 0
 
 def install_core_dependencies():
     # Always check that core dependencies are satisfied before running anything

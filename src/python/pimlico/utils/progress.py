@@ -4,6 +4,7 @@
 
 import warnings
 
+from pimlico import cfg
 from itertools import islice
 from progressbar import Percentage, Bar, RotatingMarker, ETA, ProgressBar, Counter, UnknownLength
 
@@ -17,6 +18,11 @@ def get_progress_bar(maxval, counter=False, title=None, start=True):
     start is no longer used, included only for backwards compatibility.
 
     """
+    if cfg.NON_INTERACTIVE_MODE:
+        # If we're not in interactive mode (e.g. piping to a file), don't output the progress bar
+        # In future we might want to print things instead, but for now we just don't output anything
+        return NonOutputtingProgressBar(maxval)
+
     widgets = []
     if title is not None:
         widgets.append("%s: " % title)
@@ -53,6 +59,35 @@ class SafeProgressBar(ProgressBar):
 
     def increment(self):
         self.update(self.currval+1)
+
+
+class DummyFileDescriptor(object):
+    """
+    Passed in to ProgressBar instead of a file descriptor (e.g. stderr) to ensure that
+    nothing gets output.
+
+    """
+    def read(self, size=None):
+        return None
+
+    def readLine(self, size=None):
+        return None
+
+    def write(self, s):
+        return
+
+    def close(self):
+        return
+
+
+class NonOutputtingProgressBar(SafeProgressBar):
+    """
+    Behaves like ProgressBar, but doesn't output anything.
+
+    """
+    def __init__(self, *args, **kwargs):
+        kwargs["fd"] = DummyFileDescriptor()
+        super(NonOutputtingProgressBar, self).__init__(*args, **kwargs)
 
 
 def slice_progress(iterable, num_items, title=None):
