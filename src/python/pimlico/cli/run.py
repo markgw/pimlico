@@ -151,9 +151,12 @@ class RunCmd(PimlicoCLISubcommand):
 
         exit_status = 0
         try:
-            check_and_execute_modules(pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,
-                                      all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error,
-                                      preliminary=preliminary, email=opts.email)
+            # If this completes, there might have been an error, in which case the appropriate exit status is returned
+            exit_status = check_and_execute_modules(
+                pipeline, module_specs, force_rerun=opts.force_rerun, debug=debug, log=log,
+                all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error,
+                preliminary=preliminary, email=opts.email
+            )
         except (ModuleInfoLoadError, ModuleNotReadyError), e:
             exit_status = 1
             if debug:
