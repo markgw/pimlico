@@ -461,31 +461,81 @@ class PipelineConfig(object):
                     new_alternatives = []
                     # It's possible for the value to already have alternatives, in which case we include them all
                     for original_val in module_config[input_opt].split("|"):
-                        # If the input connection has more than just a module name, we only modify the module name
-                        val_module_name, __, rest_of_val = original_val.partition(".")
-                        # If the module name is unknown, this will be a problem, but leave the error handling till later
-                        # For safety's sake, skip over anything that starts with * or is a comma-separated list
-                        if len(original_to_expanded_sections.get(val_module_name, [])) > 1 and \
-                                not val_module_name.startswith("*") and not "," in val_module_name:
-                            # The previous module has been expanded: add all of the resulting modules as alternatives
-                            previous_modules = original_to_expanded_sections[val_module_name]
-                            # Include the rest of the input specifier (generally an output name)
-                            previous_modules = [
-                                "%s.%s" % (mod, rest_of_val) if rest_of_val else mod for mod in previous_modules
-                            ]
-                            # If the previous module names are already in the form module[alt_name], take the alt_name
-                            # from there
-                            previous_module_alt_names = [
-                                mod[mod.index("[")+1:mod.index("]")] if "[" in mod else None for mod in previous_modules
-                            ]
-                            new_alternatives.extend([
-                                "{%s}%s" % (alt_name, mod) if alt_name is not None else mod
-                                for (mod, alt_name) in zip(previous_modules, previous_module_alt_names)
-                            ])
+                        # If there's a list of values here, we need to handle it carefully
+                        new_items = []
+                        new_item_alt_names = []
+                        for original_val_item in original_val.split(","):
+                            original_val_item = original_val_item.strip()
+                            # If the input connection has more than just a module name, we only modify the module name
+                            val_module_name, __, rest_of_val = original_val_item.partition(".")
+                            # If module name is unknown, this will be a problem, but leave the error handling till later
+                            # For safety's sake, skip over anything that starts with *
+                            if len(original_to_expanded_sections.get(val_module_name, [])) > 1 and \
+                                    not val_module_name.startswith("*"):
+                                # The previous module has been expanded: add all of the resulting modules as alternatives
+                                previous_modules = original_to_expanded_sections[val_module_name]
+                                # Include the rest of the input specifier (generally an output name)
+                                previous_modules = [
+                                    "%s.%s" % (mod, rest_of_val) if rest_of_val else mod for mod in previous_modules
+                                ]
+                                # If the previous module names are already in the form module[alt_name], take the alt_name
+                                # from there
+                                previous_module_alt_names = [
+                                    mod[mod.index("[")+1:mod.index("]")] if "[" in mod else None for mod in previous_modules
+                                ]
+                                new_items.append(previous_modules)
+                                # The different items might give us different alt names
+                                # In that case, we'll just use the first for every alt
+                                new_item_alt_names.append(previous_module_alt_names)
+                            else:
+                                # Previous module this one takes input from has not been expanded: leave unchanged
+                                # Or it starts with * or includes a ,
+                                new_items.append([original_val_item])
+                                # No alternative name associated with this (unless it's already given)
+                                new_item_alt_names.append([None])
+                        if len(new_items) == 1:
+                            # Simplest case: no comma-separated list at all
+                            new_alternatives.extend(new_items[0])
+                        elif any(len(i) == 1 for i in new_items) and not all(len(i) == 1 for i in new_items):
+                            # Some items have only one alternative, but others have more
+                            num_alts = (len(i) for i in new_items if len(i) > 1).next()
+                            # Multiply the ones that have only one alternative, to use that same value for each of the
+                            #  other items
+                            new_items = [i if len(i) > 1 else i*num_alts for i in new_items]
+                            # Now zip together the alternative values for each list item
+                            new_alternatives = [",".join(item_alts) for item_alts in zip(*new_items)]
+                        elif any(len(i) != len(new_items[0]) for i in new_items[1:]):
+                            # Otherwise, we expect each item in the list to have ended up with the same number
+                            #  of alternatives, so we can zip them together
+                            raise PipelineConfigParseError(
+                                "error processing alternative values for {} to {}. When expanding a list of module "
+                                "names, every item in the list must have the same number of alternatives, or just "
+                                "one alternative. Got alternative numbers '{}' from list '{}'".format(
+                                    input_opt, module_name, ", ".join(str(len(i)) for i in new_items), original_val
+                                ))
                         else:
-                            # Previous module this one takes input from has not been expanded: leave unchanged
-                            # Or it starts with * or includes a ,
-                            new_alternatives.append(original_val)
+                            # All items have same number of alternatives
+                            # Zip together the alternative values for each list item
+                            new_alternatives = [",".join(item_alts) for item_alts in zip(*new_items)]
+
+                        new_alts_with_names = []
+                        for alt_num, new_alt in enumerate(new_alternatives):
+                            if new_alt.startswith("{"):
+                                # This already has an alternative name: don't do anything
+                                new_alts_with_names.append(new_alt)
+                            else:
+                                # Try to find a name from one of the items in the list
+                                try:
+                                    new_name = (item_alt_names[alt_num]
+                                                for item_alt_names in new_item_alt_names
+                                                if len(item_alt_names) > alt_num
+                                                and item_alt_names[alt_num] is not None).next()
+                                except StopIteration:
+                                    # No name found: just leave the value as it is, unnamed
+                                    new_alts_with_names.append(new_alt)
+                                else:
+                                    new_alts_with_names.append("{%s}%s" % (new_name, new_alt))
+                        new_alternatives = new_alts_with_names
                     module_config[input_opt] = "|".join(new_alternatives)
 
                 # Now look for any options with alternative values and expand them out into multiple module configs

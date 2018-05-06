@@ -306,6 +306,14 @@ class BaseModuleInfo(object):
                 spec = spec_parts[0]
                 additional_names = spec_parts[1:]  # Most of the time this is empty
 
+                if "[" in spec:
+                    # Don't split before the end of the expanded module name
+                    part0, part1, rest = spec.partition("[")
+                    part2, part3, spec = rest.partition("]")
+                    first_part = part0 + part1 + part2 + part3
+                else:
+                    first_part = ""
+
                 if "." in spec:
                     # This is a module name + output name
                     module_name, __, output_name = spec.rpartition(".")
@@ -313,6 +321,7 @@ class BaseModuleInfo(object):
                     # Just a module name, using the default output
                     module_name = spec
                     output_name = None
+                module_name = first_part + module_name
 
                 if expand:
                     # If the module name starts with a *, it should refer to one that has been expanded out according
