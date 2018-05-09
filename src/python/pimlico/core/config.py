@@ -1233,6 +1233,19 @@ def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
         rest = rest[1:]
         # Now perform the actual join
         val = joiner.join(join_list)
+    elif param.startswith("len("):
+        # Calculate the length of a list
+        rest = param[5:]
+        # The only argument should be a list
+        len_list, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
+        if not type(len_list) is list:
+            raise ValueError("argument to len() function must be a list. Got: %s" % len_list)
+        rest = rest.lstrip()
+        if not rest.startswith(")"):
+            raise ValueError("expected closing ) after len's arg")
+        rest = rest[1:]
+        # Just compute the length of the list, which should be a string for future use
+        val = str(len(len_list))
     else:
         match = int_literal_re.search(param)
         if match:

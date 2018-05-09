@@ -401,6 +401,13 @@ variable ``var_name`` that was received from input ``input_name``.
    modvar_first_lang=lang_a.lang
    modvar_second_lang=lang_b.lang
 
+If a module inherits multiple values for the same variable from the **same input** (i.e. a multiple-input),
+they are all kept and treated as a list. The most common way to then use the values is via the ``join`` function.
+Like Python's ``string.join``, this turns a list into a single string by joining the values with a given separator
+string. Use ``join(sep, list)`` to join the values coming from some list modvar ``list`` on the separator ``sep``.
+
+You can get the number of values in a list modvar using ``len(list)``, which works just like Python's ``len()``.
+
 Use in module parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
