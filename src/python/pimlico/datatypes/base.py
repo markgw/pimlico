@@ -378,6 +378,11 @@ class MultipleInputs(object):
     see :ref:`parameter-alternatives`). Use the notation `*name`, where `name` is the base module name, to denote
     all of the expanded module names as inputs. These are treated as if you'd written out all of the expanded module
     names separated by commas.
+    
+    In a config file, if you need the same input specification to be repeated multiple times in a list,
+    instead of writing it out explicitly you can use a multiplier to repeat it N times by putting
+    ``*N`` after it. This is particularly useful when ``N`` is the result of expanding module variables,
+    allowing the number of times an input is repeated to depend on some modvar expression.
 
     When get_input() is called on the module, instead of returning a single datatype, a list of datatypes is returned.
 

@@ -294,7 +294,25 @@ class BaseModuleInfo(object):
             # Multiple inputs may be specified, separated by commas
             # This will only work if the input datatype is a MultipleInputs
             inputs[input_name] = []
-            for spec in input_spec.split(","):
+            input_specs_initial = input_spec.split(",")
+            # Check for a * somewhere in the spec other than at the beginning
+            input_specs = []
+            input_multipliers = []
+            for spec in input_specs_initial:
+                # This indicates that one of the inputs should be repeated
+                if "*" in spec[1:]:
+                    mult_star_idx = spec[1:].index("*") + 1
+                    spec, multiplier = spec[:mult_star_idx], spec[mult_star_idx+1:]
+                    spec = spec.strip()
+                    # We can't do the multiplication now, as the multiplier might be a modvar expression,
+                    # or otherwise require further processing
+                    input_multipliers.append(multiplier)
+                else:
+                    # Don't repeat
+                    input_multipliers.append("")
+                input_specs.append(spec)
+
+            for spec, multiplier in zip(input_specs, input_multipliers):
                 # Check for an initial *, meaning we should expand out an expanded previous module input multiple inputs
                 if spec.startswith("*"):
                     spec = spec[1:]
@@ -338,7 +356,7 @@ class BaseModuleInfo(object):
 
                 # Most of the time there will only be one of these, == module_name
                 for expanded_module_name in expanded_module_names:
-                    inputs[input_name].append((expanded_module_name, output_name, additional_names))
+                    inputs[input_name].append((expanded_module_name, output_name, additional_names, multiplier))
 
         return inputs
 
