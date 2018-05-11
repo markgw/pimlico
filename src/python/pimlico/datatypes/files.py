@@ -362,10 +362,28 @@ class UnnamedFileCollectionWriter(PimlicoDatatypeWriter):
         super(UnnamedFileCollectionWriter, self).__init__(*args, **kwargs)
         self.written_filenames = []
 
-    def write_file(self, filename, data):
-        with open(os.path.join(self.data_dir, filename), "w") as f:
-            f.write(data)
+    def get_absolute_path(self, filename):
+        return os.path.join(self.data_dir, filename)
+
+    def add_written_file(self, filename):
+        """
+        Add a filename to the list of files included in the collection. Should only
+        be called after the file of that name has been written to the path given by
+        `get_absolute_path()`.
+
+        Usually, you should use `write_file()` instead, which handles this itself.
+
+        """
         self.written_filenames.append(filename)
+
+    def write_file(self, filename, data):
+        """
+        Write data to a file and add the file to the collection.
+
+        """
+        with open(self.get_absolute_path(filename), "w") as f:
+            f.write(data)
+        self.add_written_file(filename)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
