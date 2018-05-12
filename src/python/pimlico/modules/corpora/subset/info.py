@@ -10,6 +10,10 @@ on the full corpus.
 Can be run on an iterable corpus or a tarred corpus. If the input is a tarred corpus, the filter will
 emulate a tarred corpus with the appropriate datatype, passing through the archive names from the input.
 
+When a number of valid documents is required (calculating corpus length when skipping invalid docs),
+if one is stored in the metadata as ``valid_documents``, that count is used instead of iterating
+over the data to count them up.
+
 """
 from itertools import islice
 
@@ -18,6 +22,7 @@ from pimlico.core.modules.options import str_to_bool
 from pimlico.datatypes.base import IterableCorpus, DynamicOutputDatatype, \
     iterable_corpus_with_data_point_type, InvalidDocument
 from pimlico.datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
+from pimlico.utils.core import cached_property
 
 
 class CorpusSubsetFilter(IterableCorpus):
@@ -38,11 +43,15 @@ class CorpusSubsetFilter(IterableCorpus):
         else:
             return min(self.size, len(self.input_datatype))
 
-    @property
+    @cached_property
     def num_valid_docs(self):
         if self._num_valid_docs is None:
-            self._num_valid_docs = sum(1 for doc_name, doc in self.input_datatype
-                                       if not isinstance(doc, InvalidDocument))
+            if "valid_documents" in self.metadata:
+                # A count was stored in the metadata: use that
+                self._num_valid_docs = self.metadata["valid_documents"]
+            else:
+                self._num_valid_docs = sum(1 for doc_name, doc in self.input_datatype
+                                           if not isinstance(doc, InvalidDocument))
         return self._num_valid_docs
 
     def __iter__(self):
