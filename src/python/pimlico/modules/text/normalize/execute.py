@@ -2,7 +2,7 @@ from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 
 
 def worker_setup(worker):
-    worker.case = worker.executor.options["case"]
+    worker.case = worker.executor.info.options["case"]
 
 
 def process_document(worker, archive_name, doc_name, doc):
