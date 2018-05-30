@@ -154,13 +154,31 @@ class DocumentCounterModuleExecutor(BaseModuleExecutor):
 
         if not hasattr(output_corpus, "count_documents"):
             raise ModuleExecutionError("input reader '{}' was defined as having a document count execution "
-                                       "phase, but does not implement a count_documents() method")
+                                       "phase, but does not implement a count_documents() method".format(
+                output_corpus.datatype_name
+            ))
+
         self.log.info("Counting documents in corpus")
         num_docs = output_corpus.count_documents()
+        num_valid_docs = None
+
+        if type(num_docs) is tuple:
+            # A pair of values was returned: this is the num docs and num valid docs
+            if len(num_docs) > 2:
+                raise ModuleExecutionError("input reader '{}' return a tuple document count with {} values. "
+                                           "Expected either one or two values (num docs and num valid docs)".format(
+                    output_corpus.datatype_name, len(num_docs)
+                ))
+            elif len(num_docs) == 1:
+                num_docs = num_docs[0]
+            else:
+                num_docs, num_valid_docs = num_docs
 
         self.log.info("Corpus contains {} docs. Storing count".format(num_docs))
         with IterableCorpusWriter(self.info.get_absolute_output_dir("corpus")) as writer:
             writer.metadata["length"] = num_docs
+            if num_valid_docs is not None:
+                writer.metadata["valid_documents"] = num_valid_docs
 
 
 def decorate_require_stored_len(obj):
@@ -199,6 +217,11 @@ def iterable_input_reader_factory(input_module_options, output_type, module_type
     It is common for this to be the only processing that needs to be done on the dataset before using it.
     The ``output_type`` should then implement a ``count_documents()`` method.
     The ``__len__`` method then simply use the computed and stored value. There is no need to override it.
+
+    If the ``count_documents()`` method returns a pair of integers, instead of just a single integer,
+    they are taken to be the total number of documents in the corpus and the number of valid documents
+    (i.e. the number that will be produce an InvalidDocument). In this case, the valid documents count
+    is also stored in the metadata, as ``valid_documents``.
 
     **How is this different from ``input_module_factory``?** This method is used in your module code
     to prepare a ModuleInfo class for reading a particular type of input data and presenting it as a

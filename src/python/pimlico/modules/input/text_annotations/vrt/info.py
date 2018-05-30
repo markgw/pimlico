@@ -30,6 +30,10 @@ class VRTOutputType(RawTextOuputType):
         Counts length of corpus. Each file can contain an arbitrary number of documents.
         Should only be called after data_ready() == True.
 
+        All documents are considered valid, even if they have no content, so the valid
+        of valid docs supplied during the counting process is the same as the total
+        number of docs.
+
         """
         count = 0
         for path, start, end in get_paths_from_options(self.reader_options):
@@ -40,8 +44,9 @@ class VRTOutputType(RawTextOuputType):
                         line = line.decode(self.reader_options["encoding"])
                         if line.startswith(u"<text "):
                             count += 1
-        return count
-
+        # Num docs, num valid docs
+        return count, count
+    
     def iter_docs_in_file(self, f):
         # Use the super method to iterate over files
         # Then we need to split each file into multiple docs

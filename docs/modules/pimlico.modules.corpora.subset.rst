@@ -16,6 +16,10 @@ on the full corpus.
 Can be run on an iterable corpus or a tarred corpus. If the input is a tarred corpus, the filter will
 emulate a tarred corpus with the appropriate datatype, passing through the archive names from the input.
 
+When a number of valid documents is required (calculating corpus length when skipping invalid docs),
+if one is stored in the metadata as ``valid_documents``, that count is used instead of iterating
+over the data to count them up.
+
 
 This is a filter module. It is not executable, so won't appear in a pipeline's list of modules that can be run. It produces its output for the next module on the fly when the next module needs it.
 

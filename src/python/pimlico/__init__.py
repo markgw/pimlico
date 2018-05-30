@@ -32,6 +32,7 @@ EXAMPLES_DIR = os.path.join(PIMLICO_ROOT, "examples")
 TEST_DATA_DIR = os.path.join(PIMLICO_ROOT, "test", "data")
 TEST_STORAGE_DIR = os.path.join(PIMLICO_ROOT, "test", "storage")
 
+
 def install_core_dependencies():
     # Always check that core dependencies are satisfied before running anything
     # Core dependencies are not allowed to depend on the local config, as we can't get to it at this point

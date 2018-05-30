@@ -9,12 +9,15 @@ Provides access to many subcommands, acting as the primary interface to Pimlico'
 """
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
+
     install_core_dependencies()
 
 import argparse
 import os
 import sys
 from operator import itemgetter
+
+from pimlico import cfg
 
 from pimlico.cli.newmodule import NewModuleCmd
 from pimlico.cli.check import InstallCmd, DepsCmd
@@ -167,6 +170,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
     parser.add_argument("--debug", "-d", help="Output verbose debugging info", action="store_true")
+    parser.add_argument("--non-interactive",
+                        help="Don't output things like progress bars that rely on being in a terminal or similar. "
+                             "Equivalent to setting environment variable PIM_NON_INT=1",
+                        action="store_true")
     parser.add_argument("--variant", "-v", help="Load a particular variant of a pipeline. For a list of available "
                                                 "variants, use the 'variants' command", default="main")
     parser.add_argument("--override-local-config", "--local", "-l",
@@ -208,6 +215,9 @@ if __name__ == "__main__":
     # Set the process title (if possible) as "pimlico", plus the config filename
     # This might have no effect, if the system doesn't allow it
     set_proc_title("pimlico %s" % opts.pipeline_config)
+
+    if opts.non_interactive:
+        cfg.NON_INTERACTIVE_MODE = True
 
     # Read in the pipeline config from the given file
     try:

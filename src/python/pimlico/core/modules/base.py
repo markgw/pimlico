@@ -45,7 +45,13 @@ class BaseModuleInfo(object):
     module_type_name = None
     module_readable_name = None
     module_options = {}
+    """ Specifies a list of (name, datatype class) pairs for inputs that are always required """
     module_inputs = []
+    """ 
+    Specifies a list of (name, datatype class) pairs for optional inputs. The module's execution may 
+    vary depending on what is provided. If these are not given, None is returned from get_input() 
+    """
+    module_optional_inputs = []
     """ Specifies a list of (name, datatype class) pairs for outputs that are always written """
     module_outputs = []
     """
@@ -67,8 +73,8 @@ class BaseModuleInfo(object):
     """
     main_module = None
 
-    def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[], docstring="",
-                 include_outputs=[], alt_expanded_from=None, alt_param_settings=[], module_variables={}):
+    def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[],
+                 docstring="", include_outputs=[], alt_expanded_from=None, alt_param_settings=[], module_variables={}):
         self.docstring = docstring
         self.inputs = inputs
         self.options = options
@@ -209,7 +215,9 @@ class BaseModuleInfo(object):
 
     @property
     def input_names(self):
-        return [name for name, __ in self.module_inputs]
+        """ All required inputs, first, then all supplied optional inputs """
+        return [name for name, __ in self.module_inputs] + \
+               [name for name, __ in self.module_optional_inputs if name in self.inputs]
 
     @property
     def output_names(self):
@@ -261,7 +269,7 @@ class BaseModuleInfo(object):
                                                           cls.module_type_name, len(cls.module_inputs)))
             elif opt_name.startswith("input_"):
                 input_name = opt_name[6:]
-                if input_name not in dict(cls.module_inputs):
+                if input_name not in dict(cls.module_inputs) and input_name not in dict(cls.module_optional_inputs):
                     raise ModuleInfoLoadError("%s module%s got unknown input '%s'. Available inputs: %s" % (
                         cls.module_type_name, (" %s" % module_name) if module_name else "",
                         input_name, ", ".join([i[0] for i in cls.module_inputs])
@@ -286,7 +294,25 @@ class BaseModuleInfo(object):
             # Multiple inputs may be specified, separated by commas
             # This will only work if the input datatype is a MultipleInputs
             inputs[input_name] = []
-            for spec in input_spec.split(","):
+            input_specs_initial = input_spec.split(",")
+            # Check for a * somewhere in the spec other than at the beginning
+            input_specs = []
+            input_multipliers = []
+            for spec in input_specs_initial:
+                # This indicates that one of the inputs should be repeated
+                if "*" in spec[1:]:
+                    mult_star_idx = spec[1:].index("*") + 1
+                    spec, multiplier = spec[:mult_star_idx], spec[mult_star_idx+1:]
+                    spec = spec.strip()
+                    # We can't do the multiplication now, as the multiplier might be a modvar expression,
+                    # or otherwise require further processing
+                    input_multipliers.append(multiplier)
+                else:
+                    # Don't repeat
+                    input_multipliers.append("")
+                input_specs.append(spec)
+
+            for spec, multiplier in zip(input_specs, input_multipliers):
                 # Check for an initial *, meaning we should expand out an expanded previous module input multiple inputs
                 if spec.startswith("*"):
                     spec = spec[1:]
@@ -298,6 +324,14 @@ class BaseModuleInfo(object):
                 spec = spec_parts[0]
                 additional_names = spec_parts[1:]  # Most of the time this is empty
 
+                if "[" in spec:
+                    # Don't split before the end of the expanded module name
+                    part0, part1, rest = spec.partition("[")
+                    part2, part3, spec = rest.partition("]")
+                    first_part = part0 + part1 + part2 + part3
+                else:
+                    first_part = ""
+
                 if "." in spec:
                     # This is a module name + output name
                     module_name, __, output_name = spec.rpartition(".")
@@ -305,6 +339,7 @@ class BaseModuleInfo(object):
                     # Just a module name, using the default output
                     module_name = spec
                     output_name = None
+                module_name = first_part + module_name
 
                 if expand:
                     # If the module name starts with a *, it should refer to one that has been expanded out according
@@ -321,7 +356,7 @@ class BaseModuleInfo(object):
 
                 # Most of the time there will only be one of these, == module_name
                 for expanded_module_name in expanded_module_names:
-                    inputs[input_name].append((expanded_module_name, output_name, additional_names))
+                    inputs[input_name].append((expanded_module_name, output_name, additional_names, multiplier))
 
         return inputs
 
@@ -469,7 +504,7 @@ class BaseModuleInfo(object):
         if input_name is None:
             input_type = self.module_inputs[0][1]
         else:
-            input_type = dict(self.module_inputs)[input_name]
+            input_type = dict(self.module_inputs + self.module_optional_inputs)[input_name]
         return isinstance(input_type, MultipleInputs)
 
     def get_input_module_connection(self, input_name=None, always_list=False):
@@ -484,12 +519,18 @@ class BaseModuleInfo(object):
 
         """
         if input_name is None:
-            if len(self.module_inputs) == 0:
+            if len(self.module_inputs):
+                input_name = self.module_inputs[0][0]
+            else:
                 raise PipelineStructureError("module '%s' doesn't have any inputs. Tried to get the first input" %
                                              self.module_name)
-            input_name = self.module_inputs[0][0]
         if input_name not in self.inputs:
-            raise PipelineStructureError("module '%s' doesn't have an input '%s'" % (self.module_name, input_name))
+            # Check whether it's an optional input that's not been given, so we can say so in the error
+            if input_name in dict(self.module_optional_inputs):
+                raise PipelineStructureError("could not get optional input '{}' to module '{}', as it's not "
+                                             "been given".format(input_name, self.module_name))
+            else:
+                raise PipelineStructureError("module '%s' doesn't have an input '%s'" % (self.module_name, input_name))
 
         # Try getting hold of the module that we need the output of
         if always_list or self.is_multiple_input(input_name):
@@ -526,10 +567,18 @@ class BaseModuleInfo(object):
         of inputs, this is a list. Otherwise, it's a single datatype instance.
         If always_list=True, in this latter case we return a single-item list.
 
+        If the requested input name is an optional input and it has not been supplied,
+        returns None.
+
         Additional kwargs will be passed through to the datatype's init call.
 
         """
         from pimlico.datatypes.base import IterableCorpus
+
+        # Check whether this is an optional input: otherwise get_input_module_connection() will raise an error
+        if input_name is not None and input_name in dict(self.module_optional_inputs) and input_name not in self.inputs:
+            return None
+
         inputs = [
             previous_module.get_output(output_name, additional_names=additional_names, **kwargs)
             for previous_module, output_name, additional_names in
@@ -723,7 +772,7 @@ class BaseModuleInfo(object):
 
         """
         input_connections = self.inputs[input_name]
-        input_type_requirements = dict(self.module_inputs)[input_name]
+        input_type_requirements = dict(self.module_inputs + self.module_optional_inputs)[input_name]
 
         if isinstance(input_type_requirements, MultipleInputs):
             # Type requirements are the same for all inputs

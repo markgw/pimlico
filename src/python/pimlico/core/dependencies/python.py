@@ -116,6 +116,25 @@ class PythonPackageOnPip(PythonPackageDependency):
         return True
 
     def install(self, local_config, trust_downloaded_archives=False):
+        import subprocess
+
+        # Use subprocess to call Pip: the recommended way to use it programmatically
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.pip_package])
+
+        # Refresh sys.path so we can import the installed package
+        import site
+        reload(site)
+
+    def _old_install(self, local_config, trust_downloaded_archives=False):
+        """
+        This is an old approach to installing programmatically using Pip. Technically, this
+        way of using Pip is unsupported and, sure enough, you end up running into horrible
+        errors with differing versions of Pip.
+
+        An alternative, more supported approach is now implemented, but this is left
+        here in case we need to incorporate anything from it.
+
+        """
         try:
             from pip import __version__
         except ImportError:
@@ -258,9 +277,16 @@ scipy_dependency = PythonPackageSystemwideInstall("scipy", "Scipy",
                                                   pip_package="scipy", yum_package="scipy", apt_package="python-scipy",
                                                   url="https://www.scipy.org/scipylib/")
 theano_dependency = PythonPackageOnPip("theano", pip_package="Theano")
+tensorflow_dependency = PythonPackageOnPip("tensorflow")
 # We usually need h5py for reading/storing models
 h5py_dependency = PythonPackageOnPip("h5py", pip_package="h5py")
-keras_dependency = PythonPackageOnPip("keras", dependencies=[theano_dependency, h5py_dependency])
+# This version of the Keras dependency assumes we're using the theano backend
+keras_theano_dependency = PythonPackageOnPip("keras", dependencies=[theano_dependency, h5py_dependency])
+keras_tensorflow_dependency = PythonPackageOnPip("keras", dependencies=[tensorflow_dependency, h5py_dependency])
+# This version does not depend on any of the backend packages
+# This allows you to be ambivalent about which one is used, but means the package is not checked
+keras_dependency = PythonPackageOnPip("keras", dependencies=[h5py_dependency])
+
 sklearn_dependency = PythonPackageOnPip(
     "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
 )

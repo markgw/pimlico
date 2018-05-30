@@ -461,31 +461,81 @@ class PipelineConfig(object):
                     new_alternatives = []
                     # It's possible for the value to already have alternatives, in which case we include them all
                     for original_val in module_config[input_opt].split("|"):
-                        # If the input connection has more than just a module name, we only modify the module name
-                        val_module_name, __, rest_of_val = original_val.partition(".")
-                        # If the module name is unknown, this will be a problem, but leave the error handling till later
-                        # For safety's sake, skip over anything that starts with * or is a comma-separated list
-                        if len(original_to_expanded_sections.get(val_module_name, [])) > 1 and \
-                                not val_module_name.startswith("*") and not "," in val_module_name:
-                            # The previous module has been expanded: add all of the resulting modules as alternatives
-                            previous_modules = original_to_expanded_sections[val_module_name]
-                            # Include the rest of the input specifier (generally an output name)
-                            previous_modules = [
-                                "%s.%s" % (mod, rest_of_val) if rest_of_val else mod for mod in previous_modules
-                            ]
-                            # If the previous module names are already in the form module[alt_name], take the alt_name
-                            # from there
-                            previous_module_alt_names = [
-                                mod[mod.index("[")+1:mod.index("]")] if "[" in mod else None for mod in previous_modules
-                            ]
-                            new_alternatives.extend([
-                                "{%s}%s" % (alt_name, mod) if alt_name is not None else mod
-                                for (mod, alt_name) in zip(previous_modules, previous_module_alt_names)
-                            ])
+                        # If there's a list of values here, we need to handle it carefully
+                        new_items = []
+                        new_item_alt_names = []
+                        for original_val_item in original_val.split(","):
+                            original_val_item = original_val_item.strip()
+                            # If the input connection has more than just a module name, we only modify the module name
+                            val_module_name, __, rest_of_val = original_val_item.partition(".")
+                            # If module name is unknown, this will be a problem, but leave the error handling till later
+                            # For safety's sake, skip over anything that starts with *
+                            if len(original_to_expanded_sections.get(val_module_name, [])) > 1 and \
+                                    not val_module_name.startswith("*"):
+                                # The previous module has been expanded: add all of the resulting modules as alternatives
+                                previous_modules = original_to_expanded_sections[val_module_name]
+                                # Include the rest of the input specifier (generally an output name)
+                                previous_modules = [
+                                    "%s.%s" % (mod, rest_of_val) if rest_of_val else mod for mod in previous_modules
+                                ]
+                                # If the previous module names are already in the form module[alt_name], take the alt_name
+                                # from there
+                                previous_module_alt_names = [
+                                    mod[mod.index("[")+1:mod.index("]")] if "[" in mod else None for mod in previous_modules
+                                ]
+                                new_items.append(previous_modules)
+                                # The different items might give us different alt names
+                                # In that case, we'll just use the first for every alt
+                                new_item_alt_names.append(previous_module_alt_names)
+                            else:
+                                # Previous module this one takes input from has not been expanded: leave unchanged
+                                # Or it starts with * or includes a ,
+                                new_items.append([original_val_item])
+                                # No alternative name associated with this (unless it's already given)
+                                new_item_alt_names.append([None])
+                        if len(new_items) == 1:
+                            # Simplest case: no comma-separated list at all
+                            new_alternatives.extend(new_items[0])
+                        elif any(len(i) == 1 for i in new_items) and not all(len(i) == 1 for i in new_items):
+                            # Some items have only one alternative, but others have more
+                            num_alts = (len(i) for i in new_items if len(i) > 1).next()
+                            # Multiply the ones that have only one alternative, to use that same value for each of the
+                            #  other items
+                            new_items = [i if len(i) > 1 else i*num_alts for i in new_items]
+                            # Now zip together the alternative values for each list item
+                            new_alternatives = [",".join(item_alts) for item_alts in zip(*new_items)]
+                        elif any(len(i) != len(new_items[0]) for i in new_items[1:]):
+                            # Otherwise, we expect each item in the list to have ended up with the same number
+                            #  of alternatives, so we can zip them together
+                            raise PipelineConfigParseError(
+                                "error processing alternative values for {} to {}. When expanding a list of module "
+                                "names, every item in the list must have the same number of alternatives, or just "
+                                "one alternative. Got alternative numbers '{}' from list '{}'".format(
+                                    input_opt, module_name, ", ".join(str(len(i)) for i in new_items), original_val
+                                ))
                         else:
-                            # Previous module this one takes input from has not been expanded: leave unchanged
-                            # Or it starts with * or includes a ,
-                            new_alternatives.append(original_val)
+                            # All items have same number of alternatives
+                            # Zip together the alternative values for each list item
+                            new_alternatives = [",".join(item_alts) for item_alts in zip(*new_items)]
+
+                        new_alts_with_names = []
+                        for alt_num, new_alt in enumerate(new_alternatives):
+                            if new_alt.startswith("{"):
+                                # This already has an alternative name: don't do anything
+                                new_alts_with_names.append(new_alt)
+                            else:
+                                # Try to find a name from one of the items in the list
+                                try:
+                                    new_name = (item_alt_names[alt_num]
+                                                for item_alt_names in new_item_alt_names
+                                                if len(item_alt_names) > alt_num
+                                                and item_alt_names[alt_num] is not None).next()
+                                except StopIteration:
+                                    # No name found: just leave the value as it is, unnamed
+                                    new_alts_with_names.append(new_alt)
+                                else:
+                                    new_alts_with_names.append("{%s}%s" % (new_name, new_alt))
+                        new_alternatives = new_alts_with_names
                     module_config[input_opt] = "|".join(new_alternatives)
 
                 # Now look for any options with alternative values and expand them out into multiple module configs
@@ -685,7 +735,7 @@ class PipelineConfig(object):
                     for input_name, input_specs in inputs.iteritems():
                         input_module_group = []
                         for input_spec_num, input_spec in enumerate(input_specs):
-                            if "$(" in input_spec[0]:
+                            if "$(" in input_spec[0] or "$(" in input_spec[3]:
                                 # Input module names are allowed to be dependent on module variables, but if they
                                 # are we can't inherit modvars from their input modules (cart before horse).
                                 # We leave them out here and come back and fill in the modvar later
@@ -722,10 +772,16 @@ class PipelineConfig(object):
                             expanded_param_settings[expanded_module_name], inherited_variables,
                             list_action="expand"
                         )
+                        new_input_multiplier = substitute_modvars_in_value(
+                            input_name, inputs[input_name][input_spec_num][3], module_variables,
+                            expanded_param_settings[expanded_module_name], inherited_variables,
+                            list_action="error"
+                        )
                         if type(new_input_names) is not list:
                             new_input_names = [new_input_names]
                         new_input_specs = [
-                            tuple([iname] + list(inputs[input_name][input_spec_num][1:])) for iname in new_input_names
+                            tuple([iname] + list(inputs[input_name][input_spec_num][1:3]) + [new_input_multiplier])
+                            for iname in new_input_names
                         ]
                         # In the simple and most common case that there's only one resulting input spec, just use that
                         inputs[input_name][input_spec_num] = new_input_specs[0]
@@ -740,6 +796,28 @@ class PipelineConfig(object):
                             for offset, new_spec in enumerate(new_specs):
                                 inputs[input_name].insert(original_spec_num + 1 + offset + added, new_spec)
                             added += len(new_specs)
+
+                    # Apply input multipliers
+                    for input_name, input_specs in inputs.items():
+                        new_input_specs = []
+                        for _mod, _output, _adtnl, _mlt in input_specs:
+                            _mlt = _mlt.strip(" ()")
+                            if len(_mlt) == 0:
+                                # Most common case: no multiplier at all
+                                _mlt = 1
+                            else:
+                                try:
+                                    _mlt = int(_mlt)
+                                except ValueError:
+                                    raise PipelineConfigParseError("input multiplier must be an integer value after "
+                                                                   "variable expansion. Got '{}' in input '{}' to "
+                                                                   "module '{}'".format(_mlt, input_name, module_name))
+                            new_input_specs.extend([(_mod, _output, _adtnl)] * _mlt)
+                        inputs[input_name] = new_input_specs
+
+                    inputs = dict(
+                        (input_name, [spec[:3] for spec in input_spec]) for (input_name, input_spec) in inputs.items()
+                    )
 
                     # We're now ready to do the main parameter processing, which is dependent on the module
                     options = module_info_class.process_module_options(options_dict)
@@ -1183,6 +1261,19 @@ def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
         rest = rest[1:]
         # Now perform the actual join
         val = joiner.join(join_list)
+    elif param.startswith("len("):
+        # Calculate the length of a list
+        rest = param[4:]
+        # The only argument should be a list
+        len_list, rest = _parse_modvar_param(rest, vars, expanded_params, variables_from_inputs)
+        if not type(len_list) is list:
+            raise ValueError("argument to len() function must be a list. Got: %s" % len_list)
+        rest = rest.lstrip()
+        if not rest.startswith(")"):
+            raise ValueError("expected closing ) after len's arg")
+        rest = rest[1:]
+        # Just compute the length of the list, which should be a string for future use
+        val = str(len(len_list))
     else:
         match = int_literal_re.search(param)
         if match:
@@ -1363,12 +1454,18 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     for target_section, source_sections in copies.iteritems():
         # There may be multiple source sections: process in order of directives, so later ones override earlier
         copy_values = {}
-        for source_section in source_sections:
+        for source_section, exceptions in source_sections:
             if source_section not in config_sections_dict:
                 raise PipelineConfigParseError("copy directive in [%s] referred to unknown module '%s'" %
                                                (target_section, source_section))
+            source_settings = copy.copy(config_sections_dict[source_section])
+            for exception in exceptions:
+                if exception not in source_settings:
+                    raise PipelineConfigParseError("copy directive exception referred to parameter that wasn't "
+                                                   "in the source section: %s" % exception)
+                del source_settings[exception]
             # Accumulate values to the copied into target section
-            copy_values.update(config_sections_dict[source_section])
+            copy_values.update(source_settings)
         # Values set in section itself take precedence over those copied
         copy_values.update(config_sections_dict[target_section])
         # Replace the settings for this module
@@ -1463,8 +1560,10 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                 elif directive == "copy":
                     # Copy config values from another section
                     # For now, just store a list of sections to copy from: we'll do the copying later
-                    source_section = rest.strip()
-                    copies.setdefault(current_section, []).append(source_section)
+                    source_section, __, rest = rest.partition(" ")
+                    # The directive might also specify settings that shouldn't be copied
+                    exceptions = rest.strip().split()
+                    copies.setdefault(current_section, []).append((source_section, exceptions))
                 elif directive == "abstract":
                     # Mark this file as being abstract (must be included)
                     abstract = True
@@ -1579,17 +1678,6 @@ def check_release(release_str):
     required_major_release, __, required_minor_release = release_str.partition(".")
     current_major_release, required_major_release = int(current_major_release), int(required_major_release)
 
-    if current_major_release < required_major_release:
-        raise PipelineStructureError("config file was written for a later version of Pimlico than the one you're "
-                                     "running. You need to update Pimlico (or check out a later release), as there "
-                                     "could be backwards-incompatible changes between major versions. Running version "
-                                     "%s, required version %s" % (__version__, release_str))
-    elif current_major_release > required_major_release:
-        raise PipelineStructureError("config file was written for an earlier version of Pimlico than the one you're "
-                                     "running. You need to check out an earlier release, as the behaviour of Pimlico "
-                                     "could be very different to when the config file was written. Running version "
-                                     "%s, required version %s" % (__version__, release_str))
-
     current_rc = current_minor_release.endswith("rc")
     if current_rc:
         # This is a release candidate
@@ -1600,6 +1688,17 @@ def check_release(release_str):
         # RC required
         # Allow minor versions above it, or an identical RC
         required_minor_release = required_minor_release[:-2]
+
+    if current_major_release < required_major_release:
+        raise PipelineStructureError("config file was written for a later version of Pimlico than the one you're "
+                                     "running. You need to update Pimlico (or check out a later release), as there "
+                                     "could be backwards-incompatible changes between major versions. Running version "
+                                     "%s, required version %s" % (__version__, release_str))
+    elif current_major_release > required_major_release:
+        raise PipelineStructureError("config file was written for an earlier version of Pimlico than the one you're "
+                                     "running. You need to check out an earlier release, as the behaviour of Pimlico "
+                                     "could be very different to when the config file was written. Running version "
+                                     "%s, required version %s" % (__version__, release_str))
 
     # Right major version
     # Check we're not running an earlier minor version
@@ -1614,8 +1713,10 @@ def check_release(release_str):
                                          "one you're running. You need to use >= v%s to run this config "
                                          "file (and not > %s). Currently using %s" %
                                          (release_str, required_major_release, __version__))
+
         current_part, __, remaining_current = remaining_current.partition(".")
         given_part, __, remaining_given = remaining_given.partition(".")
+
         if int(current_part) > int(given_part):
             # Using a higher minor version than required: stop checking
             higher_than_required = True
@@ -1627,13 +1728,17 @@ def check_release(release_str):
                                          (release_str, required_major_release, __version__))
         # Otherwise using same version at this level: go down to next level and check
 
+    if len(remaining_current) > 0:
+        # Given version has the same prefix, but current version has more subversions, so is a later release
+        higher_than_required = True
+
     if not higher_than_required:
         # Allow equal minor versions, except in the case where the supplied version is only a RC
         if current_rc and not given_rc:
-            raise PipelineStructureError("config file was written for a later (minor) version of Pimlico than the "
-                                         "one you're running. You need to use >= v%s to run this config "
-                                         "file (and not > %s). Currently only using a release candidate, %s" %
-                                         (release_str, required_major_release, __version__))
+            raise PipelineStructureError("config file was written for the version of Pimlico you're running, but "
+                                         "not a release candidate. Require %s. "
+                                         "Currently only using a release candidate, %s" %
+                                         (release_str, __version__))
 
 
 def check_pipeline(pipeline):
@@ -1742,7 +1847,12 @@ def print_missing_dependencies(pipeline, modules):
                 "All" if len(missing_dependencies) == len(auto_installable_deps) else "Some",
                 ", ".join(dep.name for dep in auto_installable_deps)
             )
-            install_now = raw_input("Do you want to install these now? [y/N] ").lower().strip() == "y"
+            try:
+                install_now = raw_input("Do you want to install these now? [y/N] ").lower().strip() == "y"
+            except EOFError:
+                # We get an EOF if the user enters it, or if we're not running in interactive mode
+                install_now = False
+
             if install_now:
                 uninstalled = check_and_install(auto_installable_deps, pipeline.local_config)
                 if len(uninstalled):

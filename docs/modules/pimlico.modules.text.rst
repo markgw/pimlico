@@ -21,5 +21,6 @@ Probably a good deal of these will be added in due course.
    :titlesonly:
 
    pimlico.modules.text.char_tokenize
+   pimlico.modules.text.normalize
    pimlico.modules.text.simple_tokenize
    pimlico.modules.text.untokenize

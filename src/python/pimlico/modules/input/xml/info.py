@@ -104,7 +104,8 @@ def get_doc_nodes(filename, document_node_type, encoding, attr_constraints=None)
     data = data.decode(encoding)
 
     # Read the XML using Beautiful Soup, so we can handle messy XML in a tolerant fashion
-    soup = BeautifulSoup(data, "lxml")
+    # We specify XML, instead of HTML
+    soup = BeautifulSoup(data, "xml")
     # Look for the type of XML node that documents are stored in and count them
     return soup.find_all(document_node_type, attrs=attr_constraints)
 
@@ -185,7 +186,7 @@ class XMLOutputType(ReaderOutputType):
                             doc_name = u"{}-{}".format(base_doc_name, file_doc_id)
                     else:
                         # The node should supply us with the document name, using the attribute name specified
-                        doc_name = doc_node.get(self.options["document_name_attr"])
+                        doc_name = doc_node.get(doc_name_attr)
                     # Pull the text out of the document node
                     doc_text = doc_node.text
                     yield doc_name, self.filter_text(doc_text)

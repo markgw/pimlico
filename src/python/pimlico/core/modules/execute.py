@@ -118,8 +118,9 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
         log.info("All checks passed")
     else:
         # Checks passed: run the module
-        execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug, exit_on_error=exit_on_error,
-                        preliminary=execute_preliminary, email=email)
+        # Returns the exit status the should be used (i.e. 1 if there was an error)
+        return execute_modules(pipeline, modules, log, force_rerun=force_rerun, debug=debug, exit_on_error=exit_on_error,
+                               preliminary=execute_preliminary, email=email)
 
 
 def check_modules_ready(pipeline, modules, log, preliminary=False):
@@ -396,6 +397,11 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
             send_final_report_email(pipeline, error_modules, success_modules, skipped_modules, modules)
         else:
             log.warn("Not sending email, since we failed so quickly")
+
+    if error_modules:
+        return 1
+    else:
+        return 0
 
 
 def format_execution_dependency_tree(tree):
