@@ -12,6 +12,13 @@ Subpackages
     pimlico.test
     pimlico.utils
 
+Submodules
+----------
+
+.. toctree::
+
+   pimlico.cfg
+
 Module contents
 ---------------
 

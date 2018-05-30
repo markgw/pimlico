@@ -22,4 +22,5 @@ Core modules for generic manipulation of mainly iterable corpora.
    pimlico.modules.corpora.tar
    pimlico.modules.corpora.tar_filter
    pimlico.modules.corpora.vocab_builder
+   pimlico.modules.corpora.vocab_counter
    pimlico.modules.corpora.vocab_mapper
