@@ -97,7 +97,8 @@ class TarredCorpus(IterableCorpus):
                     for tarinfo in tarball:
                         filename = tarinfo.name
                         # By default, doc name is just the same as filename
-                        doc_name = filename
+                        # Filenames could be unicode and we should preserve that in the doc name
+                        doc_name = filename.decode("utf8")
 
                         # Allow the first portion of the corpus to be skipped
                         if not started:

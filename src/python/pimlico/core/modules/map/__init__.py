@@ -136,7 +136,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def update_processing_status(self, docs_completed, archive_name, filename):
         self.info.set_metadata_values({
             "status": "PARTIALLY_PROCESSED",
-            "last_doc_completed": "%s/%s" % (archive_name, filename),
+            "last_doc_completed": u"%s/%s" % (archive_name, filename),
             "docs_completed": docs_completed,
         })
 
