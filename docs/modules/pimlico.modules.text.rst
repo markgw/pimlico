@@ -23,4 +23,5 @@ Probably a good deal of these will be added in due course.
    pimlico.modules.text.char_tokenize
    pimlico.modules.text.normalize
    pimlico.modules.text.simple_tokenize
+   pimlico.modules.text.text_normalize
    pimlico.modules.text.untokenize
