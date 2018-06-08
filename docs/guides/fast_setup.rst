@@ -16,8 +16,7 @@ Create a file in your home directory called ``.pimlico`` that looks like this:
 
 .. code-block:: ini
 
-   long_term_store=/home/me/.pimlico_store
-   short_term_store=/home/me/.pimlico_store
+   store=/home/me/.pimlico_store
 
 This is not specific to a pipeline: separate pipelines use separate subdirectories.
 

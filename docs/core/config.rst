@@ -53,8 +53,6 @@ Use them anywhere in your config file with an expression like ``%(varname)s`` (n
 - ``test_data_dir``:
     Directory in Pimlico distribution where test data is stored (``test/data`` in Pimlico root). Used in test pipelines,
     which take all their input data from this directory.
-- ``long_term_store`` and ``short_term_store``:
-    *Now removed*. It should not generally be necessary to refer to these locations directly
 
 For example, to point a parameter to a file located within the project root:
 

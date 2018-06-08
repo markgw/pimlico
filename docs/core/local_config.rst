@@ -68,8 +68,8 @@ doesn't work in your case, you can fall back to pointing Pimlico at your own hos
 
 .. _data-stores:
 
-Long-term and short-term stores
-===============================
+Data stores
+===========
 Pimlico needs to know where to put and find output files as it executes.
 Settings are given in the local config, since they apply to all Pimlico pipelines you run and may vary from
 system to system.
@@ -77,25 +77,30 @@ Note that Pimlico will make sure that different pipelines don't interfere
 with each other's output (provided you give them different names): all pipelines store their output and look
 for their input within these same base locations.
 
-The **short-term store** should be on a disk that's as fast as possible to write to. For example, avoid using an NFS
-disk. It needs to be large enough to store output between pipeline stages, though you can easily move
-output from earlier stages into the long-term store as you go along.
+See :ref:`data-storage` for an explanation of Pimlico's data store system.
 
-The **long-term store** is where things are typically put at the end of
-a pipeline. It therefore doesn't need to be super-fast to access, but you may want it to be in a location that gets
-backed up, so you don't lose your valuable output.
-
-For a simple setup, these could be just two subdirectories of the same directory, or actually the same directory.
-However, it can be useful to distinguish them.
-
-Specific the locations in the local config like this:
+At least one store must be given in the local config:
 
 .. code-block:: ini
 
-    long_term_store=/path/to/long-term/store
-    short_term_store=/path/to/short-term/store
+    store=/path/to/storage/root
 
-Remember, these paths are not specific to a pipeline: all pipelines will use different subdirectories of these ones.
+You may specify as many storage locations as you like, giving each a name:
+
+.. code-block:: ini
+
+    store_fast=/path/to/fast/store
+    store_big=/path/to/big/store
+
+If you specify named stores *and* an unnamed one, the unnamed one will be used as the default output
+store. Otherwise, the first in the file will be the default.
+
+.. code-block:: ini
+
+    store=/path/to/a/store          # This will be the default output store
+    store_fast=/path/to/fast/store  # These will be additional, named stores
+    store_big=/path/to/big/store
+
 
 .. _other-local-config:
 

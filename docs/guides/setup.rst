@@ -19,18 +19,15 @@ know where to put output files as it executes. Settings are given in a config fi
 apply to all Pimlico pipelines you run. Note that Pimlico will make sure that different pipelines don't interfere 
 with each other's output (provided you give them different names).
 
-There are two locations you need to specify: **short-term** and **long-term storage**. For more details, see
-:ref:`data-stores`.
-
-For a simple setup, these could be just two subdirectories of the same directory. However, it can be
-useful to distinguish them.
+Most of the time, you only need to specify one storage location, using the ``store`` parameter in your local
+config file. You may if you like specify multiple locations where Pimlico will look for data. For more details, see
+:ref:`data-storage`.
 
 Create a file ``~/.pimlico`` that looks like this:
 
 .. code-block:: ini
 
-    long_term_store=/path/to/long-term/store
-    short_term_store=/path/to/short-term/store
+    store=/path/to/storage/directory
 
 Remember, these paths are not specific to a pipeline: all pipelines will use different subdirectories of these ones.
 
