@@ -13,7 +13,6 @@ if __name__ == "__main__":
     install_core_dependencies()
 
 import argparse
-import os
 import sys
 from operator import itemgetter
 
@@ -23,7 +22,7 @@ from pimlico.cli.newmodule import NewModuleCmd
 from pimlico.cli.check import InstallCmd, DepsCmd
 from pimlico.cli.clean import CleanCmd
 from pimlico.cli.loaddump import DumpCmd, LoadCmd
-from pimlico.cli.locations import InputsCmd, OutputCmd
+from pimlico.cli.locations import InputsCmd, OutputCmd, ListStoresCmd, MoveStoresCmd
 from pimlico.cli.pyshell import PythonShellCmd
 from pimlico.cli.reset import ResetCmd
 from pimlico.cli.run import RunCmd
@@ -34,7 +33,6 @@ from pimlico.cli.testemail import EmailCmd
 from pimlico.cli.util import module_number_to_name, module_numbers_to_names
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError, PipelineStructureError
 from pimlico.core.modules.options import ModuleOptionParseError
-from pimlico.utils.filesystem import copy_dir_with_progress
 from pimlico.utils.system import set_proc_title
 
 
@@ -50,32 +48,6 @@ class VariantsCmd(PimlicoCLISubcommand):
         variants = ["main"] + pipeline.available_variants
         print "Available pipeline variants: %s" % ", ".join(variants)
         print "Select one using the --variant option"
-
-
-class LongStoreCmd(PimlicoCLISubcommand):
-    command_name = "longstore"
-    command_help = "Move a particular module's output from the short-term store to the long-term " \
-                   "store. It will still be found here by input readers. You might want to do " \
-                   "this if your long-term store is bigger, to keep down the short-term store size"
-    command_desc = "Move a particular module's output from the short-term store to the long-term store"
-
-    def add_arguments(self, parser):
-        parser.add_argument("modules", nargs="*", help="The names (or numbers) of the module whose output to move")
-
-    def run_command(self, pipeline, opts):
-        print "Copying modules from short-term to long-term store: %s" % ", ".join(opts.modules)
-        for module_name in opts.modules:
-            # Get the path within the stores
-            module_path = pipeline[module_name].get_module_output_dir()
-            # Work out where it lives in the short-term and long-term stores
-            short_term_dir = os.path.join(pipeline.short_term_store, module_path)
-            long_term_dir = os.path.join(pipeline.long_term_store, module_path)
-            if not os.path.exists(short_term_dir):
-                print "Output dir %s does not exist, cannot move" % short_term_dir
-            elif short_term_dir == long_term_dir:
-                print "Short-term dir is the same as long-term dir (%s), not moving" % short_term_dir
-            else:
-                copy_dir_with_progress(short_term_dir, long_term_dir)
 
 
 class UnlockCmd(PimlicoCLISubcommand):
@@ -153,7 +125,8 @@ class VisualizeCmd(PimlicoCLISubcommand):
 
 
 SUBCOMMANDS = [
-    StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd, LongStoreCmd, UnlockCmd,
+    StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd,
+    ListStoresCmd, MoveStoresCmd, UnlockCmd,
     DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, NewModuleCmd, VisualizeCmd, EmailCmd
 ]
 

@@ -71,20 +71,19 @@ class PipelineConfig(object):
             self.storage_locations.append(
                 ("default", os.path.join(self.local_config["store"], self.name, self.variant)))
         self.storage_locations.extend([
-            (key[8:], os.path.join(val, self.name, self.variant))
+            (key[6:], os.path.join(val, self.name, self.variant))
             for (key, val) in local_config.items() if key.startswith("store_")
         ])
         if len(self.storage_locations) == 0:
             raise PipelineConfigParseError("at least one storage location must be specified: none found in "
                                            "local config")
-        self.named_storage_locations = dict(self.storage_locations)
 
         # Number of processes to use for anything that supports multiprocessing
         self.processes = int(self.local_config.get("processes", 1))
 
         # By default, the first storage location is used for output
         # This may be overridden by storage_location kwarg (which it will later be possible to set from the cmd line)
-        self.output_path = self.storage_locations[0][1]
+        self.output_store = self.storage_locations[0][0]
 
         # Get paths to add to the python path for the pipeline
         # Used so that a project can specify custom module types and other python code outside the pimlico source tree
@@ -263,6 +262,18 @@ class PipelineConfig(object):
         """ For backwards compatibility: return storage location 'long' if it exists, else first storage location """
         warnings.warn("Used deprecated attribute 'long_term_store'. Should use new named storage location system")
         return self.named_storage_locations.get("long", self.storage_locations[0][1])
+
+    @property
+    def named_storage_locations(self):
+        return dict(self.storage_locations)
+
+    @property
+    def store_names(self):
+        return [n for (n, loc) in self.storage_locations]
+
+    @property
+    def output_path(self):
+        return self.named_storage_locations[self.output_store]
 
     @staticmethod
     def load(filename, local_config=None, variant="main", override_local_config={}, only_override_config=False):
@@ -1051,29 +1062,53 @@ class PipelineConfig(object):
         relative to output location, whichever of the storage locations that might be
         :return: absolute path to data, or None if not found in any store
         """
-        if os.path.isabs(path):
-            return path
-        try:
-            return self.find_all_data_paths(path).next()
-        except StopIteration:
-            if default == "output":
-                return os.path.join(self.output_path, path)
-            elif default is not None:
-                return os.path.join(self.named_storage_locations[default], path)
-            else:
-                return None
+        return self.find_data(path, default=default)[1]
 
-    def find_all_data_paths(self, path):
-        # If the path is already an absolute path, don't search for the data
-        # Just return it if it exists
-        if os.path.isabs(path):
-            if os.path.exists(path):
-                yield path
-            return
+    def find_data_store(self, path, default=None):
+        """
+        Like `find_data_path()`, searches through storage locations to see if any of them
+        include the data that lives at this relative path. This method returns the name of
+        the store in which it was found.
 
-        for abs_path in self.get_data_search_paths(path):
+        :param path: path to data, relative to store base
+        :param default: usually, return None if no data is found. If default is given, return the path
+        relative to the named storage location if no data is found. Special value "output" returns path
+        relative to output location, whichever of the storage locations that might be
+        :return: name of store
+        """
+        return self.find_data(path, default=default)[0]
+
+    def find_data(self, path, default=None):
+        """
+        Given a path to a data dir/file relative to a data store, tries taking it relative to various store base
+        dirs. If it exists in a store, that absolute path is returned. If it exists in no store, return None.
+        If the path is already an absolute path, nothing is done to it.
+
+        Searches all the specified storage locations.
+
+        :param path: path to data, relative to store base
+        :param default: usually, return None if no data is found. If default is given, return the path
+        relative to the named storage location if no data is found. Special value "output" returns path
+        relative to output location, whichever of the storage locations that might be
+        :return: (store, path), where store is the name of the store used and path is
+        absolute path to data, or None for both if not found in any store
+        """
+        if os.path.isabs(path):
+            return None, path
+        # Try all the possible locations for this relative path
+        for store_name, abs_path in self.get_data_search_paths(path):
             if os.path.exists(abs_path):
-                yield abs_path
+                # Return the first path that exists
+                return store_name, abs_path
+        # The data was not found in any storage location
+        if default == "output":
+            # Return the path that would be used to output the data to
+            return self.output_store, os.path.join(self.output_path, path)
+        elif default is not None:
+            # Return the path in a given default store
+            return default, os.path.join(self.named_storage_locations[default], path)
+        else:
+            return None, None
 
     def get_data_search_paths(self, path):
         """
@@ -1083,14 +1118,7 @@ class PipelineConfig(object):
         :param path: relative path within Pimlico directory structures
         :return: list of string
         """
-        return [os.path.join(store_base, path) for store_base in self.get_store_roots()]
-
-    def get_store_roots(self):
-        """
-        Returns a list of all the (pipeline-specific) storage root locations known to the pipeline.
-
-        """
-        return [path for (name, path) in self.storage_locations]
+        return [(name, os.path.join(store_base, path)) for (name, store_base) in self.storage_locations]
 
     @property
     def step(self):

@@ -34,7 +34,7 @@ class CleanCmd(PimlicoCLISubcommand):
 
     def run_command(self, pipeline, opts):
         to_clean = set()
-        for root_dir in pipeline.get_store_roots():
+        for store_name, root_dir in pipeline.storage_locations:
             if os.path.exists(root_dir):
                 for dirname in os.listdir(root_dir):
                     if os.path.isdir(os.path.join(root_dir, dirname)):
