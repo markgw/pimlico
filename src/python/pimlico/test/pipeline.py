@@ -63,7 +63,7 @@ class TestPipeline(object):
             raise TestPipelineRunError("could not load test pipeline at '{}': file does not exist".format(path))
         # Set the local config paths to point to the (usually temporary) storage root we're using
         local_config = {
-            "storage": storage_root,
+            "store": storage_root,
         }
         return PipelineConfig.load(path, override_local_config=local_config, only_override_config=True)
 

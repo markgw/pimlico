@@ -66,13 +66,13 @@ class PipelineConfig(object):
 
         # Certain standard system-wide settings, loaded from the local config
         self.storage_locations = []
-        if "storage" in local_config:
+        if "store" in local_config:
             # Default, unnamed storage location: use name "default"
             self.storage_locations.append(
-                ("default", os.path.join(self.local_config["storage"], self.name, self.variant)))
+                ("default", os.path.join(self.local_config["store"], self.name, self.variant)))
         self.storage_locations.extend([
             (key[8:], os.path.join(val, self.name, self.variant))
-            for (key, val) in local_config.items() if key.startswith("storage_")
+            for (key, val) in local_config.items() if key.startswith("store_")
         ])
         if len(self.storage_locations) == 0:
             raise PipelineConfigParseError("at least one storage location must be specified: none found in "
@@ -977,17 +977,17 @@ class PipelineConfig(object):
         if "short_term_store" in local_config_data:
             # This was the default output location, so we should use the value as the first location, unless one
             # is already given
-            if any(key.startswith("storage") for key in local_config_data.keys()):
+            if any(key.startswith("store") for key in local_config_data.keys()):
                 local_config_data["storage_short"] = local_config_data["short_term_store"]
             else:
                 # Insert the named storage location, ensuring it comes before any others
                 local_config_data = OrderedDict(
-                    [("storage_short", local_config_data["short_term_store"])] +
+                    [("store_short", local_config_data["short_term_store"])] +
                     local_config_data.items()
                 )
             del local_config_data["short_term_store"]
         if "long_term_store" in local_config_data:
-            local_config_data["storage_long"] = local_config_data["long_term_store"]
+            local_config_data["store_long"] = local_config_data["long_term_store"]
             del local_config_data["long_term_store"]
 
         # Check we've got all the essentials from somewhere
@@ -996,10 +996,10 @@ class PipelineConfig(object):
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
 
         # Check that there's at least one storage location given
-        if not any(key.startswith("storage") for key in local_config_data.keys()):
+        if not any(key.startswith("store") for key in local_config_data.keys()):
             raise PipelineConfigParseError("no storage location was found in local config. You should specify "
                                            "at least one, either as a default 'storage' parameter, or a named storage "
-                                           "location 'storage_<name>'")
+                                           "location 'store_<name>'")
 
         return local_config_data, used_config_sources
 
@@ -1083,9 +1083,9 @@ class PipelineConfig(object):
         :param path: relative path within Pimlico directory structures
         :return: list of string
         """
-        return [os.path.join(store_base, path) for store_base in self.get_storage_roots()]
+        return [os.path.join(store_base, path) for store_base in self.get_store_roots()]
 
-    def get_storage_roots(self):
+    def get_store_roots(self):
         """
         Returns a list of all the (pipeline-specific) storage root locations known to the pipeline.
 
