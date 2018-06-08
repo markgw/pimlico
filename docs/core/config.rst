@@ -48,17 +48,13 @@ Use them anywhere in your config file with an expression like ``%(varname)s`` (n
     Root directory of the whole project. Current assumed to always be the parent directory of ``pimlico_root``.
 - ``output_dir``:
     Path to output dir (usually ``output`` in Pimlico root).
-- ``long_term_store``:
-    Long-term store base directory being used under the current config. Can be used to link to data from
-    other pipelines run on the same system. This is the value specified in the :ref:`local config file <local-config>`.
-- ``short_term_store``:
-    Short-term store base directory being used under the current config. Can be used to link to data from
-    other pipelines run on the same system. This is the value specified in the :ref:`local config file <local-config>`.
 - ``home``:
     Running user's home directory (on Unix and Windows, see Python's ``os.path.expanduser()``).
 - ``test_data_dir``:
     Directory in Pimlico distribution where test data is stored (``test/data`` in Pimlico root). Used in test pipelines,
     which take all their input data from this directory.
+- ``long_term_store`` and ``short_term_store``:
+    *Now removed*. It should not generally be necessary to refer to these locations directly
 
 For example, to point a parameter to a file located within the project root:
 

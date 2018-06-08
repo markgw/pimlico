@@ -15,6 +15,8 @@ This way of providing tests also has the advantage that modules at the same time
 several) of how to use them -- how pipeline config should look and what sort of input data to use.
 
 """
+import traceback
+
 from pimlico.utils.core import remove_duplicates
 
 if __name__ == "__main__":
@@ -61,10 +63,9 @@ class TestPipeline(object):
             raise TestPipelineRunError("could not load test pipeline at '{}': file does not exist".format(path))
         # Set the local config paths to point to the (usually temporary) storage root we're using
         local_config = {
-            "long_term_store": storage_root,
-            "short_term_store": storage_root,
+            "storage": storage_root,
         }
-        return PipelineConfig.load(path, override_local_config=local_config)
+        return PipelineConfig.load(path, override_local_config=local_config, only_override_config=True)
 
     def get_uninstalled_dependencies(self):
         deps = get_dependencies(self.pipeline, self.to_run, recursive=True)
@@ -131,6 +132,7 @@ def run_test_pipeline(path, module_names, log, no_clean=False):
             pipeline = TestPipeline.load_pipeline(path, TEST_STORAGE_DIR)
             test_pipeline = TestPipeline(pipeline, module_names, log)
         except Exception, e:
+            traceback.print_exc()
             raise TestPipelineRunError("could not load test pipeline {}: {}".format(path, e))
 
         # Check for uninstalled dependencies

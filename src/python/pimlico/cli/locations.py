@@ -72,5 +72,5 @@ class OutputCmd(PimlicoCLISubcommand):
             print >>sys.stderr, "Error: module '{}' does not exist".format(module_name)
             sys.exit(1)
         # Get the output dir for the module
-        module_output_dir = module.get_module_output_dir(short_term_store=True)
+        module_output_dir = module.get_module_output_dir(absolute=True)
         print "Output location for module '%s': %s" % (module_name, module_output_dir)

@@ -66,13 +66,13 @@ def input_module_factory(datatype):
             super(DatatypeInputModuleInfo, self).__init__(module_name, pipeline, **kwargs)
             self.override_base_dir = self.options["dir"]
 
-        def get_output_dir(self, output_name, short_term_store=False):
+        def get_output_dir(self, output_name, absolute=False):
             if self.override_base_dir is None:
                 if datatype.requires_data_preparation:
                     # During data preparation, this directly will be created and some data stored there
                     # The data is only ready once we pass data_ready() in the normal way
                     return super(DatatypeInputModuleInfo, self).get_output_dir(output_name,
-                                                                               short_term_store=short_term_store)
+                                                                               absolute=absolute)
                 else:
                     # No data preparation required, which means that this input datatype never stores anything
                     # It therefore has a None base_dir, which causes the datatype to be satisfied without it,

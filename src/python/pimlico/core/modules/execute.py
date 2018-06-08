@@ -264,10 +264,10 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
 
             # Store a copy of all the config files from which the pipeline was loaded, so we can see exactly
             # what we did later
-            config_store_path = os.path.join(module.get_module_output_dir(short_term_store=True), "pipeline_config.tar")
+            config_store_path = os.path.join(module.get_module_output_dir(absolute=True), "pipeline_config.tar")
             run_num = 1
             while os.path.exists(config_store_path):
-                config_store_path = os.path.join(module.get_module_output_dir(short_term_store=True),
+                config_store_path = os.path.join(module.get_module_output_dir(absolute=True),
                                                  "pipeline_config.%d.tar" % run_num)
                 run_num += 1
             with TarFile(config_store_path, "w") as config_store_tar:

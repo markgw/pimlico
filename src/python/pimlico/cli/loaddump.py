@@ -165,7 +165,7 @@ class LoadCmd(PimlicoCLISubcommand):
                     continue
 
                 # Get the output dir for the module
-                module_output_dir = module.get_module_output_dir(short_term_store=True)
+                module_output_dir = module.get_module_output_dir(absolute=True)
                 print "Extracting module data to %s" % module_output_dir
                 # If the output dir already exists, delete it first
                 if os.path.exists(module_output_dir):

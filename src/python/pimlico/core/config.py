@@ -10,6 +10,7 @@ import copy
 import os
 import re
 import sys
+import warnings
 from ConfigParser import SafeConfigParser, RawConfigParser
 from StringIO import StringIO
 from collections import OrderedDict
@@ -30,7 +31,7 @@ __all__ = [
     "print_dependency_leaf_problems", "PipelineCheckError",
 ]
 
-REQUIRED_LOCAL_CONFIG = ["short_term_store", "long_term_store"]
+REQUIRED_LOCAL_CONFIG = []
 
 
 class PipelineConfig(object):
@@ -64,10 +65,26 @@ class PipelineConfig(object):
         self.expanded_modules = {}
 
         # Certain standard system-wide settings, loaded from the local config
-        self.long_term_store = os.path.join(self.local_config["long_term_store"], self.name, self.variant)
-        self.short_term_store = os.path.join(self.local_config["short_term_store"], self.name, self.variant)
+        self.storage_locations = []
+        if "storage" in local_config:
+            # Default, unnamed storage location: use name "default"
+            self.storage_locations.append(
+                ("default", os.path.join(self.local_config["storage"], self.name, self.variant)))
+        self.storage_locations.extend([
+            (key[8:], os.path.join(val, self.name, self.variant))
+            for (key, val) in local_config.items() if key.startswith("storage_")
+        ])
+        if len(self.storage_locations) == 0:
+            raise PipelineConfigParseError("at least one storage location must be specified: none found in "
+                                           "local config")
+        self.named_storage_locations = dict(self.storage_locations)
+
         # Number of processes to use for anything that supports multiprocessing
         self.processes = int(self.local_config.get("processes", 1))
+
+        # By default, the first storage location is used for output
+        # This may be overridden by storage_location kwarg (which it will later be possible to set from the cmd line)
+        self.output_path = self.storage_locations[0][1]
 
         # Get paths to add to the python path for the pipeline
         # Used so that a project can specify custom module types and other python code outside the pimlico source tree
@@ -234,8 +251,21 @@ class PipelineConfig(object):
         config_dir = os.path.dirname(os.path.abspath(self.filename))
         return os.path.abspath(os.path.join(config_dir, path))
 
+    @property
+    def short_term_store(self):
+        """ For backwards compatibility: returns output path """
+        warnings.warn("Used deprecated attribute 'short_term_store'. Should use new named storage location system. "
+                      "(Perhaps 'pipeline.output_path' is appropriate?)")
+        return self.output_path
+
+    @property
+    def long_term_store(self):
+        """ For backwards compatibility: return storage location 'long' if it exists, else first storage location """
+        warnings.warn("Used deprecated attribute 'long_term_store'. Should use new named storage location system")
+        return self.named_storage_locations.get("long", self.storage_locations[0][1])
+
     @staticmethod
-    def load(filename, local_config=None, variant="main", override_local_config={}):
+    def load(filename, local_config=None, variant="main", override_local_config={}, only_override_config=False):
         """
         Main function that loads a pipeline from a config file.
 
@@ -245,6 +275,8 @@ class PipelineConfig(object):
             searched. When loading programmatically, you might want to give this
         :param variant: pipeline variant to load
         :param override_local_config: extra configuration values to override the system-wide config
+        :param only_override_config: don't load local config from files, just use that given in override_local_config.
+            Used for loading test pipelines
         :return:
         """
         from pimlico.core.modules.base import ModuleInfoLoadError
@@ -258,15 +290,14 @@ class PipelineConfig(object):
             variant = "main"
 
         local_config_data, used_config_sources = \
-            PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
+            PipelineConfig.load_local_config(filename=local_config, override=override_local_config,
+                                             only_override=only_override_config)
 
         # Special vars are available for substitution in all options, including other vars
         special_vars = {
             "project_root": PROJECT_ROOT,
             "pimlico_root": PIMLICO_ROOT,
             "output_dir": OUTPUT_DIR,
-            "long_term_store": local_config_data["long_term_store"],
-            "short_term_store": local_config_data["short_term_store"],
             "home": os.path.expanduser("~"),
             "test_data_dir": TEST_DATA_DIR,
         }
@@ -865,80 +896,115 @@ class PipelineConfig(object):
         return pipeline
 
     @staticmethod
-    def load_local_config(filename=None, override={}):
+    def load_local_config(filename=None, override={}, only_override=False):
         """
         Load local config parameters. These are usually specified in a `.pimlico` file, but may be overridden by
         other config locations, on the command line, or elsewhere programmatically.
 
+        If only_override=True, don't load any files, just use the values given in override. The various
+        locations for local config files will not be checked (which usually happens when filename=None).
+        This is not useful for normal pipeline loading, but is used for loading test pipelines.
+
         """
-        if filename is None:
-            home_dir = os.path.expanduser("~")
-            # Use the default locations for local config file
-            # First, look for the basic config, which must always exist
-            basic_config_filename = os.path.join(home_dir, ".pimlico")
-            if not os.path.exists(basic_config_filename):
-                raise PipelineConfigParseError("basic Pimlico local config file does not exist. Looked for: %s" %
-                                               basic_config_filename)
-            local_config = [basic_config_filename]
-
-            # Allow other files to override the settings in this basic one
-            # Look for any files matching the pattern .pimlico_*
-            alt_config_files = [f for f in os.listdir(home_dir) if f.startswith(".pimlico_")]
-
-            # You may specify config files for specific hosts
-            hostname = gethostname()
-            if hostname is not None and len(hostname) > 0:
-                for alt_config_filename in alt_config_files:
-                    suffix = alt_config_filename[9:]
-                    if hostname == suffix:
-                        # Our hostname matches a hostname-specific config file .pimlico_<hostname>
-                        local_config.append(os.path.join(home_dir, alt_config_filename))
-                        # Only allow one host-specific config file
-                        break
-                    elif suffix.endswith("-") and hostname.startswith(suffix[:-1]):
-                        # Hostname match hostname-prefix-specific config file .pimlico_<hostname_prefix>-
-                        local_config.append(os.path.join(home_dir, alt_config_filename))
-                        break
-        else:
-            local_config = [filename]
-
-        def _load_config_file(fn):
-            # Read in the local config and supply a section heading to satisfy config parser
-            with open(fn, "r") as f:
-                local_text_buffer = StringIO("[main]\n%s" % f.read())
-            # User config parser to interpret file contents
-            local_config_parser = SafeConfigParser()
-            local_config_parser.readfp(local_text_buffer)
-            # Get a dictionary of settings from the file
-            return dict(local_config_parser.items("main"))
-
         # Keep a record of where we got config from, for debugging purposes
         used_config_sources = []
 
-        local_config_data = {}
-        # Process each file, loading config data from it
-        for local_config_filename in local_config:
-            local_config_file_data = _load_config_file(local_config_filename)
-            if local_config_file_data:
-                # Override previous local config data
-                local_config_data.update(local_config_file_data)
-                # Mark this source as used (for debugging)
-                used_config_sources.append("file %s" % local_config_filename)
+        if only_override:
+            local_config_data = OrderedDict()
+        else:
+            if filename is None:
+                home_dir = os.path.expanduser("~")
+                # Use the default locations for local config file
+                # First, look for the basic config, which must always exist
+                basic_config_filename = os.path.join(home_dir, ".pimlico")
+                if not os.path.exists(basic_config_filename):
+                    raise PipelineConfigParseError("basic Pimlico local config file does not exist. Looked for: %s" %
+                                                   basic_config_filename)
+                local_config = [basic_config_filename]
+
+                # Allow other files to override the settings in this basic one
+                # Look for any files matching the pattern .pimlico_*
+                alt_config_files = [f for f in os.listdir(home_dir) if f.startswith(".pimlico_")]
+
+                # You may specify config files for specific hosts
+                hostname = gethostname()
+                if hostname is not None and len(hostname) > 0:
+                    for alt_config_filename in alt_config_files:
+                        suffix = alt_config_filename[9:]
+                        if hostname == suffix:
+                            # Our hostname matches a hostname-specific config file .pimlico_<hostname>
+                            local_config.append(os.path.join(home_dir, alt_config_filename))
+                            # Only allow one host-specific config file
+                            break
+                        elif suffix.endswith("-") and hostname.startswith(suffix[:-1]):
+                            # Hostname match hostname-prefix-specific config file .pimlico_<hostname_prefix>-
+                            local_config.append(os.path.join(home_dir, alt_config_filename))
+                            break
+            else:
+                local_config = [filename]
+
+            def _load_config_file(fn):
+                # Read in the local config and supply a section heading to satisfy config parser
+                with open(fn, "r") as f:
+                    local_text_buffer = StringIO("[main]\n%s" % f.read())
+                # User config parser to interpret file contents
+                local_config_parser = SafeConfigParser()
+                local_config_parser.readfp(local_text_buffer)
+                # Get a dictionary of settings from the file
+                return OrderedDict(local_config_parser.items("main"))
+
+            local_config_data = OrderedDict()
+            # Process each file, loading config data from it
+            for local_config_filename in local_config:
+                local_config_file_data = _load_config_file(local_config_filename)
+                if local_config_file_data:
+                    # Override previous local config data
+                    local_config_data.update(local_config_file_data)
+                    # Mark this source as used (for debugging)
+                    used_config_sources.append("file %s" % local_config_filename)
 
         if override:
             # Allow parameters to be overridden on the command line
             local_config_data.update(override)
             used_config_sources.append("command-line overrides")
 
+        # We used to require "short_term_store" and "long_term_store"
+        # This has now been replaced by the more flexible storage system that allows unlimited locations
+        # For backwards compatibility, we convert these values as we load them and warn the user
+        if "short_term_store" in local_config_data or "long_term_store" in local_config_data:
+            warnings.warn("Local config used deprecated 'short_term_store'/'long_term_store' parameters. "
+                          "Converting to new named storage system. You should update your local config")
+        if "short_term_store" in local_config_data:
+            # This was the default output location, so we should use the value as the first location, unless one
+            # is already given
+            if any(key.startswith("storage") for key in local_config_data.keys()):
+                local_config_data["storage_short"] = local_config_data["short_term_store"]
+            else:
+                # Insert the named storage location, ensuring it comes before any others
+                local_config_data = OrderedDict(
+                    [("storage_short", local_config_data["short_term_store"])] +
+                    local_config_data.items()
+                )
+            del local_config_data["short_term_store"]
+        if "long_term_store" in local_config_data:
+            local_config_data["storage_long"] = local_config_data["long_term_store"]
+            del local_config_data["long_term_store"]
+
         # Check we've got all the essentials from somewhere
         for attr in REQUIRED_LOCAL_CONFIG:
             if attr not in local_config_data:
                 raise PipelineConfigParseError("required attribute '%s' is not specified in local config" % attr)
 
+        # Check that there's at least one storage location given
+        if not any(key.startswith("storage") for key in local_config_data.keys()):
+            raise PipelineConfigParseError("no storage location was found in local config. You should specify "
+                                           "at least one, either as a default 'storage' parameter, or a named storage "
+                                           "location 'storage_<name>'")
+
         return local_config_data, used_config_sources
 
     @staticmethod
-    def empty(local_config=None, override_local_config={}, override_pipeline_config={}):
+    def empty(local_config=None, override_local_config={}, override_pipeline_config={}, only_override_config=False):
         """
         Used to programmatically create an empty pipeline. It will contain no modules, but provides a gateway to
         system info, etc and can be used in place of a real Pimlico pipeline.
@@ -950,7 +1016,8 @@ class PipelineConfig(object):
         from pimlico import __version__ as current_pimlico_version
 
         local_config_data, used_config_sources = \
-            PipelineConfig.load_local_config(filename=local_config, override=override_local_config)
+            PipelineConfig.load_local_config(filename=local_config, override=override_local_config,
+                                             only_override=only_override_config)
         name = "empty_pipeline"
         pipeline_config = {
             "name": name,
@@ -976,12 +1043,12 @@ class PipelineConfig(object):
         dirs. If it exists in a store, that absolute path is returned. If it exists in no store, return None.
         If the path is already an absolute path, nothing is done to it.
 
-        The stores searched are the long-term store and the short-term store, though in the future more valid data
-        storage locations may be added.
+        Searches all the specified storage locations.
 
         :param path: path to data, relative to store base
-        :param default: usually, return None if no data is found. If default="short", return path relative to
-         short-term store in this case. If default="long", long-term store.
+        :param default: usually, return None if no data is found. If default is given, return the path
+        relative to the named storage location if no data is found. Special value "output" returns path
+        relative to output location, whichever of the storage locations that might be
         :return: absolute path to data, or None if not found in any store
         """
         if os.path.isabs(path):
@@ -989,10 +1056,10 @@ class PipelineConfig(object):
         try:
             return self.find_all_data_paths(path).next()
         except StopIteration:
-            if default == "short":
-                return os.path.join(self.short_term_store, path)
-            elif default == "long":
-                return os.path.join(self.long_term_store, path)
+            if default == "output":
+                return os.path.join(self.output_path, path)
+            elif default is not None:
+                return os.path.join(self.named_storage_locations[default], path)
             else:
                 return None
 
@@ -1016,19 +1083,14 @@ class PipelineConfig(object):
         :param path: relative path within Pimlico directory structures
         :return: list of string
         """
-        return [
-            os.path.join(store_base, path) for store_base in self.get_storage_roots()
-        ]
+        return [os.path.join(store_base, path) for store_base in self.get_storage_roots()]
 
     def get_storage_roots(self):
         """
         Returns a list of all the (pipeline-specific) storage root locations known to the pipeline.
 
-        Currently, this is always `[self.short_term_store, self.long_term_store]`, but in future we may
-        have a more flexible system that allows an unbounded number of storage locations.
-
         """
-        return [self.short_term_store, self.long_term_store]
+        return [path for (name, path) in self.storage_locations]
 
     @property
     def step(self):

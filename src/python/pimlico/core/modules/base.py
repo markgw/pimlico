@@ -143,7 +143,7 @@ class BaseModuleInfo(object):
 
     @property
     def metadata_filename(self):
-        return os.path.join(self.pipeline.find_data_path(self.get_module_output_dir(), default="short"), "metadata")
+        return os.path.join(self.pipeline.find_data_path(self.get_module_output_dir(), default="output"), "metadata")
 
     def get_metadata(self):
         if self._metadata is None:
@@ -161,15 +161,15 @@ class BaseModuleInfo(object):
 
     def set_metadata_values(self, val_dict):
         # Make sure we've got an output directory to output the metadata to
-        # Always write to short-term store, don't search others
-        if not os.path.exists(self.get_module_output_dir(short_term_store=True)):
-            os.makedirs(self.get_module_output_dir(short_term_store=True))
+        # Always write to output store, don't search others
+        if not os.path.exists(self.get_module_output_dir(absolute=True)):
+            os.makedirs(self.get_module_output_dir(absolute=True))
         # Load the existing metadata
         metadata = self.get_metadata()
         # Add our new values to it
         metadata.update(val_dict)
         # Write the whole thing out to the file
-        with open(os.path.join(self.get_module_output_dir(short_term_store=True), "metadata"), "w") as f:
+        with open(os.path.join(self.get_module_output_dir(absolute=True), "metadata"), "w") as f:
             json.dump(metadata, f, indent=4)
 
     def __get_status(self):
@@ -183,7 +183,7 @@ class BaseModuleInfo(object):
 
     @property
     def execution_history_path(self):
-        return os.path.join(self.pipeline.find_data_path(self.get_module_output_dir(), default="short"), "history")
+        return os.path.join(self.pipeline.find_data_path(self.get_module_output_dir(), default="output"), "history")
 
     def add_execution_history_record(self, line):
         """
@@ -384,18 +384,25 @@ class BaseModuleInfo(object):
         """
         return []
 
-    def get_module_output_dir(self, short_term_store=False):
+    def get_module_output_dir(self, absolute=False, short_term_store=None):
         """
         Gets the path to the base output dir to be used by this module, relative to the storage base dir.
         When outputting data, the storage base dir will always be the short term store path, but when looking
         for the output data other base paths might be explored, including the long term store.
 
-        :param short_term_store: if True, return absolute path to output dir in short-term store (used for output)
-        :return: path, relative to store base path, or if short_term_store=True absolute path to output dir
+        Kwarg ``short_term_store`` is included for backward compatibility, but outputs a deprecation warning.
+
+        :param absolute: if True, return absolute path to output dir in output store
+        :return: path, relative to store base path, or if absolute=True absolute path to output dir
         """
+        if short_term_store is not None:
+            warnings.warn("short_term_store kwarg to get_module_output_dir() is deprecated. Use 'absolute' instead")
+            # If this was given, it should override absolute, to preserve earlier functionality
+            absolute = short_term_store
+
         relative_dir = self.module_name
-        if short_term_store:
-            return os.path.join(self.pipeline.short_term_store, relative_dir)
+        if absolute:
+            return os.path.join(self.pipeline.output_path, relative_dir)
         else:
             return relative_dir
 
@@ -404,24 +411,31 @@ class BaseModuleInfo(object):
         The simplest way to get hold of the directory to use to output data to for a given output. This is
         the usual way to get an output directory for an output writer.
 
-        The directory is an absolute path to a location in the Pimlico short-term store.
+        The directory is an absolute path to a location in the Pimlico output storage location.
 
         :param output_name: the name of an output
         :return: the absolute path to the output directory to use for the named output
         """
-        return self.get_output_dir(output_name, short_term_store=True)
+        return self.get_output_dir(output_name, absolute=True)
 
-    def get_output_dir(self, output_name, short_term_store=False):
+    def get_output_dir(self, output_name, absolute=False, short_term_store=None):
         """
-        :param short_term_store: return an absolute path in the short-term store. If False (default), return a
+        Kwarg ``short_term_store`` is included for backward compatibility, but outputs a deprecation warning.
+
+        :param absolute: return an absolute path in the storage location used for output. If False (default), return a
             relative path, specified relative to the root of the Pimlico store used. This allows multiple stores
             to be searched for output
         :param output_name: the name of an output
         :return: the path to the output directory to use for the named output, which may be relative to the root
-            of the Pimlico store in use (default) or an absolute path in the short-term store, depending on
-            `short_term_store`
+            of the Pimlico store in use (default) or an absolute path in the output store, depending on
+            `absolute`
 
         """
+        if short_term_store is not None:
+            warnings.warn("short_term_store kwarg to get_output_dir() is deprecated. Use 'absolute' instead")
+            # If this was given, it should override absolute, to preserve earlier functionality
+            absolute = short_term_store
+
         if output_name is None:
             output_name = self.default_output_name
 
@@ -429,7 +443,7 @@ class BaseModuleInfo(object):
             raise PipelineStructureError("%s module does not have an output named '%s'. Available outputs: %s" %
                                          (self.module_type_name, output_name, ", ".join(self.output_names)))
 
-        return os.path.join(self.get_module_output_dir(short_term_store=short_term_store), output_name)
+        return os.path.join(self.get_module_output_dir(absolute=absolute), output_name)
 
     def get_output_datatype(self, output_name=None, additional_names=[]):
         if output_name is None:
@@ -955,7 +969,7 @@ class BaseModuleInfo(object):
 
     @property
     def lock_path(self):
-        return os.path.join(self.get_module_output_dir(short_term_store=True), ".execution_lock")
+        return os.path.join(self.get_module_output_dir(absolute=True), ".execution_lock")
 
     def lock(self):
         """
@@ -987,7 +1001,7 @@ class BaseModuleInfo(object):
         multiple times to output multiple logs.
 
         """
-        dir_name = self.get_module_output_dir(short_term_store=True)
+        dir_name = self.get_module_output_dir(absolute=True)
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
 
