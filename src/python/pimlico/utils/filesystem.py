@@ -37,9 +37,11 @@ def format_file_size(bytes):
         return "%db" % bytes
 
 
-def copy_dir_with_progress(source_dir, target_dir):
+def copy_dir_with_progress(source_dir, target_dir, move=False):
     """
-    Utility for copying a large directory and displaying a progress bar showing how much is copied.
+    Utility for moving/copying a large directory and displaying a progress bar showing how much is copied.
+
+    Note that the directory is first copied, then the old directory is removed, if move=True.
 
     :param source_dir:
     :param target_dir:
@@ -56,7 +58,8 @@ def copy_dir_with_progress(source_dir, target_dir):
         shutil.rmtree(target_dir)
 
     source_size = dirsize(source_dir)
-    print "Moving %s from %s to %s" % (format_file_size(source_size), source_dir, target_dir)
+    print "%s %s from %s to %s" % ("Moving" if move else "Copying",
+                                   format_file_size(source_size), source_dir, target_dir)
 
     # Do the copying in a thread
     copy_thread = threading.Thread(target=shutil.copytree, args=(source_dir, target_dir))
@@ -71,8 +74,13 @@ def copy_dir_with_progress(source_dir, target_dir):
             if target_size <= source_size:
                 pbar.update(target_size)
     pbar.finish()
-    # Remove from source
-    shutil.rmtree(source_dir)
+    if move:
+        # Remove from source
+        shutil.rmtree(source_dir)
+
+
+def move_dir_with_progress(source_dir, target_dir):
+    copy_dir_with_progress(source_dir, target_dir, move=True)
 
 
 def new_filename(directory, initial_filename="tmp_file"):

@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.utils.core import remove_duplicates
-from pimlico.utils.filesystem import copy_dir_with_progress
+from pimlico.utils.filesystem import move_dir_with_progress
 
 
 class InputsCmd(PimlicoCLISubcommand):
@@ -121,4 +121,4 @@ class MoveStoresCmd(PimlicoCLISubcommand):
             print "Copying '{}' data from {} to {}".format(module_name, src_store, dest_store)
             # Work out where it will lives in the dest store
             dest_path = os.path.join(pipeline.named_storage_locations[dest_store], module_path)
-            copy_dir_with_progress(src_path, dest_path)
+            move_dir_with_progress(src_path, dest_path)
