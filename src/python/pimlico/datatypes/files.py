@@ -109,6 +109,10 @@ class NamedFileCollectionWriter(PimlicoDatatypeWriter):
         path = self.get_absolute_path(filename)
         with open(path, "w") as f:
             f.write(data)
+        self.file_written(filename)
+
+    def file_written(self, filename):
+        """ Mark the given file as having been written, if write_file() was not used to write it. """
         self.task_complete("write_%s" % filename)
 
     def get_absolute_path(self, filename):
