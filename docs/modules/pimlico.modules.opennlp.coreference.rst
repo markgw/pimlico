@@ -13,11 +13,6 @@ OpenNLP coreference resolution
 
    Document this module
 
-
-.. todo::
-
-   Replace check_runtime_dependencies() with get_software_dependencies()
-
 Use local config setting opennlp_memory to set the limit on Java heap memory for the OpenNLP processes. If
 parallelizing, this limit is shared between the processes. That is, each OpenNLP worker will have a memory
 limit of `opennlp_memory / processes`. That setting can use `g`, `G`, `m`, `M`, `k` and `K`, as in the Java setting.

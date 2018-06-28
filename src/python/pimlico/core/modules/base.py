@@ -912,8 +912,9 @@ class BaseModuleInfo(object):
         necessary, but most of the time the base implementation is enough.
 
         """
-        for path in self.pipeline.find_all_data_paths(self.get_module_output_dir()):
-            shutil.rmtree(path)
+        for name, path in self.pipeline.get_data_search_paths(self.get_module_output_dir()):
+            if os.path.exists(path):
+                shutil.rmtree(path)
 
     def get_detailed_status(self):
         """

@@ -16,16 +16,12 @@ The individual parts of the output can easily be retrieved from the output corpu
 to be able to use them as input to other modules, they need to be converted to compatible standard datatypes.
 
 For example, tokenization output is stored in Caevo's XML output using a special format. Instead of writing
-other modules in such a way as to be able to pull this information out of the :class:~pimlico.datatypes.CaevoCorpus,
-you can filter the output using this module to provide a :class:~pimlico.datatypes.TokenizedCorpus, which is a
+other modules in such a way as to be able to pull this information out of the :class:`~pimlico.datatypes.CaevoCorpus`,
+you can filter the output using this module to provide a :class:`~pimlico.datatypes.TokenizedCorpus`, which is a
 standard format for input to other module types.
 
 As with other document map modules, you can use this as a filter (`filter=T`), so you can actually need to commit
 the converted data to disk.
-
-.. todo::
-
-   Add more output convertors: currently only provides tokenization
 
 
 Inputs
