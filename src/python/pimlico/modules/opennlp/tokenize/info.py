@@ -11,9 +11,9 @@ import os
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.documents import RawTextDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tokenized import TokenizedCorpus
+from pimlico.old_datatypes.documents import RawTextDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tokenized import TokenizedCorpus
 from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 

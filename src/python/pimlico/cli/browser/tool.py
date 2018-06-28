@@ -24,7 +24,7 @@ except ImportError:
         raise
 
 from pimlico.cli.browser.formatter import load_formatter
-from pimlico.datatypes.base import InvalidDocument
+from pimlico.old_datatypes.base import InvalidDocument
 
 urwid.set_encoding("UTF-8")
 
@@ -45,7 +45,7 @@ def browse_cmd(pipeline, opts):
     Command for main Pimlico CLI
 
     """
-    from pimlico.datatypes.base import IterableCorpus
+    from pimlico.old_datatypes.base import IterableCorpus
 
     module_name = opts.module_name
     output_name = opts.output_name

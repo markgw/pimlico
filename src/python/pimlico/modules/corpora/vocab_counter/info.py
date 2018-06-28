@@ -17,13 +17,13 @@ so that OOVs are represented by the ID vocab_size+1, instead of having a
 special token).
 
 """
-from pimlico.datatypes.arrays import NumpyArray
+from pimlico.old_datatypes.arrays import NumpyArray
 from pimlico.core.dependencies.python import numpy_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool
-from pimlico.datatypes.dictionary import Dictionary
-from pimlico.datatypes.ints import IntegerListsDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.dictionary import Dictionary
+from pimlico.old_datatypes.ints import IntegerListsDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(BaseModuleInfo):

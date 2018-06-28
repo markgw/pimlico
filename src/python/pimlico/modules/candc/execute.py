@@ -16,8 +16,8 @@ from pimlico.core.external.java import OutputConsumer
 from pimlico.core.logs import get_log_file
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.multiproc import MultiprocessingMapProcess, multiprocessing_executor_factory
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.parse.candc import CandcOutput
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.parse.candc import CandcOutput
 from pimlico.utils.network import get_unused_local_ports
 
 

@@ -2,7 +2,7 @@ import os
 
 from pimlico.core.dependencies.python import numpy_dependency, gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.embeddings import Embeddings
+from pimlico.old_datatypes.embeddings import Embeddings
 
 
 class ModuleInfo(BaseModuleInfo):

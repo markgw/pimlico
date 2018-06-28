@@ -10,9 +10,9 @@
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool, comma_separated_strings
-from pimlico.datatypes.features import TermFeatureListCorpus, TermFeatureListCorpusWriter
-from pimlico.datatypes.parse.dependency import CoNLLDependencyParseDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.features import TermFeatureListCorpus, TermFeatureListCorpusWriter
+from pimlico.old_datatypes.parse.dependency import CoNLLDependencyParseDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(DocumentMapModuleInfo):

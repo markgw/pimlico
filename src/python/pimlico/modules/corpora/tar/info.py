@@ -26,7 +26,7 @@ grouping will be preserved as the corpus passes through the pipeline.
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import IterableCorpus
+from pimlico.old_datatypes.base import IterableCorpus
 from pimlico.modules.corpora.tar_filter.info import TarredCorpusWithDocumentTypeFromInput
 
 

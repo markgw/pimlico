@@ -1,5 +1,5 @@
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.embeddings import Embeddings, TSVVecFiles
+from pimlico.old_datatypes.embeddings import Embeddings, TSVVecFiles
 
 
 class ModuleInfo(BaseModuleInfo):

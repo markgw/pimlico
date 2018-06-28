@@ -9,7 +9,7 @@ from pimlico.core.modules.base import BaseModuleExecutor
 import csv
 
 
-from pimlico.datatypes.plotting import PlotOutputWriter
+from pimlico.old_datatypes.plotting import PlotOutputWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):

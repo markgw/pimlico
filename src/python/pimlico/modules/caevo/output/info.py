@@ -21,10 +21,10 @@ the converted data to disk.
 
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
-from pimlico.datatypes import TokenizedCorpus, TokenizedCorpusWriter
-from pimlico.datatypes.caevo import CaevoCorpus
-from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
-from pimlico.datatypes.word_annotations import WordAnnotationCorpusWithRequiredFields, WordAnnotationCorpusWithFields, \
+from pimlico.old_datatypes import TokenizedCorpus, TokenizedCorpusWriter
+from pimlico.old_datatypes.caevo import CaevoCorpus
+from pimlico.old_datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
+from pimlico.old_datatypes.word_annotations import WordAnnotationCorpusWithRequiredFields, WordAnnotationCorpusWithFields, \
     SimpleWordAnnotationCorpusWriter
 
 

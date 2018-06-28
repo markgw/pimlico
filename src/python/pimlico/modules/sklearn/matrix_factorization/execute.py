@@ -4,7 +4,7 @@
 
 from pimlico.core.config import PipelineConfigParseError
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.arrays import NumpyArrayWriter
+from pimlico.old_datatypes.arrays import NumpyArrayWriter
 from pimlico.modules.sklearn.matrix_factorization.info import SKLEARN_CLASSES
 
 

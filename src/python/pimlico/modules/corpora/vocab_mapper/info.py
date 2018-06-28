@@ -3,10 +3,10 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.dictionary import Dictionary
-from pimlico.datatypes.ints import IntegerListsDocumentCorpus, IntegerListsDocumentCorpusWriter
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tokenized import TokenizedDocumentType
+from pimlico.old_datatypes.dictionary import Dictionary
+from pimlico.old_datatypes.ints import IntegerListsDocumentCorpus, IntegerListsDocumentCorpusWriter
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):

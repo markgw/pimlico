@@ -9,8 +9,8 @@ be repeated as the lemma.
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, CoNLLDependencyParseInputCorpusWriter
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithRequiredFields
+from pimlico.old_datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, CoNLLDependencyParseInputCorpusWriter
+from pimlico.old_datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationCorpusWithRequiredFields
 
 
 class ModuleInfo(DocumentMapModuleInfo):

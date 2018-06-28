@@ -6,8 +6,8 @@ import random
 from copy import copy
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.core import StringListWriter
-from pimlico.datatypes.tar import TarredCorpusWriter
+from pimlico.old_datatypes.core import StringListWriter
+from pimlico.old_datatypes.tar import TarredCorpusWriter
 from pimlico.utils.progress import get_progress_bar
 
 

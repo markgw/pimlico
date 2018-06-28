@@ -6,8 +6,8 @@ from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.coref.opennlp import Entity
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.coref.opennlp import Entity
 from pimlico.modules.opennlp.coreference.info import WORDNET_DIR
 
 

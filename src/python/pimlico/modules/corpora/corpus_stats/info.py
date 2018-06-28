@@ -8,9 +8,9 @@ Counts the number of tokens, sentences and distinct tokens in a corpus.
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.files import NamedFile
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tokenized import TokenizedDocumentType
+from pimlico.old_datatypes.files import NamedFile
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(BaseModuleInfo):

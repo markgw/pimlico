@@ -6,7 +6,7 @@ import numpy
 from scipy.sparse.dok import dok_matrix
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.arrays import ScipySparseMatrixWriter
+from pimlico.old_datatypes.arrays import ScipySparseMatrixWriter
 from pimlico.utils.progress import get_progress_bar
 
 

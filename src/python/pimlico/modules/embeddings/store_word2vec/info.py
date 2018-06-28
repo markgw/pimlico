@@ -1,7 +1,7 @@
 from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.embeddings import Embeddings
-from pimlico.datatypes.files import NamedFileCollection, NamedFileCollectionWriter
+from pimlico.old_datatypes.embeddings import Embeddings
+from pimlico.old_datatypes.files import NamedFileCollection, NamedFileCollectionWriter
 
 
 class Word2VecFiles(NamedFileCollection):

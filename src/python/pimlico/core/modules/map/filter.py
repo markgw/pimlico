@@ -10,8 +10,8 @@ from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import load_module_executor, BaseModuleInfo
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import InputQueueFeeder, DocumentMapModuleInfo
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.tar import TarredCorpus, AlignedTarredCorpora
 from pimlico.utils.pipes import qget
 
 

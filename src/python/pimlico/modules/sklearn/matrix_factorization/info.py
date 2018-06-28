@@ -19,7 +19,7 @@ from pimlico.core.config import PipelineConfigParseError
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import choose_from_list
-from pimlico.datatypes.arrays import ScipySparseMatrix, NumpyArray
+from pimlico.old_datatypes.arrays import ScipySparseMatrix, NumpyArray
 
 
 SKLEARN_CLASSES = {

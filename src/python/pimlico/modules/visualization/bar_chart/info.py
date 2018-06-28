@@ -3,9 +3,9 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import MultipleInputs
-from pimlico.datatypes.plotting import PlotOutput
-from pimlico.datatypes.results import NumericResult
+from pimlico.old_datatypes.base import MultipleInputs
+from pimlico.old_datatypes.plotting import PlotOutput
+from pimlico.old_datatypes.results import NumericResult
 from pimlico.modules.visualization import matplotlib_dependency
 
 

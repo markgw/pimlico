@@ -5,8 +5,8 @@
 from gensim.models.word2vec import Word2Vec
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.embeddings import EmbeddingsWriter
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.embeddings import EmbeddingsWriter
 from pimlico.utils.progress import get_progress_bar
 
 

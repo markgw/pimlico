@@ -6,8 +6,8 @@ import json
 from collections import Counter
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.files import NamedFileWriter
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.files import NamedFileWriter
 from pimlico.utils.progress import get_progress_bar
 
 

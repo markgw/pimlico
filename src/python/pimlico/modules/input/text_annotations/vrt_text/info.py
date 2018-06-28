@@ -18,8 +18,8 @@ Uses sentence tags to divide each text into sentences.
 """
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory
-from pimlico.datatypes.tokenized import TokenizedDocumentType
-from pimlico.datatypes.vrt import VRTDocumentType
+from pimlico.old_datatypes.tokenized import TokenizedDocumentType
+from pimlico.old_datatypes.vrt import VRTDocumentType
 from pimlico.modules.input.text.raw_text_files.info import ModuleInfo as RawTextModuleInfo
 from pimlico.modules.input.text_annotations.vrt.info import VRTOutputType
 

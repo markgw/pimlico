@@ -1,5 +1,5 @@
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.embeddings import TSVVecFilesWriter
+from pimlico.old_datatypes.embeddings import TSVVecFilesWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):

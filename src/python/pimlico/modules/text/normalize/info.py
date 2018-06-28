@@ -11,10 +11,10 @@ the future, more normalization operations may be added.
 from pimlico.core.modules.map import DocumentMapModuleInfo
 
 from pimlico.core.modules.options import choose_from_list
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tar import TarredCorpusWriter
-from pimlico.datatypes.tokenized import TokenizedCorpus
-from pimlico.datatypes.tokenized import TokenizedDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tar import TarredCorpusWriter
+from pimlico.old_datatypes.tokenized import TokenizedCorpus
+from pimlico.old_datatypes.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):

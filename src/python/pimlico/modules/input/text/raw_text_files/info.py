@@ -29,7 +29,7 @@ from glob import glob, iglob
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory, ReaderOutputType
 from pimlico.core.modules.options import comma_separated_strings, comma_separated_list, opt_type_help
-from pimlico.datatypes.documents import RawTextDocumentType
+from pimlico.old_datatypes.documents import RawTextDocumentType
 
 
 @opt_type_help("(line range-limited) file path")

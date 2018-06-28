@@ -14,10 +14,10 @@ from pimlico.core.dependencies.java import get_module_classpath
 from pimlico.core.modules.execute import StopProcessing
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.threaded import threading_executor_factory
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.parse.dependency import StanfordDependencyParse
-from pimlico.datatypes.tokenized import TokenizedCorpus, TokenizedDocumentType
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationsDocumentType
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.parse.dependency import StanfordDependencyParse
+from pimlico.old_datatypes.tokenized import TokenizedCorpus, TokenizedDocumentType
+from pimlico.old_datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationsDocumentType
 from pimlico.modules.corenlp import CoreNLPProcessingError
 from pimlico.modules.corenlp.wrapper import CoreNLP
 

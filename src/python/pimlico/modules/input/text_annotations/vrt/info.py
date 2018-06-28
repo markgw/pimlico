@@ -12,7 +12,7 @@ Reads in files from arbitrary locations in the same way as :mod:`pimlico.modules
 import os
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory
-from pimlico.datatypes.vrt import VRTDocumentType
+from pimlico.old_datatypes.vrt import VRTDocumentType
 from pimlico.modules.input.text.raw_text_files.info import ModuleInfo as RawTextModuleInfo, \
     OutputType as RawTextOuputType, get_paths_from_options
 from pimlico.utils.core import cached_property

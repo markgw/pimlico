@@ -10,9 +10,9 @@
 """
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.features import KeyValueListCorpus, KeyValueListCorpusWriter
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.word_annotations import WordAnnotationsDocumentType
+from pimlico.old_datatypes.features import KeyValueListCorpus, KeyValueListCorpusWriter
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.word_annotations import WordAnnotationsDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):

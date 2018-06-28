@@ -15,7 +15,7 @@ from gzip import GzipFile
 from pimlico.core.dependencies.python import beautiful_soup_dependency, safe_import_bs4
 from pimlico.core.modules.inputs import iterable_input_reader_factory, ReaderOutputType
 from pimlico.core.modules.options import comma_separated_strings
-from pimlico.datatypes.documents import RawTextDocumentType
+from pimlico.old_datatypes.documents import RawTextDocumentType
 from pimlico.utils.core import cached_property
 
 

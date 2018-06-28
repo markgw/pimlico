@@ -32,7 +32,7 @@ import warnings
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
-from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
+from pimlico.old_datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
     MultipleInputs
 from pimlico.utils.core import remove_duplicates
 
@@ -587,7 +587,7 @@ class BaseModuleInfo(object):
         Additional kwargs will be passed through to the datatype's init call.
 
         """
-        from pimlico.datatypes.base import IterableCorpus
+        from pimlico.old_datatypes.base import IterableCorpus
 
         # Check whether this is an optional input: otherwise get_input_module_connection() will raise an error
         if input_name is not None and input_name in dict(self.module_optional_inputs) and input_name not in self.inputs:

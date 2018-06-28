@@ -14,9 +14,9 @@ from pimlico import MODEL_DIR
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.coref.opennlp import CorefCorpus, CorefCorpusWriter
-from pimlico.datatypes.parse import TreeStringsDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.coref.opennlp import CorefCorpus, CorefCorpusWriter
+from pimlico.old_datatypes.parse import TreeStringsDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
 from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 WORDNET_DIR = os.path.join(MODEL_DIR, "wordnet", "db-3.1")

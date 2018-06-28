@@ -1,7 +1,7 @@
 from gensim.models.wrappers.fasttext import FastText
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.embeddings import EmbeddingsWriter
+from pimlico.old_datatypes.embeddings import EmbeddingsWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):

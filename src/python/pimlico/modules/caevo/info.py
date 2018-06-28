@@ -17,9 +17,9 @@ from pimlico import MODEL_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.dependencies.java import argparse4j_dependency, py4j_dependency
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.caevo import CaevoCorpus
-from pimlico.datatypes.documents import RawTextDocumentType
-from pimlico.datatypes.tar import TarredCorpusWriter, TarredCorpusType
+from pimlico.old_datatypes.caevo import CaevoCorpus
+from pimlico.old_datatypes.documents import RawTextDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusWriter, TarredCorpusType
 from .deps import caevo_dependency, caevo_wrapper_dependency
 
 

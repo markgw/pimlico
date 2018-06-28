@@ -16,9 +16,9 @@ from pimlico.core.modules.base import DependencyError
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.datatypes.parse.dependency import CoNLLDependencyParseCorpus, \
+from pimlico.old_datatypes.parse.dependency import CoNLLDependencyParseCorpus, \
     CoNLLDependencyParseCorpusWriter, CoNLLDependencyParseDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(DocumentMapModuleInfo):

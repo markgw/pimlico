@@ -14,9 +14,9 @@ not currently implemented and may not be worth the trouble. Perhaps we will add 
 from itertools import islice, chain
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import IterableCorpus, DynamicOutputDatatype, \
+from pimlico.old_datatypes.base import IterableCorpus, DynamicOutputDatatype, \
     iterable_corpus_with_data_point_type, MultipleInputs
-from pimlico.datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
+from pimlico.old_datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
 
 
 def _common_data_point_type(types):

@@ -35,7 +35,7 @@ from pimlico.core.dependencies.base import InstallationError
 from pimlico.core.modules.base import collect_unexecuted_dependencies
 from pimlico.core.modules.execute import check_and_execute_modules
 from pimlico.core.modules.inputs import InputModuleInfo
-from pimlico.datatypes.base import IterableCorpus
+from pimlico.old_datatypes.base import IterableCorpus
 from pimlico.utils.logging import get_console_logger
 
 

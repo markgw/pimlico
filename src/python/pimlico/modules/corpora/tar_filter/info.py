@@ -13,9 +13,9 @@ import math
 
 from pimlico.core.modules.base import BaseModuleInfo, TypeCheckError
 from pimlico.core.modules.execute import ModuleNotReadyError
-from pimlico.datatypes.base import IterableCorpus, DynamicOutputDatatype
-from pimlico.datatypes.documents import RawDocumentType
-from pimlico.datatypes.tar import TarredCorpus
+from pimlico.old_datatypes.base import IterableCorpus, DynamicOutputDatatype
+from pimlico.old_datatypes.documents import RawDocumentType
+from pimlico.old_datatypes.tar import TarredCorpus
 
 
 class TarredCorpusGrouper(object):

@@ -3,7 +3,7 @@ from itertools import islice
 import numpy
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.embeddings import EmbeddingsWriter
+from pimlico.old_datatypes.embeddings import EmbeddingsWriter
 from pimlico.utils.progress import get_progress_bar
 
 

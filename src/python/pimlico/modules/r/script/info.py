@@ -9,8 +9,8 @@ pipeline, making it easy to pass in data from the output of other modules.
 """
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import MultipleInputs, PimlicoDatatype
-from pimlico.datatypes.files import NamedFile
+from pimlico.old_datatypes.base import MultipleInputs, PimlicoDatatype
+from pimlico.old_datatypes.files import NamedFile
 from pimlico.modules.r.deps import r_dependency
 
 

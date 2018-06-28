@@ -4,7 +4,7 @@
 
 from pimlico.core.modules.map import skip_invalid, invalid_doc_on_error
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
-from pimlico.datatypes.parse import Tree
+from pimlico.old_datatypes.parse import Tree
 
 
 @skip_invalid

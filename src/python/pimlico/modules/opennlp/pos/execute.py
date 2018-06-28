@@ -5,7 +5,7 @@
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus
+from pimlico.old_datatypes.word_annotations import WordAnnotationCorpus
 from .tagger import PosTagger
 
 

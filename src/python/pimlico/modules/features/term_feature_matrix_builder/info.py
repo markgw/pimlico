@@ -10,8 +10,8 @@
 """
 from pimlico.core.dependencies.python import numpy_dependency, scipy_dependency
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.arrays import ScipySparseMatrix
-from pimlico.datatypes.features import IndexedTermFeatureListCorpus
+from pimlico.old_datatypes.arrays import ScipySparseMatrix
+from pimlico.old_datatypes.features import IndexedTermFeatureListCorpus
 
 
 class ModuleInfo(BaseModuleInfo):

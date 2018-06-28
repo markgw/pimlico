@@ -11,7 +11,7 @@ grind to a halt if we do this.
 
 """
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
-from pimlico.datatypes import TokenizedCorpus
+from pimlico.old_datatypes import TokenizedCorpus
 
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError

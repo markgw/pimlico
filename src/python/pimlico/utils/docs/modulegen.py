@@ -19,7 +19,7 @@ from sphinx.apidoc import format_heading
 
 from pimlico import install_core_dependencies
 from pimlico.core.modules.options import format_option_type
-from pimlico.datatypes.base import DynamicOutputDatatype, PimlicoDatatype, MultipleInputs
+from pimlico.old_datatypes.base import DynamicOutputDatatype, PimlicoDatatype, MultipleInputs
 from pimlico.utils.docs import trim_docstring
 from pimlico.utils.docs.rest import make_table
 

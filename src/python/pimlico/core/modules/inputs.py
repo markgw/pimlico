@@ -8,11 +8,11 @@ Base classes and utilities for input modules in a pipeline.
 """
 import copy
 
-from pimlico.datatypes.base import IterableCorpusWriter
+from pimlico.old_datatypes.base import IterableCorpusWriter
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.datatypes.base import IterableCorpus
+from pimlico.old_datatypes.base import IterableCorpus
 from .base import BaseModuleInfo
 
 

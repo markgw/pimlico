@@ -10,9 +10,9 @@ module that expects tokenized text.
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 
-from pimlico.datatypes.documents import TextDocumentType
-from pimlico.datatypes.tar import TarredCorpusType, tarred_corpus_with_data_point_type
-from pimlico.datatypes.tokenized import CharacterTokenizedDocumentType, CharacterTokenizedCorpusWriter
+from pimlico.old_datatypes.documents import TextDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType, tarred_corpus_with_data_point_type
+from pimlico.old_datatypes.tokenized import CharacterTokenizedDocumentType, CharacterTokenizedCorpusWriter
 
 
 class ModuleInfo(DocumentMapModuleInfo):

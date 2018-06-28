@@ -13,9 +13,9 @@ This module is simply a wrapper to call `Gensim <https://radimrehurek.com/gensim
 """
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.embeddings import Embeddings
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tokenized import TokenizedDocumentType
+from pimlico.old_datatypes.embeddings import Embeddings
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(BaseModuleInfo):

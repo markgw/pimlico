@@ -10,8 +10,8 @@ location. Useful for collecting together final output at the end of a pipeline.
 """
 
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.base import MultipleInputs
-from pimlico.datatypes.files import File
+from pimlico.old_datatypes.base import MultipleInputs
+from pimlico.old_datatypes.files import File
 
 
 class ModuleInfo(DocumentMapModuleInfo):

@@ -9,9 +9,9 @@
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.dictionary import Dictionary
-from pimlico.datatypes.features import IndexedTermFeatureListCorpus, TermFeatureListDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.dictionary import Dictionary
+from pimlico.old_datatypes.features import IndexedTermFeatureListCorpus, TermFeatureListDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(BaseModuleInfo):

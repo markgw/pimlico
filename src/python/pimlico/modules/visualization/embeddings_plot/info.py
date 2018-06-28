@@ -14,9 +14,9 @@ Uses scikit-learn to perform the MDS/TSNE reduction.
 from pimlico.core.dependencies.python import sklearn_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import json_string, choose_from_list, comma_separated_strings
-from pimlico.datatypes.base import MultipleInputs
-from pimlico.datatypes.embeddings import Embeddings
-from pimlico.datatypes.plotting import PlotOutput
+from pimlico.old_datatypes.base import MultipleInputs
+from pimlico.old_datatypes.embeddings import Embeddings
+from pimlico.old_datatypes.plotting import PlotOutput
 from pimlico.modules.visualization import matplotlib_dependency
 
 

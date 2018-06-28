@@ -40,7 +40,7 @@ filter module).
 """
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import PimlicoDatatype, TypeFromInput
+from pimlico.old_datatypes.base import PimlicoDatatype, TypeFromInput
 
 
 class ModuleInfo(BaseModuleInfo):

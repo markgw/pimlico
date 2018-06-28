@@ -6,7 +6,7 @@ import inspect
 import threading
 
 from pimlico.cli.debug import fmt_frame_info, output_stack_trace
-from pimlico.datatypes import TarredCorpus
+from pimlico.old_datatypes import TarredCorpus
 
 
 class Stepper(object):

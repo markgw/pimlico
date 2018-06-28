@@ -15,7 +15,7 @@ consumption.
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.tar import TarredCorpus
+from pimlico.old_datatypes.tar import TarredCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):

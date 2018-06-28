@@ -6,7 +6,7 @@ from collections import Counter
 import numpy
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.arrays import NumpyArrayWriter
+from pimlico.old_datatypes.arrays import NumpyArrayWriter
 from pimlico.utils.progress import get_progress_bar
 
 

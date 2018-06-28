@@ -12,9 +12,9 @@ features.
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import comma_separated_strings
-from pimlico.datatypes.dictionary import Dictionary
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tokenized import TokenizedDocumentType
+from pimlico.old_datatypes.dictionary import Dictionary
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(BaseModuleInfo):

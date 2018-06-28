@@ -19,9 +19,9 @@ from itertools import islice
 
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool
-from pimlico.datatypes.base import IterableCorpus, DynamicOutputDatatype, \
+from pimlico.old_datatypes.base import IterableCorpus, DynamicOutputDatatype, \
     iterable_corpus_with_data_point_type, InvalidDocument
-from pimlico.datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
+from pimlico.old_datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
 from pimlico.utils.core import cached_property
 
 

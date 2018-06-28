@@ -3,8 +3,8 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.features import IndexedTermFeatureListCorpusWriter
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.features import IndexedTermFeatureListCorpusWriter
 from pimlico.utils.progress import get_progress_bar
 
 

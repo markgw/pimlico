@@ -13,7 +13,7 @@ from sklearn.metrics.pairwise import cosine_distances, euclidean_distances, manh
 import numpy
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.plotting import PlotOutputWriter
+from pimlico.old_datatypes.plotting import PlotOutputWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):

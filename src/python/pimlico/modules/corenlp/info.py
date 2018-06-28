@@ -26,15 +26,15 @@ This is a small addition that will be implemented in the future.
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool
-from pimlico.datatypes.base import DynamicOutputDatatype
-from pimlico.datatypes.coref.corenlp import CorefCorpus
-from pimlico.datatypes.documents import RawTextDocumentType
-from pimlico.datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
-from pimlico.datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
-from pimlico.datatypes.parse.dependency import StanfordDependencyParseCorpus, StanfordDependencyParseCorpusWriter
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tokenized import TokenizedCorpus, TokenizedCorpusWriter, TokenizedDocumentType
-from pimlico.datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter, \
+from pimlico.old_datatypes.base import DynamicOutputDatatype
+from pimlico.old_datatypes.coref.corenlp import CorefCorpus
+from pimlico.old_datatypes.documents import RawTextDocumentType
+from pimlico.old_datatypes.jsondoc import JsonDocumentCorpus, JsonDocumentCorpusWriter
+from pimlico.old_datatypes.parse import ConstituencyParseTreeCorpus, ConstituencyParseTreeCorpusWriter
+from pimlico.old_datatypes.parse.dependency import StanfordDependencyParseCorpus, StanfordDependencyParseCorpusWriter
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tokenized import TokenizedCorpus, TokenizedCorpusWriter, TokenizedDocumentType
+from pimlico.old_datatypes.word_annotations import WordAnnotationCorpus, SimpleWordAnnotationCorpusWriter, \
     WordAnnotationsDocumentType
 from .deps import corenlp_dependencies
 

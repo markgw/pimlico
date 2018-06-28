@@ -8,8 +8,8 @@ from traceback import format_exc
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor, satisfies_typecheck
 from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
-from pimlico.datatypes.base import InvalidDocument
-from pimlico.datatypes.tar import TarredCorpus, AlignedTarredCorpora, TarredCorpusWriter
+from pimlico.old_datatypes.base import InvalidDocument
+from pimlico.old_datatypes.tar import TarredCorpus, AlignedTarredCorpora, TarredCorpusWriter
 from pimlico.utils.core import multiwith
 from pimlico.utils.pipes import qget
 from pimlico.utils.progress import get_progress_bar

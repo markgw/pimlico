@@ -8,9 +8,9 @@ Text normalization for raw text documents.
 from pimlico.core.modules.map import DocumentMapModuleInfo
 
 from pimlico.core.modules.options import choose_from_list, str_to_bool
-from pimlico.datatypes.documents import TextDocumentType
-from pimlico.datatypes.tar import TarredCorpusType, RawTextTarredCorpus
-from pimlico.datatypes.tar import TarredCorpusWriter
+from pimlico.old_datatypes.documents import TextDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType, RawTextTarredCorpus
+from pimlico.old_datatypes.tar import TarredCorpusWriter
 
 
 class ModuleInfo(DocumentMapModuleInfo):
