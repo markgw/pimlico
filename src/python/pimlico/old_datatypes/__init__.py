@@ -28,7 +28,8 @@ from .tokenized import *
 from .word_annotations import *
 from .xml import *
 
-warnings.warn("DEPRECATED: imported pimlico.old_datatypes. Switch to using new datatypes in pimlico.datatypes")
+warnings.warn("DEPRECATED: imported pimlico.old_datatypes. Switch to using new datatypes in pimlico.datatypes",
+              stacklevel=2)
 
 
 __all__ = \

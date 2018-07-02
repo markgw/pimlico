@@ -6,7 +6,7 @@ import inspect
 import threading
 
 from pimlico.cli.debug import fmt_frame_info, output_stack_trace
-from pimlico.old_datatypes import TarredCorpus
+from pimlico.datatypes.corpora.grouped import GroupedCorpus
 
 
 class Stepper(object):
@@ -42,7 +42,7 @@ def enable_step_for_pipeline(pipeline):
         wrap_output_names = []
         for output_name in module.output_names:
             dtype = module.get_output(output_name)
-            if isinstance(dtype, TarredCorpus):
+            if isinstance(dtype, GroupedCorpus):
                 # Wrap some of the datatype's methods
                 wrap_output_names.append(output_name)
 
