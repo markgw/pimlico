@@ -129,7 +129,7 @@ class XMLOutputType(ReaderOutputType):
         """
         return self.data_point_type_instance.process_document(data)
 
-    def data_ready(self):
+    def data_ready(self, **kwargs):
         return check_paths_from_options(self.reader_options)
 
     @cached_property

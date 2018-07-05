@@ -29,7 +29,7 @@ from glob import glob, iglob
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory, ReaderOutputType
 from pimlico.core.modules.options import comma_separated_strings, comma_separated_list, opt_type_help
-from pimlico.old_datatypes.documents import RawTextDocumentType
+from pimlico.datatypes.corpora.data_points import RawTextDocumentType
 
 
 @opt_type_help("(line range-limited) file path")
@@ -135,76 +135,74 @@ class OutputType(ReaderOutputType):
     ``filter_text()``
 
     """
-    data_point_type = RawTextDocumentType
-
-    def filter_text(self, data):
-        """
-        May be overridden by subclasses to perform postprocessing of document data.
-        Otherwise, the document type's process_document() method is used.
-
-        """
-        return self.data_point_type_instance.process_document(data)
-
-    def data_ready(self):
+    def data_ready(self, base_dir):
         return check_paths_from_options(self.reader_options)
 
-    def __len__(self):
-        # Should only be called after data_ready() == True
-        if "length" in self.metadata:
-            # If the length has been stored, use that
-            return self.metadata["length"]
-        else:
-            return len(get_paths_from_options(self.reader_options))
+    class Reader:
+        def filter_text(self, text):
+            """
+            May be overridden by subclasses to perform postprocessing of document data.
+            Otherwise, the document type's standard processing is used.
 
-    def iter_docs_in_file(self, f):
-        """
-        Subclasses may want to provide a way to split a file into multiple docs.
-        This implementation just reads in the whole file as a single doc.
+            """
+            return text
 
-        Note that, if you override this with something that (might) split the files into
-        multiple docs, you should also override __len__() to give the correct doc count.
+        def __len__(self):
+            if "length" in self.metadata:
+                # If the length has been stored, use that
+                return self.metadata["length"]
+            else:
+                return len(get_paths_from_options(self.datatype.reader_options))
 
-        """
-        yield f.read()
+        def iter_docs_in_file(self, f):
+            """
+            Subclasses may want to provide a way to split a file into multiple docs.
+            This implementation just reads in the whole file as a single doc.
 
-    def __iter__(self):
-        options = self.reader_options
+            Note that, if you override this with something that (might) split the files into
+            multiple docs, you should also override __len__() to give the correct doc count.
 
-        encoding = options["encoding"]
-        # Use the file basenames as doc names where possible, but make sure they're unique
-        used_doc_names = set()
-        paths = get_paths_from_options(options)
-        if len(paths):
-            for path, start, end in paths:
-                doc_name = os.path.basename(path)
-                distinguish_id = 0
-                # Keep increasing the distinguishing ID until we have a unique name
-                while doc_name in used_doc_names:
-                    base, ext = os.path.splitext(doc_name)
-                    doc_name = "%s-%d%s" % (base, distinguish_id, ext)
-                    distinguish_id += 1
-                used_doc_names.add(doc_name)
+            """
+            yield f.read()
 
-                with open(path, "r") as f:
-                    for data in self.iter_docs_in_file(f):
-                        if not type(data) is unicode:
-                            data = data.decode(encoding, errors=options["encoding_errors"])
+        def __iter__(self):
+            options = self.datatype.reader_options
 
-                        if start != 0 or end != -1:
-                            # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
-                            if start != 0:
-                                # Otherwise, shift down to account for 1-indexing
-                                start -= 1
-                            if end != -1:
-                                end -= 1
+            encoding = options["encoding"]
+            # Use the file basenames as doc names where possible, but make sure they're unique
+            used_doc_names = set()
+            paths = get_paths_from_options(options)
+            if len(paths):
+                for path, start, end in paths:
+                    doc_name = os.path.basename(path)
+                    distinguish_id = 0
+                    # Keep increasing the distinguishing ID until we have a unique name
+                    while doc_name in used_doc_names:
+                        base, ext = os.path.splitext(doc_name)
+                        doc_name = "%s-%d%s" % (base, distinguish_id, ext)
+                        distinguish_id += 1
+                    used_doc_names.add(doc_name)
 
-                            lines = data.split("\n")
-                            if end == -1:
-                                data = u"\n".join(lines[start:])
-                            else:
-                                data = u"\n".join(lines[start:end+1])
+                    with open(path, "r") as f:
+                        for data in self.iter_docs_in_file(f):
+                            if not type(data) is unicode:
+                                data = data.decode(encoding, errors=options["encoding_errors"])
 
-                        yield doc_name, self.filter_text(data)
+                            if start != 0 or end != -1:
+                                # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
+                                if start != 0:
+                                    # Otherwise, shift down to account for 1-indexing
+                                    start -= 1
+                                if end != -1:
+                                    end -= 1
+
+                                lines = data.split("\n")
+                                if end == -1:
+                                    data = u"\n".join(lines[start:])
+                                else:
+                                    data = u"\n".join(lines[start:end+1])
+
+                            yield doc_name, self.datatype.data_point_type(self.filter_text(data))
 
 
 ModuleInfo = iterable_input_reader_factory(
@@ -233,7 +231,7 @@ ModuleInfo = iterable_input_reader_factory(
             "default": "strict",
         },
     },
-    OutputType, 
+    OutputType(RawTextDocumentType()),
     module_type_name="raw_text_files_reader",
     module_readable_name="Raw text files",
 )

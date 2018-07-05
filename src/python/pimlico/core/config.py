@@ -427,7 +427,14 @@ class PipelineConfig(object):
                     raise PipelineConfigParseError("module %s does not specify a type" % module_name)
                 try:
                     # First see if this is a datatype
-                    datatype_class = load_datatype(module_type_name)
+                    # If so, all options other than 'dir' and other special keys are used as datatype options
+                    datatype_options = OrderedDict((k, v) for (k, v) in module_config.iteritems()
+                                                   if k not in ["dir", "tie_alts", "alt_naming"]
+                                                   and not k.startswith("modvar_"))
+                    datatype_class = load_datatype(module_type_name, options=datatype_options)
+                    # Params used as datatype options should be removed from config
+                    for key in datatype_options:
+                        del module_config[key]
                 except DatatypeLoadError:
                     # Not a datatype
                     module_info_class = load_module_info(module_type_name)

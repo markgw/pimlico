@@ -32,8 +32,8 @@ import warnings
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
-from pimlico.old_datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
-    MultipleInputs
+from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
+    MultipleInputs, DataNotReadyError
 from pimlico.utils.core import remove_duplicates
 
 
@@ -445,7 +445,18 @@ class BaseModuleInfo(object):
 
         return os.path.join(self.get_module_output_dir(absolute=absolute), output_name)
 
-    def get_output_datatype(self, output_name=None, additional_names=[]):
+    def get_output_datatype(self, output_name=None):
+        """
+        Get the datatype of a named output, or the default output.
+        Returns an instance of the relevant PimlicoDatatype subclass. This can be used
+        for typechecking and also for getting a reader for the output data, once it's ready,
+        by supplying it with the path to the data.
+
+        To get a reader for the output data, use :meth:`get_output`.
+
+        :param output_name: output whose datatype to retrieve. Default output if not specified
+        :return:
+        """
         if output_name is None:
             # Get the default output
             # Often there'll be only one output, so a name needn't be specified
@@ -462,6 +473,7 @@ class BaseModuleInfo(object):
         if isinstance(datatype, DynamicOutputDatatype):
             # Call the get_datatype() method to build the actual datatype
             datatype = datatype.get_datatype(self)
+
         # An output datatype should never be a DynamicInputDatatypeRequirement, which should only be used for inputs
         # If this happens, it's an error in the module info definition
         # Since it's an easy mistake to make, check for it here
@@ -470,44 +482,57 @@ class BaseModuleInfo(object):
                                          "input type requirement as output type on output '{}'".format(
                 self.module_type_name, output_name))
 
-        # Recursively retrieve additional datatypes from this one
-        additional_names = additional_names or []
-        for additional_name in additional_names:
-            if additional_name not in dict(datatype.supplied_additional):
-                raise PipelineStructureError("datatype '%s' does not supplied an additional datatype by the name of "
-                                             "'%s'. Additional datatypes it supplies: %s" %
-                                             (datatype.datatype_name, additional_name,
-                                              dict(datatype.supplied_additional).keys()))
-            datatype = dict(datatype.supplied_additional)[additional_name]
-
         return output_name, datatype
 
-    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
+    def instantiate_output_datatype(self, output_name, output_datatype):
         """
         Subclasses may want to override this to provide special behaviour for instantiating
         particular outputs' datatypes.
 
-        Additional kwargs will be pass through to the datatype's init.
+        .. deprecated:: new datatypes
+
+           Shouldn't need this any more, I think. Should be possible to do everything
+           necessary using dynamic output datatypes.
 
         """
-        return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self, **kwargs)
+        #return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self)
+        return None
+    instantiate_output_datatype._original = True
 
-    def get_output(self, output_name=None, additional_names=None, **kwargs):
+    def get_output(self, output_name=None):
         """
-        Get a datatype instance corresponding to one of the outputs of the module.
+        Get a reader corresponding to one of the outputs of the module. The reader
+        will be that which corresponds to the output's declared datatype and
+        will read the data from any of the possible locations where it can be
+        found.
 
-        Additional kwargs will be pass through to the datatype's init.
+        If the data is not available in any location, raises a
+        :class:`~pimlico.datatypes.base.DataNotReadyError`.
 
         """
         output_name, datatype = self.get_output_datatype(output_name=output_name)
-        output_datatype_instance = self.instantiate_output_datatype(output_name, datatype, **kwargs)
-        if additional_names:
-            # Use the main output datatype to fetch additional datatype(s)
-            for i in range(len(additional_names)):
-                additional_name = "->".join(additional_names[:i+1])
-                output_datatype_instance = \
-                    output_datatype_instance.instantiate_additional_datatype(additional_names[i], additional_name)
-        return output_datatype_instance
+        # Search for the data directory
+        dataset_rel_dir = self.get_output_dir(output_name)
+        dataset_abs_dir = self.pipeline.find_data(dataset_rel_dir)
+        if dataset_abs_dir is None:
+            # No dataset dir was found in any of the storage locations
+            raise DataNotReadyError("could not create reader for output '{}' to module '{}': no directory found "
+                                    "in any storage location".format(output_name, self.module_name))
+        # Try creating a reader using this directory
+        try:
+            reader = datatype(dataset_abs_dir)
+        except DataNotReadyError, e:
+            raise DataNotReadyError(
+                "could not create reader for output '{}' to module '{}': {}".format(
+                output_name, self.module_name, e
+            ))
+        # TODO Remove this
+        # While developing new datatypes, check whether instantiate_output_datatype has been overridden
+        # If so, the functionality should be replaced
+        if not hasattr(self.instantiate_output_datatype, "_original"):
+            warnings.warn("Module type {} overrides instantiate_output_datatype: this functionality should "
+                          "be replaced".format(self.module_type_name))
+        return reader
 
     def is_multiple_input(self, input_name=None):
         """
@@ -548,15 +573,15 @@ class BaseModuleInfo(object):
 
         # Try getting hold of the module that we need the output of
         if always_list or self.is_multiple_input(input_name):
-            return [(self.pipeline[previous_module_name], output_name, additional_names)
-                    for (previous_module_name, output_name, additional_names) in self.inputs[input_name]]
+            return [(self.pipeline[previous_module_name], output_name)
+                    for (previous_module_name, output_name) in self.inputs[input_name]]
         else:
-            previous_module_name, output_name, additional_names = self.inputs[input_name][0]
-            return self.pipeline[previous_module_name], output_name, additional_names
+            previous_module_name, output_name = self.inputs[input_name][0]
+            return self.pipeline[previous_module_name], output_name
 
     def get_input_datatype(self, input_name=None, always_list=False):
         """
-        Get a list of datatype classes corresponding to one of the inputs to the module.
+        Get a list of datatype instances corresponding to one of the inputs to the module.
         If an input name is not given, the first input is returned.
 
         If the input type was specified with MultipleInputs, meaning that we're expecting an unbounded number
@@ -564,15 +589,14 @@ class BaseModuleInfo(object):
 
         """
         datatypes = [
-            previous_module.get_output_datatype(output_name, additional_names=additional_names)[1]
-            for previous_module, output_name, additional_names in
-            self.get_input_module_connection(input_name, always_list=True)
+            previous_module.get_output_datatype(output_name)[1]
+            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
         ]
         return datatypes if always_list or self.is_multiple_input(input_name) else datatypes[0]
 
-    def get_input(self, input_name=None, always_list=False, **kwargs):
+    def get_input(self, input_name=None, always_list=False):
         """
-        Get a datatype instances corresponding to one of the inputs to the module.
+        Get datatype instances corresponding to one of the inputs to the module.
         Looks up the corresponding output from another module and uses that module's metadata to
         get that output's instance.
         If an input name is not given, the first input is returned.
@@ -584,35 +608,20 @@ class BaseModuleInfo(object):
         If the requested input name is an optional input and it has not been supplied,
         returns None.
 
-        Additional kwargs will be passed through to the datatype's init call.
-
         """
-        from pimlico.old_datatypes.base import IterableCorpus
-
         # Check whether this is an optional input: otherwise get_input_module_connection() will raise an error
         if input_name is not None and input_name in dict(self.module_optional_inputs) and input_name not in self.inputs:
             return None
 
         inputs = [
-            previous_module.get_output(output_name, additional_names=additional_names, **kwargs)
-            for previous_module, output_name, additional_names in
-            self.get_input_module_connection(input_name, always_list=True)
+            previous_module.get_output(output_name)
+            for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
         ]
-        # For IterableCorpora, we may need to let the corpus know what datapoint type was required,
-        # in case the provided type needs to be cast
-        # Find out what type requirement was met (by each input)
-        satisfied = self.typecheck_input(input_name)
-        for input, satisfied_req in zip(inputs, satisfied):
-            # TODO This is really difficult: we need to know what document type was required of this
-            # corpus, but it's impossible to get this in a neat, reliable way, as it could be some
-            # arbitrary typechecking routine, or several allowed document types
-            # Leaving this for now: I think we fundamentally need a whole new way to deal with doc types
-            pass
         return inputs if always_list or self.is_multiple_input(input_name) else inputs[0]
 
     def input_ready(self, input_name=None):
         """
-        Check whether the datatype is (or datatypes are) ready to go, corresponding to the named input.
+        Check whether the data is ready to go corresponding to the named input.
 
         :param input_name: input to check
         :return: True if input is ready
@@ -693,13 +702,15 @@ class BaseModuleInfo(object):
                 input_connections = self.get_input_module_connection(input_name, always_list=True)
                 missing_for_input = []
 
-                for previous_module, output_name, additional_names in input_connections:
+                for previous_module, output_name in input_connections:
                     # If the previous module is to be assumed executed, skip checking whether its output data is
                     # available
                     if previous_module.module_name in assume_executed:
                         continue
-                    # Don't check whether additional datatypes are ready -- supposedly guaranteed if the main is
-                    if not previous_module.get_output(output_name).data_ready():
+                    # Check whether we can get the output reader for the output corresponding to this input
+                    try:
+                        reader = previous_module.get_output(output_name)
+                    except DataNotReadyError:
                         # If the previous module is a filter, it's more helpful to say exactly what data it's missing
                         if previous_module.is_filter():
                             missing_for_input.extend(previous_module.missing_data(assume_executed=assume_executed))
@@ -708,11 +719,12 @@ class BaseModuleInfo(object):
                                 missing_for_input.append("%s (default output)" % previous_module.module_name)
                             else:
                                 missing_for_input.append("%s output '%s'" % (previous_module.module_name, output_name))
-                    elif previous_module.module_name in assume_failed:
-                        # If previous module is assumed failed, assume its output data is not ready,
-                        # even when it looks ready
-                        missing_for_input.append("%s module failed, so we assume  output '%s' is not complete" %
-                                                 (previous_module.module_name, output_name))
+                    else:
+                        if previous_module.module_name in assume_failed:
+                            # If previous module is assumed failed, assume its output data is not ready,
+                            # even when it looks ready
+                            missing_for_input.append("%s module failed, so we assume  output '%s' is not complete" %
+                                                     (previous_module.module_name, output_name))
 
                 if allow_preliminary and len(input_connections) > 1:
                     # For multiple inputs, be satisfied with at least one ready
@@ -754,16 +766,6 @@ class BaseModuleInfo(object):
             deps.extend(self.pipeline[dep].get_transitive_dependencies())
         return remove_duplicates(deps)
 
-    def get_input_type_requirements(self, input_name=None):
-        if input_name is None:
-            input_name = self.module_inputs[0][0]
-        # Get the type requirements given by the module info definition for this input
-        input_type_requirements = dict(self.module_inputs)[input_name]
-        if isinstance(input_type_requirements, MultipleInputs):
-            # Type requirements are the same for all inputs
-            input_type_requirements = input_type_requirements.datatype_requirements
-        return input_type_requirements
-
     def typecheck_inputs(self):
         if self.is_input() or len(self.module_inputs) == 0:
             # Nothing to check
@@ -797,31 +799,27 @@ class BaseModuleInfo(object):
                                          "given" % (input_name, self.module_name, len(input_connections)))
 
         first_satisfied = []
-        for (dep_module_name, output, additional_names) in input_connections:
+        for dep_module_name, output_name in input_connections:
             # Load the dependent module
             dep_module = self.pipeline[dep_module_name]
-            output_name = output or "default"
             # Try to load the named output (or the default, if no name was given)
-            dep_module_output_name, dep_module_output = \
-                dep_module.get_output_datatype(output_name=output, additional_names=additional_names)
+            dep_module_output_name, dep_module_output = dep_module.get_output_datatype(output_name=output_name)
 
             # Check the output datatype is given in a suitable form
-            if not (isinstance(dep_module_output, type) and issubclass(dep_module_output, PimlicoDatatype)) and \
-                    not isinstance(dep_module_output, DynamicOutputDatatype):
-                raise PipelineStructureError("invalid output datatype from output '%s' of module '%s'. "
-                                             "Must be a PimlicoDatatype "
-                                             "subclass or a DynamicOutputDatatype subclass instance: "
-                                             "got %s" % (
-                                                 dep_module_output_name, dep_module_name, dep_module_output.__name__
-                                             ))
+            if not isinstance(dep_module_output, (DynamicOutputDatatype, PimlicoDatatype)):
+                raise PipelineStructureError(
+                    "invalid output datatype from output '{}' of module '{}'. Must be instance of PimlicoDatatype "
+                    "subclass or a DynamicOutputDatatype subclass, got {}".format(
+                        dep_module_output_name, dep_module_name, type(dep_module_output).__name__
+                    ))
             try:
                 first_satisfied.append(check_type(dep_module_output, input_type_requirements))
             except TypeCheckError, e:
-                additional_name_str = "".join("->%s" % an for an in additional_names)
-                raise PipelineStructureError("type-checking error matching input '%s' to module '%s' with output "
-                                             "'%s%s' from module '%s': %s" %
-                                             (input_name, self.module_name, output_name, additional_name_str,
-                                              dep_module_name, e))
+                raise PipelineStructureError(
+                    "type-checking error matching input '{}' to module '{}' with output '{}' from "
+                    "module '{}': {}".format(
+                        input_name, self.module_name, output_name or "default", dep_module_name, e
+                ))
         return first_satisfied
 
     def get_software_dependencies(self):

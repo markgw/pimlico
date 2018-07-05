@@ -560,6 +560,9 @@ def load_datatype(path, options={}):
     Try loading a datatype class for a given path. Raises a DatatypeLoadError if it's not a valid
     datatype path.
 
+    Options are unprocessed strings that will be processed using the datatype's option
+    definitions.
+
     """
     try:
         cls = import_member(path)

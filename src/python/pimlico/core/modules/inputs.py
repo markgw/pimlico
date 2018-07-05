@@ -6,13 +6,11 @@
 Base classes and utilities for input modules in a pipeline.
 
 """
-import copy
-
-from pimlico.old_datatypes.base import IterableCorpusWriter
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.old_datatypes.base import IterableCorpus
+from pimlico.datatypes.corpora import IterableCorpus
+from pimlico.old_datatypes.base import IterableCorpusWriter
 from .base import BaseModuleInfo
 
 
@@ -34,8 +32,7 @@ class InputModuleInfo(BaseModuleInfo):
     module_executable = False
 
     def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-        raise NotImplementedError("input module type (%s) must implement its own datatype instantiator" %
-                                  self.module_type_name)
+        return output_datatype(self.options["dir"], self.pipeline, module=self)
 
 
 def input_module_factory(datatype):
@@ -43,59 +40,19 @@ def input_module_factory(datatype):
     Create an input module class to load a given datatype.
 
     """
-    input_module_options = copy.copy(datatype.input_module_options)
-    if issubclass(datatype, IterableCorpus):
-        # Also get input options from the document type
-        input_module_options.update(datatype.data_point_type.input_module_options)
-
-    # Add a special option to allow a dir to be specified to read the data from
-    # This will become the base_dir for the datatype when instantiated
-    input_module_options["dir"] = {
-        "help": "Directory to read the data from. May be used to load a dataset from an output from another "
-                "Pimlico pipeline. If not given, the datatype's base dir will be the expected base dir within "
-                "this pipeline's data directory, which usually won't exist",
-    }
-
     class DatatypeInputModuleInfo(InputModuleInfo):
         module_type_name = "%s_input" % datatype.datatype_name
         module_readable_name = "%s datatype input" % datatype.datatype_name
         module_outputs = [("data", datatype)]
-        module_options = input_module_options
-
-        def __init__(self, module_name, pipeline, **kwargs):
-            super(DatatypeInputModuleInfo, self).__init__(module_name, pipeline, **kwargs)
-            self.override_base_dir = self.options["dir"]
-
-        def get_output_dir(self, output_name, absolute=False):
-            if self.override_base_dir is None:
-                if datatype.requires_data_preparation:
-                    # During data preparation, this directly will be created and some data stored there
-                    # The data is only ready once we pass data_ready() in the normal way
-                    return super(DatatypeInputModuleInfo, self).get_output_dir(output_name,
-                                                                               absolute=absolute)
-                else:
-                    # No data preparation required, which means that this input datatype never stores anything
-                    # It therefore has a None base_dir, which causes the datatype to be satisfied without it,
-                    # providing any further checks provided by its data_ready() are satisfied
-                    return None
-            else:
-                return self.override_base_dir
-
-        def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-            return output_datatype.create_from_options(self.get_output_dir(output_name), self.pipeline,
-                                                       copy.deepcopy(self.options), module=self)
-
-    if datatype.requires_data_preparation:
-        # This module needs to be executed
-        class DataPreparationExecutor(BaseModuleExecutor):
-            def execute(self):
-                # Get the datatype instance
-                datatype_instance = self.info.get_output("data")
-                # Run the special data preparation method
-                datatype_instance.prepare_data(self.info.get_absolute_output_dir("data"), self.log)
-
-        DatatypeInputModuleInfo.module_executable = True
-        DatatypeInputModuleInfo.module_executor_override = DataPreparationExecutor
+        # One special option to allow a dir to be specified to read the data from
+        # This will become the base_dir for the datatype when instantiated
+        module_options = {
+            "dir": {
+                "help": "Directory to read the data from. May be used to load a dataset from an output from another "
+                        "Pimlico pipeline",
+                "required": True,
+            },
+        }
 
     return DatatypeInputModuleInfo
 
@@ -119,28 +76,32 @@ class ReaderOutputType(IterableCorpus):
 
     In all cases, the input options are available as ``self.reader_options``.
 
+    On the Document, override __len__ to compute length using self.reader_options,
+    unless you use execute_count.
+    Also override __iter__ to iterate over documents using self.reader_options.
+
     """
     datatype_name = "reader_iterator"
-    #: Must be overridden by subclasses
-    data_point_type = None
     #: Subclass information should be ignored for type checking. Should be treated exactly as an IterableCorpus
     emulated_datatype = IterableCorpus
 
-    def __init__(self, reader_options, base_dir, pipeline, **kwargs):
-        super(ReaderOutputType, self).__init__(base_dir, pipeline, **kwargs)
-        self.reader_options = reader_options
+    def __init__(self, *args, **kwargs):
+        super(ReaderOutputType, self).__init__(*args, **kwargs)
+        self.reader_options = None
 
-    def data_ready(self):
-        # Override to compute determine whether data is ready, using self.reader_options
-        raise NotImplementedError()
+    def set_reader_options(self, options):
+        """
+        Use the given set of options for reading the input. These are not datatype
+        options, as they do not relate to the nature of the produced output type.
+        They are options that affect the way to data is read in from disk, so are
+        provided to the special input reader output type's Reader in this way.
 
-    def __len__(self):
-        # Override to compute length using self.reader_options, unless you use execute_count
-        return super(ReaderOutputType, self).__len__()
+        """
+        self.reader_options = options
 
-    def __iter__(self):
-        # Override to iterate over documents using self.reader_options
-        raise NotImplementedError()
+    def data_ready(self, base_dir):
+        raise NotImplementedError("ReaderOutputType should override data_ready() to check whether the data is "
+                                  "ready to read")
 
 
 class DocumentCounterModuleExecutor(BaseModuleExecutor):
@@ -234,9 +195,8 @@ def iterable_input_reader_factory(input_module_options, output_type, module_type
     with input reader modules, such as those created by this factory.
 
     """
-    dp_type = output_type.data_point_type
-    mt_name = module_type_name or "reader_for_{}".format(dp_type.__name__)
-    mr_name = module_readable_name or "Input reader for {} iterable corpus".format(dp_type.__name__)
+    mt_name = module_type_name or "reader_for_{}".format(output_type.data_point_type.name)
+    mr_name = module_readable_name or "Input reader for {} iterable corpus".format(output_type.data_point_type.name)
 
     class IterableInputReaderModuleInfo(InputModuleInfo):
         module_type_name = mt_name
@@ -254,7 +214,9 @@ def iterable_input_reader_factory(input_module_options, output_type, module_type
                 # If executing to provide a length, we need the corpus to have a base dir so it finds the count
                 base_dir = self.get_output_dir("corpus")
 
-            corpus = output_type(self.options, base_dir, self.pipeline)
+            # Set the reader options on the datatype, which control how the reader will read in the data
+            output_type.set_reader_options(self.options)
+            corpus = output_type(base_dir, self.pipeline)
 
             if execute_count:
                 # Wrap the data_ready() in a decorator that checks the length has been counted
