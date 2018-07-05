@@ -4,7 +4,8 @@ from traceback import format_exc
 from pimlico.cli.shell.base import ShellCommand
 from pimlico.core.modules.options import opt_type_help
 from pimlico.datatypes.base import PimlicoDatatype, DatatypeLoadError, DatatypeWriteError
-from pimlico.datatypes.corpora.data_points import DataPointType
+from pimlico.datatypes.corpora import InvalidDocument
+from pimlico.datatypes.corpora.data_points import DataPointType, InvalidDocument
 from pimlico.utils.core import import_member
 from pimlico.utils.progress import get_progress_bar
 from . import data_points
@@ -134,13 +135,9 @@ class IterableCorpus(PimlicoDatatype):
             corpus in a consistent order. They may also provide other methods for iterating over or otherwise
             accessing the data.
 
-            TODO: The following documentation will need to be updated once the document typing system is redesigned
-
-            Each yielded document should consist of a pair `(name, doc)`, where `name` is an identifier for the document
-            (e.g. filename) and `doc` is the document's data, in the appropriate type.
-
-            You may wish to call `process_document_data_with_datatype()` on the raw content to apply the data-point
-            type's standard processing to it.
+            Each yielded document should consist of a pair `(name, doc)`,
+            where `name` is an identifier for the document (e.g. filename)
+            and `doc` is an instance of the appropriate document type.
 
             """
             raise NotImplementedError
@@ -168,6 +165,22 @@ class IterableCorpus(PimlicoDatatype):
                     )
             return document
 
+    class Writer:
+        """
+        Stores the length of the corpus.
+
+        NB: IterableCorpus itself has no particular way of storing files, so this is only here to
+        ensure that all subclasses (e.g. GroupedCorpus) store a length in the same way.
+
+        """
+        metadata_defaults = {"length": None}
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            super(self.__class__, self).__exit__(exc_type, exc_val, exc_tb)
+            # Check the length has been set
+            if self.metadata["length"] is None:
+                raise DatatypeWriteError("writer for IterableDocumentCorpus must set a 'length' value in the metadata")
+
     def check_type(self, supplied_type):
         """
         Override type checking to require that the supplied type have a document type that is compatible with
@@ -182,61 +195,3 @@ class IterableCorpus(PimlicoDatatype):
 
     def full_datatype_name(self):
         return "%s<%s>" % (self.datatype_name, self.data_point_type.name)
-
-
-class IterableCorpusWriter(object):
-    """
-    TODO Provide when writer system is implemented (as IterableCorpus.Writer)
-
-    NB: IterableCorpus itself has no particular way of storing files, so this is only here to
-    ensure that all subclasses (e.g. GroupedCorpus) store a length in the same way.
-
-    """
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        super(IterableCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
-        # Check the length has been set
-        if "length" not in self.metadata:
-            raise DatatypeWriteError("writer for IterableDocumentCorpus must set a 'length' value in the metadata")
-
-
-class InvalidDocument(object):
-    """
-    Widely used in Pimlico to represent an empty document that is empty not because the original input document
-    was empty, but because a module along the way had an error processing it. Document readers/writers should
-    generally be robust to this and simply pass through the whole thing where possible, so that it's always
-    possible to work out, where one of these pops up, where the error occurred.
-
-    """
-    def __init__(self, module_name, error_info=None):
-        self.error_info = error_info
-        self.module_name = module_name
-
-    def __unicode__(self):
-        return u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\nFull error details:\n%s" % \
-               (self.module_name, self.error_info or "")
-
-    def __str__(self):
-        return unicode(self).encode("ascii", "ignore")
-
-    @staticmethod
-    def load(text):
-        if not text.startswith("***** EMPTY DOCUMENT *****"):
-            raise ValueError("tried to read empty document text from invalid text: %s" % text)
-        text = text.partition("\n")[2]
-        module_line, __, text = text.partition("\n\n")
-        module_name = module_line.partition(": ")[2]
-        error_info = text.partition("\n")[2]
-        return InvalidDocument(module_name, error_info)
-
-    @staticmethod
-    def invalid_document_or_text(text):
-        """
-        If the text represents an invalid document, parse it and return an InvalidDocument object.
-        Otherwise, return the text as is.
-        """
-        if isinstance(text, InvalidDocument):
-            return text
-        elif text.startswith("***** EMPTY DOCUMENT *****"):
-            return InvalidDocument.load(text)
-        else:
-            return text

@@ -7,7 +7,8 @@ Document types used to represent datatypes of individual documents in an Iterabl
 
 """
 
-__all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError"]
+__all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
+           "InvalidDocument"]
 
 
 class DataPointType(object):
@@ -55,32 +56,43 @@ class DataPointType(object):
     def name(self):
         return self.__class__.__name__
 
+    def is_type_for_doc(self, doc):
+        """
+        Check whether the given document is of this type, or a subclass of this one.
+
+        """
+        return isinstance(doc.data_point_type, type(self))
+
     @classmethod
     def _get_document_cls(cls):
-        if cls is DataPointType:
-            # On the base class, we just return the base document, subclassing object
-            parent_doc_cls = object
-        else:
-            parent_doc_cls = cls.__bases__[0]._get_document_cls()
-
-        my_doc_cls = cls.Document
-        if parent_doc_cls is my_doc_cls:
-            # Document is not overridden, so we don't need to subclass
-            return parent_doc_cls
-        else:
-            # Perform subclassing so that a new Document is created that is a subclass of the parent's document
-            type_name = cls.__name__
-            if type_name.endswith("Type"):
-                # To get the class name, we typically remove "Type" from the end of the data point type class name
-                doc_name = type_name[:-4]
+        # Cache document subtyping, so that the same type object is returned from repeated calls on the
+        # same document type
+        if not hasattr(cls, "__document_type"):
+            if cls is DataPointType:
+                # On the base class, we just return the base document
+                cls.__document_type = cls.Document
             else:
-                # If the class name didn't follow the pattern of ending with "Type",
-                # add "Document" instead to distinguish it
-                doc_name = "{}Document".format(type_name)
+                parent_doc_cls = cls.__bases__[0]._get_document_cls()
 
-            return type(doc_name, (parent_doc_cls,), my_doc_cls.__dict__)
+                my_doc_cls = cls.Document
+                if parent_doc_cls is my_doc_cls:
+                    # Document is not overridden, so we don't need to subclass
+                    cls.__document_type = parent_doc_cls
+                else:
+                    # Perform subclassing so that a new Document is created that is a subclass of the parent's document
+                    type_name = cls.__name__
+                    if type_name.endswith("Type"):
+                        # To get the class name, we typically remove "Type" from the end of the data point type class name
+                        doc_name = type_name[:-4]
+                    else:
+                        # If the class name didn't follow the pattern of ending with "Type",
+                        # add "Document" instead to distinguish it
+                        doc_name = "{}Document".format(type_name)
 
-    class Document:
+                        cls.__document_type = type(doc_name, (parent_doc_cls,), my_doc_cls.__dict__)
+        return cls.__document_type
+
+    class Document(object):
         """
         The abstract superclass of all documents.
 
@@ -192,6 +204,76 @@ class DataPointType(object):
                 self._internal_data = self.raw_to_internal(self._raw_data)
                 self.internal_available()
             return self._internal_data
+
+
+class InvalidDocument(DataPointType):
+    """
+    Widely used in Pimlico to represent an empty document that is empty not because the original input document
+    was empty, but because a module along the way had an error processing it. Document readers/writers should
+    generally be robust to this and simply pass through the whole thing where possible, so that it's always
+    possible to work out, where one of these pops up, where the error occurred.
+
+    """
+    class Document:
+        def raw_to_internal(self, raw_data):
+            if not raw_data.startswith(u"***** EMPTY DOCUMENT *****"):
+                raise ValueError(u"tried to read empty document text from invalid text: %s" % raw_data)
+            text = raw_data.partition("\n")[2]
+            module_line, __, text = text.partition("\n\n")
+            module_name = module_line.partition(": ")[2]
+            error_info = text.partition("\n")[2]
+            return {"module_name": module_name, "error_info": error_info}
+
+        def internal_to_raw(self, internal_data):
+            return u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\n" \
+                   u"Full error details:\n%s" % \
+                   (internal_data["module_name"], internal_data["error_info"])
+
+        @property
+        def module_name(self):
+            return self.internal_data["module_name"]
+
+        @property
+        def error_info(self):
+            return self.internal_data["error_info"]
+
+        def __unicode__(self):
+            return self.internal_to_raw(self.internal_data)
+
+        def __str__(self):
+            return unicode(self).encode("ascii", "ignore")
+
+
+def invalid_document(module_name, error_info):
+    """
+    Convenience function to create an invalid document instance.
+
+    """
+    return InvalidDocument()({
+        "module_name": module_name,
+        "error_info": error_info,
+    }, from_internal=True)
+
+
+def invalid_document_or_text(text):
+    """
+    If the text represents an invalid document, parse it and return an InvalidDocument object.
+    Otherwise, return the text as is.
+
+    """
+    if is_invalid_doc(text):
+        return text
+    elif text.startswith("***** EMPTY DOCUMENT *****"):
+        return InvalidDocument()(text)
+    else:
+        return text
+
+
+def is_invalid_doc(doc):
+    """
+    Check whether the given document is of the invalid document types
+    """
+    return isinstance(doc, DataPointType.Document) and InvalidDocument().is_type_for_doc(doc)
 
 
 class RawDocumentType(DataPointType):

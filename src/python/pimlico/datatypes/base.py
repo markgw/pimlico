@@ -126,23 +126,16 @@ class PimlicoDatatype(object):
         # Data is ready, so we should be able to instantiate the reader
         return reader_cls(self, base_dir, pipeline, module=module)
 
-    @classmethod
-    def _get_reader_cls(cls):
-        if cls is PimlicoDatatype:
-            # On the base class, we just return the base reader, subclassing object
-            parent_reader = object
-        else:
-            # In case of multiple inheritance, first base class is the one we use to inherit reader functionality
-            # Typically multiple inheritance probably won't be used anyway with datatypes
-            parent_reader = cls.__bases__[0]._get_reader_cls()
+    def get_writer(self, base_dir, pipeline, module=None):
+        """
+        Instantiate a writer to write data to the given base dir.
 
-        my_reader = cls.Reader
-        if parent_reader is my_reader:
-            # Reader is not overridden, so we don't need to subclass
-            return parent_reader
-        else:
-            # Perform subclassing so that a new Reader is created that is a subclass of the parent's reader
-            return type("{}Reader".format(cls.__name__), (parent_reader,), my_reader.__dict__)
+        :param base_dir: output dir to write dataset to
+        :param pipeline: current pipeline
+        :param module: module name (optional, for debugging only)
+        :return: instance of the writer subclass corresponding to this datatype
+        """
+        # TODO
 
     @classmethod
     def instantiate_from_options(cls, options={}):
@@ -302,7 +295,7 @@ class PimlicoDatatype(object):
 
     class Reader:
         """
-        The abstract superclass of all dataset reader.
+        The abstract superclass of all dataset readers.
 
         You do not need to subclass or instantiate these yourself: subclasses are created automatically
         to correspond to each datatype. You can add functionality to a datatype's reader by creating a
@@ -367,6 +360,225 @@ class PimlicoDatatype(object):
 
         def __repr__(self):
             return "Reader({}: {})".format(self.datatype.full_datatype_name(), self.base_dir)
+
+    class Writer:
+        """
+        The abstract superclass of all dataset writers.
+
+        You do not need to subclass or instantiate these yourself: subclasses are created automatically
+        to correspond to each datatype. You can add functionality to a datatype's writer by creating a
+        nested `Writer` class. This will inherit from the parent datatype's writer. This happens
+        automatically - you don't need to do it yourself and shouldn't inherit from anything:
+
+        .. code-block:: py
+           class MyDatatype(PimlicoDatatype):
+               class Writer:
+                   # Overide writer things here
+
+        Writers should be used as context managers. Typically, you will get hold of a writer
+        for a module's output directly from the module-info instance:
+
+        .. code-block:: py
+
+           with module.get_output_writer("output_name") as writer:
+               # Call the writer's methods, set its attributes, etc
+               writer.do_something(my_data)
+               writer.some_attr = "This data"
+
+        Any additional kwargs passed into the writer (which you can do by passing kwargs to
+        ``get_output_writer()`` on the module) will set values in the dataset's metadata.
+        Available parameters are given, along with their default values, in the dictionary
+        ``metadata_defaults`` on a Writer class. They also include all values from ancestor
+        writers.
+
+        It is important to pass in parameters as kwargs that affect the writing of the data,
+        to ensure that the correct values are available as soon as the writing process starts.
+
+        All metadata values, including those passed in as kwargs, should be serializable
+        as simple JSON types.
+
+        Another set of parameters, *writer params*, is used to specify things that affect
+        the writing process, but do not need to be stored in the metadata. This could be,
+        for example, the number of CPUs to use for some part of the writing process. Unlike,
+        for example, the format of the stored data, this is not needed later when the data
+        is read.
+
+        Available writer params are given, along with their default values, in the dictionary
+        ``writer_param_defaults`` on a Writer class. (They do not need to be JSON serializable.)
+        Their values are also specified as kwargs in the same way as metadata.
+
+        """
+        # Values should be (val, doc) pairs, where val is the default value and doc is a string describing
+        # what the parameter is for (used for documentation)
+        metadata_defaults = {}
+        writer_param_defaults = {}
+
+        def __init__(self, datatype, base_dir, pipeline, module=None, **kwargs):
+            self.datatype = datatype
+            self.pipeline = pipeline
+            self.module = module
+
+            self.base_dir = base_dir
+            # This is the directory all data should be written to
+            self.data_dir = self.datatype._get_data_dir(base_dir)
+            self._metadata_path = os.path.join(self.base_dir, "corpus_metadata")
+
+            # Corpus metadata that will be written out to a JSON file accompanying the dataset
+            # Values can be set using kwargs, but typically the metadata should not be modified
+            #  by the user once the context manager is entered, as the writing process may be
+            #  parameterized by these values
+            self.metadata = {}
+
+            # Extract kwargs that correspond to metadata keys
+            for key, default in self.metadata_defaults.items():
+                if key in kwargs:
+                    self._metadata[key] = kwargs.pop(key)
+                else:
+                    self._metadata[key] = default
+            # Check here that metadata from kwargs is all JSON serializable, to avoid mysterious errors later
+            try:
+                json.dumps(self._metadata)
+            except TypeError, e:
+                raise DatatypeWriteError(
+                    "metadata parameters passed to writer as kwargs must be JSON serializable: {}".format(e)
+                )
+
+            # Extract kwargs that correspond to writer params
+            self.params = {}
+            for key, default in self.writer_param_defaults.items():
+                if key in kwargs:
+                    self.params[key] = kwargs.pop(key)
+                else:
+                    self.params[key] = default
+
+            # Any remaining kwargs are incorrect, as they're not listed as either metadata or writer param keys
+            if len(kwargs):
+                raise DatatypeWriteError("writer kwargs not valid as metadata keys or writer parameters: {}".format(
+                    ", ".join(kwargs.keys())
+                ))
+
+            # Stores a set of output tasks that must be completed before the exit routine is called
+            # Subclasses can add things to this in their init and remove them as the tasks are performed
+            # The superclass exit will check that the set is empty
+            self._to_output = set()
+
+        def require_tasks(self, *tasks):
+            """
+            Add a name or multiple names to the list of output tasks that must be completed before writing is finished
+            """
+            self._to_output.update(tasks)
+
+        def task_complete(self, task):
+            """ Mark the named task as completed """
+            if task in self._to_output:
+                self._to_output.remove(task)
+
+        @property
+        def incomplete_tasks(self):
+            """ List of required tasks that have not yet been completed """
+            return list(self._to_output)
+
+        def __enter__(self):
+            # Make sure the necessary directories exist
+            if not os.path.exists(self.data_dir):
+                os.makedirs(self.data_dir)
+            # Store an initial version of the metadata
+            self.write_metadata()
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if exc_type is None:
+                self.write_metadata()
+                # Check all required output tasks were completed
+                if len(self._to_output):
+                    raise DatatypeWriteError("some outputs were not written for datatype %s: %s" %
+                                             (type(self).__name__, ", ".join(self._to_output)))
+
+        def write_metadata(self):
+            with open(self._metadata_path, "w") as f:
+                # We used to pickle the metadata dictionary, but now we store it as JSON, so it's readable
+                json.dump(self.metadata, f)
+                # Make sure that the file doesn't get buffered anywhere, but is fully written to disk now
+                # We need to be sure that the up-to-date metadata is available immediately
+                f.flush()
+                os.fsync(f.fileno())
+
+        def __repr__(self):
+            return "Writer({}: {})".format(self.datatype.full_datatype_name(), self.base_dir)
+
+
+    ########## Type hiearchy construction for readers and writers ###########
+    # Readers and writers are in a type hierarchy that exactly mirrors the datatype hierarchy.
+    # Methods are added and overridden according to the specifications of the Reader and Writer dummy classes
+
+    @classmethod
+    def _get_reader_cls(cls):
+        if cls is PimlicoDatatype:
+            # On the base class, we just return the base reader, subclassing object
+            parent_reader = object
+        else:
+            # In case of multiple inheritance, first base class is the one we use to inherit reader functionality
+            # Typically multiple inheritance probably won't be used anyway with datatypes
+            parent_reader = cls.__bases__[0]._get_reader_cls()
+
+        my_reader = cls.Reader
+        if parent_reader is my_reader:
+            # Reader is not overridden, so we don't need to subclass
+            return parent_reader
+        else:
+            # Perform subclassing so that a new Reader is created that is a subclass of the parent's reader
+            return type("{}Reader".format(cls.__name__), (parent_reader,), my_reader.__dict__)
+
+    @classmethod
+    def _get_some_writer_cls(cls):
+        """ Get writer subclass, even if this type has no writer, going up the type hierarchy if necessary """
+        if cls is PimlicoDatatype:
+            # On the base class, parent is just object
+            parent_writer = object
+        else:
+            # In case of multiple inheritance, first base class is the one we use to inherit writer functionality
+            parent_writer = cls.__bases__[0]._get_some_writer_cls()
+
+        my_writer = cls.Writer
+        if my_writer is None:
+            # No writer for this type, but we want to get some writer
+            # Go up type hieararchy, skipping types for which Writer is None
+            return parent_writer
+        elif parent_writer is my_writer:
+            # Writer is not overridden, so we don't need to subclass
+            return parent_writer
+        else:
+            new_cls_dict = dict(my_writer.__dict__)
+            new_metadata_defaults = new_cls_dict.get("metadata_defaults", {})
+            new_writer_param_defaults = new_cls_dict.get("writer_param_defaults", {})
+            # Collect metadata_defaults and writer params from the Writer if given
+            new_cls_dict["metadata_defaults"] = dict(parent_writer.metadata_defaults, **new_metadata_defaults)
+            new_cls_dict["writer_param_defaults"] = dict(parent_writer.writer_param_defaults, **new_writer_param_defaults)
+
+            # Check that defaults were given in the right format
+            for val in new_metadata_defaults.values():
+                if type(val) not in (list, tuple) or len(val) != 2:
+                    raise TypeError("writer metadata defaults should be pairs of default values and documentation "
+                                    "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+            for val in new_writer_param_defaults.values():
+                if type(val) not in (list, tuple) or len(val) != 2:
+                    raise TypeError("writer param defaults should be pairs of default values and documentation "
+                                    "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+
+            # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
+            return type("{}Writer".format(cls.__name__), (parent_writer,), new_cls_dict)
+
+    @classmethod
+    def _get_writer_cls(cls):
+        """ Get the writer subclass, or None if this type has no writer """
+        my_writer = cls.Writer
+        if my_writer is None:
+            # This datatype has been marked as not having a writer
+            # In this case, we return None, indicating that no writer is avialable
+            return None
+        else:
+            # Hand over the the subtyping routine that skips over Nones to construct the writer type
+            return cls._get_some_writer_cls()
 
 
 class DynamicOutputDatatype(object):
@@ -452,74 +664,6 @@ class MultipleInputs(object):
     """
     def __init__(self, datatype_requirements):
         self.datatype_requirements = datatype_requirements
-
-
-class PimlicoDatasetWriter(object):
-    """
-    Abstract base class of data writer associated with Pimlico datatypes.
-
-    TODO: To be moved to PimlicoDatatype.Writer, with the same inheritance system as Reader
-
-    """
-    def __init__(self, base_dir, additional_name=None):
-        self.additional_name = additional_name
-        self.base_dir = base_dir
-        self.data_dir = os.path.join(self.base_dir, "data")
-        self.metadata = {}
-        # Make sure the necessary directories exist
-        if not os.path.exists(self.data_dir):
-            os.makedirs(self.data_dir)
-        # Stores a set of output tasks that must be completed before the exit routine is called
-        # Subclasses can add things to this in their init and remove them as the tasks are performed
-        # The superclass exit will check that the set is empty
-        self._to_output = set()
-
-    def require_tasks(self, *tasks):
-        """
-        Add a name or multiple names to the list of output tasks that must be completed before writing is finished
-        """
-        self._to_output.update(tasks)
-
-    def task_complete(self, task):
-        if task in self._to_output:
-            self._to_output.remove(task)
-
-    @property
-    def incomplete_tasks(self):
-        return list(self._to_output)
-
-    def __enter__(self):
-        # Store an initial version of the metadata
-        self.write_metadata()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type is None:
-            self.write_metadata()
-            # Check all required output tasks were completed
-            if len(self._to_output):
-                raise DatatypeWriteError("some outputs were not written for datatype %s: %s" %
-                                         (type(self).__name__, ", ".join(self._to_output)))
-
-    def write_metadata(self):
-        if self.additional_name is None:
-            metadata_filename = "corpus_metadata"
-        else:
-            metadata_filename = "%s_corpus_metadata" % self.additional_name
-
-        with open(os.path.join(self.base_dir, metadata_filename), "w") as f:
-            # We used to pickle the metadata dictionary, but now we store it as JSON, so it's readable
-            json.dump(self.metadata, f)
-            # Make sure that the file doesn't get buffered anywhere, but is fully written to disk now
-            # We need to be sure that the up-to-date metadata is available immediately
-            f.flush()
-            os.fsync(f.fileno())
-
-    def subordinate_additional_name(self, name):
-        if self.additional_name is not None:
-            return "%s->%s" % (self.additional_name, name)
-        else:
-            return name
 
 
 class TypeFromInput(DynamicOutputDatatype):

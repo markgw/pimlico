@@ -13,9 +13,10 @@ from cStringIO import StringIO
 from itertools import izip
 from tempfile import mkdtemp
 
-from pimlico.datatypes.corpora import IterableCorpusWriter, InvalidDocument
-from pimlico.utils.filesystem import retry_open
+from pimlico.datatypes.corpora import DataPointType
 from pimlico.datatypes.corpora import IterableCorpus
+from pimlico.datatypes.corpora.data_points import is_invalid_doc
+from pimlico.utils.filesystem import retry_open
 
 __all__ = [
     "GroupedCorpus", "AlignedGroupedCorpora",
@@ -188,146 +189,143 @@ class GroupedCorpus(IterableCorpus):
                 for filename in filenames:
                     yield archive_name, filename
 
+    class Writer:
+        """
+        Writes a large corpus of documents out to disk, grouping them together in tar archives.
 
-class TarredCorpusWriter(IterableCorpusWriter):
-    """
-    If gzip=True, each document is gzipped before adding it to the archive. Not the same as creating a tarball,
-    since the docs are gzipped *before* adding them, not the whole archive together, but it means we can easily
-    iterate over the documents, unzipping them as required.
+        A subtlety is that, as soon as the writer has been initialized,
+        it must be legitimate to initialize a datatype to read the corpus. Naturally, at this point there will
+        be no documents in the corpus, but it allows us to do document processing on the fly by initializing
+        writers and readers to be sure the pre/post-processing is identical to if we were writing the docs to disk
+        and reading them in again.
 
-    A subtlety of TarredCorpusWriter and its subclasses is that, as soon as the writer has been initialized,
-    it must be legitimate to initialize a datatype to read the corpus. Naturally, at this point there will
-    be no documents in the corpus, but it allows us to do document processing on the fly by initializing
-    writers and readers to be sure the pre/post-processing is identical to if we were writing the docs to disk
-    and reading them in again.
+        """
+        metadata_defaults = {
+            "gzip": (
+                False,
+                "Gzip each document before adding it to the archive. Not the same as creating a tarball, "
+                "since the docs are gzipped *before* adding them, not the whole archive together, but means "
+                "we can easily iterate over the documents, unzipping them as required"
+            ),
+            "encoding": (
+                "utf-8",
+                "String encoding to use for each document"
+            ),
+        }
+        writer_param_defaults = {
+            "append": (
+                False,
+                "If True, existing archives and their files are not overwritten, the new files are "
+                "just added to the end. This is useful where we want to restart processing that was "
+                "broken off in the middle"
+            ),
+            "trust_length": (
+                False,
+                "If True, when appending, the initial length of the corpus is read from the metadata " 
+                "already written. Otherwise (default), the number of docs already written is actually "
+                "counted during initialization. This is sensible when the previous writing process "
+                "may have ended abruptly, so that the metadata is not reliable. If you know you can "
+                "trust the metadata, however, setting this will speed things up"
+            )
+        }
 
-    If append=True, existing archives and their files are not overwritten, the new files are just added to the end.
-    This is useful where we want to restart processing that was broken off in the middle. If trust_length=True,
-    when appending the initial length of the corpus is read from the metadata already written. Otherwise (default),
-    the number of docs already written is actually counted during initialization. This is sensible when the
-    previous writing process may have ended abruptly, so that the metadata is not reliable. If you know you can
-    trust the metadata, however, setting trust_length=True will speed things up.
+        def __init__(self, *args, **kwargs):
+            super(self.__class__, self).__init__(*args, **kwargs)
 
-    TODO Turn this into a new-style writer
+            # Set "gzip" in the metadata, so we know to unzip when reading
+            self.gzip = self.metadata["gzip"]
+            self.encoding = self.metadata["encoding"]
+            self.append = self.params["append"]
+            self.trust_length = self.params["trust_length"]
 
-    """
-    def __init__(self, base_dir, gzip=False, append=False, trust_length=False, encoding="utf-8", **kwargs):
-        super(TarredCorpusWriter, self).__init__(base_dir, **kwargs)
-        self.append = append
-        self.current_archive_name = None
-        self.current_archive_tar = None
-        self.gzip = gzip
-        # Set "gzip" in the metadata, so we know to unzip when reading
-        self.metadata["gzip"] = gzip
-        self.encoding = encoding
-        self.metadata["encoding"] = encoding
+            self.current_archive_name = None
+            self.current_archive_tar = None
 
-        self.metadata["length"] = 0
-        if append:
-            if trust_length:
-                # Try reading length so far if we're appending and some docs have already been written
-                # If no metadata has been written, we start from 0
-                metadata_path = os.path.join(self.base_dir, "corpus_metadata")
-                if os.path.exists(metadata_path):
-                    with open(metadata_path, "r") as f:
-                        raw_data = f.read()
-                        if len(raw_data) != 0:
-                            # If empty metadata file, assume empty metadata
-                            try:
-                                # In later versions of Pimlico, we store metadata as JSON
-                                data = json.loads(raw_data)
-                            except ValueError:
-                                # If the metadata was written by an earlier Pimlico version, it's a pickled dictionary
-                                data = pickle.loads(raw_data)
-                            self.metadata["length"] = data.get("length", 0)
-            else:
-                # Can't rely on the metadata: count up docs in archive to get initial length
-                for root, dirs, files in os.walk(self.data_dir):
-                    for filename in files:
-                        tar_filename = os.path.join(root, filename)
-                        if tar_filename.endswith(".tar.gz") or tar_filename.endswith(".tar"):
-                            with tarfile.open(tar_filename, "r") as tarball:
-                                self.metadata["length"] += len(tarball.getmembers())
-        self.doc_count = self.metadata["length"]
+            self.metadata["length"] = 0
 
-        # Write out the metadata, so we're in a fit state to open a reader
-        self.write_metadata()
+            if self.append:
+                if self.trust_length:
+                    # Try reading length so far if we're appending and some docs have already been written
+                    # If no metadata has been written, we start from 0
+                    if os.path.exists(self._metadata_path):
+                        with open(self._metadata_path, "r") as f:
+                            raw_data = f.read()
+                            if len(raw_data) != 0:
+                                try:
+                                    # In later versions of Pimlico, we store metadata as JSON
+                                    data = json.loads(raw_data)
+                                except ValueError:
+                                    # If written by an earlier Pimlico version, it's a pickled dictionary
+                                    data = pickle.loads(raw_data)
+                                self.metadata["length"] = data.get("length", 0)
+                else:
+                    # Can't rely on the metadata: count up docs in archive to get initial length
+                    for root, dirs, files in os.walk(self.data_dir):
+                        for filename in files:
+                            tar_filename = os.path.join(root, filename)
+                            if tar_filename.endswith(".tar.gz") or tar_filename.endswith(".tar"):
+                                with tarfile.open(tar_filename, "r") as tarball:
+                                    self.metadata["length"] += len(tarball.getmembers())
+            self.doc_count = self.metadata["length"]
 
-    def add_document(self, archive_name, doc_name, data):
-        data = self.document_to_raw_data(data)
-
-        if type(data) is InvalidDocument:
-            # For an invalid result, signified by the special type, output the error info for later stages
-            data = unicode(data)
-        elif data is None:
-            # For an empty result, signified by None, output an empty file
-            data = u""
-
-        if archive_name != self.current_archive_name:
-            # Starting a new archive
-            if self.current_archive_tar is not None:
-                # Close the old one
-                self.current_archive_tar.close()
-            self.current_archive_name = archive_name
-            tar_filename = os.path.join(self.data_dir, "%s.tar" % archive_name)
-            # If we're appending a corpus and the archive already exists, append to it
+        def add_document(self, archive_name, doc_name, doc):
+            # A document instance provides access to the raw data for a document as a unicode string
+            # If it's not directly available, it will be converted when we try to retrieve the raw data
             try:
-                self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w")
-            except tarfile.ReadError:
-                # Couldn't open the existing file to append to, write instead
-                self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
+                data = doc.raw_data
+            except AttributeError:
+                # Instead of type-checking every document, we assume that if it has a raw_data attr, this
+                # is the right thing to use
+                # If not, we kick up a fuss, as we've presumably been given something that's not a valid document
+                if not isinstance(doc, DataPointType.Document):
+                    raise TypeError("documents added to a grouped corpus should be instances of the data point type's "
+                                    "document class. Data point type is {}".format(self.datatype.data_point_type.name))
+                else:
+                    # Some other problem caused this
+                    raise
 
-        # Add a new document to archive
-        if self.encoding is not None:
-            data = data.encode(self.encoding)
-        if self.gzip:
-            # We used to just use zlib to compress, which works fine, but it's not easy to open the files manually
-            # Using gzip (i.e. writing gzip headers) makes it easier to use the data outside Pimlico
-            gzip_io = StringIO()
-            with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=gzip_io) as gzip_file:
-                gzip_file.write(data)
-            data = gzip_io.getvalue()
-        data_file = StringIO(data)
-        # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
-        info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
-        info.size = len(data)
-        self.current_archive_tar.addfile(info, data_file)
+            if data is None:
+                # For an empty result, signified by None, output an empty file
+                data = u""
 
-        # Keep a count of how many we've added so we can write metadata
-        self.doc_count += 1
+            if archive_name != self.current_archive_name:
+                # Starting a new archive
+                if self.current_archive_tar is not None:
+                    # Close the old one
+                    self.current_archive_tar.close()
+                self.current_archive_name = archive_name
+                tar_filename = os.path.join(self.data_dir, "%s.tar" % archive_name)
+                # If we're appending a corpus and the archive already exists, append to it
+                try:
+                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w")
+                except tarfile.ReadError:
+                    # Couldn't open the existing file to append to, write instead
+                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
 
-    def document_to_raw_data(self, doc):
-        """
-        Overridden by subclasses to provide the mapping from the structured data supplied to the writer to
-        the actual raw string to be written to disk. Override this instead of add_document(), so that filters
-        can do the mapping on the fly without writing the output to disk.
+            # Add a new document to archive
+            if self.encoding is not None:
+                data = data.encode(self.encoding)
+            if self.gzip:
+                # We used to just use zlib to compress, which works fine, but it's not easy to open the files manually
+                # Using gzip (i.e. writing gzip headers) makes it easier to use the data outside Pimlico
+                gzip_io = StringIO()
+                with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=gzip_io) as gzip_file:
+                    gzip_file.write(data)
+                data = gzip_io.getvalue()
+            data_file = StringIO(data)
+            # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
+            info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
+            info.size = len(data)
+            self.current_archive_tar.addfile(info, data_file)
 
-        """
-        return doc
+            # Keep a count of how many we've added so we can write metadata
+            self.doc_count += 1
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.current_archive_tar is not None:
-            self.current_archive_tar.close()
-        self.metadata["length"] = self.doc_count
-        super(TarredCorpusWriter, self).__exit__(exc_type, exc_val, exc_tb)
-
-
-def pass_up_invalid(fn):
-    """
-    Decorator for document_to_raw_data() methods of TarredCorpusWriter subclasses that detects invalid documents and
-    calls simply returns them, skipping any subclass-specific processing. Does the same where the data
-    is None.
-
-    TODO Use, modify, replace or remove for new writer
-
-    """
-    def _fn(self, data):
-        if type(data) is InvalidDocument or data is None:
-            # Don't do subclass's processing
-            return data
-        else:
-            return fn(self, data)
-    return _fn
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if self.current_archive_tar is not None:
+                self.current_archive_tar.close()
+            self.metadata["length"] = self.doc_count
+            super(self.__class__, self).__exit__(exc_type, exc_val, exc_tb)
 
 
 def exclude_invalid(doc_iter):
@@ -335,7 +333,7 @@ def exclude_invalid(doc_iter):
     Generator that skips any invalid docs when iterating over a document dataset.
 
     """
-    return ((doc_name, doc) for (doc_name, doc) in doc_iter if not isinstance(doc, InvalidDocument))
+    return ((doc_name, doc) for (doc_name, doc) in doc_iter if not is_invalid_doc(doc))
 
 
 class AlignedGroupedCorpora(object):
