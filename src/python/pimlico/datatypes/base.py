@@ -21,6 +21,11 @@ datatype and can be instantiated via the datatype (by calling it). These perform
 A similar reflection of the datatype hierarchy is used for dataset writers, except that not all datatypes
 provide a writer.
 
+.. todo::
+
+   Remove emulated_datatype once you've confirmed that its previous use cases are covered
+   in other ways under the new type system
+
 """
 import json
 import os
@@ -72,6 +77,7 @@ class PimlicoDatatype(object):
     Override to provide shell commands specific to this datatype. Should include the superclass' list.
     """
     shell_commands = []
+    # TODO Remove emulated_datatype, as I'm pretty sure it's not needed in the new datatype system
     """
     Most datatype classes define their own type of corpus, which is often a subtype of some other. Some, however,
     emulate another type and it is that type that should be considered the be the type of the dataset, not the
@@ -126,16 +132,23 @@ class PimlicoDatatype(object):
         # Data is ready, so we should be able to instantiate the reader
         return reader_cls(self, base_dir, pipeline, module=module)
 
-    def get_writer(self, base_dir, pipeline, module=None):
+    def get_writer(self, base_dir, pipeline, module=None, **kwargs):
         """
         Instantiate a writer to write data to the given base dir.
+
+        Kwargs are passed through to the writer and used to specify initial metadata and
+        writer params.
 
         :param base_dir: output dir to write dataset to
         :param pipeline: current pipeline
         :param module: module name (optional, for debugging only)
         :return: instance of the writer subclass corresponding to this datatype
         """
-        # TODO
+        # Get the writer class
+        writer_cls = self._get_writer_cls()
+        if writer_cls is None:
+            raise DatatypeWriteError("datatype {} does not provide writing functionality".format(self.datatype_name))
+        return writer_cls(self, base_dir, pipeline, module=module, **kwargs)
 
     @classmethod
     def instantiate_from_options(cls, options={}):
@@ -293,6 +306,33 @@ class PimlicoDatatype(object):
     def _get_data_dir(base_dir):
         return None if base_dir is None else os.path.join(base_dir, "data")
 
+    def _metadata_path(self, base_dir):
+        return os.path.join(base_dir, "corpus_metadata")
+
+    def _read_metadata(self, base_dir):
+        """
+        Read in metadata for a dataset stored at the given path. Used by
+        readers and rarely needed outside them.
+
+        """
+        if os.path.exists(self._metadata_path):
+            # Load dictionary of metadata
+            with open(self._metadata_path(base_dir), "r") as f:
+                raw_data = f.read()
+                if len(raw_data) == 0:
+                    # Empty metadata file: return empty metadata no matter what
+                    return {}
+                try:
+                    # In later versions of Pimlico, we store metadata as JSON, so that it can be read in the file
+                    return json.loads(raw_data)
+                except ValueError:
+                    # If the metadata was written by an earlier Pimlico version, we fall back to the old system:
+                    # it's a pickled dictionary
+                    return pickle.loads(raw_data)
+        else:
+            # No metadata written: data may not have been written yet
+            return {}
+
     class Reader:
         """
         The abstract superclass of all dataset readers.
@@ -316,7 +356,6 @@ class PimlicoDatatype(object):
             self.base_dir = base_dir
             self.data_dir = self.datatype._get_data_dir(base_dir)
             self.module = module
-            self._metadata_filename = None
 
         def get_detailed_status(self):
             """
@@ -339,23 +378,7 @@ class PimlicoDatatype(object):
             problems with out-of-date metadata being returned.
 
             """
-            if self._metadata_filename is not None and os.path.exists(self._metadata_filename):
-                # Load dictionary of metadata
-                with open(self._metadata_filename, "r") as f:
-                    raw_data = f.read()
-                    if len(raw_data) == 0:
-                        # Empty metadata file: return empty metadata no matter what
-                        return {}
-                    try:
-                        # In later versions of Pimlico, we store metadata as JSON, so that it can be read in the file
-                        return json.loads(raw_data)
-                    except ValueError:
-                        # If the metadata was written by an earlier Pimlico version, we fall back to the old system:
-                        # it's a pickled dictionary
-                        return pickle.loads(raw_data)
-            else:
-                # No metadata written: data may not have been written yet
-                return {}
+            return self.datatype._read_metadata(self.base_dir)
         metadata = property(_get_metadata)
 
         def __repr__(self):
@@ -432,12 +455,12 @@ class PimlicoDatatype(object):
             # Extract kwargs that correspond to metadata keys
             for key, default in self.metadata_defaults.items():
                 if key in kwargs:
-                    self._metadata[key] = kwargs.pop(key)
+                    self.metadata[key] = kwargs.pop(key)
                 else:
-                    self._metadata[key] = default
+                    self.metadata[key] = default
             # Check here that metadata from kwargs is all JSON serializable, to avoid mysterious errors later
             try:
-                json.dumps(self._metadata)
+                json.dumps(self.metadata)
             except TypeError, e:
                 raise DatatypeWriteError(
                     "metadata parameters passed to writer as kwargs must be JSON serializable: {}".format(e)

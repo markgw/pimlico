@@ -7,20 +7,18 @@ Like :mod:`tar <pimlico.modules.corpora.tar>`, but doesn't write the archives to
 tar but as a filter, grouping files on the fly and passing them through with an archive name
 
 """
-import random
-
 import math
+import random
+from collections import OrderedDict
 
-from pimlico.core.modules.base import BaseModuleInfo, TypeCheckError
-from pimlico.core.modules.execute import ModuleNotReadyError
-from pimlico.old_datatypes.base import IterableCorpus, DynamicOutputDatatype
-from pimlico.old_datatypes.documents import RawDocumentType
-from pimlico.old_datatypes.tar import TarredCorpus
+from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.datatypes.corpora import IterableCorpus
+from pimlico.datatypes.corpora.grouped import GroupedCorpus, GroupedCorpusWithDataPointTypeFromInput
 
 
-class TarredCorpusGrouper(object):
+class IterableCorpusGrouper(object):
     """
-    Tool for grouping documents into tar archives and naming the archives appropriately.
+    Tool for grouping documents into archives and naming the archives appropriately.
 
     Requires a total number of documents at initialization, but does not depend on this being exactly correct.
     It is used to determine the format of the archive names. It's better to ensure that the given length is an
@@ -69,19 +67,46 @@ class TarredCorpusGrouper(object):
             yield self.next_document()
 
 
-# Subclass TarredCorpus so that inputs expecting one can accept this
-class TarredCorpusFilter(TarredCorpus):
-    emulated_datatype = TarredCorpus
+# TODO Sort this out in the new system: remove this class and just create a reader instead
+# The idea of a filter datatype is not appropriate in the new system
+# Use the actual (previously "emulated") datatype as an output type, but create an alternative *reader*
+class CorpusGroupFilter(GroupedCorpus):
+    emulated_datatype = GroupedCorpus
+    datatype_options = OrderedDict([
+        ("archive_size", {
+            "type": int,
+            "default": 1000,
+            "help": "Number of documents to group into each archive",
+        }),
+        ("archive_basename", {
+            "default": "archive",
+            "help": "First part of the name of each archive. The archive number is appended to this "
+                    "to get each archive name",
+        }),
+    ])
 
-    def __init__(self, pipeline, input_datatype, archive_size, archive_basename="archive", **kwargs):
-        IterableCorpus.__init__(self, None, pipeline, **kwargs)
+    def __init__(self, input_datatype, **kwargs):
+        GroupedCorpus.__init__(self, **kwargs)
 
-        self.archive_basename = archive_basename
+        self.archive_basename = self.options["archive_basename"]
+        self.archive_size = self.options["archive_size"]
         self.input_datatype = input_datatype
-        self.archive_size = archive_size
 
-        self._tarballs = None
+    def data_ready(self, base_dir):
+        # We're ready as soon as the input dataset is
+        # We need to have been given an input dataset
+        return self.input_dataset is not None and self.in
 
+    def __call__(self, *args, **kwargs):
+        """
+        Override the call so that it takes an input dataset instead of a base dir
+
+        """
+
+    class Reader:
+        def __init__(self, *args, **kwargs):
+            super(self.__class__, self).__init__(*args, **kwargs)
+            self.
     def __len__(self):
         return len(self.input_datatype)
 
@@ -141,45 +166,11 @@ class TarredCorpusFilter(TarredCorpus):
         return self.input_datatype.data_ready()
 
 
-def filter_with_subtype(dp_type):
-    class FilterWithSubtype(TarredCorpusFilter):
-        data_point_type = dp_type
-    return FilterWithSubtype
-
-
-class TarredCorpusWithDocumentTypeFromInput(DynamicOutputDatatype):
-    """
-    Dynamic datatype that produces a TarredCorpus with a document datatype that is the same as the input's
-    document/data-point type.
-
-    Should only be used when taking an IterableCorpus as input and giving a TarredCorpus as output. Otherwise,
-    you can just use a dynamic output datatype the returns the input datatype directly.
-    It's therefore only really useful for the modules that tar iterable corpora.
-
-    """
-    datatype_name = "tarred corpus with input doc type"
-
-    def get_base_datatype_class(self):
-        return TarredCorpus
-
-    def get_datatype(self, module_info):
-        # Get the document type from the input iterable corpus
-        input_document_type = module_info.get_input_datatype("documents").data_point_type
-        # Check that this is a subclass of RawDocumentType
-        # An IterableCorpus is not required to have a document type, but a tarred corpus is, so that it can read
-        #  its documents from disk
-        if not issubclass(input_document_type, RawDocumentType):
-            raise TypeCheckError("could not apply tarred corpus filter to input, which has a data-point type of %s. "
-                                 "Input data points must be subclasses of RawDocumentType" %
-                                 input_document_type.__name__)
-        return type("TarredCorpusFromIterableCorpus", (TarredCorpus,), {"data_point_type": input_document_type})
-
-
 class ModuleInfo(BaseModuleInfo):
-    module_type_name = "tar_filter"
-    module_readable_name = "Tar archive grouper (filter)"
-    module_inputs = [("documents", IterableCorpus)]
-    module_outputs = [("documents", TarredCorpusWithDocumentTypeFromInput())]
+    module_type_name = "group_filter"
+    module_readable_name = "Archive grouper (filter)"
+    module_inputs = [("documents", IterableCorpus())]
+    module_outputs = [("documents", GroupedCorpusWithDataPointTypeFromInput())]
     module_options = {
         "archive_size": {
             "help": "Number of documents to include in each archive (default: 1k)",
@@ -193,8 +184,5 @@ class ModuleInfo(BaseModuleInfo):
     }
     module_executable = False
 
-    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-        input_corpus = self.get_input("documents")
-        filter_type = filter_with_subtype(input_corpus.data_point_type)
-        return filter_type(self.pipeline, self.get_input("documents"), self.options["archive_size"],
-                           archive_basename=self.options["archive_basename"], module=self)
+    def instantiate_output_reader(self, output_name, datatype, base_dir):
+        # TODO Create a custom reader and instantiate it here

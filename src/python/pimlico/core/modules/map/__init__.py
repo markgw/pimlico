@@ -8,8 +8,9 @@ from traceback import format_exc
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor, satisfies_typecheck
 from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
-from pimlico.old_datatypes.base import InvalidDocument
-from pimlico.old_datatypes.tar import TarredCorpus, AlignedTarredCorpora, TarredCorpusWriter
+from pimlico.datatypes.corpora import is_invalid_doc, invalid_document
+from pimlico.datatypes.corpora.data_points import RawDocumentType
+from pimlico.datatypes.corpora.grouped import GroupedCorpus, AlignedGroupedCorpora
 from pimlico.utils.core import multiwith
 from pimlico.utils.pipes import qget
 from pimlico.utils.progress import get_progress_bar
@@ -28,7 +29,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
 
     """
     # Most subclasses will want to override this to give a more specific datatype for the output
-    module_outputs = [("documents", TarredCorpus)]
+    module_outputs = [("documents", GroupedCorpus(RawDocumentType()))]
 
     def __init__(self, module_name, pipeline, **kwargs):
         super(DocumentMapModuleInfo, self).__init__(module_name, pipeline, **kwargs)
@@ -44,27 +45,19 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         # If there's only one, this also works
         inputs = [self.get_input(input_name) for input_name in self.input_names]
         # We also allow (additional) inputs that are not tarred corpora, which get left out of this
-        datasets = [corpus for corpus in inputs if satisfies_typecheck(corpus, TarredCorpus)]
+        datasets = [corpus for corpus in inputs if satisfies_typecheck(corpus, GroupedCorpus(RawDocumentType()))]
         if len(datasets) == 0:
             raise PipelineStructureError(
                 "document map module '%s' got no TarredCorpus instances among its inputs" % self.module_name)
         return datasets
     input_corpora = property(_load_inputs)
 
-    def get_writer(self, output_name, output_dir, append=False):
-        """
-        Get the writer instance that will be given processed documents to write. Should return
-        a subclass of TarredCorpusWriter. The default implementation instantiates a plain
-        TarredCorpusWriter.
-
-        """
-        return TarredCorpusWriter(output_dir, append=append)
-
     def get_writers(self, append=False):
         # Only include the outputs that are tarred corpus types
         # This allows there to be other outputs aside from those mapped to
-        outputs = [name for name in self.output_names if isinstance(self.get_output(name), TarredCorpus)]
-        return tuple(self.get_writer(name, self.get_absolute_output_dir(name), append=append) for name in outputs)
+        outputs = [name for name in self.output_names
+                   if satisfies_typecheck(self.get_output_datatype(name), GroupedCorpus(RawDocumentType()))]
+        return tuple(self.get_output_writer(name, append=append) for name in outputs)
 
     def get_detailed_status(self):
         status_lines = super(DocumentMapModuleInfo, self).get_detailed_status()
@@ -93,7 +86,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def __init__(self, module_instance_info, **kwargs):
         super(DocumentMapModuleExecutor, self).__init__(module_instance_info, **kwargs)
         self.input_corpora = self.info.input_corpora
-        self.input_iterator = AlignedTarredCorpora(self.input_corpora)
+        self.input_iterator = AlignedGroupedCorpora(self.input_corpora)
 
     def preprocess(self):
         """
@@ -222,7 +215,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                             next_output = result_buffer.pop((archive, filename))
 
                             # Next document processed: output the result precisely as in the single-core case
-                            if type(next_output) is InvalidDocument:
+                            if is_invalid_doc(next_output):
                                 # Just got a single invalid document out: write it out to every output
                                 next_output = [next_output] * len(writers)
                             elif type(next_output) is not tuple:
@@ -274,7 +267,7 @@ def skip_invalid(fn):
 
     """
     def _fn(self, archive, filename, *docs):
-        invalid = [doc for doc in docs if type(doc) is InvalidDocument]
+        invalid = [doc for doc in docs if is_invalid_doc(doc)]
         if len(invalid):
             # If there's more than one InvalidDocument among the inputs, just return the first one
             return invalid[0]
@@ -290,7 +283,7 @@ def skip_invalids(fn):
 
     """
     def _fn(self, input_tuples):
-        invalids = [[doc for doc in args[2:] if type(doc) is InvalidDocument] for args in input_tuples]
+        invalids = [[doc for doc in args[2:] if is_invalid_doc(doc)] for args in input_tuples]
         # Leave out input tuples where there are invalid docs
         input_tuples = [input_tuple for (input_tuple, invalid) in zip(input_tuples, invalids) if len(invalid) == 0]
         # Only call the inner function in those without invalid docs
@@ -320,15 +313,9 @@ def invalid_doc_on_error(fn):
             raise
         except Exception, e:
             # Error while processing the document: output an invalid document, with some error information
-            if isinstance(self, TarredCorpus):
-                # Decorator wrapped a process_document() method on a datatype
-                # Instead of the module name, output the datatype name and its base dir
-                return InvalidDocument("datatype:%s[%s]" % (self.datatype_name, self.base_dir),
-                                       "%s\n%s" % (e, format_exc()))
-            else:
-                # This covers the case of wrapping a process_document() function for a map factory,
-                # since the first argument is always the worker process
-                return InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))
+            # This covers the case of wrapping a process_document() function for a map factory,
+            # since the first argument is always the worker process
+            return invalid_document(self.info.module_name,  "%s\n%s" % (e, format_exc()))
     return _fn
 
 
@@ -347,13 +334,7 @@ def invalid_docs_on_error(fn):
             raise
         except Exception, e:
             # Error while processing the document: output invalid documents, with some error information
-            if isinstance(self, TarredCorpus):
-                # Decorator wrapped a process_document() method on a datatype
-                # Instead of the module name, output the datatype name and its base dir
-                return [InvalidDocument("datatype:%s[%s]" % (self.datatype_name, self.base_dir),
-                                        "%s\n%s" % (e, format_exc()))] * len(input_tuples)
-            else:
-                return [InvalidDocument(self.info.module_name,  "%s\n%s" % (e, format_exc()))] * len(input_tuples)
+            return [invalid_document(self.info.module_name,  "%s\n%s" % (e, format_exc()))] * len(input_tuples)
     return _fn
 
 
@@ -453,7 +434,7 @@ class InputQueueFeeder(Thread):
                 if self.cancelled.is_set():
                     # Stop feeding right away
                     return
-                if any(type(doc) is InvalidDocument for doc in docs):
+                if any(is_invalid_doc(doc) for doc in docs):
                     self.invalid_docs.put((archive, filename))
                 # If the queue is full, this will block until there's room to put the next one on
                 # It also blocks if the queue is closed/destroyed/something similar, so we need to check now and

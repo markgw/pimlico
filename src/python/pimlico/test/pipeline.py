@@ -35,7 +35,7 @@ from pimlico.core.dependencies.base import InstallationError
 from pimlico.core.modules.base import collect_unexecuted_dependencies
 from pimlico.core.modules.execute import check_and_execute_modules
 from pimlico.core.modules.inputs import InputModuleInfo
-from pimlico.old_datatypes.base import IterableCorpus
+from pimlico.datatypes.corpora import IterableCorpus
 from pimlico.utils.logging import get_console_logger
 
 
@@ -85,13 +85,13 @@ class TestPipeline(object):
         # Check each output dataset
         # Typically there's only one, but we might as well deal with the case of multiple
         for output_name, dtype in module.module_outputs:
-            dataset = module.get_output(output_name)
-            if not dataset.data_ready():
+            if not module.output_ready(output_name):
                 raise TestPipelineRunError("test of input dataset {}.{} failed: data not ready".format(
                     module.module_name, output_name
                 ))
+            dataset = module.get_output(output_name)
             # Handle special case of iterable corpora: check they can be iterated over
-            if isinstance(dataset, IterableCorpus):
+            if isinstance(dataset.datatype, IterableCorpus):
                 try:
                     for doc_name, doc in dataset:
                         pass

@@ -3,8 +3,7 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.tar import TarredCorpusWriter
-from pimlico.modules.corpora.tar_filter.info import TarredCorpusFilter
+from pimlico.modules.corpora.group_filter.info import TarredCorpusFilter
 
 
 class ModuleExecutor(BaseModuleExecutor):
@@ -18,6 +17,6 @@ class ModuleExecutor(BaseModuleExecutor):
         )
         
         # Create a writer to do the writing to disk
-        with TarredCorpusWriter(self.info.get_absolute_output_dir("documents"), encoding=None) as writer:
+        with self.info.get_output_writer("documents") as writer:
             for archive_name, doc_name, doc in filter_datatype.archive_iter():
                 writer.add_document(archive_name, doc_name, doc)

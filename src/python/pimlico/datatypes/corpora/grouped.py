@@ -13,14 +13,15 @@ from cStringIO import StringIO
 from itertools import izip
 from tempfile import mkdtemp
 
-from pimlico.datatypes.corpora import DataPointType
-from pimlico.datatypes.corpora import IterableCorpus
+from pimlico.datatypes.base import DynamicOutputDatatype
+from pimlico.datatypes.corpora import IterableCorpus, DataPointType
 from pimlico.datatypes.corpora.data_points import is_invalid_doc
 from pimlico.utils.filesystem import retry_open
 
 __all__ = [
     "GroupedCorpus", "AlignedGroupedCorpora",
-    "CorpusAlignmentError", "GroupedCorpusIterationError"
+    "CorpusAlignmentError", "GroupedCorpusIterationError",
+    "GroupedCorpusWithDataPointTypeFromInput",
 ]
 
 
@@ -378,6 +379,34 @@ class AlignedGroupedCorpora(object):
 
     def __len__(self):
         return len(self.readers[0])
+
+
+class GroupedCorpusWithDataPointTypeFromInput(DynamicOutputDatatype):
+    """
+    Dynamic datatype that produces a GroupedCorpus with a document datatype that is the same as the input's
+    document/data-point type.
+
+    If the input name is not given, uses the first input.
+
+    """
+    datatype_name = "grouped corpus with input doc type"
+
+    def __init__(self, input_name=None):
+        self.input_name = input_name
+
+    def get_base_datatype_class(self):
+        return GroupedCorpus()
+
+    def get_datatype(self, module_info):
+        from pimlico.core.modules.base import satisfies_typecheck, TypeCheckError
+
+        if not satisfies_typecheck(module_info.get_input_datatype(self.input_name), IterableCorpus()):
+            raise TypeCheckError("tried to get data point type from input {} to module {}, but input "
+                                 "is not an iterable corpus".format(
+                self.input_name or "(default)", module_info.module_name))
+        # Get the document type from the input iterable corpus
+        input_document_type = module_info.get_input_datatype(self.input_name).data_point_type
+        return GroupedCorpus(input_document_type)
 
 
 class CorpusAlignmentError(Exception):

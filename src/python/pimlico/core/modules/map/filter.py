@@ -2,16 +2,23 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+"""
+.. todo::
+
+   Update this for the new datatype system
+
+"""
+
 from Queue import Empty
 from time import sleep
-from traceback import print_exc, format_exc
+from traceback import format_exc
 
 from pimlico.core.config import PipelineStructureError
-from pimlico.core.modules.base import load_module_executor, BaseModuleInfo
+from pimlico.core.modules.base import BaseModuleInfo, satisfies_typecheck
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import InputQueueFeeder, DocumentMapModuleInfo
-from pimlico.old_datatypes.base import InvalidDocument
-from pimlico.old_datatypes.tar import TarredCorpus, AlignedTarredCorpora
+from pimlico.datatypes.corpora import is_invalid_doc
+from pimlico.datatypes.corpora.grouped import AlignedGroupedCorpora, GroupedCorpus
 from pimlico.utils.pipes import qget
 
 
@@ -35,7 +42,7 @@ class DocumentMapOutputTypeWrapper(object):
         # Get hold of the outputs from the previous modules to iterate over them
         self.input_corpora = [self.wrapped_module_info.get_input(input_name)
                               for input_name in self.wrapped_module_info.input_names]
-        self.input_iterator = AlignedTarredCorpora(self.input_corpora)
+        self.input_iterator = AlignedGroupedCorpora(self.input_corpora)
 
     def __len__(self):
         # Delegate to input datatypes
@@ -136,9 +143,9 @@ class DocumentMapOutputTypeWrapper(object):
                         )
 
                     # Next document processed: yield the result
-                    if type(result) is InvalidDocument or \
-                            (self.multiple_outputs and type(result.data[self.output_num]) is InvalidDocument) or \
-                            (not self.multiple_outputs and type(result.data) is InvalidDocument):
+                    if is_invalid_doc(result) or \
+                            (self.multiple_outputs and is_invalid_doc(result.data[self.output_num])) or \
+                            (not self.multiple_outputs and is_invalid_doc(result.data)):
                         invalid_outputs += 1
                         # Check whether the document was also invalid in the input
                         if input_feeder.check_invalid(result.archive, result.filename):
@@ -211,11 +218,11 @@ class DocumentMapOutputTypeWrapper(object):
 def _wrap_output(module_info_instance, inner_output_name):
     __, output_datatype = module_info_instance.get_output_datatype(inner_output_name)
 
-    if not issubclass(output_datatype, TarredCorpus):
-        # Can only wrap TarredCorpus outputs of a document map
+    if not satisfies_typecheck(output_datatype, GroupedCorpus()):
+        # Can only wrap grouped corpus outputs of a document map
         raise PipelineStructureError("problem treating module '%s' as a filter. Tried to wrap output '%s' with a "
-                                     "datatype that produces the output on the fly, but it's not a subclass of "
-                                     "TarredCorpus" % (module_info_instance.module_name, inner_output_name))
+                                     "datatype that produces the output on the fly, but it's not a grouped "
+                                     "corpus" % (module_info_instance.module_name, inner_output_name))
 
     # Create a special subclass of the general output wrapper for this output
     # Doing so using type() instead of a class def allows us to give it an informative class name
@@ -239,6 +246,13 @@ def wrap_module_info_as_filter(module_info_instance):
     to its config.
 
     This function is called when `filter=T` is given.
+
+    .. todo::
+
+       Under the new datatype system, this should be done differently.
+       Don't wrap datatypes, but instead use the actual output datatypes (taken from
+       the wrapped module type's output) and instead create custom readers
+       that gets instantiated when fetching the module's output readers.
 
     :param module_info_instance: basic module info to wrap the outputs of
     :return: a new non-executable ModuleInfo whose outputs are produced on the fly and will be identical to

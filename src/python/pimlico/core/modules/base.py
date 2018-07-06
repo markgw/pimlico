@@ -491,13 +491,47 @@ class BaseModuleInfo(object):
 
         .. deprecated:: new datatypes
 
-           Shouldn't need this any more, I think. Should be possible to do everything
-           necessary using dynamic output datatypes.
+           Roughly replaced by instantiate_output_reader(), but many of the use cases
+           can be covered in other ways now
 
         """
         #return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self)
         return None
     instantiate_output_datatype._original = True
+
+    def output_ready(self, output_name=None):
+        """
+        Check whether the named output is ready to be read from one of its possible storage locations.
+
+        :param output_name: output to check, or default output if not given
+        :return False if data is not ready to be read. Absolute path to base dir otherwise
+        """
+        # Get the output's datatype
+        output_name, datatype = self.get_output_datatype(output_name=output_name)
+        # Look for the data dir for this output
+        dataset_rel_dir = self.get_output_dir(output_name)
+        dataset_abs_dir = self.pipeline.find_data_path(dataset_rel_dir)
+        if dataset_abs_dir is None:
+            # No dataset dir was found in any of the storage locations
+            return False
+        # Perform further checks to see whether the output data is ready to be read
+        if not datatype.data_ready(dataset_abs_dir):
+            return False
+        else:
+            return dataset_abs_dir
+
+    def instantiate_output_reader(self, output_name, datatype, base_dir):
+        """
+        Prepare a reader for a particular output. The default implementation is
+        very simple, but subclasses may override this for cases where the normal
+        process of creating readers has to be modified.
+
+        :param output_name:
+        :param datatype:
+        :param base_dir:
+        :return:
+        """
+        return datatype(base_dir, self)
 
     def get_output(self, output_name=None):
         """
@@ -513,14 +547,14 @@ class BaseModuleInfo(object):
         output_name, datatype = self.get_output_datatype(output_name=output_name)
         # Search for the data directory
         dataset_rel_dir = self.get_output_dir(output_name)
-        dataset_abs_dir = self.pipeline.find_data(dataset_rel_dir)
+        dataset_abs_dir = self.pipeline.find_data_path(dataset_rel_dir)
         if dataset_abs_dir is None:
             # No dataset dir was found in any of the storage locations
             raise DataNotReadyError("could not create reader for output '{}' to module '{}': no directory found "
                                     "in any storage location".format(output_name, self.module_name))
         # Try creating a reader using this directory
         try:
-            reader = datatype(dataset_abs_dir)
+            reader = self.instantiate_output_reader(output_name, datatype, dataset_abs_dir)
         except DataNotReadyError, e:
             raise DataNotReadyError(
                 "could not create reader for output '{}' to module '{}': {}".format(
@@ -533,6 +567,23 @@ class BaseModuleInfo(object):
             warnings.warn("Module type {} overrides instantiate_output_datatype: this functionality should "
                           "be replaced".format(self.module_type_name))
         return reader
+
+    def get_output_writer(self, output_name=None, **kwargs):
+        """
+        Get a writer instance for the given output. Kwargs will be passed through to the
+        writer and used to specify metadata and writer params.
+
+        :param output_name: output to get writer for, or default output if left
+        :param kwargs:
+        :return:
+        """
+        output_name, datatype = self.get_output_datatype(output_name=output_name)
+        return datatype.get_writer(
+            self.get_output_dir(output_name, absolute=True),
+            self.pipeline,
+            self.module_name,
+            **kwargs
+        )
 
     def is_multiple_input(self, input_name=None):
         """

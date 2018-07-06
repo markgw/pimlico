@@ -4,8 +4,8 @@ from traceback import format_exc
 from pimlico.cli.shell.base import ShellCommand
 from pimlico.core.modules.options import opt_type_help
 from pimlico.datatypes.base import PimlicoDatatype, DatatypeLoadError, DatatypeWriteError
-from pimlico.datatypes.corpora import InvalidDocument
-from pimlico.datatypes.corpora.data_points import DataPointType, InvalidDocument
+from pimlico.datatypes.corpora.data_points import DataPointType, InvalidDocument, is_invalid_doc, \
+    invalid_document_or_text, invalid_document
 from pimlico.utils.core import import_member
 from pimlico.utils.progress import get_progress_bar
 from . import data_points
@@ -24,7 +24,7 @@ class CountInvalidCmd(ShellCommand):
         corpus = shell.data
         pbar = get_progress_bar(len(corpus), title="Counting")
         invalids = sum(
-            (1 if isinstance(doc, InvalidDocument) else 0) for __, doc in pbar(corpus)
+            (1 if is_invalid_doc(doc) else 0) for __, doc in pbar(corpus)
         )
         print "%d / %d documents are invalid" % (invalids, len(corpus))
 
@@ -90,9 +90,11 @@ class IterableCorpus(PimlicoDatatype):
     datatype_options = OrderedDict([
         ("data_point_type", {
             "type": data_point_type_opt,
-            "required": True,
-            "help": "Required data point type for the iterable corpus. This is used to process each "
-                    "document in the corpus in an appropriate way. Should be a subclass of DataPointType"
+            "default": DataPointType(),
+            "help": "Data point type for the iterable corpus. This is used to process each "
+                    "document in the corpus in an appropriate way. Should be a subclass of DataPointType. "
+                    "This should almost always be given, typically as the first positional arg when instantiating "
+                    "the datatype. Defaults to the generic data point type at the top of the hierarchy"
         })
     ] + PimlicoDatatype.datatype_options.items())
 
@@ -151,7 +153,7 @@ class IterableCorpus(PimlicoDatatype):
             :return: document instance
             """
             # Catch invalid documents
-            document = InvalidDocument.invalid_document_or_text(data)
+            document = invalid_document_or_text(data)
             # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
             if type(document) is not InvalidDocument:
                 try:
@@ -159,7 +161,7 @@ class IterableCorpus(PimlicoDatatype):
                     document = self.datatype.data_point_type(document)
                 except BaseException, e:
                     # If there's any problem reading in the document, yield an invalid doc with the error
-                    document = InvalidDocument(
+                    document = invalid_document(
                         "datatype %s reader" % self.datatype.data_point_type.name,
                         "{}: {}".format(e, format_exc())
                     )
