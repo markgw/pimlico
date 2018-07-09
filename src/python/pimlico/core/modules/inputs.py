@@ -30,9 +30,6 @@ class InputModuleInfo(BaseModuleInfo):
     module_type_name = "input"
     module_executable = False
 
-    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-        return output_datatype(self.options["dir"], self.pipeline, module=self)
-
 
 def input_module_factory(datatype):
     """
@@ -52,6 +49,10 @@ def input_module_factory(datatype):
                 "required": True,
             },
         }
+
+        def instantiate_output_reader_setup(self, output_name, datatype):
+            # Create a reader setup that just has the given directory as a possible location for the data
+            return datatype([self.options["dir"]])
 
     return DatatypeInputModuleInfo
 
@@ -83,16 +84,9 @@ def iterable_input_reader(input_module_options, data_point_type,
     Reader options are available at read time from the datatype instance's ``reader_options`` attribute.
     You can get this from the reader instance by ``reader.options``.
 
-    .. todo::
-
-       Change the way this is done slightly. Under the new datatype system, you
-       shouldn't create a special output datatype, but use the actual datatype that
-       will be produced. Instead create a special *reader*, which gets instantiated
-       by the module (using ``instantiate_output_reader()``).
-
     :param iter_fn: function that takes a reader instance and returns a generator
         to iterate over the documents of the corpus. Like any IterableCorpus, it should yield pairs of
-        (doc_name, doc)
+        (doc_name, doc). Reader options are available as `reader.setup.reader_options`.
     :param len_fn: function that takes the reader options and returns the number of docs
     :param input_module_options:
     :param data_point_type: a data point type for the individual documents that will be produced. They
@@ -113,50 +107,28 @@ def iterable_input_reader(input_module_options, data_point_type,
     mt_name = module_type_name or "reader_for_{}".format(data_point_type.name)
     mr_name = module_readable_name or "Input reader for {} iterable corpus".format(data_point_type.name)
 
-    class ReaderOutputType(IterableCorpus):
-        """
-        A datatype for reading in input according to input module options and allowing it to
-        be iterated over by other modules.
+    class Reader:
+        class Setup:
+            def __init__(self, datatype, output_dir, reader_options):
+                self.datatype = datatype
+                self.reader_options = reader_options
+                self.output_dir = output_dir
 
-        """
-        datatype_name = "reader_iterator"
-        #: Subclass information should be ignored for type checking. Should be treated exactly as an IterableCorpus
-        emulated_datatype = IterableCorpus
+            def ready_to_read(self):
+                # If executing a count, make sure the result is ready before we read the data
+                if execute_count and self.read_metadata(self.output_dir).get("length", None) is None:
+                    return False
+                return data_ready_fn(self.reader_options)
 
-        def __init__(self, *args, **kwargs):
-            super(ReaderOutputType, self).__init__(*args, **kwargs)
-            self.reader_options = None
+        def __len__(self):
+            if "length" in self.metadata:
+                # If the length has been stored, use that
+                return self.metadata["length"]
+            else:
+                return len_fn(self.setup.reader_options)
 
-        def set_reader_options(self, options):
-            """
-            Use the given set of options for reading the input. These are not datatype
-            options, as they do not relate to the nature of the produced output type.
-            They are options that affect the way to data is read in from disk, so are
-            provided to the special input reader output type's Reader in this way.
-
-            """
-            self.reader_options = options
-
-        def data_ready(self, base_dir):
-            # If executing a count, make sure the result is ready before we read the data
-            if execute_count and self._read_metadata(base_dir).get("length", None) is None:
-                return False
-            return data_ready_fn(base_dir, self.reader_options)
-
-        class Reader:
-            def __init__(self, *args, **kwargs):
-                super(self.__class__, self).__init__(*args, **kwargs)
-                self.options = self.datatype.reader_options
-
-            def __len__(self):
-                if "length" in self.metadata:
-                    # If the length has been stored, use that
-                    return self.metadata["length"]
-                else:
-                    return len_fn(self.options)
-
-            def __iter__(self):
-                return iter_fn(self)
+        def __iter__(self):
+            return iter_fn(self)
 
     if execute_count:
         class DocumentCounterModuleExecutor(BaseModuleExecutor):
@@ -194,18 +166,15 @@ def iterable_input_reader(input_module_options, data_point_type,
     class IterableInputReaderModuleInfo(InputModuleInfo):
         module_type_name = mt_name
         module_readable_name = mr_name
-        module_outputs = [("corpus", ReaderOutputType(data_point_type))]
+        module_outputs = [("corpus", IterableCorpus(data_point_type))]
         module_options = input_module_options
 
         # Special behaviour if we're making this an executable module in order to count the data
         module_executable = execute_count
         module_executor_override = DocumentCounterModuleExecutor if execute_count else None
 
-        def get_output_datatype(self, output_name=None):
-            # TODO Use instantiate_output_reader() here instead of this
-            name, dt = super(IterableInputReaderModuleInfo, self).get_output_datatype(output_name=output_name)
-            dt.set_reader_options(self.options)
-            return name, dt
+        def instantiate_output_reader_setup(self, output_name, datatype):
+            return Reader.get_setup(datatype, self.get_absolute_output_dir(output_name), self.options)
 
         def get_software_dependencies(self):
             if software_dependencies is None:

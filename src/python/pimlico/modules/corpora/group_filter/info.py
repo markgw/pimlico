@@ -8,12 +8,11 @@ tar but as a filter, grouping files on the fly and passing them through with an 
 
 """
 import math
-import random
-from collections import OrderedDict
 
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.datatypes.base import BaseDatatypeReader
 from pimlico.datatypes.corpora import IterableCorpus
-from pimlico.datatypes.corpora.grouped import GroupedCorpus, GroupedCorpusWithDataPointTypeFromInput
+from pimlico.datatypes.corpora.grouped import GroupedCorpusWithDataPointTypeFromInput
 
 
 class IterableCorpusGrouper(object):
@@ -67,75 +66,58 @@ class IterableCorpusGrouper(object):
             yield self.next_document()
 
 
-# TODO Sort this out in the new system: remove this class and just create a reader instead
-# The idea of a filter datatype is not appropriate in the new system
-# Use the actual (previously "emulated") datatype as an output type, but create an alternative *reader*
-class CorpusGroupFilter(GroupedCorpus):
-    emulated_datatype = GroupedCorpus
-    datatype_options = OrderedDict([
-        ("archive_size", {
-            "type": int,
-            "default": 1000,
-            "help": "Number of documents to group into each archive",
-        }),
-        ("archive_basename", {
-            "default": "archive",
-            "help": "First part of the name of each archive. The archive number is appended to this "
-                    "to get each archive name",
-        }),
-    ])
+class CorpusGroupReader(BaseDatatypeReader):
+    """
+    Special reader for grouping documents in an iterable corpus on the fly and
+    producing a corresponding grouped corpus.
 
-    def __init__(self, input_datatype, **kwargs):
-        GroupedCorpus.__init__(self, **kwargs)
+    """
+    class Setup:
+        def __init__(self, datatype, input_reader_setup, options):
+            self.options = options
+            self.input_reader_setup = input_reader_setup
+            self.datatype = datatype
 
-        self.archive_basename = self.options["archive_basename"]
-        self.archive_size = self.options["archive_size"]
-        self.input_datatype = input_datatype
+        def ready_to_read(self):
+            # We're ready when the input's ready
+            return self.input_reader_setup.ready_to_read()
 
-    def data_ready(self, base_dir):
-        # We're ready as soon as the input dataset is
-        # We need to have been given an input dataset
-        return self.input_dataset is not None and self.in
+    def __init__(self, datatype, setup, pipeline, module=None):
+        super(CorpusGroupReader, self).__init__(datatype, setup, pipeline, module=module)
+        # Prepare the input reader
+        self.input_reader = self.setup.input_reader_setup.get_reader(pipeline, module=module)
 
-    def __call__(self, *args, **kwargs):
-        """
-        Override the call so that it takes an input dataset instead of a base dir
+    def process_setup(self):
+        # Don't call the super method: we don't have base dir, etc
+        self.archive_basename = self.setup.options["archive_basename"]
+        self.archive_size = self.setup.options["archive_size"]
 
-        """
-
-    class Reader:
-        def __init__(self, *args, **kwargs):
-            super(self.__class__, self).__init__(*args, **kwargs)
-            self.
     def __len__(self):
-        return len(self.input_datatype)
+        return len(self.input_reader)
 
     def extract_file(self, archive_name, filename):
         raise TypeError("cannot extract files from filter: it's not an actual corpus")
 
     def __iter__(self):
-        for __, doc_name, doc in self.archive_iter():
-            yield doc_name, doc
+        """
+        This is the same as the input reader, since the docs aren't grouped in this case.
+        """
+        return iter(self.input_reader)
 
-    @property
-    def tarballs(self):
-        if not self.data_ready():
-            return []
-        return TarredCorpusGrouper(
-            self.archive_size, len(self), archive_basename=self.archive_basename).get_archive_names()
+    def doc_iter(self, start_after=None, skip=None, name_filter=None):
+        """In this case, just the same as iterating over the input reader"""
+        return iter(self)
 
-    def archive_iter(self, subsample=None, start_after=None, skip=None):
-        grouper = TarredCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
+    def archive_iter(self, start_after=None, skip=None, name_filter=None):
+        grouper = IterableCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
 
-        if start_after is None:
+        skipped = 0
+        if start_after is None and skip is None:
             # Don't wait to start
             started = True
         else:
-            # Start after we've hit this (archive, doc name)
+            # Start after we've hit this (archive, doc name), or after we've passed a certain number of docs
             started = False
-
-        # Pass through the raw_data attribute to the input corpus before we start iterating
-        self.input_datatype.raw_data = self.raw_data
 
         for doc_name, doc in self.input_datatype:
             # Update the archive name, perhaps moving on to the next one
@@ -149,8 +131,29 @@ class CorpusGroupFilter(GroupedCorpus):
                     started = True
                 continue
 
-            # If subsampling, decide whether to extract this file
-            if subsample is not None and random.random() > subsample:
+            # Allow the first portion of the corpus to be skipped
+            if not started:
+                if start_after is not None:
+                    # Skip until we get to the requested file + archive
+                    if start_after == (archive_name, doc_name):
+                        # We've hit the condition for starting
+                        # Skip this doc and start on the next (or after we've satisfied "skip")
+                        start_after = None
+                    continue
+                elif skip is not None:
+                    if skipped >= skip:
+                        # Skipped enough now: stop skipping
+                        started = True
+                    else:
+                        # Keep skipping docs
+                        skipped += 1
+                        continue
+                else:
+                    # No more skipping requirements left
+                    started = True
+
+            # If subsampling or filtering, decide whether to extract this file
+            if name_filter is not None and not name_filter(archive_name, doc_name):
                 # Reject this file
                 continue
 
@@ -158,12 +161,9 @@ class CorpusGroupFilter(GroupedCorpus):
 
     def list_archive_iter(self):
         # Since we're not extracting the data here, we can't make things any faster in the case where the document
-        #  itself isn't needed. Implement this for compatibility with TarredCorpus
+        #  itself isn't needed. Implement this for compatibility with the normal reader
         for tar_name, doc_name, doc in self.archive_iter():
             yield tar_name, doc_name
-
-    def data_ready(self):
-        return self.input_datatype.data_ready()
 
 
 class ModuleInfo(BaseModuleInfo):
@@ -184,5 +184,6 @@ class ModuleInfo(BaseModuleInfo):
     }
     module_executable = False
 
-    def instantiate_output_reader(self, output_name, datatype, base_dir):
-        # TODO Create a custom reader and instantiate it here
+    def instantiate_output_reader_setup(self, output_name, datatype):
+        # We use a special reader to pass documents through from the input
+        return CorpusGroupReader.get_setup(datatype, self.get_input_reader_setup("documents"), self.options)

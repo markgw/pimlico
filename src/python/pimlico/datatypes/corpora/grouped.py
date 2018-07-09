@@ -30,25 +30,27 @@ class GroupedCorpus(IterableCorpus):
     # This may be overridden by subclasses to provide filters for documents applied before main doc processing
     document_preprocessors = []
 
-    def data_ready(self, base_dir):
-        # Run the superclass check -- that the data dir exists
-        # Also check that we've got at least one archive in the data dir
-        return super(GroupedCorpus, self).data_ready(base_dir) and \
-               len(self._get_archive_filenames(self._get_data_dir(base_dir))) > 0
-
-    def _get_archive_filenames(self, data_dir):
-        if data_dir is not None:
-            return [f for f in
-                    [os.path.join(root, filename) for root, dirs, files in os.walk(data_dir) for filename in files]
-                    if f.endswith(".tar.gz") or f.endswith(".tar")]
-        else:
-            return []
-
     class Reader:
+        class Setup:
+            def data_ready(self, base_dir):
+                # Run the superclass check -- that the data dir exists
+                # Also check that we've got at least one archive in the data dir
+                return self.parent_data_ready(base_dir) and \
+                       len(self._get_archive_filenames(self._get_data_dir(base_dir))) > 0
+
+            def _get_archive_filenames(self, data_dir):
+                if data_dir is not None:
+                    return [f for f in
+                            [os.path.join(root, filename) for root, dirs, files in os.walk(data_dir) for filename in
+                             files]
+                            if f.endswith(".tar.gz") or f.endswith(".tar")]
+                else:
+                    return []
+
         def __init__(self, *args, **kwargs):
             super(self.__class__, self).__init__(*args, **kwargs)
             # Read in the archive filenames, which are stored as tar files
-            self.archive_filenames = self.datatype._get_archive_filenames(self.data_dir)
+            self.archive_filenames = self.setup._get_archive_filenames(self.data_dir)
             self.archive_filenames.sort()
             self.archives = [os.path.splitext(os.path.basename(f))[0] for f in self.archive_filenames]
 

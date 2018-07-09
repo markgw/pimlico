@@ -100,6 +100,7 @@ class MoveStoresCmd(PimlicoCLISubcommand):
         parser.add_argument("modules", nargs="*", help="The names (or numbers) of the module whose output to move")
 
     def run_command(self, pipeline, opts):
+        raise NotImplementedError("not yet updated for the new datatypes system: not safe to use!")
         dest_store = opts.dest
         if dest_store not in pipeline.store_names:
             print >>sys.stderr, "No such store: {}".format(dest_store)
@@ -110,6 +111,7 @@ class MoveStoresCmd(PimlicoCLISubcommand):
             # Get the path within the stores
             module_path = pipeline[module_name].get_module_output_dir()
             # Check which store the module's data is currently in
+            # TODO Update this for the new datatype system
             src_store, src_path = pipeline.find_data(module_path)
             if src_store is None:
                 print >>sys.stderr, "Cannot move data for '{}' as it wasn't found in any store".format(module_name)

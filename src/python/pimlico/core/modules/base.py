@@ -23,12 +23,11 @@ is loaded.
 
 """
 import json
+import os
 import shutil
+import warnings
 from datetime import datetime
 from importlib import import_module
-
-import os
-import warnings
 
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
@@ -504,34 +503,48 @@ class BaseModuleInfo(object):
         Check whether the named output is ready to be read from one of its possible storage locations.
 
         :param output_name: output to check, or default output if not given
-        :return False if data is not ready to be read. Absolute path to base dir otherwise
+        :return False if data is not ready to be read
         """
-        # Get the output's datatype
-        output_name, datatype = self.get_output_datatype(output_name=output_name)
-        # Look for the data dir for this output
-        dataset_rel_dir = self.get_output_dir(output_name)
-        dataset_abs_dir = self.pipeline.find_data_path(dataset_rel_dir)
-        if dataset_abs_dir is None:
-            # No dataset dir was found in any of the storage locations
-            return False
-        # Perform further checks to see whether the output data is ready to be read
-        if not datatype.data_ready(dataset_abs_dir):
-            return False
-        else:
-            return dataset_abs_dir
+        reader_setup = self.get_output_reader_setup(output_name)
+        return reader_setup.ready_to_read()
 
-    def instantiate_output_reader(self, output_name, datatype, base_dir):
+    def instantiate_output_reader_setup(self, output_name, datatype):
+        """
+        Produce a reader setup instance that will be used to prepare this reader.
+        This provides functionality like checking that the data is ready to be
+        read before the reader is instantiated.
+
+        The standard implementation uses the datatype's methods to get its
+        standard reader setup and reader, but some modules may need to override
+        this to provide other readers.
+
+        `output_name` is provided so that overriding methods' behaviour can
+        be conditioned on which output is being fetched.
+
+        """
+        # Get the module's output dir relative to the storage location in use
+        dataset_rel_dir = self.get_output_dir(output_name)
+        # Get all possible absolute paths where this could be, according to the pipeline's configuration
+        possible_paths = self.pipeline.get_data_search_paths(dataset_rel_dir)
+        # Produce a reader setup that will look in these paths for the data
+        return datatype(possible_paths)
+
+    def instantiate_output_reader(self, output_name, datatype, pipeline, module=None):
         """
         Prepare a reader for a particular output. The default implementation is
         very simple, but subclasses may override this for cases where the normal
         process of creating readers has to be modified.
 
-        :param output_name:
-        :param datatype:
-        :param base_dir:
-        :return:
+        :param output_name: output to produce a reader for
+        :param datatype: the datatype for this output, already inferred
         """
-        return datatype(base_dir, self)
+        return self.instantiate_output_reader_setup(output_name, datatype).get_reader(pipeline, module=module)
+
+    def get_output_reader_setup(self, output_name=None):
+        # Get the datatype for this output
+        output_name, datatype = self.get_output_datatype(output_name=output_name)
+        # Instantiate a setup for this reader
+        return self.instantiate_output_reader_setup(output_name, datatype)
 
     def get_output(self, output_name=None):
         """
@@ -543,30 +556,15 @@ class BaseModuleInfo(object):
         If the data is not available in any location, raises a
         :class:`~pimlico.datatypes.base.DataNotReadyError`.
 
+        To check whether the data is ready without calling this, call `output_ready()`.
+
         """
-        output_name, datatype = self.get_output_datatype(output_name=output_name)
-        # Search for the data directory
-        dataset_rel_dir = self.get_output_dir(output_name)
-        dataset_abs_dir = self.pipeline.find_data_path(dataset_rel_dir)
-        if dataset_abs_dir is None:
-            # No dataset dir was found in any of the storage locations
-            raise DataNotReadyError("could not create reader for output '{}' to module '{}': no directory found "
-                                    "in any storage location".format(output_name, self.module_name))
-        # Try creating a reader using this directory
-        try:
-            reader = self.instantiate_output_reader(output_name, datatype, dataset_abs_dir)
-        except DataNotReadyError, e:
-            raise DataNotReadyError(
-                "could not create reader for output '{}' to module '{}': {}".format(
-                output_name, self.module_name, e
-            ))
-        # TODO Remove this
-        # While developing new datatypes, check whether instantiate_output_datatype has been overridden
-        # If so, the functionality should be replaced
-        if not hasattr(self.instantiate_output_datatype, "_original"):
-            warnings.warn("Module type {} overrides instantiate_output_datatype: this functionality should "
-                          "be replaced".format(self.module_type_name))
-        return reader
+        reader_setup = self.get_output_reader_setup(output_name)
+        # Make sure the data is ready to read before creating the reader
+        if not reader_setup.ready_to_read():
+            raise DataNotReadyError("tried to get reader for output '{}' to module '{}', but data is not "
+                                    "ready to read yet".format(output_name or "default", self.module_name))
+        return reader_setup.get_reader(self.pipeline, module=self.module_name)
 
     def get_output_writer(self, output_name=None, **kwargs):
         """
@@ -645,9 +643,9 @@ class BaseModuleInfo(object):
         ]
         return datatypes if always_list or self.is_multiple_input(input_name) else datatypes[0]
 
-    def get_input(self, input_name=None, always_list=False):
+    def get_input_reader_setup(self, input_name=None, always_list=False):
         """
-        Get datatype instances corresponding to one of the inputs to the module.
+        Get reader setup for one of the inputs to the module.
         Looks up the corresponding output from another module and uses that module's metadata to
         get that output's instance.
         If an input name is not given, the first input is returned.
@@ -659,16 +657,42 @@ class BaseModuleInfo(object):
         If the requested input name is an optional input and it has not been supplied,
         returns None.
 
+        You can get a reader for the input, once the data is ready to be read, by
+        calling `get_reader()` on the setup object. Or use `get_input()` on the module.
+
         """
         # Check whether this is an optional input: otherwise get_input_module_connection() will raise an error
         if input_name is not None and input_name in dict(self.module_optional_inputs) and input_name not in self.inputs:
             return None
 
         inputs = [
-            previous_module.get_output(output_name)
+            previous_module.get_output_reader_setup(output_name)
             for previous_module, output_name in self.get_input_module_connection(input_name, always_list=True)
         ]
         return inputs if always_list or self.is_multiple_input(input_name) else inputs[0]
+
+    def get_input(self, input_name=None, always_list=False):
+        """
+        Get a reader for one of the inputs to the module. Should only be called once
+        the input data is ready to read. It's therefore fine to call this from a
+        module executor, since data availability has already been checked by
+        this point.
+
+        If the input type was specified with MultipleInputs, meaning that we're expecting an unbounded number
+        of inputs, this is a list. Otherwise, it's a single datatype instance.
+        If always_list=True, in this latter case we return a single-item list.
+
+        If the requested input name is an optional input and it has not been supplied,
+        returns None.
+
+        """
+        input_setups = self.get_input_reader_setup(input_name=input_name, always_list=always_list)
+        if type(input_setups) is list:
+            return [
+                setup.get_reader(self.pipeline, self.module_name) for setup in input_setups
+            ]
+        else:
+            return input_setups.get_reader(self.pipeline, self.module_name)
 
     def input_ready(self, input_name=None):
         """

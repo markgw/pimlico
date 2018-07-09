@@ -21,11 +21,6 @@ datatype and can be instantiated via the datatype (by calling it). These perform
 A similar reflection of the datatype hierarchy is used for dataset writers, except that not all datatypes
 provide a writer.
 
-.. todo::
-
-   Remove emulated_datatype once you've confirmed that its previous use cases are covered
-   in other ways under the new type system
-
 """
 import json
 import os
@@ -33,7 +28,7 @@ import pickle
 import re
 from collections import OrderedDict
 
-from pimlico.utils.core import import_member
+from pimlico.utils.core import import_member, cached_property
 
 __all__ = [
     "PimlicoDatatype",
@@ -77,19 +72,6 @@ class PimlicoDatatype(object):
     Override to provide shell commands specific to this datatype. Should include the superclass' list.
     """
     shell_commands = []
-    # TODO Remove emulated_datatype, as I'm pretty sure it's not needed in the new datatype system
-    """
-    Most datatype classes define their own type of corpus, which is often a subtype of some other. Some, however,
-    emulate another type and it is that type that should be considered the be the type of the dataset, not the
-    class itself.
-
-    For example, TarredCorpusFilter dynamically produces something that looks like a TarredCorpus,
-    and further down the pipeline, if its type is need, it should be considered to be a TarredCorpus.
-
-    Most of the time, this can be left empty, but occasionally it needs to be set.
-
-    """
-    emulated_datatype = None
 
     def __init__(self, *args, **kwargs):
         # Kwargs specify (processed) values for named datatype options
@@ -120,17 +102,28 @@ class PimlicoDatatype(object):
             # Build a better name out of the class name
             self.datatype_name = _class_name_word_boundary.sub(r"\1_\2", type(self).__name__).lower()
 
-    def __call__(self, base_dir, pipeline, module=None):
+    def __call__(self, *args, **kwargs):
         """
-        Instantiate a reader to read data from the given base dir (or None, if the reader doesn't
-        need a base dir). Calls data_ready() first and raises a DataNotReadyError if it fails.
+        Instantiate a reader setup of the relevant type. Args and kwargs will be
+        passed through to the setup class' init. They may depend on the particular
+        setup class, but typically one arg is required, which is a list of paths
+        where the data may be found.
+
+        You can use the reader setup to get a reader, once the data is ready to
+        read.
+
+        .. code-block:: py
+
+           datatype = ThisDatatype(options...)
+           # Most of the time, you will pass in a list of possible paths to the data
+           setup = datatype(possible_paths_list)
+           reader = setup.get_reader(pipeline, module="pipeline_module")
 
         """
-        if not self.data_ready(base_dir):
-            raise DataNotReadyError("data not ready at {}".format(base_dir))
+        # Get the standard reader class for this datatype
         reader_cls = self._get_reader_cls()
-        # Data is ready, so we should be able to instantiate the reader
-        return reader_cls(self, base_dir, pipeline, module=module)
+        # Get the reader type's corresponding setup class and instantiate it
+        return reader_cls.get_setup(self, *args, **kwargs)
 
     def get_writer(self, base_dir, pipeline, module=None, **kwargs):
         """
@@ -182,8 +175,6 @@ class PimlicoDatatype(object):
         :return: True if the check is successful, False otherwise
 
         """
-        if supplied_type.emulated_datatype is not None:
-            return self.check_type(supplied_type.emulated_datatype)
         if isinstance(supplied_type, type):
             # This is how datatypes used to be specified, but now they should be instances
             raise TypeError("type checking was given a class as a supplied type. It should be an instance "
@@ -265,74 +256,6 @@ class PimlicoDatatype(object):
         """
         return []
 
-    def data_ready(self, base_dir):
-        """
-        Check whether the data corresponding to this dataset exists and is ready to be read at
-        the given base dir.
-
-        Called before the reader is instantiated and has access to any information in the datatype
-        instance. It may be called several times with different possible base dirs to check whether
-        data is available at any of them.
-
-        Default implementation just checks whether the data dir exists. Subclasses might want to add their own
-        checks, or even override this, if the data dir isn't needed.
-
-        """
-        # Get a list of files that the datatype depends on
-        data_dir = self._get_data_dir(base_dir)
-
-        if base_dir is not None and not os.path.exists(data_dir):
-            # base_dir may be None, meaning that it's not required
-            # Otherwise, it must exist, and the data dir within it
-            return False
-
-        paths = self.get_required_paths()
-        if paths:
-            for path in paths:
-                if os.path.abspath(path):
-                    # Simply check whether the file exists
-                    if not os.path.exists(path):
-                        return False
-                else:
-                    # Relative path: requires that data_dir exists
-                    if data_dir is None:
-                        return False
-                    elif not os.path.exists(os.path.join(data_dir, path)):
-                        # Data dir is ready, but the file within it doesn't exist
-                        return False
-        return True
-
-    @staticmethod
-    def _get_data_dir(base_dir):
-        return None if base_dir is None else os.path.join(base_dir, "data")
-
-    def _metadata_path(self, base_dir):
-        return os.path.join(base_dir, "corpus_metadata")
-
-    def _read_metadata(self, base_dir):
-        """
-        Read in metadata for a dataset stored at the given path. Used by
-        readers and rarely needed outside them.
-
-        """
-        if os.path.exists(self._metadata_path):
-            # Load dictionary of metadata
-            with open(self._metadata_path(base_dir), "r") as f:
-                raw_data = f.read()
-                if len(raw_data) == 0:
-                    # Empty metadata file: return empty metadata no matter what
-                    return {}
-                try:
-                    # In later versions of Pimlico, we store metadata as JSON, so that it can be read in the file
-                    return json.loads(raw_data)
-                except ValueError:
-                    # If the metadata was written by an earlier Pimlico version, we fall back to the old system:
-                    # it's a pickled dictionary
-                    return pickle.loads(raw_data)
-        else:
-            # No metadata written: data may not have been written yet
-            return {}
-
     class Reader:
         """
         The abstract superclass of all dataset readers.
@@ -345,17 +268,25 @@ class PimlicoDatatype(object):
         .. code-block:: py
            class MyDatatype(PimlicoDatatype):
                class Reader:
-                   # Overide reader things here
+                   # Override reader things here
 
         """
-        def __init__(self, datatype, base_dir, pipeline, module=None):
+        def __init__(self, datatype, setup, pipeline, module=None):
             self.datatype = datatype
             self.pipeline = pipeline
-            # Base dir should already be an absolute path to an existing directory
-            # If it's None, the reader is one that doesn't need a directory (e.g. generates data)
-            self.base_dir = base_dir
-            self.data_dir = self.datatype._get_data_dir(base_dir)
             self.module = module
+            self.setup = setup
+
+            self.process_setup()
+
+        def process_setup(self):
+            """
+            Do any processing of the setup object (e.g. retrieving values and setting
+            attributes on the reader) that should be done when the reader is instantiated.
+
+            """
+            self.base_dir = self.setup.get_base_dir()
+            self.data_dir = self.setup.get_data_dir()
 
         def get_detailed_status(self):
             """
@@ -378,11 +309,220 @@ class PimlicoDatatype(object):
             problems with out-of-date metadata being returned.
 
             """
-            return self.datatype._read_metadata(self.base_dir)
+            return self.setup.read_metadata()
         metadata = property(_get_metadata)
 
         def __repr__(self):
             return "Reader({}: {})".format(self.datatype.full_datatype_name(), self.base_dir)
+
+        class Setup:
+            """
+            Abstract superclass of all dataset reader setup classes.
+
+            These classes provide any functionality relating to a reader needed before it is
+            ready to read and instantiated. Most importantly, it provides the `ready_to_read()`
+            method, which indicates whether the reader is ready to be instantiated.
+
+            The standard implementation, which can be used in almost all cases,
+            takes a list of possible paths to the dataset at initialization and checks
+            whether the dataset is ready to be read from any of them. You generally
+            don't need to override `ready_to_read()` with this, but just
+            `data_ready()`, which checks whether the data is ready to be read in a
+            specific location. You can call `parent_data_read()` to perform the parent
+            class' data-ready checks.
+
+            The whole `Setup` object will
+            be passed to the corresponding `Reader`'s init, so that it has access to
+            data locations, etc.
+
+            Subclasses may take different init args/kwargs and store whatever attributes
+            are relevant for preparing their corresponding `Reader`. In such cases, you
+            will usually override a `ModuleInfo`'s `get_output_reader_setup()` method
+            for a specific output's reader preparation, to provide it with the appropriate
+            arguments. Do this by calling the `Reader` class' `get_setup(*args, **kwargs)`
+            class method, which passes args and kwargs through to the `Setup`'s init.
+
+            You do not need to subclass or instantiate these yourself: subclasses are created automatically
+            to correspond to each reader type. You can add functionality to a reader's setup by creating a
+            nested `Setup` class. This will inherit from the parent reader's setup. This happens
+            automatically - you don't need to do it yourself and shouldn't inherit from anything:
+
+            .. code-block:: py
+               class MyDatatype(PimlicoDatatype):
+                   class Reader:
+                       # Overide reader things here
+
+                       class Setup:
+                           # Override setup things here
+                           # E.g.:
+                           def data_ready(path):
+                               # Check whether the data's ready
+                               return True
+
+            The first arg to the init should always be the datatype instance.
+
+            """
+            reader_type = None
+
+            def __init__(self, datatype, data_paths):
+                self.datatype = datatype
+                self.data_paths = data_paths
+
+            def data_ready(self, path):
+                """
+                Check whether the data at the given path is ready to be read using
+                this type of reader. It may be called several times with different
+                possible base dirs to check whether data is available at any of them.
+
+                Often you will override this for particular datatypes to provide special
+                checks. You may (but don't have to) check the setup's parent implementation
+                of `data_ready()` by calling `self.parent_data_ready()`.
+
+                The base implementation just checks whether the data dir exists.
+                Subclasses will typically want to add their own checks.
+
+                """
+                # Check the data dir is also there
+                if not os.path.exists(path):
+                    return False
+                data_dir = self._get_data_dir(path)
+                if not os.path.exists(data_dir):
+                    return False
+
+                # Check whether any additional paths exist
+                paths = self.get_required_paths()
+                if paths:
+                    for path in paths:
+                        if os.path.abspath(path):
+                            # Simply check whether the file exists
+                            if not os.path.exists(path):
+                                return False
+                        else:
+                            # Relative path: requires that data_dir exists
+                            if data_dir is None:
+                                return False
+                            elif not os.path.exists(os.path.join(data_dir, path)):
+                                # Data dir is ready, but the file within it doesn't exist
+                                return False
+                return True
+
+            def parent_data_ready(self, path):
+                return super(self.__class__, self).data_ready(path)
+
+            def ready_to_read(self):
+                """
+                Check whether we're ready to instantiate a reader using this setup. Always
+                called before a reader is instantiated.
+
+                Subclasses may override this, but most of the time you won't need to. See
+                `data_ready()` instead.
+
+                :return: True if the reader's ready to be instantiated, False otherwise
+                """
+                return any(self._paths_ready)
+
+            def get_required_paths(self):
+                """
+                May be overridden by subclasses to provide a list of paths (absolute, or
+                relative to the data dir) that must exist for the data to be considered
+                ready.
+
+                """
+                return []
+
+            def get_base_dir(self):
+                """
+                :return: the first of the possible base dir paths at which the data is
+                ready to read. Raises an exception if none is ready. Typically used to
+                get the path from the reader, once we've already confirmed that at least
+                one is available.
+
+                """
+                try:
+                    return (path for (path, ready) in zip(self.data_paths, self._paths_ready) if ready).next()
+                except StopIteration:
+                    raise DataNotReadyError("tried to get base dir from reader setup, but no path provides ready data")
+
+            def get_data_dir(self):
+                """
+                :return: the path to the data dir within the base dir (typically a dir called "data")
+                """
+                return self._get_data_dir(self.get_base_dir())
+
+            def read_metadata(self, base_dir):
+                """
+                Read in metadata for a dataset stored at the given path. Used by
+                readers and rarely needed outside them. It may sometimes be necessary
+                to call this from `data_ready()` to check that required metadata is
+                available.
+
+                """
+                if os.path.exists(self._metadata_path):
+                    # Load dictionary of metadata
+                    with open(self._metadata_path(base_dir), "r") as f:
+                        raw_data = f.read()
+                        if len(raw_data) == 0:
+                            # Empty metadata file: return empty metadata no matter what
+                            return {}
+                        try:
+                            # In later versions of Pimlico, we store metadata as JSON, so that it can be read in the file
+                            return json.loads(raw_data)
+                        except ValueError:
+                            # If the metadata was written by an earlier Pimlico version, we fall back to the old system:
+                            # it's a pickled dictionary
+                            return pickle.loads(raw_data)
+                else:
+                    # No metadata written: data may not have been written yet
+                    return {}
+
+            def get_reader(self, pipeline, module=None):
+                """
+                Instantiate a reader using this setup.
+
+                :param pipeline: currently loaded pipeline
+                :param module: (optional) module name of the module by which the datatype has been
+                    loaded. Used for producing intelligible error output
+                """
+                return self.reader_type(self.datatype, self, pipeline, module=module)
+
+            @cached_property
+            def _paths_ready(self):
+                return [self.data_ready(path) for path in self.data_paths]
+
+            def _get_data_dir(self, base_dir):
+                return os.path.join(base_dir, "data")
+
+            def _metadata_path(self, base_dir):
+                return os.path.join(base_dir, "corpus_metadata")
+
+        @classmethod
+        def get_setup(cls, datatype, *args, **kwargs):
+            """
+            Instantiate a reader setup object for this reader. The args and kwargs are those
+            of the reader's corresponding setup class and will be passed straight through
+            to the init.
+
+            """
+            return cls._get_setup_cls()(datatype, *args, **kwargs)
+
+        @classmethod
+        def _get_setup_cls(cls):
+            if len(cls.__bases__) == 0:
+                # On the base class, we just return the base setup, subclassing object
+                parent_setup = object
+            else:
+                # In case of multiple inheritance, first base class is the one we use to inherit setup functionality
+                parent_setup = cls.__bases__[0]._get_setup_cls()
+
+            my_setup = cls.Setup
+            if my_setup is my_setup:
+                # Setup is not overridden, so we don't need to subclass
+                return parent_setup
+            else:
+                # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
+                my_dict = dict(my_setup.__dict__)
+                my_dict["reader_type"] = cls
+                return type("{}ReaderSetup".format(cls.__name__), (parent_setup,), my_dict)
 
     class Writer:
         """
@@ -602,6 +742,11 @@ class PimlicoDatatype(object):
         else:
             # Hand over the the subtyping routine that skips over Nones to construct the writer type
             return cls._get_some_writer_cls()
+
+
+# Make this available so that it's easy to create special readers that subclass it
+# Most readers are not created this way: the subclassing is performed automatically
+BaseDatatypeReader = PimlicoDatatype._get_reader_cls()
 
 
 class DynamicOutputDatatype(object):
