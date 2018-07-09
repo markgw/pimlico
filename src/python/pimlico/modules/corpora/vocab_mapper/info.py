@@ -1,7 +1,12 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+"""
+.. todo::
 
+   Write description of vocab mapper module
+
+"""
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.dictionary import Dictionary
 from pimlico.datatypes.ints import IntegerListsDocumentCorpus, IntegerListsDocumentCorpusWriter
