@@ -9,11 +9,10 @@ from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 @skip_invalid
 def process_document(worker, archive, filename, doc):
     # Run tokenization
-    # This tokenizer doesn't split sentences, so we return just a single sentence for each line in the input
-    sents = doc.splitlines()
-    tokenized_sents = [worker.tokenizer.tokenize(sent, lowercase=worker.info.options["lowercase"]) for sent in sents]
-    # Output one sentence per line
-    return u"\n".join(u" ".join(sent) for sent in tokenized_sents)
+    # This tokenizer doesn't split sentences, so linebreaks will be the same as in the input
+    # These linebreaks will subsequently be treated as sentence breaks
+    # It's slightly faster to use return_str
+    return worker.tokenizer.tokenize(doc, lowercase=worker.info.options["lowercase"], return_str=True)
 
 
 def worker_set_up(worker):
