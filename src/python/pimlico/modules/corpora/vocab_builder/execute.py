@@ -42,7 +42,7 @@ class ModuleExecutor(BaseModuleExecutor):
                 self.info.options["max_prop"],
                 self.info.options["limit"]
             )
-            show_removed = removed[:30] + ["..."] if len(removed) > 30 else removed
+            show_removed = removed[:30] + [("...", None, None)] if len(removed) > 30 else removed
             self.log.info("Filters removed %d items from vocabulary: %s" % (
                 len(removed), ", ".join(char.encode("utf8") for (char, __, __) in show_removed)
             ))
