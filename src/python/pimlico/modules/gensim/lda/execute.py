@@ -7,6 +7,8 @@ from pimlico.datatypes.gensim import GensimLdaModelWriter
 from pimlico.modules.gensim.utils import GensimCorpus
 import logging
 
+from pimlico.utils.progress import get_progress_bar
+
 
 class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
@@ -14,7 +16,7 @@ class ModuleExecutor(BaseModuleExecutor):
         corpus = self.info.get_input("corpus")
         vocab = self.info.get_input("vocab").get_data()
         # Get the Gensim data structure for the vocab as well
-        gen_dict = vocab.as_gensim_dictionary()
+        #gen_dict = vocab.as_gensim_dictionary()
 
         opts = self.info.options
 
@@ -39,8 +41,12 @@ class ModuleExecutor(BaseModuleExecutor):
         gensim_corpus = GensimCorpus(corpus, ignore_ids=ignore_ids)
 
         if opts["tfidf"]:
+            # We can also use the dictionary directly to compute the tfidf stats, but then we need
+            # to be sure that the frequencies stored there reflect this corpus
+            # Perhaps in future add an option to use these stats, as it's quite a lot quicker
             self.log.info("Preparing tf-idf transformation")
-            gensim_corpus = TfidfModel(id2word=vocab.id2token, dictionary=gen_dict)[gensim_corpus]
+            pbar = get_progress_bar(len(gensim_corpus), title="Counting")
+            gensim_corpus = TfidfModel(pbar(gensim_corpus), id2word=vocab.id2token)[gensim_corpus]
 
         # Train gensim model
         self.log.info("Training Gensim model with {} topics on {} documents".format(opts["num_topics"], len(corpus)))
