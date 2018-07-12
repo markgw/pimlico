@@ -12,16 +12,22 @@ class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         input_docs = self.info.get_input("text")
         oov_token = self.info.options["oov"]
+
+        prune_at = self.info.options["prune_at"] or None
+        if prune_at is not None:
+            self.log.info("Pruning if dictionary size reaches {}".format(prune_at))
+
         self.log.info("Building dictionary from %d docs" % len(input_docs))
         pbar = get_progress_bar(len(input_docs), title="Counting")
 
         # Prepare dictionary writers for the term and feature vocabs
         with DictionaryWriter(self.info.get_absolute_output_dir("vocab")) as vocab_writer:
             # Input is given for every document in a corpus
-            for doc_name, document in pbar(input_docs):
-                if not isinstance(document, InvalidDocument):
-                    # Update the term vocab with all terms in this doc
-                    vocab_writer.add_documents(document)
+            # Update the term vocab with all terms in each doc
+            vocab_writer.add_documents(
+                (line for doc_name, doc in pbar(input_docs) if not isinstance(doc, InvalidDocument) for line in doc),
+                prune_at=prune_at
+            )
 
             # Filter the vocab according to the options set
             self.log.info("Built dictionary of %d terms, applying filters" % len(vocab_writer.data))
