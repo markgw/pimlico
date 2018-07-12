@@ -11,6 +11,8 @@ We don't use Gensim's data structure directly, because it's unnecessary to depen
 for one data structure.
 
 """
+from __future__ import absolute_import
+
 import os
 from collections import defaultdict
 import itertools
@@ -90,8 +92,6 @@ class DictionaryData(object):
     """
     Dictionary encapsulates the mapping between normalized words and their integer ids.
     This is taken almost directly from Gensim.
-
-    TODO: Provide a mapping to Gensim's actual Dictionary type for modules that use Gensim.
 
     """
     def __init__(self):
@@ -291,3 +291,22 @@ class DictionaryData(object):
         self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.iteritems())
         self._id2token = {}
         self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.iteritems())
+
+    def as_gensim_dictionary(self):
+        """
+        Convert to Gensim's dictionary type, which this type is based on.
+        If you call this, Gensim will be imported, so your code becomes dependent
+        on having Gensim installed.
+
+        :return: gensim dictionary
+        """
+        from gensim.corpora import Dictionary
+        gen_dict = Dictionary()
+
+        gen_dict.token2id = self.token2id
+        gen_dict.dfs = self.dfs
+        gen_dict.num_docs = self.num_docs
+        gen_dict.num_pos = self.num_pos
+        gen_dict.num_nnz = self.num_nnz
+
+        return gen_dict
