@@ -7,7 +7,7 @@ Trains LDA using Gensim's `basic LDA implementation <https://radimrehurek.com/ge
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.core.modules.options import str_to_bool
+from pimlico.core.modules.options import str_to_bool, comma_separated_strings
 from pimlico.datatypes.dictionary import Dictionary
 from pimlico.datatypes.gensim import GensimLdaModel
 from pimlico.datatypes.ints import IntegerListsDocumentType
@@ -37,6 +37,19 @@ class ModuleInfo(BaseModuleInfo):
     module_inputs = [("corpus", TarredCorpusType(IntegerListsDocumentType)), ("vocab", Dictionary)]
     module_outputs = [("model", GensimLdaModel)]
     module_options = {
+        "ignore_terms": {
+            "type": comma_separated_strings,
+            "default": [],
+            "help": "Ignore any of these terms in the bags of words when iterating over the corpus to train the "
+                    "model. Typically, you'll want to include an OOV term here if your corpus has one, and any "
+                    "other special terms that are not part of a document's content"
+        },
+        "tfidf": {
+            "type": str_to_bool,
+            "default": False,
+            "help": "Transform word counts using TF-IDF when presenting documents to the model for training. "
+                    "Default: False"
+        },
         "num_topics": {
             "type": int,
             "default": 100,

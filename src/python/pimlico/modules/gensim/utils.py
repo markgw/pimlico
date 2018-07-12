@@ -17,8 +17,10 @@ class GensimCorpus(object):
     This is a simple utility, since the representations are already very similar.
 
     """
-    def __init__(self, indexed_corpus):
+    def __init__(self, indexed_corpus, ignore_ids=None):
         self.indexed_corpus = indexed_corpus
+        self.ignore_ids = ignore_ids or []
+
         self._len = None
 
     def __len__(self):
@@ -32,5 +34,7 @@ class GensimCorpus(object):
             if not isinstance(doc, InvalidDocument):
                 # The document is currently a list of sentences, where each is a list of word IDs
                 # Count up the occurrences of each ID in the document to get the bag of words for Gensim
-                word_counter = Counter(word_id for sentence in doc for word_id in sentence)
+                word_counter = Counter(
+                    word_id for sentence in doc for word_id in sentence if word_id not in self.ignore_ids
+                )
                 yield list(word_counter.iteritems())
