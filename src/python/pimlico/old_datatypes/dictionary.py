@@ -11,6 +11,8 @@ We don't use Gensim's data structure directly, because it's unnecessary to depen
 for one data structure.
 
 """
+from __future__ import absolute_import
+
 import os
 from collections import defaultdict
 import itertools
@@ -91,8 +93,6 @@ class DictionaryData(object):
     Dictionary encapsulates the mapping between normalized words and their integer ids.
     This is taken almost directly from Gensim.
 
-    TODO: Provide a mapping to Gensim's actual Dictionary type for modules that use Gensim.
-
     """
     def __init__(self):
         self.token2id = {}  # token -> tokenId
@@ -102,6 +102,8 @@ class DictionaryData(object):
         self.num_docs = 0  # number of documents processed
         self.num_pos = 0  # total number of corpus positions
         self.num_nnz = 0  # total number of non-zeroes in the BOW matrix
+
+        self._last_prune = 0
 
     def __getitem__(self, tokenid):
         return self.id2token[tokenid]  # will throw for non-existent ids
@@ -157,11 +159,16 @@ class DictionaryData(object):
         total number of unique words <= `prune_at`. This is to save memory on very
         large inputs. To disable this pruning, set `prune_at=None`.
 
+        Keeps track of total documents added, rather than just those added in this
+        call, to decide when to prune. Otherwise, making many calls with a small
+        number of docs in each results in pruning on every call.
+
         """
         for docno, document in enumerate(documents):
             # Run a regular check for pruning, once every 10k docs
-            if docno % 10000 == 0 and prune_at is not None and len(self) > prune_at:
+            if prune_at is not None and self.num_docs > self._last_prune + 10000 and len(self) > prune_at:
                 self.filter_extremes(no_below=0, no_above=1.0, keep_n=prune_at)
+                self._last_prune = self.num_docs
             # Update dictionary with the document
             self.doc2bow(document, allow_update=True)  # ignore the result, here we only care about updating token ids
 
@@ -236,6 +243,8 @@ class DictionaryData(object):
         good_ids = sorted(good_ids, key=self.dfs.get, reverse=True)
         if keep_n is not None:
             good_ids = good_ids[:keep_n]
+        # Convert to set for (much) faster inclusion check
+        good_ids = set(good_ids)
         # Keep a record of what items we remove, along with their counts
         removed = [(token, id, self.dfs[id]) for (token, id) in self.token2id.iteritems() if id not in good_ids]
         # do the actual filtering, then rebuild dictionary to remove gaps in ids
@@ -282,3 +291,22 @@ class DictionaryData(object):
         self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.iteritems())
         self._id2token = {}
         self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.iteritems())
+
+    def as_gensim_dictionary(self):
+        """
+        Convert to Gensim's dictionary type, which this type is based on.
+        If you call this, Gensim will be imported, so your code becomes dependent
+        on having Gensim installed.
+
+        :return: gensim dictionary
+        """
+        from gensim.corpora import Dictionary
+        gen_dict = Dictionary()
+
+        gen_dict.token2id = self.token2id
+        gen_dict.dfs = self.dfs
+        gen_dict.num_docs = self.num_docs
+        gen_dict.num_pos = self.num_pos
+        gen_dict.num_nnz = self.num_nnz
+
+        return gen_dict

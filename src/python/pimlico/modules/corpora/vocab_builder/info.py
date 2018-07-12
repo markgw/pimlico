@@ -46,4 +46,13 @@ class ModuleInfo(BaseModuleInfo):
                     "Represent OOVs using the given string in the vocabulary",
             "type": str,
         },
+        "prune_at": {
+            "help": "Prune the dictionary if it reaches this size. Setting a lower value avoids getting stuck "
+                    "with too big a dictionary to be able to prune and slowing things down, but means that the "
+                    "final pruning will less accurately reflect the true corpus stats. Should be considerably "
+                    "higher than limit (if used). Set to 0 to disable. "
+                    "Default: 2M (Gensim's default)",
+            "type": int,
+            "default": 2000000,
+        },
     }

@@ -322,3 +322,36 @@ class BeautifulSoupDependency(PythonPackageOnPip):
         return safe_import_bs4()
 
 beautiful_soup_dependency = BeautifulSoupDependency()
+
+
+
+nltk_dependency = PythonPackageOnPip("nltk", "NLTK")
+
+
+class NLTKResource(SoftwareDependency):
+    """
+    Check for and install NLTK resources, using NLTK's own downloader.
+
+    """
+    def problems(self, local_config):
+        problems = super(NLTKResource, self).problems(local_config)
+        # Check whether the resource is available
+        from nltk.downloader import _downloader
+        try:
+            resource_installed = _downloader.is_installed(self.name)
+        except Exception, e:
+            problems.append("Error checking NLTK resource status for {}: {}".format(self.name, e))
+        else:
+            if not resource_installed:
+                problems.append("NLTK resource '{}' not installed".format(self.name))
+        return problems
+
+    def installable(self):
+        return True
+
+    def install(self, local_config, trust_downloaded_archives=False):
+        from nltk import download
+        download(self.name)
+
+    def dependencies(self):
+        return super(NLTKResource, self).dependencies() + [nltk_dependency]
