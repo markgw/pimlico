@@ -69,3 +69,30 @@ whose data you want to move.
 
 Once you've done that, Pimlico should continue to behave as it did before, just as if the
 data was still in its original location.
+
+
+Updating from the old storage system
+====================================
+
+Prior to v0.8, Pimlico used a different system of storage locations. If you have a local config
+file (``~/.pimlico``) from an earlier version you will see deprecation warnings.
+
+Change something like this:
+
+.. code-block:: ini
+
+   long_term_store=/path/to/long/store
+   short_term_store=/path/to/short/store
+
+to something like this:
+
+.. code-block:: ini
+
+   store_long=/path/to/long/store
+   store_short=/path/to/short/store
+
+Or, if you only ever needed one storage location, simply this:
+
+.. code-block:: ini
+
+   store=/path/to/store
