@@ -62,19 +62,17 @@ class DumpCmd(PimlicoCLISubcommand):
 
             # Get the output dir for the module
             module_rel_output_dir = module.get_module_output_dir()
-            # See if it exists in the short-term store
-            module_output_dir = os.path.join(pipeline.short_term_store, module_rel_output_dir)
-            if not os.path.exists(module_output_dir):
-                # Try the long-term store
-                module_output_dir = os.path.join(pipeline.long_term_store, module_rel_output_dir)
-                if not os.path.exists(module_output_dir):
-                    print "ERROR: Could not dump module %s, as its output dir (%s) doesn't exist in either the " \
-                          "long-term or short-term store" % (module_name, module_rel_output_dir)
-                    continue
+            # See if it exists in any store
+            store_name, module_abs_output_dir = pipeline.find_data(module_rel_output_dir)
+            if store_name is None:
+                print "Could not find any output data for module '{}'. Not dumping anything".format(module_name)
+                continue
+            else:
+                print "Data found in {} store".format(store_name)
 
             # Work out where to put the output
             tarball_path = os.path.join(output_dir, "%s.tar.gz" % module_name)
-            print "Dumping to %s" % tarball_path
+            print "Dumping to %s\n" % tarball_path
 
             with tarfile.open(tarball_path, mode="w:gz") as tarball:
                 # Prepare a file containing a bit of metadata that will be read by Pimlico if the data is loaded
@@ -91,7 +89,7 @@ class DumpCmd(PimlicoCLISubcommand):
                 tarball.addfile(meta_info, StringIO(dump_meta))
 
                 # Add the module's output directory to the tarball (recursively)
-                tarball.add(module_output_dir, arcname=module_name)
+                tarball.add(module_abs_output_dir, arcname=module_name)
 
 
 class LoadCmd(PimlicoCLISubcommand):

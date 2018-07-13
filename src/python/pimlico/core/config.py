@@ -254,7 +254,7 @@ class PipelineConfig(object):
     def short_term_store(self):
         """ For backwards compatibility: returns output path """
         warnings.warn("Used deprecated attribute 'short_term_store'. Should use new named storage location system. "
-                      "(Perhaps 'pipeline.output_path' is appropriate?)")
+                      "(Perhaps 'pipeline.output_path' is appropriate?)", stacklevel=2)
         return self.output_path
 
     @property
