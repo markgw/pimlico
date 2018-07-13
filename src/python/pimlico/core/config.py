@@ -984,7 +984,8 @@ class PipelineConfig(object):
         # For backwards compatibility, we convert these values as we load them and warn the user
         if "short_term_store" in local_config_data or "long_term_store" in local_config_data:
             warnings.warn("Local config used deprecated 'short_term_store'/'long_term_store' parameters. "
-                          "Converting to new named storage system. You should update your local config")
+                          "Converting to new named storage system. You should update your local config. "
+                          "See https://bit.ly/2mcvZhT")
         if "short_term_store" in local_config_data:
             # This was the default output location, so we should use the value as the first location, unless one
             # is already given
