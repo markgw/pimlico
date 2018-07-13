@@ -50,7 +50,7 @@ class DataPointType(object):
         return doc_cls(self, raw_data=raw_data, internal_data=internal_data)
 
     def __repr__(self):
-        return self.name
+        return "{}()".format(self.name)
 
     @property
     def name(self):
@@ -89,7 +89,7 @@ class DataPointType(object):
                         # add "Document" instead to distinguish it
                         doc_name = "{}Document".format(type_name)
 
-                        cls.__document_type = type(doc_name, (parent_doc_cls,), my_doc_cls.__dict__)
+                    cls.__document_type = type(doc_name, (parent_doc_cls,), my_doc_cls.__dict__)
         return cls.__document_type
 
     class Document(object):
@@ -303,7 +303,15 @@ class TextDocumentType(RawDocumentType):
     unicode string, which is fine for raw text. However, it
     serves to indicate that the document represents text (not just any old raw data).
 
+    The property `text` provides the text, which is, for this base type, just the
+    raw data. However, subclasses will override this, since their raw data will
+    contain information other than the raw text.
+
     """
+    class Document:
+        @property
+        def text(self):
+            return self.raw_data
 
 
 class RawTextDocumentType(TextDocumentType):

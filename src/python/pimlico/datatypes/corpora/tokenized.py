@@ -63,7 +63,8 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
     You might use this, for example, if you want to train character-level models on a text corpus, but
     don't use strictly single-character units, perhaps grouping together certain short character sequences.
 
-    Uses the character `/` to separate elements. If a `/` is found in an element, it is stored as `@slash@`,
+    Uses the character `/` to separate elements in the raw data.
+    If a `/` is found in an element, it is stored as `@slash@`,
     so this string is assumed not to be used in any element (which seems reasonable enough, generally).
 
     """
@@ -71,6 +72,10 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
     #formatters = [("segmented_lines", "pimlico.datatypes.formatters.tokenized.SegmentedLinesFormatter")]
 
     class Document:
+        @property
+        def text(self):
+            return u"\n".join(u"".join(token for token in sent) for sent in self.internal_data["sentences"])
+
         @property
         def sentences(self):
             return self.internal_data["sentences"]

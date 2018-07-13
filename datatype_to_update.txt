@@ -1,0 +1,80 @@
+Datatypes in old_datatypes that need a new, corresponding datatype created.
+
+The formatters in pimlico.old_datatypes.formatters should also be copy/adapted.
+They should maybe go with their datatypes, as many others have.
+
+
+core
+  SingleTextDocument
+  Dict
+  StringList
+dictionary
+  Dictionary
+floats
+  FloatListsDocumentCorpus
+  FloatListDocumentCorpus
+ints
+  IntegerListsDocumentCorpus
+  IntegerListDocumentCorpus
+json
+  JsonDocumentCorpus
+files
+  File (probably don't do this: use a specialized file collection instead)
+  NamedFileCollection
+  UnnamedFileCollection (remove everything relating to input readers)
+  NamedFile
+  FilesInput (if necessary)
+  RawTextFiles / RawTextDirectory: almost certainly skip, as they're only for reading input
+arrays
+  NumpyArray
+  ScipySparseMatrix
+results
+  NumericResult
+embeddings
+  Embeddings
+  TSVVecFiles
+word_annotations
+  WordAnnotationCorpus
+  AddAnnotationField
+  WordAnnotationCorpusWithRequiredFields
+features
+  KeyValueListDocumentType
+  TermFeatureListDocumentType
+  IndexedTermFeatureListDataPointType (doc type)
+  IndexedTermFeatureListCorpus
+  FeatureListScoreDocumentType (doc type)
+  FeatureListScoreCorpus
+keras
+  KerasModel
+  KerasModelBuilderClass
+plotting
+  PlotOutput
+r
+  RTabSeparatedValuesFile
+sklearn
+  SklearnModel
+spans
+  SentenceSpansCorpus
+table
+  IntegerTableDocumentCorpus
+vrt
+  VRTDocumentType (doc type)
+word2vec
+  Word2VecModel
+coref.corenlp
+  CorefCorpus
+coref.opennlp
+  CorefCorpus
+parse.candc
+  CandcOutputCorpus
+parse.dependency
+  StanfordDependencyParseCorpus
+  CoNLLDependencyParseCorpus
+  CoNLLDependencyParseInputCorpus
+
+
+Lower priority:
+---------------
+caevo
+  CaevoDocument (doc type)
+  CaevoCorpus
