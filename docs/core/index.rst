@@ -13,4 +13,5 @@ A set of articles on the core aspects and features of Pimlico.
    module_structure
    dependencies
    local_config
+   storage
    python_scripts

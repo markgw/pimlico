@@ -13,8 +13,8 @@ Word2vec embedding learning algorithm, using `Gensim <https://radimrehurek.com/g
 
 Find out more about `word2vec <https://code.google.com/archive/p/word2vec/>`_.
 
-This module is simply a wrapper to call `Gensim <https://radimrehurek.com/gensim/models/word2vec.html>`_'s Python
-(+C) implementation of word2vec on a Pimlico corpus.
+This module is simply a wrapper to call `Gensim Python (+C) <https://radimrehurek.com/gensim/models/word2vec.html>`_'s
+implementation of word2vec on a Pimlico corpus.
 
 
 Inputs

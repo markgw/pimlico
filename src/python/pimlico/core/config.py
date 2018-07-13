@@ -1058,8 +1058,8 @@ class PipelineConfig(object):
 
         :param path: path to data, relative to store base
         :param default: usually, return None if no data is found. If default is given, return the path
-        relative to the named storage location if no data is found. Special value "output" returns path
-        relative to output location, whichever of the storage locations that might be
+            relative to the named storage location if no data is found. Special value "output" returns path
+            relative to output location, whichever of the storage locations that might be
         :return: absolute path to data, or None if not found in any store
         """
         return self.find_data(path, default=default)[1]
@@ -1072,8 +1072,8 @@ class PipelineConfig(object):
 
         :param path: path to data, relative to store base
         :param default: usually, return None if no data is found. If default is given, return the path
-        relative to the named storage location if no data is found. Special value "output" returns path
-        relative to output location, whichever of the storage locations that might be
+            relative to the named storage location if no data is found. Special value "output" returns path
+            relative to output location, whichever of the storage locations that might be
         :return: name of store
         """
         return self.find_data(path, default=default)[0]
@@ -1088,10 +1088,10 @@ class PipelineConfig(object):
 
         :param path: path to data, relative to store base
         :param default: usually, return None if no data is found. If default is given, return the path
-        relative to the named storage location if no data is found. Special value "output" returns path
-        relative to output location, whichever of the storage locations that might be
+            relative to the named storage location if no data is found. Special value "output" returns path
+            relative to output location, whichever of the storage locations that might be
         :return: (store, path), where store is the name of the store used and path is
-        absolute path to data, or None for both if not found in any store
+            absolute path to data, or None for both if not found in any store
         """
         if os.path.isabs(path):
             return None, path
