@@ -4,6 +4,7 @@ from itertools import islice
 
 from pimlico import TEST_DATA_DIR
 from pimlico.datatypes.base import PimlicoDatatype, BaseDatatypeReader
+from pimlico.datatypes.core import Dict, StringList
 from pimlico.datatypes.corpora.data_points import RawTextDocumentType, TextDocumentType
 from pimlico.datatypes.corpora.grouped import GroupedCorpus
 from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType, CharacterTokenizedDocumentType
@@ -12,6 +13,8 @@ from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType, Character
 DATATYPES = [
     # Specify: datatype class, path to data base dir
     (PimlicoDatatype, os.path.join(TEST_DATA_DIR, "datasets", "text_corpora", "europarl")),
+    (Dict, os.path.join(TEST_DATA_DIR, "datasets", "demo_dict")),
+    (StringList, os.path.join(TEST_DATA_DIR, "datasets", "demo_string_list")),
 ]
 
 # Similar set of test cases, for different data point types of grouped corpora

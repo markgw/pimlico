@@ -4,10 +4,6 @@ The formatters in pimlico.old_datatypes.formatters should also be copy/adapted.
 They should maybe go with their datatypes, as many others have.
 
 
-core
-  SingleTextDocument
-  Dict
-  StringList
 dictionary
   Dictionary
 floats
@@ -25,6 +21,8 @@ files
   NamedFile
   FilesInput (if necessary)
   RawTextFiles / RawTextDirectory: almost certainly skip, as they're only for reading input
+core
+  SingleTextDocument -- do once NamedFileCollection is done
 arrays
   NumpyArray
   ScipySparseMatrix

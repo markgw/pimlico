@@ -54,6 +54,36 @@ class PimlicoDatatype(object):
     instantiating a datatype in some context other than module output. It should generally be set for
     input datatypes, though, since they are treated as being created by a special input module.
 
+    Creating a new datatype
+    =======================
+
+    This is the typical process for creating a new datatype. Of course, some datatypes do more and
+    some of the following is not always necessary, but it's a good guide for reference.
+
+    1. Create the datatype class, which may subclass :class:`PimlicoDatatype` or some other existing
+       datatype.
+    2. Specify a `datatype_name` as a class attribute.
+    3. Specify software dependencies for reading the data, if any, by overriding `get_software_dependencies()`
+       (calling the super method as well).
+    4. Specify software dependencies for writing the data, if any that are not among the reading dependencies,
+       by overriding `get_writer_software_dependencies()`
+    5. Define a nested `Reader` class to add any methods to the reader for this datatype. The data should
+       be read from the directory given by its `data_dir`. It should provide methods for getting different
+       bits of the data, iterating over it, or whatever is appropriate.
+    6. Define a nested `Setup` class within the reader with a `data_ready(base_dir)` method to check whether the
+       data in `base_dir` is ready to be read using the reader.
+       If all that this does is check the existence of particular filenames or paths within the data
+       dir, you can instead implement the `Setup` class' `get_required_paths()` method to return the
+       paths relative to the data dir.
+    7. Define a nested `Writer` class in the datatype to add any methods to the writer for this datatype.
+       The data should be written to the path given by its `data_dir`. Provide methods that the user can
+       call to write things to the dataset. Required elements of the dataset should be specified as a list of
+       strings as the `required_tasks` attribute and ticked off as written using `task_complete()`
+    8. You may want to specify:
+
+       * `datatype_options`: an OrderedDict of option definitions
+       * `shell_commands`: a list of shell commands associated with the datatype
+
     """
     datatype_name = "base_datatype"
     """
@@ -101,6 +131,59 @@ class PimlicoDatatype(object):
         if self.datatype_name == "base_datatype" and type(self) is not PimlicoDatatype:
             # Build a better name out of the class name
             self.datatype_name = _class_name_word_boundary.sub(r"\1_\2", type(self).__name__).lower()
+
+    def get_required_paths(self):
+        """
+        Returns a list of paths to files that should be available for the data to be read.
+        The base data_ready() implementation checks that these are all available.
+
+        Paths may be absolute or relative. If relative, they refer to files within the data directory
+        and data_ready() will fail if the data dir doesn't exist.
+
+        :return: list of absolute or relative paths
+        """
+        return []
+
+    def get_software_dependencies(self):
+        """
+        Get a list of all software required to **read** this datatype. This is
+        separate to metadata config checks, so that you don't need to satisfy the dependencies for
+        all modules in order to be able to run one of them. You might, for example, want to run different
+        modules on different machines. This is called when a module is about to be executed and each of the
+        dependencies is checked.
+
+        Returns a list of instances of subclasses of :class:~pimlico.core.dependencies.base.SoftwareDependency,
+        representing the libraries that this module depends on.
+
+        Take care when providing dependency classes that you don't put any import statements at the top of the Python
+        module that will make loading the dependency type itself dependent on runtime dependencies.
+        You'll want to run import checks by putting import statements within this method.
+
+        You should call the super method for checking superclass dependencies.
+
+        Note that there may be different software dependencies for **writing** a datatype using its `Writer`.
+        These should be specified using `get_writer_software_dependencies()`.
+
+        """
+        return []
+
+    def get_writer_software_dependencies(self):
+        """
+        Get a list of all software required to **write** this datatype using its `Writer`. This
+        works in a similar way to `get_software_dependencies()` (for the `Reader`) and the
+        dependencies will be check before the writer is instantiated.
+
+        It is assumed that all the reader's dependencies also apply to the writer, so this method
+        only needs to specify any additional dependencies the writer has.
+
+        You should call the super method for checking superclass dependencies.
+
+        .. todo::
+
+           Call get_writer_software_dependencies before instantiating writer
+
+        """
+        return []
 
     def __call__(self, *args, **kwargs):
         """
@@ -203,59 +286,6 @@ class PimlicoDatatype(object):
     def __repr__(self):
         return self.datatype_name
 
-    def get_required_paths(self):
-        """
-        Returns a list of paths to files that should be available for the data to be read.
-        The base data_ready() implementation checks that these are all available.
-
-        Paths may be absolute or relative. If relative, they refer to files within the data directory
-        and data_ready() will fail if the data dir doesn't exist.
-
-        :return: list of absolute or relative paths
-        """
-        return []
-
-    def get_software_dependencies(self):
-        """
-        Get a list of all software required to **read** this datatype. This is
-        separate to metadata config checks, so that you don't need to satisfy the dependencies for
-        all modules in order to be able to run one of them. You might, for example, want to run different
-        modules on different machines. This is called when a module is about to be executed and each of the
-        dependencies is checked.
-
-        Returns a list of instances of subclasses of :class:~pimlico.core.dependencies.base.SoftwareDependency,
-        representing the libraries that this module depends on.
-
-        Take care when providing dependency classes that you don't put any import statements at the top of the Python
-        module that will make loading the dependency type itself dependent on runtime dependencies.
-        You'll want to run import checks by putting import statements within this method.
-
-        You should call the super method for checking superclass dependencies.
-
-        Note that there may be different software dependencies for **writing** a datatype using its `Writer`.
-        These should be specified using `get_writer_software_dependencies()`.
-
-        """
-        return []
-
-    def get_writer_software_dependencies(self):
-        """
-        Get a list of all software required to **write** this datatype using its `Writer`. This
-        works in a similar way to `get_software_dependencies()` (for the `Reader`) and the
-        dependencies will be check before the writer is instantiated.
-
-        It is assumed that all the reader's dependencies also apply to the writer, so this method
-        only needs to specify any additional dependencies the writer has.
-
-        You should call the super method for checking superclass dependencies.
-
-        .. todo::
-
-           Call get_writer_software_dependencies before instantiating writer
-
-        """
-        return []
-
     class Reader:
         """
         The abstract superclass of all dataset readers.
@@ -297,23 +327,6 @@ class PimlicoDatatype(object):
 
             """
             return []
-
-        def _get_metadata(self):
-            """
-            Read in metadata from a file in the corpus directory.
-
-            Note that this is no longer cached in memory. We need to be sure that the metadata values returned are
-            always up to date with what is on disk, so always re-read the file when we need to get a value from
-            the metadata. Since the file is typically small, this is unlikely to cause a problem. If we decide to
-            return to cacheing the metadata dictionary in future, we will need to make sure that we can never run into
-            problems with out-of-date metadata being returned.
-
-            """
-            return self.setup.read_metadata(self.setup.get_base_dir())
-        metadata = property(_get_metadata)
-
-        def __repr__(self):
-            return "Reader({}: {})".format(self.datatype.full_datatype_name(), self.base_dir)
 
         class Setup:
             """
@@ -385,7 +398,7 @@ class PimlicoDatatype(object):
                 # Check the data dir is also there
                 if not os.path.exists(path):
                     return False
-                data_dir = self._get_data_dir(path)
+                data_dir = _get_data_dir(path)
                 if not os.path.exists(data_dir):
                     return False
 
@@ -393,7 +406,7 @@ class PimlicoDatatype(object):
                 paths = self.get_required_paths()
                 if paths:
                     for path in paths:
-                        if os.path.abspath(path):
+                        if os.path.isabs(path):
                             # Simply check whether the file exists
                             if not os.path.exists(path):
                                 return False
@@ -447,7 +460,7 @@ class PimlicoDatatype(object):
                 """
                 :return: the path to the data dir within the base dir (typically a dir called "data")
                 """
-                return self._get_data_dir(self.get_base_dir())
+                return _get_data_dir(self.get_base_dir())
 
             def read_metadata(self, base_dir):
                 """
@@ -457,9 +470,9 @@ class PimlicoDatatype(object):
                 available.
 
                 """
-                if os.path.exists(self._metadata_path(base_dir)):
+                if os.path.exists(_metadata_path(base_dir)):
                     # Load dictionary of metadata
-                    with open(self._metadata_path(base_dir), "r") as f:
+                    with open(_metadata_path(base_dir), "r") as f:
                         raw_data = f.read()
                         if len(raw_data) == 0:
                             # Empty metadata file: return empty metadata no matter what
@@ -497,14 +510,11 @@ class PimlicoDatatype(object):
             def _paths_ready(self):
                 return [self.data_ready(path) for path in self.data_paths]
 
-            def _get_data_dir(self, base_dir):
-                return os.path.join(base_dir, "data")
-
-            def _metadata_path(self, base_dir):
-                return os.path.join(base_dir, "corpus_metadata")
-
             def __repr__(self):
                 return "{}()".format(self.__class__.__name__)
+
+            def _get_data_dir(self, base_dir):
+                return _get_data_dir(base_dir)
 
         @classmethod
         def get_setup(cls, datatype, *args, **kwargs):
@@ -541,6 +551,23 @@ class PimlicoDatatype(object):
                     setup_cls = type("{}Setup".format(cls.__name__), (parent_setup,), my_dict)
                 setattr(cls, _cache_name, setup_cls)
             return getattr(cls, _cache_name)
+
+        def _get_metadata(self):
+            """
+            Read in metadata from a file in the corpus directory.
+
+            Note that this is no longer cached in memory. We need to be sure that the metadata values returned are
+            always up to date with what is on disk, so always re-read the file when we need to get a value from
+            the metadata. Since the file is typically small, this is unlikely to cause a problem. If we decide to
+            return to cacheing the metadata dictionary in future, we will need to make sure that we can never run into
+            problems with out-of-date metadata being returned.
+
+            """
+            return self.setup.read_metadata(self.setup.get_base_dir())
+        metadata = property(_get_metadata)
+
+        def __repr__(self):
+            return "Reader({}: {})".format(self.datatype.full_datatype_name(), self.base_dir)
 
     class Writer:
         """
@@ -593,6 +620,9 @@ class PimlicoDatatype(object):
         # what the parameter is for (used for documentation)
         metadata_defaults = {}
         writer_param_defaults = {}
+        #: This can be overriden on writer classes to add this list of tasks to the required tasks when the
+        #: writer is initialized
+        required_tasks = []
 
         def __init__(self, datatype, base_dir, pipeline, module=None, **kwargs):
             self.datatype = datatype
@@ -601,7 +631,7 @@ class PimlicoDatatype(object):
 
             self.base_dir = base_dir
             # This is the directory all data should be written to
-            self.data_dir = self.datatype._get_data_dir(base_dir)
+            self.data_dir = _get_data_dir(base_dir)
             self._metadata_path = os.path.join(self.base_dir, "corpus_metadata")
 
             # Corpus metadata that will be written out to a JSON file accompanying the dataset
@@ -642,6 +672,10 @@ class PimlicoDatatype(object):
             # Subclasses can add things to this in their init and remove them as the tasks are performed
             # The superclass exit will check that the set is empty
             self._to_output = set()
+
+            # Set any required tasks that were specified as a class attribute
+            if len(self.required_tasks):
+                self.require_tasks(*self.required_tasks)
 
         def require_tasks(self, *tasks):
             """
@@ -749,21 +783,22 @@ class PimlicoDatatype(object):
                 writer_cls = parent_writer
             else:
                 new_cls_dict = dict(my_writer.__dict__)
-                new_metadata_defaults = new_cls_dict.get("metadata_defaults", {})
-                new_writer_param_defaults = new_cls_dict.get("writer_param_defaults", {})
-                # Collect metadata_defaults and writer params from the Writer if given
-                new_cls_dict["metadata_defaults"] = dict(parent_writer.metadata_defaults, **new_metadata_defaults)
-                new_cls_dict["writer_param_defaults"] = dict(parent_writer.writer_param_defaults, **new_writer_param_defaults)
+                if parent_writer is not object:
+                    new_metadata_defaults = new_cls_dict.get("metadata_defaults", {})
+                    new_writer_param_defaults = new_cls_dict.get("writer_param_defaults", {})
+                    # Collect metadata_defaults and writer params from the Writer if given
+                    new_cls_dict["metadata_defaults"] = dict(parent_writer.metadata_defaults, **new_metadata_defaults)
+                    new_cls_dict["writer_param_defaults"] = dict(parent_writer.writer_param_defaults, **new_writer_param_defaults)
 
-                # Check that defaults were given in the right format
-                for val in new_metadata_defaults.values():
-                    if type(val) not in (list, tuple) or len(val) != 2:
-                        raise TypeError("writer metadata defaults should be pairs of default values and documentation "
-                                        "strings: invalid dictionary for {} writer".format(cls.datatype_name))
-                for val in new_writer_param_defaults.values():
-                    if type(val) not in (list, tuple) or len(val) != 2:
-                        raise TypeError("writer param defaults should be pairs of default values and documentation "
-                                        "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+                    # Check that defaults were given in the right format
+                    for val in new_metadata_defaults.values():
+                        if type(val) not in (list, tuple) or len(val) != 2:
+                            raise TypeError("writer metadata defaults should be pairs of default values and documentation "
+                                            "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+                    for val in new_writer_param_defaults.values():
+                        if type(val) not in (list, tuple) or len(val) != 2:
+                            raise TypeError("writer param defaults should be pairs of default values and documentation "
+                                            "strings: invalid dictionary for {} writer".format(cls.datatype_name))
 
                 # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
                 writer_cls = type("{}Writer".format(cls.__name__), (parent_writer,), new_cls_dict)
@@ -781,6 +816,14 @@ class PimlicoDatatype(object):
         else:
             # Hand over the the subtyping routine that skips over Nones to construct the writer type
             return cls._get_some_writer_cls()
+
+
+def _get_data_dir(base_dir):
+    return os.path.join(base_dir, "data")
+
+
+def _metadata_path(base_dir):
+    return os.path.join(base_dir, "corpus_metadata")
 
 
 # Make this available so that it's easy to create special readers that subclass it
