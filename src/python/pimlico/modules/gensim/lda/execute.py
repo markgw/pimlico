@@ -50,16 +50,33 @@ class ModuleExecutor(BaseModuleExecutor):
 
         # Train gensim model
         self.log.info("Training Gensim model with {} topics on {} documents".format(opts["num_topics"], len(corpus)))
-        # Set all parameters from options
-        lda = LdaModel(
-            gensim_corpus,
-            num_topics=opts["num_topics"], id2word=vocab.id2token,
-            distributed=opts["distributed"], chunksize=opts["chunksize"], passes=opts["passes"],
-            update_every=opts["update_every"], alpha=opts["alpha"], eta=opts["eta"],
-            decay=opts["decay"], offset=opts["offset"], eval_every=opts["eval_every"],
-            iterations=opts["iterations"], gamma_threshold=opts["gamma_threshold"],
-            minimum_probability=opts["minimum_probability"], minimum_phi_value=opts["minimum_phi_value"]
-        )
+
+        if opts["multicore"]:
+            from gensim.models.ldamulticore import LdaMulticore
+            num_workers = self.info.pipeline.processes
+            self.log.info("Using multicore LDA implementation with {} workers".format(num_workers))
+
+            # Set all parameters from options
+            lda = LdaMulticore(
+                gensim_corpus, workers=num_workers,
+                num_topics=opts["num_topics"], id2word=vocab.id2token,
+                chunksize=opts["chunksize"], passes=opts["passes"],
+                alpha=opts["alpha"], eta=opts["eta"],
+                decay=opts["decay"], offset=opts["offset"], eval_every=opts["eval_every"],
+                iterations=opts["iterations"], gamma_threshold=opts["gamma_threshold"],
+                minimum_probability=opts["minimum_probability"], minimum_phi_value=opts["minimum_phi_value"]
+            )
+        else:
+            # Set all parameters from options
+            lda = LdaModel(
+                gensim_corpus,
+                num_topics=opts["num_topics"], id2word=vocab.id2token,
+                distributed=opts["distributed"], chunksize=opts["chunksize"], passes=opts["passes"],
+                update_every=opts["update_every"], alpha=opts["alpha"], eta=opts["eta"],
+                decay=opts["decay"], offset=opts["offset"], eval_every=opts["eval_every"],
+                iterations=opts["iterations"], gamma_threshold=opts["gamma_threshold"],
+                minimum_probability=opts["minimum_probability"], minimum_phi_value=opts["minimum_phi_value"]
+            )
 
         self.log.info("Training complete. Some of the learned topics:")
         for topic, topic_repr in lda.show_topics(10, 6):
