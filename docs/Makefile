@@ -14,6 +14,10 @@ MODULEDIR     = modules
 # Exclude Pimlico modules from the API doc, since they need to be built in a special way
 MODULE_PATH   = pimlico/modules/
 COMMANDDIR    = commands
+# Space-separated paths (relative to here) to exclude from API docs
+# Exclude visualize module for now, since it's partly built, so doesn't need documenting
+#  and causes automatic installation of graphviz
+EXCLUDE_API   = ../src/python/pimlico/core/visualize
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -55,7 +59,7 @@ clean:
 
 api:
 	rm -rf $(APIDIR)
-	$(SPHINXAPI) -eT -d 2 -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH)
+	$(SPHINXAPI) -eT -d 2 -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH) $(EXCLUDE_API)
 
 modules:
 	@rm -rf $(MODULEDIR)
