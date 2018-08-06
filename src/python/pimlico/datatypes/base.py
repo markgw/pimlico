@@ -28,6 +28,7 @@ import pickle
 import re
 from collections import OrderedDict
 
+from pimlico.core.modules.options import process_module_options
 from pimlico.utils.core import import_member, cached_property
 
 __all__ = [
@@ -393,7 +394,7 @@ class PimlicoDatatype(object):
     @classmethod
     def instantiate_from_options(cls, options={}):
         """Given string options e.g. from a config file, perform option processing and instantiate datatype"""
-        # TODO Do preprocesing of datatype options here
+        options = process_module_options(cls.datatype_options, options, "{} dataset loader".format(cls.datatype_name))
         return cls(**options)
 
     @classmethod

@@ -15,14 +15,15 @@ consumption.
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.old_datatypes.tar import TarredCorpus
+from pimlico.datatypes.corpora.data_points import RawTextDocumentType
+from pimlico.datatypes.corpora.grouped import GroupedCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "format"
     module_readable_name = "Human-readable formatting"
-    module_inputs = [("corpus", TarredCorpus)]
-    module_outputs = [("formatted", TarredCorpus)]
+    module_inputs = [("corpus", GroupedCorpus())]
+    module_outputs = [("formatted", GroupedCorpus(RawTextDocumentType()))]
     module_options = {
         "formatter": {
             "help": "Fully qualified class name of a formatter to use to format the data. If not specified, the "

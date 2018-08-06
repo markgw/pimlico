@@ -45,7 +45,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         # If there's only one, this also works
         inputs = [self.get_input(input_name) for input_name in self.input_names]
         # We also allow (additional) inputs that are not tarred corpora, which get left out of this
-        datasets = [corpus for corpus in inputs if satisfies_typecheck(corpus, GroupedCorpus(RawDocumentType()))]
+        datasets = [corpus for corpus in inputs if satisfies_typecheck(corpus.datatype, GroupedCorpus())]
         if len(datasets) == 0:
             raise PipelineStructureError(
                 "document map module '%s' got no TarredCorpus instances among its inputs" % self.module_name)
@@ -56,7 +56,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         # Only include the outputs that are tarred corpus types
         # This allows there to be other outputs aside from those mapped to
         outputs = [name for name in self.output_names
-                   if satisfies_typecheck(self.get_output_datatype(name), GroupedCorpus(RawDocumentType()))]
+                   if satisfies_typecheck(self.get_output_datatype(name)[1], GroupedCorpus(RawDocumentType()))]
         return tuple(self.get_output_writer(name, append=append) for name in outputs)
 
     def get_detailed_status(self):

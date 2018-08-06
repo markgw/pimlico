@@ -15,7 +15,6 @@ from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor, WorkerStartupError
-from pimlico.old_datatypes.base import InvalidDocument
 from pimlico.utils.pipes import qget
 
 

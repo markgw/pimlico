@@ -126,7 +126,7 @@ def check_paths_from_options(options):
     return got_something
 
 
-def data_ready(base_dir, options):
+def data_ready(options):
     return check_paths_from_options(options)
 
 

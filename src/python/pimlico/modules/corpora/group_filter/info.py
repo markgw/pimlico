@@ -10,7 +10,7 @@ tar but as a filter, grouping files on the fly and passing them through with an 
 import math
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import BaseDatatypeReader
+from pimlico.datatypes.base import PimlicoDatatype
 from pimlico.datatypes.corpora import IterableCorpus
 from pimlico.datatypes.corpora.grouped import GroupedCorpusWithDataPointTypeFromInput
 
@@ -66,7 +66,7 @@ class IterableCorpusGrouper(object):
             yield self.next_document()
 
 
-class CorpusGroupReader(BaseDatatypeReader):
+class CorpusGroupReader(PimlicoDatatype.Reader):
     """
     Special reader for grouping documents in an iterable corpus on the fly and
     producing a corresponding grouped corpus.
@@ -86,6 +86,9 @@ class CorpusGroupReader(BaseDatatypeReader):
         super(CorpusGroupReader, self).__init__(datatype, setup, pipeline, module=module)
         # Prepare the input reader
         self.input_reader = self.setup.input_reader_setup.get_reader(pipeline, module=module)
+        # Create an initial grouper utility to get the list of archive names
+        tmp_grouper = IterableCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
+        self.archives = tmp_grouper.get_archive_names()
 
     def process_setup(self):
         # Don't call the super method: we don't have base dir, etc
@@ -119,7 +122,7 @@ class CorpusGroupReader(BaseDatatypeReader):
             # Start after we've hit this (archive, doc name), or after we've passed a certain number of docs
             started = False
 
-        for doc_name, doc in self.input_datatype:
+        for doc_name, doc in self.input_reader:
             # Update the archive name, perhaps moving on to the next one
             archive_name = grouper.next_document()
 
@@ -186,4 +189,4 @@ class ModuleInfo(BaseModuleInfo):
 
     def instantiate_output_reader_setup(self, output_name, datatype):
         # We use a special reader to pass documents through from the input
-        return CorpusGroupReader.get_setup(datatype, self.get_input_reader_setup("documents"), self.options)
+        return CorpusGroupReader.Setup(datatype, self.get_input_reader_setup("documents"), self.options)

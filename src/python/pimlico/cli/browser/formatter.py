@@ -18,8 +18,8 @@ compatible with the datatype being browsed and provides a method to format each 
 in your custom code and refer to them by their fully qualified class name.
 
 """
-from pimlico.datatypes.corpora import IterableCorpus, is_invalid_doc
 from pimlico.datatypes.corpora import DataPointType
+from pimlico.datatypes.corpora import IterableCorpus, is_invalid_doc
 
 
 class DocumentBrowserFormatter(object):
@@ -30,8 +30,6 @@ class DocumentBrowserFormatter(object):
     """
     Should be overridden by subclasses to specify the corpus/document datatype(s) that can be formatted. Given in the
     same way as data-point types of iterable corpora, so expected to be a subclass of DataPointType.
-    May also be an IterableCorpus subclass, in which case the corpus' data_point_type is used to check the formatted
-    dataset's type.
     """
     DATATYPE = DataPointType
 
@@ -70,7 +68,7 @@ class DefaultFormatter(DocumentBrowserFormatter):
     Generic implementation of a browser formatter that's used if no other formatter is given.
 
     """
-    DATATYPE = IterableCorpus
+    DATATYPE = DataPointType
 
     def __init__(self, corpus, raw_data=False):
         super(DefaultFormatter, self).__init__(corpus)
@@ -139,7 +137,7 @@ def load_formatter(dataset, formatter_name=None, parse=True):
     :param parse: only used if the default formatter is loaded, determines `raw_data` (`= not parse`)
     :return: instantiated formatter
     """
-    formatted_type = dataset.data_point_type
+    formatted_type = dataset.datatype.data_point_type
 
     if formatter_name is None:
         # See if the data point type provides a default formatter

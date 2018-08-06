@@ -318,10 +318,6 @@ class BaseModuleInfo(object):
                     expand = True
                 else:
                     expand = False
-                # Split off any additional datatype specifiers: there could be multiple (recursive)
-                spec_parts = spec.split("->")
-                spec = spec_parts[0]
-                additional_names = spec_parts[1:]  # Most of the time this is empty
 
                 if "[" in spec:
                     # Don't split before the end of the expanded module name
@@ -355,7 +351,7 @@ class BaseModuleInfo(object):
 
                 # Most of the time there will only be one of these, == module_name
                 for expanded_module_name in expanded_module_names:
-                    inputs[input_name].append((expanded_module_name, output_name, additional_names, multiplier))
+                    inputs[input_name].append((expanded_module_name, output_name, multiplier))
 
         return inputs
 
@@ -564,7 +560,7 @@ class BaseModuleInfo(object):
         if not reader_setup.ready_to_read():
             raise DataNotReadyError("tried to get reader for output '{}' to module '{}', but data is not "
                                     "ready to read yet".format(output_name or "default", self.module_name))
-        return reader_setup.get_reader(self.pipeline, module=self.module_name)
+        return reader_setup(self.pipeline, module=self.module_name)
 
     def get_output_writer(self, output_name=None, **kwargs):
         """
@@ -828,7 +824,7 @@ class BaseModuleInfo(object):
         """
         return remove_duplicates(
             [module_name for input_connections in self.inputs.values()
-             for (module_name, output_name, additional_names) in input_connections])
+             for (module_name, output_name) in input_connections])
 
     def get_transitive_dependencies(self):
         """
@@ -929,7 +925,7 @@ class BaseModuleInfo(object):
         # Instantiate any input datatypes this module will need and check the datatype's dependencies
         return sum([
             mod.get_software_dependencies() for input_name in self.inputs.keys()
-            for mod in self.get_input(input_name, always_list=True)
+            for mod in self.get_input_datatype(input_name, always_list=True)
         ], [])
 
     def get_output_software_dependencies(self):
@@ -949,7 +945,7 @@ class BaseModuleInfo(object):
         """
         # Instantiate any output datatypes this module will need and check the datatype's dependencies
         return sum([
-            self.get_output(output_name).get_software_dependencies()
+            self.get_output_datatype(output_name)[1].get_software_dependencies()
             for output_name in dict(self.available_outputs).keys()
         ], [])
 
@@ -1016,7 +1012,7 @@ class BaseModuleInfo(object):
         """
         inputs = []
         for input_name in self.input_names:
-            for previous_module, output_name, additional_names in \
+            for previous_module, output_name in \
                     self.get_input_module_connection(input_name, always_list=True):
                 if previous_module.is_filter():
                     inputs.append((input_name, output_name, previous_module.get_execution_dependency_tree()))
@@ -1035,7 +1031,7 @@ class BaseModuleInfo(object):
         else:
             modules = [self]
             for input_name in self.input_names:
-                for previous_module, output_name, additional_names in \
+                for previous_module, output_name in \
                         self.get_input_module_connection(input_name, always_list=True):
                     if previous_module.is_filter():
                         modules.extend(previous_module.get_all_executed_modules())
@@ -1178,11 +1174,10 @@ def check_type(provided_type, type_requirements):
         type_requirements = (type_requirements,)
     # Make sure the input type requirements are given in a suitable form
     for intype in type_requirements:
-        if not (isinstance(intype, type) and issubclass(intype, PimlicoDatatype)) and \
-                not isinstance(intype, DynamicInputDatatypeRequirement):
+        if not isinstance(intype, (PimlicoDatatype, DynamicInputDatatypeRequirement)):
             # Alternatively, it can be an instance of a dynamic datatype requirement
-            raise TypeCheckError("invalid input datatype requirement. Each item must be either a PimlicoDatatype "
-                                 "subclass or instance of a DynamicInputDatatypeRequirement subclass: got '%s'" %
+            raise TypeCheckError("invalid input datatype requirement. Must be either a PimlicoDatatype or "
+                                 "DynamicInputDatatypeRequirement  instance: got '%s'" %
                                  type(intype).__name__)
 
     # Check that the provided output type is a subclass of (or equal to) the required input type

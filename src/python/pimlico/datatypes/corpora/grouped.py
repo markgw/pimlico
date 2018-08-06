@@ -393,10 +393,11 @@ class GroupedCorpusWithDataPointTypeFromInput(DynamicOutputDatatype):
     def get_datatype(self, module_info):
         from pimlico.core.modules.base import satisfies_typecheck, TypeCheckError
 
-        if not satisfies_typecheck(module_info.get_input_datatype(self.input_name), IterableCorpus()):
+        input_datatype = module_info.get_input_datatype(self.input_name)
+        if not satisfies_typecheck(input_datatype, IterableCorpus()):
             raise TypeCheckError("tried to get data point type from input {} to module {}, but input "
-                                 "is not an iterable corpus".format(
-                self.input_name or "(default)", module_info.module_name))
+                                 "is not an iterable corpus (it's a {})".format(
+                self.input_name or "(default)", module_info.module_name, input_datatype))
         # Get the document type from the input iterable corpus
         input_document_type = module_info.get_input_datatype(self.input_name).data_point_type
         return GroupedCorpus(input_document_type)

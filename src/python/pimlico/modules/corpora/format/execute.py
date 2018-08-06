@@ -6,6 +6,7 @@ from pimlico.cli.browser.formatter import load_formatter
 from pimlico.core.modules.base import TypeCheckError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
+from pimlico.datatypes.corpora.data_points import RawTextDocumentType
 
 
 def worker_setup(worker):
@@ -18,7 +19,10 @@ def worker_setup(worker):
 
 
 def process_document(worker, archive_name, doc_name, doc):
-    return worker.formatter.format_document(doc)
+    return RawTextDocumentType()(
+        {"text": worker.formatter.format_document(doc)},
+        from_internal=True,
+    )
 
 
 ModuleExecutor = multiprocessing_executor_factory(process_document, worker_set_up_fn=worker_setup)

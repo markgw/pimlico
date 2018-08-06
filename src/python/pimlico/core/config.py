@@ -784,7 +784,7 @@ class PipelineConfig(object):
                     for input_name, input_specs in inputs.iteritems():
                         input_module_group = []
                         for input_spec_num, input_spec in enumerate(input_specs):
-                            if "$(" in input_spec[0] or "$(" in input_spec[3]:
+                            if "$(" in input_spec[0] or "$(" in input_spec[2]:
                                 # Input module names are allowed to be dependent on module variables, but if they
                                 # are we can't inherit modvars from their input modules (cart before horse).
                                 # We leave them out here and come back and fill in the modvar later
@@ -822,14 +822,14 @@ class PipelineConfig(object):
                             list_action="expand"
                         )
                         new_input_multiplier = substitute_modvars_in_value(
-                            input_name, inputs[input_name][input_spec_num][3], module_variables,
+                            input_name, inputs[input_name][input_spec_num][2], module_variables,
                             expanded_param_settings[expanded_module_name], inherited_variables,
                             list_action="error"
                         )
                         if type(new_input_names) is not list:
                             new_input_names = [new_input_names]
                         new_input_specs = [
-                            tuple([iname] + list(inputs[input_name][input_spec_num][1:3]) + [new_input_multiplier])
+                            tuple([iname] + [inputs[input_name][input_spec_num][1]] + [new_input_multiplier])
                             for iname in new_input_names
                         ]
                         # In the simple and most common case that there's only one resulting input spec, just use that
@@ -849,7 +849,7 @@ class PipelineConfig(object):
                     # Apply input multipliers
                     for input_name, input_specs in inputs.items():
                         new_input_specs = []
-                        for _mod, _output, _adtnl, _mlt in input_specs:
+                        for _mod, _output, _mlt in input_specs:
                             _mlt = _mlt.strip(" ()")
                             if len(_mlt) == 0:
                                 # Most common case: no multiplier at all
@@ -861,11 +861,11 @@ class PipelineConfig(object):
                                     raise PipelineConfigParseError("input multiplier must be an integer value after "
                                                                    "variable expansion. Got '{}' in input '{}' to "
                                                                    "module '{}'".format(_mlt, input_name, module_name))
-                            new_input_specs.extend([(_mod, _output, _adtnl)] * _mlt)
+                            new_input_specs.extend([(_mod, _output)] * _mlt)
                         inputs[input_name] = new_input_specs
 
                     inputs = dict(
-                        (input_name, [spec[:3] for spec in input_spec]) for (input_name, input_spec) in inputs.items()
+                        (input_name, [spec[:2] for spec in input_spec]) for (input_name, input_spec) in inputs.items()
                     )
 
                     # We're now ready to do the main parameter processing, which is dependent on the module

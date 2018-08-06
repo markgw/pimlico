@@ -269,6 +269,27 @@ class DataPointType(object):
                 self.internal_available()
             return self._internal_data
 
+        def __reduce__(self):
+            return (_DocumentPickler(), (
+                self.data_point_type,
+                self._raw_data if self._raw_data is not None else self._internal_data,
+                self._raw_data is None
+            ))
+
+
+class _DocumentPickler(object):
+    """
+    Our fancy document typing system means pickle has trouble reconstructing document objects.
+    We reduce a document instance as the data point type instance, plus either the raw
+    data or the internal data (avoiding conversion) and a flag to say which type of data
+    it is.
+
+    Then we can simply reconstruct the document from the datatype's __call__ when unpickling.
+
+    """
+    def __call__(self, datatype, data, from_internal):
+        return datatype(data, from_internal=from_internal)
+
 
 class InvalidDocument(DataPointType):
     """

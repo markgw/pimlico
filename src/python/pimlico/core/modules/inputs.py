@@ -9,6 +9,8 @@ Base classes and utilities for input modules in a pipeline.
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.core.modules.execute import ModuleExecutionError
+from pimlico.datatypes import PimlicoDatatype
+from pimlico.datatypes.base import PimlicoDatatypeReaderMeta
 from pimlico.datatypes.corpora import IterableCorpus
 from .base import BaseModuleInfo
 
@@ -81,13 +83,13 @@ def iterable_input_reader(input_module_options, data_point_type,
     (i.e. the number that will be produce an InvalidDocument). In this case, the valid documents count
     is also stored in the metadata, as ``valid_documents``.
 
-    Reader options are available at read time from the datatype instance's ``reader_options`` attribute.
-    You can get this from the reader instance by ``reader.options``.
+    Reader options are available at read time from the reader setup instance's ``reader_options`` attribute,
+    also available from the reader instance as ``reader.options``.
 
     :param iter_fn: function that takes a reader instance and returns a generator
         to iterate over the documents of the corpus. Like any IterableCorpus, it should yield pairs of
         (doc_name, doc). Reader options are available as `reader.setup.reader_options`.
-    :param len_fn: function that takes the reader options and returns the number of docs
+    :param len_fn: function that takes the reader (which makes options available) and returns the number of docs
     :param input_module_options:
     :param data_point_type: a data point type for the individual documents that will be produced. They
         do not need to be read in using this type's reading functionality, which will later be used for
@@ -107,7 +109,14 @@ def iterable_input_reader(input_module_options, data_point_type,
     mt_name = module_type_name or "reader_for_{}".format(data_point_type.name)
     mr_name = module_readable_name or "Input reader for {} iterable corpus".format(data_point_type.name)
 
-    class Reader:
+    class InputReader(PimlicoDatatype.Reader):
+        __metaclass__ = PimlicoDatatypeReaderMeta
+
+        def __init__(self, *args, **kwargs):
+            super(InputReader, self).__init__(*args, **kwargs)
+            # Provide easy access to the options from the config
+            self.options = self.setup.reader_options
+
         class Setup:
             def __init__(self, datatype, output_dir, reader_options):
                 self.datatype = datatype
@@ -125,10 +134,21 @@ def iterable_input_reader(input_module_options, data_point_type,
                 # If the length has been stored, use that
                 return self.metadata["length"]
             else:
-                return len_fn(self.setup.reader_options)
+                return len_fn(self)
 
         def __iter__(self):
             return iter_fn(self)
+
+        def process_setup(self):
+            """ Override so we don't try to get base_dir, etc, as the standard reader does """
+            return
+
+        def _get_metadata(self):
+            if execute_count:
+                return self.setup.read_metadata(self.setup.output_dir)
+            else:
+                return {}
+        metadata = property(_get_metadata)
 
     if execute_count:
         class DocumentCounterModuleExecutor(BaseModuleExecutor):
@@ -174,7 +194,7 @@ def iterable_input_reader(input_module_options, data_point_type,
         module_executor_override = DocumentCounterModuleExecutor if execute_count else None
 
         def instantiate_output_reader_setup(self, output_name, datatype):
-            return Reader.get_setup(datatype, self.get_absolute_output_dir(output_name), self.options)
+            return InputReader.Setup(datatype, self.get_absolute_output_dir(output_name), self.options)
 
         def get_software_dependencies(self):
             if software_dependencies is None:

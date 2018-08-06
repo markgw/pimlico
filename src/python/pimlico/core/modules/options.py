@@ -126,6 +126,8 @@ def process_module_options(opt_def, opt_dict, module_type_name):
     """
     Utility for processing runtime module options. Called from module base class.
 
+    Also used when loading a dataset's datatype from datatype options specified in a config file.
+
     :param opt_def: dictionary defining available options
     :param opt_dict: dictionary of option values
     :param module_type_name: name for error output
