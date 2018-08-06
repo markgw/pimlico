@@ -41,7 +41,172 @@ __all__ = [
 _class_name_word_boundary = re.compile(r"([a-z])([A-Z])")
 
 
+class PimlicoDatatypeMeta(type):
+    """
+    Metaclass for all Pimlico datatype classes. Takes care of preparing a Reader and
+    Writer class for every datatype.
+
+    You should never need to do anything with this: it's used by the base datatype,
+    and hence by every other datatype.
+
+    """
+    def __new__(cls, *args, **kwargs):
+        new_cls = super(PimlicoDatatypeMeta, cls).__new__(cls, *args, **kwargs)
+        # Replace the existing Reader class, if any, which is used to construct the actual Reader,
+        # with the constructed Reader
+        new_cls.Reader = PimlicoDatatypeMeta._get_reader_cls(new_cls)
+        # Do the same with the Writer
+        new_cls.Writer = PimlicoDatatypeMeta._get_writer_cls(new_cls)
+        # Also prepare a Writer to inherit from, even if this class' writer should be None
+        new_cls._NotNoneWriter = PimlicoDatatypeMeta._get_some_writer_cls(new_cls)
+
+        return new_cls
+
+    ########## Type hiearchy construction for readers and writers ###########
+    # Readers and writers are in a type hierarchy that exactly mirrors the datatype hierarchy.
+    # Methods are added and overridden according to the specifications of the Reader and Writer dummy classes
+
+    @staticmethod
+    def _get_reader_cls(cls):
+        # Use a special attribute that includes the class name to cache the reader so that we only
+        # cache for this exact type and don't inherit
+        # This is like Python's mangling of "__" names, but we can't use that because it happens at
+        # compile time, so all of these would use PimlicoDatatype for mangling
+        _cache_name = "_{}_reader_cls".format(cls.__name__)
+
+        if not hasattr(cls, _cache_name):
+            # Fetch the reader type
+            if len(cls.__bases__) == 0 or cls.__bases__[0] is object:
+                # On the base class, we just return the base reader, subclassing object
+                parent_reader = object
+            else:
+                # In case of multiple inheritance, first base class is the one we use to inherit reader functionality
+                # Typically multiple inheritance probably won't be used anyway with datatypes
+                parent_reader = cls.__bases__[0].Reader
+
+            my_reader = cls.Reader
+            if parent_reader is my_reader:
+                # Reader is not overridden, so we don't need to subclass
+                reader_cls = parent_reader
+            else:
+                # Perform subclassing so that a new Reader is created that is a subclass of the parent's reader
+                my_dict = dict(my_reader.__dict__)
+                # Don't inherit the cached setup cls for this reader type, as we should recompute to do subtyping
+                if "_setup_cls" in my_dict:
+                    del my_dict["_setup_cls"]
+                reader_cls = PimlicoDatatypeReaderMeta("{}Reader".format(cls.__name__), (parent_reader,), my_dict)
+            setattr(cls, _cache_name, reader_cls)
+
+        return getattr(cls, _cache_name)
+
+    @staticmethod
+    def _get_some_writer_cls(cls):
+        """ Get writer subclass, even if this type has no writer, going up the type hierarchy if necessary """
+        # Clever cacheing: see _get_reader_cls()
+        _cache_name = "_{}_writer_cls".format(cls.__name__)
+
+        if not hasattr(cls, _cache_name):
+            if len(cls.__bases__) == 0 or cls.__bases__[0] is object:
+                # On the base class, parent is just object
+                parent_writer = object
+            else:
+                # In case of multiple inheritance, first base class is the one we use to inherit writer functionality
+                parent_writer = cls.__bases__[0]._NotNoneWriter
+
+            my_writer = cls.Writer
+            if my_writer is None:
+                # No writer for this type, but we want to get some writer
+                # Go up type hieararchy, skipping types for which Writer is None
+                writer_cls = parent_writer
+            elif parent_writer is my_writer:
+                # Writer is not overridden, so we don't need to subclass
+                writer_cls = parent_writer
+            else:
+                new_cls_dict = dict(my_writer.__dict__)
+                if parent_writer is not object:
+                    new_metadata_defaults = new_cls_dict.get("metadata_defaults", {})
+                    new_writer_param_defaults = new_cls_dict.get("writer_param_defaults", {})
+                    # Collect metadata_defaults and writer params from the Writer if given
+                    new_cls_dict["metadata_defaults"] = dict(parent_writer.metadata_defaults,
+                                                             **new_metadata_defaults)
+                    new_cls_dict["writer_param_defaults"] = dict(parent_writer.writer_param_defaults,
+                                                                 **new_writer_param_defaults)
+
+                    # Check that defaults were given in the right format
+                    for val in new_metadata_defaults.values():
+                        if type(val) not in (list, tuple) or len(val) != 2:
+                            raise TypeError(
+                                "writer metadata defaults should be pairs of default values and documentation "
+                                "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+                    for val in new_writer_param_defaults.values():
+                        if type(val) not in (list, tuple) or len(val) != 2:
+                            raise TypeError(
+                                "writer param defaults should be pairs of default values and documentation "
+                                "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+
+                # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
+                writer_cls = type("{}Writer".format(cls.__name__), (parent_writer,), new_cls_dict)
+            setattr(cls, _cache_name, writer_cls)
+        return getattr(cls, _cache_name)
+
+    @staticmethod
+    def _get_writer_cls(cls):
+        """ Get the writer subclass, or None if this type has no writer """
+        my_writer = cls.Writer
+        if my_writer is None:
+            # This datatype has been marked as not having a writer
+            # In this case, we return None, indicating that no writer is avialable
+            return None
+        else:
+            # Hand over the the subtyping routine that skips over Nones to construct the writer type
+            return PimlicoDatatypeMeta._get_some_writer_cls(cls)
+
+
+class PimlicoDatatypeReaderMeta(type):
+    """
+    Metaclass for all Pimlico readers, which are (mostly) created automatically, one
+    for each datatype.
+
+    This metaclass takes case of creating a Setup class to correspond to each Reader
+    class.
+
+    """
+    def __new__(cls, *args, **kwargs):
+        new_cls = super(PimlicoDatatypeReaderMeta, cls).__new__(cls, *args, **kwargs)
+        # Replace the existing Setup class, if any, which is used to construct the actual Setup,
+        # with the constructed Seupt
+        new_cls.Setup = PimlicoDatatypeReaderMeta._get_setup_cls(new_cls)
+        return new_cls
+
+    @staticmethod
+    def _get_setup_cls(cls):
+        # Cache the setup cls for the reader type
+        # Clever cacheing: see _get_reader_cls()
+        # Use the class' ID, in case the reader type names aren't unique
+        _cache_name = "_{}_setup_cls".format(id(cls))
+        if not hasattr(cls, _cache_name):
+            if len(cls.__bases__) == 0 or cls.__bases__[0] is object:
+                # On the base class, we just return the base setup, subclassing object
+                parent_setup = object
+            else:
+                # In case of multiple inheritance, first base class is the one we use to inherit setup functionality
+                parent_setup = cls.__bases__[0].Setup
+
+            my_setup = cls.Setup
+            if my_setup is parent_setup:
+                # Setup is not overridden, so we don't need to subclass
+                setup_cls = parent_setup
+            else:
+                # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
+                my_dict = dict(my_setup.__dict__)
+                my_dict["reader_type"] = cls
+                setup_cls = type("{}Setup".format(cls.__name__), (parent_setup,), my_dict)
+            setattr(cls, _cache_name, setup_cls)
+        return getattr(cls, _cache_name)
+
+
 class PimlicoDatatype(object):
+    __metaclass__ = PimlicoDatatypeMeta
     """
     The abstract superclass of all datatypes. Provides basic functionality for identifying where
     data should be stored and such.
@@ -204,9 +369,8 @@ class PimlicoDatatype(object):
 
         """
         # Get the standard reader class for this datatype
-        reader_cls = self._get_reader_cls()
         # Get the reader type's corresponding setup class and instantiate it
-        return reader_cls.get_setup(self, *args, **kwargs)
+        return self.Reader.get_setup(self, *args, **kwargs)
 
     def get_writer(self, base_dir, pipeline, module=None, **kwargs):
         """
@@ -221,7 +385,7 @@ class PimlicoDatatype(object):
         :return: instance of the writer subclass corresponding to this datatype
         """
         # Get the writer class
-        writer_cls = self._get_writer_cls()
+        writer_cls = self.Writer
         if writer_cls is None:
             raise DatatypeWriteError("datatype {} does not provide writing functionality".format(self.datatype_name))
         return writer_cls(self, base_dir, pipeline, module=module, **kwargs)
@@ -341,8 +505,8 @@ class PimlicoDatatype(object):
             whether the dataset is ready to be read from any of them. You generally
             don't need to override `ready_to_read()` with this, but just
             `data_ready()`, which checks whether the data is ready to be read in a
-            specific location. You can call `parent_data_read()` to perform the parent
-            class' data-ready checks.
+            specific location. You can call the parent class' data-ready checks
+            using super: `super(MyDatatype.Reader.Setup, self).data_ready()`.
 
             The whole `Setup` object will
             be passed to the corresponding `Reader`'s init, so that it has access to
@@ -369,7 +533,11 @@ class PimlicoDatatype(object):
                            # Override setup things here
                            # E.g.:
                            def data_ready(path):
-                               # Check whether the data's ready
+                               # Parent checks: usually you want to do this
+                               if not super(MyDatatype.Reader.Setup, self).data_ready(path):
+                                  return False
+                               # Check whether the data's ready according to our own criteria
+                               # ...
                                return True
 
             The first arg to the init should always be the datatype instance.
@@ -389,7 +557,8 @@ class PimlicoDatatype(object):
 
                 Often you will override this for particular datatypes to provide special
                 checks. You may (but don't have to) check the setup's parent implementation
-                of `data_ready()` by calling `self.parent_data_ready()`.
+                of `data_ready()` by calling
+                `super(MyDatatype.Reader.Setup, self).data_ready(path)`.
 
                 The base implementation just checks whether the data dir exists.
                 Subclasses will typically want to add their own checks.
@@ -418,9 +587,6 @@ class PimlicoDatatype(object):
                                 # Data dir is ready, but the file within it doesn't exist
                                 return False
                 return True
-
-            def parent_data_ready(self, path):
-                return super(self.__class__, self).data_ready(path)
 
             def ready_to_read(self):
                 """
@@ -524,33 +690,7 @@ class PimlicoDatatype(object):
             to the init.
 
             """
-            return cls._get_setup_cls()(datatype, *args, **kwargs)
-
-        @classmethod
-        def _get_setup_cls(cls):
-            # Cache the setup cls for the reader type
-            # Clever cacheing: see _get_reader_cls() below
-            # Use the class' ID, in case the reader type names aren't unique
-            _cache_name = "_{}_setup_cls".format(id(cls))
-            if not hasattr(cls, _cache_name):
-                if len(cls.__bases__) == 0 or cls.__bases__[0] is object:
-                    # On the base class, we just return the base setup, subclassing object
-                    parent_setup = object
-                else:
-                    # In case of multiple inheritance, first base class is the one we use to inherit setup functionality
-                    parent_setup = cls.__bases__[0]._get_setup_cls()
-
-                my_setup = cls.Setup
-                if my_setup is parent_setup:
-                    # Setup is not overridden, so we don't need to subclass
-                    setup_cls = parent_setup
-                else:
-                    # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
-                    my_dict = dict(my_setup.__dict__)
-                    my_dict["reader_type"] = cls
-                    setup_cls = type("{}Setup".format(cls.__name__), (parent_setup,), my_dict)
-                setattr(cls, _cache_name, setup_cls)
-            return getattr(cls, _cache_name)
+            return cls.Setup(datatype, *args, **kwargs)
 
         def _get_metadata(self):
             """
@@ -641,7 +781,7 @@ class PimlicoDatatype(object):
             self.metadata = {}
 
             # Extract kwargs that correspond to metadata keys
-            for key, default in self.metadata_defaults.items():
+            for key, (default, doc) in self.metadata_defaults.items():
                 if key in kwargs:
                     self.metadata[key] = kwargs.pop(key)
                 else:
@@ -722,113 +862,12 @@ class PimlicoDatatype(object):
             return "Writer({}: {})".format(self.datatype.full_datatype_name(), self.base_dir)
 
 
-    ########## Type hiearchy construction for readers and writers ###########
-    # Readers and writers are in a type hierarchy that exactly mirrors the datatype hierarchy.
-    # Methods are added and overridden according to the specifications of the Reader and Writer dummy classes
-
-    @classmethod
-    def _get_reader_cls(cls):
-        # Use a special attribute that includes the class name to cache the reader so that we only
-        # cache for this exact type and don't inherit
-        # This is like Python's mangling of "__" names, but we can't use that because it happens at
-        # compile time, so all of these would use PimlicoDatatype for mangling
-        _cache_name = "_{}_reader_cls".format(cls.__name__)
-
-        if not hasattr(cls, _cache_name):
-            # Fetch the reader type
-            if cls is PimlicoDatatype:
-                # On the base class, we just return the base reader, subclassing object
-                parent_reader = object
-            else:
-                # In case of multiple inheritance, first base class is the one we use to inherit reader functionality
-                # Typically multiple inheritance probably won't be used anyway with datatypes
-                parent_reader = cls.__bases__[0]._get_reader_cls()
-
-            my_reader = cls.Reader
-            if parent_reader is my_reader:
-                # Reader is not overridden, so we don't need to subclass
-                reader_cls = parent_reader
-            else:
-                # Perform subclassing so that a new Reader is created that is a subclass of the parent's reader
-                my_dict = dict(my_reader.__dict__)
-                # Don't inherit the cached setup cls for this reader type, as we should recompute to do subtyping
-                if "_setup_cls" in my_dict:
-                    del my_dict["_setup_cls"]
-                reader_cls = type("{}Reader".format(cls.__name__), (parent_reader,), my_dict)
-            setattr(cls, _cache_name, reader_cls)
-
-        return getattr(cls, _cache_name)
-
-    @classmethod
-    def _get_some_writer_cls(cls):
-        """ Get writer subclass, even if this type has no writer, going up the type hierarchy if necessary """
-        # Clever cacheing: see _get_reader_cls()
-        _cache_name = "_{}_writer_cls".format(cls.__name__)
-
-        if not hasattr(cls, _cache_name):
-            if cls is PimlicoDatatype:
-                # On the base class, parent is just object
-                parent_writer = object
-            else:
-                # In case of multiple inheritance, first base class is the one we use to inherit writer functionality
-                parent_writer = cls.__bases__[0]._get_some_writer_cls()
-
-            my_writer = cls.Writer
-            if my_writer is None:
-                # No writer for this type, but we want to get some writer
-                # Go up type hieararchy, skipping types for which Writer is None
-                writer_cls = parent_writer
-            elif parent_writer is my_writer:
-                # Writer is not overridden, so we don't need to subclass
-                writer_cls = parent_writer
-            else:
-                new_cls_dict = dict(my_writer.__dict__)
-                if parent_writer is not object:
-                    new_metadata_defaults = new_cls_dict.get("metadata_defaults", {})
-                    new_writer_param_defaults = new_cls_dict.get("writer_param_defaults", {})
-                    # Collect metadata_defaults and writer params from the Writer if given
-                    new_cls_dict["metadata_defaults"] = dict(parent_writer.metadata_defaults, **new_metadata_defaults)
-                    new_cls_dict["writer_param_defaults"] = dict(parent_writer.writer_param_defaults, **new_writer_param_defaults)
-
-                    # Check that defaults were given in the right format
-                    for val in new_metadata_defaults.values():
-                        if type(val) not in (list, tuple) or len(val) != 2:
-                            raise TypeError("writer metadata defaults should be pairs of default values and documentation "
-                                            "strings: invalid dictionary for {} writer".format(cls.datatype_name))
-                    for val in new_writer_param_defaults.values():
-                        if type(val) not in (list, tuple) or len(val) != 2:
-                            raise TypeError("writer param defaults should be pairs of default values and documentation "
-                                            "strings: invalid dictionary for {} writer".format(cls.datatype_name))
-
-                # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
-                writer_cls = type("{}Writer".format(cls.__name__), (parent_writer,), new_cls_dict)
-            setattr(cls, _cache_name, writer_cls)
-        return getattr(cls, _cache_name)
-
-    @classmethod
-    def _get_writer_cls(cls):
-        """ Get the writer subclass, or None if this type has no writer """
-        my_writer = cls.Writer
-        if my_writer is None:
-            # This datatype has been marked as not having a writer
-            # In this case, we return None, indicating that no writer is avialable
-            return None
-        else:
-            # Hand over the the subtyping routine that skips over Nones to construct the writer type
-            return cls._get_some_writer_cls()
-
-
 def _get_data_dir(base_dir):
     return os.path.join(base_dir, "data")
 
 
 def _metadata_path(base_dir):
     return os.path.join(base_dir, "corpus_metadata")
-
-
-# Make this available so that it's easy to create special readers that subclass it
-# Most readers are not created this way: the subclassing is performed automatically
-BaseDatatypeReader = PimlicoDatatype._get_reader_cls()
 
 
 class DynamicOutputDatatype(object):

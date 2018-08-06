@@ -6,74 +6,38 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
+from collections import OrderedDict
 
 __all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
            "InvalidDocument"]
 
 
-class DataPointType(object):
+class DataPointTypeMeta(type):
     """
-    Base data-point type for iterable corpora. All iterable corpora should have data-point types that are
-    subclasses of this.
+    Metaclass for all data point type classes. Takes care of preparing a
+    Document class for every datatype.
 
-    .. note::
-
-       For now, data point types don't have a way of specifying options (like main datatypes do).
-       I'm not sure whether this is needed, so I'm leaving it out for now. If it is needed, an
-       additional datatype option can be added to iterable corpora that allows you to specify
-       data point type options for when a datatype is being loaded using a config file.
+    You should never need to do anything with this: it's used by the base datatype,
+    and hence by every other datatype.
 
     """
-    #: List of (name, cls_path) pairs specifying a standard set of formatters that the user might want to choose from to
-    #: view a dataset of this type. The user is not restricted to this set, but can easily choose these by name,
-    #: instead of specifying a class path themselves.
-    #: The first in the list is the default used if no formatter is specified. Falls back to DefaultFormatter if empty
-    formatters = []
+    def __new__(cls, *args, **kwargs):
+        new_cls = super(DataPointTypeMeta, cls).__new__(cls, *args, **kwargs)
+        # Replace the existing Document class, if any, which is used to construct the actual Document,
+        # with the constructed Document
+        new_cls.Document = DataPointTypeMeta._get_document_cls(new_cls)
+        return new_cls
 
-    def __call__(self, data, from_internal=False):
-        """
-        Produce a document of this type, using the raw data unicode string to instantiate
-        the document's data from.
-
-        If `from_internal=True`, the given data is the document's internal data
-        dictionary, not a unicode string. You may do this, for example, if you're
-        modifying a document's data and producing a document of a subtype.
-
-        """
-        if from_internal:
-            raw_data = None
-            internal_data = data
-        else:
-            raw_data = data
-            internal_data = None
-        doc_cls = self._get_document_cls()
-        return doc_cls(self, raw_data=raw_data, internal_data=internal_data)
-
-    def __repr__(self):
-        return "{}()".format(self.name)
-
-    @property
-    def name(self):
-        return self.__class__.__name__
-
-    def is_type_for_doc(self, doc):
-        """
-        Check whether the given document is of this type, or a subclass of this one.
-
-        """
-        return isinstance(doc.data_point_type, type(self))
-
-    @classmethod
+    @staticmethod
     def _get_document_cls(cls):
         # Cache document subtyping, so that the same type object is returned from repeated calls on the
         # same document type
         if not hasattr(cls, "__document_type"):
-            if cls is DataPointType:
+            if len(cls.__bases__) == 0 or cls.__bases__[0] is object:
                 # On the base class, we just return the base document
                 cls.__document_type = cls.Document
             else:
-                parent_doc_cls = cls.__bases__[0]._get_document_cls()
-
+                parent_doc_cls = cls.__bases__[0].Document
                 my_doc_cls = cls.Document
                 if parent_doc_cls is my_doc_cls:
                     # Document is not overridden, so we don't need to subclass
@@ -92,6 +56,104 @@ class DataPointType(object):
                     cls.__document_type = type(doc_name, (parent_doc_cls,), my_doc_cls.__dict__)
         return cls.__document_type
 
+
+class DataPointType(object):
+    """
+    Base data-point type for iterable corpora. All iterable corpora should have data-point types that are
+    subclasses of this.
+
+    Every data point type has a corresponding document class, which can be accessed as
+    `MyDataPointType.Document`. When overriding data point types, you can define a nested
+    `Document` class, with no base class, to override parts of the document class'
+    functionality or add new methods, etc. This will be used to automatically create
+    the `Document` class for the data point type.
+
+    .. note::
+
+       For now, data point types don't have a way of specifying options (like main datatypes do).
+       I'm not sure whether this is needed, so I'm leaving it out for now. If it is needed, an
+       additional datatype option can be added to iterable corpora that allows you to specify
+       data point type options for when a datatype is being loaded using a config file.
+
+    """
+    __metaclass__ = DataPointTypeMeta
+    #: List of (name, cls_path) pairs specifying a standard set of formatters that the user might want to choose from to
+    #: view a dataset of this type. The user is not restricted to this set, but can easily choose these by name,
+    #: instead of specifying a class path themselves.
+    #: The first in the list is the default used if no formatter is specified. Falls back to DefaultFormatter if empty
+    formatters = []
+    #: Metadata keys that should be written for this data point type, with default values and
+    #: strings documenting the meaning of the parameter. Used for writers for this data point
+    #: type. See :class:`~pimlico.datatypes.PimlicoDatatype.Writer`.
+    metadata_defaults = {}
+
+    def __init__(self):
+        # This is set when the reader is initialized
+        self.metadata = None
+
+    def __call__(self, data, from_internal=False):
+        """
+        Produce a document of this type, using the raw data unicode string to instantiate
+        the document's data from.
+
+        If `from_internal=True`, the given data is the document's internal data
+        dictionary, not a unicode string. You may do this, for example, if you're
+        modifying a document's data and producing a document of a subtype.
+
+        """
+        if from_internal:
+            raw_data = None
+            internal_data = data
+        else:
+            raw_data = data
+            internal_data = None
+        return self.Document(self, raw_data=raw_data, internal_data=internal_data)
+
+    def __repr__(self):
+        return "{}()".format(self.name)
+
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    def is_type_for_doc(self, doc):
+        """
+        Check whether the given document is of this type, or a subclass of this one.
+
+        """
+        return isinstance(doc.data_point_type, type(self))
+
+    def reader_init(self, reader):
+        """
+        Called when a reader is initialized. May be overridden to perform any tasks
+        specific to the data point type that need to be done before the reader
+        starts producing data points.
+
+        The super `reader_init()` should be called. This takes care of making
+        reader metadata available in the `metadata` attribute of the data point
+        type instance.
+
+        """
+        self.metadata = reader.metadata
+
+    def writer_init(self, writer):
+        """
+        Called when a writer is initialized. May be overridden to perform any
+        tasks specific to the data point type that should be done before documents
+        start getting written.
+
+        The super `writer_init()` should be called. This takes care of updating
+        the writer's metadata from anything in the instance's `metadata`
+        attribute, for any keys given in the data point type's `metadata_defaults`.
+
+        """
+        metadata = self.metadata or {}
+        # Don't need to set default values here, as that's handled by the writer
+        # Just pass through any metadata values for the data point type's keys
+        for key in self.metadata_defaults:
+            if key in metadata:
+                writer.metadata[key] = metadata[key]
+
     class Document(object):
         """
         The abstract superclass of all documents.
@@ -106,6 +168,8 @@ class DataPointType(object):
                class Document:
                    # Overide document things here
                    # Add your own methods, properties, etc for getting data from the document
+
+        A data point type's constructed document class is available as `MyDataPointType.Document`.
 
         Each document type should provide a method to convert from raw data (a unicode string) to the
         internal representation (an arbitrary dictionary) called `raw_to_internal()`, and another to convert
@@ -216,6 +280,9 @@ class InvalidDocument(DataPointType):
     """
     class Document:
         def raw_to_internal(self, raw_data):
+            # Raw data always encoded as utf-8
+            raw_data = raw_data.decode("utf-8")
+
             if not raw_data.startswith(u"***** EMPTY DOCUMENT *****"):
                 raise ValueError(u"tried to read empty document text from invalid text: %s" % raw_data)
             text = raw_data.partition("\n")[2]
@@ -225,9 +292,10 @@ class InvalidDocument(DataPointType):
             return {"module_name": module_name, "error_info": error_info}
 
         def internal_to_raw(self, internal_data):
-            return u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\n" \
-                   u"Full error details:\n%s" % \
-                   (internal_data["module_name"], internal_data["error_info"])
+            # Encode back to utf-8 for the raw data
+            return (u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\n"
+                    u"Full error details:\n%s" %
+                    (internal_data["module_name"], internal_data["error_info"])).encode("utf-8")
 
         @property
         def module_name(self):
@@ -238,10 +306,10 @@ class InvalidDocument(DataPointType):
             return self.internal_data["error_info"]
 
         def __unicode__(self):
-            return self.internal_to_raw(self.internal_data)
+            return self.raw_data.decode("utf-8")
 
         def __str__(self):
-            return unicode(self).encode("ascii", "ignore")
+            return self.raw_data
 
 
 def invalid_document(module_name, error_info):
@@ -311,7 +379,13 @@ class TextDocumentType(RawDocumentType):
     class Document:
         @property
         def text(self):
-            return self.raw_data
+            return self.internal_data["text"]
+
+        def internal_to_raw(self, internal_data):
+            return internal_data["text"].encode("utf-8")
+
+        def raw_to_internal(self, raw_data):
+            return {"text": raw_data.decode("utf-8")}
 
 
 class RawTextDocumentType(TextDocumentType):

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from collections import OrderedDict
 from traceback import format_exc
 
@@ -120,6 +121,12 @@ class IterableCorpus(PimlicoDatatype):
         return super(IterableCorpus, self).__call__(*args, **kwargs)
 
     class Reader:
+        def __init__(self, *args, **kwargs):
+            super(IterableCorpus.Reader, self).__init__(*args, **kwargs)
+            # Call the data point type's reader_init() method to allow it to do anything
+            # that should be done when the reader is prepared
+            self.datatype.data_point_type.reader_init(self)
+
         def __len__(self):
             try:
                 return self.metadata["length"]
@@ -129,7 +136,7 @@ class IterableCorpus(PimlicoDatatype):
                                         (self.datatype.datatype_name, self.metadata.keys()))
 
         def get_detailed_status(self):
-            return super(self.__class__, self).get_detailed_status() + ["Length: %d" % len(self)]
+            return super(IterableCorpus.Reader, self).get_detailed_status() + ["Length: %d" % len(self)]
 
         def __iter__(self):
             """
@@ -176,10 +183,24 @@ class IterableCorpus(PimlicoDatatype):
         ensure that all subclasses (e.g. GroupedCorpus) store a length in the same way.
 
         """
-        metadata_defaults = {"length": None}
+        metadata_defaults = {
+            "length": (
+                None,
+                "Number of documents in the corpus. Must be set by the writer, otherwise "
+                "an exception will be raised at the end of writing"
+            ),
+        }
+
+        def __init__(self, datatype, *args, **kwargs):
+            # Add the data point type's metadata defaults to our dictionary
+            self.metadata_defaults = dict(self.metadata_defaults, **datatype.data_point_type.metadata_defaults)
+            super(IterableCorpus.Writer, self).__init__(datatype, *args, **kwargs)
+            # Call the data point type's writer_init() method to allow it to do anything
+            # that should be done when the writer is prepared
+            datatype.data_point_type.writer_init(self)
 
         def __exit__(self, exc_type, exc_val, exc_tb):
-            super(self.__class__, self).__exit__(exc_type, exc_val, exc_tb)
+            super(IterableCorpus.Writer, self).__exit__(exc_type, exc_val, exc_tb)
             # Check the length has been set
             if self.metadata["length"] is None:
                 raise DatatypeWriteError("writer for IterableDocumentCorpus must set a 'length' value in the metadata")

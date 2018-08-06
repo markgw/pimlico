@@ -1016,7 +1016,7 @@ class PipelineConfig(object):
         # Check that there's at least one storage location given
         if not any(key.startswith("store") for key in local_config_data.keys()):
             raise PipelineConfigParseError("no storage location was found in local config. You should specify "
-                                           "at least one, either as a default 'storage' parameter, or a named storage "
+                                           "at least one, either as a default 'store' parameter, or a named storage "
                                            "location 'store_<name>'")
 
         return local_config_data, used_config_sources
@@ -1029,6 +1029,9 @@ class PipelineConfig(object):
 
         :param local_config: filename to load local config from. If not given, the default locations are searched
         :param override_local_config: manually override certain local config parameters. Dict of parameter values
+        :param only_override_config: don't load any files, just use the values given in override. The various
+            locations for local config files will not be checked (which usually happens when filename=None).
+            This is not useful for normal pipeline loading, but is used for loading test pipelines.
         :return: the :class:`PipelineConfig` instance
         """
         from pimlico import __version__ as current_pimlico_version

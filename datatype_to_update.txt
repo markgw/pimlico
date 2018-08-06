@@ -4,14 +4,6 @@ The formatters in pimlico.old_datatypes.formatters should also be copy/adapted.
 They should maybe go with their datatypes, as many others have.
 
 
-dictionary
-  Dictionary
-floats
-  FloatListsDocumentCorpus
-  FloatListDocumentCorpus
-ints
-  IntegerListsDocumentCorpus
-  IntegerListDocumentCorpus
 json
   JsonDocumentCorpus
 files
@@ -53,8 +45,6 @@ sklearn
   SklearnModel
 spans
   SentenceSpansCorpus
-table
-  IntegerTableDocumentCorpus
 vrt
   VRTDocumentType (doc type)
 word2vec

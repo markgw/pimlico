@@ -11,7 +11,7 @@ class PipelineConfigTest(unittest.TestCase):
         self.storage_dir = tempfile.mkdtemp()
         # Override the local config values that should point to this path
         self.override_local_config = {
-            "storage": self.storage_dir,
+            "store": self.storage_dir,
         }
 
     def tearDown(self):
@@ -40,8 +40,7 @@ class TestEmptyPipelineCreation(PipelineConfigTest):
     """
     def test_load(self):
         from pimlico.core.config import PipelineConfig
-        pipeline = PipelineConfig.empty(local_config=self.local_conf_path,
-                                        override_local_config=self.override_local_config, only_override_config=True)
+        pipeline = PipelineConfig.empty(override_local_config=self.override_local_config, only_override_config=True)
 
 
 if __name__ == "__main__":

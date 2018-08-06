@@ -18,8 +18,8 @@ compatible with the datatype being browsed and provides a method to format each 
 in your custom code and refer to them by their fully qualified class name.
 
 """
-from pimlico.old_datatypes.base import IterableCorpus, InvalidDocument
-from pimlico.old_datatypes.documents import DataPointType
+from pimlico.datatypes.corpora import IterableCorpus, is_invalid_doc
+from pimlico.datatypes.corpora import DataPointType
 
 
 class DocumentBrowserFormatter(object):
@@ -101,7 +101,7 @@ class InvalidDocumentFormatter(DocumentBrowserFormatter):
         return doc
 
     def filter_document(self, doc):
-        return doc if isinstance(doc, InvalidDocument) else None
+        return doc if is_invalid_doc(doc) else None
 
 
 def typecheck_formatter(formatted_doc_type, formatter_cls):

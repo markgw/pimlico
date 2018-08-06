@@ -35,7 +35,7 @@ class GroupedCorpus(IterableCorpus):
             def data_ready(self, base_dir):
                 # Run the superclass check -- that the data dir exists
                 # Also check that we've got at least one archive in the data dir
-                return self.parent_data_ready(base_dir) and \
+                return super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir) and \
                        len(self._get_archive_filenames(self._get_data_dir(base_dir))) > 0
 
             def _get_archive_filenames(self, data_dir):
@@ -48,7 +48,7 @@ class GroupedCorpus(IterableCorpus):
                     return []
 
         def __init__(self, *args, **kwargs):
-            super(self.__class__, self).__init__(*args, **kwargs)
+            super(GroupedCorpus.Reader, self).__init__(*args, **kwargs)
             # Read in the archive filenames, which are stored as tar files
             self.archive_filenames = self.setup._get_archive_filenames(self.data_dir)
             self.archive_filenames.sort()
@@ -87,7 +87,7 @@ class GroupedCorpus(IterableCorpus):
                 been seen
             """
             gzipped = self.metadata.get("gzip", False)
-            encoding = self.metadata.get("encoding", "utf-8")
+
             # Prepare a temporary directory to extract everything to
             tmp_dir = mkdtemp()
 
@@ -163,8 +163,6 @@ class GroupedCorpus(IterableCorpus):
                                     # For backwards-compatibility, where gzip=True, but the gz extension wasn't used, we
                                     #  just decompress with zlib, without trying to parse the gzip headers
                                     raw_data = zlib.decompress(raw_data)
-                            if encoding is not None:
-                                raw_data = raw_data.decode(encoding)
 
                             # Apply subclass-specific post-processing and produce a document instance
                             document = self.data_to_document(raw_data)
@@ -210,10 +208,6 @@ class GroupedCorpus(IterableCorpus):
                 "since the docs are gzipped *before* adding them, not the whole archive together, but means "
                 "we can easily iterate over the documents, unzipping them as required"
             ),
-            "encoding": (
-                "utf-8",
-                "String encoding to use for each document"
-            ),
         }
         writer_param_defaults = {
             "append": (
@@ -233,11 +227,10 @@ class GroupedCorpus(IterableCorpus):
         }
 
         def __init__(self, *args, **kwargs):
-            super(self.__class__, self).__init__(*args, **kwargs)
+            super(GroupedCorpus.Writer, self).__init__(*args, **kwargs)
 
             # Set "gzip" in the metadata, so we know to unzip when reading
             self.gzip = self.metadata["gzip"]
-            self.encoding = self.metadata["encoding"]
             self.append = self.params["append"]
             self.trust_length = self.params["trust_length"]
 
@@ -306,8 +299,6 @@ class GroupedCorpus(IterableCorpus):
                     self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
 
             # Add a new document to archive
-            if self.encoding is not None:
-                data = data.encode(self.encoding)
             if self.gzip:
                 # We used to just use zlib to compress, which works fine, but it's not easy to open the files manually
                 # Using gzip (i.e. writing gzip headers) makes it easier to use the data outside Pimlico
@@ -328,7 +319,7 @@ class GroupedCorpus(IterableCorpus):
             if self.current_archive_tar is not None:
                 self.current_archive_tar.close()
             self.metadata["length"] = self.doc_count
-            super(self.__class__, self).__exit__(exc_type, exc_val, exc_tb)
+            super(GroupedCorpus.Writer, self).__exit__(exc_type, exc_val, exc_tb)
 
 
 def exclude_invalid(doc_iter):
