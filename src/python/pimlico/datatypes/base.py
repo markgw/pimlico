@@ -1003,7 +1003,10 @@ def load_datatype(path, options={}):
     except ImportError, e:
         raise DatatypeLoadError("could not load datatype class %s: %s" % (path, e))
 
-    if type(cls) is not type(object):
+    # The type of the class will generally not be "type", since we use meta classes
+    # However, it should be a subclass of it
+    # This distinguishes it from, e.g. modules
+    if not issubclass(type(cls), type(object)):
         raise DatatypeLoadError("tried to load datatype %s, but result was not a class, it was a %s" %
                                 (path, type(cls).__name__))
 
