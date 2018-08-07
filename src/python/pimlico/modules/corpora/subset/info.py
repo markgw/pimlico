@@ -14,14 +14,17 @@ When a number of valid documents is required (calculating corpus length when ski
 if one is stored in the metadata as ``valid_documents``, that count is used instead of iterating
 over the data to count them up.
 
+.. todo::
+
+   Finish updating to new datatypes system
+
 """
 from itertools import islice
 
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool
-from pimlico.old_datatypes.base import IterableCorpus, DynamicOutputDatatype, \
-    iterable_corpus_with_data_point_type, InvalidDocument
-from pimlico.old_datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
+from pimlico.datatypes.corpora import IterableCorpus
+from pimlico.datatypes.corpora.grouped import CorpusWithTypeFromInput
 from pimlico.utils.core import cached_property
 
 
@@ -147,38 +150,11 @@ class TarredCorpusSubsetFilter(TarredCorpus):
         return self.input_datatype.data_ready()
 
 
-class DataPointTypeFromInput(DynamicOutputDatatype):
-    """
-    Infer output corpus' data-point type from the type of an input.
-    Passes the type through, except where the input datatype provides an `emulated_datatype`.
-
-    If the input is a tarred corpus, so is the output. Otherwise, it's just an IterableCorpus.
-
-    Input name may be given. Otherwise, the default input is used.
-
-    """
-    datatype_name = "corpus with data-point from input"
-
-    def __init__(self, input_name=None):
-        self.input_name = input_name
-
-    def get_datatype(self, module_info):
-        datatype = module_info.get_input_datatype(self.input_name)
-        # If the input datatype emulates another, it is that other that we will produce as output
-        if datatype.emulated_datatype is not None:
-            datatype = datatype.emulated_datatype
-        # Check whether the input was a tarred corpus
-        if issubclass(datatype, TarredCorpus):
-            return tarred_corpus_with_data_point_type(datatype.data_point_type)
-        else:
-            return iterable_corpus_with_data_point_type(datatype.data_point_type)
-
-
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "subset"
     module_readable_name = "Corpus subset"
-    module_inputs = [("documents", IterableCorpus)]
-    module_outputs = [("documents", DataPointTypeFromInput())]
+    module_inputs = [("documents", IterableCorpus())]
+    module_outputs = [("documents", CorpusWithTypeFromInput())]
     module_options = {
         "size": {
             "help": "Number of documents to include",

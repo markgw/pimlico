@@ -6,6 +6,10 @@
 Sentence splitting and tokenization using the
 `NLTK NIST tokenizer <https://www.nltk.org/api/nltk.tokenize.html#module-nltk.tokenize.nist>`_.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 
 from pimlico.core.dependencies.python import nltk_dependency, NLTKResource

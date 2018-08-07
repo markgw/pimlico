@@ -21,7 +21,7 @@ from pimlico.utils.filesystem import retry_open
 __all__ = [
     "GroupedCorpus", "AlignedGroupedCorpora",
     "CorpusAlignmentError", "GroupedCorpusIterationError",
-    "GroupedCorpusWithDataPointTypeFromInput",
+    "GroupedCorpusWithTypeFromInput", "CorpusWithTypeFromInput"
 ]
 
 
@@ -57,7 +57,7 @@ class GroupedCorpus(IterableCorpus):
         def extract_file(self, archive_name, filename):
             """
             Extract an individual file by archive name and filename. This is not an efficient
-            way of extracting a lot of files. The typical use case of a tarred corpus is to
+            way of extracting a lot of files. The typical use case of a grouped corpus is to
             iterate over its files, which is much faster.
 
             """
@@ -374,12 +374,16 @@ class AlignedGroupedCorpora(object):
         return len(self.readers[0])
 
 
-class GroupedCorpusWithDataPointTypeFromInput(DynamicOutputDatatype):
+class GroupedCorpusWithTypeFromInput(DynamicOutputDatatype):
     """
     Dynamic datatype that produces a GroupedCorpus with a document datatype that is the same as the input's
     document/data-point type.
 
     If the input name is not given, uses the first input.
+
+    Unlike :class:`CorpusWithTypeFromInput`, this does not infer whether the result should be
+    a grouped corpus or not: it always is. The input should be an iterable corpus (or subtype,
+    including grouped corpus), and that's where the datatype will come from.
 
     """
     datatype_name = "grouped corpus with input doc type"
@@ -401,6 +405,54 @@ class GroupedCorpusWithDataPointTypeFromInput(DynamicOutputDatatype):
         # Get the document type from the input iterable corpus
         input_document_type = module_info.get_input_datatype(self.input_name).data_point_type
         return GroupedCorpus(input_document_type)
+
+
+class CorpusWithTypeFromInput(DynamicOutputDatatype):
+    """
+    Infer output corpus' data-point type from the type of an input. Passes the data point type through.
+    Similar to :class:`GroupedCorpusWithTypeFromInput`, but more flexible.
+
+    If the input is a grouped corpus, so is the output. Otherwise, it's just an IterableCorpus.
+
+    Handles the case where the input is a multiple input. Tries to find a
+    common data point type among the inputs.
+    They must have the same data point type, or all must be subtypes of one of them.
+    (In theory, we could find the most specific common ancestor and use that as the output type,
+    but this is not currently implemented and is probably not worth the trouble.)
+
+    Input name may be given. Otherwise, the default input is used.
+
+    """
+    datatype_name = "corpus with data-point from input"
+
+    def __init__(self, input_name=None):
+        self.input_name = input_name
+
+    def get_datatype(self, module_info):
+        datatypes = module_info.get_input_datatype(self.input_name, always_list=True)
+        dp_types = [t.data_point_type for t in datatypes]
+
+        # Find the common data point type to use for the output
+        # Simplest case: all identical
+        if all(t is dp_types[0] for t in dp_types[1:]):
+            dp_type = dp_types[0]
+        else:
+            # Otherwise, check for each one whether all the others are subtypes
+            for dpt in dp_types:
+                if all(isinstance(t1, type(dpt)) for t1 in dp_types):
+                    dp_type = dpt
+                    break
+            else:
+                # No type to serve as the common type
+                raise TypeError(
+                    "incompatible data point types for concatenation: %s" % ", ".join(t.__name__ for t in types))
+
+        # Check whether the inputs are all grouped corpora
+        if all(isinstance(datatype, GroupedCorpus) for datatype in datatypes):
+            return GroupedCorpus(dp_type)
+        else:
+            # If they're not all grouped corpora, just produce an iterable corpus
+            return IterableCorpus(dp_type)
 
 
 class CorpusAlignmentError(Exception):

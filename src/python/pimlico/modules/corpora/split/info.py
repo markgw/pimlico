@@ -16,6 +16,10 @@ the same thing for the second input too. Note that you might prefer to only stor
 e.g. in a training-test split, store only the test document list, as the training list will be much larger. In such
 a case, just put the smaller set first and don't request the optional output `doc_list2`.
 
+.. todo::
+
+   Update to new datatypes system
+
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.old_datatypes.base import DynamicOutputDatatype, TypeFromInput

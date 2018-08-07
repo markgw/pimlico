@@ -101,9 +101,13 @@ class TestPipeline(object):
 
     def test_module_execution(self, module_name):
         try:
-            check_and_execute_modules(self.pipeline, [module_name], log=self.log)
+            exit_status = check_and_execute_modules(self.pipeline, [module_name], log=self.log)
         except Exception, e:
+            traceback.print_exc()
             raise TestPipelineRunError("error while running module '{}': {}".format(module_name, e))
+        if exit_status != 0:
+            # Module failed
+            raise TestPipelineRunError("module '{}' failed".format(module_name))
 
 
 def run_test_pipeline(path, module_names, log, no_clean=False):

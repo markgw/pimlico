@@ -7,6 +7,10 @@ Copy a file
 Simple utility for copying a file (which presumably comes from the output of another module) into a particular
 location. Useful for collecting together final output at the end of a pipeline.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 
 from pimlico.core.modules.map import DocumentMapModuleInfo

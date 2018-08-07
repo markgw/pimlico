@@ -7,6 +7,10 @@
 
    Document this module
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.dependencies.python import numpy_dependency, scipy_dependency
 from pimlico.core.modules.base import BaseModuleInfo

@@ -5,6 +5,10 @@
 """
 Sentence splitting and tokenization using OpenNLP's tools.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 import os
 

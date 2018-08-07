@@ -9,6 +9,10 @@ a tool for extracting events of many types from text and ordering them.
 `CAEVO is open source <https://github.com/nchambers/caevo>`_, implemented in Java, so is easily integrated
 into Pimlico using Py4J.
 
+.. todo::
+
+   Not a heavily used module. Remove rather than updating to new datatypes system.
+
 """
 
 import os

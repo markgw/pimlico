@@ -7,6 +7,10 @@ train character-level models, since the output appears exactly like a tokenized
 document, where each token is a single character. You can then feed it into any
 module that expects tokenized text.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 

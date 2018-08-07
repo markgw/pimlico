@@ -10,6 +10,10 @@ class ModuleInfo(BaseModuleInfo):
 
     These are suitable as input to the [Tensorflow Projector](https://projector.tensorflow.org/).
 
+    .. todo::
+
+       Update to new datatypes system and add test pipeline
+
     """
     module_type_name = "store_tsv"
     module_readable_name = "Store in TSV format"

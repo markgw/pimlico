@@ -6,6 +6,10 @@
 
    Write description of vocab mapper module
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.old_datatypes.dictionary import Dictionary

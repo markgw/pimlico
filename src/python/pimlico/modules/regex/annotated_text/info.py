@@ -7,6 +7,10 @@
 
    Document this module
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.base import ModuleInfoLoadError
 from pimlico.core.modules.map import DocumentMapModuleInfo

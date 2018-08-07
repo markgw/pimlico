@@ -15,6 +15,10 @@ Uses sentence tags to divide each text into sentences.
    :mod:`pimlico.modules.input.text_annotations.vrt`:
       Reading VRT files with all their annotations
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory

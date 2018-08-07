@@ -12,6 +12,10 @@ take a look at the table of parameters in the
 `Scikit-Learn documentation <http://scikit-learn.org/stable/modules/classes.html#module-sklearn.decomposition>`_
 for each class.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 import json
 

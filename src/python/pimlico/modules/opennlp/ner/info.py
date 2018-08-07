@@ -13,6 +13,10 @@ Note that the default model is for identifying person names only. You can identi
 other pre-trained OpenNLP NER models. Identification of multiple name types at the same time is not (yet)
 implemented.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 import os
 

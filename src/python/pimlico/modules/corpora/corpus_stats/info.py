@@ -6,6 +6,10 @@
 
 Counts the number of tokens, sentences and distinct tokens in a corpus.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.old_datatypes.files import NamedFile

@@ -9,6 +9,10 @@ By default, uses the pre-trained English model distributed with OpenNLP. If you 
 for other languages), download them from the OpenNLP website to the models dir (`models/opennlp`) and specify
 the model name as an option.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 import os
 

@@ -10,6 +10,10 @@ read in using Pimlico's generic word embedding storage type.
 
 Uses scikit-learn to perform the MDS/TSNE reduction.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.dependencies.python import sklearn_dependency
 from pimlico.core.modules.base import BaseModuleInfo

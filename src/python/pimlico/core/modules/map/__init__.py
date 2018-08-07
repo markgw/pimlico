@@ -33,24 +33,23 @@ class DocumentMapModuleInfo(BaseModuleInfo):
 
     def __init__(self, module_name, pipeline, **kwargs):
         super(DocumentMapModuleInfo, self).__init__(module_name, pipeline, **kwargs)
-        # Load all the input datatypes now in order to perform typechecking
-        # Note that we don't store these now, but reload them when we start execution, as it's important
-        # that they've been freshly instantiated prior to execution
-        # Otherwise they can end up cacheing things that get changed by other modules executed first
-        self._load_inputs()
 
-    def _load_inputs(self):
-        # Prepare the list of document map inputs that will be fed into the executor
-        # We may have multiple inputs, which should be aligned tarred corpora
-        # If there's only one, this also works
-        inputs = [self.get_input(input_name) for input_name in self.input_names]
-        # We also allow (additional) inputs that are not tarred corpora, which get left out of this
-        datasets = [corpus for corpus in inputs if satisfies_typecheck(corpus.datatype, GroupedCorpus())]
+        # Load all the input datatypes now in order to perform typechecking
+        input_datatypes = [self.get_input_datatype(input_name) for input_name in self.input_names]
+        # We also allow (additional) inputs that are not grouped corpora, which get left out here
+        datasets = [dt for dt in input_datatypes if satisfies_typecheck(dt, GroupedCorpus())]
         if len(datasets) == 0:
-            raise PipelineStructureError(
-                "document map module '%s' got no TarredCorpus instances among its inputs" % self.module_name)
+            raise PipelineStructureError("document map module '%s' got no GroupedCorpus inputs" % self.module_name)
+
+    def _load_input_readers(self):
+        # Prepare the list of document map inputs that will be fed into the executor
+        # We may have multiple inputs that are grouped corpora, in which case they're aligned
+        # If there's only one, this is also fine
+        readers = [self.get_input(input_name) for input_name in self.input_names]
+        # We also allow (additional) inputs that are not grouped corpora, which get left out of this list
+        datasets = [reader for reader in readers if satisfies_typecheck(reader.datatype, GroupedCorpus())]
         return datasets
-    input_corpora = property(_load_inputs)
+    input_corpora = property(_load_input_readers)
 
     def get_writers(self, append=False):
         # Only include the outputs that are tarred corpus types

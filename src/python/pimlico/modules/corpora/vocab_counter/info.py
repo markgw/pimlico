@@ -16,6 +16,10 @@ the length plus one, if oov_excluded=T (used if the corpus has been mapped
 so that OOVs are represented by the ID vocab_size+1, instead of having a
 special token).
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.old_datatypes.arrays import NumpyArray
 from pimlico.core.dependencies.python import numpy_dependency

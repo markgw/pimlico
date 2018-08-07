@@ -7,6 +7,10 @@
 
    Document this module
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 import os
 

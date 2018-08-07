@@ -3,85 +3,86 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-Concatenate two corpora to produce a bigger corpus.
+Concatenate two (or more) corpora to produce a bigger corpus.
 
 They must have the same data point type, or one must be a subtype of the other.
 
-In theory, we could find the most specific common ancestor and use that as the output type, but this is
-not currently implemented and may not be worth the trouble. Perhaps we will add this in future.
-
 """
-from itertools import islice, chain
+from itertools import chain
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.old_datatypes.base import IterableCorpus, DynamicOutputDatatype, \
-    iterable_corpus_with_data_point_type, MultipleInputs
-from pimlico.old_datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
+from pimlico.datatypes import MultipleInputs
+from pimlico.datatypes.corpora import IterableCorpus, GroupedCorpus
+from pimlico.datatypes.corpora.grouped import CorpusWithTypeFromInput
 
 
-def _common_data_point_type(types):
-    # Simplest case: all identical
-    if all(t is types[0] for t in types[1:]):
-        return types[0]
-    # Otherwise, check for each one whether all the others are subtypes
-    for t in types:
-        if all(issubclass(t1, t) for t1 in types):
-            return t
-    # No type to serve as the common type
-    raise TypeError("incompatible data point types for concatenation: %s" % ", ".join(t.__name__ for t in types))
+class ModuleInfo(BaseModuleInfo):
+    module_type_name = "concat"
+    module_readable_name = "Corpus concatenation"
+    module_inputs = [("corpora", MultipleInputs(IterableCorpus()))]
+    module_outputs = [("corpus", CorpusWithTypeFromInput())]
+    module_executable = False
+
+    def instantiate_output_reader_setup(self, output_name, datatype):
+        if isinstance(datatype, GroupedCorpus):
+            # Produce reader with GroupedCorpus.Reader interface
+            Setup = ConcatenatedGroupedCorpusReader.Setup
+        else:
+            # Produce reader that just acts like an IterableCorpus
+            Setup = ConcatenatedIterableCorpusReader.Setup
+
+        return Setup(
+            self.get_output_datatype("corpus")[1],
+            self.get_input_reader_setup("corpora", always_list=True),
+        )
 
 
-class CorpusConcatFilter(IterableCorpus):
-    def __init__(self, pipeline, input_datatypes, **kwargs):
-        self._master_raw_data = False
-        self.input_datatypes = input_datatypes
-        IterableCorpus.__init__(self, None, pipeline, **kwargs)
+class ConcatenatedGroupedCorpusReader(GroupedCorpus.Reader):
+    """
+    A custom reader that is used for the output of the concatenate module.
+
+    This simply wraps the input corpora to provide iteration over the two (or more)
+    in sequence.
+
+    """
+    metadata = {}
+
+    def __init__(self, datatype, setup, pipeline, **kwargs):
+        # Don't call GroupedCorpus init, but jump up to IterableCorpus
+        IterableCorpus.Reader.__init__(self, datatype, setup, pipeline, **kwargs)
+        # Get readers for each of the input corpora
+        self.input_readers = [
+            setup.get_reader(self.pipeline, module=self.module) for setup in self.setup.input_reader_setups
+        ]
+        # To make sure we don't reuse archive names, add a prefix to each corpus' archive names
+        self.corpus_prefixes = ["corpus{}_".format(i) for i in range(len(self.input_readers))]
+        # Provide the same interface to archives as the GroupedCorpus reader
+        # These aren't real filenames, but provide something
+        self.archive_filenames = [
+            "{}{}".format(prx, fn)
+            for (prx, reader) in zip(self.corpus_prefixes, self.input_readers)
+            for fn in reader.archive_filenames
+        ]
+        # These are the actual archive names we'll use
+        self.archives = [
+            "{}{}".format(prx, archive)
+            for (prx, reader) in zip(self.corpus_prefixes, self.input_readers) for archive in reader.archives
+        ]
+        # Make it easy to trace an archive name back to the original corpus later
+        self.archive_name_map = dict(
+            ("{}{}".format(prx, old_archive_name), (reader, old_archive_name))
+            for (prx, reader) in zip(self.corpus_prefixes, self.input_readers) for old_archive_name in reader.archives
+        )
 
     def __len__(self):
-        return sum((len(d) for d in self.input_datatypes), 0)
-
-    def __iter__(self):
-        return chain(*self.input_datatypes)
-
-    def data_ready(self):
-        return all(d.data_ready() for d in self.input_datatypes)
-
-    def _set_raw_data(self, val):
-        self._master_raw_data = val
-        # Set on all the datasets
-        for d in self.input_datatypes:
-            d.raw_data = val
-
-    def _get_raw_data(self):
-        return self._master_raw_data
-
-    raw_data = property(_get_raw_data, _set_raw_data)
-
-
-class TarredCorpusConcatFilter(TarredCorpus):
-    def __init__(self, pipeline, input_datatypes, **kwargs):
-        self._master_raw_data = False
-        self.input_datatypes = input_datatypes
-        TarredCorpus.__init__(self, None, pipeline, **kwargs)
-
-    def __len__(self):
-        return sum((len(d) for d in self.input_datatypes), 0)
-
-    def _set_raw_data(self, val):
-        self._master_raw_data = val
-        # Set on all the datasets
-        for d in self.input_datatypes:
-            d.raw_data = val
-
-    def _get_raw_data(self):
-        return self._master_raw_data
-
-    raw_data = property(_get_raw_data, _set_raw_data)
+        return sum((len(reader) for reader in self.input_readers), 0)
 
     def extract_file(self, archive_name, filename):
-        raise NotImplementedError("cannot extract file from concatenation of corpora")
+        # Trace the archive back to the input readers and pass over to them to get the file
+        reader, old_archive_name = self.archive_name_map[archive_name]
+        return reader.extract_file(old_archive_name, filename)
 
-    def archive_iter(self, subsample=None, start_after=None, skip=None):
+    def archive_iter(self, start_after=None, skip=None, name_filter=None):
         skipped = 0
         if start_after is None and skip is None:
             # Don't wait to start
@@ -89,109 +90,103 @@ class TarredCorpusConcatFilter(TarredCorpus):
         else:
             # Start after we've hit this (archive, doc name), or after we've passed a certain number of docs
             started = False
-            # Don't allow subsample to be used together with start_after or skip, as their interaction is tricky!
-            if subsample is not None:
-                raise ValueError("corpus concat does not permit combining the 'subsample' option with 'start_after' "
-                                 "or 'skip'")
 
-        for dataset_num, dataset in enumerate(self.input_datatypes):
-            # This prefix is applied to every archive name in the corpus
-            dataset_prefix = "corpus%02d_" % dataset_num
+        for corpus_num, reader in enumerate(self.input_readers):
+            corpus_prefix = u"corpus{}_".format(corpus_num)
 
-            to_skip = None
             if not started:
                 if start_after is not None:
-                    if start_after[0].startswith(dataset_prefix):
+                    # Check whether the archive name uses this corpus prefix
+                    if not start_after[0].startswith(corpus_prefix):
+                        # Waiting for a particular archive, but it's not in this corpus, so skip to the next
+                        continue
+                    else:
                         # The starting archive is somewhere in this dataset
-                        start_archive = start_after[0][len(dataset_prefix):]
-                        dataset_iter = dataset.archive_iter(start_after=(start_archive, start_after[1]))
+                        start_archive = start_after[0][len(corpus_prefix):]
+                        dataset_iter = reader.archive_iter(start_after=(start_archive, start_after[1]))
                         start_after = None
-                    else:
-                        # The starting archive isn't in this dataset, so we can skip it
-                        continue
-                else:
+                elif skip is not None and skip - skipped > len(reader):
                     # If we've still got more left to skip than are in this corpus, we can skip the whole thing
-                    if skip - skipped > len(dataset):
-                        skipped += len(dataset)
-                        continue
-                    else:
-                        dataset_iter = dataset.archive_iter()
-
-                if skip is not None:
-                    to_skip = skip - skipped
+                    skipped += len(reader)
+                    continue
+                else:
+                    dataset_iter = reader.archive_iter()
             else:
-                dataset_iter = dataset.archive_iter()
+                dataset_iter = reader.archive_iter()
 
-            for archive_name, doc_name, doc in islice(dataset_iter, to_skip, None):
+            if skip is not None:
+                # If we've still got some to skip, do so by iterating over the corpus
+                # It's possible there won't be enough left in the corpus (after start_after) to skip
+                try:
+                    while skip - skipped > 0:
+                        dataset_iter.next()
+                        skipped += 1
+                except StopIteration:
+                    pass
+                if skip - skipped == 0:
+                    skip = None
+                    started = True
+                else:
+                    # Reached end of corpus without exhausting skip
+                    continue
+
+            for archive_name, doc_name, doc in dataset_iter:
                 started = True
-                yield u"%s%s" % (dataset_prefix, archive_name), doc_name, doc
+                yield u"{}{}".format(corpus_prefix, archive_name), doc_name, doc
 
     def list_archive_iter(self):
-        for dataset_num, dataset in enumerate(self.input_datatypes):
-            dataset_prefix = "corpus%02d_" % dataset_num
-            for tar_name, filename in dataset.list_archive_iter():
-                yield u"%s%s" % (dataset_prefix, tar_name), filename
+        for corpus_num, reader in enumerate(self.input_readers):
+            corpus_prefix = "corpus{}_".format(corpus_num)
+            for archive_name, doc_name in reader.list_archive_iter():
+                yield u"{}{}".format(corpus_prefix, archive_name), doc_name
 
-    def data_ready(self):
-        return all(d.data_ready() for d in self.input_datatypes)
+    class Setup:
+        def __init__(self, datatype, input_reader_setups):
+            self.input_reader_setups = input_reader_setups
+            self.datatype = datatype
 
+        def ready_to_read(self):
+            return all(setup.ready_to_read() for setup in self.input_reader_setups)
 
-def tarred_corpus_concat_filter_dp_type(dp_type):
-    class TarredCorpusConcatFilterSubtype(TarredCorpusConcatFilter):
-        data_point_type = dp_type
-    return TarredCorpusConcatFilterSubtype
-
-
-def corpus_concat_filter_dp_type(dp_type):
-    class CorpusConcatFilterSubtype(CorpusConcatFilter):
-        data_point_type = dp_type
-    return CorpusConcatFilterSubtype
+    def process_setup(self):
+        # Override to not do data path processing
+        return
 
 
-class DataPointTypeFromInputs(DynamicOutputDatatype):
+class ConcatenatedIterableCorpusReader(IterableCorpus.Reader):
     """
-    Infer output corpus' data-point type from the type of an input.
-    Passes the type through, except where the input datatype provides an `emulated_datatype`.
+    A custom reader that is used for the output of the concatenate module.
 
-    If the input is a tarred corpus, so is the output. Otherwise, it's just an IterableCorpus.
-
-    Input name may be given. Otherwise, the default input is used.
+    This version is used where not all the input corpora are grouped corpora. It
+    implements the interface of IterableCorpus' reader, but not GroupedCorpus.
 
     """
-    datatype_name = "corpus with data-point from input"
+    metadata = {}
 
-    def __init__(self, input_name=None):
-        self.input_name = input_name
+    def __init__(self, datatype, setup, pipeline, **kwargs):
+        # Don't call GroupedCorpus init, but jump up to IterableCorpus
+        IterableCorpus.Reader.__init__(self, datatype, setup, pipeline, **kwargs)
+        # Get readers for each of the input corpora
+        self.input_readers = [
+            setup.get_reader(self.pipeline, module=self.module) for setup in self.setup.input_reader_setups
+        ]
+        # To make sure we don't reuse archive names, add a prefix to each corpus' archive names
+        self.corpus_prefixes = ["corpus{}_".format(i) for i in range(len(self.input_readers))]
 
-    def get_datatype(self, module_info):
-        datatypes = module_info.get_input_datatype(self.input_name, always_list=True)
-        # If the input datatype emulates another, it is that other that we will produce as output
-        datatypes = [datatype.emulated_datatype or datatype for datatype in datatypes]
-        # Find the common data point type to use for the output
-        dp_type = _common_data_point_type([d.data_point_type for d in datatypes])
-        # Check whether the inputs are all tarred corpora
-        if all(issubclass(datatype, TarredCorpus) for datatype in datatypes):
-            return tarred_corpus_with_data_point_type(dp_type)
-        else:
-            # If they're not all tarred corpora, just produce an iterable corpus
-            return iterable_corpus_with_data_point_type(dp_type)
+    def __len__(self):
+        return sum((len(reader) for reader in self.input_readers), 0)
 
+    def __iter__(self):
+        return chain(*self.input_readers)
 
-class ModuleInfo(BaseModuleInfo):
-    module_type_name = "concat"
-    module_readable_name = "Corpus concatenation"
-    module_inputs = [("corpora", MultipleInputs(IterableCorpus))]
-    module_outputs = [("corpus", DataPointTypeFromInputs())]
-    module_executable = False
+    class Setup:
+        def __init__(self, datatype, input_reader_setups):
+            self.input_reader_setups = input_reader_setups
+            self.datatype = datatype
 
-    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-        datatypes = self.get_input("corpora", always_list=True)
-        # Find the common datapoint type to use for the output corpus
-        dp_type = _common_data_point_type([d.data_point_type for d in datatypes])
+        def ready_to_read(self):
+            return all(setup.ready_to_read() for setup in self.input_reader_setups)
 
-        if issubclass(output_datatype, TarredCorpus):
-            filter_type = tarred_corpus_concat_filter_dp_type(dp_type)
-        else:
-            filter_type = corpus_concat_filter_dp_type(dp_type)
-
-        return filter_type(self.pipeline, datatypes, module=self)
+    def process_setup(self):
+        # Override to not do data path processing
+        return

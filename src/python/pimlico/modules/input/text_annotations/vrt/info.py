@@ -7,6 +7,10 @@ Input reader for VRT text collections (`VeRticalized Text, as used by Korp:
 <https://www.kielipankki.fi/development/korp/corpus-input-format/#VRT_file_format>`_).
 Reads in files from arbitrary locations in the same way as :mod:`pimlico.modules.input.text.raw_text_files`.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 
 import os

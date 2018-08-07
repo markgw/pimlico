@@ -21,6 +21,11 @@ class ModuleInfo(BaseModuleInfo):
 
     Uses the Gensim implementation of the storage, so depends on Gensim.
 
+
+    .. todo::
+
+       Update to new datatypes system and add test pipeline
+
     """
     module_type_name = "store_word2vec"
     module_readable_name = "Store in word2vec format"

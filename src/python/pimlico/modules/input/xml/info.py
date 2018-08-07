@@ -6,6 +6,10 @@
 Input reader for XML file collections.  Gigaword, for example, is stored in this way.
 The data retrieved from the files is plain unicode text.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 import fnmatch
 import os

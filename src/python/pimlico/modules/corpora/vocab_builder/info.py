@@ -9,6 +9,10 @@ ID to every distinct word seen in the corpus, optionally applying thresholds so 
 Similar to :mod:`pimlico.modules.features.vocab_builder`, which builds two vocabs, one for terms and one for
 features.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import comma_separated_strings

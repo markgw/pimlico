@@ -12,6 +12,10 @@ Tokenized text is a subtype of text, so theoretically it should be acceptable to
 that expect plain text (and is considered so by typechecking). But it provides an incompatible
 data structure, so things go bad if you use it like that.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.old_datatypes.tar import TarredCorpusWriter

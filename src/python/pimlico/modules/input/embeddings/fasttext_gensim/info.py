@@ -22,6 +22,10 @@ class ModuleInfo(BaseModuleInfo):
        :mod:`pimlico.modules.input.embeddings.fasttext`:
           An alternative reader that does not use Gensim. It permits (only) reading the text format.
 
+    .. todo::
+
+       Update to new datatypes system and add test pipeline
+
     """
     module_type_name = "fasttext_embedding_reader_gensim"
     module_readable_name = "FastText embedding reader using Gensim"

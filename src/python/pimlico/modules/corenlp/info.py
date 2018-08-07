@@ -23,6 +23,10 @@ tags won't be handed into CoreNLP. In the future, this will be implemented.
 We also don't currently provide a way of choosing models other than the standard, pre-trained English models.
 This is a small addition that will be implemented in the future.
 
+.. todo::
+
+   Update to new datatypes system and add test pipelines
+
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import choose_from_list, str_to_bool

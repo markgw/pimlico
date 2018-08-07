@@ -6,6 +6,10 @@
 Simple interface to R that just involves running a given R script, first substituting in some paths from the
 pipeline, making it easy to pass in data from the output of other modules.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 
 from pimlico.core.modules.base import BaseModuleInfo

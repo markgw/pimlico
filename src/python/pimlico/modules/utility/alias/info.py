@@ -37,6 +37,10 @@ and anything else you could do with the original module name. This module, howev
 exactly one output of a module and generates a module instance of its own in the pipeline (albeit a
 filter module).
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 
 from pimlico.core.modules.base import BaseModuleInfo

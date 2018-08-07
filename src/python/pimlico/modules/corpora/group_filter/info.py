@@ -12,7 +12,7 @@ import math
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.base import PimlicoDatatype
 from pimlico.datatypes.corpora import IterableCorpus
-from pimlico.datatypes.corpora.grouped import GroupedCorpusWithDataPointTypeFromInput
+from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
 
 
 class IterableCorpusGrouper(object):
@@ -173,7 +173,7 @@ class ModuleInfo(BaseModuleInfo):
     module_type_name = "group_filter"
     module_readable_name = "Archive grouper (filter)"
     module_inputs = [("documents", IterableCorpus())]
-    module_outputs = [("documents", GroupedCorpusWithDataPointTypeFromInput())]
+    module_outputs = [("documents", GroupedCorpusWithTypeFromInput())]
     module_options = {
         "archive_size": {
             "help": "Number of documents to include in each archive (default: 1k)",

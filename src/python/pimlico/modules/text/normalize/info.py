@@ -7,6 +7,10 @@ Perform text normalization on tokenized documents.
 Currently, this includes only case normalization (to upper or lower case). In
 the future, more normalization operations may be added.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 

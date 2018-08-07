@@ -11,6 +11,10 @@ as a raw text datatype.
 If you want to do proper tokenization, consider either the CoreNLP or OpenNLP core
 modules.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.old_datatypes.documents import TextDocumentType

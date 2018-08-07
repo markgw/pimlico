@@ -6,6 +6,10 @@
 Runs the full coreference resolution pipeline using OpenNLP. This includes sentence splitting, tokenization,
 pos tagging, parsing and coreference resolution. The results of all the stages are available in the output.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 import os
 

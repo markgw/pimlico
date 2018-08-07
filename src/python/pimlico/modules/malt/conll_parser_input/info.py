@@ -7,6 +7,10 @@ Converts word-annotations to CoNLL format, ready for input into the Malt parser.
 Annotations must contain words and POS tags. If they contain lemmas, all the better; otherwise the word will
 be repeated as the lemma.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.old_datatypes.parse.dependency import CoNLLDependencyParseInputCorpus, CoNLLDependencyParseInputCorpusWriter

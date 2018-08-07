@@ -5,6 +5,10 @@
 """
 Trains LDA using Gensim's `basic LDA implementation <https://radimrehurek.com/gensim/models/ldamodel.html>`_.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool, comma_separated_strings
