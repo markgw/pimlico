@@ -14,147 +14,22 @@ When a number of valid documents is required (calculating corpus length when ski
 if one is stored in the metadata as ``valid_documents``, that count is used instead of iterating
 over the data to count them up.
 
-.. todo::
-
-   Finish updating to new datatypes system
-
 """
 from itertools import islice
 
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool
-from pimlico.datatypes.corpora import IterableCorpus
+from pimlico.datatypes.corpora import IterableCorpus, is_invalid_doc, GroupedCorpus
 from pimlico.datatypes.corpora.grouped import CorpusWithTypeFromInput
 from pimlico.utils.core import cached_property
-
-
-class CorpusSubsetFilter(IterableCorpus):
-    def __init__(self, pipeline, input_datatype, size, offset=0, skip_invalid=False, **kwargs):
-        IterableCorpus.__init__(self, None, pipeline, **kwargs)
-
-        self.skip_invalid = skip_invalid
-        self.offset = offset
-        self.input_datatype = input_datatype
-        self.size = size
-
-        self.data_point_type = self.input_datatype.data_point_type
-        self._num_valid_docs = None
-
-    def __len__(self):
-        if self.skip_invalid:
-            return min(self.size, self.num_valid_docs)
-        else:
-            return min(self.size, len(self.input_datatype))
-
-    @cached_property
-    def num_valid_docs(self):
-        if self._num_valid_docs is None:
-            if "valid_documents" in self.metadata:
-                # A count was stored in the metadata: use that
-                self._num_valid_docs = self.metadata["valid_documents"]
-            else:
-                self._num_valid_docs = sum(1 for doc_name, doc in self.input_datatype
-                                           if not isinstance(doc, InvalidDocument))
-        return self._num_valid_docs
-
-    def __iter__(self):
-        if not self.skip_invalid:
-            # Simple to implement this...
-            return islice(self.input_datatype, self.offset, self.offset+self.size)
-        else:
-            return iter(self.skip_invalid_iter())
-
-    def skip_invalid_iter(self):
-        done = 0
-        for doc_num, (doc_name, doc) in enumerate(self.input_datatype):
-            if doc_num < self.offset:
-                continue
-            if isinstance(doc, InvalidDocument):
-                # Skip over invalid docs
-                continue
-
-            yield doc_name, doc
-
-            done += 1
-            if done >= self.size:
-                return
-
-    def data_ready(self):
-        return self.input_datatype.data_ready()
-
-
-class TarredCorpusSubsetFilter(TarredCorpus):
-    def __init__(self, pipeline, input_datatype, size, offset=0, skip_invalid=False, **kwargs):
-        TarredCorpus.__init__(self, None, pipeline, **kwargs)
-
-        self.skip_invalid = skip_invalid
-        self.offset = offset
-        self.input_datatype = input_datatype
-        self.size = size
-
-        self.data_point_type = self.input_datatype.data_point_type
-        self._num_valid_docs = None
-
-    def __len__(self):
-        if self.skip_invalid:
-            # If we have as many as `size` docs, we can stop counting
-            return self.count_valid_docs(self.size)
-        else:
-            return min(self.size, len(self.input_datatype) - self.offset)
-
-    def count_valid_docs(self, stop_after=None):
-        if self._num_valid_docs is None:
-            if stop_after is not None:
-                # Don't need to count the full thing, just to check if it's smaller than a given size
-                # We cache this, which becomes invalid if self.size changes, but that shouldn't happen
-                self._num_valid_docs = sum(1 for __ in self.archive_iter())
-            else:
-                # Have to count the full set: no shortcuts
-                # Cache it for next time
-                self._num_valid_docs = sum(islice((1 for doc_name, doc in self.input_datatype
-                                                   if not isinstance(doc, InvalidDocument)), self.offset, None))
-        return self._num_valid_docs
-
-    def archive_iter(self, subsample=None, start_after=None, skip=None):
-        skip = skip or 0
-        start_index = self.offset + min(skip, self.size)
-
-        if subsample is not None:
-            raise NotImplementedError("tarred corpus subset filter doesn't implement subsampling")
-
-        # We can't use the base datatype's start_after functionality, as we don't know how many docs it's skipped
-        # Have to implement it here instead
-        started = start_after is None
-        done = 0
-        for doc_num, (archive, doc_name, doc) in enumerate(self.input_datatype.archive_iter()):
-            if start_after is not None and not started and (archive, doc_name) == start_after:
-                started = True
-                # Don't yield this one: start from the next one (unless we're still skipping)
-                continue
-            if doc_num < start_index:
-                # Skip this doc
-                continue
-            if self.skip_invalid and isinstance(doc, InvalidDocument):
-                # Jump over invalid docs
-                continue
-
-            # We're in the right range: pass through the doc
-            yield archive, doc_name, doc
-
-            done += 1
-            if done >= self.size:
-                # Reached the end of the slice: stop altogether
-                return
-
-    def data_ready(self):
-        return self.input_datatype.data_ready()
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "subset"
     module_readable_name = "Corpus subset"
-    module_inputs = [("documents", IterableCorpus())]
-    module_outputs = [("documents", CorpusWithTypeFromInput())]
+    module_inputs = [("corpus", IterableCorpus())]
+    module_outputs = [("corpus", CorpusWithTypeFromInput())]
+    module_executable = False
     module_options = {
         "size": {
             "help": "Number of documents to include",
@@ -173,16 +48,140 @@ class ModuleInfo(BaseModuleInfo):
             "type": str_to_bool,
         },
     }
-    module_executable = False
 
-    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-        if issubclass(output_datatype, TarredCorpus):
-            return TarredCorpusSubsetFilter(self.pipeline, self.get_input("documents"),
-                                            self.options["size"], offset=self.options["offset"],
-                                            skip_invalid=self.options["skip_invalid"],
-                                            module=self)
+    def instantiate_output_reader_setup(self, output_name, datatype):
+        if isinstance(datatype, GroupedCorpus):
+            # Produce reader with GroupedCorpus.Reader interface
+            Setup = SubsetGroupedCorpusReader.Setup
         else:
-            return CorpusSubsetFilter(self.pipeline, self.get_input("documents"),
-                                      self.options["size"], offset=self.options["offset"],
-                                      skip_invalid=self.options["skip_invalid"],
-                                      module=self)
+            # Produce reader that just acts like an IterableCorpus
+            Setup = SubsetIterableCorpusReader.Setup
+
+        return Setup(self.get_output_datatype("corpus")[1], self.get_input_reader_setup("corpus"), self.options)
+
+
+class SubsetIterableCorpusReader(IterableCorpus.Reader):
+    """
+    A custom reader that is used for the output of the subset module.
+
+    This version is used where the input corpus is not a grouped corpus. It
+    implements the interface of IterableCorpus' reader, but not GroupedCorpus.
+
+    """
+    metadata = {}
+
+    class Setup:
+        def __init__(self, datatype, input_reader_setup, options):
+            self.datatype = datatype
+            self.options = options
+            self.input_reader_setup = input_reader_setup
+
+        def ready_to_read(self):
+            # We're ready when the input's ready
+            return self.input_reader_setup.ready_to_read()
+
+    def __init__(self, datatype, setup, pipeline, **kwargs):
+        # Don't call GroupedCorpus init, but jump up to IterableCorpus
+        IterableCorpus.Reader.__init__(self, datatype, setup, pipeline, **kwargs)
+        # Get reader for the input corpus
+        self.input_reader = self.setup.input_reader_setup.get_reader(self.pipeline, module=self.module)
+        # Get the options
+        self.size = self.setup.options["size"]
+        self.offset = self.setup.options["offset"]
+        self.skip_invalid = self.setup.options["skip_invalid"]
+
+    def __len__(self):
+        return self.length
+
+    @cached_property
+    def length(self):
+        if self.skip_invalid:
+            # If we have as many as `size` docs, we can stop counting
+            return sum(islice(
+                (1 for doc_name, doc in self.input_reader if not is_invalid_doc(doc)),
+                self.offset, self.offset+self.size
+            ))
+        else:
+            # If not skipping invalid docs, it's easier to work out the output size
+            return min(self.size, len(self.input_reader) - self.offset)
+
+    def __iter__(self):
+        if self.skip_invalid:
+            doc_iter = ((doc_name, doc) for (doc_name, doc) in self.input_reader if not is_invalid_doc(doc))
+        else:
+            doc_iter = iter(self.input_reader)
+        return islice(doc_iter, self.offset, self.offset+self.size)
+
+    def process_setup(self):
+        # Override to not do data path processing
+        return
+
+
+class SubsetGroupedCorpusReader(SubsetIterableCorpusReader):
+    """
+    A custom reader that is used for the output of the subset module.
+
+    This simply wraps the input corpus to provide iteration over the truncated version.
+
+    """
+    metadata = {}
+
+    def __init__(self, datatype, setup, pipeline, **kwargs):
+        SubsetIterableCorpusReader.__init__(self, datatype, setup, pipeline, **kwargs)
+        # Provide the same interface to archives as the GroupedCorpus reader
+        # Just pass through archive names
+        # Note that some might not ever be used
+        self.archive_filenames = self.input_reader.archive_filenames
+        self.archives = self.input_reader.archives
+
+    def extract_file(self, archive_name, filename):
+        return self.input_reader.extract_file(archive_name, filename)
+
+    def archive_iter(self, start_after=None, skip=None, name_filter=None):
+        if skip is not None and skip == 0:
+            skip = None
+        # We use the input's skip functionality to skip over the offset
+        # We then have to implement our own skip functionality (and start_after), so that skipped docs
+        #  count towards the subset
+        started = start_after is None or skip is None
+        skipped = 0
+        done = 0
+        for doc_num, (archive, doc_name, doc) in enumerate(self.input_reader.archive_iter(skip=self.offset)):
+            if done >= self.size:
+                # Reached the end of the slice: stop iterating
+                return
+
+            if self.skip_invalid and is_invalid_doc(doc):
+                # Jump over invalid docs
+                # These don't count towards the subset size
+                continue
+
+            done += 1
+
+            if not started:
+                if start_after is not None:
+                    if (archive, doc_name) == start_after:
+                        # Start on the next doc
+                        start_after = None
+                    continue
+                elif skip is not None:
+                    if skipped < skip:
+                        skipped += 1
+                        continue
+                    else:
+                        started = True
+
+            # If filtering, decide whether to include this file
+            if name_filter is not None and not name_filter(archive, doc_name):
+                # Reject this file
+                continue
+
+            # We're in the right range: pass through the doc
+            yield archive, doc_name, doc
+
+    def list_archive_iter(self):
+        if self.skip_invalid:
+            # Can't make this faster than reading all, as we have to check whether they're invalid
+            return ((archive, doc_name) for (archive, doc_name, doc) in self.archive_iter())
+        else:
+            return islice(self.input_reader.list_archive_iter(), self.offset, self.offset+self.size)

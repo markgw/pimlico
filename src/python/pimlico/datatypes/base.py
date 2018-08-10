@@ -194,14 +194,10 @@ class PimlicoDatatypeReaderMeta(type):
                 parent_setup = cls.__bases__[0].Setup
 
             my_setup = cls.Setup
-            if my_setup is parent_setup:
-                # Setup is not overridden, so we don't need to subclass
-                setup_cls = parent_setup
-            else:
-                # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
-                my_dict = dict(my_setup.__dict__)
-                my_dict["reader_type"] = cls
-                setup_cls = type("{}Setup".format(cls.__name__), (parent_setup,), my_dict)
+            # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
+            my_dict = dict(my_setup.__dict__)
+            my_dict["reader_type"] = cls
+            setup_cls = type("{}Setup".format(cls.__name__), (parent_setup,), my_dict)
             setattr(cls, _cache_name, setup_cls)
         return getattr(cls, _cache_name)
 
