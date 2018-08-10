@@ -801,7 +801,9 @@ class PimlicoDatatype(object):
 
             # Any remaining kwargs are incorrect, as they're not listed as either metadata or writer param keys
             if len(kwargs):
-                raise DatatypeWriteError("writer kwargs not valid as metadata keys or writer parameters: {}".format(
+                raise DatatypeWriteError("writer kwargs not valid as metadata keys or writer parameters "
+                                         "for {} writer: {}".format(
+                    self.datatype.full_datatype_name(),
                     ", ".join(kwargs.keys())
                 ))
 

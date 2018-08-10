@@ -3,11 +3,8 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 import random
-from copy import copy
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.core import StringListWriter
-from pimlico.old_datatypes.tar import TarredCorpusWriter
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -15,9 +12,6 @@ class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         input_corpus = self.info.get_input("corpus")
         input_corpus.raw_data = True
-
-        gzip = input_corpus.metadata.get("gzip", False)
-        encoding = input_corpus.metadata.get("encoding", "utf-8")
 
         set1_list = []
         set2_list = []
@@ -38,17 +32,10 @@ class ModuleExecutor(BaseModuleExecutor):
         set2_remaining = len(input_corpus) - set1_remaining
 
         pbar = get_progress_bar(len(input_corpus), title="Splitting")
-
-        # Use a generic TarredCorpusWriter, since we're just passing through the encoded data from the input
-        with TarredCorpusWriter(self.info.get_absolute_output_dir("set1"), gzip=gzip, encoding=encoding) as set1_writer:
-            # Copy over the corpus metadata from the input to start with
-            # The writer will replace some values, but anything specific to the datatype should be copied
-            set1_writer.metadata = copy(input_corpus.metadata)
-
-            with TarredCorpusWriter(self.info.get_absolute_output_dir("set2"),
-                                    gzip=gzip, encoding=encoding) as set2_writer:
-                set2_writer.metadata = copy(input_corpus.metadata)
-
+        # Copy over the corpus metadata from the input to start with
+        # The writer will replace some values, but anything specific to the datatype should be copied
+        with self.info.get_output_writer("set1", **input_corpus.metadata) as set1_writer:
+            with self.info.get_output_writer("set2", **input_corpus.metadata) as set2_writer:
                 for archive_name, doc_name, doc_data in pbar(input_corpus.archive_iter()):
                     if set1_remaining == 0:
                         # Must be set 2
@@ -71,13 +58,11 @@ class ModuleExecutor(BaseModuleExecutor):
                         lst.append(doc_name)
 
         # Output the list(s) of chosen docs
-        output_dir = self.info.get_absolute_output_dir("doc_list1")
-        self.log.info("Outputting set1 list to %s" % output_dir)
-        with StringListWriter(output_dir) as list_writer:
-            list_writer.data = set1_list
+        with self.info.get_output_writer("doc_list1") as list_writer:
+            self.log.info("Outputting set1 list to %s" % list_writer.base_dir)
+            list_writer.write_list(set1_list)
 
         if output_set2_list:
-            output_dir = self.info.get_absolute_output_dir("doc_list2")
-            self.log.info("Outputting set2 list to %s" % output_dir)
-            with StringListWriter(output_dir) as list_writer:
-                list_writer.data = set2_list
+            with self.info.get_output_writer("doc_list2") as list_writer:
+                self.log.info("Outputting set2 list to %s" % list_writer.base_dir)
+                list_writer.write_list(set2_list)

@@ -4,15 +4,13 @@ The formatters in pimlico.old_datatypes.formatters should also be copy/adapted.
 They should maybe go with their datatypes, as many others have.
 
 
+files
+  Done all, but still need unittests
+embeddings
+  TSVVecFiles (depends on files)
+  Also unittests
 json
   JsonDocumentCorpus
-files
-  File (probably don't do this: use a specialized file collection instead)
-  NamedFileCollection
-  UnnamedFileCollection (remove everything relating to input readers)
-  NamedFile
-  FilesInput (if necessary)
-  RawTextFiles / RawTextDirectory: almost certainly skip, as they're only for reading input
 core
   SingleTextDocument -- do once NamedFileCollection is done
 arrays
@@ -20,9 +18,6 @@ arrays
   ScipySparseMatrix
 results
   NumericResult
-embeddings
-  Embeddings
-  TSVVecFiles
 word_annotations
   WordAnnotationCorpus
   AddAnnotationField

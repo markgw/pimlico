@@ -16,23 +16,23 @@ the same thing for the second input too. Note that you might prefer to only stor
 e.g. in a training-test split, store only the test document list, as the training list will be much larger. In such
 a case, just put the smaller set first and don't request the optional output `doc_list2`.
 
-.. todo::
-
-   Update to new datatypes system
-
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.old_datatypes.base import DynamicOutputDatatype, TypeFromInput
-from pimlico.old_datatypes.core import StringList
-from pimlico.old_datatypes.tar import TarredCorpus
+from pimlico.datatypes.core import StringList
+from pimlico.datatypes.corpora import GroupedCorpus
+from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "split"
     module_readable_name = "Corpus split"
-    module_inputs = [("corpus", TarredCorpus)]
-    module_outputs = [("set1", TypeFromInput()), ("set2", TypeFromInput()), ("doc_list1", StringList)]
-    module_optional_outputs = [("doc_list2", StringList)]
+    module_inputs = [("corpus", GroupedCorpus())]
+    module_outputs = [
+        ("set1", GroupedCorpusWithTypeFromInput()),
+        ("set2", GroupedCorpusWithTypeFromInput()),
+        ("doc_list1", StringList()),
+    ]
+    module_optional_outputs = [("doc_list2", StringList())]
     module_options = {
         "set1_size": {
             "help": "Proportion of the corpus to put in the first set, float between 0.0 and 1.0. "
