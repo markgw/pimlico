@@ -521,7 +521,7 @@ class BaseModuleInfo(object):
         # Get the module's output dir relative to the storage location in use
         dataset_rel_dir = self.get_output_dir(output_name)
         # Get all possible absolute paths where this could be, according to the pipeline's configuration
-        possible_paths = self.pipeline.get_data_search_paths(dataset_rel_dir)
+        possible_paths = [path for (name, path) in self.pipeline.get_data_search_paths(dataset_rel_dir)]
         # Produce a reader setup that will look in these paths for the data
         return datatype(possible_paths)
 
@@ -764,10 +764,10 @@ class BaseModuleInfo(object):
             # Don't check inputs for an input module: there aren't any
             # However, the output datatypes might require certain files before the data preparation routine can be run
             for output_name in self.output_names:
-                for path in self.get_output(output_name).get_required_paths():
-                    if not os.path.exists(path):
-                        output_text = "default output" if output_name is None else ("output '%s'" % output_name)
-                        missing.append("%s (required for '%s' (%s)" % (path, self.module_name, output_text))
+                reader_setup = self.get_output_reader_setup(output_name)
+                if not reader_setup.ready_to_read():
+                    output_text = "default output" if output_name is None else ("output '%s'" % output_name)
+                    missing.append("data not ready for input module '%s' (%s)" % (self.module_name, output_text))
         else:
             for input_name in input_names:
                 input_connections = self.get_input_module_connection(input_name, always_list=True)

@@ -4,15 +4,8 @@ The formatters in pimlico.old_datatypes.formatters should also be copy/adapted.
 They should maybe go with their datatypes, as many others have.
 
 
-files
-  Done all, but still need unittests
-embeddings
-  TSVVecFiles (depends on files)
-  Also unittests
 json
   JsonDocumentCorpus
-core
-  SingleTextDocument -- do once NamedFileCollection is done
 arrays
   NumpyArray
   ScipySparseMatrix

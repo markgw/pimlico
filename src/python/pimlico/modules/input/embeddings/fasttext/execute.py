@@ -3,7 +3,6 @@ from itertools import islice
 import numpy
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.embeddings import EmbeddingsWriter
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -47,8 +46,7 @@ class ModuleExecutor(BaseModuleExecutor):
         # We don't know word counts, so just set them to a descending count, so that they get ordered correctly
         word_counts = [(word, len(words)-1-i) for i, word in enumerate(words)]
 
-        output_dir = self.info.get_absolute_output_dir("embeddings")
-        self.log.info("Writing embeddings to {}".format(output_dir))
-        with EmbeddingsWriter(output_dir) as writer:
+        self.log.info("Writing embeddings")
+        with self.info.get_output_writer() as writer:
             writer.write_word_counts(word_counts)
             writer.write_vectors(vectors)

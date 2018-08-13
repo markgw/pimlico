@@ -8,10 +8,6 @@ There used to be an UnnamedFileCollection, which has been removed in the move to
 new datatype system. It used to be used mostly for input datatypes, which don't exist
 any more. There may still be a use for this, though, so I may be added in future.
 
-.. todo::
-
-   Add a unittest for these datatypes
-
 """
 
 import os
@@ -43,6 +39,7 @@ class NamedFileCollection(PimlicoDatatype):
         ("filenames", {
             "type": comma_separated_strings,
             "help": "Filenames contained in the collection",
+            "default": [],
         })
     ])
 
@@ -71,6 +68,7 @@ class NamedFileCollection(PimlicoDatatype):
                 ]
 
         def process_setup(self):
+            super(NamedFileCollection.Reader, self).process_setup()
             self.filenames = self.datatype.filenames
 
         def get_absolute_path(self, filename):
@@ -83,9 +81,22 @@ class NamedFileCollection(PimlicoDatatype):
             return [self.get_absolute_path(f) for f in self.filenames]
 
         def read_file(self, filename=None, mode="r"):
+            """
+            Read a file from the collection.
+
+            :param filename: string filename, which should be one of the filenames specified for this
+                collection; or an integer, in which case the ith file in the collection is read. If
+                not given, the first file is read
+            :param mode:
+            :return:
+            """
             # By default, read the first file in the collection
             if filename is None:
                 filename = self.filenames[0]
+            elif type(filename) is int:
+                # Allow an int to specify the ith filename
+                filename = self.filenames[filename]
+
             with open(self.get_absolute_path(filename), mode=mode) as f:
                 return f.read()
 
@@ -123,19 +134,41 @@ class NamedFile(NamedFileCollection):
     The filename is given as the `filename` datatype option, which can also be given
     as the first init arg: `NamedFile("myfile.txt")`.
 
+    Since NamedFile is a subtype of NamedFileCollection, it also has a "filenames" option.
+    It is ignored if the `filename` option is given, and otherwise must have exactly one
+    item.
+
     """
     datatype_name = "named_file"
     datatype_options = OrderedDict([
         ("filename", {
             "help": "The file's name",
         })
-    ])
+    ] + NamedFileCollection.datatype_options.items())
 
     def __init__(self, *args, **kwargs):
-        super(NamedFile, self).__init__(*args, **kwargs)
+        super(NamedFile, self).__init__(*args, filenames=[], **kwargs)
         self.filename = self.options["filename"]
+        if self.filename is None:
+            # Allow the "filenames" option to be used as well
+            if len(self.filenames) > 1:
+                raise ValueError("tried to instantiate NamedFile with multiple filenames in the 'filename' option")
+            elif len(self.filenames) == 1:
+                self.filename = self.filenames[0]
+            else:
+                # Use a default filename if none is given
+                self.filename = "data"
+
         # Set filenames from our filename
         self.filenames = [self.filename]
+
+    class Writer:
+        def __init__(self, *args, **kwargs):
+            super(NamedFile.Writer, self).__init__(*args, **kwargs)
+            self.filename = self.datatype.filename
+
+        def write_file(self, data):
+            super(NamedFile.Writer, self).write_file(self.filename, data)
 
 
 class FilesInput(DynamicInputDatatypeRequirement):
@@ -153,3 +186,27 @@ class FilesInput(DynamicInputDatatypeRequirement):
 # Alias FilesInput as FileInput: the default min no. files is 1, so this makes sense, but is easier to read
 # if only one file is expected
 FileInput = FilesInput
+
+
+class TextFile(NamedFile):
+    """
+    Simple dataset containing just a single utf-8 encoded text file.
+
+    """
+    datatype_name = "text_document"
+    datatype_options = OrderedDict([
+        ("filename", {
+            "help": "The file's name. Typically left as the default. Default: data.txt",
+            "default": "data.txt",
+        })
+    ] + NamedFileCollection.datatype_options.items())
+
+    class Reader:
+        def read_file(self, filename=None, mode="r"):
+            # Ignore filename, since there's only one
+            data = super(TextFile.Reader, self).read_file()
+            return data.decode("utf-8")
+
+    class Writer:
+        def write_file(self, data):
+            super(TextFile.Writer, self).write_file(data.encode("utf-8"))

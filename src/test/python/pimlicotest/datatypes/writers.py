@@ -21,6 +21,8 @@ import os
 from pimlico.core.config import PipelineConfig
 from pimlico.datatypes.core import Dict, StringList
 from pimlico.datatypes.dictionary import DictionaryData, Dictionary
+from pimlico.datatypes.embeddings import Embeddings
+from pimlico.datatypes.files import NamedFileCollection, NamedFile, TextFile
 
 
 class WriterTest(object):
@@ -104,3 +106,62 @@ class StringListWriterTest(WriterTest, unittest.TestCase):
         writer.write_list(
             ["a", "list", "of", "strings", ",", "quite", "simply"]
         )
+
+
+class NamedFileCollectionWriterTest1(WriterTest, unittest.TestCase):
+    datatype_cls = NamedFileCollection
+
+    def instantiate_datatype(self):
+        return self.datatype_cls(["text_file.txt"])
+
+    def write_data(self, writer):
+        writer.write_file(writer.filenames[0], "Some text data in a single text file\n\nJust some text\n")
+
+
+class NamedFileCollectionWriterTest2(WriterTest, unittest.TestCase):
+    datatype_cls = NamedFileCollection
+
+    def instantiate_datatype(self):
+        return self.datatype_cls(["text_file.txt", "data.bin"])
+
+    def write_data(self, writer):
+        import struct
+        # Write a text file
+        writer.write_file(writer.filenames[0], "Some text data in a single text file\n\nJust some text\n")
+        # Also write some binary data
+        data = struct.pack("?fff", True, 0.5, 1.0, 2.0)
+        writer.write_file(writer.filenames[1], data)
+
+
+class NamedFileWriterTest(WriterTest, unittest.TestCase):
+    datatype_cls = NamedFile
+
+    def instantiate_datatype(self):
+        return self.datatype_cls("text_file.txt")
+
+    def write_data(self, writer):
+        # Write a text file
+        writer.write_file("Some text data in a single text file\n\nJust some text\nThis one's for a NamedFile test\n")
+
+
+class TextFileWriterTest(WriterTest, unittest.TestCase):
+    datatype_cls = TextFile
+
+    def write_data(self, writer):
+        # Write a text file
+        writer.write_file("Some text data in a single text file\n\nJust some text\nThis one's for a TextFile test\n")
+
+
+class EmbeddingsWriterTest(WriterTest, unittest.TestCase):
+    datatype_cls = Embeddings
+
+    def write_data(self, writer):
+        import numpy
+        # 10 random vectors, dimensionality 50
+        vectors = numpy.random.rand(10, 50)
+        # Need a word for each vectors
+        words = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+        counts = list(range(10))
+
+        writer.write_vectors(vectors)
+        writer.write_word_counts(zip(words, counts))

@@ -2,6 +2,7 @@ import os
 
 from pimlico.core.dependencies.python import numpy_dependency
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.datatypes.embeddings import Embeddings
 
 
 class ModuleInfo(BaseModuleInfo):
@@ -21,14 +22,10 @@ class ModuleInfo(BaseModuleInfo):
           An alternative reader that uses Gensim's FastText format reading code and permits reading from the
           binary format, which contains more information.
 
-    .. todo::
-
-       Update to new datatypes system and add test pipeline
-
     """
     module_type_name = "fasttext_embedding_reader"
     module_readable_name = "FastText embedding reader"
-    module_outputs = [("embeddings", Embeddings)]
+    module_outputs = [("embeddings", Embeddings())]
     module_options = {
         "path": {
             "help": "Path to the FastText embedding file",

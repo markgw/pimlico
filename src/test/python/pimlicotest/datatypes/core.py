@@ -5,10 +5,13 @@ Tests instantiating the datatypes and reading in data from an example dataset.
 
 """
 import os
+import types
 import unittest
 from itertools import islice
 
 from pimlico import TEST_DATA_DIR
+
+# Create test cases automatically for lots of datatypes
 from pimlico.datatypes.base import PimlicoDatatype
 from pimlico.datatypes.core import Dict, StringList
 from pimlico.datatypes.corpora.data_points import RawTextDocumentType, TextDocumentType
@@ -17,16 +20,27 @@ from pimlico.datatypes.corpora.grouped import GroupedCorpus
 from pimlico.datatypes.corpora.ints import IntegerListDocumentType, IntegerListsDocumentType
 from pimlico.datatypes.corpora.table import IntegerTableDocumentType
 from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType, CharacterTokenizedDocumentType
-
-# Create test cases automatically for lots of datatypes
 from pimlico.datatypes.dictionary import Dictionary
+from pimlico.datatypes.embeddings import Embeddings
+from pimlico.datatypes.files import NamedFileCollection, NamedFile, TextFile
 
 DATATYPES = [
-    # Specify: datatype class, path to data base dir
-    (PimlicoDatatype, os.path.join("text_corpora", "europarl")),
-    (Dict, "demo_dict"),
-    (StringList, "demo_string_list"),
-    (Dictionary, "dictionary")
+    # Specify: datatype class, path to data base dir, list of attributes/methods to test
+    (PimlicoDatatype(), os.path.join("text_corpora", "europarl"), []),
+    (Dict(), "demo_dict", ["get_dict"]),
+    (StringList(), "demo_string_list", ["get_list"]),
+    (Dictionary(), "dictionary", ["get_data"]),
+    (NamedFileCollection(["text_file.txt"]), "named_files1", [("read_file", 0)]),
+    (
+        NamedFileCollection(["text_file.txt", "data.bin"]), "named_files2",
+        [("read_file", 0), ("read_file", 1)]
+    ),
+    # This test uses the same dataset as the NamedFileCollection with one file
+    (NamedFile("text_file.txt"), "named_files1", ["read_file"]),
+    # This test uses a dataset written by a NamedFile writer
+    (NamedFile("text_file.txt"), "named_file", ["read_file"]),
+    (TextFile(), "text_file", ["read_file"]),
+    (Embeddings(), "embeddings", ["vectors", "word_counts"]),
 ]
 
 # Similar set of test cases, for different data point types of grouped corpora
@@ -52,10 +66,11 @@ class DatatypeTest(object):
 
     """
     # Override the following attributes in each subclass
-    datatype_cls = None
+    datatype = None
     data_base_dir = None
     datatype_args = ()
     datatype_kwargs = {}
+    attrs_to_test = []
 
     def setUp(self):
         # Create a dummy, empty pipeline
@@ -64,15 +79,38 @@ class DatatypeTest(object):
         self.pipeline = PipelineConfig.empty()
 
     def reader_tests(self, reader):
-        return
+        datatype_name = reader.datatype.full_datatype_name()
 
-    def instantiate_datatype(self):
-        return self.datatype_cls()
+        for attr in self.attrs_to_test:
+            if type(attr) is tuple:
+                # Allow args to be specified for a method call, optionally
+                attr, args = attr
+                if type(args) is not tuple:
+                    # Simple case for a single arg
+                    args = (args, )
+            else:
+                args = tuple()
+
+            # If the attr is a property or simply an attribute, this is all we need to do
+            try:
+                value = getattr(reader, attr)
+            except AttributeError:
+                raise AssertionError("datatype {} does not have an attribute '{}', named in test definition".format(
+                    datatype_name, attr
+                ))
+            except Exception, e:
+                raise AssertionError("error getting attribute '{}' of {}: {}".format(attr, datatype_name, e))
+            # If it's a method, we should call it
+            if type(value) is types.MethodType:
+                try:
+                    value = value(*args)
+                except Exception, e:
+                    raise AssertionError("error calling method {}({}) on datatype {}: {}".format(
+                        attr, ", ".join(str(a) for a in args), datatype_name, e)
+                    )
 
     def runTest(self):
-        # Instantiate the datatype
-        datatype = self.instantiate_datatype()
-        self.assertIsInstance(datatype, self.datatype_cls)
+        datatype = self.datatype
         # Create a reader setup for the given data base dir
         reader_setup = datatype([self.data_base_dir])
         self.assertIsInstance(reader_setup, PimlicoDatatype.Reader.Setup)
@@ -93,15 +131,12 @@ class DatatypeTest(object):
 
 class GroupedCorpusDatatypeTest(DatatypeTest):
     # Must be overridden by concrete subclasses
-    data_point_type = None  # Instance of data point type
-    datatype_cls = GroupedCorpus
+    datatype = None
     document_attrs = []  # Attributes to try to read on the document
-
-    def instantiate_datatype(self):
-        return self.datatype_cls(self.data_point_type)
 
     def reader_tests(self, reader):
         """ Additional test with a grouped corpus to try iterating, etc. """
+        super(GroupedCorpusDatatypeTest, self).reader_tests(reader)
         # Try reading several documents from the reader
         for doc_name, doc in islice(reader, 3):
             # Check we can reader the raw_data attribute, which all doc types should have
@@ -113,15 +148,23 @@ class GroupedCorpusDatatypeTest(DatatypeTest):
             for attr in self.document_attrs:
                 # Check the attr exists
                 self.assertTrue(hasattr(doc, attr), msg="attribute '{}' does not exist on data point type {}".format(
-                    attr, self.data_point_type.name
+                    attr, self.datatype.data_point_type.name
                 ))
                 if hasattr(doc, attr):
                     # Try reading the attribute: usually this is a property, which could fail
                     getattr(doc, attr)
 
 
-for datatype_cls, base_dir in DATATYPES:
-    cls_name = "{}Test".format(datatype_cls.__name__)
+_used_names = []
+for datatype, base_dir, attrs_to_test in DATATYPES:
+    base_cls_name = cls_name = "{}Test".format(type(datatype).__name__)
+    # Allow multiple tests of the same datatype without name clashes
+    name_id = -1
+    while cls_name in _used_names:
+        name_id += 1
+        cls_name = "{}{}".format(base_cls_name, name_id)
+    _used_names.append(cls_name)
+
     if not os.path.isabs(base_dir):
         base_dir = os.path.join(TEST_DATA_DIR, "datasets", base_dir)
     # Put the test class in globals so that unittest can discover it
@@ -136,13 +179,21 @@ for datatype_cls, base_dir in DATATYPES:
         cls_name,
         (DatatypeTest, unittest.TestCase),
         {
-            "datatype_cls": datatype_cls,
+            "datatype": datatype,
             "data_base_dir": base_dir,
+            "attrs_to_test": attrs_to_test,
         }
     )
 
 for data_point_type, base_dir, doc_attrs in GROUPED_CORPUS_DATATYPES:
-    cls_name = "GroupedCorpus{}Test".format(data_point_type.name)
+    base_cls_name = cls_name = "GroupedCorpus{}Test".format(data_point_type.name)
+    # Allow multiple tests of the same datatype without name clashes
+    name_id = -1
+    while cls_name in _used_names:
+        name_id += 1
+        cls_name = "{}{}".format(base_cls_name, name_id)
+    _used_names.append(cls_name)
+
     if not os.path.isabs(base_dir):
         base_dir = os.path.join(TEST_DATA_DIR, "datasets", base_dir)
     # Put the test class in globals so that unittest can discover it
@@ -157,7 +208,7 @@ for data_point_type, base_dir, doc_attrs in GROUPED_CORPUS_DATATYPES:
         cls_name,
         (GroupedCorpusDatatypeTest, unittest.TestCase),
         {
-            "data_point_type": data_point_type,
+            "datatype": GroupedCorpus(data_point_type),
             "data_base_dir": base_dir,
             "document_attrs": doc_attrs,
         }

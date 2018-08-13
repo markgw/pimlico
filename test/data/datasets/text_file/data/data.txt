@@ -1,0 +1,4 @@
+Some text data in a single text file
+
+Just some text
+This one's for a NamedFile test

@@ -294,18 +294,6 @@ class PimlicoDatatype(object):
             # Build a better name out of the class name
             self.datatype_name = _class_name_word_boundary.sub(r"\1_\2", type(self).__name__).lower()
 
-    def get_required_paths(self):
-        """
-        Returns a list of paths to files that should be available for the data to be read.
-        The base data_ready() implementation checks that these are all available.
-
-        Paths may be absolute or relative. If relative, they refer to files within the data directory
-        and data_ready() will fail if the data dir doesn't exist.
-
-        :return: list of absolute or relative paths
-        """
-        return []
-
     def get_software_dependencies(self):
         """
         Get a list of all software required to **read** this datatype. This is

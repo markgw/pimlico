@@ -3,4 +3,4 @@ pipelines/corpora/group_filter.conf, output
 pipelines/corpora/concat.conf, output
 pipelines/corpora/subset.conf, output
 pipelines/corpora/split.conf, split
-pipelines/input/fasttext.conf, vectors
+pipelines/input/fasttext.conf, vectors, stored_vectors

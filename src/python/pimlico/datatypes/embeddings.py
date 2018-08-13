@@ -1,10 +1,16 @@
 """
-.. todo::
+Datatypes to store embedding vectors, together with their words.
 
-   Not yet finished implementing this. TSVVecFiles uses NamedFileCollection, which
-   I'm still in the process of implenting. Once that's finished (with unit test)
-   add TSVVecFiles.
+The main datatype here, :class:`Embeddings`, is the main datatype that should be used
+for passing embeddings between modules.
 
+We also provide a simple file collection datatype that stores the files used by
+Tensorflow, for example, as input to the Tensorflow Projector.
+Modules that need data in this format can use this datatype, which makes it
+easy to convert from other formats.
+
+"""
+"""
 .. todo::
 
    Add unittests for these datatypes.
@@ -14,6 +20,7 @@ import os
 
 from pimlico.core.dependencies.python import numpy_dependency
 from pimlico.datatypes import PimlicoDatatype
+from pimlico.datatypes.files import NamedFileCollection
 from pimlico.utils.core import cached_property
 
 
@@ -58,6 +65,10 @@ class Embeddings(PimlicoDatatype):
         return super(Embeddings, self).get_writer_software_dependencies() + [numpy_dependency]
 
     class Reader:
+        class Setup:
+            def get_required_paths(self):
+                return ["vectors.npy", "vocab.csv"]
+
         @cached_property
         def vectors(self):
             import numpy
@@ -219,42 +230,44 @@ class TSVVecFiles(NamedFileCollection):
 
     """
     datatype_name = "tsv_vec_files"
-    filenames = ["embeddings.tsv", "metadata.tsv"]
 
+    def __init__(self, *args, **kwargs):
+        super(TSVVecFiles, self).__init__(["embeddings.tsv", "metadata.tsv"], *args, **kwargs)
 
-class TSVVecFilesWriter(NamedFileCollectionWriter):
-    """
-    Write embeddings and their labels to TSV files, as used by Tensorflow.
-    
-    """
-    filenames = ["embeddings.tsv", "metadata.tsv"]
+    class Reader:
+        def get_embeddings_data(self):
+            return self.read_file(self.filenames[0])
 
-    def write_vectors(self, array):
-        import csv
+        def get_embeddings_metadata(self):
+            return self.read_file(self.filenames[1])
 
-        with open(self.get_absolute_path(self.filenames[0]), "w") as f:
-            writer = csv.writer(f, dialect="excel-tab")
-            # Write each row
-            for vec in array:
-                writer.writerow([str(val) for val in vec])
-        self.file_written(self.filenames[0])
+    class Writer:
+        def write_vectors(self, array):
+            import csv
 
-    def write_vocab_with_counts(self, word_counts):
-        import csv
+            with open(self.get_absolute_path(self.filenames[0]), "w") as f:
+                writer = csv.writer(f, dialect="excel-tab")
+                # Write each row
+                for vec in array:
+                    writer.writerow([str(val) for val in vec])
+            self.file_written(self.filenames[0])
 
-        with open(self.get_absolute_path(self.filenames[1]), "w") as f:
-            writer = csv.writer(f, dialect="excel-tab")
-            writer.writerow(["Word", "Count"])
-            for word, count in word_counts:
-                writer.writerow([unicode(word).encode("utf-8"), str(count)])
-        self.file_written(self.filenames[1])
+        def write_vocab_with_counts(self, word_counts):
+            import csv
 
-    def write_vocab_without_counts(self, words):
-        import csv
+            with open(self.get_absolute_path(self.filenames[1]), "w") as f:
+                writer = csv.writer(f, dialect="excel-tab")
+                writer.writerow(["Word", "Count"])
+                for word, count in word_counts:
+                    writer.writerow([unicode(word).encode("utf-8"), str(count)])
+            self.file_written(self.filenames[1])
 
-        with open(self.get_absolute_path(self.filenames[1]), "w") as f:
-            writer = csv.writer(f, dialect="excel-tab")
-            writer.writerow(["Word"])
-            for word in words:
-                writer.writerow([unicode(word).encode("utf-8")])
-        self.file_written(self.filenames[1])
+        def write_vocab_without_counts(self, words):
+            import csv
+
+            with open(self.get_absolute_path(self.filenames[1]), "w") as f:
+                writer = csv.writer(f, dialect="excel-tab")
+                writer.writerow(["Word"])
+                for word in words:
+                    writer.writerow([unicode(word).encode("utf-8")])
+            self.file_written(self.filenames[1])
