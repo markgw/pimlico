@@ -3,8 +3,7 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.base import InvalidDocument
-from pimlico.old_datatypes.dictionary import DictionaryWriter
+from pimlico.datatypes.corpora import is_invalid_doc
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -21,11 +20,11 @@ class ModuleExecutor(BaseModuleExecutor):
         pbar = get_progress_bar(len(input_docs), title="Counting")
 
         # Prepare dictionary writers for the term and feature vocabs
-        with DictionaryWriter(self.info.get_absolute_output_dir("vocab")) as vocab_writer:
+        with self.info.get_output_writer("vocab") as vocab_writer:
             # Input is given for every document in a corpus
             # Update the term vocab with all terms in each doc
             vocab_writer.add_documents(
-                (line for doc_name, doc in pbar(input_docs) if not isinstance(doc, InvalidDocument) for line in doc),
+                (line for doc_name, doc in pbar(input_docs) if not is_invalid_doc(doc) for line in doc),
                 prune_at=prune_at
             )
 

@@ -11,21 +11,21 @@ features.
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Updated to new datatypes system. Add test pipeline and test
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import comma_separated_strings
-from pimlico.old_datatypes.dictionary import Dictionary
-from pimlico.old_datatypes.tar import TarredCorpusType
-from pimlico.old_datatypes.tokenized import TokenizedDocumentType
+from pimlico.datatypes.corpora import GroupedCorpus
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
+from pimlico.datatypes.dictionary import Dictionary
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "vocab_builder"
     module_readable_name = "Corpus vocab builder"
-    module_inputs = [("text", TarredCorpusType(TokenizedDocumentType))]
-    module_outputs = [("vocab", Dictionary)]
+    module_inputs = [("text", GroupedCorpus(TokenizedDocumentType()))]
+    module_outputs = [("vocab", Dictionary())]
     module_options = {
         "threshold": {
             "help": "Minimum number of occurrences required of a term to be included",
