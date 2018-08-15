@@ -10,12 +10,6 @@ Modules that need data in this format can use this datatype, which makes it
 easy to convert from other formats.
 
 """
-"""
-.. todo::
-
-   Add unittests for these datatypes.
-
-"""
 import os
 
 from pimlico.core.dependencies.python import numpy_dependency

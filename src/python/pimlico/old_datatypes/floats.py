@@ -164,3 +164,64 @@ class FloatListDocumentCorpusWriter(TarredCorpusWriter):
                 raise ValueError("error encoding float data %s using struct format %s: %s" %
                                  (num, self.packer.format, e))
         return raw_data.getvalue()
+
+
+class VectorDocumentType(RawDocumentType):
+    """
+    Like FloatListDocumentType, but each document has the same number of float values
+
+    """
+    formatters = [("vector", "pimlico.datatypes.floats.VectorFormatter")]
+
+    def __init__(self, options, metadata):
+        super(VectorDocumentType, self).__init__(options, metadata)
+
+    @cached_property
+    def unpacker(self):
+        """ Struct for reading in the whole vector """
+        dim = self.metadata["dimensions"]
+        return struct.Struct("<" + "d"*dim)
+
+    def process_document(self, data):
+        try:
+            return self.unpacker.unpack(data)
+        except struct.error, e:
+            raise IOError("error interpreting float vector data: %s" % e)
+
+
+class VectorFormatter(DocumentBrowserFormatter):
+    DATATYPE = VectorDocumentType
+
+    def format_document(self, doc):
+        return "\n".join("{:.3f}".format(f) for f in doc)
+
+
+class VectorDocumentCorpus(TarredCorpus):
+    """
+    Corpus of float data, where each document contains a single list of floats
+    and each one has the same length. That is, each document is one vector.
+
+    The floats are stored as C doubles, using 8 bytes each.
+
+    """
+    datatype_name = "vector_corpus"
+    data_point_type = VectorDocumentType
+
+
+class VectorDocumentCorpusWriter(TarredCorpusWriter):
+    def __init__(self, base_dir, dimensions, **kwargs):
+        # Tell TarredCorpus not to encode/decode text data
+        kwargs["encoding"] = None
+        super(VectorDocumentCorpusWriter, self).__init__(base_dir, **kwargs)
+
+        # Struct for writing a whole vector
+        self.packer = struct.Struct("<" + "d"*dimensions)
+        self.metadata["dimensions"] = dimensions
+
+    @pass_up_invalid
+    def document_to_raw_data(self, doc):
+        try:
+            return self.packer.pack(*doc)
+        except struct.error, e:
+            raise ValueError("error encoding float data %s using struct format %s: %s" %
+                             (doc, self.packer.format, e))

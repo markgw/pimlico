@@ -20,8 +20,10 @@ many applications.
    pimlico.modules.corpora
    pimlico.modules.embeddings
    pimlico.modules.features
+   pimlico.modules.gensim
    pimlico.modules.input
    pimlico.modules.malt
+   pimlico.modules.nltk
    pimlico.modules.opennlp
    pimlico.modules.r
    pimlico.modules.regex

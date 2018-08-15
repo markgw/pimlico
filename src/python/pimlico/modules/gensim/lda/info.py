@@ -52,7 +52,14 @@ class ModuleInfo(BaseModuleInfo):
             "type": str_to_bool,
             "default": False,
             "help": "Transform word counts using TF-IDF when presenting documents to the model for training. "
-                    "Default: False"
+                    "Default: False",
+        },
+        "multicore": {
+            "type": str_to_bool,
+            "default": False,
+            "help": "Use Gensim's multicore implementation of LDA training (gensim.models.ldamulticore). Default "
+                    "is to use gensim.models.ldamodel. Number of cores used for training set by Pimlico's processes "
+                    "parameter",
         },
         "num_topics": {
             "type": int,
@@ -62,12 +69,12 @@ class ModuleInfo(BaseModuleInfo):
         "distributed": {
             "type": str_to_bool,
             "default": False,
-            "help": "Turn on distributed computing. Default: False",
+            "help": "Turn on distributed computing. Default: False. Ignored by multicore implementation",
         },
         "chunksize": {
             "type": int,
             "default": 2000,
-            "help": "Model's chunksize parameter. Chunk size to use for distributed computing. Default: 2000",
+            "help": "Model's chunksize parameter. Chunk size to use for distributed/multicore computing. Default: 2000",
         },
         "passes": {
             "type": int,
@@ -77,7 +84,7 @@ class ModuleInfo(BaseModuleInfo):
         "update_every": {
             "type": int,
             "default": 1,
-            "help": "Model's update_every parameter. Default: 1",
+            "help": "Model's update_every parameter. Default: 1. Ignored by multicore implementation",
         },
         "alpha": {
             "type": alpha_opt,

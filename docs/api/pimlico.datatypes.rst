@@ -25,6 +25,7 @@ Submodules
    pimlico.datatypes.features
    pimlico.datatypes.files
    pimlico.datatypes.floats
+   pimlico.datatypes.gensim
    pimlico.datatypes.ints
    pimlico.datatypes.jsondoc
    pimlico.datatypes.keras

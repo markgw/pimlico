@@ -254,7 +254,7 @@ class PipelineConfig(object):
     def short_term_store(self):
         """ For backwards compatibility: returns output path """
         warnings.warn("Used deprecated attribute 'short_term_store'. Should use new named storage location system. "
-                      "(Perhaps 'pipeline.output_path' is appropriate?)")
+                      "(Perhaps 'pipeline.output_path' is appropriate?)", stacklevel=2)
         return self.output_path
 
     @property
@@ -991,7 +991,8 @@ class PipelineConfig(object):
         # For backwards compatibility, we convert these values as we load them and warn the user
         if "short_term_store" in local_config_data or "long_term_store" in local_config_data:
             warnings.warn("Local config used deprecated 'short_term_store'/'long_term_store' parameters. "
-                          "Converting to new named storage system. You should update your local config")
+                          "Converting to new named storage system. You should update your local config. "
+                          "See https://bit.ly/2mcvZhT")
         if "short_term_store" in local_config_data:
             # This was the default output location, so we should use the value as the first location, unless one
             # is already given
@@ -1068,8 +1069,8 @@ class PipelineConfig(object):
 
         :param path: path to data, relative to store base
         :param default: usually, return None if no data is found. If default is given, return the path
-        relative to the named storage location if no data is found. Special value "output" returns path
-        relative to output location, whichever of the storage locations that might be
+            relative to the named storage location if no data is found. Special value "output" returns path
+            relative to output location, whichever of the storage locations that might be
         :return: absolute path to data, or None if not found in any store
         """
         return self.find_data(path, default=default)[1]
@@ -1082,8 +1083,8 @@ class PipelineConfig(object):
 
         :param path: path to data, relative to store base
         :param default: usually, return None if no data is found. If default is given, return the path
-        relative to the named storage location if no data is found. Special value "output" returns path
-        relative to output location, whichever of the storage locations that might be
+            relative to the named storage location if no data is found. Special value "output" returns path
+            relative to output location, whichever of the storage locations that might be
         :return: name of store
         """
         return self.find_data(path, default=default)[0]
@@ -1098,10 +1099,10 @@ class PipelineConfig(object):
 
         :param path: path to data, relative to store base
         :param default: usually, return None if no data is found. If default is given, return the path
-        relative to the named storage location if no data is found. Special value "output" returns path
-        relative to output location, whichever of the storage locations that might be
+            relative to the named storage location if no data is found. Special value "output" returns path
+            relative to output location, whichever of the storage locations that might be
         :return: (store, path), where store is the name of the store used and path is
-        absolute path to data, or None for both if not found in any store
+            absolute path to data, or None for both if not found in any store
         """
         if os.path.isabs(path):
             return None, path

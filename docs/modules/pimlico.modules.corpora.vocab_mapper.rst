@@ -9,6 +9,10 @@ Tokenized corpus to ID mapper
 | Executable | yes                                  |
 +------------+--------------------------------------+
 
+.. todo::
+
+   Write description of vocab mapper module
+
 
 Inputs
 ======
