@@ -172,6 +172,8 @@ class VectorDocumentType(RawDocumentType):
     Like FloatListDocumentType, but each document has the same number of float values
 
     """
+    formatters = [("vector", "pimlico.datatypes.floats.VectorFormatter")]
+
     def __init__(self, options, metadata):
         super(VectorDocumentType, self).__init__(options, metadata)
 
@@ -186,6 +188,13 @@ class VectorDocumentType(RawDocumentType):
             return self.unpacker.unpack(data)
         except struct.error, e:
             raise IOError("error interpreting float vector data: %s" % e)
+
+
+class VectorFormatter(DocumentBrowserFormatter):
+    DATATYPE = VectorDocumentType
+
+    def format_document(self, doc):
+        return "\n".join("{:.3f}".format(f) for f in doc)
 
 
 class VectorDocumentCorpus(TarredCorpus):
@@ -213,7 +222,7 @@ class VectorDocumentCorpusWriter(TarredCorpusWriter):
     @pass_up_invalid
     def document_to_raw_data(self, doc):
         try:
-            return self.packer.pack(doc)
+            return self.packer.pack(*doc)
         except struct.error, e:
             raise ValueError("error encoding float data %s using struct format %s: %s" %
                              (doc, self.packer.format, e))
