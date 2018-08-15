@@ -17,7 +17,7 @@ COMMANDDIR    = commands
 # Space-separated paths (relative to here) to exclude from API docs
 # Exclude visualize module for now, since it's partly built, so doesn't need documenting
 #  and causes automatic installation of graphviz
-EXCLUDE_API   = ../src/python/pimlico/core/visualize
+EXCLUDE_API   = ../src/python/pimlico/core/visualize ../src/python/pimlico/old_datatypes
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4

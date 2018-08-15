@@ -18,6 +18,10 @@ The wrapper uses C&C's SOAP server. It sets the SOAP server running in the backg
 SOAP client for each document. If parallelizing, multiple SOAP servers are set going and each one is kept
 constantly fed with documents.
 
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
 
 Inputs
 ======
@@ -31,11 +35,11 @@ Inputs
 Outputs
 =======
 
-+--------+-----------------------------------------------------------+
-| Name   | Type(s)                                                   |
-+========+===========================================================+
-| parsed | :class:`~pimlico.datatypes.parse.candc.CandcOutputCorpus` |
-+--------+-----------------------------------------------------------+
++--------+---------------------------------------------------------------+
+| Name   | Type(s)                                                       |
++========+===============================================================+
+| parsed | :class:`~pimlico.old_datatypes.parse.candc.CandcOutputCorpus` |
++--------+---------------------------------------------------------------+
 
 Options
 =======

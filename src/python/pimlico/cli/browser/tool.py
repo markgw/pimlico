@@ -9,6 +9,8 @@ import os
 import sys
 from traceback import format_exc
 
+from pimlico.datatypes.corpora import is_invalid_doc
+
 try:
     import urwid
 except ImportError:
@@ -24,7 +26,6 @@ except ImportError:
         raise
 
 from pimlico.cli.browser.formatter import load_formatter
-from pimlico.old_datatypes.base import InvalidDocument
 
 urwid.set_encoding("UTF-8")
 
@@ -183,11 +184,11 @@ def browse_data(data, formatter, parse=False, skip_invalid=False):
 
             doc_data = formatter.filter_document(state.current_doc_data)
 
-            if skip_invalid and isinstance(doc_data, InvalidDocument):
+            if skip_invalid and is_invalid_doc(doc_data):
                 doc_data = None
                 continue
 
-        if isinstance(doc_data, InvalidDocument):
+        if is_invalid_doc(doc_data):
             body_text.set_text(
                 "== INVALID DOCUMENT ==\nInvalid output was produced by module '%s'.\n\nFull error info from %s:\n%s" %
                 (doc_data.module_name, doc_data.module_name,

@@ -29,6 +29,10 @@ tags won't be handed into CoreNLP. In the future, this will be implemented.
 We also don't currently provide a way of choosing models other than the standard, pre-trained English models.
 This is a small addition that will be implemented in the future.
 
+.. todo::
+
+   Update to new datatypes system and add test pipelines
+
 
 Inputs
 ======
@@ -47,23 +51,23 @@ No non-optional outputs
 Optional
 --------
 
-+-------------+------------------------------------------------------------------------------------------------+
-| Name        | Type(s)                                                                                        |
-+=============+================================================================================================+
-| annotations | :class:`AnnotationFieldsFromOptions <pimlico.datatypes.word_annotations.WordAnnotationCorpus>` |
-+-------------+------------------------------------------------------------------------------------------------+
-| tokenized   | :class:`~pimlico.datatypes.tokenized.TokenizedCorpus`                                          |
-+-------------+------------------------------------------------------------------------------------------------+
-| parse       | :class:`~pimlico.datatypes.parse.ConstituencyParseTreeCorpus`                                  |
-+-------------+------------------------------------------------------------------------------------------------+
-| parse-deps  | :class:`~pimlico.datatypes.parse.dependency.StanfordDependencyParseCorpus`                     |
-+-------------+------------------------------------------------------------------------------------------------+
-| dep-parse   | :class:`~pimlico.datatypes.parse.dependency.StanfordDependencyParseCorpus`                     |
-+-------------+------------------------------------------------------------------------------------------------+
-| raw         | :class:`~pimlico.datatypes.jsondoc.JsonDocumentCorpus`                                         |
-+-------------+------------------------------------------------------------------------------------------------+
-| coref       | :class:`~pimlico.datatypes.coref.corenlp.CorefCorpus`                                          |
-+-------------+------------------------------------------------------------------------------------------------+
++-------------+----------------------------------------------------------------------------------------------------+
+| Name        | Type(s)                                                                                            |
++=============+====================================================================================================+
+| annotations | :class:`AnnotationFieldsFromOptions <pimlico.old_datatypes.word_annotations.WordAnnotationCorpus>` |
++-------------+----------------------------------------------------------------------------------------------------+
+| tokenized   | :class:`~pimlico.old_datatypes.tokenized.TokenizedCorpus`                                          |
++-------------+----------------------------------------------------------------------------------------------------+
+| parse       | :class:`~pimlico.old_datatypes.parse.ConstituencyParseTreeCorpus`                                  |
++-------------+----------------------------------------------------------------------------------------------------+
+| parse-deps  | :class:`~pimlico.old_datatypes.parse.dependency.StanfordDependencyParseCorpus`                     |
++-------------+----------------------------------------------------------------------------------------------------+
+| dep-parse   | :class:`~pimlico.old_datatypes.parse.dependency.StanfordDependencyParseCorpus`                     |
++-------------+----------------------------------------------------------------------------------------------------+
+| raw         | :class:`~pimlico.old_datatypes.jsondoc.JsonDocumentCorpus`                                         |
++-------------+----------------------------------------------------------------------------------------------------+
+| coref       | :class:`~pimlico.old_datatypes.coref.corenlp.CorefCorpus`                                          |
++-------------+----------------------------------------------------------------------------------------------------+
 
 Options
 =======
