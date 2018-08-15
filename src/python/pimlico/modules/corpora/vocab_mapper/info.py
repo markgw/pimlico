@@ -21,7 +21,8 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_outputs = [("ids", IntegerListsDocumentCorpus)]
     module_options = {
         "oov": {
-            "help": "If given, special token to map all OOV characters to. Otherwise, use vocab_size+1 as index",
+            "help": "If given, special token to map all OOV tokens to. Otherwise, use vocab_size+1 as index. "
+                    "Special value 'skip' simply skips over OOV tokens",
         },
     }
 
