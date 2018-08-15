@@ -19,8 +19,8 @@ from pimlico.datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
-    module_type_name = "lda_trainer"
-    module_readable_name = "LDA trainer"
+    module_type_name = "lda_doc_topics"
+    module_readable_name = "LDA document topic analysis"
     module_inputs = [
         ("corpus", TarredCorpusType(IntegerListsDocumentType)),
         ("model", GensimLdaModel)
