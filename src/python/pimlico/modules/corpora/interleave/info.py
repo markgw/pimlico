@@ -18,51 +18,87 @@ not currently implemented and may not be worth the trouble. Perhaps we will add 
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Updated to new datatypes system. Now add test pipeline and test
 
 """
 from itertools import izip
 
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.base import DynamicOutputDatatype, MultipleInputs
-from pimlico.datatypes.tar import TarredCorpus, tarred_corpus_with_data_point_type
-from pimlico.modules.corpora.tar_filter.info import TarredCorpusGrouper
-from ..concat.info import _common_data_point_type
+from pimlico.datatypes.corpora import GroupedCorpus, IterableCorpus
+from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
+from pimlico.modules.corpora.group_filter.info import IterableCorpusGrouper
 
 
-class TarredCorpusInterleaveFilter(TarredCorpus):
-    def __init__(self, pipeline, input_datatypes, archive_size=1000, archive_basename="archive", **kwargs):
-        self.archive_size = archive_size
-        self.archive_basename = archive_basename
-        self._master_raw_data = False
-        self.input_datatypes = input_datatypes
-        TarredCorpus.__init__(self, None, pipeline, **kwargs)
+class ModuleInfo(BaseModuleInfo):
+    module_type_name = "interleave"
+    module_readable_name = "Interleaved corpora"
+    module_inputs = [("corpora", MultipleInputs(GroupedCorpus()))]
+    module_outputs = [("corpus", GroupedCorpusWithTypeFromInput())]
+    module_executable = False
+    module_options = {
+        "archive_size": {
+            "help": "Documents are regrouped into new archives. "
+                    "Number of documents to include in each archive (default: 1k)",
+            "default": 1000,
+        },
+        "archive_basename": {
+            "help": "Documents are regrouped into new archives. "
+                    "Base name to use for archive tar files. The archive number is appended to this. "
+                    "(Default: 'archive')",
+            "default": "archive",
+        },
+    }
+
+    def instantiate_output_reader_setup(self, output_name, datatype):
+        return InterleavedGroupedCorpusReader.Setup(
+            self.get_output_datatype("corpus")[1],
+            self.get_input_reader_setup("corpora", always_list=True),
+            self.options["archive_size"], self.options["archive_basename"]
+        )
+
+
+class InterleavedGroupedCorpusReader(GroupedCorpus.Reader):
+    """
+    A custom reader that is used for the output of the interleave module.
+
+    This simply wraps the input corpora to provide iteration over the two (or more)
+    interleaved.
+
+    """
+    metadata = {}
+
+    def __init__(self, datatype, setup, pipeline, **kwargs):
+        # Don't call GroupedCorpus init, but jump up to IterableCorpus
+        IterableCorpus.Reader.__init__(self, datatype, setup, pipeline, **kwargs)
+        # Get readers for each of the input corpora
+        self.input_readers = [
+            setup.get_reader(self.pipeline, module=self.module) for setup in self.setup.input_reader_setups
+        ]
+        self.archive_grouper = IterableCorpusGrouper(
+            self.setup.archive_size, len(self), archive_basename=self.setup.archive_basename
+        )
+        # These are the actual archive names we'll use
+        self.archives = self.archive_grouper.get_archive_names()
+        # Pretend we've got archive filenames
+        self.archive_filenames = self.archives
 
     def __len__(self):
-        return sum((len(d) for d in self.input_datatypes), 0)
-
-    def _set_raw_data(self, val):
-        self._master_raw_data = val
-        # Set on all the datasets
-        for d in self.input_datatypes:
-            d.raw_data = val
-    def _get_raw_data(self):
-        return self._master_raw_data
-    raw_data = property(_get_raw_data, _set_raw_data)
+        return sum((len(reader) for reader in self.input_readers), 0)
 
     def extract_file(self, archive_name, filename):
-        raise NotImplementedError("cannot extract file from concatenation of corpora")
+        raise NotImplementedError("cannot extract file from interleaved corpora")
 
     def _iter_docs(self, subsample=None):
-        lengths = [len(c) for c in self.input_datatypes]
+        lengths = [len(c) for c in self.input_readers]
         # The longest corpus increments its progress count by 1 for each document
         # Shorter ones increment theirs by proportionally less
         # Then we always just yield a document from the corpus with the lowest progress
         # The result is that we get documents more often from the longer corpus
         doc_weights = [float(max(lengths))/float(l) for l in lengths]
-        progresses = [0. for _ in self.input_datatypes]
-        finished = [False for _ in self.input_datatypes]
-        iterators = [c.archive_iter(subsample=subsample) for c in self.input_datatypes]
+        progresses = [0. for _ in self.input_readers]
+        finished = [False for _ in self.input_readers]
+        iterators = [c.archive_iter(subsample=subsample) for c in self.input_readers]
 
         while not all(finished):
             # Take a document from the corpus with lowest progress count
@@ -97,8 +133,7 @@ class TarredCorpusInterleaveFilter(TarredCorpus):
 
         # We regrouped docs into archives, using a new set of archive names, since it
         # doesn't make sense to use those in the input when interleaving
-        archive_grouper = TarredCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
-        for archive_name, (doc_name, doc) in izip(archive_grouper, self._iter_docs()):
+        for archive_name, (doc_name, doc) in izip(self.archive_grouper, self._iter_docs()):
             if not started:
                 if start_after is not None:
                     if start_after == (archive_name, doc_name):
@@ -116,69 +151,19 @@ class TarredCorpusInterleaveFilter(TarredCorpus):
             yield archive_name, doc_name, doc
 
     def list_archive_iter(self):
-        # Can't easily make this faster than iterating
-        for archive_name, doc_name, doc in self.archive_iter():
-            yield archive_name, doc_name
+        for archive, doc_name, doc in self.archive_iter():
+            yield archive, doc_name
 
-    def data_ready(self):
-        return all(d.data_ready() for d in self.input_datatypes)
+    class Setup:
+        def __init__(self, datatype, input_reader_setups, archive_size, archive_basename):
+            self.archive_basename = archive_basename
+            self.archive_size = archive_size
+            self.input_reader_setups = input_reader_setups
+            self.datatype = datatype
 
+        def ready_to_read(self):
+            return all(setup.ready_to_read() for setup in self.input_reader_setups)
 
-def tarred_corpus_interleave_filter_dp_type(dp_type):
-    class TarredCorpusInterleaveFilterSubtype(TarredCorpusInterleaveFilter):
-        data_point_type = dp_type
-    return TarredCorpusInterleaveFilterSubtype
-
-
-class DataPointTypeFromInputs(DynamicOutputDatatype):
-    """
-    Infer output corpus' data-point type from the type of an input.
-    Passes the type through, except where the input datatype provides an `emulated_datatype`.
-
-    Input name may be given. Otherwise, the default input is used.
-
-    """
-    datatype_name = "corpus with data-point from input"
-
-    def __init__(self, input_name=None):
-        self.input_name = input_name
-
-    def get_datatype(self, module_info):
-        datatypes = module_info.get_input_datatype(self.input_name, always_list=True)
-        # If the input datatype emulates another, it is that other that we will produce as output
-        datatypes = [datatype.emulated_datatype or datatype for datatype in datatypes]
-        # Find the common data point type to use for the output
-        dp_type = _common_data_point_type([d.data_point_type for d in datatypes])
-
-        return tarred_corpus_with_data_point_type(dp_type)
-
-
-class ModuleInfo(BaseModuleInfo):
-    module_type_name = "concat"
-    module_readable_name = "Corpus concatenation"
-    module_inputs = [("corpora", MultipleInputs(TarredCorpus))]
-    module_outputs = [("corpus", DataPointTypeFromInputs())]
-    module_executable = False
-    module_options = {
-        "archive_size": {
-            "help": "Documents are regrouped into new archives. "
-                    "Number of documents to include in each archive (default: 1k)",
-            "default": 1000,
-        },
-        "archive_basename": {
-            "help": "Documents are regrouped into new archives. "
-                    "Base name to use for archive tar files. The archive number is appended to this. "
-                    "(Default: 'archive')",
-            "default": "archive",
-        },
-    }
-
-    def instantiate_output_datatype(self, output_name, output_datatype, **kwargs):
-        datatypes = self.get_input("corpora", always_list=True)
-        # Find the common datapoint type to use for the output corpus
-        dp_type = _common_data_point_type([d.data_point_type for d in datatypes])
-        filter_type = tarred_corpus_interleave_filter_dp_type(dp_type)
-
-        return filter_type(self.pipeline, datatypes,
-                           archive_size=self.options["archive_size"], archive_basename=self.options["archive_basename"],
-                           module=self)
+    def process_setup(self):
+        # Override to not do data path processing
+        return
