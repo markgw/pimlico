@@ -2,6 +2,10 @@
   Setting up a new project using Pimlico
 ==========================================
 
+.. todo::
+
+   Setup guide has a lot that needs to be updated for the new datatypes system
+
 You've decided to use Pimlico to implement a data processing pipeline. So, where do you start?
 
 This guide steps

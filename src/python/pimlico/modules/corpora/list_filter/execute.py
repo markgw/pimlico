@@ -11,7 +11,7 @@ class ModuleExecutor(BaseModuleExecutor):
         input_corpus = self.info.get_input("corpus")
 
         pbar = get_progress_bar(len(input_corpus), title="Filtering")
-        set1_list = self.info.get_input("list").data
+        set1_list = self.info.get_input("list").get_list()
 
         with self.info.get_output_writer("set1", **input_corpus.metadata) as set1_writer:
             with self.info.get_output_writer("set2", **input_corpus.metadata) as set2_writer:
