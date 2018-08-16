@@ -1,7 +1,11 @@
-FastText embedding reader using Gensim
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! FastText embedding reader using Gensim
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.input.embeddings.fasttext_gensim
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+--------------------------------------------------+
 | Path       | pimlico.modules.input.embeddings.fasttext_gensim |

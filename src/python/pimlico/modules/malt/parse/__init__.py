@@ -1,4 +1,4 @@
-__author__ = 'mark'
+AWAITING_UPDATE = True
 
 
 class CoreNLPClientError(Exception):

@@ -1,7 +1,11 @@
-Term-feature corpus vocab builder
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Term-feature corpus vocab builder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.vocab_builder
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+----------------------------------------+
 | Path       | pimlico.modules.features.vocab_builder |

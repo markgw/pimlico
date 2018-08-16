@@ -1,1 +1,1 @@
-__author__ = 'mtw29'
+AWAITING_UPDATE = True

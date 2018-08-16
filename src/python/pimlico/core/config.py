@@ -1572,7 +1572,7 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
         # Replace the settings for this module
         config_sections = [(sect, copy_values) if sect == target_section else (sect, settings)
                            for (sect, settings) in config_sections]
-        # Udpate the sections dict so we can subsequently copy from this module
+        # UPDATE the sections dict so we can subsequently copy from this module
         config_sections_dict = OrderedDict(config_sections)
 
     if "pipeline" in section_docstrings:

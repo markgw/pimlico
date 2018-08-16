@@ -1,7 +1,11 @@
-Token frequency counter
-~~~~~~~~~~~~~~~~~~~~~~~
+!! Token frequency counter
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.vocab_counter
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+---------------------------------------+
 | Path       | pimlico.modules.corpora.vocab_counter |

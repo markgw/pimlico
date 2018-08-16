@@ -1,7 +1,11 @@
-Corpus statistics
-~~~~~~~~~~~~~~~~~
+!! Corpus statistics
+~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.corpus_stats
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+--------------------------------------+
 | Path       | pimlico.modules.corpora.corpus_stats |

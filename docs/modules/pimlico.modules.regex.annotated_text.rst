@@ -1,7 +1,11 @@
-Regex annotated text matcher
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Regex annotated text matcher
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.regex.annotated_text
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+--------------------------------------+
 | Path       | pimlico.modules.regex.annotated_text |

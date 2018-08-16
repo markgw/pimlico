@@ -1,7 +1,11 @@
-Embedding space plotter
-~~~~~~~~~~~~~~~~~~~~~~~
+!! Embedding space plotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.visualization.embeddings_plot
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+-----------------------------------------------+
 | Path       | pimlico.modules.visualization.embeddings_plot |

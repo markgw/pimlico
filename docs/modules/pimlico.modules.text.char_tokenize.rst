@@ -1,7 +1,11 @@
-Text to character level
-~~~~~~~~~~~~~~~~~~~~~~~
+!! Text to character level
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.text.char_tokenize
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+------------------------------------+
 | Path       | pimlico.modules.text.char_tokenize |

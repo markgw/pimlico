@@ -1,7 +1,11 @@
-Tokenized corpus to ID mapper
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Tokenized corpus to ID mapper
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.vocab_mapper
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+--------------------------------------+
 | Path       | pimlico.modules.corpora.vocab_mapper |

@@ -1,7 +1,11 @@
-Term-feature matrix builder
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Term-feature matrix builder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.term_feature_matrix_builder
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+------------------------------------------------------+
 | Path       | pimlico.modules.features.term_feature_matrix_builder |

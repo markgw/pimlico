@@ -1,7 +1,11 @@
-Stanford CoreNLP
-~~~~~~~~~~~~~~~~
+!! Stanford CoreNLP
+~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corenlp
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+-------------------------+
 | Path       | pimlico.modules.corenlp |

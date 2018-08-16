@@ -1,7 +1,11 @@
-OpenNLP NIST tokenizer
-~~~~~~~~~~~~~~~~~~~~~~
+!! OpenNLP NIST tokenizer
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.nltk.nist_tokenize
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+------------------------------------+
 | Path       | pimlico.modules.nltk.nist_tokenize |

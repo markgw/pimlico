@@ -1,7 +1,11 @@
-Key-value to term-feature converter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Key-value to term-feature converter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.term_feature_compiler
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+------------------------------------------------+
 | Path       | pimlico.modules.features.term_feature_compiler |

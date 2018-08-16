@@ -1,7 +1,11 @@
-LDA document topic analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! LDA document topic analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.gensim.lda_doc_topics
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+---------------------------------------+
 | Path       | pimlico.modules.gensim.lda_doc_topics |

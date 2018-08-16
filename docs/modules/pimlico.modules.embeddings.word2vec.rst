@@ -1,7 +1,11 @@
-Word2vec embedding trainer
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Word2vec embedding trainer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.word2vec
+
+.. note::
+
+   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+-------------------------------------+
 | Path       | pimlico.modules.embeddings.word2vec |

@@ -84,6 +84,10 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
     # Check whether we've been instructed to skip this module
     if hasattr(pymod, "SKIP_MODULE_DOCS") and pymod.SKIP_MODULE_DOCS:
         return
+    # While datatype update is going on, mark the modules that haven't yet been updated
+    awaiting_datatype_update = hasattr(pymod, "AWAITING_UPDATE") and pymod.AWAITING_UPDATE
+    if awaiting_datatype_update:
+        warnings.warn("Module {} is still waiting to be updated to the new datatypes system".format(module_path))
 
     # Import the info pymodule so we can get the ModuleInfo class
     info = import_module("%s.info" % module_path)  # We know this exists
@@ -108,15 +112,15 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
         module_title = module_title[0].capitalize() + module_title[1:]
         module_title = module_title.replace("_", " ")
     input_table = [
-        [input_name, input_datatype_list(input_types, context=module_path)]
+        [input_name, input_datatype_list(input_types, context=module_path, no_warn=awaiting_datatype_update)]
         for input_name, input_types in ModuleInfo.module_inputs
     ]
     output_table = [
-        [output_name, output_datatype_text(output_types, context=module_path)]
+        [output_name, output_datatype_text(output_types, context=module_path, no_warn=awaiting_datatype_update)]
         for output_name, output_types in ModuleInfo.module_outputs
     ]
     optional_output_table = [
-        [output_name, output_datatype_text(output_types, context=module_path)]
+        [output_name, output_datatype_text(output_types, context=module_path, no_warn=awaiting_datatype_update)]
         for output_name, output_types in ModuleInfo.module_optional_outputs
     ]
     info_doc = info.__doc__
@@ -141,11 +145,17 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
         for (option_name, d) in ModuleInfo.module_options.items()
     ]
 
+    if awaiting_datatype_update:
+        module_title = "!! {}".format(module_title)
+
     with open(filename, "w") as output_file:
         # Make a page heading
         output_file.write(format_heading(0, module_title))
         # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
         output_file.write(".. py:module:: %s\n\n" % module_path)
+        if awaiting_datatype_update:
+            output_file.write(".. note::\n\n   This module has not yet been updated to the new datatype system, so cannot be used "
+                              "in the `datatypes` branch. Soon it will be updated.\n\n")
         # Output a summary table of key information
         output_file.write("%s\n" % make_table(key_info))
         # Insert text from docstrings
@@ -189,16 +199,16 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
     return ModuleInfo
 
 
-def input_datatype_list(types, context=None):
+def input_datatype_list(types, context=None, no_warn=False):
     if type(types) is tuple:
         # This is a list of types
-        return " or ".join(input_datatype_text(t, context=context) for t in types)
+        return " or ".join(input_datatype_text(t, context=context, no_warn=no_warn) for t in types)
     else:
         # Just a single type
-        return input_datatype_text(types, context=context)
+        return input_datatype_text(types, context=context, no_warn=no_warn)
 
 
-def input_datatype_text(datatype, context=None):
+def input_datatype_text(datatype, context=None, no_warn=False):
     if isinstance(datatype, PimlicoDatatype):
         # Standard behaviour for normal datatypes
         return ":class:`%s <%s>`" % (datatype.full_datatype_name(), datatype.datatype_full_class_name())
@@ -214,12 +224,13 @@ def input_datatype_text(datatype, context=None):
             # Dynamic datatype requirement with no custom string
             return ":class:`%s <%s.%s>`" % (type(datatype).__name__, type(datatype).__module__, type(datatype).__name__)
     else:
-        warnings.warn("Invalid input type specification {} (not datatype, multiple input, or dynamic "
-                        "requirement): {}".format("in {}".format(context) if context else "", type(datatype)))
+        if not no_warn:
+            warnings.warn("Invalid input type specification {} (not datatype, multiple input, or dynamic "
+                            "requirement): {}".format("in {}".format(context) if context else "", type(datatype)))
         return "**invalid input type specification**"
 
 
-def output_datatype_text(datatype, context=None):
+def output_datatype_text(datatype, context=None, no_warn=False):
     if isinstance(datatype, DynamicOutputDatatype):
         # Use the datatype name given by the dynamic datatype and link to the class
         datatype_class = datatype.get_base_datatype_class()
@@ -241,9 +252,10 @@ def output_datatype_text(datatype, context=None):
                 datatype.full_datatype_name()
             )
     else:
-        warnings.warn("Invalid output type {} (not datatype or dynamic output type): {}".format(
-            "in {}".format(context) if context else "", type(datatype))
-        )
+        if not no_warn:
+            warnings.warn("Invalid output type {} (not datatype or dynamic output type): {}".format(
+                "in {}".format(context) if context else "", type(datatype))
+            )
         return "**invalid output type specification**"
 
 
