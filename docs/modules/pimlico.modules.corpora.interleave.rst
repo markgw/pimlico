@@ -22,10 +22,6 @@ They must have the same data point type, or one must be a subtype of the other.
 In theory, we could find the most specific common ancestor and use that as the output type, but this is
 not currently implemented and may not be worth the trouble. Perhaps we will add this in future.
 
-.. todo::
-
-   Updated to new datatypes system. Now add test pipeline and test
-
 
 This is a filter module. It is not executable, so won't appear in a pipeline's list of modules that can be run. It produces its output for the next module on the fly when the next module needs it.
 

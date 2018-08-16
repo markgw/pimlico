@@ -27,9 +27,7 @@ and the grouping will be preserved as the corpus passes through the pipeline.
    There also used to be a ``tar`` module that wrote the grouped corpus to disk.
    This has now been removed, since most of the time it's fine to use this
    filter module instead. If you really want to store the grouped corpus, you
-   will soon be able to use the ``store`` module, a generic version of
-   :mod:`~pimlico.modules.corpora.store_text`, which will be created at some
-   point soon.
+   can use the ``store`` module.
 
 
 This is a filter module. It is not executable, so won't appear in a pipeline's list of modules that can be run. It produces its output for the next module on the fly when the next module needs it.

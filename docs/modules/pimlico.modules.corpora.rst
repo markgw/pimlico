@@ -20,7 +20,7 @@ Core modules for generic manipulation of mainly iterable corpora.
    pimlico.modules.corpora.interleave
    pimlico.modules.corpora.list_filter
    pimlico.modules.corpora.split
-   pimlico.modules.corpora.store_text
+   pimlico.modules.corpora.store
    pimlico.modules.corpora.subset
    pimlico.modules.corpora.vocab_builder
    pimlico.modules.corpora.vocab_counter
