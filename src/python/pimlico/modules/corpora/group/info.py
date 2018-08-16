@@ -18,10 +18,14 @@ grouping will be preserved as the corpus passes through the pipeline.
    This module used to be called ``tar``, but has been renamed in keeping
    with other changes in the new datatype system.
 
+.. todo::
+
+   Updated to new datatype system. Add test pipeline and test it
+
 """
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.datatypes.corpora import IterableCorpus
 from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
-from pimlico.old_datatypes.base import IterableCorpus
 
 
 class ModuleInfo(BaseModuleInfo):

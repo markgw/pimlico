@@ -16,10 +16,10 @@ be done.
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes.floats import VectorDocumentCorpus, VectorDocumentCorpusWriter
-from pimlico.datatypes.gensim import GensimLdaModel
-from pimlico.datatypes.ints import IntegerListsDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.floats import VectorDocumentCorpus, VectorDocumentCorpusWriter
+#from pimlico.old_datatypes.gensim import GensimLdaModel
+from pimlico.old_datatypes.ints import IntegerListsDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
@@ -27,7 +27,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_readable_name = "LDA document topic analysis"
     module_inputs = [
         ("corpus", TarredCorpusType(IntegerListsDocumentType)),
-        ("model", GensimLdaModel)
+        ("model", None)  # GensimLdaModel
     ]
     module_outputs = [("vectors", VectorDocumentCorpus)]
     module_options = {}

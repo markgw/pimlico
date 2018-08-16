@@ -14,6 +14,7 @@ from pimlico.cli.browser.formatter import DocumentBrowserFormatter
 from pimlico.old_datatypes.documents import RawDocumentType
 from pimlico.old_datatypes.table import get_struct
 from pimlico.old_datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid
+from pimlico.utils.core import cached_property
 
 
 class FloatListsDocumentType(RawDocumentType):

@@ -15,9 +15,9 @@ Sentence splitting and tokenization using the
 from pimlico.core.dependencies.python import nltk_dependency, NLTKResource
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
-from pimlico.datatypes.documents import RawTextDocumentType
-from pimlico.datatypes.tar import TarredCorpusType
-from pimlico.datatypes.tokenized import TokenizedCorpus
+from pimlico.old_datatypes.documents import RawTextDocumentType
+from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.old_datatypes.tokenized import TokenizedCorpus
 
 
 class ModuleInfo(DocumentMapModuleInfo):

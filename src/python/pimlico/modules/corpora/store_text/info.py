@@ -19,17 +19,16 @@ produced text as a simple text corpus for further use.
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Add test pipeline and test it
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.datatypes import RawTextDocumentType
-from pimlico.datatypes.documents import TextDocumentType
-from pimlico.datatypes.tar import TarredCorpusType, tarred_corpus_with_data_point_type
+from pimlico.datatypes.corpora import GroupedCorpus
+from pimlico.datatypes.corpora.data_points import RawTextDocumentType, TextDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "store_text"
     module_readable_name = "Store a text corpus"
-    module_inputs = [("corpus", TarredCorpusType(TextDocumentType))]
-    module_outputs = [("text", tarred_corpus_with_data_point_type(RawTextDocumentType))]
+    module_inputs = [("corpus", GroupedCorpus(TextDocumentType()))]
+    module_outputs = [("text", GroupedCorpus(RawTextDocumentType()))]

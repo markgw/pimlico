@@ -19,6 +19,10 @@ Uses sentence tags to divide each text into sentences.
 
    Update to new datatypes system and add test pipeline
 
+.. todo::
+
+   Currently skipped from module doc generator, until updated
+
 """
 
 from pimlico.core.modules.inputs import iterable_input_reader_factory

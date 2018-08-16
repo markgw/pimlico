@@ -64,7 +64,7 @@ def iterable_input_reader(input_module_options, data_point_type,
                           module_type_name=None, module_readable_name=None,
                           software_dependencies=None, execute_count=False):
     """
-    This is a new version of the factory :func:`.iterable_input_reader_factor` and should be
+    This is a new version of the factory :func:`.iterable_input_reader_factory` and should be
     used where possible. It provides a nicer interface using the new datatypes system.
 
     Factory for creating an input reader module type. This is a non-executable module that has no

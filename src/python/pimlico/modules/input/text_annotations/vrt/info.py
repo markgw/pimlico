@@ -11,18 +11,22 @@ Reads in files from arbitrary locations in the same way as :mod:`pimlico.modules
 
    Update to new datatypes system and add test pipeline
 
+.. todo::
+
+   Currently skipped from module doc generator, until updated
+
 """
 
 import os
 
-from pimlico.core.modules.inputs import iterable_input_reader_factory
+from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.core.modules.inputs import iterable_input_reader
 from pimlico.old_datatypes.vrt import VRTDocumentType
 from pimlico.modules.input.text.raw_text_files.info import ModuleInfo as RawTextModuleInfo, \
-    OutputType as RawTextOuputType, get_paths_from_options
-from pimlico.utils.core import cached_property
+    get_paths_from_options
 
 
-class VRTOutputType(RawTextOuputType):
+class VRTOutputType(object):  #RawTextOuputType
     """
     Output type used by reader to read the documents straight from external files.
 
@@ -72,12 +76,17 @@ class VRTOutputType(RawTextOuputType):
                 current_text.append(line)
 
 
-ModuleInfo = iterable_input_reader_factory(
+# TODO Not updated this to use the new factory
+ModuleInfo = BaseModuleInfo
+"""iterable_input_reader(
     dict(RawTextModuleInfo.module_options, **{
         # More options may be added here
     }),
     VRTOutputType,
+    lambda x: x, lambda x: x, lambda x: x,
     module_type_name="vrt_files_reader",
     module_readable_name="VRT annotated text files",
     execute_count=True,
 )
+
+"""

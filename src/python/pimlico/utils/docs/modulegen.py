@@ -19,7 +19,7 @@ from sphinx.apidoc import format_heading
 
 from pimlico import install_core_dependencies
 from pimlico.core.modules.options import format_option_type
-from pimlico.old_datatypes.base import DynamicOutputDatatype, PimlicoDatatype, MultipleInputs
+from pimlico.datatypes import PimlicoDatatype, MultipleInputs, DynamicOutputDatatype, DynamicInputDatatypeRequirement
 from pimlico.utils.docs import trim_docstring
 from pimlico.utils.docs.rest import make_table
 
@@ -55,9 +55,10 @@ def generate_docs_for_pymod(module, output_dir):
         # This looks like a Pimlico module
         # Try building module docs for this one
         # If there were submodules, they should be included in the module doc in a TOC
-        generate_docs_for_pimlico_mod(module_name, output_dir, all_generated)
-        is_pimlico_module = True
-        all_pimlico_modules.append(module_name)
+        info = generate_docs_for_pimlico_mod(module_name, output_dir, all_generated)
+        if info is not None:
+            is_pimlico_module = True
+            all_pimlico_modules.append(module_name)
     elif all_generated:
         # This was just a package, not a Pimlico module, but it included Pimlico modules
         # Generate a contents page for the submodules
@@ -77,6 +78,13 @@ def generate_docs_for_pymod(module, output_dir):
 
 def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
     print "Building docs for %s" % module_path
+    filename = os.path.join(output_dir, "%s.rst" % module_path)
+    # First import the python module
+    pymod = import_module(module_path)
+    # Check whether we've been instructed to skip this module
+    if hasattr(pymod, "SKIP_MODULE_DOCS") and pymod.SKIP_MODULE_DOCS:
+        return
+
     # Import the info pymodule so we can get the ModuleInfo class
     info = import_module("%s.info" % module_path)  # We know this exists
     try:
@@ -100,13 +108,16 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
         module_title = module_title[0].capitalize() + module_title[1:]
         module_title = module_title.replace("_", " ")
     input_table = [
-        [input_name, input_datatype_list(input_types)] for input_name, input_types in ModuleInfo.module_inputs
+        [input_name, input_datatype_list(input_types, context=module_path)]
+        for input_name, input_types in ModuleInfo.module_inputs
     ]
     output_table = [
-        [output_name, output_datatype_text(output_types)] for output_name, output_types in ModuleInfo.module_outputs
+        [output_name, output_datatype_text(output_types, context=module_path)]
+        for output_name, output_types in ModuleInfo.module_outputs
     ]
     optional_output_table = [
-        [output_name, output_datatype_text(output_types)] for output_name, output_types in ModuleInfo.module_optional_outputs
+        [output_name, output_datatype_text(output_types, context=module_path)]
+        for output_name, output_types in ModuleInfo.module_optional_outputs
     ]
     info_doc = info.__doc__
     module_info_doc = ModuleInfo.__doc__
@@ -130,7 +141,6 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
         for (option_name, d) in ModuleInfo.module_options.items()
     ]
 
-    filename = os.path.join(output_dir, "%s.rst" % module_path)
     with open(filename, "w") as output_file:
         # Make a page heading
         output_file.write(format_heading(0, module_title))
@@ -179,32 +189,37 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
     return ModuleInfo
 
 
-def input_datatype_list(types):
+def input_datatype_list(types, context=None):
     if type(types) is tuple:
         # This is a list of types
-        return " or ".join(input_datatype_text(t) for t in types)
+        return " or ".join(input_datatype_text(t, context=context) for t in types)
     else:
         # Just a single type
-        return input_datatype_text(types)
+        return input_datatype_text(types, context=context)
 
 
-def input_datatype_text(datatype):
-    if isinstance(datatype, type) and issubclass(datatype, PimlicoDatatype):
+def input_datatype_text(datatype, context=None):
+    if isinstance(datatype, PimlicoDatatype):
         # Standard behaviour for normal datatypes
-        return ":class:`%s <%s>`" % (datatype.__name__, datatype.datatype_full_class_name())
+        return ":class:`%s <%s>`" % (datatype.full_datatype_name(), datatype.datatype_full_class_name())
     elif isinstance(datatype, MultipleInputs):
         # Multiple inputs, but the datatype is known: call this function to format the common type
         return ":class:`list <pimlico.datatypes.base.MultipleInputs>` of %s" % \
                input_datatype_text(datatype.datatype_requirements)
-    elif datatype.datatype_doc_info is not None:
-        # Dynamic input type that gives us a name to use
-        return datatype.datatype_doc_info
+    elif isinstance(datatype, DynamicInputDatatypeRequirement):
+        if datatype.datatype_doc_info is not None:
+            # Dynamic input type that gives us a name to use
+            return datatype.datatype_doc_info
+        else:
+            # Dynamic datatype requirement with no custom string
+            return ":class:`%s <%s.%s>`" % (type(datatype).__name__, type(datatype).__module__, type(datatype).__name__)
     else:
-        # Dynamic datatype requirement with no custom string
-        return ":class:`%s <%s.%s>`" % (type(datatype).__name__, type(datatype).__module__, type(datatype).__name__)
+        warnings.warn("Invalid input type specification {} (not datatype, multiple input, or dynamic "
+                        "requirement): {}".format("in {}".format(context) if context else "", type(datatype)))
+        return "**invalid input type specification**"
 
 
-def output_datatype_text(datatype):
+def output_datatype_text(datatype, context=None):
     if isinstance(datatype, DynamicOutputDatatype):
         # Use the datatype name given by the dynamic datatype and link to the class
         datatype_class = datatype.get_base_datatype_class()
@@ -215,13 +230,21 @@ def output_datatype_text(datatype):
             datatype_class_name = "%s.%s" % (type(datatype).__module__, type(datatype).__name__)
         datatype_name = datatype.datatype_name or type(datatype).__name__
         return ":class:`%s <%s>`" % (datatype_name, datatype_class_name)
-    else:
+    elif isinstance(datatype, PimlicoDatatype):
         class_name = datatype.datatype_full_class_name()
         # Allow non-class datatypes to be specified in the string
         if class_name.startswith(":"):
             return class_name
         else:
-            return ":class:`~%s`" % datatype.datatype_full_class_name()
+            return ":class:`~{} <{}>`".format(
+                datatype.datatype_full_class_name(),
+                datatype.full_datatype_name()
+            )
+    else:
+        warnings.warn("Invalid output type {} (not datatype or dynamic output type): {}".format(
+            "in {}".format(context) if context else "", type(datatype))
+        )
+        return "**invalid output type specification**"
 
 
 def generate_contents_page(modules, output_dir, index_name, title, content):

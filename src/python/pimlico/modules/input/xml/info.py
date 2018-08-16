@@ -10,6 +10,10 @@ The data retrieved from the files is plain unicode text.
 
    Update to new datatypes system and add test pipeline
 
+.. todo::
+
+   Currently skipped from module doc generator, until updated
+
 """
 import fnmatch
 import os
