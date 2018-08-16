@@ -3,6 +3,8 @@ import os
 from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.datatypes import PimlicoDatatype
 
+__all__ = ["GensimLdaModel"]
+
 
 class GensimLdaModel(PimlicoDatatype):
     datatype_name = "lda_model"

@@ -4,4 +4,5 @@ pipelines/corpora/concat.conf, output
 pipelines/corpora/subset.conf, output
 pipelines/corpora/split.conf, split
 pipelines/corpora/interleave.conf, output
+pipelines/corpora/list_filter.conf, europarl_filtered
 pipelines/input/fasttext.conf, vectors, stored_vectors

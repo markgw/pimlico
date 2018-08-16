@@ -117,6 +117,8 @@ def import_member(path):
     from importlib import import_module
 
     mod_path, __, cls_name = path.rpartition(".")
+    if not len(mod_path):
+        raise ImportError("no module name in {}".format(path))
     try:
         mod = import_module(mod_path)
     except ImportError, e:

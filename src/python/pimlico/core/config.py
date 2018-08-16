@@ -20,7 +20,8 @@ from socket import gethostname
 from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR, TEST_DATA_DIR
 from pimlico.cli.debug.stepper import enable_step_for_pipeline
 from pimlico.core.dependencies.base import check_and_install
-from pimlico.datatypes.base import load_datatype, DatatypeLoadError
+from pimlico.datatypes.base import DatatypeLoadError
+from pimlico.datatypes import load_datatype
 from pimlico.utils.core import remove_duplicates
 from pimlico.utils.format import title_box
 from pimlico.utils.logging import get_console_logger
@@ -437,7 +438,11 @@ class PipelineConfig(object):
                         del module_config[key]
                 except DatatypeLoadError:
                     # Not a datatype
-                    module_info_class = load_module_info(module_type_name)
+                    try:
+                        module_info_class = load_module_info(module_type_name)
+                    except ModuleInfoLoadError, e:
+                        raise PipelineConfigParseError("could not load a module type for the name '{}': "
+                                                       "no datatype or module type could be loaded".format(module_type_name))
                 else:
                     # Get an input module info class for this datatype
                     module_info_class = input_module_factory(datatype_class)

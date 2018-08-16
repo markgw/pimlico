@@ -17,6 +17,8 @@ from pimlico.core.modules.options import comma_separated_strings
 from pimlico.datatypes import PimlicoDatatype, DynamicInputDatatypeRequirement
 from pimlico.utils.core import cached_property
 
+__all__ = ["NamedFileCollection", "NamedFile", "FilesInput", "FileInput", "TextFile"]
+
 
 class NamedFileCollection(PimlicoDatatype):
     """

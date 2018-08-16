@@ -10,6 +10,8 @@ import os
 
 from pimlico.datatypes.base import PimlicoDatatype
 
+__all__ = ["Dict", "StringList"]
+
 
 class Dict(PimlicoDatatype):
     """

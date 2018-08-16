@@ -41,13 +41,13 @@ import re
 from collections import OrderedDict
 
 from pimlico.core.modules.options import process_module_options
-from pimlico.utils.core import import_member, cached_property
+from pimlico.utils.core import cached_property
 
 __all__ = [
     "PimlicoDatatype",
     "DynamicOutputDatatype", "DynamicInputDatatypeRequirement",
     "DatatypeLoadError", "DatatypeWriteError",
-    "load_datatype", "MultipleInputs",
+    "MultipleInputs",
 ]
 
 
@@ -985,33 +985,3 @@ class DatatypeWriteError(Exception):
 
 class DataNotReadyError(Exception):
     pass
-
-
-def load_datatype(path, options={}):
-    """
-    Try loading a datatype class for a given path. Raises a DatatypeLoadError if it's not a valid
-    datatype path.
-
-    Options are unprocessed strings that will be processed using the datatype's option
-    definitions.
-
-    """
-    try:
-        cls = import_member(path)
-    except ImportError, e:
-        raise DatatypeLoadError("could not load datatype class %s: %s" % (path, e))
-
-    # The type of the class will generally not be "type", since we use meta classes
-    # However, it should be a subclass of it
-    # This distinguishes it from, e.g. modules
-    if not issubclass(type(cls), type(object)):
-        raise DatatypeLoadError("tried to load datatype %s, but result was not a class, it was a %s" %
-                                (path, type(cls).__name__))
-
-    if not issubclass(cls, PimlicoDatatype):
-        raise DatatypeLoadError("%s is not a Pimlico datatype" % path)
-
-    # Instantiate the datatype, taking account of (unprocessed) options
-    dt = cls.instantiate_from_options(options)
-
-    return dt

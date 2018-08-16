@@ -1,0 +1,2 @@
+String list corpus that contains a subset of the filenames in text_corpora/europarl.
+Used by corpus list_filter module test.
