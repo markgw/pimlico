@@ -13,6 +13,17 @@ It is especially focussed on processing linguistic corpora and
 provides wrappers around many
 existing, widely used **NLP** (Natural Language Processing) tools.
 
+.. note::
+
+   These are the docs for the ``datatypes`` branch of Pimlico. This is a big project
+   to change the way datatypes work internally and requires all datatypes and modules
+   to be updated to the new system. See the
+   `Github project <https://github.com/markgw/pimlico/projects/1>`_ for more information.
+
+   Modules marked with a ``!!`` in the documentation are still waiting to be updated and
+   don't work. Other known outstanding tasks are marked with todos:
+   :doc:`full todo list </plans/wishlist>`.
+
 It makes it easy to write large, potentially complex pipelines 
 with the following key goals:
 

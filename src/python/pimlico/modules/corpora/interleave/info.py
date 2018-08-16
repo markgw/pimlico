@@ -24,10 +24,10 @@ not currently implemented and may not be worth the trouble. Perhaps we will add 
 from itertools import izip
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import DynamicOutputDatatype, MultipleInputs
+from pimlico.datatypes.base import MultipleInputs
 from pimlico.datatypes.corpora import GroupedCorpus, IterableCorpus
 from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
-from pimlico.modules.corpora.group_filter.info import IterableCorpusGrouper
+from pimlico.modules.corpora.group.info import IterableCorpusGrouper
 
 
 class ModuleInfo(BaseModuleInfo):

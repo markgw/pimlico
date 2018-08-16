@@ -17,7 +17,6 @@ Core modules for generic manipulation of mainly iterable corpora.
    pimlico.modules.corpora.corpus_stats
    pimlico.modules.corpora.format
    pimlico.modules.corpora.group
-   pimlico.modules.corpora.group_filter
    pimlico.modules.corpora.interleave
    pimlico.modules.corpora.list_filter
    pimlico.modules.corpora.split

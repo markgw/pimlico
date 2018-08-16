@@ -1,33 +1,38 @@
-Archive grouper
-~~~~~~~~~~~~~~~
+Archive grouper (filter)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.group
 
 +------------+-------------------------------+
 | Path       | pimlico.modules.corpora.group |
 +------------+-------------------------------+
-| Executable | yes                           |
+| Executable | no                            |
 +------------+-------------------------------+
 
-Group the files of a multi-file iterable corpus into tar archives. This is a
-standard thing to do at the start of the pipeline, since it's a handy way to
-store many (potentially small) files without running into filesystem problems.
+Group the data points (documents) of an iterable corpus into fixed-size archives.
+This is a standard thing to do at the start of the pipeline, since it's a handy
+way to store many (potentially small) files without running into filesystem problems.
 
-The files are simply grouped linearly into a series of tar archives such that
-each (apart from the last) contains the given number.
+The documents are simply grouped linearly into a series of groups (archives) such that
+each (apart from the last) contains the given number of documents.
 
-After grouping documents in this way, document map modules can be called on the corpus and the
-grouping will be preserved as the corpus passes through the pipeline.
+After grouping documents in this way, document map modules can be called on the corpus
+and the grouping will be preserved as the corpus passes through the pipeline.
 
 .. note::
 
-   This module used to be called ``tar``, but has been renamed in keeping
+   This module used to be called ``tar_filter``, but has been renamed in keeping
    with other changes in the new datatype system.
 
-.. todo::
+   There also used to be a ``tar`` module that wrote the grouped corpus to disk.
+   This has now been removed, since most of the time it's fine to use this
+   filter module instead. If you really want to store the grouped corpus, you
+   will soon be able to use the ``store`` module, a generic version of
+   :mod:`~pimlico.modules.corpora.store_text`, which will be created at some
+   point soon.
 
-   Updated to new datatype system. Add test pipeline and test it
 
+This is a filter module. It is not executable, so won't appear in a pipeline's list of modules that can be run. It produces its output for the next module on the fly when the next module needs it.
 
 Inputs
 ======
