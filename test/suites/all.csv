@@ -1,6 +1,7 @@
 pipelines/input/raw_text_files.conf, europarl
-pipelines/corpora/group_filter.conf, output
+pipelines/corpora/group.conf, output
 pipelines/corpora/concat.conf, output
 pipelines/corpora/subset.conf, output
 pipelines/corpora/split.conf, split
+pipelines/corpora/interleave.conf, output
 pipelines/input/fasttext.conf, vectors, stored_vectors
