@@ -16,10 +16,6 @@ They must have the same data point type, or one must be a subtype of the other.
 In theory, we could find the most specific common ancestor and use that as the output type, but this is
 not currently implemented and may not be worth the trouble. Perhaps we will add this in future.
 
-.. todo::
-
-   Updated to new datatypes system. Now add test pipeline and test
-
 """
 from itertools import izip
 
