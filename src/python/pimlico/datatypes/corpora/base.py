@@ -54,7 +54,7 @@ class IterableCorpus(PimlicoDatatype):
     documents and a storage mechanism for grouping together documents in archives on disk.
 
     May be used as a type requirement, but remember that it is not possible to create a reader
-    from this type directly: use a subtype, like :cls:`~pimlico.datatypes.grouped.GroupedCorpus`, instead.
+    from this type directly: use a subtype, like :class:`~pimlico.datatypes.grouped.GroupedCorpus`, instead.
 
     The actual type of the data depends on the type given as the first argument,
     which should be an instance of DataPointType or a subclass: it could be, e.g. coref output, etc.

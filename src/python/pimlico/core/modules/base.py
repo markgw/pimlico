@@ -499,7 +499,7 @@ class BaseModuleInfo(object):
         Check whether the named output is ready to be read from one of its possible storage locations.
 
         :param output_name: output to check, or default output if not given
-        :return False if data is not ready to be read
+        :return: False if data is not ready to be read
         """
         reader_setup = self.get_output_reader_setup(output_name)
         return reader_setup.ready_to_read()

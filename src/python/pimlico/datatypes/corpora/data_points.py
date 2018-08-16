@@ -6,8 +6,6 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
-from collections import OrderedDict
-
 __all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
            "InvalidDocument"]
 
@@ -164,6 +162,7 @@ class DataPointType(object):
         This happens automatically - you don't need to do it yourself and shouldn't inherit from anything:
 
         .. code-block:: py
+
            class MyDataPointType(DataPointType):
                class Document:
                    # Overide document things here
