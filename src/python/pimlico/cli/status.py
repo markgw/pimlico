@@ -158,7 +158,7 @@ class StatusCmd(PimlicoCLISubcommand):
                                 colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
                             )
                         print "       outputs: %s" % ", ".join([
-                            colored(name, "green") if module.get_output(name).data_ready() else colored(name, "red")
+                            colored(name, "green") if module.get_output_reader_setup(name).ready_to_read() else colored(name, "red")
                             for name in module.output_names
                         ])
                         if module.is_locked():
@@ -226,10 +226,11 @@ def module_status(module):
     # Put together information about the inputs
     input_infos = []
     for input_name in module.input_names:
-        for (input_datatype, (input_module, input_module_output, input_additional_names)) in \
-                zip(module.get_input(input_name, always_list=True),
+        for (input_setup, (input_module, input_module_output)) in \
+                zip(module.get_input_reader_setup(input_name, always_list=True),
                     module.get_input_module_connection(input_name, always_list=True)):
-            corpus_dir = input_datatype.absolute_base_dir or "not available yet"
+            input_datatype = input_setup.datatype
+            input_ready = input_setup.ready_to_read()
             # Format all the information about this input
             input_info = """\
 Input {input_name}:
@@ -237,27 +238,26 @@ Input {input_name}:
     From module: {input_module} ({input_module_output} output)
     Datatype: {datatype_name}""".format(
                 input_name=input_name,
-                status=colored("Data ready", "green") if module.input_ready(input_name) else colored("Data not ready", "red"),
+                status=colored("Data ready", "green") if input_ready else colored("Data not ready", "red"),
                 input_module=input_module.module_name,
                 input_module_output=input_module_output or "default",
-                input_datatype=input_datatype,
                 datatype_name=input_datatype.full_datatype_name(),
             )
             if input_module.module_executable:
                 # Executable module: if it's been executed, we get data from there
-                if module.input_ready(input_name):
-                    input_info += "\n    Stored in: {corpus_dir}".format(corpus_dir=corpus_dir)
+                input_info += "\n    Executable module"
             elif input_module.is_filter():
-                input_info += "\n    Input module is a filter"
+                input_info += "\n    Filter module"
             else:
                 # Input module
                 input_info += "\n    Pipeline input"
-            if input_datatype.data_ready():
-                # Get additional detailed information from the datatype instance
-                datatype_details = input_datatype.get_detailed_status()
+            if input_ready:
+                # Get the input reader and any additional information it supplies
+                input_reader = input_setup(module.pipeline, module=input_module.module_name)
+                # Get additional detailed information from the reader
+                datatype_details = input_reader.get_detailed_status()
                 if datatype_details:
-                    # Indent the lines
-                    input_info = "%s\n%s" % (input_info, "\n".join("    %s" % line for line in datatype_details))
+                    input_info += "\n".join("    {}".format(line) for line in datatype_details)
             input_infos.append(input_info)
 
             # If filter module: output further information about where it gets its inputs from
@@ -267,28 +267,22 @@ Input {input_name}:
     # Do the same thing for the outputs
     output_infos = []
     for output_name in module.output_names:
-        output_datatype = module.get_output(output_name)
-        if module.is_filter():
-            corpus_dir = "filter module, output not stored"
-        elif output_datatype.base_dir is None:
-            # A None base_dir indicates that the dir in the Pimlico storage is not required
-            # This happens with input datatypes that require no preparation
-            corpus_dir = "nothing to be stored"
-        else:
-            corpus_dir = output_datatype.absolute_base_dir or "not available yet"
+        output_setup = module.get_output_reader_setup(output_name)
+        output_datatype = output_setup.datatype
+        output_ready = output_setup.ready_to_read()
         output_info = """\
 Output {output_name}:
     {status}
-    Datatype: {output_datatype}
-    Stored in: {corpus_dir}""".format(
+    Datatype: {output_datatype}{filter_info}""".format(
             output_name=output_name,
-            status=colored("Data available", "green") if output_datatype.data_ready() else colored("Data not available", "red"),
+            status=colored("Data available", "green") if output_ready else colored("Data not available", "red"),
             output_datatype=output_datatype.full_datatype_name(),
-            corpus_dir=corpus_dir,
+            filter_info="\n    Filter module" if module.is_filter() else "",
         )
-        if output_datatype.data_ready():
-            # Get additional detailed information from the datatype instance
-            datatype_details = output_datatype.get_detailed_status()
+        if output_ready:
+            # Get additional detailed information from the reader instance
+            output_reader = output_setup(module.pipeline, module=module.module_name)
+            datatype_details = output_reader.get_detailed_status()
             if datatype_details:
                 # Indent the lines
                 output_info = "%s\n%s" % (output_info, "\n".join("    %s" % line for line in datatype_details))

@@ -178,17 +178,17 @@ def run_test_suite(pipelines_and_modules, log, no_clean=False):
     :param pipeline_and_modules: list of (pipeline, modules) pairs, where pipeline is a path to a config file and
         modules a list of module names to test
     """
-    all_succeeded = True
+    failed = []
     for path, module_names in pipelines_and_modules:
         log.info("Running test pipeline {}, modules {}".format(path, ", ".join(module_names)))
         try:
             run_test_pipeline(path, module_names, log, no_clean=no_clean)
         except TestPipelineRunError, e:
             log.error("Test failed: {}".format(e))
-            all_succeeded = False
+            failed.append((path, module_names))
         else:
             log.info("Test succeeded")
-    return all_succeeded
+    return failed
 
 
 def clear_storage_dir():
@@ -222,9 +222,11 @@ if __name__ == "__main__":
     pipelines_and_modules = [(row[0].strip(), [m.strip() for m in row[1:]]) for row in rows]
     log.info("Running {} test pipelines".format(len(pipelines_and_modules)))
 
-    all_succeeded = run_test_suite(pipelines_and_modules, log, no_clean=opts.no_clean)
-    if all_succeeded:
-        log.info("All tests completed successfully")
+    failed = run_test_suite(pipelines_and_modules, log, no_clean=opts.no_clean)
+    if failed:
+        log.error("Some tests did not complete successfully: {}. See above for details".format(
+            ", ".join("{}[{}]".format(pipeline, ",".join(modules)) for (pipeline, modules) in failed)
+        ))
     else:
-        log.error("Some tests did not complete successfully. See above for details")
-    sys.exit(1 if all_succeeded else 0)
+        log.info("All tests completed successfully")
+    sys.exit(1 if failed else 0)

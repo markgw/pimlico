@@ -21,9 +21,7 @@ and the grouping will be preserved as the corpus passes through the pipeline.
    There also used to be a ``tar`` module that wrote the grouped corpus to disk.
    This has now been removed, since most of the time it's fine to use this
    filter module instead. If you really want to store the grouped corpus, you
-   will soon be able to use the ``store`` module, a generic version of
-   :mod:`~pimlico.modules.corpora.store_text`, which will be created at some
-   point soon.
+   can use the ``store`` module.
 
 """
 import math
@@ -110,6 +108,10 @@ class CorpusGroupReader(PimlicoDatatype.Reader):
         # Create an initial grouper utility to get the list of archive names
         tmp_grouper = IterableCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
         self.archives = tmp_grouper.get_archive_names()
+
+    @property
+    def metadata(self):
+        return self.input_reader.metadata
 
     def process_setup(self):
         # Don't call the super method: we don't have base dir, etc

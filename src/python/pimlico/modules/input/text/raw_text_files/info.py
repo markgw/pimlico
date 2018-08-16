@@ -158,8 +158,10 @@ def corpus_iter(reader):
 
             with open(path, "r") as f:
                 data = f.read()
-                if not type(data) is unicode:
+                # Normalize encoding, but keep the data as utf8
+                if not type(data) is unicode and encoding.lower() not in ["utf-8", "utf8"]:
                     data = data.decode(encoding, errors=options["encoding_errors"])
+                    data = data.encode("utf8")
 
                 if start != 0 or end != -1:
                     # start=0 (i.e. no cutting) is the same as start=1 (start from first line)

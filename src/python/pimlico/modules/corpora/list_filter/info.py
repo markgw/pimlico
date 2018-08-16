@@ -6,10 +6,6 @@
 Similar to :mod:`~pimlico.modules.corpora.split`, but instead of taking a random split of the dataset, splits it
 according to a given list of documents, putting those in the list in one set and the rest in another.
 
-.. todo::
-
-   Updated to new datatypes system. Add test pipeline
-
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.core import StringList
