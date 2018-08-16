@@ -3,23 +3,35 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-Datatypes provide interfaces for reading (and in some cases writing) datasets. At their most basic,
-they define a way to iterate over a dataset linearly. Some datatypes may also provide other functionality,
-such as random access or compression.
+Datatypes provide interfaces for reading and writing datasets. They provide different
+ways of reading in or iterating over datasets and different ways to write out datasets,
+as appropriate to the datatype. They are used by Pimlico to typecheck connections
+between modules to make sure that the output from one module provides a suitable
+type of data for the input to another. They are then also used by the modules to read
+in their input data coming from earlier in a pipeline and to write out their output
+data, to be passed to later modules.
 
 As much as possible, Pimlico pipelines should use standard datatypes to connect up the output of modules
 with the input of others. Most datatypes have a lot in common, which should be reflected in their sharing
-common base classes. Custom input modules will be needed for most datasets when they're used as inputs, but
-as far as possible, these should produce standard datatypes like
-:class:`~pimlico.datatypes.tar.TarredCorpus` as output.
+common base classes. Input modules take care of reading in data from external sources
+and they provide access to that data in a way that is identified by a Pimlico datatype.
 
-Instances of subclasses of PimlicoDatatype represent the type of datasets and are used for typechecking
-in a pipeline. Subclasses of PimlicoDatatypeReader are created automatically to correspond to each
-datatype and can be instantiated via the datatype (by calling it). These perform the actual reading of
-(e.g. iteration over) datasets.
+Instances of subclasses of :class:`PimlicoDatatype` represent the type of datasets
+and are used for typechecking in a pipeline.
+Each datatype has an associated `Reader` class, accessed by `datatype_cls.Reader`.
+These are created automatically and can be instantiated via the datatype (by calling it).
+They are all subclasses of :class:`PimlicoDatatype.Reader`.
+It is these readers that are used within a pipeline to read a dataset output by an earlier
+module. In some cases, other readers may be used: for example, input modules provide
+standard datatypes at their outputs, but use special readers to provide access to
+the external data.
 
-A similar reflection of the datatype hierarchy is used for dataset writers, except that not all datatypes
-provide a writer.
+A similar reflection of the datatype hierarchy is used for dataset writers, which are
+used to write the outputs from modules, to be passed to subsequent modules. These
+are created automatically, just like readers, and are all subclasses of
+:class:`PimlicoDatatype.Writer`. You can get a datatype's standard writer class
+via `datatype_cls.Writer`. Some datatypes might not provide a writer, but
+most do.
 
 """
 import json
@@ -203,7 +215,6 @@ class PimlicoDatatypeReaderMeta(type):
 
 
 class PimlicoDatatype(object):
-    __metaclass__ = PimlicoDatatypeMeta
     """
     The abstract superclass of all datatypes. Provides basic functionality for identifying where
     data should be stored and such.
@@ -216,8 +227,7 @@ class PimlicoDatatype(object):
     instantiating a datatype in some context other than module output. It should generally be set for
     input datatypes, though, since they are treated as being created by a special input module.
 
-    Creating a new datatype
-    =======================
+    **Creating a new datatype**
 
     This is the typical process for creating a new datatype. Of course, some datatypes do more and
     some of the following is not always necessary, but it's a good guide for reference.
@@ -247,6 +257,8 @@ class PimlicoDatatype(object):
        * `shell_commands`: a list of shell commands associated with the datatype
 
     """
+    __metaclass__ = PimlicoDatatypeMeta
+
     datatype_name = "base_datatype"
     """
     Options specified in the same way as module options that control the nature of the 
