@@ -12,10 +12,6 @@ module or from an input reader, but where it is desirable to store the
 produced corpus for further use, rather than always running the filters/readers
 each time the corpus' documents are needed.
 
-.. todo::
-
-   Added test pipeline: get it working!
-
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.corpora import GroupedCorpus
