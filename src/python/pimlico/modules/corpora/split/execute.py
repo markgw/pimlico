@@ -11,7 +11,6 @@ from pimlico.utils.progress import get_progress_bar
 class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         input_corpus = self.info.get_input("corpus")
-        input_corpus.raw_data = True
 
         set1_list = []
         set2_list = []
