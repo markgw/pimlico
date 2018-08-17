@@ -53,17 +53,27 @@ def main():
     if "--git" in args:
         args.remove("--git")
         git = True
+        if "--branch" in args:
+            br_id = args.index("--branch")
+            # Pass in the branch name instead of just True as git kwarg to bootstrap
+            # This tells it to clone the named branch
+            git = args[br_id+1]
+            args.pop(br_id)
+            args.pop(br_id)
     else:
         git = False
 
     if len(args) == 0:
         print "Specify a project name"
         print "Usage:"
-        print "  python newproject.py [--git] <project_name>"
+        print "  python newproject.py [--git] [--branch <branch_name>] <project_name>"
         print
         print "If you specify --git, Pimlico will be cloned as a Git repository, rather "
         print "than downloaded from a release. This only works on Linux and requires that Git is "
         print "installed. Most of the time, you don't want to do this: it's only for Pimlico development"
+        print
+        print "If you also specify --branch, the given branch will be cloned instead of master. "
+        print "Again, this is only for development"
         sys.exit(1)
 
     project_name = args[0]

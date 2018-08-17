@@ -139,9 +139,14 @@ def bootstrap(config_file, git=False):
 
     if git:
         # Clone the latest version of the code from the Git repository
-        print "Cloning git repository"
+        # Allow the git kwarg to name a branch to clone
+        if type(git) is str:
+            args = "--branch {} ".format(git)
+        else:
+            args = ""
+        print "Cloning git repository ({})".format("{} branch".format(git) if type(git) is str else "master")
         import subprocess
-        subprocess.check_call("git clone %s" % GIT_URL, shell=True)
+        subprocess.check_call("git clone {}{}".format(args, GIT_URL), shell=True)
     else:
         archive_url = "%s%s.tar.gz" % (DOWNLOAD_URL, fetch_release)
         print "Downloading Pimlico source code from %s" % archive_url
