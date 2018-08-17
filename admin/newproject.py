@@ -17,8 +17,7 @@ import urllib2
 import subprocess
 
 
-RAW_URL = "https://raw.githubusercontent.com/markgw/pimlico/master/"
-RELEASE_URL = "%sadmin/release.txt" % RAW_URL
+RAW_URL = "https://raw.githubusercontent.com/markgw/pimlico/"
 
 
 def create_directory_structure(dirs, base_dir):
@@ -36,11 +35,12 @@ def create_directory_structure(dirs, base_dir):
                 f.write("")
 
 
-def lookup_bleeding_edge():
+def lookup_bleeding_edge(branch_url):
+    release_url = "{}admin/release.txt".format(branch_url)
     try:
-        release_data = urllib2.urlopen(RELEASE_URL).read()
+        release_data = urllib2.urlopen(release_url).read()
     except Exception, e:
-        print "Could not fetch Pimlico release from %s: %s" % (RELEASE_URL, e)
+        print "Could not fetch Pimlico release from %s: %s" % (release_url, e)
         sys.exit(1)
     return release_data.splitlines()[-1].lstrip("v")
 
@@ -50,6 +50,7 @@ def main():
     args = sys.argv[1:]
 
     # Allow the --git switch to pass through to bootstrap function
+    branch_name = None
     if "--git" in args:
         args.remove("--git")
         git = True
@@ -57,11 +58,13 @@ def main():
             br_id = args.index("--branch")
             # Pass in the branch name instead of just True as git kwarg to bootstrap
             # This tells it to clone the named branch
-            git = args[br_id+1]
+            branch_name = args[br_id+1]
+            git = branch_name
             args.pop(br_id)
             args.pop(br_id)
     else:
         git = False
+    branch_url = "{}{}/".format(RAW_URL, branch_name if branch_name is not None else "master")
 
     if len(args) == 0:
         print "Specify a project name"
@@ -97,7 +100,7 @@ def main():
     create_directory_structure(structure, base_dir)
 
     # Look up the latest Pimlico version
-    pimlico_version = lookup_bleeding_edge()
+    pimlico_version = lookup_bleeding_edge(branch_url)
     print "Using latest Pimlico version, %s" % pimlico_version
 
     # Output a basic config file to get us started
@@ -107,7 +110,8 @@ def main():
     print "Output skeletal config file to %s" % conf_filename
 
     # Fetch the bootstrap script from the repository
-    bootstrap_url = "%sadmin/bootstrap.py" % RAW_URL
+    # If using a branch, also get the bootstrap script from that branch
+    bootstrap_url = "{}admin/bootstrap.py".format(branch_url)
     try:
         bootstrap_script = urllib2.urlopen(bootstrap_url).read()
     except Exception, e:

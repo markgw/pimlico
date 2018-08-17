@@ -16,7 +16,7 @@ import urllib2
 import json
 
 
-RELEASE_URL = "https://raw.githubusercontent.com/markgw/pimlico/master/admin/release.txt"
+RAW_URL = "https://raw.githubusercontent.com/markgw/pimlico/"
 DOWNLOAD_URL = "https://github.com/markgw/pimlico/archive/"
 GIT_URL = "https://github.com/markgw/pimlico.git"
 GITHUB_API = "https://api.github.com"
@@ -34,13 +34,14 @@ def lookup_pimlico_versions():
     return [tag["name"] for tag in reversed(tag_data)]
 
 
-def lookup_bleeding_edge():
+def lookup_bleeding_edge(branch_url):
+    release_url = "{}admin/release.txt".format(branch_url)
     try:
-        release_data = urllib2.urlopen(RELEASE_URL).read()
+        release_data = urllib2.urlopen(release_url).read()
     except Exception, e:
-        print "Could not fetch Pimlico release from %s: %s" % (RELEASE_URL, e)
+        print "Could not fetch Pimlico release from %s: %s" % (release_url, e)
         sys.exit(1)
-    return release_data.splitlines()[-1]
+    return release_data.splitlines()[-1].lstrip("v")
 
 
 def find_config_value(config_path, key, start_in_pipeline=False):
@@ -106,6 +107,8 @@ def symlink(source, link_name):
 
 def bootstrap(config_file, git=False):
     current_dir = os.path.abspath(os.path.dirname(__file__))
+    branch_name = git if type(git) is str else "master"
+    branch_url = "{}{}/".format(RAW_URL, branch_name)
 
     if os.path.exists(os.path.join(current_dir, "pimlico")):
         print "Pimlico source directory already exists: delete it if you want to fetch again"
@@ -120,7 +123,7 @@ def bootstrap(config_file, git=False):
     print "Config file requires Pimlico version %s" % version
 
     available_releases = lookup_pimlico_versions()
-    bleeding_edge = lookup_bleeding_edge()
+    bleeding_edge = lookup_bleeding_edge(branch_url)
     tags = available_releases
 
     # If the bleeding edge version is compatible (same major version) just use that
