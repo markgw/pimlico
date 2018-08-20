@@ -91,10 +91,6 @@ class BrowseCmd(PimlicoCLISubcommand):
                                                 "'module:stage' for multi-stage modules")
         parser.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
                                                            "load the default output")
-        parser.add_argument("--raw", "-r", action="store_true",
-                            help="Don't parse the data using the output datatype (i.e. just read the raw text). If not "
-                                 "set, we output the result of applying unicode() to the parsed data structure, or a "
-                                 "custom formatting if the datatype loaded defines one")
         parser.add_argument("--skip-invalid", action="store_true",
                             help="Skip over invalid documents, instead of showing the error that caused them to be "
                                  "invalid")

@@ -31,14 +31,7 @@ class DocumentBrowserFormatter(object):
     Should be overridden by subclasses to specify the corpus/document datatype(s) that can be formatted. Given in the
     same way as data-point types of iterable corpora, so expected to be a subclass of DataPointType.
     """
-    DATATYPE = DataPointType
-
-    """
-    Whether the formatter expects to get the parsed document, according to the datatype's usual input reading
-    routine, or just the raw text stored in the file. Usually it's the former (default), but subclasses may
-    override this.
-    """
-    RAW_INPUT = False
+    DATATYPE = DataPointType()
 
     def __init__(self, corpus):
         self.corpus = corpus
@@ -68,23 +61,13 @@ class DefaultFormatter(DocumentBrowserFormatter):
     Generic implementation of a browser formatter that's used if no other formatter is given.
 
     """
-    DATATYPE = DataPointType
-
-    def __init__(self, corpus, raw_data=False):
-        super(DefaultFormatter, self).__init__(corpus)
-        self.raw_data = raw_data
+    DATATYPE = DataPointType()
 
     def format_document(self, doc):
-        if self.raw_data:
-            # We're just showing the raw data, so don't try to do anything other than ensure it's a string
-            doc = unicode(doc)
-        else:
-            # Allow datatypes to provide a custom way to format the data, other than the __unicode__
-            try:
-                doc = doc.browser_display
-            except AttributeError:
-                doc = unicode(doc)
-        return doc
+        try:
+            return doc.raw_data.decode("utf8")
+        except:
+            return unicode(doc.raw_data)
 
 
 class InvalidDocumentFormatter(DocumentBrowserFormatter):
@@ -93,10 +76,8 @@ class InvalidDocumentFormatter(DocumentBrowserFormatter):
     information.
 
     """
-    DATATYPE = IterableCorpus
-
     def format_document(self, doc):
-        return doc
+        return doc.error_info
 
     def filter_document(self, doc):
         return doc if is_invalid_doc(doc) else None
@@ -109,24 +90,21 @@ def typecheck_formatter(formatted_doc_type, formatter_cls):
     """
     from pimlico.core.modules.base import TypeCheckError
     # Check that the datatype provided is compatible with the formatter's datatype
-    if issubclass(formatter_cls.DATATYPE, IterableCorpus):
-        # Got a corpus type: use its document type to check compatibility
-        document_type = formatter_cls.DATATYPE.data_point_type
-    elif issubclass(formatter_cls.DATATYPE, DataPointType):
-        # Was given a data-point type directly
+    if issubclass(formatter_cls.DATATYPE, DataPointType):
         document_type = formatter_cls.DATATYPE
     else:
-        raise TypeCheckError("formatter's datatype needs to be an iterable corpus subclass or a data-point type. "
-                             "Got %s" % formatter_cls.DATATYPE.__name__)
+        raise TypeCheckError("formatter's datatype needs to be a data-point type. Got {}".format(
+            formatter_cls.DATATYPE.__name__
+        ))
 
     if not issubclass(formatted_doc_type, document_type):
         raise TypeCheckError(
             "formatter %s is not designed for this data-point type (%s)" %
-            (formatter_cls.__name__, formatted_doc_type.__name__)
+            (formatter_cls.__name__, formatted_doc_type.name)
         )
 
 
-def load_formatter(dataset, formatter_name=None, parse=True):
+def load_formatter(dataset, formatter_name=None):
     """
     Load a formatter specified by its fully qualified Python class name. If None, loads the default formatter.
     You may also specify a formatter by name, choosing from one of the standard ones that the formatted
@@ -145,7 +123,7 @@ def load_formatter(dataset, formatter_name=None, parse=True):
             formatter_name = formatted_type.formatters[0][1]
         else:
             # Just instantiate the default formatter
-            return DefaultFormatter(dataset, raw_data=not parse)
+            return DefaultFormatter(dataset)
 
     if type(formatter_name) is type:
         # Allow formatters to be specified by class directly as well as by path

@@ -9,6 +9,8 @@ import os
 import sys
 from traceback import format_exc
 
+from pimlico.core.modules.base import satisfies_typecheck
+from pimlico.datatypes import IterableCorpus
 from pimlico.datatypes.corpora import is_invalid_doc
 
 try:
@@ -46,24 +48,22 @@ def browse_cmd(pipeline, opts):
     Command for main Pimlico CLI
 
     """
-    from pimlico.old_datatypes.base import IterableCorpus
-
     module_name = opts.module_name
     output_name = opts.output_name
     print "Loading %s of module '%s'" % \
           ("default output" if output_name is None else "output '%s'" % output_name, module_name)
-    data = pipeline[module_name].get_output(output_name)
-    print "Datatype: %s" % data.datatype_name
+    reader_setup = pipeline[module_name].get_output_reader_setup(output_name)
+    datatype = reader_setup.datatype
+    print "Datatype: %s" % datatype.datatype_name
 
     # We can only browse tarred corpora document by document
-    if not isinstance(data, IterableCorpus):
-        print "%s is not a sub-type of iteratable corpus, so can't be browsed (datatype class is %s)" % \
-              (data.datatype_name, type(data).__name__)
+    if not satisfies_typecheck(reader_setup.datatype, IterableCorpus()):
+        print "{} is not an iteratable corpus, so can't be browsed".format(datatype.datatype_name)
         sys.exit(1)
 
     # Catch the special formatter value 'help' that lists available standard formatters
     if opts.formatter == "help":
-        standard_formatters = data.data_point_type.formatters
+        standard_formatters = reader_setup.data_point_type.formatters
         if len(standard_formatters) == 0:
             print "\nDatatype does not define any standard formatters."
             print "If you don't specify one, the default formatter will be used (raw data)"
@@ -82,44 +82,31 @@ def browse_cmd(pipeline, opts):
 
     # Load the formatter if one was requested
     try:
-        formatter = load_formatter(data, opts.formatter, parse=not opts.raw)
+        formatter = load_formatter(reader_setup, opts.formatter)
     except TypeError, e:
         print >>sys.stderr, "Error loading formatter"
         print >>sys.stderr, e
         sys.exit(1)
 
-    if opts.formatter is not None:
-        # If a formatter's given, use its attribute to determine whether we get raw input
-        parse = not formatter.RAW_INPUT
-    else:
-        # Otherwise (default formatter), use the cmd-line option
-        parse = not opts.raw
-
-    browse_data(data, formatter, parse=parse, skip_invalid=opts.skip_invalid)
-
-
-def browse_data(data, formatter, parse=False, skip_invalid=False):
-    if not parse:
-        data.raw_data = True
-    if not data.data_ready():
-        if data.module is not None:
-            if data.module.module_executable:
-                print "Data not available from module output (%s): perhaps it hasn't been run? (base dir: %s)" % \
-                      (data.module.module_name, data.base_dir)
-            else:
-                print "Data not available from non-executable module's output (%s)" % data.module.module_name
-        else:
-            print "Data not ready: cannot browse it"
+    if not reader_setup.ready_to_read():
+        print "Data not ready: cannot browse it"
         sys.exit(1)
 
+    # Get a reader for the corpus
+    reader = reader_setup(pipeline, module_name)
+
+    browse_data(reader, formatter, skip_invalid=opts.skip_invalid)
+
+
+def browse_data(reader, formatter, skip_invalid=False):
     # Top of the screen
     doc_line = urwid.Text("")
     top_widgets = [
         doc_line,
         urwid.Divider(),
     ]
-    if data.base_dir is not None:
-        top_widgets.insert(0, urwid.Text("Documents in %s" % data.base_dir))
+    if hasattr(reader, "base_dir"):
+        top_widgets.insert(0, urwid.Text("Documents in %s" % reader.base_dir))
 
     # Middle: content
     body_text = urwid.Text(u"")
@@ -132,7 +119,7 @@ def browse_data(data, formatter, parse=False, skip_invalid=False):
                              "| w = write (save) doc"), footer_text]
 
     # Management of current document, navigation
-    corpus_state = CorpusState(data)
+    corpus_state = CorpusState(reader)
 
     # Main layout
     main = urwid.LineBox(
