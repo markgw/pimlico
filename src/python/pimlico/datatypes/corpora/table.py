@@ -80,6 +80,8 @@ class IntegerTableDocumentType(RawDocumentType):
         self.struct = get_struct(self.bytes, self.signed, self.row_length)
 
     class Document:
+        keys = ["table"]
+
         def raw_to_internal(self, raw_data):
             reader = StringIO(raw_data)
             table = list(self.read_rows(reader))

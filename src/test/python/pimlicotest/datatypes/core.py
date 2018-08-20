@@ -14,6 +14,7 @@ from pimlico import TEST_DATA_DIR
 # Create test cases automatically for lots of datatypes
 from pimlico.datatypes.base import PimlicoDatatype
 from pimlico.datatypes.core import Dict, StringList
+from pimlico.datatypes.corpora import InvalidDocument
 from pimlico.datatypes.corpora.data_points import RawTextDocumentType, TextDocumentType
 from pimlico.datatypes.corpora.floats import FloatListDocumentType, FloatListsDocumentType
 from pimlico.datatypes.corpora.grouped import GroupedCorpus
@@ -144,6 +145,12 @@ class GroupedCorpusDatatypeTest(DatatypeTest):
             self.assertIsInstance(doc.raw_data, str)
             # Internal data should always be available in some form, though its keys may vary
             self.assertIsInstance(doc.internal_data, dict)
+            # Example corpora shouldn't generally include invalid documents, so it's a sign something has gone wrong
+            self.assertNotIsInstance(doc, InvalidDocument.Document,
+                                     msg="{} corpus contained invalid doc...\nError was: {}".format(
+                                         reader.datatype.data_point_type.name,
+                                         getattr(doc, "error_info", "(none)")
+                                     ))
             # Try reading any attributes that this doc type is supposed to have
             for attr in self.document_attrs:
                 # Check the attr exists

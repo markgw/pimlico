@@ -152,7 +152,7 @@ class IterableCorpus(PimlicoDatatype):
             # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
             try:
                 # Produce a document instance of the appropriate type
-                document = self.datatype.data_point_type(data)
+                document = self.datatype.data_point_type(raw_data=data)
             except BaseException, e:
                 # If there's any problem reading in the document, yield an invalid doc with the error
                 document = invalid_document(

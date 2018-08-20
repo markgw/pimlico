@@ -16,12 +16,6 @@ file. If this does not hold, the dataset is assumed to be not ready. You can ove
 a ``?`` at the start of a filename/glob, indicating that it will be included if it exists, but is
 not depended on for considering the data ready to use.
 
-.. seealso::
-
-   Datatype :class:`pimlico.datatypes.files.UnnamedFileCollection`
-      The datatype previously used for reading in file collections, now being phased out to be replaced
-      by this input reader.
-
 """
 import fnmatch
 import os
@@ -158,10 +152,8 @@ def corpus_iter(reader):
 
             with open(path, "r") as f:
                 data = f.read()
-                # Normalize encoding, but keep the data as utf8
-                if not type(data) is unicode and encoding.lower() not in ["utf-8", "utf8"]:
-                    data = data.decode(encoding, errors=options["encoding_errors"])
-                    data = data.encode("utf8")
+                # Decode to unicode string, which will be used as data for document
+                data = data.decode(encoding, errors=options["encoding_errors"])
 
                 if start != 0 or end != -1:
                     # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
@@ -177,7 +169,7 @@ def corpus_iter(reader):
                     else:
                         data = u"\n".join(lines[start:end+1])
 
-                yield doc_name, reader.datatype.data_point_type(data)
+                yield doc_name, reader.datatype.data_point_type(text=data)
 
 
 ModuleInfo = iterable_input_reader(

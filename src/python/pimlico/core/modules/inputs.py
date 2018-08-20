@@ -64,14 +64,27 @@ def iterable_input_reader(input_module_options, data_point_type,
                           module_type_name=None, module_readable_name=None,
                           software_dependencies=None, execute_count=False):
     """
-    This is a new version of the factory :func:`.iterable_input_reader_factory` and should be
-    used where possible. It provides a nicer interface using the new datatypes system.
-
-    Factory for creating an input reader module type. This is a non-executable module that has no
+    Factory for creating an input reader module info. This is a non-executable module that has no
     inputs. It reads its data from some external location, using the given module options. The resulting
     dataset is an IterableCorpus, with the given document type.
 
-    If execute_count=True, the module will be an executable module and the execution will simply count
+    The returned class is a subclass of :class:`~pimlico.core.modules.base.BaseModuleInfo`.
+    It is typically used like this, within a Pimlico module's `info.py`:
+
+    .. code-block:: py
+
+       ModuleInfo = iterable_input_reader(
+           {
+               # ... module options ...
+           },
+           DataPointType(),
+           data_ready_function,
+           len_function,
+           iter_function,
+           "my_module_name"
+       )
+
+    If `execute_count=True`, the module will be an executable module and the execution will simply count
     the number of documents in the corpus and store the count. This should be used if counting the documents
     in the dataset is not completely trivial and quick (e.g. if you need to read through the data itself,
     rather than something like counting files in a directory or checking metedata).
@@ -104,7 +117,7 @@ def iterable_input_reader(input_module_options, data_point_type,
         when ``get_software_dependencies()`` is called, or a function that takes the module-info instance and
         returns such a list. If left blank, no dependencies are returned.
     :param execute_count: make an executable module that counts the data to get its length (num docs)
-    :return:
+    :return: module info class
     """
     mt_name = module_type_name or "reader_for_{}".format(data_point_type.name)
     mr_name = module_readable_name or "Input reader for {} iterable corpus".format(data_point_type.name)

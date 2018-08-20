@@ -50,7 +50,7 @@ class RawDocumentTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
             # Generate a random string for this document
             data = u"".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(50))
             name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
-            yield name, RawDocumentType()(data)
+            yield name, RawDocumentType()(raw_data=data)
 
 
 class IntegerTableTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
@@ -68,8 +68,7 @@ class IntegerTableTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
                 for rownum in range(10)
             ]
             name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
-            data = {"table": table}
-            yield name, self.data_point_type(data, from_internal=True)
+            yield name, self.data_point_type(table=table)
 
 
 class IntegerListsTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
@@ -84,8 +83,7 @@ class IntegerListsTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
                 for rownum in range(random.randint(0, 20))
             ]
             name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
-            data = {"lists": lsts}
-            yield name, self.data_point_type(data, from_internal=True)
+            yield name, self.data_point_type(lists=lsts)
 
 
 class IntegerListTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
@@ -97,8 +95,7 @@ class IntegerListTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
             # Each doc has a random length
             lst = [random.randint(0, 10) for i in range(random.randint(0, 20))]
             name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
-            data = {"list": lst}
-            yield name, self.data_point_type(data, from_internal=True)
+            yield name, self.data_point_type(list=lst)
 
 
 class FloatListsTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
@@ -113,8 +110,7 @@ class FloatListsTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
                 for rownum in range(random.randint(0, 20))
             ]
             name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
-            data = {"lists": lsts}
-            yield name, self.data_point_type(data, from_internal=True)
+            yield name, self.data_point_type(lists=lsts)
 
 
 class FloatListTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
@@ -126,5 +122,4 @@ class FloatListTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
             # Each doc has a random length
             lst = [random.uniform(0., 10.) for i in range(random.randint(0, 20))]
             name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
-            data = {"list": lst}
-            yield name, self.data_point_type(data, from_internal=True)
+            yield name, self.data_point_type(list=lst)

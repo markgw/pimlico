@@ -19,10 +19,7 @@ def worker_setup(worker):
 
 
 def process_document(worker, archive_name, doc_name, doc):
-    return RawTextDocumentType()(
-        {"text": worker.formatter.format_document(doc)},
-        from_internal=True,
-    )
+    return RawTextDocumentType()(text=worker.formatter.format_document(doc))
 
 
 ModuleExecutor = multiprocessing_executor_factory(process_document, worker_set_up_fn=worker_setup)

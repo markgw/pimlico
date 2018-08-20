@@ -19,6 +19,8 @@ class TokenizedDocumentType(TextDocumentType):
     #formatters = [("tokenized_doc", "pimlico.datatypes.formatters.tokenized.TokenizedDocumentFormatter")]
 
     class Document:
+        keys = ["sentences", "text"]
+
         @property
         def sentences(self):
             return self.internal_data["sentences"]

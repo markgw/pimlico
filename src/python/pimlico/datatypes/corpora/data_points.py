@@ -6,6 +6,10 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
+import copy
+
+from pimlico.utils.core import remove_duplicates
+
 __all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
            "InvalidDocument"]
 
@@ -37,21 +41,23 @@ class DataPointTypeMeta(type):
             else:
                 parent_doc_cls = cls.__bases__[0].Document
                 my_doc_cls = cls.Document
-                if parent_doc_cls is my_doc_cls:
-                    # Document is not overridden, so we don't need to subclass
-                    cls.__document_type = parent_doc_cls
+                if my_doc_cls is parent_doc_cls:
+                    # Nothing overridden
+                    new_dict = {}
                 else:
-                    # Perform subclassing so that a new Document is created that is a subclass of the parent's document
-                    type_name = cls.__name__
-                    if type_name.endswith("Type"):
-                        # To get the class name, we typically remove "Type" from the end of the data point type class name
-                        doc_name = type_name[:-4]
-                    else:
-                        # If the class name didn't follow the pattern of ending with "Type",
-                        # add "Document" instead to distinguish it
-                        doc_name = "{}Document".format(type_name)
+                    new_dict = my_doc_cls.__dict__
 
-                    cls.__document_type = type(doc_name, (parent_doc_cls,), my_doc_cls.__dict__)
+                # Perform subclassing so that a new Document is created that is a subclass of the parent's document
+                type_name = cls.__name__
+                if type_name.endswith("Type"):
+                    # To get the class name, we typically remove "Type" from the end of the data point type class name
+                    doc_name = type_name[:-4]
+                else:
+                    # If the class name didn't follow the pattern of ending with "Type",
+                    # add "Document" instead to distinguish it
+                    doc_name = "{}Document".format(type_name)
+
+                cls.__document_type = type(doc_name, (parent_doc_cls,), new_dict)
         return cls.__document_type
 
 
@@ -89,22 +95,39 @@ class DataPointType(object):
         # This is set when the reader is initialized
         self.metadata = None
 
-    def __call__(self, data, from_internal=False):
+    def __call__(self, **kwargs):
         """
-        Produce a document of this type, using the raw data unicode string to instantiate
-        the document's data from.
+        Produce a document of this type. Data is specified using kwargs, which should
+        be keys listed in the document type's `keys` list.
 
-        If `from_internal=True`, the given data is the document's internal data
-        dictionary, not a unicode string. You may do this, for example, if you're
-        modifying a document's data and producing a document of a subtype.
+        If `raw_data` is given it should be a string.
+        Other kwargs are ignored and the document is instantiated
+        from the raw data alone. Otherwise, it is instantiated from an internal data
+        dictionary containing all of the specified keys.
 
         """
-        if from_internal:
-            raw_data = None
-            internal_data = data
-        else:
-            raw_data = data
+        if "raw_data" in kwargs:
+            raw_data = kwargs["raw_data"]
             internal_data = None
+        else:
+            if set(kwargs.keys()) != set(self.Document.keys):
+                # Check that no unknown keys are given for the document's internal representation
+                unknown_keys = set(kwargs.keys()) - set(self.Document.keys)
+                if unknown_keys:
+                    raise DocumentInitializationError("{} got unknown key(s) {} to create a document".format(
+                        self.name, ", ".join("'{}'".format(k) for k in sorted(unknown_keys))
+                    ))
+                # Check that all required keys are given
+                missing_keys = set(self.Document.keys) - set(kwargs.keys())
+                if missing_keys:
+                    raise DocumentInitializationError("{} requires key(s) {} to create a document, only got {}".format(
+                        self.name,
+                        ", ".join("'{}'".format(k) for k in sorted(missing_keys)),
+                        ", ".join("'{}'".format(k) for k in sorted(kwargs.keys()))
+                    ))
+            raw_data = None
+            internal_data = dict(kwargs)
+
         return self.Document(self, raw_data=raw_data, internal_data=internal_data)
 
     def __repr__(self):
@@ -191,6 +214,10 @@ class DataPointType(object):
         to do on the basis of one of these and then store to avoid repeated computation.
 
         """
+        #: Specifies the keys that a document has in its internal data
+        #: Subclasses should specify their keys
+        keys = []
+
         def __init__(self, data_point_type, raw_data=None, internal_data=None):
             self.data_point_type = data_point_type
 
@@ -287,7 +314,10 @@ class _DocumentPickler(object):
 
     """
     def __call__(self, datatype, data, from_internal):
-        return datatype(data, from_internal=from_internal)
+        if from_internal:
+            return datatype(**data)
+        else:
+            return datatype(raw_data=data)
 
 
 class InvalidDocument(DataPointType):
@@ -299,6 +329,8 @@ class InvalidDocument(DataPointType):
 
     """
     class Document:
+        keys = ["module_name", "error_info"]
+
         def raw_to_internal(self, raw_data):
             # Raw data always encoded as utf-8
             raw_data = raw_data.decode("utf-8")
@@ -337,10 +369,7 @@ def invalid_document(module_name, error_info):
     Convenience function to create an invalid document instance.
 
     """
-    return InvalidDocument()({
-        "module_name": module_name,
-        "error_info": error_info,
-    }, from_internal=True)
+    return InvalidDocument()(module_name=module_name, error_info=error_info)
 
 
 def invalid_document_or_text(text):
@@ -374,6 +403,8 @@ class RawDocumentType(DataPointType):
 
     """
     class Document:
+        keys = ["raw_data"]
+
         def raw_to_internal(self, raw_data):
             # Just include the raw data itself, so it's possible to convert back to raw data later
             return {"raw_data": raw_data}
@@ -397,6 +428,8 @@ class TextDocumentType(RawDocumentType):
 
     """
     class Document:
+        keys = ["text"]
+
         @property
         def text(self):
             return self.internal_data["text"]
@@ -419,4 +452,8 @@ class RawTextDocumentType(TextDocumentType):
 
 
 class DataPointError(Exception):
+    pass
+
+
+class DocumentInitializationError(Exception):
     pass
