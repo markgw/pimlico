@@ -33,4 +33,6 @@ class Tokenizer(object):
         Returns a list of sentences, where each is tokenized, with tokens separated by spaces.
 
         """
-        return self.gateway.entry_point.tokenize(text.encode("utf-8"))
+        tokenized_sents = list(self.gateway.entry_point.tokenize(text.encode("utf-8")))
+        sents = [s.split(u" ") for s in tokenized_sents]
+        return sents

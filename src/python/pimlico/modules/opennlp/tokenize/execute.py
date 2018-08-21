@@ -8,18 +8,30 @@ Py4J gateway with multiple clients. Instead, we start a Py4J gateway in every pr
 
 """
 
-from pimlico.core.external.java import Py4JInterface
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 from .tokenizer import Tokenizer
 
 
 @skip_invalid
 def process_document(worker, archive, filename, doc):
     # Run tokenization
-    tokenized_sents = list(worker.tokenizer.tokenize_text(doc))
+    tokenized_sents = list(worker.tokenizer.tokenize_text(doc.text))
     # Output one sentence per line
-    return u"\n".join(tokenized_sents)
+    return TokenizedDocumentType()(sentences=tokenized_sents)
+
+
+def executor_set_up(executor):
+    # Output to logs whichs models we're using
+    if executor.info.options["tokenize_only"]:
+        executor.log.info("Tokenizing with model: {}. Not splitting sentences".format(
+            executor.info.options["token_model"]
+        ))
+    else:
+        executor.log.info("Tokenizing with model: {}. Sentence splitting with model: {}".format(
+            executor.info.options["token_model"], executor.info.options["sentence_model"]
+        ))
 
 
 def worker_set_up(worker):
@@ -38,4 +50,5 @@ def worker_tear_down(worker):
 ModuleExecutor = multiprocessing_executor_factory(
     process_document,
     worker_set_up_fn=worker_set_up, worker_tear_down_fn=worker_tear_down,
+    preprocess_fn=executor_set_up,
 )

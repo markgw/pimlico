@@ -167,7 +167,10 @@ class JavaJarsDependency(JavaDependency):
         # Download all archives we need
         for archive_url, archive_filename in archives_to_download:
             print "Downloading %s from %s" % (archive_filename, archive_url)
-            download_file(archive_url, archive_filename)
+            try:
+                download_file(archive_url, archive_filename)
+            except Exception, e:
+                raise InstallationError("could not download archive from '{}': {}".format(archive_url, e))
 
         # Got all the archives, extract the required members
         for archive_filename, members in archive_files.iteritems():

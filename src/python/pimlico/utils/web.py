@@ -14,3 +14,5 @@ def download_file(url, target_file):
     except URLError, e:
         if len(e.args) and e.args[0] == "unknown url type: https":
             raise RuntimeError("cannot download from https URL, as Python was not installed with openssl support")
+        else:
+            raise

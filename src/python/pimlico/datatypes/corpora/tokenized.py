@@ -2,6 +2,7 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 from pimlico.datatypes.corpora.data_points import TextDocumentType
+from pimlico.utils.core import cached_property
 
 __all__ = ["TokenizedDocumentType", "SegmentedLinesDocumentType", "CharacterTokenizedDocumentType"]
 
@@ -19,17 +20,24 @@ class TokenizedDocumentType(TextDocumentType):
     #formatters = [("tokenized_doc", "pimlico.datatypes.formatters.tokenized.TokenizedDocumentFormatter")]
 
     class Document:
-        keys = ["sentences", "text"]
+        keys = ["sentences"]
 
         @property
         def sentences(self):
             return self.internal_data["sentences"]
 
+        @cached_property
+        def text(self):
+            if self._raw_data is not None:
+                # The text is just the raw data, decoded, so it's quickest to get it from that
+                return self._raw_data.decode("utf-8")
+            else:
+                return u"\n".join(u" ".join(sentence) for sentence in self.internal_data["sentences"])
+
         def raw_to_internal(self, raw_data):
             text = raw_data.decode("utf-8")
             return {
                 "sentences": [sentence.split(u" ") for sentence in text.split(u"\n")],
-                "text": text,
             }
 
         def internal_to_raw(self, internal_data):

@@ -7,8 +7,8 @@ from pimlico import JAVA_BUILD_JAR_DIR
 
 from pimlico.core.dependencies.java import JavaDependency, py4j_dependency, JavaJarsDependency, argparse4j_dependency
 
-OPENNLP_VERSION = "1.5.3"
-OPENNLP_URL = "http://apache.mesi.com.ar//opennlp/opennlp-{v}/apache-opennlp-{v}-bin.tar.gz".format(v=OPENNLP_VERSION)
+OPENNLP_VERSION = "1.9.0"
+OPENNLP_URL = "http://mirror.netinch.com/pub/apache/opennlp/opennlp-{v}/apache-opennlp-{v}-bin.tar.gz".format(v=OPENNLP_VERSION)
 
 
 opennlp_dependency = JavaJarsDependency(
@@ -16,14 +16,12 @@ opennlp_dependency = JavaJarsDependency(
     [
         (jar_name, "{url}->apache-opennlp-{v}/lib/{jar}".format(url=OPENNLP_URL, v=OPENNLP_VERSION, jar=jar_name))
         for jar_name in [
-            "opennlp-maxent-3.0.3.jar",
             "opennlp-tools-{v}.jar".format(v=OPENNLP_VERSION),
             "opennlp-uima-{v}.jar".format(v=OPENNLP_VERSION),
-            "jwnl-1.3.3.jar",
         ]
     ] + [
         # Not everything necessarily needs Guava, but we tend to use it a lot, so include in all OpenNLP dep sets
-        ("guava.jar", "http://search.maven.org/remotecontent?filepath=com/google/guava/guava/15.0/guava-15.0.jar"),
+        ("guava.jar", "http://search.maven.org/remotecontent?filepath=com/google/guava/guava/23.0/guava-23.0.jar"),
     ]
 )
 
