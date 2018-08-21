@@ -24,7 +24,7 @@ class ModuleExecutor(BaseModuleExecutor):
             # Input is given for every document in a corpus
             # Update the term vocab with all terms in each doc
             vocab_writer.add_documents(
-                (line for doc_name, doc in pbar(input_docs) if not is_invalid_doc(doc) for line in doc),
+                (line for doc_name, doc in pbar(input_docs) if not is_invalid_doc(doc) for line in doc.sentences),
                 prune_at=prune_at
             )
 
