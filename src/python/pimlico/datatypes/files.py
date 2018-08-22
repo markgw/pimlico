@@ -79,8 +79,13 @@ class NamedFileCollection(PimlicoDatatype):
             return os.path.join(self.data_dir, filename)
 
         @cached_property
-        def absolute_filenames(self):
+        def absolute_paths(self):
             return [self.get_absolute_path(f) for f in self.filenames]
+
+        @property
+        def absolute_filenames(self):
+            """ For backwards compatibility: use absolute_paths by preference """
+            return self.absolute_paths
 
         def read_file(self, filename=None, mode="r"):
             """
@@ -128,6 +133,10 @@ class NamedFileCollection(PimlicoDatatype):
                 raise ValueError("'{}' is not a filename in the file collection".format(filename))
             return os.path.join(self.data_dir, filename)
 
+        @cached_property
+        def absolute_paths(self):
+            return [self.get_absolute_path(f) for f in self.filenames]
+
 
 class NamedFile(NamedFileCollection):
     """
@@ -164,6 +173,15 @@ class NamedFile(NamedFileCollection):
         # Set filenames from our filename
         self.filenames = [self.filename]
 
+    class Reader:
+        def process_setup(self):
+            super(NamedFile.Reader, self).process_setup()
+            self.filename = self.datatype.filename
+
+        @property
+        def absolute_path(self):
+            return self.get_absolute_path(self.filename)
+
     class Writer:
         def __init__(self, *args, **kwargs):
             super(NamedFile.Writer, self).__init__(*args, **kwargs)
@@ -171,6 +189,10 @@ class NamedFile(NamedFileCollection):
 
         def write_file(self, data):
             super(NamedFile.Writer, self).write_file(self.filename, data)
+
+        @property
+        def absolute_path(self):
+            return self.get_absolute_path(self.filename)
 
 
 class FilesInput(DynamicInputDatatypeRequirement):

@@ -65,7 +65,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
             status_lines.append("Last doc completed: %s" % self.get_metadata()["last_doc_completed"])
         return status_lines
 
-    def document(self, data, from_internal=False, output_name=None):
+    def document(self, output_name=None, **kwargs):
         """
         Instantiate a document of the output type for the given output name (or number), or
         the default output.
@@ -75,7 +75,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         """
         output_type = self.get_output_datatype(output_name=output_name)[1]
         output_data_point_type = output_type.data_point_type
-        return output_data_point_type(data, from_internal=from_internal)
+        return output_data_point_type(**kwargs)
 
 
 class DocumentMapModuleExecutor(BaseModuleExecutor):

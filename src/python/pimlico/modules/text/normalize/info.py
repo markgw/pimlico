@@ -4,28 +4,27 @@
 """
 Perform text normalization on tokenized documents.
 
-Currently, this includes only case normalization (to upper or lower case). In
-the future, more normalization operations may be added.
+Currently, this includes only the following:
 
-.. todo::
+ - case normalization (to upper or lower case)
+ - blank line removal
+ - empty sentence removal
 
-   Update to new datatypes system and add test pipeline
+In the future, more normalization operations may be added.
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 
-from pimlico.core.modules.options import choose_from_list
-from pimlico.old_datatypes.tar import TarredCorpusType
-from pimlico.old_datatypes.tar import TarredCorpusWriter
-from pimlico.old_datatypes.tokenized import TokenizedCorpus
-from pimlico.old_datatypes.tokenized import TokenizedDocumentType
+from pimlico.core.modules.options import choose_from_list, str_to_bool
+from pimlico.datatypes import GroupedCorpus
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "normalize"
     module_readable_name = "Normalize tokenized text"
-    module_inputs = [("corpus", TarredCorpusType(TokenizedDocumentType))]
-    module_outputs = [("corpus", TokenizedCorpus)]
+    module_inputs = [("corpus", GroupedCorpus(TokenizedDocumentType()))]
+    module_outputs = [("corpus", GroupedCorpus(TokenizedDocumentType()))]
     module_options = {
         "case": {
             "help": "Transform all text to upper or lower case. Choose from 'upper' or 'lower', "
@@ -33,8 +32,15 @@ class ModuleInfo(DocumentMapModuleInfo):
             "default": u"",
             "type": choose_from_list(["upper", "lower", ""]),
         },
+        "remove_empty": {
+            "help": "Skip over any empty sentences (i.e. blank lines)",
+            "default": False,
+            "type": str_to_bool,
+        },
+        "remove_only_punct": {
+            "help": "Skip over any sentences that are empty if punctuation is ignored",
+            "default": False,
+            "type": str_to_bool,
+        },
     }
 
-    def get_writer(self, output_name, output_dir, append=False):
-        if output_name == "corpus":
-            return TarredCorpusWriter(output_dir, append=append)

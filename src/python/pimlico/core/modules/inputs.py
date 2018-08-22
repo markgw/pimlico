@@ -205,6 +205,8 @@ def iterable_input_reader(input_module_options, data_point_type,
         # Special behaviour if we're making this an executable module in order to count the data
         module_executable = execute_count
         module_executor_override = DocumentCounterModuleExecutor if execute_count else None
+        # Also make the reader class available so that it can be reused if necessary
+        input_reader_class = InputReader
 
         def instantiate_output_reader_setup(self, output_name, datatype):
             return InputReader.Setup(datatype, self.get_absolute_output_dir(output_name), self.options)

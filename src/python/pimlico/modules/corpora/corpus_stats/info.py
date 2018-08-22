@@ -6,19 +6,14 @@
 
 Counts the number of tokens, sentences and distinct tokens in a corpus.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
-
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.old_datatypes.files import NamedFile
-from pimlico.old_datatypes.tar import TarredCorpusType
-from pimlico.old_datatypes.tokenized import TokenizedDocumentType
+from pimlico.datatypes import GroupedCorpus, NamedFile
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "corpus_stats"
     module_readable_name = "Corpus statistics"
-    module_inputs = [("corpus", TarredCorpusType(TokenizedDocumentType))]
+    module_inputs = [("corpus", GroupedCorpus(TokenizedDocumentType()))]
     module_outputs = [("stats", NamedFile("stats.json"))]

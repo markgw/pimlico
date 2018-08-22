@@ -7,7 +7,6 @@ OpenNLP's tokenizer is not thread-safe, so we can't take the approach we use els
 Py4J gateway with multiple clients. Instead, we start a Py4J gateway in every process.
 
 """
-
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType

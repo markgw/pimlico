@@ -7,4 +7,6 @@ pipelines/corpora/interleave.conf, output
 pipelines/corpora/list_filter.conf, europarl_filtered
 pipelines/corpora/store.conf, store
 pipelines/corpora/vocab_builder.conf, vocab
+pipelines/corpora/stats.conf, stats
+pipelines/text/normalize.conf, norm
 pipelines/input/fasttext.conf, vectors, stored_vectors

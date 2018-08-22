@@ -5,6 +5,10 @@
 """
 Sentence splitting and tokenization using OpenNLP's tools.
 
+Sentence splitting may be skipped by setting the option `tokenize_only=T`. The tokenizer
+will then assume that each line in the input file represents a sentence and tokenize
+within the lines.
+
 .. todo:
 
    The OpenNLP tokenizer test pipeline needs models to have been installed before running.
