@@ -44,12 +44,12 @@ jwnl-1.3.3.jar :
 
 apache-opennlp-1.5.3-bin.tar.gz :
 	# Fetch OpenNlp archive
-	$(FETCH) http://apache.mesi.com.ar//opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-bin.tar.gz
+	$(FETCH) https://archive.apache.org/dist/opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-bin.tar.gz
 
 # Optionally, also fetch OpenNLP src files, useful for debugging wrappers, etc
 opennlp-src : src/opennlp
 src/opennlp :
-	$(FETCH) http://apache.mirror.anlx.net//opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-src.tar.gz
+	$(FETCH) https://archive.apache.org/dist/opennlp/opennlp-1.5.3/apache-opennlp-1.5.3-src.tar.gz
 	tar xzf apache-opennlp-1.5.3-src.tar.gz apache-opennlp-1.5.3-src
 	mkdir -p src
 	mv apache-opennlp-1.5.3-src src/opennlp

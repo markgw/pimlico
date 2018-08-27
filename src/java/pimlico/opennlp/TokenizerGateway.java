@@ -55,15 +55,19 @@ public class TokenizerGateway {
             } else {
                 // Not doing sentence detection
                 // Split the input on linebreaks, assuming each line is a sentence
-                sents = input.split("\n");
+                sents = input.split("\n", -1);
             }
 
             // Tokenization
             String[] tokenizedSents = new String[sents.length];
             for (int i=0; i < sents.length; i++) {
-                String[] tokens = tokenizer.tokenize(sents[i]);
-                // Output the space-separated tokens
-                tokenizedSents[i] = whitespaceJoiner.join(tokens);
+                if (sents[i].length() == 0) {
+                    tokenizedSents[i] = "";
+                } else {
+                    String[] tokens = tokenizer.tokenize(sents[i]);
+                    // Output the space-separated tokens
+                    tokenizedSents[i] = whitespaceJoiner.join(tokens);
+                }
             }
             return tokenizedSents;
         }
