@@ -17,7 +17,7 @@ class ModuleInfo(BaseModuleInfo):
 
     """
     module_type_name = "word2vec_embedding_reader"
-    module_readable_name = "Word2vec embedding reader using Gensim"
+    module_readable_name = "Word2vec embedding reader (Gensim)"
     module_outputs = [("embeddings", Embeddings())]
     module_options = {
         "binary": {

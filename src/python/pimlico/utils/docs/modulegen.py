@@ -19,7 +19,9 @@ from sphinx.apidoc import format_heading
 
 from pimlico import install_core_dependencies
 from pimlico.core.modules.options import format_option_type
-from pimlico.datatypes import PimlicoDatatype, MultipleInputs, DynamicOutputDatatype, DynamicInputDatatypeRequirement
+from pimlico.datatypes import PimlicoDatatype, MultipleInputs, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
+    IterableCorpus
+from pimlico.datatypes.corpora import DataPointType
 from pimlico.utils.docs import trim_docstring
 from pimlico.utils.docs.rest import make_table
 
@@ -211,7 +213,7 @@ def input_datatype_list(types, context=None, no_warn=False):
 def input_datatype_text(datatype, context=None, no_warn=False):
     if isinstance(datatype, PimlicoDatatype):
         # Standard behaviour for normal datatypes
-        return ":class:`%s <%s>`" % (datatype.full_datatype_name(), datatype.datatype_full_class_name())
+        return datatype_to_link(datatype)
     elif isinstance(datatype, MultipleInputs):
         # Multiple inputs, but the datatype is known: call this function to format the common type
         return ":class:`list <pimlico.datatypes.base.MultipleInputs>` of %s" % \
@@ -242,21 +244,41 @@ def output_datatype_text(datatype, context=None, no_warn=False):
         datatype_name = datatype.datatype_name or type(datatype).__name__
         return ":class:`%s <%s>`" % (datatype_name, datatype_class_name)
     elif isinstance(datatype, PimlicoDatatype):
-        class_name = datatype.datatype_full_class_name()
-        # Allow non-class datatypes to be specified in the string
-        if class_name.startswith(":"):
-            return class_name
-        else:
-            return ":class:`~{} <{}>`".format(
-                datatype.datatype_full_class_name(),
-                datatype.full_datatype_name()
-            )
+        return datatype_to_link(datatype)
     else:
         if not no_warn:
             warnings.warn("Invalid output type {} (not datatype or dynamic output type): {}".format(
                 "in {}".format(context) if context else "", type(datatype))
             )
         return "**invalid output type specification**"
+
+
+def datatype_to_link(datatype_inst):
+    # Special behaviour for iterable corpora, so we link to their data point type
+    if isinstance(datatype_inst, IterableCorpus):
+        if type(datatype_inst.data_point_type) is DataPointType:
+            # If using the most general type (i.e. any type will do) don't show the data point type
+            return ":class:`{} <{}>`".format(
+                datatype_inst.datatype_name,  # May be an IterableCorpus subtype (usually GroupedCorpus)
+                datatype_inst.datatype_full_class_name(),  # Link to corpus type
+            )
+        else:
+            return ":class:`{} <{}>` <:class:`{} <{}>`>".format(
+                datatype_inst.datatype_name,  # May be an IterableCorpus subtype (usually GroupedCorpus)
+                datatype_inst.datatype_full_class_name(),  # Link to corpus type
+                datatype_inst.data_point_type.name,
+                datatype_inst.data_point_type.full_class_name(),
+            )
+    else:
+        class_name = datatype_inst.datatype_full_class_name()
+        # Allow non-class datatypes to be specified in the string
+        if class_name.startswith(":"):
+            return class_name
+        else:
+            return ":class:`{} <{}>`".format(
+                datatype_inst.full_datatype_name(),
+                datatype_inst.datatype_full_class_name(),
+            )
 
 
 def generate_contents_page(modules, output_dir, index_name, title, content):

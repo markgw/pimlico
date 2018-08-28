@@ -29,7 +29,7 @@ class ModuleInfo(BaseModuleInfo):
 
     """
     module_type_name = "fasttext_embedding_reader_gensim"
-    module_readable_name = "FastText embedding reader using Gensim"
+    module_readable_name = "FastText embedding reader (Gensim)"
     module_outputs = [("embeddings", Embeddings())]
     module_options = {
         "path": {

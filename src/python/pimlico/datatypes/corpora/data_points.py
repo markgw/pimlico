@@ -175,6 +175,15 @@ class DataPointType(object):
             if key in metadata:
                 writer.metadata[key] = metadata[key]
 
+    @classmethod
+    def full_class_name(cls):
+        """
+        The fully qualified name of the class for this data point type,
+        by which it is referenced in config files. Used in docs
+
+        """
+        return "%s.%s" % (cls.__module__, cls.__name__)
+
     class Document(object):
         """
         The abstract superclass of all documents.

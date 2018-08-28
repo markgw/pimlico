@@ -18,8 +18,8 @@ class ModuleInfo(BaseModuleInfo):
     Note that the format is almost identical to `word2vec`'s text format.
 
     """
-    module_type_name = "word2vec_embedding_reader"
-    module_readable_name = "Word2vec embedding reader using Gensim"
+    module_type_name = "glove_embedding_reader"
+    module_readable_name = "GloVe embedding reader (Gensim)"
     module_outputs = [("embeddings", Embeddings())]
     module_options = {
         "path": {
