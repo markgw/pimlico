@@ -1,11 +1,7 @@
-!! OpenNLP tokenizer
-~~~~~~~~~~~~~~~~~~~~
+OpenNLP tokenizer
+~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.tokenize
-
-.. note::
-
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+----------------------------------+
 | Path       | pimlico.modules.opennlp.tokenize |
@@ -15,28 +11,34 @@
 
 Sentence splitting and tokenization using OpenNLP's tools.
 
-.. todo::
+Sentence splitting may be skipped by setting the option `tokenize_only=T`. The tokenizer
+will then assume that each line in the input file represents a sentence and tokenize
+within the lines.
 
-   Update to new datatypes system and add test pipeline
+.. todo:
+
+   The OpenNLP tokenizer test pipeline needs models to have been installed before running.
+   Once `automatic fetching of models/data <https://github.com/markgw/pimlico/issues/9>`_
+   has been implemented, use this for the models and move the test pipeline to the main suite.
 
 
 Inputs
 ======
 
-+------+--------------------------------------+
-| Name | Type(s)                              |
-+======+======================================+
-| text | **invalid input type specification** |
-+------+--------------------------------------+
++------+---------------------------------------------------------------------------------------------+
+| Name | Type(s)                                                                                     |
++======+=============================================================================================+
+| text | :class:`grouped_corpus<TextDocumentType> <pimlico.datatypes.corpora.grouped.GroupedCorpus>` |
++------+---------------------------------------------------------------------------------------------+
 
 Outputs
 =======
 
-+-----------+---------------------------------------+
-| Name      | Type(s)                               |
-+===========+=======================================+
-| documents | **invalid output type specification** |
-+-----------+---------------------------------------+
++-----------+---------------------------------------------------------------------------------------------------+
+| Name      | Type(s)                                                                                           |
++===========+===================================================================================================+
+| documents | :class:`~pimlico.datatypes.corpora.grouped.GroupedCorpus <grouped_corpus<TokenizedDocumentType>>` |
++-----------+---------------------------------------------------------------------------------------------------+
 
 Options
 =======

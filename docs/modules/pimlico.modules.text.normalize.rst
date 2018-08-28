@@ -1,11 +1,7 @@
-!! Normalize tokenized text
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Normalize tokenized text
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.text.normalize
-
-.. note::
-
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+--------------------------------+
 | Path       | pimlico.modules.text.normalize |
@@ -15,38 +11,43 @@
 
 Perform text normalization on tokenized documents.
 
-Currently, this includes only case normalization (to upper or lower case). In
-the future, more normalization operations may be added.
+Currently, this includes only the following:
 
-.. todo::
+ - case normalization (to upper or lower case)
+ - blank line removal
+ - empty sentence removal
 
-   Update to new datatypes system and add test pipeline
+In the future, more normalization operations may be added.
 
 
 Inputs
 ======
 
-+--------+--------------------------------------+
-| Name   | Type(s)                              |
-+========+======================================+
-| corpus | **invalid input type specification** |
-+--------+--------------------------------------+
++--------+--------------------------------------------------------------------------------------------------+
+| Name   | Type(s)                                                                                          |
++========+==================================================================================================+
+| corpus | :class:`grouped_corpus<TokenizedDocumentType> <pimlico.datatypes.corpora.grouped.GroupedCorpus>` |
++--------+--------------------------------------------------------------------------------------------------+
 
 Outputs
 =======
 
-+--------+---------------------------------------+
-| Name   | Type(s)                               |
-+========+=======================================+
-| corpus | **invalid output type specification** |
-+--------+---------------------------------------+
++--------+---------------------------------------------------------------------------------------------------+
+| Name   | Type(s)                                                                                           |
++========+===================================================================================================+
+| corpus | :class:`~pimlico.datatypes.corpora.grouped.GroupedCorpus <grouped_corpus<TokenizedDocumentType>>` |
++--------+---------------------------------------------------------------------------------------------------+
 
 Options
 =======
 
-+------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
-| Name | Description                                                                                                             | Type                   |
-+======+=========================================================================================================================+========================+
-| case | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
-+------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
++-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
+| Name              | Description                                                                                                             | Type                   |
++===================+=========================================================================================================================+========================+
+| case              | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
++-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
+| remove_only_punct | Skip over any sentences that are empty if punctuation is ignored                                                        | bool                   |
++-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
+| remove_empty      | Skip over any empty sentences (i.e. blank lines)                                                                        | bool                   |
++-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 

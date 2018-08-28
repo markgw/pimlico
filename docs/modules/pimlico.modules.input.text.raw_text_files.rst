@@ -22,12 +22,6 @@ file. If this does not hold, the dataset is assumed to be not ready. You can ove
 a ``?`` at the start of a filename/glob, indicating that it will be included if it exists, but is
 not depended on for considering the data ready to use.
 
-.. seealso::
-
-   Datatype :class:`pimlico.datatypes.files.UnnamedFileCollection`
-      The datatype previously used for reading in file collections, now being phased out to be replaced
-      by this input reader.
-
 
 This is an input module. It takes no pipeline inputs and is used to read in data
 

@@ -15,10 +15,6 @@ ID to every distinct word seen in the corpus, optionally applying thresholds so 
 Similar to :mod:`pimlico.modules.features.vocab_builder`, which builds two vocabs, one for terms and one for
 features.
 
-.. todo::
-
-   Updated to new datatypes system. Add test pipeline and test
-
 
 Inputs
 ======

@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    pimlico.test.pipeline
+   pimlico.test.suite
 
 Module contents
 ---------------

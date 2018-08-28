@@ -30,7 +30,8 @@ Reads only the binary format (``.bin``), not the text format (``.vec``).
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Add test pipeline. This is slightly difficult, as we need a small FastText binary
+   file, which is harder to produce, since you can't easily just truncate a big file.
 
 
 Inputs
@@ -41,11 +42,11 @@ No inputs
 Outputs
 =======
 
-+------------+---------------------------------------+
-| Name       | Type(s)                               |
-+============+=======================================+
-| embeddings | **invalid output type specification** |
-+------------+---------------------------------------+
++------------+----------------------------------------------------------------+
+| Name       | Type(s)                                                        |
++============+================================================================+
+| embeddings | :class:`~pimlico.datatypes.embeddings.Embeddings <embeddings>` |
++------------+----------------------------------------------------------------+
 
 Options
 =======
