@@ -113,7 +113,7 @@ class Embeddings(PimlicoDatatype):
             """
             return self.word_vecs([word])
 
-        def word_vecs(self, words):
+        def word_vecs(self, words, norm=False):
             """
             Accept multiple words as input.
             Returns the words' representations in vector space, as a 1D numpy array.
@@ -123,7 +123,10 @@ class Embeddings(PimlicoDatatype):
                 word_ids = [self.vocab[w].index for w in words]
             except KeyError, e:
                 raise KeyError("word not in vocabulary: {}".format(e))
-            return self.vectors[word_ids]
+            if norm:
+                return self.normed_vectors[word_ids]
+            else:
+                return self.vectors[word_ids]
 
         def to_keyed_vectors(self):
             from gensim.models.keyedvectors import KeyedVectors, Vocab as GensimVocab
