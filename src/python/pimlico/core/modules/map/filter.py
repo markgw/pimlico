@@ -5,10 +5,11 @@
 """
 .. todo::
 
-   Update this for the new datatype system
+   Continue updating this for the new datatype system. I've got partway,
+   but the reader is still far from finished
 
 """
-
+import warnings
 from Queue import Empty
 from time import sleep
 from traceback import format_exc
@@ -17,12 +18,19 @@ from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import BaseModuleInfo, satisfies_typecheck
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import InputQueueFeeder, DocumentMapModuleInfo
+from pimlico.datatypes import IterableCorpus
 from pimlico.datatypes.corpora import is_invalid_doc
 from pimlico.datatypes.corpora.grouped import AlignedGroupedCorpora, GroupedCorpus
 from pimlico.utils.pipes import qget
 
 
 class DocumentMapOutputTypeWrapper(object):
+    """
+    TODO: This was from the old datatypes system
+
+    Remove it once you've replicated the key bits in the reader class below.
+
+    """
     # Tells you the datatype that this simulates, for typechecking
     non_filter_datatype = None
     wrapped_module_info = None
@@ -215,28 +223,52 @@ class DocumentMapOutputTypeWrapper(object):
                    for input_type in self.wrapped_module_info.get_input(input_name, always_list=True))
 
 
-def _wrap_output(module_info_instance, inner_output_name):
-    __, output_datatype = module_info_instance.get_output_datatype(inner_output_name)
 
-    if not satisfies_typecheck(output_datatype, GroupedCorpus()):
-        # Can only wrap grouped corpus outputs of a document map
-        raise PipelineStructureError("problem treating module '%s' as a filter. Tried to wrap output '%s' with a "
-                                     "datatype that produces the output on the fly, but it's not a grouped "
-                                     "corpus" % (module_info_instance.module_name, inner_output_name))
 
-    # Create a special subclass of the general output wrapper for this output
-    # Doing so using type() instead of a class def allows us to give it an informative class name
-    wrapper_cls = type(
-        "%sFilterWrapper" % output_datatype.__name__,
-        (DocumentMapOutputTypeWrapper, output_datatype),
-        dict(
-            non_filter_datatype=output_datatype,
-            wrapped_module_info=module_info_instance,
-            output_name=inner_output_name,
-        )
-    )
+class FilterModuleOutputReader(GroupedCorpus.Reader):
+    """
+    A custom reader that is used for the output of a filter module, producing
+    documents on the fly.
 
-    return wrapper_cls
+    """
+    metadata = {}
+
+    def __init__(self, datatype, setup, pipeline, **kwargs):
+        # Don't call GroupedCorpus init, but jump up to IterableCorpus
+        IterableCorpus.Reader.__init__(self, datatype, setup, pipeline, **kwargs)
+        # TODO Set archives and archive_filenames to conform to GroupedCorpus.Reader interface
+
+    def __len__(self):
+        # TODO
+        pass
+
+    def extract_file(self, archive_name, filename):
+        raise NotImplementedError("cannot extract file from filter module reader")
+
+    def list_archive_iter(self):
+        for archive, doc_name, doc in self.archive_iter():
+            yield archive, doc_name
+
+    def archive_iter(self, start_after=None, skip=None, name_filter=None):
+        # TODO This is the big 'un
+        # See above for the old one to model on
+        pass
+
+    class Setup:
+        def __init__(self, datatype, wrapped_module_info, output_name):
+            self.wrapped_module_info = wrapped_module_info
+            self.output_name = output_name
+            self.datatype = datatype
+
+        def ready_to_read(self):
+            # Calling missing_data() checks that all input data is available and any other module requirements
+            missing_data = self.wrapped_module_info.missing_data()
+            return len(missing_data) == 0
+
+    def process_setup(self):
+        # Override to not do data path processing
+        return
+
 
 
 def wrap_module_info_as_filter(module_info_instance):
@@ -254,11 +286,15 @@ def wrap_module_info_as_filter(module_info_instance):
        the wrapped module type's output) and instead create custom readers
        that gets instantiated when fetching the module's output readers.
 
+       I've created the test pipeline filter_tokenize for testing this.
+
     :param module_info_instance: basic module info to wrap the outputs of
     :return: a new non-executable ModuleInfo whose outputs are produced on the fly and will be identical to
         the outputs of the wrapper module.
 
     """
+    warnings.warn("Filter module wrapper is still being updated for the new datatypes system and "
+                  "probably doesn't work yet")
     # Check that this is a document map module: otherwise it doesn't make sense to wrap it
     if not isinstance(module_info_instance, DocumentMapModuleInfo):
         raise PipelineStructureError("cannot create a filter from a %s module, as it's not a document map module "
@@ -266,17 +302,34 @@ def wrap_module_info_as_filter(module_info_instance):
                                      (module_info_instance.module_type_name, module_info_instance.module_name))
 
     # Wrap each of the output datatypes so that it executes the document processing on the fly
-    wrapped_outputs = []
-    for output_name in module_info_instance.output_names:
-        wrapped_outputs.append((output_name, _wrap_output(module_info_instance, output_name)))
+    #wrapped_outputs = []
+    #for output_name in module_info_instance.output_names:
+    #    wrapped_outputs.append((output_name, _wrap_output(module_info_instance, output_name)))
+
+    # Check that all outputs are grouped corpora
+    # If not, we can't wrap the module to produce those outputs on the fly
+    #   We might want to move this check to within instantiate_output_reader_setup() so that
+    #   we can wrap a module with non-grouped corpora outputs if those outputs are never needed.
+    #   But then we probably get the error at an odd time
+    output_datatypes = [
+        (output_name, module_info_instance.get_output_datatype(output_name))
+        for output_name in module_info_instance.output_names
+    ]
+    for (output_name, output_datatype) in output_datatypes:
+        if not satisfies_typecheck(output_datatype, GroupedCorpus()):
+            raise PipelineStructureError("problem treating module '{}' as a filter. Output '{}' is not a grouped "
+                                         "corpus".format(module_info_instance.module_name, output_name))
 
     class ModuleInfo(BaseModuleInfo):
         module_type_name = "%s_filter" % module_info_instance.module_type_name
         module_options = []
         module_inputs = module_info_instance.module_inputs
-        module_outputs = wrapped_outputs
+        module_outputs = module_info_instance.module_outputs
         module_optional_outputs = []
         module_executable = False
+
+        def instantiate_output_reader_setup(self, output_name, datatype):
+            return FilterModuleOutputReader.Setup(datatype, module_info_instance, output_name)
 
     info = ModuleInfo(
         module_info_instance.module_name,

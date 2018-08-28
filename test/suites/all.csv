@@ -9,5 +9,6 @@ pipelines/corpora/store.conf, store
 pipelines/corpora/vocab_builder.conf, vocab
 pipelines/corpora/stats.conf, stats
 pipelines/text/normalize.conf, norm
+pipelines/text/simple_tokenize.conf, tokenize
 pipelines/input/fasttext.conf, vectors
 pipelines/input/glove.conf, vectors
