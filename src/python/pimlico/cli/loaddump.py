@@ -12,6 +12,7 @@ from datetime import datetime
 from cStringIO import StringIO
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
+from pimlico.utils.core import remove_duplicates
 
 
 class DumpCmd(PimlicoCLISubcommand):
@@ -44,6 +45,11 @@ class DumpCmd(PimlicoCLISubcommand):
                                  "file will be dumped for each")
         parser.add_argument("--output", "-o",
                             help="Path to directory to output to. Defaults to the current user's home directory")
+        parser.add_argument("--inputs", "-i", action="store_true",
+                            help="Dump data for the modules corresponding to the inputs of the named modules, "
+                                 "instead of those modules themselves. Useful for when you're preparing to "
+                                 "run a module on a different machine, for getting all the necessary input "
+                                 "data for a module")
 
     def run_command(self, pipeline, opts):
         output_dir = opts.output
@@ -52,13 +58,31 @@ class DumpCmd(PimlicoCLISubcommand):
             output_dir = os.path.expanduser("~")
         output_dir = os.path.abspath(output_dir)
 
-        for module_name in opts.modules:
+        try:
+            named_modules = [pipeline[module_name] for module_name in opts.modules]
+        except KeyError, e:
+            print >>sys.stderr, "Error: module does not exist: {}".format(e)
+            sys.exit(1)
+
+        if opts.inputs:
+            # Get the inputs to the named modules
+            print "Dumping data for inputs to {}".format(", ".join(opts.modules))
+            modules = []
+            for module in named_modules:
+                for input_name in module.input_names:
+                    modules.extend(
+                        prev_mod
+                        for (prev_mod, output_name) in module.get_input_module_connection(input_name, always_list=True)
+                    )
+            # Don't include a module multiple times
+            modules = remove_duplicates(modules, key=lambda m: m.module_name)
+            print "Modules: {}\n".format(", ".join(mod.module_name for mod in modules))
+        else:
+            modules = named_modules
+
+        for module in modules:
+            module_name = module.module_name
             print "== Dumping data for '%s' ==" % module_name
-            try:
-                module = pipeline[module_name]
-            except KeyError:
-                print >>sys.stderr, "Error: module '{}' does not exist".format(module_name)
-                continue
 
             # Get the output dir for the module
             module_rel_output_dir = module.get_module_output_dir()
