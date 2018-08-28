@@ -1,8 +1,8 @@
 import os
 
-from pimlico.core.dependencies.python import numpy_dependency, gensim_dependency
+from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.old_datatypes.embeddings import Embeddings
+from pimlico.datatypes import Embeddings
 
 
 class ModuleInfo(BaseModuleInfo):
@@ -24,12 +24,13 @@ class ModuleInfo(BaseModuleInfo):
 
     .. todo::
 
-       Update to new datatypes system and add test pipeline
+       Add test pipeline. This is slightly difficult, as we need a small FastText binary
+       file, which is harder to produce, since you can't easily just truncate a big file.
 
     """
     module_type_name = "fasttext_embedding_reader_gensim"
     module_readable_name = "FastText embedding reader using Gensim"
-    module_outputs = [("embeddings", Embeddings)]
+    module_outputs = [("embeddings", Embeddings())]
     module_options = {
         "path": {
             "help": "Path to the FastText embedding file (.bin)",
