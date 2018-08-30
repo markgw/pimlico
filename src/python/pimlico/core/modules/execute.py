@@ -284,10 +284,10 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
 
                 try:
                     # Get hold of an executor for this module
-                    executer = module.load_executor()
+                    executor = module.load_executor()
                     try:
                         # Give the module an initial in-progress status
-                        end_status = executer(module, debug=debug, force_rerun=force_rerun).execute()
+                        end_status = executor(module, debug=debug, force_rerun=force_rerun).execute()
                     except Exception, e:
                         # Catch all exceptions that occur within the executor and wrap them in a ModuleExecutionError
                         # so they can be nicely handled by the error reporting below
