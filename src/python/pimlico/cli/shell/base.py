@@ -71,6 +71,7 @@ class DataShell(Cmd):
         # May get updated as time goes on
         self.env = {
             "data": self.data,
+            "reader": self.data,
         }
 
     def get_names(self):
