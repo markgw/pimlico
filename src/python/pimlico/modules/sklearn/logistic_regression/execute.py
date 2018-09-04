@@ -1,48 +1,55 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from sklearn.linear_model import LogisticRegression
+
+import numpy as np
+from scipy.sparse import csr_matrix
 
 from pimlico.core.config import PipelineConfigParseError
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.arrays import NumpyArrayWriter
-from pimlico.modules.sklearn.matrix_factorization.info import SKLEARN_CLASSES
 
 
 class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
-        input_matrix = self.info.get_input("matrix").array
-        self.log.info("Loaded input matrix: %s" % str(input_matrix.shape))
+        features = self.info.get_input("features")
+        # Set the dimensionality based on total features, even if they're not all used
+        num_features = len(features.feature_types)
 
-        transform_type = self.info.options["class"]
-        # Check known properties of this type of transformation
-        transform_props = SKLEARN_CLASSES[transform_type]
-        # Check whether this type is able to accept sparse input
-        if transform_props["sparse"]:
-            # Convert to CSR, which is better for most purposes
-            input_matrix = input_matrix.tocsr()
-        else:
-            # We need to transform the matrix to a dense array
-            # This could cause problems with large matrices, in which case you need to use a different transform type
-            self.log.info("%s transformation requires dense input: converting matrix" % transform_type)
-            input_matrix = input_matrix.toarray()
+        data = []
+        rows = []
+        cols = []
+        scores = []
+        # Don't translate the stored feature IDs back to names, but keep them as raw IDs
+        row_num = -1
+        for row_num, (features, score) in enumerate(features.iter_ids()):
+            scores.append(score)
+
+            for feat_id, val in features.iteritems():
+                data.append(val)
+                rows.append(row_num)
+                cols.append(feat_id)
+
+        # Read the features into a sparse matrix
+        input_data = csr_matrix((data, (rows, cols)), shape=(row_num+1, num_features))
+        scores = np.array(scores)
+        self.log.info("Loaded input matrix: %s" % str(input_data.shape))
 
         # Try initializing the transformation
+        lr_init_kwargs = self.info.options["options"]
         self.log.info(
-            "Initializing %s with options: %s" %
-            (transform_type, ", ".join("%s=%s" % (key, val) for (key, val) in self.info.init_kwargs.items()))
+            "Initializing LogisticRegression with options: {}".format(
+                ", ".join("%s=%s" % (key, val) for (key, val) in lr_init_kwargs))
         )
-        transform_cls = self.info.load_transformer_class()
         try:
-            transformer = transform_cls(**self.info.init_kwargs)
+            log_reg = LogisticRegression(**lr_init_kwargs)
         except TypeError, e:
-            raise PipelineConfigParseError("invalid arguments to %s: %s" % (transform_type, e))
+            raise PipelineConfigParseError("invalid arguments to LogisticRegression: {}".format(e))
 
         # Apply transformation to the matrix
-        self.log.info("Fitting %s transformation on input matrix" % transform_type)
-        transformed_matrix = transformer.fit_transform(input_matrix)
-        self.log.info("Fitting complete: storing H and W matrices")
+        self.log.info("Fitting logistic regression on input matrix")
+        log_reg.fit(input_data, scores)
+        self.log.info("Fitting complete: storing model")
 
-        with NumpyArrayWriter(self.info.get_absolute_output_dir("w")) as w_writer:
-            w_writer.set_array(transformed_matrix)
-        with NumpyArrayWriter(self.info.get_absolute_output_dir("h")) as h_writer:
-            h_writer.set_array(transformer.components_)
+        with self.info.get_output_writer() as writer:
+            writer.save_model(log_reg)
