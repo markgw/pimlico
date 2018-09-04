@@ -97,18 +97,21 @@ class NamedFileCollection(PimlicoDatatype):
             :param mode:
             :return:
             """
+
+            with self.open_file(filename, mode=mode) as f:
+                return f.read()
+
+        def read_files(self, mode="r"):
+            return [self.read_file(f, mode=mode) for f in self.filenames]
+
+        def open_file(self, filename=None, mode="r"):
             # By default, read the first file in the collection
             if filename is None:
                 filename = self.filenames[0]
             elif type(filename) is int:
                 # Allow an int to specify the ith filename
                 filename = self.filenames[filename]
-
-            with open(self.get_absolute_path(filename), mode=mode) as f:
-                return f.read()
-
-        def read_files(self, mode="r"):
-            return [self.read_file(f, mode=mode) for f in self.filenames]
+            return OpenFileReader(self, filename, mode=mode)
 
     class Writer:
         def __init__(self, *args, **kwargs):
@@ -119,23 +122,47 @@ class NamedFileCollection(PimlicoDatatype):
                 self.require_tasks("write_%s" % filename)
 
         def write_file(self, filename, data):
-            path = self.get_absolute_path(filename)
-            with open(path, "w") as f:
+            with self.open_file(filename) as f:
                 f.write(data)
-            self.file_written(filename)
 
         def file_written(self, filename):
             """ Mark the given file as having been written, if write_file() was not used to write it. """
             self.task_complete("write_%s" % filename)
 
-        def get_absolute_path(self, filename):
-            if filename not in self.filenames:
+        def open_file(self, filename=None):
+            if filename is None:
+                filename = self.filenames[0]
+            return OpenFileWriter(self, filename)
+
+        def get_absolute_path(self, filename=None):
+            if filename is None:
+                filename = self.filenames[0]
+            elif filename not in self.filenames:
                 raise ValueError("'{}' is not a filename in the file collection".format(filename))
             return os.path.join(self.data_dir, filename)
 
         @cached_property
         def absolute_paths(self):
             return [self.get_absolute_path(f) for f in self.filenames]
+
+
+class OpenFileWriter(file):
+    def __init__(self, writer, filename):
+        self.writer = writer
+        self.filename = filename
+        super(OpenFileWriter, self).__init__(self.writer.get_absolute_path(self.filename), "w")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super(OpenFileWriter, self).__exit__(exc_type, exc_val, exc_tb)
+        if exc_type is None:
+            self.writer.file_written(self.filename)
+
+
+class OpenFileReader(file):
+    def __init__(self, reader, filename, mode="r"):
+        self.reader = reader
+        self.filename = filename
+        super(OpenFileReader, self).__init__(self.reader.get_absolute_path(self.filename), mode=mode)
 
 
 class NamedFile(NamedFileCollection):
