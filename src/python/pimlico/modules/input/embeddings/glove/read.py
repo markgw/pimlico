@@ -1,12 +1,10 @@
 import warnings
 
 from gensim import utils
-from gensim.models import KeyedVectors
-from gensim.models.keyedvectors import Vocab
+from gensim.models.keyedvectors import Vocab, WordEmbeddingsKeyedVectors
 from gensim.scripts.glove2word2vec import get_glove_info
 from numpy import zeros, float32, ascontiguousarray
 
-from pimlico.utils.logging import get_console_logger
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -56,8 +54,7 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
     with utils.smart_open(fname) as fin:
         if limit:
             vocab_size = min(vocab_size, limit)
-        result = KeyedVectors()
-        result.vector_size = vector_size
+        result = WordEmbeddingsKeyedVectors(vector_size)
         result.syn0 = zeros((vocab_size, vector_size), dtype=float32)
 
         def add_word(word, weights):
