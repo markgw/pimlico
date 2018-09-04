@@ -105,6 +105,20 @@ def json_string(string):
         raise ValueError("error parsing JSON string: {}".format(e))
 
 
+@opt_type_help("JSON dict")
+def json_dict(string):
+    """JSON dicts, with or without {}s"""
+    string = string.strip()
+    if string[0] != "{":
+        # {}s weren't included
+        string = "{%s}" % string
+
+    try:
+        return json.loads(string)
+    except ValueError, e:
+        raise ValueError("error parsing JSON string: {}".format(e))
+
+
 def _enhanced_int(val):
     """
     Used as a replacement for the builtin int for converting strings to ints.
