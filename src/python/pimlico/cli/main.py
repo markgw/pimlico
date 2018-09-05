@@ -89,16 +89,16 @@ class BrowseCmd(PimlicoCLISubcommand):
     def add_arguments(self, parser):
         parser.add_argument("module_name", help="The name (or number) of the module whose output to look at. Use "
                                                 "'module:stage' for multi-stage modules")
-        parser.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. If blank, "
-                                                           "load the default output")
+        parser.add_argument("output_name", nargs="?", help="The name of the output from the module to browse. "
+                                                           "If blank, load the default output")
         parser.add_argument("--skip-invalid", action="store_true",
                             help="Skip over invalid documents, instead of showing the error that caused them to be "
                                  "invalid")
         parser.add_argument("--formatter", "-f",
-                            help="Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine "
-                                 "what to output for each document. If specified, --raw is ignored. You may also choose "
-                                 "from the named standard formatters for the datatype in question. Use '-f help' to see a "
-                                 "list of available formatters")
+                            help="When browsing iterable corpora, fully qualified class name of a subclass of "
+                                 "DocumentBrowserFormatter to use to determine what to output for each document. "
+                                 "You may also choose from the named standard formatters for the datatype in question. "
+                                 "Use '-f help' to see a list of available formatters")
 
     def run_command(self, pipeline, opts):
         # When this is first imported, it checks that it has its dependencies

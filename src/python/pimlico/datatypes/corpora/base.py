@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from traceback import format_exc
 
+import sys
+
 from pimlico.cli.shell.base import ShellCommand
 from pimlico.core.modules.options import opt_type_help
 from pimlico.datatypes.base import PimlicoDatatype, DatatypeLoadError, DatatypeWriteError
@@ -105,6 +107,39 @@ class IterableCorpus(PimlicoDatatype):
             raise TypeError("tried to create a reader from iterable corpus type: use a subtype, like "
                             "GroupedCorpus, instead")
         return super(IterableCorpus, self).__call__(*args, **kwargs)
+
+    def run_browser(self, reader, opts):
+        from pimlico.cli.browser.tools.formatter import load_formatter
+        from pimlico.cli.browser.tools.corpus import browse_data
+
+        # Catch the special formatter value 'help' that lists available standard formatters
+        if opts.formatter == "help":
+            standard_formatters = self.data_point_type.formatters
+            if len(standard_formatters) == 0:
+                print "\nDatatype does not define any standard formatters."
+                print "If you don't specify one, the default formatter will be used (raw data)"
+            else:
+                print "\nStandard formatters for datatype: %s" % ", ".join(name for (name, cls) in standard_formatters)
+                print "These can be selected by name using the --formatter option."
+                print "If no formatter is selected, %s will be used" % standard_formatters[0][0]
+            sys.exit(0)
+
+        # Check we've got urwid installed
+        try:
+            import urwid
+        except ImportError:
+            print "You need Urwid to run the browser: install by running 'make urwid' in the Python lib dir"
+            sys.exit(1)
+
+        # Load the formatter if one was requested
+        try:
+            formatter = load_formatter(self, opts.formatter)
+        except TypeError, e:
+            print >> sys.stderr, "Error loading formatter"
+            print >> sys.stderr, e
+            sys.exit(1)
+
+        browse_data(reader, formatter, skip_invalid=opts.skip_invalid)
 
     class Reader:
         def __init__(self, *args, **kwargs):

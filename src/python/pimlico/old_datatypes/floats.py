@@ -10,7 +10,7 @@ Similar to :mod:pimlico.datatypes.ints, but for lists of floats.
 import struct
 from StringIO import StringIO
 
-from pimlico.cli.browser.formatter import DocumentBrowserFormatter
+from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.old_datatypes.documents import RawDocumentType
 from pimlico.old_datatypes.table import get_struct
 from pimlico.old_datatypes.tar import TarredCorpus, TarredCorpusWriter, pass_up_invalid

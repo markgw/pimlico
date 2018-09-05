@@ -33,8 +33,8 @@ class DocumentBrowserFormatter(object):
     """
     DATATYPE = DataPointType()
 
-    def __init__(self, corpus):
-        self.corpus = corpus
+    def __init__(self, corpus_datatype):
+        self.corpus_datatype = corpus_datatype
 
     def format_document(self, doc):
         """
@@ -104,18 +104,18 @@ def typecheck_formatter(formatted_doc_type, formatter_cls):
         )
 
 
-def load_formatter(dataset, formatter_name=None):
+def load_formatter(datatype, formatter_name=None):
     """
     Load a formatter specified by its fully qualified Python class name. If None, loads the default formatter.
     You may also specify a formatter by name, choosing from one of the standard ones that the formatted
     datatype gives.
 
     :param formatter_name: class name, or class
-    :param dataset: dataset that will be formatted
+    :param datatype: dataset that will be formatted
     :param parse: only used if the default formatter is loaded, determines `raw_data` (`= not parse`)
     :return: instantiated formatter
     """
-    formatted_type = dataset.datatype.data_point_type
+    formatted_type = datatype.data_point_type
 
     if formatter_name is None:
         # See if the data point type provides a default formatter
@@ -123,7 +123,7 @@ def load_formatter(dataset, formatter_name=None):
             formatter_name = formatted_type.formatters[0][1]
         else:
             # Just instantiate the default formatter
-            return DefaultFormatter(dataset)
+            return DefaultFormatter(datatype)
 
     if type(formatter_name) is type:
         # Allow formatters to be specified by class directly as well as by path
@@ -146,6 +146,6 @@ def load_formatter(dataset, formatter_name=None):
 
     typecheck_formatter(formatted_type, fmt_cls)
     # Instantiate the formatter, providing it with the dataset
-    formatter = fmt_cls(dataset)
+    formatter = fmt_cls(datatype)
 
     return formatter

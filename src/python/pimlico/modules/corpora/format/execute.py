@@ -2,7 +2,7 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-from pimlico.cli.browser.formatter import load_formatter
+from pimlico.cli.browser.tools.formatter import load_formatter
 from pimlico.core.modules.base import TypeCheckError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory

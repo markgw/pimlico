@@ -447,6 +447,24 @@ class PimlicoDatatype(object):
     def __repr__(self):
         return self.datatype_name
 
+    def run_browser(self, reader, opts):
+        """
+        Launches a browser interface for reading this datatype, browsing the
+        data provided by the given reader.
+
+        Not all datatypes provide a browser. For those that don't, this method
+        should raise a NotImplementedError.
+
+        `opts` provides the argparser options from the command line.
+
+        This tool used to be only available for iterable corpora, but now it's possible
+        for any datatype to provide a browser. IterableCorpus provides its own browser,
+        as before, which uses one of the data point type's formatters to format
+        documents.
+
+        """
+        raise NotImplementedError("datatype {} does not provide a dataset browser".format(self.datatype_name))
+
     class Reader:
         """
         The abstract superclass of all dataset readers.

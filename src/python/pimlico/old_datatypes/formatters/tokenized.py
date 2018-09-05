@@ -1,4 +1,4 @@
-from pimlico.cli.browser.formatter import DocumentBrowserFormatter
+from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.old_datatypes.tokenized import TokenizedDocumentType, CharacterTokenizedDocumentType, \
     SegmentedLinesDocumentType
 

@@ -23,6 +23,16 @@ class ScoredRealFeatureSets(NamedFileCollection):
     def __init__(self, *args, **kwargs):
         super(ScoredRealFeatureSets, self).__init__(["feature_types.list", "data.csv"], *args, **kwargs)
 
+    def browse_file(self, reader, filename):
+        if filename == "data.csv":
+            # Show feature names instead of IDs
+            feature_names = reader.feature_types
+            data = reader.read_file(filename)
+            lines = [line.split() for line in data.splitlines()]
+            return u"\n".join(u"{}: {}".format(row[0], u", ".join(u"{} ({:.2f})".format(feature_names[int(item.partition(":")[0])], float(item.partition(":")[2])) for item in row[1:])) for row in lines).encode("utf8")
+        else:
+            super(ScoredRealFeatureSets, self).browse_file(reader, filename)
+
     class Reader:
         def __iter__(self):
             for features, score in self.iter_ids():

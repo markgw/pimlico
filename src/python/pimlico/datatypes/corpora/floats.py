@@ -13,7 +13,7 @@ import struct
 from StringIO import StringIO
 from cStringIO import StringIO
 
-from pimlico.cli.browser.formatter import DocumentBrowserFormatter
+from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from .table import get_struct
 

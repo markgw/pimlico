@@ -60,6 +60,31 @@ class NamedFileCollection(PimlicoDatatype):
                 return False
         return True
 
+    def browse_file(self, reader, filename):
+        """
+        Return text for a particular file in the collection to show in the
+        browser. By default, just reads in the file's data and returns
+        it, but subclasses might want to override this (perhaps conditioned
+        on the filename) to format the data readably.
+
+        :param reader:
+        :param filename:
+        :return: file data to show
+        """
+        return reader.read_file(filename)
+
+    def run_browser(self, reader, opts):
+        """
+        All NamedFileCollections provide a browser that just lets you see a
+        list of the files and view them, in the case of text files.
+
+        Subclasses may override the way individual files are shown by
+        overriding `browse_file()`.
+
+        """
+        from pimlico.cli.browser.tools.files import browse_files
+        browse_files(reader)
+
     class Reader:
         class Setup:
             def get_required_paths(self):
