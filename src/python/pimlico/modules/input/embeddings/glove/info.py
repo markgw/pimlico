@@ -2,7 +2,6 @@ import os
 
 from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.core.modules.options import str_to_bool
 from pimlico.datatypes import Embeddings
 
 
