@@ -8,13 +8,12 @@ Simple utility for copying a file (which presumably comes from the output of ano
 location. Useful for collecting together final output at the end of a pipeline.
 
 """
-
-from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.base import MultipleInputs
 from pimlico.datatypes.files import File
 
 
-class ModuleInfo(DocumentMapModuleInfo):
+class ModuleInfo(BaseModuleInfo):
     module_type_name = "copy_file"
     module_readable_name = "Copy file"
     module_inputs = [("source", MultipleInputs(File))]
