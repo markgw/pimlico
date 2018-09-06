@@ -64,10 +64,10 @@ class NamedFileCollection(PimlicoDatatype):
         if not super(NamedFileCollection, self).data_ready():
             return False
         try:
-            for filename in self.filenames:
+            for path in self.absolute_filenames:
                 # Allow subdirectories of the data dir to be specified with /s
                 # Check that the file that the path points to exists
-                if not os.path.exists(os.path.join(self.data_dir, filename)):
+                if not os.path.exists(path):
                     return False
         except IOError:
             # Subclasses may raise an IOError while trying to compute the path: in this case it's assumed not ready
@@ -79,6 +79,8 @@ class NamedFileCollection(PimlicoDatatype):
             return None
         if filename not in self.filenames:
             raise ValueError("'{}' is not a filename in the file collection".format(filename))
+        # Normalize /s to whatever is appropriate for the OS
+        filename = os.path.join(*filename.split("/"))
         return os.path.join(self.data_dir, filename)
 
     @cached_property
@@ -107,6 +109,11 @@ class NamedFileCollectionWriter(PimlicoDatatypeWriter):
 
     def write_file(self, filename, data):
         path = self.get_absolute_path(filename)
+        # The filename could contain a subdirectory, so check the dir exists
+        file_dir = os.path.dirname(path)
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)
+        # Write out the data to the file
         with open(path, "w") as f:
             f.write(data)
         self.file_written(filename)
