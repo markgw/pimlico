@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import os
 
 from pimlico.datatypes.base import PimlicoDatatype, PimlicoDatatypeWriter
@@ -101,13 +102,17 @@ class Embeddings(PimlicoDatatype):
         return self.vectors[word_ids]
 
     def to_keyed_vectors(self):
+        """
+        NB: this assumes we're using a recent version of Gensim (e.g. >=3.5.0). If you get problems
+        with the KeyedVectors class, it's probably because you need a later version than you have.
+
+        """
         from gensim.models.keyedvectors import KeyedVectors, Vocab as GensimVocab
-        kvecs = KeyedVectors()
+        kvecs = KeyedVectors(self.vector_size)
         index2vocab = [GensimVocab(word=v.word, count=v.count, index=v.index) for v in self.index2vocab]
         kvecs.vocab = dict((v.word, v) for v in index2vocab)
         kvecs.index2word = self.index2word
-        kvecs.syn0 = self.vectors
-        kvecs.vector_size = self.vector_size
+        kvecs.vectors = self.vectors
         kvecs.init_sims()
         return kvecs
 
