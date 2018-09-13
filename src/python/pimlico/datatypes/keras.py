@@ -10,8 +10,8 @@ from __future__ import absolute_import
 
 import json
 import os
-from pimlico.core.dependencies.python import keras_dependency
 
+from pimlico.core.dependencies.python import keras_dependency, keras_tensorflow_dependency
 from pimlico.datatypes.base import PimlicoDatatypeWriter, PimlicoDatatype
 from pimlico.utils.core import import_member
 
@@ -123,6 +123,11 @@ class KerasModelBuilderClass(PimlicoDatatype):
     """
     def __init__(self, base_dir, pipeline, **kwargs):
         super(KerasModelBuilderClass, self).__init__(base_dir, pipeline, **kwargs)
+
+    def get_software_dependencies(self):
+        return super(KerasModelBuilderClass, self).get_software_dependencies() + [
+            keras_tensorflow_dependency,
+        ]
 
     @property
     def weights_filename(self):
