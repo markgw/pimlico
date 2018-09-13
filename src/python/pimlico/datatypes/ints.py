@@ -40,11 +40,11 @@ class IntegerListsDocumentType(RawDocumentType):
         def _read_row(length):
             for i in range(length):
                 num_string = reader.read(int_size)
-                if num_string == "":
-                    raise IOError("file ended mid-row")
                 try:
                     yield unpacker.unpack(num_string)[0]
                 except struct.error, e:
+                    if num_string == "":
+                        raise IOError("file ended mid-row")
                     raise IOError("error interpreting int data: %s" % e)
 
         while True:
