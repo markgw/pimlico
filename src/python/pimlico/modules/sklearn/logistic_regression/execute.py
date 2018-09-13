@@ -1,10 +1,10 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-from sklearn.linear_model import LogisticRegression
-
 import numpy as np
 from scipy.sparse import csr_matrix
+from sklearn.linear_model import LogisticRegression
+from sklearn.utils import shuffle
 
 from pimlico.core.config import PipelineConfigParseError
 from pimlico.core.modules.base import BaseModuleExecutor
@@ -45,6 +45,10 @@ class ModuleExecutor(BaseModuleExecutor):
             log_reg = LogisticRegression(**lr_init_kwargs)
         except TypeError, e:
             raise PipelineConfigParseError("invalid arguments to LogisticRegression: {}".format(e))
+
+        # Shuffle the rows of the training data, so that the source providing the
+        # data doesn't need to do this
+        input_data = shuffle(input_data)
 
         # Apply transformation to the matrix
         self.log.info("Fitting logistic regression on input matrix")
