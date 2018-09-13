@@ -10,6 +10,8 @@ Modules that need data in this format can use this datatype, which makes it
 easy to convert from other formats.
 
 """
+from __future__ import absolute_import
+
 import os
 
 from pimlico.core.dependencies.python import numpy_dependency
@@ -105,13 +107,13 @@ class Embeddings(PimlicoDatatype):
         def __len__(self):
             return len(self.index2vocab)
 
-        def word_vec(self, word):
+        def word_vec(self, word, norm=False):
             """
             Accept a single word as input.
             Returns the word's representation in vector space, as a 1D numpy array.
 
             """
-            return self.word_vecs([word])
+            return self.word_vecs([word], norm=norm)
 
         def word_vecs(self, words, norm=False):
             """
@@ -130,12 +132,11 @@ class Embeddings(PimlicoDatatype):
 
         def to_keyed_vectors(self):
             from gensim.models.keyedvectors import KeyedVectors, Vocab as GensimVocab
-            kvecs = KeyedVectors()
+            kvecs = KeyedVectors(self.vector_size)
             index2vocab = [GensimVocab(word=v.word, count=v.count, index=v.index) for v in self.index2vocab]
             kvecs.vocab = dict((v.word, v) for v in index2vocab)
             kvecs.index2word = self.index2word
             kvecs.syn0 = self.vectors
-            kvecs.vector_size = self.vector_size
             kvecs.init_sims()
             return kvecs
 
