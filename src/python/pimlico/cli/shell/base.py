@@ -28,6 +28,13 @@ class ShellCommand(object):
     help_text = None
 
     def execute(self, shell, *args, **kwargs):
+        """
+        Execute the command. Get the dataset reader as shell.data.
+
+        :param shell: DataShell instance. Reader available as shell.data
+        :param args: Args given by the user
+        :param kwargs: Named args given by the user as key=val
+        """
         raise NotImplementedError
 
 
