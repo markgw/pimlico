@@ -201,6 +201,7 @@ class ModuleInfo(BaseModuleInfo):
         "archive_size": {
             "help": "Number of documents to include in each archive (default: 1k)",
             "default": 1000,
+            "type": int,
         },
         "archive_basename": {
             "help": "Base name to use for archive tar files. The archive number is appended to this. "
