@@ -55,6 +55,7 @@ Contents
    modules/pimlico.modules
    commands/index
    api
+   test_config/index
    plans/index
 
 

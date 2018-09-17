@@ -76,3 +76,9 @@ This example usage includes more options.
    threshold=100
    include=word1,word2,... 
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-vocab_builder.conf`

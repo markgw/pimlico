@@ -1,12 +1,18 @@
 pimlico\.cli\.browser package
 =============================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pimlico.cli.browser.tools
+
 Submodules
 ----------
 
 .. toctree::
 
-   pimlico.cli.browser.formatter
    pimlico.cli.browser.tool
 
 Module contents

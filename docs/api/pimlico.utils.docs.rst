@@ -9,6 +9,7 @@ Submodules
    pimlico.utils.docs.commandgen
    pimlico.utils.docs.modulegen
    pimlico.utils.docs.rest
+   pimlico.utils.docs.testgen
 
 Module contents
 ---------------

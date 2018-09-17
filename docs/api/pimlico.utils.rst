@@ -28,6 +28,7 @@ Submodules
    pimlico.utils.strings
    pimlico.utils.system
    pimlico.utils.timeout
+   pimlico.utils.urwid
    pimlico.utils.web
 
 Module contents

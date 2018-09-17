@@ -83,3 +83,9 @@ This example usage includes more options.
    input_corpus=module_a.some_output
    set1_size=0.20
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-split.conf`

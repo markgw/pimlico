@@ -7,10 +7,8 @@ Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 
 """
 import argparse
-
-import sys
-
 import os
+import sys
 import warnings
 from importlib import import_module
 from pkgutil import iter_modules
@@ -18,8 +16,8 @@ from sphinx import __version__
 from sphinx.apidoc import format_heading
 
 from pimlico import install_core_dependencies
-from pimlico.core.modules.options import format_option_type, comma_separated_strings, comma_separated_list, str_to_bool, \
-    json_string, json_dict, choose_from_list
+from pimlico.core.modules.options import format_option_type, str_to_bool, \
+    json_string, json_dict
 from pimlico.datatypes import PimlicoDatatype, MultipleInputs, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
     IterableCorpus
 from pimlico.datatypes.corpora import DataPointType
@@ -27,7 +25,7 @@ from pimlico.utils.docs import trim_docstring
 from pimlico.utils.docs.rest import make_table
 
 
-def generate_docs_for_pymod(module, output_dir):
+def generate_docs_for_pymod(module, output_dir, test_refs={}):
     """
     Generate RST docs for Pimlico modules on a given Python path and output to a directory.
 
@@ -46,7 +44,7 @@ def generate_docs_for_pymod(module, output_dir):
         if is_package:
             # Import the module (package) so we can recurse on it
             submod = importer.find_module(modname).load_module(modname)
-            is_pim_submod, sub_pim_mods = generate_docs_for_pymod(submod, output_dir)
+            is_pim_submod, sub_pim_mods = generate_docs_for_pymod(submod, output_dir, test_refs=test_refs)
             all_generated.append(submod.__name__)
             all_pimlico_modules.extend(sub_pim_mods)
             if is_pim_submod:
@@ -58,7 +56,7 @@ def generate_docs_for_pymod(module, output_dir):
         # This looks like a Pimlico module
         # Try building module docs for this one
         # If there were submodules, they should be included in the module doc in a TOC
-        info = generate_docs_for_pimlico_mod(module_name, output_dir, all_generated)
+        info = generate_docs_for_pimlico_mod(module_name, output_dir, all_generated, test_refs=test_refs)
         if info is not None:
             is_pimlico_module = True
             all_pimlico_modules.append(module_name)
@@ -79,7 +77,7 @@ def generate_docs_for_pymod(module, output_dir):
     return is_pimlico_module, all_pimlico_modules
 
 
-def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
+def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_refs={}):
     print "Building docs for %s" % module_path
     filename = os.path.join(output_dir, "%s.rst" % module_path)
     # First import the python module
@@ -216,6 +214,14 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
                 if example_config_short is None or len(example_config_short) < len(example_config_long):
                     output_file.write("This example usage includes more options.\n\n")
                     output_file.write(".. code-block:: ini\n   \n{}\n\n".format(indent(3, example_config_long)))
+
+        # See whether this module is used in any test config files
+        test_configs = test_refs.get(module_path, [])
+        if len(test_configs):
+            output_file.write(format_heading(1, "Test pipelines"))
+            output_file.write("This module is used by the following :ref:`test pipelines <test-pipelines>`. "
+                              "They are a further source of examples of the module's usage.\n\n")
+            output_file.write("\n".join(" * :ref:`{}`".format(ref_name) for ref_name in test_configs))
 
         if submodules:
             # Generate a TOC for the nested modules
@@ -445,6 +451,9 @@ if __name__ == "__main__":
                         help="Base Python module path to generate docs for. Defaults to generating docs for core "
                              "modules from the Pimlico distribution. Use this to generate module docs for your own "
                              "modules")
+    parser.add_argument("--test-refs",
+                        help="Path to module ref list from test config file doc generator. If given, a list of "
+                             "config files will be included with each module that is used in one or more")
     opts = parser.parse_args()
 
     output_dir = os.path.abspath(opts.output_dir)
@@ -468,4 +477,17 @@ if __name__ == "__main__":
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    generate_docs_for_pymod(base_mod, output_dir)
+    test_refs = {}
+    if opts.test_refs is not None:
+        if not os.path.exists(opts.test_refs):
+            warnings.warn("Test pipeline module reference file {} does not exist".format(opts.test_refs))
+        # Load test pipeline module refs file
+        with open(opts.test_refs, "r") as f:
+            test_refs_data = f.read()
+        # Use the file to build a dictionary of referenced modules for easy lookup when building docs
+        for line in test_refs_data.splitlines():
+            ref_name, __, modules = line.partition("\t")
+            for module in modules.split(","):
+                test_refs.setdefault(module, []).append(ref_name)
+
+    generate_docs_for_pymod(base_mod, output_dir, test_refs=test_refs)

@@ -72,3 +72,9 @@ This example usage includes more options.
    remove_only_punct=F
    remove_empty=F
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-normalize.conf`

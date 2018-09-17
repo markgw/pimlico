@@ -74,3 +74,9 @@ This example usage includes more options.
    tokenize_only=F
    sentence_model=en-sent.bin
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-tokenize.conf`

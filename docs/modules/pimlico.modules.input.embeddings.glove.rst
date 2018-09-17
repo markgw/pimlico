@@ -52,3 +52,9 @@ This is an example of how this module can be used in a pipeline config file.
    [my_glove_embedding_reader_module]
    path=value
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-glove.conf`

@@ -81,3 +81,10 @@ This example usage includes more options.
    archive_size=1000
    archive_basename=archive
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-store.conf`
+ * :ref:`test-config-group.conf`

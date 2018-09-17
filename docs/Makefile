@@ -11,6 +11,7 @@ BUILDDIR      = _build
 SPHINXAPI     = sphinx-apidoc
 APIDIR        = api
 MODULEDIR     = modules
+TESTCONFIGDIR = test_config
 # Exclude Pimlico modules from the API doc, since they need to be built in a special way
 MODULE_PATH   = pimlico/modules/
 COMMANDDIR    = commands
@@ -26,13 +27,14 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext api modules commands
+.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext api modules commands test
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  api        automatically generate API docs in api/"
 	@echo "  modules    automatically generate special API docs for Pimlico modules (in $(MODULEDIR)/)"
 	@echo "  commands   automatically generate special API docs for Pimlico command-line commands (in $(COMMANDDIR)/)"
+	@echo "  test       automatically generate docs for the test pipeline config files (in $(TESTCONFIGDIR)/)"
 	@echo "  html       to make standalone HTML files"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
@@ -57,13 +59,19 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 	-rm -rf $(APIDIR)/*
 
+all: test commands modules api html
+
 api:
 	rm -rf $(APIDIR)
 	$(SPHINXAPI) -eT -d 2 -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH) $(EXCLUDE_API)
 
 modules:
 	@rm -rf $(MODULEDIR)
-	@$(PYTHON) -m pimlico.utils.docs.modulegen $(MODULEDIR)
+	@$(PYTHON) -m pimlico.utils.docs.modulegen $(MODULEDIR) --test-refs $(TESTCONFIGDIR)/module_list.tsv
+
+test:
+	@rm -rf $(TESTCONFIGDIR)
+	@$(PYTHON) -m pimlico.utils.docs.testgen $(TESTCONFIGDIR)
 
 commands:
 	@rm -rf $(COMMANDDIR)

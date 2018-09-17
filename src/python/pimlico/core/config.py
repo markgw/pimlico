@@ -123,6 +123,10 @@ class PipelineConfig(object):
     def __contains__(self, item):
         return item in self.module_infos or item in self.module_aliases
 
+    def __iter__(self):
+        for module_name in self.module_order:
+            yield self[module_name]
+
     @property
     def module_dependencies(self):
         """

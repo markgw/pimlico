@@ -17,8 +17,10 @@ Submodules
    pimlico.datatypes.core
    pimlico.datatypes.dictionary
    pimlico.datatypes.embeddings
+   pimlico.datatypes.features
    pimlico.datatypes.files
    pimlico.datatypes.gensim
+   pimlico.datatypes.sklearn
 
 Module contents
 ---------------

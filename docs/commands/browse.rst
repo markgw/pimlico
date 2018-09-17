@@ -13,7 +13,7 @@ Usage:
 
 ::
 
-    pimlico.sh [...] browse module_name [output_name] [-h] [--raw] [--skip-invalid] [--formatter FORMATTER]
+    pimlico.sh [...] browse module_name [output_name] [-h] [--skip-invalid] [--formatter FORMATTER]
 
 
 Positional arguments
@@ -33,10 +33,8 @@ Options
 +-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Option                  | Description                                                                                                                                                                                                                                                                                         |
 +=========================+=====================================================================================================================================================================================================================================================================================================+
-| ``--raw``, ``-r``       | Don't parse the data using the output datatype (i.e. just read the raw text). If not set, we output the result of applying unicode() to the parsed data structure, or a custom formatting if the datatype loaded defines one                                                                        |
-+-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``--skip-invalid``      | Skip over invalid documents, instead of showing the error that caused them to be invalid                                                                                                                                                                                                            |
 +-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``--formatter``, ``-f`` | Fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine what to output for each document. If specified, --raw is ignored. You may also choose from the named standard formatters for the datatype in question. Use '-f help' to see a list of available formatters |
+| ``--formatter``, ``-f`` | When browsing iterable corpora, fully qualified class name of a subclass of DocumentBrowserFormatter to use to determine what to output for each document. You may also choose from the named standard formatters for the datatype in question. Use '-f help' to see a list of available formatters |
 +-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 

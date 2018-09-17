@@ -75,3 +75,9 @@ This example usage includes more options.
    skip_invalid=T
    size=100
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-subset.conf`

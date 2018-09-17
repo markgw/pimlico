@@ -43,3 +43,9 @@ This is an example of how this module can be used in a pipeline config file.
    input_corpus=module_a.some_output
    
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-stats.conf`

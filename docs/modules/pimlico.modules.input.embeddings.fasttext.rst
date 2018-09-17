@@ -68,3 +68,9 @@ This example usage includes more options.
    path=value
    limit=0
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`:
+
+ * :ref:`test-config-fasttext.conf`
