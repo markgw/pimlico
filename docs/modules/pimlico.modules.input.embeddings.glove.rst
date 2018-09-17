@@ -55,6 +55,6 @@ This is an example of how this module can be used in a pipeline config file.
 Test pipelines
 ==============
 
-This module is used by the following :ref:`test pipelines <test-pipelines>`:
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
 
  * :ref:`test-config-glove.conf`
