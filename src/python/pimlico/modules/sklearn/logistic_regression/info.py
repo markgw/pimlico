@@ -36,6 +36,7 @@ class ModuleInfo(BaseModuleInfo):
                     "(potentially without the {}s). E.g.: '\"C\":1.5, \"penalty\":\"l2\"'",
             "type": json_dict,
             "default": {},
+            "example": '\"C\":1.5, \"penalty\":\"l2\"',
         },
     }
 
