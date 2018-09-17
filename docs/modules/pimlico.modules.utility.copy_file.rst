@@ -52,3 +52,23 @@ Options
 | target_dir  | (required) Path to directory into which the file should be copied. Will be created if it doesn't exist                                      | string |
 +-------------+---------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_copy_file_module]
+   input_source=module_a.some_output
+   target_dir=value
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_copy_file_module]
+   input_source=module_a.some_output
+   target_name=value
+   target_dir=value
+

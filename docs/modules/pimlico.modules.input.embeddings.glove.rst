@@ -42,3 +42,13 @@ Options
 | path | (required) Path to the GloVe embedding file | string |
 +------+---------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_glove_embedding_reader_module]
+   path=value
+

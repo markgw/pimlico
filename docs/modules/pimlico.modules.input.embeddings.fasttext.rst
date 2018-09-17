@@ -50,3 +50,21 @@ Options
 | limit | Limit to the first N words. Since the files are typically ordered from most to least frequent, this limits to the N most common words | int    |
 +-------+---------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_fasttext_embedding_reader_module]
+   path=value
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_fasttext_embedding_reader_module]
+   path=value
+   limit=0
+

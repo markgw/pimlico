@@ -23,6 +23,19 @@ def opt_type_help(help_text):
     return _wrap
 
 
+def opt_type_example(example_text):
+    """
+    Decorate to add an example value to function that are designed to be used as
+    module option processors. The given text will be used in module docs as an example
+    of how to specify the option in a config file.
+
+    """
+    def _wrap(fn):
+        fn._opt_type_example = example_text
+        return fn
+    return _wrap
+
+
 def format_option_type(t):
     if hasattr(t, "option_help_text"):
         # Help text added by opt_type_help decorator
@@ -65,11 +78,12 @@ def choose_from_list(options, name=None):
         help_text = "%s or '%s'" % (", ".join("'%s'" % o for o in options[:-1]), options[-1])
 
     @opt_type_help(help_text)
+    @opt_type_help(options[0])
     def _fn(string):
         if string not in options:
             raise ValueError("%s is not a valid value%s. Valid choices: %s" % (string, name_text, ", ".join(options)))
         else:
-            return string
+            return
     return _fn
 
 
@@ -90,6 +104,7 @@ def comma_separated_list(item_type=str, length=None):
         if length is not None and len(result) != length:
             raise ValueError("list must contain %d values, got %d" % (length, len(result)))
         return result
+    _fn.list_item_type = item_type
     return _fn
 
 

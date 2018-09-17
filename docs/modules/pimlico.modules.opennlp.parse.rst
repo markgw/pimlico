@@ -49,3 +49,22 @@ Options
 | model | Parser model, full path or directory name. If a filename is given, it is expected to be in the OpenNLP model directory (models/opennlp/) | string |
 +-------+------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_opennlp_parser_module]
+   input_documents=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_opennlp_parser_module]
+   input_documents=module_a.some_output
+   model=en-parser-chunking.bin
+

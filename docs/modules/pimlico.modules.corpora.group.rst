@@ -56,8 +56,28 @@ Options
 +------------------+------------------------------------------------------------------------------------------------------+--------+
 | Name             | Description                                                                                          | Type   |
 +==================+======================================================================================================+========+
-| archive_size     | Number of documents to include in each archive (default: 1k)                                         | string |
+| archive_size     | Number of documents to include in each archive (default: 1k)                                         | int    |
 +------------------+------------------------------------------------------------------------------------------------------+--------+
 | archive_basename | Base name to use for archive tar files. The archive number is appended to this. (Default: 'archive') | string |
 +------------------+------------------------------------------------------------------------------------------------------+--------+
+
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_group_module]
+   input_documents=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_group_module]
+   input_documents=module_a.some_output
+   archive_size=1000
+   archive_basename=archive
 

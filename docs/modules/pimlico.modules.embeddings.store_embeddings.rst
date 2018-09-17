@@ -35,3 +35,14 @@ Outputs
 | embeddings | :class:`embeddings <pimlico.datatypes.embeddings.Embeddings>` |
 +------------+---------------------------------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_store_embeddings_module]
+   input_embeddings=module_a.some_output
+   
+

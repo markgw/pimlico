@@ -58,3 +58,23 @@ Options
 | options | Options to pass into the constructor of the sklearn class, formatted as a JSON dictionary (potentially without the {}s). E.g.: 'n_components=200, solver="cd", tol=0.0001, max_iter=200'                                                                                                                                                               | string                                                                                                                                         |
 +---------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_sklearn_mat_fac_module]
+   input_matrix=module_a.some_output
+   class=value
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_sklearn_mat_fac_module]
+   input_matrix=module_a.some_output
+   class=value
+   options=value
+

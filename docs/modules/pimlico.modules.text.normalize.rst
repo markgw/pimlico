@@ -51,3 +51,24 @@ Options
 | remove_empty      | Skip over any empty sentences (i.e. blank lines)                                                                        | bool                   |
 +-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_normalize_module]
+   input_corpus=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_normalize_module]
+   input_corpus=module_a.some_output
+   case=
+   remove_only_punct=F
+   remove_empty=F
+

@@ -42,3 +42,21 @@ Options
 | path   | (required) Path to the word2vec embedding file (.bin)    | string |
 +--------+----------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_word2vec_embedding_reader_module]
+   path=value
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_word2vec_embedding_reader_module]
+   binary=T
+   path=value
+

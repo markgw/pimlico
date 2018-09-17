@@ -54,3 +54,23 @@ Options
 | encoding        | Encoding to assume for input files. Default: utf8                                                                                                                                                                                                                                                                                                                                                   | string                                                  |
 +-----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_raw_text_files_reader_module]
+   files=path1,path2,...
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_raw_text_files_reader_module]
+   files=path1,path2,...
+   exclude=text,text,...
+   encoding_errors=strict
+   encoding=utf8
+

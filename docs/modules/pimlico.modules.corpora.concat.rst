@@ -34,3 +34,14 @@ Outputs
 | corpus | :class:`corpus with data-point from input <pimlico.datatypes.corpora.grouped.CorpusWithTypeFromInput>` |
 +--------+--------------------------------------------------------------------------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_concat_module]
+   input_corpora=module_a.some_output
+   
+

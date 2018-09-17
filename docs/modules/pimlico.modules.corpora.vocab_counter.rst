@@ -61,3 +61,24 @@ Options
 | oov_excluded | Indicates that the corpus has been mapped so that OOVs are represented by the ID vocab_size+1, instead of having a special token in the vocab | bool |
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------+------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_vocab_counter_module]
+   input_corpus=module_a.some_output
+   input_vocab=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_vocab_counter_module]
+   input_corpus=module_a.some_output
+   input_vocab=module_a.some_output
+   oov_excluded=T
+

@@ -26,19 +26,23 @@ class ModuleInfo(BaseModuleInfo):
         "threshold": {
             "help": "Minimum number of occurrences required of a term to be included",
             "type": int,
+            "example": "100",
         },
         "max_prop": {
             "help": "Include terms that occur in max this proportion of documents",
             "type": float,
+            "example": None,
         },
         "limit": {
             "help": "Limit vocab size to this number of most common entries (after other filters)",
             "type": int,
+            "example": "10k",
         },
         "include": {
             "help": "Ensure that certain words are always included in the vocabulary, even if they don't make it "
                     "past the various filters, or are never seen in the corpus. Give as a comma-separated list",
             "type": comma_separated_strings,
+            "example": "word1,word2,... "
         },
         "oov": {
             "help": "Use the final index the represent chars that will be out of vocabulary after applying "

@@ -54,3 +54,23 @@ Options
 | archive_basename | Documents are regrouped into new archives. Base name to use for archive tar files. The archive number is appended to this. (Default: 'archive') | string |
 +------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_interleave_module]
+   input_corpora=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_interleave_module]
+   input_corpora=module_a.some_output
+   archive_size=1000
+   archive_basename=archive
+

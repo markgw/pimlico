@@ -54,3 +54,22 @@ Options
 | model | Absolute path to models directory or name of model set. If not an absolute path, assumed to be a subdirectory of the candcs models dir (see instructions in models/candc/README on how to fetch pre-trained models) | string |
 +-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_candc_module]
+   input_documents=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_candc_module]
+   input_documents=module_a.some_output
+   model=ccgbank
+

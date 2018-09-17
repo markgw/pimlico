@@ -18,10 +18,6 @@ as a raw text datatype.
 If you want to do proper tokenization, consider either the CoreNLP or OpenNLP core
 modules.
 
-.. todo::
-
-   Updated to new datatypes system. Add test pipeline and test
-
 
 Inputs
 ======
@@ -49,4 +45,23 @@ Options
 +==========+=================================================+==================+
 | splitter | Character or string to split on. Default: space | <type 'unicode'> |
 +----------+-------------------------------------------------+------------------+
+
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_simple_tokenize_module]
+   input_corpus=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_simple_tokenize_module]
+   input_corpus=module_a.some_output
+   splitter= 
 

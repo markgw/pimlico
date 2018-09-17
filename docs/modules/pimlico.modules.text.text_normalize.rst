@@ -51,3 +51,24 @@ Options
 | strip       | Strip whitespace from the start and end of lines                                                                        | bool                   |
 +-------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_text_normalize_module]
+   input_corpus=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_text_normalize_module]
+   input_corpus=module_a.some_output
+   case=
+   blank_lines=T
+   strip=T
+

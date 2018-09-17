@@ -45,3 +45,15 @@ Outputs
 | vectors | **invalid output type specification** |
 +---------+---------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_lda_doc_topics_module]
+   input_corpus=module_a.some_output
+   input_model=module_a.some_output
+   
+

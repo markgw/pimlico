@@ -90,3 +90,26 @@ Options
 | dep_type   | Type of dependency parse to output, when outputting dependency parses, either from a constituency parse or direct dependency parse. Choose from the three types allowed by CoreNLP: 'basic', 'collapsed' or 'collapsed-ccprocessed' | 'basic', 'collapsed' or 'collapsed-ccprocessed' |
 +------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_corenlp_module]
+   input_documents=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_corenlp_module]
+   input_documents=module_a.some_output
+   gzip=T
+   timeout=0.1
+   readable=T
+   annotators=
+   dep_type=collapsed-ccprocessed
+

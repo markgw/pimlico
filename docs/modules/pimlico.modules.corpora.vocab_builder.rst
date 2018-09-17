@@ -53,3 +53,26 @@ Options
 | include   | Ensure that certain words are always included in the vocabulary, even if they don't make it past the various filters, or are never seen in the corpus. Give as a comma-separated list                                                                                                                                                                        | comma-separated list of strings |
 +-----------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_vocab_builder_module]
+   input_text=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_vocab_builder_module]
+   input_text=module_a.some_output
+   prune_at=2000000
+   oov=text
+   limit=10k
+   threshold=100
+   include=word1,word2,... 
+

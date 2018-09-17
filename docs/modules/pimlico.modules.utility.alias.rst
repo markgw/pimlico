@@ -73,3 +73,14 @@ Outputs
 | output | **invalid output type specification** |
 +--------+---------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_alias_module]
+   input_input=module_a.some_output
+   
+

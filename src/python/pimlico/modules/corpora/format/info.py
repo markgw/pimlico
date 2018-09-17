@@ -29,5 +29,6 @@ class ModuleInfo(DocumentMapModuleInfo):
             "help": "Fully qualified class name of a formatter to use to format the data. If not specified, the "
                     "default formatter is used, which uses the datatype's browser_display attribute if available, "
                     "or falls back to just converting documents to unicode",
+            "example": "path.to.formatter.FormatterClass"
         },
     }

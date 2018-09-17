@@ -51,3 +51,23 @@ Options
 | no_gzip | By default, we gzip each document in the output data. If you don't do this, the output can get very large, since it's quite a verbose output format                                                      | bool   |
 +---------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_malt_module]
+   input_documents=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_malt_module]
+   input_documents=module_a.some_output
+   model=engmalt.linear-1.7.mco
+   no_gzip=F
+

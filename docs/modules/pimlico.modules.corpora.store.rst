@@ -37,3 +37,14 @@ Outputs
 | corpus | :class:`grouped corpus with input doc type <pimlico.datatypes.corpora.grouped.GroupedCorpus>` |
 +--------+-----------------------------------------------------------------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_store_module]
+   input_corpus=module_a.some_output
+   
+

@@ -53,3 +53,24 @@ Options
 | sentence_model | Sentence segmentation model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/) | string |
 +----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_opennlp_tokenizer_module]
+   input_text=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_opennlp_tokenizer_module]
+   input_text=module_a.some_output
+   token_model=en-token.bin
+   tokenize_only=F
+   sentence_model=en-sent.bin
+

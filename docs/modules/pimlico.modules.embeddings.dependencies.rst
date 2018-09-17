@@ -55,3 +55,25 @@ Options
 | skip_types    | Dependency relations to skip, separated by commas                                                                                                                               | comma-separated list of strings |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_embedding_dep_features_module]
+   input_dependencies=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_embedding_dep_features_module]
+   input_dependencies=module_a.some_output
+   lemma=T
+   condense_prep=value
+   term_pos=
+   skip_types=
+

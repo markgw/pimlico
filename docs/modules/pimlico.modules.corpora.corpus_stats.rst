@@ -32,3 +32,14 @@ Outputs
 | stats | :class:`named_file <pimlico.datatypes.files.NamedFile>` |
 +-------+---------------------------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_corpus_stats_module]
+   input_corpus=module_a.some_output
+   
+

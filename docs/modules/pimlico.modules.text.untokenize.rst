@@ -57,3 +57,24 @@ Options
 | joiner          | String to join words on. (Default: space)               | <type 'unicode'> |
 +-----------------+---------------------------------------------------------+------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_untokenize_module]
+   input_corpus=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_untokenize_module]
+   input_corpus=module_a.some_output
+   sentence_joiner=
+   
+   joiner= 
+

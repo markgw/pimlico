@@ -53,3 +53,13 @@ Options
 | path | (required) Path to the FastText embedding file (.bin) | string |
 +------+-------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_fasttext_embedding_reader_gensim_module]
+   path=value
+

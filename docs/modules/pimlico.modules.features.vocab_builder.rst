@@ -61,3 +61,27 @@ Options
 | term_limit        | Limit vocab size to this number of most common entries (after other filters) | int   |
 +-------------------+------------------------------------------------------------------------------+-------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_term_feature_vocab_builder_module]
+   input_term_features=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_term_feature_vocab_builder_module]
+   input_term_features=module_a.some_output
+   feature_limit=0
+   feature_max_prop=0.1
+   term_max_prop=0.1
+   term_threshold=0
+   feature_threshold=0
+   term_limit=0
+

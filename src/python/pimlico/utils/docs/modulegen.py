@@ -18,7 +18,8 @@ from sphinx import __version__
 from sphinx.apidoc import format_heading
 
 from pimlico import install_core_dependencies
-from pimlico.core.modules.options import format_option_type
+from pimlico.core.modules.options import format_option_type, comma_separated_strings, comma_separated_list, str_to_bool, \
+    json_string, json_dict, choose_from_list
 from pimlico.datatypes import PimlicoDatatype, MultipleInputs, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
     IterableCorpus
 from pimlico.datatypes.corpora import DataPointType
@@ -147,6 +148,18 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
         for (option_name, d) in ModuleInfo.module_options.items()
     ]
 
+    # Try generating some example config for how this module can be used
+    try:
+        example_config_short = generate_example_config(ModuleInfo, input_table, minimal=True)
+    except Exception, e:
+        warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
+        example_config_short = None
+    try:
+        example_config_long = generate_example_config(ModuleInfo, input_table, minimal=False)
+    except Exception, e:
+        warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
+        example_config_long = None
+
     if awaiting_datatype_update:
         module_title = "!! {}".format(module_title)
 
@@ -191,6 +204,18 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[]):
         if options_table:
             output_file.write(format_heading(1, "Options"))
             output_file.write("%s\n" % make_table(options_table, header=["Name", "Description", "Type"]))
+
+        # Example config
+        if example_config_short is not None or example_config_long is not None:
+            output_file.write(format_heading(1, "Example config"))
+            if example_config_short is not None:
+                output_file.write("This is an example of how this module can be used in a pipeline config file.\n\n")
+                output_file.write(".. code-block:: ini\n   \n{}\n\n".format(indent(3, example_config_short)))
+            if example_config_long is not None:
+                # Only show long example if it's longer than short
+                if example_config_short is None or len(example_config_short) < len(example_config_long):
+                    output_file.write("This example usage includes more options.\n\n")
+                    output_file.write(".. code-block:: ini\n   \n{}\n\n".format(indent(3, example_config_long)))
 
         if submodules:
             # Generate a TOC for the nested modules
@@ -300,6 +325,116 @@ def generate_contents_page(modules, output_dir, index_name, title, content):
             list="\n   ".join(modules),
             index_name=index_name,
         ))
+
+
+def generate_example_config(info, input_types, minimal=False):
+    """
+    Generate a string containing an example of how to configure the
+    given module in a pipeline config file. Where possible, uses default
+    values for options, or values appropriate to the type, and dummy
+    input names.
+
+    """
+    input_lines = "".join(
+        "input_{}=module_a.some_output{}\n".format(
+            name, ",module_b.some_output,..." if isinstance(dtype, MultipleInputs) else ""
+        ) for (name, dtype) in input_types
+    )
+
+    # Generate example values for all the options
+    options = []
+    for opt_name, opt_dict in info.module_options.iteritems():
+        # If producing minimal version, only include required options
+        if not minimal or opt_dict.get("required", False):
+            opt_val = None
+            # If the opt dict includes an explicit "example", use that
+            if "example" in opt_dict:
+                # If example is explicitly given as None, skip this option in the long example
+                if opt_dict["example"] is None:
+                    continue
+                opt_val = opt_dict["example"]
+            else:
+                # If the option has a default value, we should use that
+                opt_default = opt_dict.get("default", None)
+                if opt_default is not None:
+                    # Whether we can simply use the default value depends on the type, as it's given as a processed value
+                    opt_val = _val_to_config(opt_default)
+
+                if opt_val is None:
+                    # Not managed to get anything from the default value
+                    # Try looking at the option type
+                    otype = opt_dict.get("type", None)
+                    if otype is not None:
+                        opt_val = _opt_type_to_config(otype)
+
+                if opt_val is None:
+                    # If nothing else works, just put something there so we see that the option can be set
+                    opt_val = "value"
+
+            options.append("{}={}".format(opt_name, opt_val))
+
+    return """\
+[my_{}_module]
+{}{}
+""".format(
+        info.module_type_name,
+        input_lines,
+        "\n".join(options)
+    )
+
+
+def _val_to_config(val):
+    if isinstance(val, basestring):
+        # This is easy: we can just use it
+        return val
+    # Some types can simply be converted to strings to get a good example
+    elif type(val) is int:
+        return str(val)
+    elif type(val) is float:
+        return "{:.2f}".format(val)
+    elif type(val) is bool:
+        return "T" if val else "F"
+    elif type(val) in (list, tuple):
+        # Presumably a comma-separated list
+        return ",".join(_val_to_config(v) for v in val)
+    else:
+        return None
+
+
+def _opt_type_to_config(otype):
+    if hasattr(otype, "_opt_type_example"):
+        return otype._opt_type_example
+    if type(otype) is type:
+        if issubclass(otype, basestring):
+            # Just a string, anything can go here
+            return "text"
+        elif issubclass(otype, int):
+            return "0"
+        elif issubclass(otype, float):
+            return "0.1"
+        elif issubclass(otype, bool):
+            # Most often, str_to_bool is used instead of this
+            # but if bool has been used, work with that
+            return "1"
+    elif otype is str_to_bool:
+        return "T"
+    elif otype is json_string:
+        return '{"key1":"value"}'
+    elif otype is json_dict:
+        return '"key1": "value", "key2": 2'
+    elif hasattr(otype, "list_item_type"):
+        # Comma-separated list
+        list_val = _opt_type_to_config(otype.list_item_type)
+        if list_val is None:
+            # We don't know how to generate an example of this list type
+            list_val = "value"
+        return "{},{},...".format(list_val, list_val)
+    else:
+        return None
+
+
+def indent(spaces, text):
+    return "\n".join("{}{}".format(" "*spaces, line) for line in text.splitlines())
 
 
 if __name__ == "__main__":

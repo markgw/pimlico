@@ -44,3 +44,16 @@ Outputs
 | data | **invalid output type specification** |
 +------+---------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_term_feature_vocab_mapper_module]
+   input_data=module_a.some_output
+   input_term_vocab=module_a.some_output
+   input_feature_vocab=module_a.some_output
+   
+

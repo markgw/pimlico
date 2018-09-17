@@ -35,6 +35,7 @@ class ModuleInfo(BaseModuleInfo):
             "help": "Number of documents to include",
             "required": True,
             "type": int,
+            "example": "100",
         },
         "offset": {
             "help": "Number of documents to skip at the beginning of the corpus (default: 0, start at beginning)",

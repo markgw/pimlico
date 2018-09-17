@@ -80,3 +80,29 @@ Options
 | sentence_model | Sentence segmentation model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/)                                                        | string |
 +----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_opennlp_coref_module]
+   input_text=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_opennlp_coref_module]
+   input_text=module_a.some_output
+   gzip=T
+   token_model=en-token.bin
+   parse_model=en-parser-chunking.bin
+   timeout=0
+   coref_model=
+   readable=T
+   pos_model=en-pos-maxent.bin
+   sentence_model=en-sent.bin
+

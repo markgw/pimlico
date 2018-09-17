@@ -54,3 +54,24 @@ Options
 | size         | (required) Number of documents to include                                                                                                                                                                                                    | int  |
 +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_subset_module]
+   input_corpus=module_a.some_output
+   size=100
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_subset_module]
+   input_corpus=module_a.some_output
+   offset=0
+   skip_invalid=T
+   size=100
+

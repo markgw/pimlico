@@ -22,11 +22,12 @@ import os
 from glob import glob, iglob
 
 from pimlico.core.modules.inputs import iterable_input_reader
-from pimlico.core.modules.options import comma_separated_strings, comma_separated_list, opt_type_help
+from pimlico.core.modules.options import comma_separated_strings, comma_separated_list, opt_type_help, opt_type_example
 from pimlico.datatypes.corpora.data_points import RawTextDocumentType
 
 
 @opt_type_help("(line range-limited) file path")
+@opt_type_example("path")
 def filename_with_range(val):
     """ Option processor for file paths with an optional start and end line at the end. """
     if ":" in val:
@@ -50,6 +51,7 @@ def filename_with_range(val):
 
 
 comma_separated_paths = comma_separated_list(filename_with_range)
+comma_separated_paths = opt_type_example("path1,path2,...")(comma_separated_paths)
 
 
 def get_paths_from_options(options, error_on_missing=False):

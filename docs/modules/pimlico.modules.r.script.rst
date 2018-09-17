@@ -48,3 +48,14 @@ Options
 | script | (required) Path to the script to be run. The script itself may include substitutions of the form '{{inputX}}', which will be replaced with the absolute path to the data dir of the Xth input, and '{{output}}', which will be replaced with the absolute path to the output dir. The latter allows the script to output things other than the output file, which always exists and contains the full script's output | string |
 +--------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_r_script_module]
+   input_sources=module_a.some_output
+   script=value
+

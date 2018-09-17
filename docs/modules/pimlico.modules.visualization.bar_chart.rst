@@ -38,3 +38,14 @@ Outputs
 | plot | **invalid output type specification** |
 +------+---------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_bar_chart_module]
+   input_values=module_a.some_output
+   
+

@@ -40,3 +40,14 @@ Outputs
 | conll_data | **invalid output type specification** |
 +------------+---------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_conll_parser_input_module]
+   input_annotations=module_a.some_output
+   
+

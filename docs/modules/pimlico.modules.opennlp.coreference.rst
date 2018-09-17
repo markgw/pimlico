@@ -59,3 +59,25 @@ Options
 | timeout  | Timeout in seconds for each individual coref resolution task. If this is exceeded, an InvalidDocument is returned for that document                                                                                       | int    |
 +----------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_opennlp_coref_module]
+   input_parses=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_opennlp_coref_module]
+   input_parses=module_a.some_output
+   gzip=T
+   model=
+   readable=T
+   timeout=0
+

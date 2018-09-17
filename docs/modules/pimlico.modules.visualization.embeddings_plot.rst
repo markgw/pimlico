@@ -63,3 +63,27 @@ Options
 | words     | Number of most frequent words to plot. Default: 50                                                                                                                                                                                             | int                                  |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 
+Example config
+==============
+
+This is an example of how this module can be used in a pipeline config file.
+
+.. code-block:: ini
+   
+   [my_embeddings_plot_module]
+   input_vectors=module_a.some_output
+   
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_embeddings_plot_module]
+   input_vectors=module_a.some_output
+   skip=0
+   metric=cosine
+   reduction=mds
+   colors=text,text,...
+   cmap={"key1":"value"}
+   words=50
+
