@@ -33,7 +33,7 @@ The complete config file for this test pipeline:
    
    
    [interleave]
-   type=pimlico.modules.corpora.concat
+   type=pimlico.modules.corpora.interleave
    input_corpora=europarl1,europarl2
    
    [output]
@@ -46,7 +46,7 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.corpora.concat`
+ * :mod:`~pimlico.modules.corpora.interleave`
  * :mod:`~pimlico.modules.corpora.format`
     
 
