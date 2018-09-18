@@ -942,12 +942,13 @@ class PipelineConfig(object):
             if filename is None:
                 home_dir = os.path.expanduser("~")
                 # Use the default locations for local config file
-                # First, look for the basic config, which must always exist
+                local_config = []
+                # First, look for the basic config
+                # If other config files are found below, we don't complain about this not existing,
+                # but usually it must exist: we will complain below if nothing else is found
                 basic_config_filename = os.path.join(home_dir, ".pimlico")
-                if not os.path.exists(basic_config_filename):
-                    raise PipelineConfigParseError("basic Pimlico local config file does not exist. Looked for: %s" %
-                                                   basic_config_filename)
-                local_config = [basic_config_filename]
+                if os.path.exists(basic_config_filename):
+                    local_config.append(basic_config_filename)
 
                 # Allow other files to override the settings in this basic one
                 # Look for any files matching the pattern .pimlico_*
@@ -967,6 +968,11 @@ class PipelineConfig(object):
                             # Hostname match hostname-prefix-specific config file .pimlico_<hostname_prefix>-
                             local_config.append(os.path.join(home_dir, alt_config_filename))
                             break
+                            
+                if len(local_config) == 0:
+                    raise PipelineConfigParseError("basic Pimlico local config file does not exist and no other local "
+                                                   "config files are available in the current context. Looked for "
+                                                   "basic config in {}".format(basic_config_filename))
             else:
                 local_config = [filename]
 

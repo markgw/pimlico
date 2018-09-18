@@ -12,13 +12,12 @@ location. Useful for collecting together final output at the end of a pipeline.
    Update to new datatypes system and add test pipeline
 
 """
-
-from pimlico.core.modules.map import DocumentMapModuleInfo
+from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.old_datatypes.base import MultipleInputs
 from pimlico.old_datatypes.files import File
 
 
-class ModuleInfo(DocumentMapModuleInfo):
+class ModuleInfo(BaseModuleInfo):
     module_type_name = "copy_file"
     module_readable_name = "Copy file"
     module_inputs = [("source", MultipleInputs(File))]

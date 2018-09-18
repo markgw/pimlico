@@ -6,6 +6,7 @@ from collections import Counter
 import numpy
 
 from pimlico.core.modules.base import BaseModuleExecutor
+from pimlico.datatypes.corpora import InvalidDocument
 from pimlico.old_datatypes.arrays import NumpyArrayWriter
 from pimlico.utils.progress import get_progress_bar
 
@@ -21,6 +22,7 @@ class ModuleExecutor(BaseModuleExecutor):
         # Iterate over the whole corpus, counting up tokens
         counts = Counter(
             token for doc_name, doc in pbar(corpus) for line in doc for token in line
+            if not isinstance(doc, InvalidDocument)
         )
         self.log.info("Counts collected")
         # Put the result in a numpy array

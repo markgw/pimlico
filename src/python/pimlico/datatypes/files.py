@@ -147,6 +147,11 @@ class NamedFileCollection(PimlicoDatatype):
                 self.require_tasks("write_%s" % filename)
 
         def write_file(self, filename, data):
+            # The filename could contain a subdirectory, so check the dir exists
+            file_dir = os.path.dirname(self.get_absolute_path(filename))
+            if not os.path.exists(file_dir):
+                os.makedirs(file_dir)
+            # Write the file
             with self.open_file(filename) as f:
                 f.write(data)
 
