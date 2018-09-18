@@ -1,12 +1,10 @@
+import logging
 from logging import getLogger
 
 from gensim.models import LdaModel, TfidfModel
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.gensim import GensimLdaModelWriter
 from pimlico.modules.gensim.utils import GensimCorpus
-import logging
-
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -83,5 +81,5 @@ class ModuleExecutor(BaseModuleExecutor):
             self.log.info(u"#{}: {}".format(topic, topic_repr).encode("utf-8"))
 
         self.log.info("Storing model")
-        with GensimLdaModelWriter(self.info.get_absolute_output_dir("model")) as w:
+        with self.info.get_output_writer("model") as w:
             w.write_model(lda)

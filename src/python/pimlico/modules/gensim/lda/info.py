@@ -7,15 +7,13 @@ Trains LDA using Gensim's `basic LDA implementation <https://radimrehurek.com/ge
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Add test pipeline and test
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool, comma_separated_strings
-from pimlico.old_datatypes.dictionary import Dictionary
-#from pimlico.old_datatypes.gensim import GensimLdaModel
-from pimlico.old_datatypes.ints import IntegerListsDocumentType
-from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.datatypes import GensimLdaModel, GroupedCorpus, Dictionary
+from pimlico.datatypes.corpora.ints import IntegerListsDocumentType
 
 
 def alpha_opt(val):
@@ -38,8 +36,8 @@ def eta_opt(val):
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "lda_trainer"
     module_readable_name = "LDA trainer"
-    module_inputs = [("corpus", TarredCorpusType(IntegerListsDocumentType)), ("vocab", Dictionary)]
-    module_outputs = [("model", None)]  # GensimLdaModel
+    module_inputs = [("corpus", GroupedCorpus(IntegerListsDocumentType())), ("vocab", Dictionary())]
+    module_outputs = [("model", GensimLdaModel())]
     module_options = {
         "ignore_terms": {
             "type": comma_separated_strings,

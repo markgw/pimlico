@@ -12,26 +12,27 @@ be done.
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Add test pipeline and test
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.old_datatypes.floats import VectorDocumentCorpus, VectorDocumentCorpusWriter
-#from pimlico.old_datatypes.gensim import GensimLdaModel
-from pimlico.old_datatypes.ints import IntegerListsDocumentType
-from pimlico.old_datatypes.tar import TarredCorpusType
+from pimlico.datatypes import GensimLdaModel, GroupedCorpus
+from pimlico.datatypes.corpora.floats import VectorDocumentType
+from pimlico.datatypes.corpora.ints import IntegerListsDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "lda_doc_topics"
     module_readable_name = "LDA document topic analysis"
     module_inputs = [
-        ("corpus", TarredCorpusType(IntegerListsDocumentType)),
-        ("model", None)  # GensimLdaModel
+        ("corpus", GroupedCorpus(IntegerListsDocumentType())),
+        ("model", GensimLdaModel())
     ]
-    module_outputs = [("vectors", VectorDocumentCorpus)]
+    module_outputs = [("vectors", GroupedCorpus(VectorDocumentType()))]
     module_options = {}
 
-    def get_writer(self, output_name, output_dir, append=False):
-        num_topics = self.get_input("model").load_model().num_topics
-        return VectorDocumentCorpusWriter(self.get_absolute_output_dir("vectors"), num_topics, append=append)
+    def get_output_writer(self, output_name=None, **kwargs):
+        if output_name == "vectors":
+            # Set the number of vector dims from the model's number of topics
+            kwargs["dimensions"] = self.get_input("model").load_model().num_topics
+        return super(ModuleInfo, self).get_output_writer(output_name=output_name, **kwargs)

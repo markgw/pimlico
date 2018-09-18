@@ -172,3 +172,53 @@ class FloatListsFormatter(DocumentBrowserFormatter):
         return "\n".join(
             " ".join("%.4f" % f for f in lst) for lst in doc.lists
         )
+
+
+class VectorDocumentType(RawDocumentType):
+    """
+    Like FloatListDocumentType, but each document has the same number of float values.
+
+    Each document contains a single list of floats
+    and each one has the same length. That is, each document is one vector.
+
+    The floats are stored as C doubles, using 8 bytes each.
+
+    """
+    formatters = [("vector", "pimlico.datatypes.floats.VectorFormatter")]
+
+    def reader_init(self, reader):
+        super(VectorDocumentType, self).reader_init(reader)
+        # Prepare struct for reading in the whole vector
+        dim = self.metadata["dimensions"]
+        self.struct = struct.Struct("<" + "d"*dim)
+        self.value_size = self.struct.size
+
+    def writer_init(self, reader):
+        super(VectorDocumentType, self).writer_init(reader)
+        # Prepare struct for writing out the whole vector
+        dim = self.metadata["dimensions"]
+        self.struct = struct.Struct("<" + "d"*dim)
+        self.value_size = self.struct.size
+
+    class Document:
+        keys = ["vector"]
+
+        def raw_to_internal(self, raw_data):
+            try:
+                return {"vector": self.data_point_type.struct.unpack(raw_data),}
+            except struct.error, e:
+                raise IOError("error interpreting float vector data: %s" % e)
+
+        def internal_to_raw(self, internal_data):
+            try:
+                return self.data_point_type.struct.pack(internal_data["vector"])
+            except struct.error, e:
+                raise ValueError("error encoding float data using struct format %s: %s" %
+                                 (self.data_point_type.struct.format, e))
+
+
+class VectorFormatter(DocumentBrowserFormatter):
+    DATATYPE = VectorDocumentType
+
+    def format_document(self, doc):
+        return "\n".join("{:.3f}".format(f) for f in doc.vector)

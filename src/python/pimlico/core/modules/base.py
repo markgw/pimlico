@@ -779,9 +779,8 @@ class BaseModuleInfo(object):
                     if previous_module.module_name in assume_executed:
                         continue
                     # Check whether we can get the output reader for the output corresponding to this input
-                    try:
-                        reader = previous_module.get_output(output_name)
-                    except DataNotReadyError:
+                    reader_setup = previous_module.get_output_reader_setup(output_name)
+                    if not reader_setup.ready_to_read():
                         # If the previous module is a filter, it's more helpful to say exactly what data it's missing
                         if previous_module.is_filter():
                             missing_for_input.extend(previous_module.missing_data(assume_executed=assume_executed))

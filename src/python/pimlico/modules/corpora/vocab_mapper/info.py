@@ -8,27 +8,23 @@
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Add test pipeline and test
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-from pimlico.old_datatypes.dictionary import Dictionary
-from pimlico.old_datatypes.ints import IntegerListsDocumentCorpus, IntegerListsDocumentCorpusWriter
-from pimlico.old_datatypes.tar import TarredCorpusType
-from pimlico.old_datatypes.tokenized import TokenizedDocumentType
+from pimlico.datatypes import GroupedCorpus, Dictionary
+from pimlico.datatypes.corpora.ints import IntegerListsDocumentType
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "vocab_mapper"
     module_readable_name = "Tokenized corpus to ID mapper"
-    module_inputs = [("text", TarredCorpusType(TokenizedDocumentType)), ("vocab", Dictionary)]
-    module_outputs = [("ids", IntegerListsDocumentCorpus)]
+    module_inputs = [("text", GroupedCorpus(TokenizedDocumentType())), ("vocab", Dictionary())]
+    module_outputs = [("ids", GroupedCorpus(IntegerListsDocumentType()))]
     module_options = {
         "oov": {
             "help": "If given, special token to map all OOV tokens to. Otherwise, use vocab_size+1 as index. "
                     "Special value 'skip' simply skips over OOV tokens",
         },
     }
-
-    def get_writer(self, output_name, output_dir, append=False):
-        return IntegerListsDocumentCorpusWriter(output_dir, signed=False, bytes=4, append=append)

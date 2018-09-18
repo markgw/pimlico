@@ -225,6 +225,7 @@ class DataPointType(object):
         """
         #: Specifies the keys that a document has in its internal data
         #: Subclasses should specify their keys
+        #: The internal data fields corresponding to these can be accessed as attributes of the document
         keys = []
 
         def __init__(self, data_point_type, raw_data=None, internal_data=None):
@@ -310,6 +311,13 @@ class DataPointType(object):
                 self._raw_data if self._raw_data is not None else self._internal_data,
                 self._raw_data is None
             ))
+
+        def __getattr__(self, item):
+            # Provide the internal data keys defined by the doc type as attributes for easy access
+            if item in self.keys:
+                return self.internal_data[item]
+            else:
+                raise AttributeError
 
 
 class _DocumentPickler(object):

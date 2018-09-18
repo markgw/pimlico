@@ -4,7 +4,7 @@ Utilities for using Gensim in Pimlico used across different modules.
 """
 from collections import Counter
 
-from pimlico.datatypes import InvalidDocument
+from pimlico.datatypes.corpora import is_invalid_doc
 
 
 class GensimCorpus(object):
@@ -31,7 +31,7 @@ class GensimCorpus(object):
 
     def __iter__(self):
         for doc_name, doc in self.indexed_corpus:
-            if not isinstance(doc, InvalidDocument):
+            if not is_invalid_doc(doc):
                 # The document is currently a list of sentences, where each is a list of word IDs
                 # Count up the occurrences of each ID in the document to get the bag of words for Gensim
                 word_counter = Counter(
