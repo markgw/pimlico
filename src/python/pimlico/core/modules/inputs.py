@@ -152,7 +152,21 @@ def iterable_input_reader(input_module_options, data_point_type,
                 return len_fn(self)
 
         def __iter__(self):
-            return iter_fn(self)
+            # Check that the first document is of the right type
+            # There's no need to check all the documents, but it's worth checking one in case the user
+            # of the factory function has made a mistake in building the iter_fn
+            it = iter(iter_fn(self))
+            doc_name, doc = it.next()
+            if not self.datatype.data_point_type.is_type_for_doc(doc):
+                raise TypeError("data iterator for input reader {} yielded the wrong type of document. Expected "
+                                "a document of data point type {}, but got {}".format(
+                    mt_name, self.datatype.data_point_type, type(doc).__name__
+                ))
+            # Yield this first document and don't check any others
+            yield doc_name, doc
+            # Just iterate over the rest
+            for doc_name, doc in it:
+                yield doc_name, doc
 
         def process_setup(self):
             """ Override so we don't try to get base_dir, etc, as the standard reader does """

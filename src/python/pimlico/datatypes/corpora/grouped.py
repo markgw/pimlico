@@ -275,7 +275,9 @@ class GroupedCorpus(IterableCorpus):
                 # If not, we kick up a fuss, as we've presumably been given something that's not a valid document
                 if not isinstance(doc, DataPointType.Document):
                     raise TypeError("documents added to a grouped corpus should be instances of the data point type's "
-                                    "document class. Data point type is {}".format(self.datatype.data_point_type.name))
+                                    "document class. Data point type is {}. Got {}".format(
+                        self.datatype.data_point_type.name, type(doc).__name__
+                    ))
                 else:
                     # Some other problem caused this
                     raise
