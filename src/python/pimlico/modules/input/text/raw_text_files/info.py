@@ -126,12 +126,8 @@ def data_ready(options):
     return check_paths_from_options(options)
 
 
-def corpus_len(reader):
-    if "length" in reader.metadata:
-        # If the length has been stored, use that
-        return reader.metadata["length"]
-    else:
-        return len(get_paths_from_options(reader.options))
+def corpus_len(reader_options):
+    return len(get_paths_from_options(reader_options))
 
 
 def corpus_iter(reader):

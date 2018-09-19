@@ -760,15 +760,11 @@ class BaseModuleInfo(object):
             input_names = self.input_names
             # Also check module data (non-input data)
             missing.extend(self.missing_module_data())
-        if self.is_input():
+        if not self.is_input():
             # Don't check inputs for an input module: there aren't any
-            # However, the output datatypes might require certain files before the data preparation routine can be run
-            for output_name in self.output_names:
-                reader_setup = self.get_output_reader_setup(output_name)
-                if not reader_setup.ready_to_read():
-                    output_text = "default output" if output_name is None else ("output '%s'" % output_name)
-                    missing.append("data not ready for input module '%s' (%s)" % (self.module_name, output_text))
-        else:
+            # If checks need to be performed before an input module's data preparation is run (i.e. an
+            # executable input module), they are added by overriding this method
+
             for input_name in input_names:
                 input_connections = self.get_input_module_connection(input_name, always_list=True)
                 missing_for_input = []

@@ -99,11 +99,8 @@ def iterable_input_reader(input_module_options, data_point_type,
     Reader options are available at read time from the reader setup instance's ``reader_options`` attribute,
     also available from the reader instance as ``reader.options``.
 
-    :param iter_fn: function that takes a reader instance and returns a generator
-        to iterate over the documents of the corpus. Like any IterableCorpus, it should yield pairs of
-        (doc_name, doc). Reader options are available as `reader.setup.reader_options`.
-    :param len_fn: function that takes the reader (which makes options available) and returns the number of docs
-    :param input_module_options:
+    :param input_module_options: dictionary defining the module options for the input module, which
+        will be provided to all the functions
     :param data_point_type: a data point type for the individual documents that will be produced. They
         do not need to be read in using this type's reading functionality, which will later be used for
         storing and reading the documents, but can be produced by some other means.
@@ -111,6 +108,11 @@ def iterable_input_reader(input_module_options, data_point_type,
         config file and returns True if the data is ready to read, False otherwise. If execute_count
         is used, the data will be considered unready until the count has been run, even if this
         function returns True.
+    :param iter_fn: function that takes a reader instance and returns a generator
+        to iterate over the documents of the corpus. Like any IterableCorpus, it should yield pairs of
+        (doc_name, doc). Reader options are available as `reader.setup.reader_options`.
+    :param len_fn: function that takes the processed options given to the module in the
+        config file and returns the number of docs
     :param module_type_name:
     :param module_readable_name:
     :param software_dependencies: a list of software dependencies that the module-info will return
@@ -170,8 +172,7 @@ def iterable_input_reader(input_module_options, data_point_type,
 
             """
             def execute(self):
-                datatype = self.info.get_output_datatype("corpus")
-                reader_options = datatype.reader_options
+                reader_options = self.info.options
 
                 self.log.info("Counting documents in corpus")
                 num_docs = len_fn(reader_options)
@@ -218,5 +219,13 @@ def iterable_input_reader(input_module_options, data_point_type,
                 return software_dependencies
             else:
                 return software_dependencies(self)
+
+        def missing_module_data(self):
+            missing_data = []
+            if execute_count:
+                # Check whether the data is ready to read, aside from input preparation
+                if not data_ready_fn(self.options):
+                    missing_data.append("Input module's source data not ready")
+            return missing_data
 
     return IterableInputReaderModuleInfo
