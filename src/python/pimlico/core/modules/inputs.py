@@ -9,9 +9,10 @@ Base classes and utilities for input modules in a pipeline.
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.core.modules.execute import ModuleExecutionError
-from pimlico.datatypes import PimlicoDatatype
+from pimlico.datatypes import PimlicoDatatype, GroupedCorpus
 from pimlico.datatypes.base import PimlicoDatatypeReaderMeta
 from pimlico.datatypes.corpora import IterableCorpus
+from pimlico.modules.corpora.group.info import CorpusGroupReader, ModuleInfo as GrouperModuleInfo
 from .base import BaseModuleInfo
 
 
@@ -36,6 +37,18 @@ class InputModuleInfo(BaseModuleInfo):
 def input_module_factory(datatype):
     """
     Create an input module class to load a given datatype.
+
+    This is used by the pipeline config loader to create a suitable module type
+    when the config has a datatype as a module type. It loads data from the
+    given directory exactly as if Pimlico had itself output a dataset of the
+    specified type to that directory.
+
+    The main use for this is loading prepared datasets in test pipelines. It
+    is also useful if you have output from some other Pimlico pipeline that
+    you just want to load as it is and use as input to a module.
+
+    It is not for loading input data from external sources. See `iterable_input_reader`
+    for creating normal input modules.
 
     """
     class DatatypeInputModuleInfo(InputModuleInfo):
@@ -62,11 +75,15 @@ def input_module_factory(datatype):
 def iterable_input_reader(input_module_options, data_point_type,
                           data_ready_fn, len_fn, iter_fn,
                           module_type_name=None, module_readable_name=None,
-                          software_dependencies=None, execute_count=False):
+                          software_dependencies=None, execute_count=False, no_group=False):
     """
-    Factory for creating an input reader module info. This is a non-executable module that has no
-    inputs. It reads its data from some external location, using the given module options. The resulting
-    dataset is an IterableCorpus, with the given document type.
+    Factory for creating an input reader module info.
+    This is a (typically) non-executable module that has no
+    inputs. It reads its data from some external location,
+    using the given module options. The resulting
+    dataset is a GroupedCorpus, with the given document type.
+
+    This is the normal way to create input reader modules.
 
     The returned class is a subclass of :class:`~pimlico.core.modules.base.BaseModuleInfo`.
     It is typically used like this, within a Pimlico module's `info.py`:
@@ -99,6 +116,17 @@ def iterable_input_reader(input_module_options, data_point_type,
     Reader options are available at read time from the reader setup instance's ``reader_options`` attribute,
     also available from the reader instance as ``reader.options``.
 
+    .. note::
+
+       Producing an IterableCorpus used to be the default behaviour. However, since we almost
+       always want to convert to a GroupedCorpus immediately after reading, the default behaviour
+       is now to do the grouping as part of the reading process and produce a GroupedCorpus straight
+       away. If you want to regroup for some reason, you can, of course, still do that with the
+       resulting GroupedCorpus.
+
+       If you need a plain IterableCorpus as output, you can use ``no_group=True`` when calling
+       this factory, which will produce the old behaviour.
+
     :param input_module_options: dictionary defining the module options for the input module, which
         will be provided to all the functions
     :param data_point_type: a data point type for the individual documents that will be produced. They
@@ -119,10 +147,14 @@ def iterable_input_reader(input_module_options, data_point_type,
         when ``get_software_dependencies()`` is called, or a function that takes the module-info instance and
         returns such a list. If left blank, no dependencies are returned.
     :param execute_count: make an executable module that counts the data to get its length (num docs)
+    :param no_group: by default, the output datatype is a GroupedCorpus. If True, use an IterableCorpus
+        instead without grouping documents into archives.
     :return: module info class
     """
     mt_name = module_type_name or "reader_for_{}".format(data_point_type.name)
     mr_name = module_readable_name or "Input reader for {} iterable corpus".format(data_point_type.name)
+    corpus_type = IterableCorpus if no_group else GroupedCorpus
+    output_datatype = corpus_type(data_point_type)
 
     class InputReader(PimlicoDatatype.Reader):
         __metaclass__ = PimlicoDatatypeReaderMeta
@@ -205,16 +237,35 @@ def iterable_input_reader(input_module_options, data_point_type,
                         num_docs, num_valid_docs = num_docs
 
                 self.log.info("Corpus contains {} docs. Storing count".format(num_docs))
-                with self.info.get_output_writer("corpus") as writer:
+                # Don't use get_output_writer here, as we're not actually writing out a corpus
+                # GroupedCorpus has a writer than writes documents and handles the corpus length in its own way
+                # Here we create a simple PimlicoDatatype.Writer ourselves and set the metadata manually
+                with PimlicoDatatype.Writer(
+                        output_datatype, self.info.get_absolute_output_dir("corpus"),
+                        self.info.pipeline, self.info.module_name) as writer:
+                    # Set any default metadata values for the correct output datatype
+                    writer.metadata.update(
+                        dict((key, spec[0]) for (key, spec) in output_datatype.Writer.metadata_defaults.iteritems())
+                    )
                     writer.metadata["length"] = num_docs
                     if num_valid_docs is not None:
                         writer.metadata["valid_documents"] = num_valid_docs
 
+    if no_group:
+        reader_option_keys = input_module_options.keys()
+        grouper_option_keys = []
+    else:
+        # Add some options to allow the config to control the grouper
+        input_module_options = dict(input_module_options)
+        reader_option_keys = input_module_options.keys()
+        input_module_options.update(GrouperModuleInfo.module_options)
+        # Keep track of what keys have been added, so we can separate out the values
+        grouper_option_keys = GrouperModuleInfo.module_options.keys()
 
     class IterableInputReaderModuleInfo(InputModuleInfo):
         module_type_name = mt_name
         module_readable_name = mr_name
-        module_outputs = [("corpus", IterableCorpus(data_point_type))]
+        module_outputs = [("corpus", output_datatype)]
         module_options = input_module_options
 
         # Special behaviour if we're making this an executable module in order to count the data
@@ -224,7 +275,15 @@ def iterable_input_reader(input_module_options, data_point_type,
         input_reader_class = InputReader
 
         def instantiate_output_reader_setup(self, output_name, datatype):
-            return InputReader.Setup(datatype, self.get_absolute_output_dir(output_name), self.options)
+            reader_options = dict((key, v) for (key, v) in self.options.iteritems() if key in reader_option_keys)
+            input_reader_setup = InputReader.Setup(datatype, self.get_absolute_output_dir(output_name), reader_options)
+            if no_group:
+                # Not grouping into a GroupedCorpus: just use the InputReader directly
+                return input_reader_setup
+            else:
+                # Use the input reader to read documents, but pass through CorpusGroupReader as well
+                grouper_options = dict((key, v) for (key, v) in self.options.iteritems() if key in grouper_option_keys)
+                return CorpusGroupReader.Setup(datatype, input_reader_setup, grouper_options)
 
         def get_software_dependencies(self):
             if software_dependencies is None:
