@@ -139,7 +139,7 @@ class SubsetGroupedCorpusReader(SubsetIterableCorpusReader):
         return self.input_reader.extract_file(archive_name, filename)
 
     def archive_iter(self, start_after=None, skip=None, name_filter=None):
-        if skip is not None and skip == 0:
+        if skip is not None and skip < 1:
             skip = None
         # We use the input's skip functionality to skip over the offset
         # We then have to implement our own skip functionality (and start_after), so that skipped docs

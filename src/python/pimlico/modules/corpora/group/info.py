@@ -108,6 +108,8 @@ class CorpusGroupReader(PimlicoDatatype.Reader):
         # Create an initial grouper utility to get the list of archive names
         tmp_grouper = IterableCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
         self.archives = tmp_grouper.get_archive_names()
+        # We need to provide something for this, but we don't have any archive files
+        self.archive_filenames = self.archives
 
     @property
     def metadata(self):
@@ -136,6 +138,8 @@ class CorpusGroupReader(PimlicoDatatype.Reader):
 
     def archive_iter(self, start_after=None, skip=None, name_filter=None):
         grouper = IterableCorpusGrouper(self.archive_size, len(self), archive_basename=self.archive_basename)
+        if skip is not None and skip < 1:
+            skip = None
 
         skipped = 0
         if start_after is None and skip is None:

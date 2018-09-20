@@ -87,6 +87,8 @@ class GroupedCorpus(IterableCorpus):
                 been seen
             """
             gzipped = self.metadata.get("gzip", False)
+            if skip is not None and skip < 1:
+                skip = None
 
             # Prepare a temporary directory to extract everything to
             tmp_dir = mkdtemp()
