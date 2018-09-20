@@ -14,6 +14,7 @@ from StringIO import StringIO
 from cStringIO import StringIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
+from pimlico.utils.core import cached_property
 from .table import get_struct
 
 
@@ -44,10 +45,7 @@ class IntegerListsDocumentType(RawDocumentType):
         super(IntegerListsDocumentType, self).reader_init(reader)
         self.bytes = self.metadata["bytes"]
         self.signed = self.metadata["signed"]
-        self.struct = get_struct(self.bytes, self.signed, 1)
         self.int_size = self.struct.size
-        # We use a separate struct for the row lengths
-        self.length_struct = get_struct(2, False, 1)
         self.length_size = self.length_struct.size
 
     def writer_init(self, writer):
@@ -55,10 +53,26 @@ class IntegerListsDocumentType(RawDocumentType):
         # Metadata should have been set by this point, using kwargs to override the defaults
         self.bytes = writer.metadata["bytes"]
         self.signed = writer.metadata["signed"]
-        self.struct = get_struct(self.bytes, self.signed, 1)
-        # We use a separate struct for the row lengths
-        self.length_struct = get_struct(2, False, 1)
         self.length_size = self.length_struct.size
+
+    @cached_property
+    def struct(self):
+        return get_struct(self.bytes, self.signed, 1)
+
+    @cached_property
+    def length_struct(self):
+        # We use a separate struct for the row lengths
+        return get_struct(2, False, 1)
+
+    def __getstate__(self):
+        # Don't pickle the prepared structs, as they don't pickle nicely
+        # They get recreated on demand anyway
+        state = dict(self.__dict__)
+        if "struct" in state:
+            del state["struct"]
+        if "length_struct" in state:
+            del state["length_struct"]
+        return state
 
     class Document:
         keys = ["lists"]
@@ -140,7 +154,6 @@ class IntegerListDocumentType(RawDocumentType):
         super(IntegerListDocumentType, self).reader_init(reader)
         self.bytes = self.metadata["bytes"]
         self.signed = self.metadata["signed"]
-        self.struct = get_struct(self.bytes, self.signed, 1)
         self.int_size = self.struct.size
 
     def writer_init(self, writer):
@@ -148,7 +161,18 @@ class IntegerListDocumentType(RawDocumentType):
         # Metadata should have been set by this point, using kwargs to override the defaults
         self.bytes = writer.metadata["bytes"]
         self.signed = writer.metadata["signed"]
-        self.struct = get_struct(self.bytes, self.signed, 1)
+
+    @cached_property
+    def struct(self):
+        return get_struct(self.bytes, self.signed, 1)
+
+    def __getstate__(self):
+        # Don't pickle the prepared struct, as it doesn't pickle nicely
+        # It gets recreated on demand anyway
+        state = dict(self.__dict__)
+        if "struct" in state:
+            del state["struct"]
+        return state
 
     class Document:
         keys = ["list"]
