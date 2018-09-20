@@ -22,10 +22,6 @@ class TokenizedDocumentType(TextDocumentType):
     class Document:
         keys = ["sentences"]
 
-        @property
-        def sentences(self):
-            return self.internal_data["sentences"]
-
         @cached_property
         def text(self):
             if self._raw_data is not None:
