@@ -26,7 +26,7 @@ class GensimCorpus(object):
     def __len__(self):
         if self._len is None:
             # We only yield valid docs, so count up how many there are
-            self._len = sum(1 for doc in self.indexed_corpus if not isinstance(doc, InvalidDocument))
+            self._len = sum(1 for doc in self.indexed_corpus if not is_invalid_doc(doc))
         return self._len
 
     def __iter__(self):
@@ -35,6 +35,6 @@ class GensimCorpus(object):
                 # The document is currently a list of sentences, where each is a list of word IDs
                 # Count up the occurrences of each ID in the document to get the bag of words for Gensim
                 word_counter = Counter(
-                    word_id for sentence in doc for word_id in sentence if word_id not in self.ignore_ids
+                    word_id for sentence in doc.lists for word_id in sentence if word_id not in self.ignore_ids
                 )
                 yield list(word_counter.iteritems())
