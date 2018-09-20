@@ -20,6 +20,12 @@ you through building a simple module.
    :doc:`document map module <map_module>`, which takes care of a lot of things for you, so you only need
    to say what to do with each document.
 
+.. todo::
+
+   Module writing guide needs to be updated for new datatypes.
+
+   In particular, the executor example and datatypes in the module definition need to be updated.
+
 Code layout
 ===========
 If you've followed the :doc:`basic project setup guide <setup>`, you'll have a project with a directory structure

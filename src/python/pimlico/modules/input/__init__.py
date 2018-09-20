@@ -14,11 +14,4 @@ by in one big XML file, text files collected into compressed archives, a big tex
 separators, etc. These all require their own input reader and all of them produce the same output
 corpus type.
 
-.. note::
-
-   These input readers are ultimately intended to replace reading input data using a datatype's
-   ``input_module_options``. That functionality will be removed altogether as part of the development of
-   the new datatype system, so it should be phased out now and replaced by input reader modules for
-   each datatype.
-
 """

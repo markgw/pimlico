@@ -9,6 +9,10 @@
    For now, the skeletons below are a useful starting point, but there should be a more fulsome explanation here
    of what document map modules are all about and how to use them.
 
+.. todo::
+
+   Document map module guides needs to be updated for new datatypes.
+
 
 Skeleton new module
 ===================

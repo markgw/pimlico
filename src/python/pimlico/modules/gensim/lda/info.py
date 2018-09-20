@@ -3,7 +3,8 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 """
-Trains LDA using Gensim's `basic LDA implementation <https://radimrehurek.com/gensim/models/ldamodel.html>`_.
+Trains LDA using Gensim's `basic LDA implementation <https://radimrehurek.com/gensim/models/ldamodel.html>`_,
+or `the multicore version <https://radimrehurek.com/gensim/models/ldamulticore.html>`_.
 
 .. todo::
 
@@ -11,11 +12,12 @@ Trains LDA using Gensim's `basic LDA implementation <https://radimrehurek.com/ge
 
 """
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.core.modules.options import str_to_bool, comma_separated_strings
+from pimlico.core.modules.options import str_to_bool, comma_separated_strings, opt_type_help
 from pimlico.datatypes import GensimLdaModel, GroupedCorpus, Dictionary
 from pimlico.datatypes.corpora.ints import IntegerListsDocumentType
 
 
+@opt_type_help("'symmetric', 'asymmetric', 'auto' or a float")
 def alpha_opt(val):
     if val not in ["symmetric", "asymmetric", "auto"]:
         # If not one of these, should be a single float or a list of floats
@@ -27,6 +29,7 @@ def alpha_opt(val):
     return val
 
 
+@opt_type_help("'symmetric', 'auto' or a float")
 def eta_opt(val):
     if val not in ["symmetric", "auto"]:
         val = float(val)

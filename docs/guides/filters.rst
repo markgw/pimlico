@@ -28,6 +28,14 @@ It is possible to chain together filter modules in sequence.
 Other filter modules
 ====================
 
+.. todo::
+
+   Filter module guide needs to be updated for new datatypes. This section is
+   currently completely wrong – **ignore it!** This is quite a substantial change.
+
+   The difficulty of describing what you need to do here suggests we might want
+   to provide some utilities to make this easier!
+
 A module can be defined so that it always functions as a filter by setting ``module_executable=False`` on its
 module-info class. Pimlico will assume that its outputs are ready as soon as its inputs are ready and will not
 try to execute it. The module developer must ensure that the outputs get produced when necessary.
