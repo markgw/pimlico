@@ -85,16 +85,17 @@ class InterleavedGroupedCorpusReader(GroupedCorpus.Reader):
     def extract_file(self, archive_name, filename):
         raise NotImplementedError("cannot extract file from interleaved corpora")
 
-    def _iter_docs(self, subsample=None):
+    def _iter_docs(self, name_filter=None):
         lengths = [len(c) for c in self.input_readers]
         # The longest corpus increments its progress count by 1 for each document
         # Shorter ones increment theirs by proportionally less
         # Then we always just yield a document from the corpus with the lowest progress
         # The result is that we get documents more often from the longer corpus
-        doc_weights = [float(max(lengths))/float(l) for l in lengths]
+        doc_weights = [float(max(lengths))/float(l) if l>0 else 0. for l in lengths]
         progresses = [0. for _ in self.input_readers]
-        finished = [False for _ in self.input_readers]
-        iterators = [c.archive_iter(subsample=subsample) for c in self.input_readers]
+        # If a corpus has 0 docs, mark it as finished already from the start
+        finished = [l == 0 for l in lengths]
+        iterators = [c.archive_iter(name_filter=name_filter) for c in self.input_readers]
 
         while not all(finished):
             # Take a document from the corpus with lowest progress count
@@ -114,7 +115,7 @@ class InterleavedGroupedCorpusReader(GroupedCorpus.Reader):
             # Increment this corpus' progress
             progresses[next_corpus] += doc_weights[next_corpus]
 
-    def archive_iter(self, subsample=None, start_after=None, skip=None):
+    def archive_iter(self, start_after=None, skip=None, name_filter=None):
         skipped = 0
         if start_after is None and skip is None:
             # Don't wait to start
@@ -122,14 +123,10 @@ class InterleavedGroupedCorpusReader(GroupedCorpus.Reader):
         else:
             # Start after we've hit this (archive, doc name), or after we've passed a certain number of docs
             started = False
-            # Don't allow subsample to be used together with start_after or skip, as their interaction is tricky!
-            if subsample is not None:
-                raise ValueError("corpus concat does not permit combining the 'subsample' option with 'start_after' "
-                                 "or 'skip'")
 
         # We regrouped docs into archives, using a new set of archive names, since it
         # doesn't make sense to use those in the input when interleaving
-        for archive_name, (doc_name, doc) in izip(self.archive_grouper, self._iter_docs()):
+        for archive_name, (doc_name, doc) in izip(self.archive_grouper, self._iter_docs(name_filter=name_filter)):
             if not started:
                 if start_after is not None:
                     if start_after == (archive_name, doc_name):
