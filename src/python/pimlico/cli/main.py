@@ -37,6 +37,12 @@ from pimlico.utils.system import set_proc_title
 
 
 class VariantsCmd(PimlicoCLISubcommand):
+    """
+    List the available variants of a pipeline config
+
+    See :doc:`/core/variants` for more details.
+
+    """
     command_name = "variants"
     command_help = "List the available variants of a pipeline config"
 

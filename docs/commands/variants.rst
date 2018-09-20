@@ -6,7 +6,10 @@ variants
 
 *Command-line tool subcommand*
 
-List the available variants of a pipeline config.
+
+List the available variants of a pipeline config
+
+See :doc:`/core/variants` for more details.
 
 
 Usage:

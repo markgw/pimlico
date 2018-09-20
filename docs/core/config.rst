@@ -60,6 +60,9 @@ For example, to point a parameter to a file located within the project root:
 
    param=%(project_root)s/data/myfile.txt
 
+
+.. _config-directives:
+
 Directives
 ----------
 
@@ -67,44 +70,44 @@ Certain special directives are processed when reading config files. They are lin
 by the directive name and any arguments.
 
 - ``variant``:
-    Allows a line to be included only when loading a particular variant of a pipeline. For more detail on
-    pipeline variants, see :doc:`/core/variants`.
+   Allows a line to be included only when loading a particular variant of a pipeline. For more detail on
+   pipeline variants, see :doc:`/core/variants`.
 
-    The variant name is
-    specified as part of the directive in the form: ``variant:variant_name``. You may include the line in more
-    than one variant by specifying multiple names, separated by commas (and no spaces). You can use the default
-    variant "main", so that the line will be left out of other variants. The rest of the line, after the directive
-    and variant name(s) is the content that will be included in those variants.
+   The variant name is
+   specified as part of the directive in the form: ``variant:variant_name``. You may include the line in more
+   than one variant by specifying multiple names, separated by commas (and no spaces). You can use the default
+   variant "main", so that the line will be left out of other variants. The rest of the line, after the directive
+   and variant name(s) is the content that will be included in those variants.
 
-    .. code-block:: ini
-       :emphasize-lines: 3,4
+   .. code-block:: ini
+      :emphasize-lines: 3,4
 
-       [my_module]
-       type=path.to.module
-       %%variant:main size=52
-       %%variant:smaller size=7
+      [my_module]
+      type=path.to.module
+      %%variant:main size=52
+      %%variant:smaller size=7
 
    An alternative notation for the variant directive is provided to make config files more readable. Instead of
    ``variant:variant_name``, you can write ``(variant_name)``. So the above example becomes:
 
-    .. code-block:: ini
-       :emphasize-lines: 3,4
+   .. code-block:: ini
+      :emphasize-lines: 3,4
 
-          [my_module]
-          type=path.to.module
-          %%(main) size=52
-          %%(smaller) size=7
+         [my_module]
+         type=path.to.module
+         %%(main) size=52
+         %%(smaller) size=7
 
 - ``novariant``:
-    A line to be included only when not loading a variant of the pipeline. Equivalent to ``variant:main``.
+   A line to be included only when not loading a variant of the pipeline. Equivalent to ``variant:main``.
 
-    .. code-block:: ini
-       :emphasize-lines: 3
+   .. code-block:: ini
+      :emphasize-lines: 3
 
-       [my_module]
-       type=path.to.module
-       %%novariant size=52
-       %%variant:smaller size=7
+      [my_module]
+      type=path.to.module
+      %%novariant size=52
+      %%variant:smaller size=7
 
 - ``include``:
     Include the entire contents of another file. The filename, specified relative to the config file in which the

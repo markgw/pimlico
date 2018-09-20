@@ -14,4 +14,5 @@ General utilities for things like filesystem manipulation.
    :titlesonly:
 
    pimlico.modules.utility.alias
+   pimlico.modules.utility.collect_files
    pimlico.modules.utility.copy_file

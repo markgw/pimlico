@@ -13,6 +13,7 @@ Submodules
 
 .. toctree::
 
+   pimlico.datatypes.arrays
    pimlico.datatypes.base
    pimlico.datatypes.core
    pimlico.datatypes.dictionary
