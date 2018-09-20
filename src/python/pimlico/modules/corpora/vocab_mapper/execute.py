@@ -28,10 +28,11 @@ def process_document(worker, archive_name, doc_name, doc):
         # Special value that causes us to skip over OOVs
         doc_ids = [[vocab.token2id[word] for word in words if word in vocab.token2id] for words in doc.sentences]
         # Skip empty sentences (which may have come from sentences with only OOVs)
-        return [sent for sent in doc_ids if len(sent)]
+        lsts = [sent for sent in doc_ids if len(sent)]
     else:
         # Map all words to their IDs, or OOV if they're not in the vocab
-        return [[vocab.token2id[word] if word in vocab.token2id else oov for word in words] for words in doc.sentences]
+        lsts = [[vocab.token2id[word] if word in vocab.token2id else oov for word in words] for words in doc.sentences]
+    return worker.info.document(lists=lsts)
 
 
 ModuleExecutor = multiprocessing_executor_factory(process_document, preprocess_fn=preprocess)
