@@ -88,6 +88,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_opennlp_coref_module]
+   type=pimlico.modules.opennlp.coreference_pipeline
    input_text=module_a.some_output
    
 
@@ -96,6 +97,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_opennlp_coref_module]
+   type=pimlico.modules.opennlp.coreference_pipeline
    input_text=module_a.some_output
    gzip=T
    token_model=en-token.bin

@@ -43,6 +43,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_store_embeddings_module]
+   type=pimlico.modules.embeddings.store_embeddings
    input_embeddings=module_a.some_output
    
 

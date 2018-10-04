@@ -58,6 +58,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_fasttext_embedding_reader_module]
+   type=pimlico.modules.input.embeddings.fasttext
    path=value
 
 This example usage includes more options.
@@ -65,6 +66,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_fasttext_embedding_reader_module]
+   type=pimlico.modules.input.embeddings.fasttext
    path=value
    limit=0
 

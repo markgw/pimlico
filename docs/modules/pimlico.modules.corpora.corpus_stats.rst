@@ -40,6 +40,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_corpus_stats_module]
+   type=pimlico.modules.corpora.corpus_stats
    input_corpus=module_a.some_output
    
 

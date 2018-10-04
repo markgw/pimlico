@@ -49,6 +49,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_char_tokenize_module]
+   type=pimlico.modules.text.char_tokenize
    input_corpus=module_a.some_output
    
 

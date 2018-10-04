@@ -57,6 +57,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_annotated_text_matcher_module]
+   type=pimlico.modules.regex.annotated_text
    input_documents=module_a.some_output
    expr=value
 

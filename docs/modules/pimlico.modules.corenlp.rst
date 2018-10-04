@@ -98,6 +98,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_corenlp_module]
+   type=pimlico.modules.corenlp
    input_documents=module_a.some_output
    
 
@@ -106,6 +107,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_corenlp_module]
+   type=pimlico.modules.corenlp
    input_documents=module_a.some_output
    gzip=T
    timeout=0.1

@@ -58,6 +58,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_sklearn_log_reg_module]
+   type=pimlico.modules.sklearn.logistic_regression
    input_features=module_a.some_output
    
 
@@ -66,6 +67,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_sklearn_log_reg_module]
+   type=pimlico.modules.sklearn.logistic_regression
    input_features=module_a.some_output
    options="C":1.5, "penalty":"l2"
 

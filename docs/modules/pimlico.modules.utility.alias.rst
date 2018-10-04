@@ -81,6 +81,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_alias_module]
+   type=pimlico.modules.utility.alias
    input_input=module_a.some_output
    
 

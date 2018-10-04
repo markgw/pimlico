@@ -148,12 +148,12 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
 
     # Try generating some example config for how this module can be used
     try:
-        example_config_short = generate_example_config(ModuleInfo, input_table, minimal=True)
+        example_config_short = generate_example_config(ModuleInfo, input_table, module_path, minimal=True)
     except Exception, e:
         warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
         example_config_short = None
     try:
-        example_config_long = generate_example_config(ModuleInfo, input_table, minimal=False)
+        example_config_long = generate_example_config(ModuleInfo, input_table, module_path, minimal=False)
     except Exception, e:
         warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
         example_config_long = None
@@ -333,7 +333,7 @@ def generate_contents_page(modules, output_dir, index_name, title, content):
         ))
 
 
-def generate_example_config(info, input_types, minimal=False):
+def generate_example_config(info, input_types, module_path, minimal=False):
     """
     Generate a string containing an example of how to configure the
     given module in a pipeline config file. Where possible, uses default
@@ -381,9 +381,11 @@ def generate_example_config(info, input_types, minimal=False):
 
     return """\
 [my_{}_module]
+type={}
 {}{}
 """.format(
         info.module_type_name,
+        module_path,
         input_lines,
         "\n".join(options)
     )

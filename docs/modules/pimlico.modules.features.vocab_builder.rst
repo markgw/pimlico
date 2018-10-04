@@ -69,6 +69,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_term_feature_vocab_builder_module]
+   type=pimlico.modules.features.vocab_builder
    input_term_features=module_a.some_output
    
 
@@ -77,6 +78,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_term_feature_vocab_builder_module]
+   type=pimlico.modules.features.vocab_builder
    input_term_features=module_a.some_output
    feature_limit=0
    feature_max_prop=0.1

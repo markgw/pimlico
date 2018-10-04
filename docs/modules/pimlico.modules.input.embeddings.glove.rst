@@ -50,6 +50,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_glove_embedding_reader_module]
+   type=pimlico.modules.input.embeddings.glove
    path=value
 
 Test pipelines

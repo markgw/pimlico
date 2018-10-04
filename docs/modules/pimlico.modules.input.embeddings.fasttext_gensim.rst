@@ -61,5 +61,6 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_fasttext_embedding_reader_gensim_module]
+   type=pimlico.modules.input.embeddings.fasttext_gensim
    path=value
 
