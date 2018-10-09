@@ -9,6 +9,7 @@ Step-by-step guides through common tasks while using Pimlico.
 
    fast_setup
    setup
+   bootstrap
    module
    map_module
    filters
