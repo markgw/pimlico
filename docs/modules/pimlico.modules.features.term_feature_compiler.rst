@@ -59,6 +59,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_term_feature_list_module]
+   type=pimlico.modules.features.term_feature_compiler
    input_key_values=module_a.some_output
    
 
@@ -67,6 +68,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_term_feature_list_module]
+   type=pimlico.modules.features.term_feature_compiler
    input_key_values=module_a.some_output
    term_keys=term
    include_feature_keys=F

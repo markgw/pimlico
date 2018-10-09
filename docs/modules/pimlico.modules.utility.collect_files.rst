@@ -63,6 +63,10 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_collect_files_module]
+<<<<<<< HEAD
+=======
+   type=pimlico.modules.utility.collect_files
+>>>>>>> 238f254c3e241cae81cba8fea74a0090eeafb35d
    input_files=module_a.some_output
    
 
@@ -71,6 +75,10 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_collect_files_module]
+<<<<<<< HEAD
+=======
+   type=pimlico.modules.utility.collect_files
+>>>>>>> 238f254c3e241cae81cba8fea74a0090eeafb35d
    input_files=module_a.some_output
    subdirs=T
    names=text,text,...

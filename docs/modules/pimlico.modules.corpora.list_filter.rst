@@ -43,6 +43,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_list_filter_module]
+   type=pimlico.modules.corpora.list_filter
    input_corpus=module_a.some_output
    input_list=module_a.some_output
    

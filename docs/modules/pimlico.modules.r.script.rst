@@ -56,6 +56,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_r_script_module]
+   type=pimlico.modules.r.script
    input_sources=module_a.some_output
    script=value
 

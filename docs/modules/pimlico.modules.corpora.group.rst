@@ -69,6 +69,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_group_module]
+   type=pimlico.modules.corpora.group
    input_documents=module_a.some_output
    
 
@@ -77,6 +78,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_group_module]
+   type=pimlico.modules.corpora.group
    input_documents=module_a.some_output
    archive_size=1000
    archive_basename=archive

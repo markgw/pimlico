@@ -45,6 +45,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_store_module]
+   type=pimlico.modules.corpora.store
    input_corpus=module_a.some_output
    
 

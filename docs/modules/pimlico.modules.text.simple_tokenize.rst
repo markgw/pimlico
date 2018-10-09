@@ -54,6 +54,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_simple_tokenize_module]
+   type=pimlico.modules.text.simple_tokenize
    input_corpus=module_a.some_output
    
 
@@ -62,6 +63,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_simple_tokenize_module]
+   type=pimlico.modules.text.simple_tokenize
    input_corpus=module_a.some_output
    splitter= 
 

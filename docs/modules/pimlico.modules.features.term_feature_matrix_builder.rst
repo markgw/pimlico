@@ -48,6 +48,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_term_feature_matrix_builder_module]
+   type=pimlico.modules.features.term_feature_matrix_builder
    input_data=module_a.some_output
    
 

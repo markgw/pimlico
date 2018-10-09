@@ -59,6 +59,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_malt_module]
+   type=pimlico.modules.malt.parse
    input_documents=module_a.some_output
    
 
@@ -67,6 +68,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_malt_module]
+   type=pimlico.modules.malt.parse
    input_documents=module_a.some_output
    model=engmalt.linear-1.7.mco
    no_gzip=F

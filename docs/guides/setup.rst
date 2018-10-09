@@ -25,15 +25,13 @@ a file in your home directory called ``.pimlico``. :ref:`More details <local-con
 
 It needs to
 know where to put output files as it executes. These settings
-apply to all Pimlico pipelines you run. Note that Pimlico will
+apply to all Pimlico pipelines you run. Pimlico will
 make sure that different pipelines don't interfere
 with each other's output (provided you give them different names).
 
 Most of the time, you only need to specify one storage location,
 using the ``store`` parameter in your local
-config file. You may if you like specify multiple locations where
-Pimlico will look for data (see
-:ref:`data-storage`).
+config file. (You can specify multiple: :ref:`more details <data-storage>`).
 
 Create a file ``~/.pimlico`` that looks like this:
 
@@ -41,8 +39,7 @@ Create a file ``~/.pimlico`` that looks like this:
 
     store=/path/to/storage/directory
 
-Remember, these paths are not specific to a pipeline: all pipelines will use different
-subdirectories of this one.
+All pipelines will use different subdirectories of this one.
 
 Getting started with Pimlico
 ============================
@@ -58,10 +55,10 @@ Choose a name for your project (e.g. ``myproject``) and run:
 
     python newproject.py myproject
 
-This fetches the latest version of Pimlico (now in the ``pimlico/`` directory)
-and creates a basic config file template, which will define your pipeline.
+This fetches the latest version of Pimlico (now in the ``pimlico/`` subdirectory)
+and creates a basic config file, which will define your pipeline.
 
-It also retrieves some libraries that Pimlico needs to run. Other libraries
+It also retrieves libraries that Pimlico needs to run. Other libraries
 required by specific pipeline modules will be installed as necessary when
 you use the modules.
 
@@ -92,46 +89,27 @@ Pimlico version.
 
 Getting input
 -------------
-Now we add our first module to the pipeline. This reads input from XML files and iterates of ``<doc>`` tags to get
-documents. This is how the Gigaword corpus is stored, so if you have Gigaword, just set the path to point to it.
+Now we add our first module to the pipeline. This reads input from a collection of
+text files. We use a small subset of the `Europarl corpus <http://www.statmt.org/europarl/>`_
+as an example here.
+This can be simply adapted to reading the real Europarl corpus or any other corpus
+stored in this straightforward way.
 
-.. todo::
+`Download and extract the small corpus from
+here <https://github.com/markgw/pimlico-data/raw/master/europarl_en_small.tar.gz>`_
 
-   Use a dataset that everyone can get to in the example
+In the example below, we have extracted the files to a directory ``data/europarl_demo`` in
+the home directory.
 
 .. code-block:: ini
 
     [input-text]
-    type=pimlico.datatypes.XmlDocumentIterator
-    path=/path/to/data/dir
+    type=pimlico.modules.input.text.raw_text_files
+    files=%(home)s/data/europarl_demo/*
 
-Perhaps your corpus is very large and you'd rather try out your pipeline on a small subset. In that case, add the 
-following option:
+.. todo::
 
-.. code-block:: ini
-
-    truncate=1000
-
-.. note::
-   For a neat way to define a small test version of your pipeline and keep its output separate from the main
-   pipeline, see :doc:`/core/variants`.
-
-Grouping files
---------------
-The standard approach to storing data between modules in Pimlico is to group them together into batches of documents, 
-storing each batch in a tar archive, containing a file for every document. This works nicely with large corpora,
-where having every document as a separate file would cause filesystem difficulties and having all documents in the 
-same file would result in a frustratingly large file.
-
-We can do the grouping on the fly as we read data from the input corpus. The ``tar_filter`` module groups
-documents together and subsequent modules will all use the same grouping to store their output, making it easy to 
-align the datasets they produce.
-
-.. code-block:: ini
-
-    [tar-grouper]
-    type=pimlico.modules.corpora.tar_filter
-    input=input-text
+   Continue writing from here
 
 Doing something: tokenization
 -----------------------------

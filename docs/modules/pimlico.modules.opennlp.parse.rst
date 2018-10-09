@@ -57,6 +57,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_opennlp_parser_module]
+   type=pimlico.modules.opennlp.parse
    input_documents=module_a.some_output
    
 
@@ -65,6 +66,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_opennlp_parser_module]
+   type=pimlico.modules.opennlp.parse
    input_documents=module_a.some_output
    model=en-parser-chunking.bin
 

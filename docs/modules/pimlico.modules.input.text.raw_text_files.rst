@@ -66,6 +66,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_raw_text_files_reader_module]
+   type=pimlico.modules.input.text.raw_text_files
    files=path1,path2,...
 
 This example usage includes more options.
@@ -73,6 +74,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_raw_text_files_reader_module]
+   type=pimlico.modules.input.text.raw_text_files
    files=path1,path2,...
    encoding=utf8
    exclude=text,text,...

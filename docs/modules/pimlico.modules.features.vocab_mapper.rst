@@ -52,6 +52,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_term_feature_vocab_mapper_module]
+   type=pimlico.modules.features.vocab_mapper
    input_data=module_a.some_output
    input_term_vocab=module_a.some_output
    input_feature_vocab=module_a.some_output

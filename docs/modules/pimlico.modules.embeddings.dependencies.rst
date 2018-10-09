@@ -63,6 +63,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_embedding_dep_features_module]
+   type=pimlico.modules.embeddings.dependencies
    input_dependencies=module_a.some_output
    
 
@@ -71,6 +72,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_embedding_dep_features_module]
+   type=pimlico.modules.embeddings.dependencies
    input_dependencies=module_a.some_output
    lemma=T
    condense_prep=value

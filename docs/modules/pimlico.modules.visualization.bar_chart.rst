@@ -46,6 +46,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_bar_chart_module]
+   type=pimlico.modules.visualization.bar_chart
    input_values=module_a.some_output
    
 

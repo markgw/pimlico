@@ -66,6 +66,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_sklearn_mat_fac_module]
+   type=pimlico.modules.sklearn.matrix_factorization
    input_matrix=module_a.some_output
    class=value
 
@@ -74,6 +75,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_sklearn_mat_fac_module]
+   type=pimlico.modules.sklearn.matrix_factorization
    input_matrix=module_a.some_output
    class=value
    options=value

@@ -50,6 +50,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_word2vec_embedding_reader_module]
+   type=pimlico.modules.input.embeddings.word2vec
    path=value
 
 This example usage includes more options.
@@ -57,6 +58,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_word2vec_embedding_reader_module]
+   type=pimlico.modules.input.embeddings.word2vec
    binary=T
    path=value
 

@@ -48,6 +48,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_conll_parser_input_module]
+   type=pimlico.modules.malt.conll_parser_input
    input_annotations=module_a.some_output
    
 

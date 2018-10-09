@@ -49,6 +49,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_lda_doc_topics_module]
+   type=pimlico.modules.gensim.lda_doc_topics
    input_corpus=module_a.some_output
    input_model=module_a.some_output
    

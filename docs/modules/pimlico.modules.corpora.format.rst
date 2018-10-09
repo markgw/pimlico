@@ -55,6 +55,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_format_module]
+   type=pimlico.modules.corpora.format
    input_corpus=module_a.some_output
    
 
@@ -63,6 +64,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_format_module]
+   type=pimlico.modules.corpora.format
    input_corpus=module_a.some_output
    formatter=path.to.formatter.FormatterClass
 

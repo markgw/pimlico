@@ -55,6 +55,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_copy_file_module]
+   type=pimlico.modules.utility.copy_file
    input_source=module_a.some_output
    target_dir=value
 
@@ -63,6 +64,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_copy_file_module]
+   type=pimlico.modules.utility.copy_file
    input_source=module_a.some_output
    target_name=value
    target_dir=value

@@ -42,6 +42,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_concat_module]
+   type=pimlico.modules.corpora.concat
    input_corpora=module_a.some_output
    
 

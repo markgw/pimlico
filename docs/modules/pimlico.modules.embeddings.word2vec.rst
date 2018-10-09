@@ -66,6 +66,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_word2vec_module]
+   type=pimlico.modules.embeddings.word2vec
    input_text=module_a.some_output
    
 
@@ -74,6 +75,7 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_word2vec_module]
+   type=pimlico.modules.embeddings.word2vec
    input_text=module_a.some_output
    iters=5
    min_count=5
