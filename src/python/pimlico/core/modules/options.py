@@ -83,7 +83,7 @@ def choose_from_list(options, name=None):
         if string not in options:
             raise ValueError("%s is not a valid value%s. Valid choices: %s" % (string, name_text, ", ".join(options)))
         else:
-            return
+            return string
     return _fn
 
 
