@@ -317,7 +317,9 @@ class DataPointType(object):
             if item in self.keys:
                 return self.internal_data[item]
             else:
-                raise AttributeError
+                raise AttributeError("{} document has no attribute or data key '{}'".format(
+                    self.data_point_type.name, item
+                ))
 
 
 class _DocumentPickler(object):
