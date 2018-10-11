@@ -391,7 +391,7 @@ def invalid_document(module_name, error_info):
     return InvalidDocument()(module_name=module_name, error_info=error_info)
 
 
-def invalid_document_or_text(text):
+def invalid_document_or_text(module_name, text):
     """
     If the text represents an invalid document, parse it and return an InvalidDocument object.
     Otherwise, return the text as is.
@@ -400,7 +400,7 @@ def invalid_document_or_text(text):
     if is_invalid_doc(text):
         return text
     elif text.startswith("***** EMPTY DOCUMENT *****"):
-        return InvalidDocument()(text)
+        return InvalidDocument()(module_name=module_name, error_info=text)
     else:
         return text
 

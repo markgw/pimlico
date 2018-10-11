@@ -181,7 +181,7 @@ class IterableCorpus(PimlicoDatatype):
             :return: document instance
             """
             # Catch invalid documents
-            data = invalid_document_or_text(data)
+            data = invalid_document_or_text("{} reader".format(self.datatype.data_point_type.name), data)
             if is_invalid_doc(data):
                 return data
             # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
