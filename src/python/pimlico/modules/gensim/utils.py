@@ -26,7 +26,7 @@ class GensimCorpus(object):
     def __len__(self):
         if self._len is None:
             # We only yield valid docs, so count up how many there are
-            self._len = sum(1 for doc in self.indexed_corpus if not is_invalid_doc(doc))
+            self._len = sum(1 for doc_name, doc in self.indexed_corpus if not is_invalid_doc(doc))
         return self._len
 
     def __iter__(self):
