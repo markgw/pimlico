@@ -93,23 +93,16 @@ class BaseModuleInfo(object):
 
         # Work out what outputs this module will make available
         if len(self.module_outputs + self.module_optional_outputs) == 0:
-            # Need at least one output
-            if len(self.module_optional_outputs):
-                raise PipelineStructureError(
-                    "module %s has no outputs. Select at least one optional output from [%s] using the 'output' option"
-                    % (self.module_name, ", ".join(name for name, dt in self.module_optional_outputs))
-                )
-            else:
-                raise PipelineStructureError("module %s defines no outputs. This could be a problem with the "
-                                             "module definition, or with the config, if the module's outputs depend "
-                                             "on its configuration" % self.module_name)
-
-        self.default_output_name = (self.module_outputs+self.module_optional_outputs)[0][0]
+            self.default_output_name = None
+        else:
+            self.default_output_name = (self.module_outputs+self.module_optional_outputs)[0][0]
 
         # The basic outputs are always available
         self.available_outputs = list(self.module_outputs)
         # Replace None with the default output name (which could be an optional output if no non-optional are defined)
-        include_outputs = set([name if name is not None else self.default_output_name for name in include_outputs])
+        include_outputs = set([n for n in
+                               [name if name is not None else self.default_output_name for name in include_outputs]
+                               if n is not None])
         # Include all of these outputs in the final output list
         self.available_outputs.extend((name, dt) for (name, dt) in self.module_optional_outputs
                                       if name in set(optional_outputs) | include_outputs)
@@ -433,6 +426,8 @@ class BaseModuleInfo(object):
 
         if output_name is None:
             output_name = self.default_output_name
+            if output_name is None:
+                raise PipelineStructureError("{} module has no default output".format(self.module_type_name))
 
         if output_name not in self.output_names:
             raise PipelineStructureError("%s module does not have an output named '%s'. Available outputs: %s" %
@@ -457,6 +452,8 @@ class BaseModuleInfo(object):
             # Often there'll be only one output, so a name needn't be specified
             # If there are multiple, the first is the default
             output_name = self.default_output_name
+            if output_name is None:
+                raise PipelineStructureError("{} module has no default output".format(self.module_type_name))
 
         outputs = dict(self.available_outputs)
         if output_name not in outputs:
