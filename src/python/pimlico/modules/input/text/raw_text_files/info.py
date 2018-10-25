@@ -54,80 +54,131 @@ comma_separated_paths = comma_separated_list(filename_with_range)
 comma_separated_paths = opt_type_example("path1,path2,...")(comma_separated_paths)
 
 
-def get_paths_from_options(options, error_on_missing=False):
+def to_exclude_path(path, exclude_pattern):
+    # Check if the path matches the pattern as a glob
+    if fnmatch.fnmatch(path, exclude_pattern):
+        return True
+    # Otherwise, if it's not an abs path, check whether it matches as a suffix
+    if not os.path.isabs(exclude_pattern) and path.endswith(exclude_pattern) and \
+        (len(path) == len(exclude_pattern) or path[-(len(exclude_pattern)+1)] == os.path.sep):
+        return True
+    return False
+
+
+def _get_paths_from_options_without_exclude(input_fns, error_on_missing=False):
     """
-    Get a list of paths to all the files specified in the ``files`` option. If ``error_on_missing=True``,
-    non-optional paths or globs that do not correspond to an existing file cause an IOError to be raised.
+    Iterates over paths to all the files specified in the ``files`` option.
+    If ``error_on_missing=True``, non-optional paths or globs that do not
+    correspond to an existing file cause an IOError to be raised.
+
+    Doesn't apply excludes.
 
     """
-    input_fns = options["files"]
-    paths = []
-    for input_fn, s, e in input_fns:
+    for input_fn, start, end in input_fns:
         optional = False
         if input_fn.startswith("?"):
             # Optional path, don't error if the file doesn't exist
             optional = True
             input_fn = input_fn[1:]
-        # Interpret the path as a glob
-        # If it's not a glob, it will just give us one path
-        matching_paths = glob(input_fn)
-        # Only interested in files, not directories
-        matching_paths = [p for p in matching_paths if os.path.isfile(p)]
-        # Sort matching paths alphabetically, to be sure that they're always in the same order
-        matching_paths.sort()
-        # If no paths match, either the path was a glob that didn't match anything or a non-existent file
-        if len(matching_paths) == 0 and not optional and error_on_missing:
-            raise IOError("path '%s' does not exist, or is a glob that matches nothing" % input_fn)
-        paths.extend([(p, s, e) for p in matching_paths])
+        # Before checking whether it's a glob, check if it's a directory
+        if os.path.isdir(input_fn):
+            got_file = False
+            for doc_name, file_path in get_paths_from_directory(input_fn):
+                if not got_file:
+                    got_file = True
+                yield doc_name, file_path, start, end
+            if error_on_missing and not got_file:
+                raise IOError("path '{}' is a directory, but it doesn't contain any files".format(input_fn))
+        else:
+            # Interpret the path as a glob
+            # If it's not a glob, it will just give us one path
+            matching_paths = glob(input_fn)
+            # Only interested in files now, not directories
+            matching_paths = [p for p in matching_paths if os.path.isfile(p)]
+            # Sort matching paths alphabetically, to be sure that they're always in the same order
+            matching_paths.sort()
+            # If no paths match, either the path was a glob that didn't match anything or a non-existent file
+            if len(matching_paths) == 0 and not optional and error_on_missing:
+                raise IOError("path '%s' does not exist, or is a glob that matches nothing" % input_fn)
+            for path in matching_paths:
+                yield None, path, start, end
 
+
+def get_paths_from_directory(path):
+    for root, dirs, files in os.walk(path):
+        for filename in files:
+            # Get a doc name as the relative path within the dir
+            doc_name = os.path.relpath(os.path.join(root, filename), path)
+            yield doc_name, os.path.join(path, root, filename)
+
+
+def get_paths_from_options(options, error_on_missing=False):
+    """
+    Iterates over paths to all the files specified in the ``files`` option.
+    If ``error_on_missing=True``, non-optional paths or globs that do not
+    correspond to an existing file cause an IOError to be raised.
+
+    """
+    input_fns = options["files"]
     if options["exclude"] is not None:
-        for excl_path in options["exclude"]:
-            # Treat this as a glob too
-            excl_matching_paths = glob(excl_path)
-            paths = [(p, s, e) for (p, s, e) in paths if p not in excl_matching_paths]
-    return paths
+        excl_paths = options["exclude"]
+    else:
+        excl_paths = []
+
+    for doc_name, path, start, end in _get_paths_from_options_without_exclude(input_fns, error_on_missing=error_on_missing):
+        if not any(to_exclude_path(path, excl_path) for excl_path in excl_paths):
+            yield doc_name, path, start, end
 
 
-def check_paths_from_options(options):
+def data_ready(options):
     """
     Like get_paths_from_options, but faster (in some cases), as it just checks whether there are
     any file for each path/glob.
+
+    Takes module options and checks whether the dataset is ready to read.
 
     """
     input_fns = options["files"]
     exclude = options["exclude"] or []
     # Make sure we get at least one file, even if everything is optional
     got_something = False
-    for input_fn, s, e in input_fns:
+    for input_fn, start, end in input_fns:
         if input_fn.startswith("?"):
             # Optional path, no need to check this
             continue
-        # Interpret the path as a glob
-        # If it's not a glob, it will just give us one path
-        matching_paths = iglob(input_fn)
-        # Only interested in files, not directories
-        glob_matched = False
-        for path in matching_paths:
-            if os.path.isfile(path):
-                # Check this doesn't match an exclude pattern
-                if not any(fnmatch.fnmatch(path, excl_path) for excl_path in exclude):
-                    # Existing path, now we've got at least something
-                    got_something = True
-                    # At least one thing matched this glob: don't carry on checking
-                    glob_matched = True
-                    break
-        if not glob_matched:
-            # The glob matched no actual files: these paths are not satisfied, give up now
-            return False
+        # Before checking whether it's a glob, check if it's a directory
+        if os.path.isdir(input_fn):
+            # Don't need to get all the filenames, just check whether there's one
+            try:
+                next(get_paths_from_directory(input_fn))
+            except StopIteration:
+                # Directory given, but no files in there
+                return False
+            got_something = True
+        else:
+            # Interpret the path as a glob
+            # If it's not a glob, it will just give us one path
+            matching_paths = iglob(input_fn)
+            # Only interested in files, not directories
+            glob_matched = False
+            for path in matching_paths:
+                if os.path.isfile(path):
+                    # Check this doesn't match an exclude pattern
+                    if not any(to_exclude_path(path, excl_path) for excl_path in exclude):
+                        # Existing path, now we've got at least something
+                        got_something = True
+                        # At least one thing matched this glob: don't carry on checking
+                        glob_matched = True
+                        break
+
+            if not glob_matched:
+                # The glob matched no actual files: these paths are not satisfied, give up now
+                return False
     return got_something
 
 
-def data_ready(options):
-    return check_paths_from_options(options)
-
-
-def corpus_len(reader_options):
-    return len(get_paths_from_options(reader_options))
+def corpus_len(reader):
+    return sum(1 for __ in get_paths_from_options(reader.options))
 
 
 def corpus_iter(reader):
@@ -136,9 +187,8 @@ def corpus_iter(reader):
     encoding = options["encoding"]
     # Use the file basenames as doc names where possible, but make sure they're unique
     used_doc_names = set()
-    paths = get_paths_from_options(options)
-    if len(paths):
-        for path, start, end in paths:
+    for doc_name, path, start, end in get_paths_from_options(options):
+        if doc_name is None:
             doc_name = os.path.basename(path)
             distinguish_id = 0
             # Keep increasing the distinguishing ID until we have a unique name
@@ -148,26 +198,26 @@ def corpus_iter(reader):
                 distinguish_id += 1
             used_doc_names.add(doc_name)
 
-            with open(path, "r") as f:
-                data = f.read()
-                # Decode to unicode string, which will be used as data for document
-                data = data.decode(encoding, errors=options["encoding_errors"])
+        with open(path, "r") as f:
+            data = f.read()
+            # Decode to unicode string, which will be used as data for document
+            data = data.decode(encoding, errors=options["encoding_errors"])
 
-                if start != 0 or end != -1:
-                    # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
-                    if start != 0:
-                        # Otherwise, shift down to account for 1-indexing
-                        start -= 1
-                    if end != -1:
-                        end -= 1
+            if start != 0 or end != -1:
+                # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
+                if start != 0:
+                    # Otherwise, shift down to account for 1-indexing
+                    start -= 1
+                if end != -1:
+                    end -= 1
 
-                    lines = data.split("\n")
-                    if end == -1:
-                        data = u"\n".join(lines[start:])
-                    else:
-                        data = u"\n".join(lines[start:end+1])
+                lines = data.split("\n")
+                if end == -1:
+                    data = u"\n".join(lines[start:])
+                else:
+                    data = u"\n".join(lines[start:end+1])
 
-                yield doc_name, reader.datatype.data_point_type(text=data)
+            yield doc_name, reader.datatype.data_point_type(text=data)
 
 
 ModuleInfo = iterable_input_reader(
