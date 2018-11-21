@@ -104,17 +104,17 @@ def typecheck_formatter(formatted_doc_type, formatter_cls):
         )
 
 
-def load_formatter(datatype, formatter_name=None):
+def load_formatter(reader, formatter_name=None):
     """
     Load a formatter specified by its fully qualified Python class name. If None, loads the default formatter.
     You may also specify a formatter by name, choosing from one of the standard ones that the formatted
     datatype gives.
 
     :param formatter_name: class name, or class
-    :param datatype: dataset that will be formatted
-    :param parse: only used if the default formatter is loaded, determines `raw_data` (`= not parse`)
+    :param reader: datatype reader providing the data to be formatted
     :return: instantiated formatter
     """
+    datatype = reader.datatype
     formatted_type = datatype.data_point_type
 
     if formatter_name is None:
@@ -146,6 +146,6 @@ def load_formatter(datatype, formatter_name=None):
 
     typecheck_formatter(formatted_type, fmt_cls)
     # Instantiate the formatter, providing it with the dataset
-    formatter = fmt_cls(datatype)
+    formatter = fmt_cls(reader)
 
     return formatter
