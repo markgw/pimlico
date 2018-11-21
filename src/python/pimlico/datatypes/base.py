@@ -89,7 +89,7 @@ class PimlicoDatatypeMeta(type):
                 # Don't inherit the cached setup cls for this reader type, as we should recompute to do subtyping
                 if "_setup_cls" in my_dict:
                     del my_dict["_setup_cls"]
-                reader_cls = PimlicoDatatypeReaderMeta("{}Reader".format(cls.__name__), (parent_reader,), my_dict)
+                reader_cls = PimlicoDatatypeReaderMeta("Reader", (parent_reader,), my_dict)
             setattr(cls, _cache_name, reader_cls)
 
         return getattr(cls, _cache_name)
@@ -140,7 +140,7 @@ class PimlicoDatatypeMeta(type):
                                 "strings: invalid dictionary for {} writer".format(cls.datatype_name))
 
                 # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
-                writer_cls = type("{}Writer".format(cls.__name__), (parent_writer,), new_cls_dict)
+                writer_cls = type("Writer", (parent_writer,), new_cls_dict)
             setattr(cls, _cache_name, writer_cls)
         return getattr(cls, _cache_name)
 
@@ -191,7 +191,7 @@ class PimlicoDatatypeReaderMeta(type):
             # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
             my_dict = dict(my_setup.__dict__)
             my_dict["reader_type"] = cls
-            setup_cls = type("{}Setup".format(cls.__name__), (parent_setup,), my_dict)
+            setup_cls = type("Setup", (parent_setup,), my_dict)
             setattr(cls, _cache_name, setup_cls)
         return getattr(cls, _cache_name)
 
@@ -431,6 +431,7 @@ class PimlicoDatatype(object):
         automatically - you don't need to do it yourself and shouldn't inherit from anything:
 
         .. code-block:: py
+
            class MyDatatype(PimlicoDatatype):
                class Reader:
                    # Override reader things here
@@ -498,6 +499,7 @@ class PimlicoDatatype(object):
             automatically - you don't need to do it yourself and shouldn't inherit from anything:
 
             .. code-block:: py
+
                class MyDatatype(PimlicoDatatype):
                    class Reader:
                        # Overide reader things here
@@ -585,10 +587,9 @@ class PimlicoDatatype(object):
             def get_base_dir(self):
                 """
                 :return: the first of the possible base dir paths at which the data is
-                ready to read. Raises an exception if none is ready. Typically used to
-                get the path from the reader, once we've already confirmed that at least
-                one is available.
-
+                    ready to read. Raises an exception if none is ready. Typically used to
+                    get the path from the reader, once we've already confirmed that at least
+                    one is available.
                 """
                 try:
                     return (path for (path, ready) in zip(self.data_paths, self._paths_ready) if ready).next()
@@ -692,6 +693,7 @@ class PimlicoDatatype(object):
         automatically - you don't need to do it yourself and shouldn't inherit from anything:
 
         .. code-block:: py
+
            class MyDatatype(PimlicoDatatype):
                class Writer:
                    # Overide writer things here

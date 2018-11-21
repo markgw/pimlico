@@ -200,7 +200,7 @@ class Embeddings(PimlicoDatatype):
             """
             Write out vocab from a list of vocab items (see ``Vocab``).
 
-            :param vocab_items: list of ``Vocab``s
+            :param vocab_items: list of ``Vocab`` s
             """
             self.write_word_counts([(v.word, v.count) for v in vocab_items])
 
