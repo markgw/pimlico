@@ -24,6 +24,7 @@ many applications.
    pimlico.modules.malt
    pimlico.modules.nltk
    pimlico.modules.opennlp
+   pimlico.modules.output
    pimlico.modules.r
    pimlico.modules.regex
    pimlico.modules.sklearn

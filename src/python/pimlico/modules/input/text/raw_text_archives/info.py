@@ -20,7 +20,7 @@ one.
 All paths given are assumed to be required for the dataset to be ready,
 unless they are preceded by a ``?``.
 
-.. see-also::
+.. seealso::
 
    :mod:`~pimlico.modules.input.text.raw_text_files` for raw files not in archives
 

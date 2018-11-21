@@ -11,27 +11,9 @@ type of data for the input to another. They are then also used by the modules to
 in their input data coming from earlier in a pipeline and to write out their output
 data, to be passed to later modules.
 
-As much as possible, Pimlico pipelines should use standard datatypes to connect up the output of modules
-with the input of others. Most datatypes have a lot in common, which should be reflected in their sharing
-common base classes. Input modules take care of reading in data from external sources
-and they provide access to that data in a way that is identified by a Pimlico datatype.
+See :doc:`/core/datatypes` for a guide to how Pimlico datatypes work.
 
-Instances of subclasses of :class:`PimlicoDatatype` represent the type of datasets
-and are used for typechecking in a pipeline.
-Each datatype has an associated `Reader` class, accessed by `datatype_cls.Reader`.
-These are created automatically and can be instantiated via the datatype (by calling it).
-They are all subclasses of :class:`PimlicoDatatype.Reader`.
-It is these readers that are used within a pipeline to read a dataset output by an earlier
-module. In some cases, other readers may be used: for example, input modules provide
-standard datatypes at their outputs, but use special readers to provide access to
-the external data.
-
-A similar reflection of the datatype hierarchy is used for dataset writers, which are
-used to write the outputs from modules, to be passed to subsequent modules. These
-are created automatically, just like readers, and are all subclasses of
-:class:`PimlicoDatatype.Writer`. You can get a datatype's standard writer class
-via `datatype_cls.Writer`. Some datatypes might not provide a writer, but
-most do.
+This module defines the base classes for all datatypes.
 
 """
 import json
@@ -227,39 +209,14 @@ class PimlicoDatatype(object):
     instantiating a datatype in some context other than module output. It should generally be set for
     input datatypes, though, since they are treated as being created by a special input module.
 
-    **Creating a new datatype**
-
-    This is the typical process for creating a new datatype. Of course, some datatypes do more and
-    some of the following is not always necessary, but it's a good guide for reference.
-
-    1. Create the datatype class, which may subclass :class:`PimlicoDatatype` or some other existing
-       datatype.
-    2. Specify a `datatype_name` as a class attribute.
-    3. Specify software dependencies for reading the data, if any, by overriding `get_software_dependencies()`
-       (calling the super method as well).
-    4. Specify software dependencies for writing the data, if any that are not among the reading dependencies,
-       by overriding `get_writer_software_dependencies()`
-    5. Define a nested `Reader` class to add any methods to the reader for this datatype. The data should
-       be read from the directory given by its `data_dir`. It should provide methods for getting different
-       bits of the data, iterating over it, or whatever is appropriate.
-    6. Define a nested `Setup` class within the reader with a `data_ready(base_dir)` method to check whether the
-       data in `base_dir` is ready to be read using the reader.
-       If all that this does is check the existence of particular filenames or paths within the data
-       dir, you can instead implement the `Setup` class' `get_required_paths()` method to return the
-       paths relative to the data dir.
-    7. Define a nested `Writer` class in the datatype to add any methods to the writer for this datatype.
-       The data should be written to the path given by its `data_dir`. Provide methods that the user can
-       call to write things to the dataset. Required elements of the dataset should be specified as a list of
-       strings as the `required_tasks` attribute and ticked off as written using `task_complete()`
-    8. You may want to specify:
-
-       * `datatype_options`: an OrderedDict of option definitions
-       * `shell_commands`: a list of shell commands associated with the datatype
+    If you're **creating a new datatype**, refer to the :doc:`datatype documentation </core/datatypes>`.
 
     """
     __metaclass__ = PimlicoDatatypeMeta
 
     datatype_name = "base_datatype"
+    """ Identifier (without spaces) to distinguish this datatype """
+    datatype_options = OrderedDict()
     """
     Options specified in the same way as module options that control the nature of the 
     datatype. These are not things to do with reading of specific datasets, for which 
@@ -271,11 +228,10 @@ class PimlicoDatatype(object):
     positional arguments as well as kwargs and config parameters.
     
     """
-    datatype_options = OrderedDict()
+    shell_commands = []
     """
     Override to provide shell commands specific to this datatype. Should include the superclass' list.
     """
-    shell_commands = []
 
     def __init__(self, *args, **kwargs):
         # Kwargs specify (processed) values for named datatype options
@@ -510,6 +466,8 @@ class PimlicoDatatype(object):
         class Setup:
             """
             Abstract superclass of all dataset reader setup classes.
+
+            See :doc:`/core/datatypes` for a information about how this class is used.
 
             These classes provide any functionality relating to a reader needed before it is
             ready to read and instantiated. Most importantly, it provides the `ready_to_read()`

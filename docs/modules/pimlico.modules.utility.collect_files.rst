@@ -47,13 +47,13 @@ Outputs
 Options
 =======
 
-+---------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| Name    | Description                                                                                                                                                                               | Type                            |
-+=========+===========================================================================================================================================================================================+=================================+
-| subdirs | Use subdirectories to collect the files from different sources, rather than renaming each file. By default, a prefix is added to the filenames                                            | bool                            |
-+---------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| names   | List of string identifiers to use to distinguish the files from different sources, either used as subdirectory names or filename prefixes. If not given, integer ids will be used instead | comma-separated list of strings |
-+---------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
++---------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
+| Name    | Description                                                                                                                                                                               | Type               |
++=========+===========================================================================================================================================================================================+====================+
+| subdirs | Use subdirectories to collect the files from different sources, rather than renaming each file. By default, a prefix is added to the filenames                                            | bool               |
++---------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
+| names   | List of string identifiers to use to distinguish the files from different sources, either used as subdirectory names or filename prefixes. If not given, integer ids will be used instead | absolute file path |
++---------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 
 Example config
 ==============
@@ -63,10 +63,7 @@ This is an example of how this module can be used in a pipeline config file.
 .. code-block:: ini
    
    [my_collect_files_module]
-<<<<<<< HEAD
-=======
    type=pimlico.modules.utility.collect_files
->>>>>>> 238f254c3e241cae81cba8fea74a0090eeafb35d
    input_files=module_a.some_output
    
 
@@ -75,11 +72,8 @@ This example usage includes more options.
 .. code-block:: ini
    
    [my_collect_files_module]
-<<<<<<< HEAD
-=======
    type=pimlico.modules.utility.collect_files
->>>>>>> 238f254c3e241cae81cba8fea74a0090eeafb35d
    input_files=module_a.some_output
    subdirs=T
-   names=text,text,...
+   names=path1,path2,...
 

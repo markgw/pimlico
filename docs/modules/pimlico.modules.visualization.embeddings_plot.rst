@@ -56,7 +56,7 @@ Options
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | reduction | Dimensionality reduction technique to use to project to 2D. Available: mds (Multi-dimensional Scaling), tsne (t-distributed Stochastic Neighbor Embedding). Default: mds                                                                       | 'mds' or 'tsne'                      |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
-| colors    | List of colours to use for different embedding sets. Should be a list of matplotlib colour strings, one for each embedding set given in input_vectors                                                                                          | comma-separated list of strings      |
+| colors    | List of colours to use for different embedding sets. Should be a list of matplotlib colour strings, one for each embedding set given in input_vectors                                                                                          | absolute file path                   |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | cmap      | Mapping from word prefixes to matplotlib plotting colours. Every word beginning with the given prefix has the prefix removed and is plotted in the corresponding colour. Specify as a JSON dictionary mapping prefix strings to colour strings | JSON string                          |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
@@ -85,7 +85,7 @@ This example usage includes more options.
    skip=0
    metric=cosine
    reduction=mds
-   colors=text,text,...
+   colors=path1,path2,...
    cmap={"key1":"value"}
    words=50
 
