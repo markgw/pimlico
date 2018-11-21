@@ -6,9 +6,6 @@ They should maybe go with their datatypes, as many others have.
 
 json
   JsonDocumentCorpus
-arrays
-  NumpyArray
-  ScipySparseMatrix
 results
   NumericResult
 word_annotations
@@ -29,8 +26,6 @@ plotting
   PlotOutput
 r
   RTabSeparatedValuesFile
-sklearn
-  SklearnModel
 spans
   SentenceSpansCorpus
 vrt
@@ -47,10 +42,3 @@ parse.dependency
   StanfordDependencyParseCorpus
   CoNLLDependencyParseCorpus
   CoNLLDependencyParseInputCorpus
-
-
-Lower priority:
----------------
-caevo
-  CaevoDocument (doc type)
-  CaevoCorpus
