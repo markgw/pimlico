@@ -26,7 +26,7 @@ unless they are preceded by a ``?``.
 
 """
 import os
-from glob import iglob
+import tarfile
 
 from pimlico.core.modules.inputs import iterable_input_reader
 from pimlico.core.modules.options import comma_separated_strings, opt_type_help, opt_type_example
@@ -36,14 +36,14 @@ comma_separated_paths = opt_type_help("absolute file path")(comma_separated_stri
 comma_separated_paths = opt_type_example("path1,path2,...")(comma_separated_paths)
 
 
-def get_paths_from_options(input_fns, error_on_missing=False):
+def get_paths_from_options(options, error_on_missing=False):
     """
     Iterates over paths to all the files specified in the ``files`` option.
     If ``error_on_missing=True``, non-optional paths or globs that do not
     correspond to an existing file cause an IOError to be raised.
 
     """
-    for input_fn in input_fns:
+    for input_fn in options["files"]:
         optional = False
         if input_fn.startswith("?"):
             # Optional path, don't error if the file doesn't exist
@@ -60,7 +60,35 @@ def get_paths_from_options(input_fns, error_on_missing=False):
             yield input_fn
 
 
-# TODO Continue with this
+def iter_archive(path):
+    """
+    Iterate over the documents in a tar archive
+
+    :param path: path to archive
+
+    """
+    with tarfile.open(path, "r") as archive:
+        for tarinfo in archive:
+            if tarinfo.isfile():
+                yield tarinfo.name, archive.extractfile(tarinfo).read()
+            archive.members = []
+
+
+def _iter_archive_infos(path):
+    """
+    Iterate over the documents in a tar archive without reading them:
+    just for counting.
+
+    :param path: path to archive
+
+    """
+    with tarfile.open(path, "r") as archive:
+        for tarinfo in archive:
+            if tarinfo.isfile():
+                yield tarinfo
+            archive.members = []
+
+
 def data_ready(options):
     """
     Like get_paths_from_options, but faster (in some cases), as it just checks whether there are
@@ -69,84 +97,64 @@ def data_ready(options):
     Takes module options and checks whether the dataset is ready to read.
 
     """
-    input_fns = options["files"]
-    exclude = options["exclude"] or []
     # Make sure we get at least one file, even if everything is optional
     got_something = False
-    for input_fn in input_fns:
-        if input_fn.startswith("?"):
-            # Optional path, no need to check this
-            continue
-        # Before checking whether it's a glob, check if it's a directory
-        if os.path.isdir(input_fn):
-            # Don't need to get all the filenames, just check whether there's one
+    try:
+        # Try looping over the files: if a non-optional one is missing, this will raise an error
+        for path in get_paths_from_options(options, error_on_missing=True):
+            # Check that there's at least one document in the archive
             try:
-                next(get_paths_from_directory(input_fn))
+                next(iter_archive(path))
             except StopIteration:
-                # Directory given, but no files in there
-                return False
-            got_something = True
-        else:
-            # Interpret the path as a glob
-            # If it's not a glob, it will just give us one path
-            matching_paths = iglob(input_fn)
-            # Only interested in files, not directories
-            glob_matched = False
-            for path in matching_paths:
-                if os.path.isfile(path):
-                    # Check this doesn't match an exclude pattern
-                    if not any(to_exclude_path(path, excl_path) for excl_path in exclude):
-                        # Existing path, now we've got at least something
-                        got_something = True
-                        # At least one thing matched this glob: don't carry on checking
-                        glob_matched = True
-                        break
-
-            if not glob_matched:
-                # The glob matched no actual files: these paths are not satisfied, give up now
-                return False
+                # Empty archive: don't count this towards having some input
+                pass
+            else:
+                got_something = True
+    except IOError:
+        return False
     return got_something
 
 
-def corpus_len(reader):
-    return sum(1 for __ in get_paths_from_options(reader.options))
+def corpus_len(options):
+    """ Just count up the documents without reading them. """
+    return sum(1 for path in get_paths_from_options(options) for __ in _iter_archive_infos(path))
 
 
 def corpus_iter(reader):
     options = reader.options
-
     encoding = options["encoding"]
-    # Use the file basenames as doc names where possible, but make sure they're unique
-    used_doc_names = set()
-    for doc_name, path, start, end in get_paths_from_options(options):
-        if doc_name is None:
-            doc_name = os.path.basename(path)
-            distinguish_id = 0
+    encoding_errors = options["encoding_errors"]
+
+    used_archive_names = set()
+    paths = list(get_paths_from_options(options))
+    for path in paths:
+        used_doc_names = set()
+
+        # Use the file basenames as doc names where possible, but make sure they're unique
+        base_archive_name = os.path.splitext(os.path.basename(path))[0]
+        archive_name = base_archive_name
+        distinguish_id = 0
+        # Keep increasing the distinguishing ID until we have a unique name
+        while archive_name in used_archive_names:
+            archive_name = "%s-%d" % (base_archive_name, distinguish_id)
+            distinguish_id += 1
+        used_archive_names.add(archive_name)
+
+        for member_name, data in iter_archive(path):
+            # Decode to unicode string, which will be used as data for document
+            data = data.decode(encoding, errors=encoding_errors)
+            # Get a unique doc name within the archive
+            base_doc_name = os.path.splitext(member_name)[0]
+            doc_name = base_doc_name
             # Keep increasing the distinguishing ID until we have a unique name
             while doc_name in used_doc_names:
-                base, ext = os.path.splitext(doc_name)
-                doc_name = "%s-%d%s" % (base, distinguish_id, ext)
+                doc_name = "%s-%d" % (base_doc_name, distinguish_id)
                 distinguish_id += 1
             used_doc_names.add(doc_name)
 
-        with open(path, "r") as f:
-            data = f.read()
-            # Decode to unicode string, which will be used as data for document
-            data = data.decode(encoding, errors=options["encoding_errors"])
-
-            if start != 0 or end != -1:
-                # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
-                if start != 0:
-                    # Otherwise, shift down to account for 1-indexing
-                    start -= 1
-                if end != -1:
-                    end -= 1
-
-                lines = data.split("\n")
-                if end == -1:
-                    data = u"\n".join(lines[start:])
-                else:
-                    data = u"\n".join(lines[start:end+1])
+            # If there's only one archive, don't include the archive name in the doc name
+            if len(paths) > 1:
+                doc_name = "{}/{}".format(archive_name, doc_name)
 
             yield doc_name, reader.datatype.data_point_type(text=data)
 
@@ -173,4 +181,7 @@ ModuleInfo = iterable_input_reader(
     data_ready, corpus_len, corpus_iter,
     module_type_name="raw_text_archives_reader",
     module_readable_name="Raw text archives",
+    # Make the module executable to count the docs, since this can take a while
+    # with large tar archives
+    execute_count=True,
 )
