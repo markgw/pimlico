@@ -20,6 +20,14 @@ one.
 All paths given are assumed to be required for the dataset to be ready,
 unless they are preceded by a ``?``.
 
+It can take a long time to count up the files in an archive, if there are
+a lot of them, as we need to iterate over the whole archive. If a file is
+found with a path and name identical to the tar archive's, with the suffix
+``.count``, a document count will be read from there and used instead of
+counting. Make sure it is correct, as it will be blindly trusted, which
+will cause difficulties in your pipeline if it's wrong! The file is expected
+to contain a single integer as text.
+
 .. seealso::
 
    :mod:`~pimlico.modules.input.text.raw_text_files` for raw files not in archives
@@ -89,6 +97,27 @@ def _iter_archive_infos(path):
             archive.members = []
 
 
+def _count_archive(path):
+    # See if there's a count file, so we don't need to run the count ourselves
+    count_path = "{}.count".format(path)
+    if os.path.exists(count_path):
+        with open(count_path, "r") as f:
+            count = f.read().strip("\n ")
+        try:
+            count = int(count)
+        except ValueError:
+            raise IOError("count file exists for archive {}, but the count could not be read from it".format(path))
+        return count
+    else:
+        # Iterate over the members to count them
+        return sum(1 for info in _iter_archive_infos(path))
+
+
+def corpus_len(options):
+    """ Just count up the documents without reading them. """
+    return sum(_count_archive(path) for path in get_paths_from_options(options))
+
+
 def data_ready(options):
     """
     Like get_paths_from_options, but faster (in some cases), as it just checks whether there are
@@ -113,11 +142,6 @@ def data_ready(options):
     except IOError:
         return False
     return got_something
-
-
-def corpus_len(options):
-    """ Just count up the documents without reading them. """
-    return sum(1 for path in get_paths_from_options(options) for __ in _iter_archive_infos(path))
 
 
 def corpus_iter(reader):

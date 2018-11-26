@@ -11,9 +11,9 @@ from pimlico.datatypes.corpora.data_points import RawTextDocumentType
 
 def worker_setup(worker):
     # Prepare a formatter to format each document
-    input_dataset = worker.info.get_input("corpus")
+    input_datatype = worker.info.get_input_datatype("corpus")
     try:
-        worker.formatter = load_formatter(input_dataset, worker.info.options["formatter"])
+        worker.formatter = load_formatter(input_datatype, worker.info.options["formatter"])
     except (TypeError, TypeCheckError), e:
         raise ModuleExecutionError("error loading formatter: %s" % e)
 
