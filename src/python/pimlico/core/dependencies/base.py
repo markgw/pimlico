@@ -64,9 +64,24 @@ class SoftwareDependency(object):
         """
         return ""
 
+    def installation_notes(self):
+        """
+        If this returns a non-empty string, the message will be output together with
+        the information that the dependency is not available, before the user is given
+        the option of installing it automatically (or told that it can't be). This
+        is useful where information about a dependency should always be displayed, not
+        just in cases where automatic installation isn't possible.
+
+        For example, you might need to include warnings about potential installation
+        difficulties, license information, sources of additional information about
+        the software, and so on.
+
+        """
+        return ""
+
     def dependencies(self):
         """
-        Returns a list of instances of :class:SoftwareDependency subcalsses representing this library's own
+        Returns a list of instances of :class:SoftwareDependency subclasses representing this library's own
         dependencies. If the library is already available, these will never be consulted, but if it is to be
         installed, we will check first that all of these are available (and try to install them if not).
 
@@ -108,6 +123,81 @@ class SoftwareDependency(object):
 
     def __hash__(self):
         return 0
+
+
+class Any(SoftwareDependency):
+    """
+    A collection of dependency requirements of which at least one must be
+    available. The first in the list that is installable is treated as the
+    default and used for automatic installation.
+
+    """
+    def __init__(self, name, dependency_options, *args, **kwargs):
+        super(Any, self).__init__(name, *args, **kwargs)
+        self.dependency_options = dependency_options
+
+    def available(self, local_config):
+        return any(dep.available(local_config) for dep in self.dependency_options)
+
+    def problems(self, local_config):
+        if self.available(local_config):
+            # At least one of the dependencies is available, so we report no problems
+            return []
+        else:
+            # No dependency is satisfied: report the problems from every one, even
+            # though only one of them needs to be fixed
+            return sum([dep.problems(local_config) for dep in self.dependency_options], [])
+
+    def installable(self):
+        return self.get_installation_candidate() is not None
+
+    def get_installation_candidate(self):
+        """
+        Returns the first dependency of the multiple possibilities that is
+        automatically installable, or None if none of them are.
+
+        """
+        for dep in self.dependency_options:
+            if dep.installable():
+                return dep
+        else:
+            return None
+
+    def get_available_option(self, local_config):
+        """ If one of the options is available, return that one. Otherwise return None. """
+        for dep in self.dependency_options:
+            if dep.available(local_config):
+                return dep
+        return None
+
+    def dependencies(self):
+        candidate = self.get_installation_candidate()
+        if candidate is None:
+            return []
+        else:
+            return candidate.dependencies()
+
+    def install(self, local_config, trust_downloaded_archives=False):
+        """
+        Installs the dependency given by :method:`get_installation_candidate`, if any.
+        Ideally, we should provide a way to select which of the options should be
+        installed. However, until we've worked out the best way to do this, the default
+        option is always installed. The user may install another option manually and
+        that will be used.
+
+        """
+        candidate = self.get_installation_candidate()
+        if candidate is None:
+            raise NotImplementedError("dependency is not installable")
+        candidate.install(local_config, trust_downloaded_archives=trust_downloaded_archives)
+
+    def installation_notes(self):
+        opt_notes = [d.installation_notes().strip() for d in self.dependency_options]
+        opt_notes = [d for d in opt_notes if len(d) > 0]
+        return u"\n\n".join(["Only one of these needs to be installed"]+opt_notes)
+
+    def __repr__(self):
+        return "({})".format(" | ".join(repr(d) for d in self.dependency_options))
 
 
 class SystemCommandDependency(SoftwareDependency):
