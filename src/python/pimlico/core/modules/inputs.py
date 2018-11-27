@@ -198,7 +198,7 @@ class DocumentCounterModuleExecutor(BaseModuleExecutor):
         # If the setup is wrapped in a grouper setup, get the wrapped setup
         if self.info.grouped:
             output_setup = output_setup.input_reader_setup
-        
+
         self.log.info("Counting documents in corpus")
         num_docs = output_setup.count()
         num_valid_docs = None

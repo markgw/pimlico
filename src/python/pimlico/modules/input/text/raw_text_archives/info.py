@@ -28,6 +28,13 @@ counting. Make sure it is correct, as it will be blindly trusted, which
 will cause difficulties in your pipeline if it's wrong! The file is expected
 to contain a single integer as text.
 
+All files in the archive are included. If you wish to filter files or
+preprocess them somehow, this can be easily done by subclassing
+:class:`RawTextArchivesInputReader` and overriding appropriate bits,
+e.g. `RawTextArchivesInputReader.Setup.iter_archive_infos()`. You can
+then use this reader to create an input reader module with the factory
+function, as is done here.
+
 .. seealso::
 
    :mod:`~pimlico.modules.input.text.raw_text_files` for raw files not in archives
