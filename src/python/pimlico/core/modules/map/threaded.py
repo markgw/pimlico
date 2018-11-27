@@ -52,11 +52,11 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
                         pass
                     else:
                         input_buffer.append(tuple([archive, filename] + docs))
-                        if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
-                            results = self.process_documents(input_buffer)
-                            for input_tuple, result in zip(input_buffer, results):
-                                self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
-                            input_buffer = []
+                    if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
+                        results = self.process_documents(input_buffer)
+                        for input_tuple, result in zip(input_buffer, results):
+                            self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
+                        input_buffer = []
             finally:
                 self.tear_down()
         except Exception, e:
