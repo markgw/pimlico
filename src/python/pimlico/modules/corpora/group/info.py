@@ -155,14 +155,6 @@ class CorpusGroupReader(PimlicoDatatype.Reader):
 
             # Allow the first portion of the corpus to be skipped
             if not started:
-                if start_after == (archive_name, doc_name):
-                    # We've hit the condition for starting
-                    # Skip this doc and start on the next
-                    started = True
-                continue
-
-            # Allow the first portion of the corpus to be skipped
-            if not started:
                 if start_after is not None:
                     # Skip until we get to the requested file + archive
                     if start_after == (archive_name, doc_name):
