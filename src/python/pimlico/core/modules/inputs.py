@@ -13,7 +13,88 @@ from pimlico.datatypes import PimlicoDatatype, GroupedCorpus
 from pimlico.datatypes.base import PimlicoDatatypeReaderMeta
 from pimlico.datatypes.corpora import IterableCorpus
 from pimlico.modules.corpora.group.info import CorpusGroupReader, ModuleInfo as GrouperModuleInfo
+
 from .base import BaseModuleInfo
+
+
+class InputReader(PimlicoDatatype.Reader):
+    """
+    Special base class for readers that read in input data to provide access to
+    it through an input reader module.
+
+    You might sometimes want to override this yourself, but most often you'll
+    use the :func:`iterable_input_reader` factory function.
+
+    """
+    __metaclass__ = PimlicoDatatypeReaderMeta
+
+    def iterate(self):
+        """ Should be overridden """
+        raise NotImplementedError("input reader did not override iterate()")
+
+    def __init__(self, *args, **kwargs):
+        super(InputReader, self).__init__(*args, **kwargs)
+        # Provide easy access to the options from the config
+        self.options = self.setup.reader_options
+
+    class Setup:
+        execute_count = False
+        # If True, the reader will not be ready to read until its length has been stored
+
+        def check_data_ready(self):
+            """ Should be overridden to use self.reader_options to check whether the data is ready to read """
+            raise NotImplementedError("input reader did not override check_data_ready()")
+
+        def count(self):
+            """ Should be overridden in all cases """
+            raise NotImplementedError("input reader did not override count()")
+
+        def __init__(self, datatype, output_dir, reader_options):
+            self.datatype = datatype
+            self.reader_options = reader_options
+            self.output_dir = output_dir
+
+        def ready_to_read(self):
+            # If executing a count, make sure the result is ready before we read the data
+            if self.execute_count and self.read_metadata(self.output_dir).get("length", None) is None:
+                return False
+            return self.check_data_ready()
+
+    def __len__(self):
+        if "length" in self.metadata:
+            # If the length has been stored, use that
+            return self.metadata["length"]
+        else:
+            return self.setup.count()
+
+    def __iter__(self):
+        # Check that the first document is of the right type
+        # There's no need to check all the documents, but it's worth checking one in case the user
+        # of the factory function has made a mistake in building the iter_fn
+        it = iter(self.iterate())
+        doc_name, doc = it.next()
+        if not self.datatype.data_point_type.is_type_for_doc(doc):
+            raise TypeError("data iterator for input reader yielded the wrong type of document. Expected "
+                            "a document of data point type {}, but got {}".format(
+                self.datatype.data_point_type, type(doc).__name__
+            ))
+        # Yield this first document and don't check any others
+        yield doc_name, doc
+        # Just iterate over the rest
+        for doc_name, doc in it:
+            yield doc_name, doc
+
+    def process_setup(self):
+        """ Override so we don't try to get base_dir, etc, as the standard reader does """
+        return
+
+    def _get_metadata(self):
+        if self.setup.execute_count:
+            return self.setup.read_metadata(self.setup.output_dir)
+        else:
+            return {}
+
+    metadata = property(_get_metadata)
 
 
 class InputModuleInfo(BaseModuleInfo):
@@ -24,7 +105,28 @@ class InputModuleInfo(BaseModuleInfo):
     You probably don't want to subclass this. You can create a subclass
     more simply by using the factory :func:`iterable_input_reader`.
 
-    Note that module_executable is typically set to False and the base
+    Subclassing this ModuleInfo is another way to create an input
+    reader module, which is in some cases more flexible, for example
+    for allowing a module info to be overridden to create related
+    readers. In this case, you should make sure to override the following:
+
+    * `module_type_name`
+    * `module_readable_name`
+    * `input_reader_class` to the Reader subclass that should be used
+      for reading the data, a subclass of :class:`InputReader`
+    * `module_outputs` should have exactly one output, with the appropriate
+      datatype that is supplied by the reader
+
+    You might also want to override:
+
+    * `module_executable` if the module is to be executed before the data
+      can be read
+    * `module_executor_override` if the module is executable. No executor
+      will be found if this is not set. Most often, it is set to
+      :class:`DocumentCounterModuleExecutor`, as it is by the factory
+    * `get_software_dependencies`
+
+    Note that `module_executable` is typically set to False and the base
     class does this. However, some input modules need to be executed
     before the input is usable, for example to collect stats about the
     input data. The most common example of this is if `execute_count`
@@ -32,7 +134,93 @@ class InputModuleInfo(BaseModuleInfo):
 
     """
     module_type_name = "input"
+    module_readable_name = "unnamed input module"
     module_executable = False
+    input_reader_class = None
+    # Should be overridden to point to the InputReader subclass to use to read the data
+    grouped = True
+    # By default, the produced output is a GroupedCorpus.
+    # Set this to False to skip grouping and produce an IterableCorpus
+    # You also need to add the grouper module info's options to the module options (see how the factory does it)
+
+    def instantiate_output_reader_setup(self, output_name, datatype):
+        input_module_options = dict(self.module_options)
+
+        if not self.grouped:
+            reader_option_keys = input_module_options.keys()
+            grouper_option_keys = []
+        else:
+            # Keep track of what keys have been added for the grouper, so we can separate out the values
+            grouper_option_keys = GrouperModuleInfo.module_options.keys()
+            reader_option_keys = [k for k in input_module_options.keys() if k not in grouper_option_keys]
+
+        reader_options = dict((key, v) for (key, v) in self.options.iteritems() if key in reader_option_keys)
+        input_reader_setup = self.input_reader_class.Setup(datatype,
+                                                           self.get_absolute_output_dir(output_name), reader_options)
+        if not self.grouped:
+            # Not grouping into a GroupedCorpus: just use the InputReader directly
+            return input_reader_setup
+        else:
+            # Use the input reader to read documents, but pass through CorpusGroupReader as well
+            grouper_options = dict((key, v) for (key, v) in self.options.iteritems() if key in grouper_option_keys)
+            return CorpusGroupReader.Setup(datatype, input_reader_setup, grouper_options)
+
+    def missing_module_data(self):
+        # This is called to check whether the module is ready to run
+        # In the case of a count executor, as well as checking that the input
+        # data is ready before we supply it at the output, we also have to
+        # check that it's ready (except the count) before running
+
+        missing_data = []
+        # Get a reader setup for the output
+        output_setup = self.get_output_reader_setup()
+        if output_setup.execute_count:
+            # Check whether the data is ready to read, aside from input preparation
+            if not output_setup.check_data_ready():
+                missing_data.append("Input module's source data not ready")
+        return missing_data
+
+
+class DocumentCounterModuleExecutor(BaseModuleExecutor):
+    """
+    An executor that just calls the len method to count documents and stores the result
+
+    """
+    def execute(self):
+        self.log.info("Counting documents in corpus")
+        # The count() function is supplied by the output reader setup
+        # We can't instantiate the reader yet, as the count isn't done!
+        output_setup = self.info.get_output_reader_setup()
+        num_docs = output_setup.count()
+        num_valid_docs = None
+
+        if type(num_docs) is tuple:
+            # A pair of values was returned: this is the num docs and num valid docs
+            if len(num_docs) > 2:
+                raise ModuleExecutionError(
+                    "document counter for input corpus returned a tuple with {} values. Expected either "
+                    "one or two values (num docs and num valid docs)".format(len(num_docs))
+                )
+            elif len(num_docs) == 1:
+                num_docs = num_docs[0]
+            else:
+                num_docs, num_valid_docs = num_docs
+
+        self.log.info("Corpus contains {} docs. Storing count".format(num_docs))
+        output_datatype = output_setup.datatype
+        # Don't use get_output_writer here, as we're not actually writing out a corpus
+        # GroupedCorpus has a writer than writes documents and handles the corpus length in its own way
+        # Here we create a simple PimlicoDatatype.Writer ourselves and set the metadata manually
+        with PimlicoDatatype.Writer(
+                output_datatype, self.info.get_absolute_output_dir("corpus"),
+                self.info.pipeline, self.info.module_name) as writer:
+            # Set any default metadata values for the correct output datatype
+            writer.metadata.update(
+                dict((key, spec[0]) for (key, spec) in output_datatype.Writer.metadata_defaults.iteritems())
+            )
+            writer.metadata["length"] = num_docs
+            if num_valid_docs is not None:
+                writer.metadata["valid_documents"] = num_valid_docs
 
 
 def input_module_factory(datatype):
@@ -76,7 +264,8 @@ def input_module_factory(datatype):
 def iterable_input_reader(input_module_options, data_point_type,
                           data_ready_fn, len_fn, iter_fn,
                           module_type_name=None, module_readable_name=None,
-                          software_dependencies=None, execute_count=False, no_group=False):
+                          software_dependencies=None, execute_count=False, no_group=False,
+                          reader_cls=None):
     """
     Factory for creating an input reader module info.
     This is a (typically) non-executable module that has no
@@ -150,118 +339,41 @@ def iterable_input_reader(input_module_options, data_point_type,
     :param execute_count: make an executable module that counts the data to get its length (num docs)
     :param no_group: by default, the output datatype is a GroupedCorpus. If True, use an IterableCorpus
         instead without grouping documents into archives.
+    :param reader_cls: a class to use as the reader for the dataset, instead of creating a new one
+        dynamically. If given, `data_ready_fn`, `len_fn` and `iter_fn` will all be ignored, so can
+        be set to None.
     :return: module info class
     """
     mt_name = module_type_name or "reader_for_{}".format(data_point_type.name)
     mr_name = module_readable_name or "Input reader for {} iterable corpus".format(data_point_type.name)
     corpus_type = IterableCorpus if no_group else GroupedCorpus
     output_datatype = corpus_type(data_point_type)
+    _execute_count = execute_count
 
-    class InputReader(PimlicoDatatype.Reader):
-        __metaclass__ = PimlicoDatatypeReaderMeta
+    if reader_cls is None:
+        # Build a reader class using the given functions
+        class FactoryInputReader(InputReader):
+            def iterate(self):
+                return iter_fn(self)
 
-        def __init__(self, *args, **kwargs):
-            super(InputReader, self).__init__(*args, **kwargs)
-            # Provide easy access to the options from the config
-            self.options = self.setup.reader_options
+            class Setup:
+                # NB execute_count is set below
 
-        class Setup:
-            def __init__(self, datatype, output_dir, reader_options):
-                self.datatype = datatype
-                self.reader_options = reader_options
-                self.output_dir = output_dir
+                def check_data_ready(self):
+                    return data_ready_fn(self.reader_options)
 
-            def ready_to_read(self):
-                # If executing a count, make sure the result is ready before we read the data
-                if execute_count and self.read_metadata(self.output_dir).get("length", None) is None:
-                    return False
-                return data_ready_fn(self.reader_options)
+                def count(self):
+                    return len_fn(self.reader_options)
 
-        def __len__(self):
-            if "length" in self.metadata:
-                # If the length has been stored, use that
-                return self.metadata["length"]
-            else:
-                return len_fn(self)
+        reader_cls = FactoryInputReader
 
-        def __iter__(self):
-            # Check that the first document is of the right type
-            # There's no need to check all the documents, but it's worth checking one in case the user
-            # of the factory function has made a mistake in building the iter_fn
-            it = iter(iter_fn(self))
-            doc_name, doc = it.next()
-            if not self.datatype.data_point_type.is_type_for_doc(doc):
-                raise TypeError("data iterator for input reader {} yielded the wrong type of document. Expected "
-                                "a document of data point type {}, but got {}".format(
-                    mt_name, self.datatype.data_point_type, type(doc).__name__
-                ))
-            # Yield this first document and don't check any others
-            yield doc_name, doc
-            # Just iterate over the rest
-            for doc_name, doc in it:
-                yield doc_name, doc
+    # Even if a reader class is given, make sure the execute_count flag is consistent with the main one
+    reader_cls.Setup.execute_count = execute_count
 
-        def process_setup(self):
-            """ Override so we don't try to get base_dir, etc, as the standard reader does """
-            return
-
-        def _get_metadata(self):
-            if execute_count:
-                return self.setup.read_metadata(self.setup.output_dir)
-            else:
-                return {}
-        metadata = property(_get_metadata)
-
-    if execute_count:
-        class DocumentCounterModuleExecutor(BaseModuleExecutor):
-            """
-            An executor that just calls the len method to count documents and stores the result
-
-            """
-            def execute(self):
-                reader_options = self.info.options
-
-                self.log.info("Counting documents in corpus")
-                num_docs = len_fn(reader_options)
-                num_valid_docs = None
-
-                if type(num_docs) is tuple:
-                    # A pair of values was returned: this is the num docs and num valid docs
-                    if len(num_docs) > 2:
-                        raise ModuleExecutionError(
-                            "document counter for input corpus returned a tuple with {} values. Expected either "
-                            "one or two values (num docs and num valid docs)".format(len(num_docs))
-                        )
-                    elif len(num_docs) == 1:
-                        num_docs = num_docs[0]
-                    else:
-                        num_docs, num_valid_docs = num_docs
-
-                self.log.info("Corpus contains {} docs. Storing count".format(num_docs))
-                # Don't use get_output_writer here, as we're not actually writing out a corpus
-                # GroupedCorpus has a writer than writes documents and handles the corpus length in its own way
-                # Here we create a simple PimlicoDatatype.Writer ourselves and set the metadata manually
-                with PimlicoDatatype.Writer(
-                        output_datatype, self.info.get_absolute_output_dir("corpus"),
-                        self.info.pipeline, self.info.module_name) as writer:
-                    # Set any default metadata values for the correct output datatype
-                    writer.metadata.update(
-                        dict((key, spec[0]) for (key, spec) in output_datatype.Writer.metadata_defaults.iteritems())
-                    )
-                    writer.metadata["length"] = num_docs
-                    if num_valid_docs is not None:
-                        writer.metadata["valid_documents"] = num_valid_docs
-
-    if no_group:
-        reader_option_keys = input_module_options.keys()
-        grouper_option_keys = []
-    else:
+    if not no_group:
         # Add some options to allow the config to control the grouper
         input_module_options = dict(input_module_options)
-        reader_option_keys = input_module_options.keys()
         input_module_options.update(GrouperModuleInfo.module_options)
-        # Keep track of what keys have been added, so we can separate out the values
-        grouper_option_keys = GrouperModuleInfo.module_options.keys()
 
     class IterableInputReaderModuleInfo(InputModuleInfo):
         module_type_name = mt_name
@@ -273,18 +385,9 @@ def iterable_input_reader(input_module_options, data_point_type,
         module_executable = execute_count
         module_executor_override = DocumentCounterModuleExecutor if execute_count else None
         # Also make the reader class available so that it can be reused if necessary
-        input_reader_class = InputReader
+        input_reader_class = reader_cls
 
-        def instantiate_output_reader_setup(self, output_name, datatype):
-            reader_options = dict((key, v) for (key, v) in self.options.iteritems() if key in reader_option_keys)
-            input_reader_setup = InputReader.Setup(datatype, self.get_absolute_output_dir(output_name), reader_options)
-            if no_group:
-                # Not grouping into a GroupedCorpus: just use the InputReader directly
-                return input_reader_setup
-            else:
-                # Use the input reader to read documents, but pass through CorpusGroupReader as well
-                grouper_options = dict((key, v) for (key, v) in self.options.iteritems() if key in grouper_option_keys)
-                return CorpusGroupReader.Setup(datatype, input_reader_setup, grouper_options)
+        grouped = not no_group
 
         def get_software_dependencies(self):
             if software_dependencies is None:
@@ -293,13 +396,5 @@ def iterable_input_reader(input_module_options, data_point_type,
                 return software_dependencies
             else:
                 return software_dependencies(self)
-
-        def missing_module_data(self):
-            missing_data = []
-            if execute_count:
-                # Check whether the data is ready to read, aside from input preparation
-                if not data_ready_fn(self.options):
-                    missing_data.append("Input module's source data not ready")
-            return missing_data
 
     return IterableInputReaderModuleInfo
