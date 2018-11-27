@@ -36,7 +36,7 @@ to contain a single integer as text.
 import os
 import tarfile
 
-from pimlico.core.modules.inputs import iterable_input_reader
+from pimlico.core.modules.inputs import iterable_input_reader, InputReader
 from pimlico.core.modules.options import comma_separated_strings, opt_type_help, opt_type_example
 from pimlico.datatypes.corpora.data_points import RawTextDocumentType
 
@@ -44,143 +44,143 @@ comma_separated_paths = opt_type_help("absolute file path")(comma_separated_stri
 comma_separated_paths = opt_type_example("path1,path2,...")(comma_separated_paths)
 
 
-def get_paths_from_options(options, error_on_missing=False):
+class RawTextArchivesInputReader(InputReader):
     """
-    Iterates over paths to all the files specified in the ``files`` option.
-    If ``error_on_missing=True``, non-optional paths or globs that do not
-    correspond to an existing file cause an IOError to be raised.
+    Special input reader to read in raw text documents from tar archives.
 
     """
-    for input_fn in options["files"]:
-        optional = False
-        if input_fn.startswith("?"):
-            # Optional path, don't error if the file doesn't exist
-            optional = True
-            input_fn = input_fn[1:]
+    class Setup:
+        def get_paths_from_options(self, error_on_missing=False):
+            """
+            Iterates over paths to all the files specified in the ``files`` option.
+            If ``error_on_missing=True``, non-optional paths or globs that do not
+            correspond to an existing file cause an IOError to be raised.
 
-        if not os.path.exists(input_fn) or not os.path.isfile(input_fn):
-            if optional or not error_on_missing:
-                # Skip this path, since it's optional, or we're not supposed to raise an error
-                continue
-            else:
-                raise IOError("path '{}' does not point to a file".format(input_fn))
-        else:
-            yield input_fn
+            """
+            for input_fn in self.reader_options["files"]:
+                optional = False
+                if input_fn.startswith("?"):
+                    # Optional path, don't error if the file doesn't exist
+                    optional = True
+                    input_fn = input_fn[1:]
 
+                if not os.path.exists(input_fn) or not os.path.isfile(input_fn):
+                    if optional or not error_on_missing:
+                        # Skip this path, since it's optional, or we're not supposed to raise an error
+                        continue
+                    else:
+                        raise IOError("path '{}' does not point to a file".format(input_fn))
+                else:
+                    yield input_fn
 
-def iter_archive(path):
-    """
-    Iterate over the documents in a tar archive
+        @classmethod
+        def iter_archive(cls, path):
+            """
+            Iterate over the documents in a tar archive
 
-    :param path: path to archive
+            :param path: path to archive
 
-    """
-    with tarfile.open(path, "r") as archive:
-        for tarinfo in archive:
-            if tarinfo.isfile():
+            """
+            for archive, tarinfo in cls.iter_archive_infos(path):
                 yield tarinfo.name, archive.extractfile(tarinfo).read()
-            archive.members = []
 
+        @classmethod
+        def iter_archive_infos(cls, path):
+            """
+            Iterate over the documents in a tar archive without reading them:
+            just for counting.
 
-def _iter_archive_infos(path):
-    """
-    Iterate over the documents in a tar archive without reading them:
-    just for counting.
+            :param path: path to archive
 
-    :param path: path to archive
+            """
+            with tarfile.open(path, "r") as archive:
+                for tarinfo in archive:
+                    if tarinfo.isfile():
+                        yield archive, tarinfo
+                    archive.members = []
 
-    """
-    with tarfile.open(path, "r") as archive:
-        for tarinfo in archive:
-            if tarinfo.isfile():
-                yield tarinfo
-            archive.members = []
-
-
-def _count_archive(path):
-    # See if there's a count file, so we don't need to run the count ourselves
-    count_path = "{}.count".format(path)
-    if os.path.exists(count_path):
-        with open(count_path, "r") as f:
-            count = f.read().strip("\n ")
-        try:
-            count = int(count)
-        except ValueError:
-            raise IOError("count file exists for archive {}, but the count could not be read from it".format(path))
-        return count
-    else:
-        # Iterate over the members to count them
-        return sum(1 for info in _iter_archive_infos(path))
-
-
-def corpus_len(options):
-    """ Just count up the documents without reading them. """
-    return sum(_count_archive(path) for path in get_paths_from_options(options))
-
-
-def data_ready(options):
-    """
-    Like get_paths_from_options, but faster (in some cases), as it just checks whether there are
-    any file for each path.
-
-    Takes module options and checks whether the dataset is ready to read.
-
-    """
-    # Make sure we get at least one file, even if everything is optional
-    got_something = False
-    try:
-        # Try looping over the files: if a non-optional one is missing, this will raise an error
-        for path in get_paths_from_options(options, error_on_missing=True):
-            # Check that there's at least one document in the archive
-            try:
-                next(iter_archive(path))
-            except StopIteration:
-                # Empty archive: don't count this towards having some input
-                pass
+        @classmethod
+        def count_archive(cls, path):
+            # See if there's a count file, so we don't need to run the count ourselves
+            count_path = "{}.count".format(path)
+            if os.path.exists(count_path):
+                with open(count_path, "r") as f:
+                    count = f.read().strip("\n ")
+                try:
+                    count = int(count)
+                except ValueError:
+                    raise IOError("count file exists for archive {}, but the count could not be read from it".format(path))
+                return count
             else:
-                got_something = True
-    except IOError:
-        return False
-    return got_something
+                # Iterate over the members to count them
+                return sum(1 for __ in cls.iter_archive_infos(path))
 
+        def count(self):
+            """ Just count up the documents without reading them. """
+            return sum(self.count_archive(path) for path in self.get_paths_from_options())
 
-def corpus_iter(reader):
-    options = reader.options
-    encoding = options["encoding"]
-    encoding_errors = options["encoding_errors"]
+        def check_data_ready(self):
+            """
+            Like get_paths_from_options, but faster (in some cases), as it just checks whether there are
+            any file for each path.
 
-    used_archive_names = set()
-    paths = list(get_paths_from_options(options))
-    for path in paths:
-        used_doc_names = set()
+            Takes module options and checks whether the dataset is ready to read.
 
-        # Use the file basenames as doc names where possible, but make sure they're unique
-        base_archive_name = os.path.splitext(os.path.basename(path))[0]
-        archive_name = base_archive_name
-        distinguish_id = 0
-        # Keep increasing the distinguishing ID until we have a unique name
-        while archive_name in used_archive_names:
-            archive_name = "%s-%d" % (base_archive_name, distinguish_id)
-            distinguish_id += 1
-        used_archive_names.add(archive_name)
+            """
+            # Make sure we get at least one file, even if everything is optional
+            got_something = False
+            try:
+                # Try looping over the files: if a non-optional one is missing, this will raise an error
+                for path in self.get_paths_from_options(error_on_missing=True):
+                    # Check that there's at least one document in the archive
+                    try:
+                        next(self.iter_archive(path))
+                    except StopIteration:
+                        # Empty archive: don't count this towards having some input
+                        pass
+                    else:
+                        got_something = True
+            except IOError:
+                return False
+            return got_something
 
-        for member_name, data in iter_archive(path):
-            # Decode to unicode string, which will be used as data for document
-            data = data.decode(encoding, errors=encoding_errors)
-            # Get a unique doc name within the archive
-            base_doc_name = os.path.splitext(member_name)[0]
-            doc_name = base_doc_name
+    def iterate(self):
+        options = self.options
+        encoding = options["encoding"]
+        encoding_errors = options["encoding_errors"]
+
+        used_archive_names = set()
+        paths = list(self.setup.get_paths_from_options())
+        for path in paths:
+            used_doc_names = set()
+
+            # Use the file basenames as doc names where possible, but make sure they're unique
+            base_archive_name = os.path.splitext(os.path.basename(path))[0]
+            archive_name = base_archive_name
+            distinguish_id = 0
             # Keep increasing the distinguishing ID until we have a unique name
-            while doc_name in used_doc_names:
-                doc_name = "%s-%d" % (base_doc_name, distinguish_id)
+            while archive_name in used_archive_names:
+                archive_name = "%s-%d" % (base_archive_name, distinguish_id)
                 distinguish_id += 1
-            used_doc_names.add(doc_name)
+            used_archive_names.add(archive_name)
 
-            # If there's only one archive, don't include the archive name in the doc name
-            if len(paths) > 1:
-                doc_name = "{}/{}".format(archive_name, doc_name)
+            for member_name, data in self.setup.iter_archive(path):
+                # Decode to unicode string, which will be used as data for document
+                data = data.decode(encoding, errors=encoding_errors)
+                # Get a unique doc name within the archive
+                base_doc_name = os.path.splitext(member_name)[0]
+                doc_name = base_doc_name
+                # Keep increasing the distinguishing ID until we have a unique name
+                while doc_name in used_doc_names:
+                    doc_name = "%s-%d" % (base_doc_name, distinguish_id)
+                    distinguish_id += 1
+                used_doc_names.add(doc_name)
 
-            yield doc_name, reader.datatype.data_point_type(text=data)
+                # If there's only one archive, don't include the archive name in the doc name
+                if len(paths) > 1:
+                    doc_name = "{}/{}".format(archive_name, doc_name)
+
+                yield doc_name, self.datatype.data_point_type(text=data)
 
 
 ModuleInfo = iterable_input_reader(
@@ -202,7 +202,7 @@ ModuleInfo = iterable_input_reader(
         },
     },
     RawTextDocumentType(),
-    data_ready, corpus_len, corpus_iter,
+    RawTextArchivesInputReader,
     module_type_name="raw_text_archives_reader",
     module_readable_name="Raw text archives",
     # Make the module executable to count the docs, since this can take a while

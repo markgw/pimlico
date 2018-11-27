@@ -6,6 +6,7 @@
 Base classes and utilities for input modules in a pipeline.
 
 """
+import types
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.core.modules.execute import ModuleExecutionError
@@ -172,9 +173,13 @@ class InputModuleInfo(BaseModuleInfo):
         # check that it's ready (except the count) before running
 
         missing_data = []
-        # Get a reader setup for the output
-        output_setup = self.get_output_reader_setup()
-        if output_setup.execute_count:
+        if self.module_executable:
+            # Get a reader setup for the output
+            output_setup = self.get_output_reader_setup()
+            # If the setup is wrapped in a grouper setup, get the wrapped setup
+            if self.grouped:
+                output_setup = output_setup.input_reader_setup
+
             # Check whether the data is ready to read, aside from input preparation
             if not output_setup.check_data_ready():
                 missing_data.append("Input module's source data not ready")
@@ -187,10 +192,14 @@ class DocumentCounterModuleExecutor(BaseModuleExecutor):
 
     """
     def execute(self):
-        self.log.info("Counting documents in corpus")
         # The count() function is supplied by the output reader setup
         # We can't instantiate the reader yet, as the count isn't done!
         output_setup = self.info.get_output_reader_setup()
+        # If the setup is wrapped in a grouper setup, get the wrapped setup
+        if self.info.grouped:
+            output_setup = output_setup.input_reader_setup
+        
+        self.log.info("Counting documents in corpus")
         num_docs = output_setup.count()
         num_valid_docs = None
 
@@ -262,10 +271,9 @@ def input_module_factory(datatype):
 
 
 def iterable_input_reader(input_module_options, data_point_type,
-                          data_ready_fn, len_fn, iter_fn,
+                          data_ready_fn, len_fn=None, iter_fn=None,
                           module_type_name=None, module_readable_name=None,
-                          software_dependencies=None, execute_count=False, no_group=False,
-                          reader_cls=None):
+                          software_dependencies=None, execute_count=False, no_group=False):
     """
     Factory for creating an input reader module info.
     This is a (typically) non-executable module that has no
@@ -326,6 +334,8 @@ def iterable_input_reader(input_module_options, data_point_type,
         config file and returns True if the data is ready to read, False otherwise. If execute_count
         is used, the data will be considered unready until the count has been run, even if this
         function returns True.
+        Alternatively, may be a class to use as the reader for the dataset, instead of creating a new one
+        dynamically. Then `len_fn` and `iter_fn` are not required (and will be ignored)
     :param iter_fn: function that takes a reader instance and returns a generator
         to iterate over the documents of the corpus. Like any IterableCorpus, it should yield pairs of
         (doc_name, doc). Reader options are available as `reader.setup.reader_options`.
@@ -339,18 +349,19 @@ def iterable_input_reader(input_module_options, data_point_type,
     :param execute_count: make an executable module that counts the data to get its length (num docs)
     :param no_group: by default, the output datatype is a GroupedCorpus. If True, use an IterableCorpus
         instead without grouping documents into archives.
-    :param reader_cls: a class to use as the reader for the dataset, instead of creating a new one
-        dynamically. If given, `data_ready_fn`, `len_fn` and `iter_fn` will all be ignored, so can
-        be set to None.
     :return: module info class
     """
     mt_name = module_type_name or "reader_for_{}".format(data_point_type.name)
     mr_name = module_readable_name or "Input reader for {} iterable corpus".format(data_point_type.name)
     corpus_type = IterableCorpus if no_group else GroupedCorpus
     output_datatype = corpus_type(data_point_type)
-    _execute_count = execute_count
 
-    if reader_cls is None:
+    if isinstance(data_ready_fn, types.FunctionType):
+        # iter_fn and len_fn are required in this (the normal) case
+        if iter_fn is None or len_fn is None:
+            raise ValueError("iter_fn and len_fn are required unless specifying a whole reader class instead "
+                             "of data_ready_fn")
+
         # Build a reader class using the given functions
         class FactoryInputReader(InputReader):
             def iterate(self):
@@ -366,6 +377,10 @@ def iterable_input_reader(input_module_options, data_point_type,
                     return len_fn(self.reader_options)
 
         reader_cls = FactoryInputReader
+    else:
+        # A reader class has been given, so we don't need to create our own
+        reader_cls = data_ready_fn
+        data_ready_fn = None
 
     # Even if a reader class is given, make sure the execute_count flag is consistent with the main one
     reader_cls.Setup.execute_count = execute_count
