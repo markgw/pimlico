@@ -681,7 +681,7 @@ class PimlicoDatatype(object):
         metadata = property(_get_metadata)
 
         def __repr__(self):
-            return "Reader({}: {})".format(self.datatype.full_datatype_name(), self.base_dir)
+            return "Reader({})".format(self.datatype.full_datatype_name())
 
     class Writer:
         """
