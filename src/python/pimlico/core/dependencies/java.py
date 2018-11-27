@@ -74,6 +74,11 @@ class JavaDependency(SoftwareDependency):
         # By default, Java deps are not installable, though subclasses may override this if they provide install()
         return False
 
+    @property
+    def jar_paths(self):
+        """ Absolute paths to the jars """
+        return [path if os.path.isabs(path) else os.path.join(JAVA_LIB_DIR, path) for path in self.jars]
+
     def _get_classpath_components_non_recursive(self):
         return [path if os.path.isabs(path) else os.path.join(JAVA_LIB_DIR, path)
                 for path in self.jars + self.class_dirs]
