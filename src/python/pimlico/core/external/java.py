@@ -19,14 +19,20 @@ DEFAULT_CLASSPATH = ":".join(["%s/*" % JAVA_LIB_DIR] + ALWAYS_INCLUDE_IN_CLASSPA
 
 
 def call_java(class_name, args=[], classpath=None):
+    # May in future want to allow the path to the java executable to be specified in local config
+    process = Popen(java_call_command(class_name, classpath=classpath) + args, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
+    stdout_data, stderr_data = process.communicate()
+    return stdout_data, stderr_data, process.returncode
+
+
+def java_call_command(class_name, classpath=None):
+    """List of components for a subprocess call to Java, used by call_java """
     if classpath is None:
         classpath = DEFAULT_CLASSPATH
     else:
         classpath = ":".join([classpath] + ALWAYS_INCLUDE_IN_CLASSPATH)
     # May in future want to allow the path to the java executable to be specified in local config
-    process = Popen(["java", "-cp", classpath, class_name] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
-    stdout_data, stderr_data = process.communicate()
-    return stdout_data, stderr_data, process.returncode
+    return ["java", "-cp", classpath, class_name]
 
 
 def start_java_process(class_name, args=[], java_args=[], wait=0.1, classpath=None):
