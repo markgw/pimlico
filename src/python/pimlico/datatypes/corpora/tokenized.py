@@ -40,6 +40,14 @@ class TokenizedDocumentType(TextDocumentType):
             return u"\n".join(u" ".join(sentence) for sentence in internal_data["sentences"]).encode("utf-8")
 
 
+class LemmatizedTokensDocumentType(TokenizedDocumentType):
+    """
+    Identical to :class:`TokenizedDocumentType`. Separate subclass to allow
+    modules to require that their input has been lemmatized (and tokenized).
+
+    """
+
+
 class CharacterTokenizedDocumentType(TokenizedDocumentType):
     """
     Simple character-level tokenized corpus. The text isn't stored in any special way,
