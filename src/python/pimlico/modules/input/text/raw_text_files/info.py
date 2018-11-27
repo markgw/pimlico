@@ -177,8 +177,8 @@ def data_ready(options):
     return got_something
 
 
-def corpus_len(reader):
-    return sum(1 for __ in get_paths_from_options(reader.options))
+def corpus_len(options):
+    return sum(1 for __ in get_paths_from_options(options))
 
 
 def corpus_iter(reader):
