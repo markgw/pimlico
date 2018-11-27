@@ -10,6 +10,7 @@ import copy
 import os
 import re
 import sys
+import textwrap
 import warnings
 from ConfigParser import SafeConfigParser, RawConfigParser
 from StringIO import StringIO
@@ -1951,6 +1952,11 @@ def print_missing_dependencies(pipeline, modules):
             print title_box(dep.name.capitalize())
             # Print the list of problems and check at the same time whether it's auto-installable
             mod_auto_installable = print_dependency_leaf_problems(dep, pipeline.local_config)
+            # Output any installation notes provided by the dependency
+            notes = dep.installation_notes().strip()
+            if len(notes):
+                print textwrap.fill(notes, 80)
+
             if mod_auto_installable:
                 auto_installable_modules.extend(dep_sources[dep])
                 auto_installable_deps.append(dep)
