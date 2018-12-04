@@ -10,7 +10,7 @@ import os
 from subprocess import check_output, STDOUT, CalledProcessError
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
-from pimlico.core.dependencies.base import SoftwareDependency, InstallationError
+from pimlico.core.dependencies.base import SoftwareDependency, InstallationError, Any
 from pimlico.core.external.java import call_java, DependencyCheckerError
 from pimlico.core.modules.base import DependencyError
 from pimlico.utils.core import remove_duplicates
@@ -74,10 +74,21 @@ class JavaDependency(SoftwareDependency):
         # By default, Java deps are not installable, though subclasses may override this if they provide install()
         return False
 
-    @property
-    def jar_paths(self):
+    def jar_paths(self, local_config):
         """ Absolute paths to the jars """
-        return [path if os.path.isabs(path) else os.path.join(JAVA_LIB_DIR, path) for path in self.jars]
+        return [path if os.path.isabs(path) else os.path.join(JAVA_LIB_DIR, path) for path in self.all_jars(local_config)]
+
+    def all_jars(self, local_config):
+        """ Get all jars, including from dependencies """
+        jars = list(self.jars)
+        for dep in self.dependencies():
+            if isinstance(dep, JavaDependency):
+                jars.extend(dep.all_jars())
+            elif isinstance(dep, Any):
+                av_dep = dep.get_available_option(local_config)
+                if av_dep is not None and isinstance(av_dep, JavaDependency):
+                    jars.extend(av_dep.all_jars(local_config))
+        return jars
 
     def _get_classpath_components_non_recursive(self):
         return [path if os.path.isabs(path) else os.path.join(JAVA_LIB_DIR, path)
