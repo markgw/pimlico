@@ -60,7 +60,7 @@ src/opennlp :
 argparse4j : argparse4j.jar
 
 argparse4j.jar :
-	$(FETCH_STDOUT) http://sourceforge.net/projects/argparse4j/files/latest/download?source=files >argparse4j.jar
+	$(FETCH_STDOUT) https://github.com/argparse4j/argparse4j/releases/download/argparse4j-0.8.1/argparse4j-0.8.1.jar >argparse4j.jar
 
 ########## Py4j ##############
 py4j : py4j0.9.2.jar
