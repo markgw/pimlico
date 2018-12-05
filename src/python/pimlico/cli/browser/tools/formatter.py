@@ -18,8 +18,10 @@ compatible with the datatype being browsed and provides a method to format each 
 in your custom code and refer to them by their fully qualified class name.
 
 """
+import inspect
+
 from pimlico.datatypes.corpora import DataPointType
-from pimlico.datatypes.corpora import IterableCorpus, is_invalid_doc
+from pimlico.datatypes.corpora import is_invalid_doc
 
 
 class DocumentBrowserFormatter(object):
@@ -90,17 +92,18 @@ def typecheck_formatter(formatted_doc_type, formatter_cls):
     """
     from pimlico.core.modules.base import TypeCheckError
     # Check that the datatype provided is compatible with the formatter's datatype
-    if issubclass(formatter_cls.DATATYPE, DataPointType):
-        document_type = formatter_cls.DATATYPE
-    else:
-        raise TypeCheckError("formatter's datatype needs to be a data-point type. Got {}".format(
+    document_type = formatter_cls.DATATYPE
+    if not isinstance(document_type, DataPointType):
+        if inspect.isclass(document_type):
+            raise TypeCheckError("formatter's datatype should be an instance of a DataPointType subclass, not a class")
+        raise TypeCheckError("formatter's datatype needs to be a data-point type instance. Got {}".format(
             formatter_cls.DATATYPE.__name__
         ))
 
-    if not issubclass(formatted_doc_type, document_type):
+    if not isinstance(formatted_doc_type, type(document_type)):
         raise TypeCheckError(
-            "formatter %s is not designed for this data-point type (%s)" %
-            (formatter_cls.__name__, formatted_doc_type.name)
+            "formatter {} is not designed for this data-point type ({})".format(
+                formatter_cls.__name__, formatted_doc_type.name)
         )
 
 
