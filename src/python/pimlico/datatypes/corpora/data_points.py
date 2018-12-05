@@ -48,16 +48,7 @@ class DataPointTypeMeta(type):
                     new_dict = my_doc_cls.__dict__
 
                 # Perform subclassing so that a new Document is created that is a subclass of the parent's document
-                type_name = cls.__name__
-                if type_name.endswith("Type"):
-                    # To get the class name, we typically remove "Type" from the end of the data point type class name
-                    doc_name = type_name[:-4]
-                else:
-                    # If the class name didn't follow the pattern of ending with "Type",
-                    # add "Document" instead to distinguish it
-                    doc_name = "{}Document".format(type_name)
-
-                cls.__document_type = type(doc_name, (parent_doc_cls,), new_dict)
+                cls.__document_type = type("Document", (parent_doc_cls,), new_dict)
         return cls.__document_type
 
 
