@@ -38,3 +38,23 @@ class GensimCorpus(object):
                     word_id for sentence in doc.lists for word_id in sentence if word_id not in self.ignore_ids
                 )
                 yield list(word_counter.iteritems())
+
+
+def word_relevance_for_topic(topic_word_probs, word_probs, l=0.6):
+    """
+    Computes a relevance score for every word in the vocabulary for
+    a given topic, following the definition of relevance from
+    Sievert & Shirley (ILLVI, 2014).
+
+    Distributions p(w | t) and p(w) should be given as numpy 1-D arrays,
+    with length the number of words in the vocabulary.
+
+    Lambda (l) specifies the balance between plain topic word probability
+    and word-topic lift, with lambda=0 giving just the former and lambda=1
+    just the latter. See the paper for more details.
+
+    relevance(w, t, l) = l * log(p(w|t)) + (1 - l)*log(p(w|t) / p(w))
+
+    """
+    import numpy as np
+    return l * np.log(topic_word_probs) + (1-l) * np.log(topic_word_probs / word_probs)
