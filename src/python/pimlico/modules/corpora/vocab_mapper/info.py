@@ -16,10 +16,6 @@ First use the :mod:`~pimlico.modules.corpora.vocab_builder` module to
 construct the word-ID mapping and filter the vocabulary as you wish,
 then use this module to apply the mapping to the corpus.
 
-.. todo::
-
-   Add test pipeline and test
-
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes import GroupedCorpus, Dictionary
