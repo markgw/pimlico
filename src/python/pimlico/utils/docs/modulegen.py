@@ -7,6 +7,7 @@ Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 
 """
 import argparse
+import codecs
 import os
 import sys
 import warnings
@@ -161,7 +162,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
     if awaiting_datatype_update:
         module_title = "!! {}".format(module_title)
 
-    with open(filename, "w") as output_file:
+    with codecs.open(filename, "w", "utf8") as output_file:
         # Make a page heading
         output_file.write(format_heading(0, module_title))
         # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
