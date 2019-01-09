@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import os
 
@@ -13,6 +13,16 @@ class GensimLdaModel(PimlicoDatatype):
 
     def get_software_dependencies(self):
         return super(GensimLdaModel, self).get_software_dependencies() + [gensim_dependency]
+
+    def run_browser(self, reader, opts):
+        """
+        Browse the LDA model simply by printing out all its topics.
+
+        """
+        model = reader.load_model()
+        print("Showing all {} trained LDA topics:".format(model.num_topics))
+        for topic, topic_repr in model.show_topics(num_topics=-1, num_words=10):
+            print(u"#{}: {}".format(topic, topic_repr).encode("utf-8"))
 
     class Reader:
         def load_model(self):
