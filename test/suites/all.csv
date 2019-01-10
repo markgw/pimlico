@@ -7,6 +7,9 @@ pipelines/corpora/interleave.conf, output
 pipelines/corpora/list_filter.conf, europarl_filtered
 pipelines/corpora/store.conf, store
 pipelines/corpora/vocab_builder.conf, vocab
+pipelines/corpora/vocab_mapper.conf, ids
+pipelines/corpora/vocab_counter.conf, counts
+pipelines/corpora/shuffle.conf, shuffle
 pipelines/corpora/stats.conf, stats
 pipelines/text/normalize.conf, norm
 pipelines/text/simple_tokenize.conf, tokenize
