@@ -1,5 +1,5 @@
-Randomly shuffle documents
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Random shuffle
+~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.shuffle
 
