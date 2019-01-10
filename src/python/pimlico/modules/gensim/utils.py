@@ -50,7 +50,7 @@ def word_relevance_for_topic(topic_word_probs, word_probs, l=0.6):
     with length the number of words in the vocabulary.
 
     Lambda (l) specifies the balance between plain topic word probability
-    and word-topic lift, with lambda=0 giving just the former and lambda=1
+    and word-topic lift, with lambda=1 giving just the former and lambda=0
     just the latter. See the paper for more details.
 
     relevance(w, t, l) = l * log(p(w|t)) + (1 - l)*log(p(w|t) / p(w))
