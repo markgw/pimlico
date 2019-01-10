@@ -1,5 +1,5 @@
-!! Text to character level
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Text to character level
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.text.char_tokenize
 

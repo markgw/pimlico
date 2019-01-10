@@ -1,5 +1,5 @@
-!! OpenNLP NIST tokenizer
-~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! OpenNLP NIST tokenizer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.nltk.nist_tokenize
 

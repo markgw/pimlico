@@ -1,5 +1,5 @@
-!! Store in word2vec format
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Store in word2vec format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.store_word2vec
 

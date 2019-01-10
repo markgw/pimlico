@@ -1,5 +1,5 @@
-!! R script executor
-~~~~~~~~~~~~~~~~~~~~
+\!\! R script executor
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.r.script
 

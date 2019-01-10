@@ -1,5 +1,5 @@
-!! Regex annotated text matcher
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Regex annotated text matcher
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.regex.annotated_text
 

@@ -1,5 +1,5 @@
-!! Term-feature corpus vocab mapper
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Term\-feature corpus vocab mapper
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.vocab_mapper
 

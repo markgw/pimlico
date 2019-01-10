@@ -1,5 +1,5 @@
-!! Word2vec embedding trainer
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Word2vec embedding trainer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.word2vec
 

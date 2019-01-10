@@ -1,5 +1,5 @@
-Human-readable formatting
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Human\-readable formatting
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.format
 

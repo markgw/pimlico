@@ -1,5 +1,5 @@
-!! Stanford CoreNLP
-~~~~~~~~~~~~~~~~~~~
+\!\! Stanford CoreNLP
+~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corenlp
 

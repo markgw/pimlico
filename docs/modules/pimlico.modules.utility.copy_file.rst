@@ -1,5 +1,5 @@
-!! Copy file
-~~~~~~~~~~~~
+\!\! Copy file
+~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.utility.copy_file
 

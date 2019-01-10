@@ -5,11 +5,13 @@ test-config-fasttext.conf	pimlico.modules.input.embeddings.fasttext
 test-config-glove.conf	pimlico.modules.input.embeddings.glove
 test-config-tokenize.conf	pimlico.modules.opennlp.tokenize
 test-config-store.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.store
+test-config-vocab_mapper.conf	pimlico.modules.corpora.vocab_mapper
 test-config-concat.conf	pimlico.modules.corpora.concat, pimlico.modules.corpora.format
 test-config-group.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.format
 test-config-vocab_builder.conf	pimlico.modules.corpora.vocab_builder
 test-config-subset.conf	pimlico.modules.corpora.subset, pimlico.modules.corpora.format
 test-config-interleave.conf	pimlico.modules.corpora.interleave, pimlico.modules.corpora.format
+test-config-vocab_counter.conf	pimlico.modules.corpora.vocab_counter
 test-config-stats.conf	pimlico.modules.corpora.corpus_stats
 test-config-list_filter.conf	pimlico.modules.corpora.list_filter
 test-config-split.conf	pimlico.modules.corpora.split

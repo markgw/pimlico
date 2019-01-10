@@ -1,5 +1,5 @@
-!! OpenNLP coreference resolution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! OpenNLP coreference resolution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.coreference_pipeline
 

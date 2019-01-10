@@ -1,5 +1,5 @@
-FastText embedding reader (Gensim)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FastText embedding reader \(Gensim\)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.input.embeddings.fasttext_gensim
 

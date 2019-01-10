@@ -1,5 +1,5 @@
-!! Store in TSV format
-~~~~~~~~~~~~~~~~~~~~~~
+\!\! Store in TSV format
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.store_tsv
 

@@ -1,5 +1,5 @@
-Scikit-learn tools
-~~~~~~~~~~~~~~~~~~
+Scikit\-learn tools
+~~~~~~~~~~~~~~~~~~~
 
 
 .. py:module:: pimlico.modules.sklearn

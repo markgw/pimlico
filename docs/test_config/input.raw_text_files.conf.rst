@@ -1,7 +1,7 @@
 .. _test-config-raw_text_files.conf:
 
-raw_text_files_test
-~~~~~~~~~~~~~~~~~~~
+raw\_text\_files\_test
+~~~~~~~~~~~~~~~~~~~~~~
 
 
 

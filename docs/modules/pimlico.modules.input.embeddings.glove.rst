@@ -1,5 +1,5 @@
-GloVe embedding reader (Gensim)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+GloVe embedding reader \(Gensim\)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.input.embeddings.glove
 
