@@ -24,6 +24,7 @@ Available pipelines
    input.glove.conf.rst
    opennlp.tokenize.conf.rst
    corpora.store.conf.rst
+   corpora.shuffle.conf.rst
    corpora.vocab_mapper.conf.rst
    corpora.concat.conf.rst
    corpora.group.conf.rst
