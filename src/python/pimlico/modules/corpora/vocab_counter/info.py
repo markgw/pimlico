@@ -1,14 +1,13 @@
-# coding=utf-8
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-u"""
+"""
 Count the frequency of each token of a vocabulary in a given corpus (most often
 the corpus on which the vocabulary was built).
 
 Note that this distribution is not otherwise available along with the vocabulary.
-It stores the document frequency counts – how many documents each token appears
-in – which may sometimes be a close enough approximation to the actual frequencies.
+It stores the document frequency counts - how many documents each token appears
+in - which may sometimes be a close enough approximation to the actual frequencies.
 But, for example, when working with character-level tokens, this estimate will
 be very poor.
 

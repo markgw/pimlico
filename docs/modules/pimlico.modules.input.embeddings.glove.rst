@@ -18,6 +18,10 @@ Can be used, for example, to read the pre-trained embeddings
 
 Note that the format is almost identical to `word2vec`'s text format.
 
+Note that this requires a recent version of Gensim, since they changed their KeyedVectors
+data structure. This is not enforced by the dependency check, since we're not able
+to require a specific version yet.
+
 
 Inputs
 ======

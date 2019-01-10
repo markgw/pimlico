@@ -14,7 +14,7 @@ import warnings
 from importlib import import_module
 from pkgutil import iter_modules
 from sphinx import __version__
-from sphinx.apidoc import format_heading
+from sphinx.ext.apidoc import format_heading
 
 from pimlico import install_core_dependencies
 from pimlico.core.modules.options import format_option_type, str_to_bool, \
