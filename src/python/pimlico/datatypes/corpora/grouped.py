@@ -35,9 +35,13 @@ class GroupedCorpus(IterableCorpus):
         class Setup:
             def data_ready(self, base_dir):
                 # Run the superclass check -- that the data dir exists
-                # Also check that we've got at least one archive in the data dir
-                return super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir) and \
-                       len(self._get_archive_filenames(self._get_data_dir(base_dir))) > 0
+                if not super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir):
+                    return False
+                # Also check that we've got at least one archive in the data dir, unless the length of the corpus is 0
+                if self.read_metadata(base_dir)["length"] > 0 and \
+                        len(self._get_archive_filenames(self._get_data_dir(base_dir))) == 0:
+                    return False
+                return True
 
             def _get_archive_filenames(self, data_dir):
                 if data_dir is not None:
