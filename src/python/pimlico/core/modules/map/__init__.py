@@ -176,7 +176,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                 else:
                     pbar = get_progress_bar(total_to_process, counter=True,
                                             title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
-                    self.log.info("Starting execution on %d docs" % total_to_process)
+                    self.log.info("Starting execution on {:,} docs".format(total_to_process))
                     # Inputs will be taken from this as they're needed
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
                     # Set a thread going to feed things onto the input queue
