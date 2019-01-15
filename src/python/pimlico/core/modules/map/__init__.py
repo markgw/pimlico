@@ -94,6 +94,8 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     :mod:.singleproc.
 
     """
+    ALLOW_SKIP_OUTPUT = False
+
     def __init__(self, module_instance_info, **kwargs):
         super(DocumentMapModuleExecutor, self).__init__(module_instance_info, **kwargs)
         self.input_corpora = self.info.input_corpora
@@ -239,7 +241,9 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                                 )
                             # Write the result to the output corpora
                             for result, writer in zip(next_output, writers):
-                                writer.add_document(archive, filename, result)
+                                # If allowing skipping outputs, we don't try to write the output if None is returned
+                                if result is not None or not self.ALLOW_SKIP_OUTPUT:
+                                    writer.add_document(archive, filename, result)
 
                             # Update the module's metadata to say that we've completed this document
                             docs_completed_now += 1

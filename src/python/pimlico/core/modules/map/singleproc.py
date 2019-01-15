@@ -17,7 +17,8 @@ class SingleThreadMapModuleExecutor(ThreadingMapModuleExecutor):
 
 
 def single_process_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,
-                                    worker_set_up_fn=None, worker_tear_down_fn=None, batch_docs=None):
+                                    worker_set_up_fn=None, worker_tear_down_fn=None, batch_docs=None,
+                                    allow_skip_output=False):
     """
     Factory function for creating an executor that uses the single-process implementations of document-map
     pools and workers. This is an easy way to implement a non-parallelized executor
@@ -33,6 +34,9 @@ def single_process_executor_factory(process_document_fn, preprocess_fn=None, pos
 
     If postprocess_fn is given, it is called at the end of execution, including on the way out after an error,
     with the executor as an argument and a kwarg *error* which is True if execution failed.
+
+    If ``allow_skip_output==True`` and the process document function returns None as one of
+    its outputs, that document will simply not be written to that output.
 
     """
     if isinstance(process_document_fn, type):
@@ -62,6 +66,7 @@ def single_process_executor_factory(process_document_fn, preprocess_fn=None, pos
     # Finally, define an executor type (subclass of DocumentMapModuleExecutor) that creates a pool of the right sort
     class ModuleExecutor(SingleThreadMapModuleExecutor):
         POOL_TYPE = FactoryMadeMapPool
+        ALLOW_SKIP_OUTPUT = allow_skip_output
 
         def preprocess(self):
             super(ModuleExecutor, self).preprocess()
