@@ -170,7 +170,7 @@ class IterableCorpus(PimlicoDatatype):
                                         (self.datatype.datatype_name, self.metadata.keys()))
 
         def get_detailed_status(self):
-            return super(IterableCorpus.Reader, self).get_detailed_status() + ["Length: %d" % len(self)]
+            return super(IterableCorpus.Reader, self).get_detailed_status() + ["Length: {:,}".format(len(self))]
 
         def __iter__(self):
             """
