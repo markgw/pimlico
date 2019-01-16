@@ -44,6 +44,11 @@ The core toolkit is written in Python. Pimlico is open source, released under th
 available from `its Github repository <https://github.com/markgw/pimlico>`_.
 To get started with a Pimlico project, follow the :doc:`getting-started guide <guides/setup>`.
 
+Currently, Pimlico only supports **Python 2**.
+`Work is underway <https://github.com/markgw/pimlico/issues/8>`_
+to make it **Python 3 compatible**, but it's a large and complex
+codebase, so this will take some time.
+
 Pimlico is short for *PIpelined Modular LInguistic COrpus processing*.
 
 More NLP tools will gradually be added. See :doc:`my wishlist <plans/wishlist>` for current plans.
