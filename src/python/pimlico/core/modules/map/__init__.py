@@ -5,6 +5,7 @@ from threading import Thread
 from time import sleep
 from traceback import format_exc
 
+import sys
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor, satisfies_typecheck
 from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
@@ -125,14 +126,34 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
     def retrieve_processing_status(self):
         # Check the metadata to see whether we've already partially completed this
-        if self.info.status == "PARTIALLY_PROCESSED":
+        if self.info.status == "FAILED":
+            # If we failed last time, we might have stored progress, but should be a bit more cautious
+            start_after = None
+            docs_completed = self.info.get_metadata().get("docs_completed", 0)
+            if docs_completed > 0:
+                last_doc_completed = self.info.get_metadata().get("last_doc_completed", None)
+                if last_doc_completed is None:
+                    # Progress wasn't properly stored: start from beginning
+                    docs_completed = 0
+                else:
+                    first_archive, __, first_filename = last_doc_completed.partition("/")
+                    start_after = (first_archive, first_filename)
+                    self.log.info(
+                        "Module execution failed previously, but progress was stored; "
+                        "picking up where we left off, after doc {}/{} "
+                        "(skipping {:,} docs, {:,} to process)".format(
+                            start_after[0], start_after[1], docs_completed, (len(self.input_iterator) - docs_completed)
+                        )
+                    )
+        elif self.info.status == "PARTIALLY_PROCESSED":
             docs_completed = self.info.get_metadata()["docs_completed"]
             first_archive, __, first_filename = self.info.get_metadata()["last_doc_completed"].partition("/")
             start_after = (first_archive, first_filename)
             self.log.info(
-                "Module has been partially executed already; picking up where we left off, after doc %s/%s "
-                "(skipping %d docs, %d to process)" %
-                (start_after[0], start_after[1], docs_completed, (len(self.input_iterator) - docs_completed))
+                "Module has been partially executed already; picking up where we left off, after doc {}/{} "
+                "(skipping {:,} docs, {:,} to process)".format(
+                    start_after[0], start_after[1], docs_completed, (len(self.input_iterator) - docs_completed)
+                )
             )
         else:
             docs_completed = 0
