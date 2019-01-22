@@ -70,6 +70,10 @@ class ModuleExecutor(BaseModuleExecutor):
                     tar_info = tarfile.TarInfo(doc_path)
                     tar_info.size = len(doc_data_enc)
                     tar_archive.addfile(tar_info, StringIO.StringIO(doc_data_enc))
+
+                    # Destroy tarfile's cache of members, since it causes memory problems with big
+                    # archives and we don't need it anyway
+                    tar_archive.members = []
                 else:
                     if archive_dirs:
                         archive_subdir = os.path.join(output_path, archive_name)
