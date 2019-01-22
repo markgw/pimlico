@@ -192,9 +192,9 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         if output_table:
             output_file.write("%s\n" % make_table(output_table, header=["Name", "Type(s)"]))
         elif optional_output_table:
-            output_file.write("No non-optional outputs\n")
+            output_file.write("No non-optional outputs\n\n")
         else:
-            output_file.write("No outputs\n")
+            output_file.write("No outputs\n\n")
         if optional_output_table:
             output_file.write("\n" + format_heading(2, "Optional"))
             output_file.write("%s\n" % make_table(optional_output_table, header=["Name", "Type(s)"]))
