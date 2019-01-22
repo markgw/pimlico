@@ -38,19 +38,31 @@ class GroupedCorpus(IterableCorpus):
                 if not super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir):
                     return False
                 # Also check that we've got at least one archive in the data dir, unless the length of the corpus is 0
-                if self.read_metadata(base_dir)["length"] > 0 and \
-                        len(self._get_archive_filenames(self._get_data_dir(base_dir))) == 0:
+                if self.read_metadata(base_dir)["length"] > 0 and not self._has_archives(self._get_data_dir(base_dir)):
                     return False
                 return True
 
             def _get_archive_filenames(self, data_dir):
-                if data_dir is not None:
-                    return [f for f in
-                            [os.path.join(root, filename) for root, dirs, files in os.walk(data_dir) for filename in
-                             files]
-                            if f.endswith(".tar.gz") or f.endswith(".tar")]
+                return list(self._iter_archive_filenames(data_dir))
+
+            def _iter_archive_filenames(self, data_dir):
+                if data_dir is None:
+                    return
                 else:
-                    return []
+                    for root, dirs, files in os.walk(data_dir):
+                        for filename in files:
+                            f = os.path.join(root, filename)
+                            if f.endswith(".tar.gz") or f.endswith(".tar"):
+                                yield f
+
+            def _has_archives(self, data_dir):
+                # Return True if there's at least 1 archive in the dir
+                try:
+                    next(self._iter_archive_filenames(data_dir))
+                except StopIteration:
+                    return False
+                else:
+                    return True
 
         def __init__(self, *args, **kwargs):
             super(GroupedCorpus.Reader, self).__init__(*args, **kwargs)
