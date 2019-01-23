@@ -15,3 +15,4 @@ pipelines/text/normalize.conf, norm
 pipelines/text/simple_tokenize.conf, tokenize
 pipelines/input/fasttext.conf, vectors
 pipelines/input/glove.conf, vectors
+pipelines/embeddings/word2vec.conf word2vec

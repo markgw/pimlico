@@ -10,23 +10,18 @@ Find out more about `word2vec <https://code.google.com/archive/p/word2vec/>`_.
 This module is simply a wrapper to call `Gensim Python (+C) <https://radimrehurek.com/gensim/models/word2vec.html>`_'s
 implementation of word2vec on a Pimlico corpus.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
-
 """
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.old_datatypes.embeddings import Embeddings
-from pimlico.old_datatypes.tar import TarredCorpusType
-from pimlico.old_datatypes.tokenized import TokenizedDocumentType
+from pimlico.datatypes import GroupedCorpus, Embeddings
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "word2vec"
     module_readable_name = "Word2vec embedding trainer"
-    module_inputs = [("text", TarredCorpusType(TokenizedDocumentType))]
-    module_outputs = [("model", Embeddings)]
+    module_inputs = [("text", GroupedCorpus(TokenizedDocumentType()))]
+    module_outputs = [("model", Embeddings())]
     module_options = {
         "min_count": {
             "help": "word2vec's min_count option: prunes the dictionary of words that appear fewer than this number "

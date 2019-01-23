@@ -5,8 +5,7 @@
 from gensim.models.word2vec import Word2Vec
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.base import InvalidDocument
-from pimlico.old_datatypes.embeddings import EmbeddingsWriter
+from pimlico.datatypes.corpora import is_invalid_doc
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -15,8 +14,13 @@ class ModuleExecutor(BaseModuleExecutor):
         input_corpus = self.info.get_input("text")
         sentences = SentenceIterator(input_corpus)
 
-        self.log.info("Training word2vec on %d documents, %d iterations" %
-                      (len(input_corpus), self.info.options["iters"]))
+        self.log.info("Training word2vec on {:,d} documents, {:d} iterations using Gensim".format(
+            len(input_corpus), self.info.options["iters"]
+        ))
+        if self.processes > 1:
+            self.log.info("Using {:d} worker processes".format(self.processes))
+
+        # Run training
         word2vec = Word2Vec(
             sentences,
             min_count=self.info.options["min_count"],
@@ -25,8 +29,9 @@ class ModuleExecutor(BaseModuleExecutor):
             iter=self.info.options["iters"],
             negative=self.info.options["negative_samples"],
         )
-        self.log.info("Training complete: saving model")
-        with EmbeddingsWriter(self.info.get_absolute_output_dir("model")) as writer:
+        self.log.info("Training complete. Trained {:,d} vectors".format(word2vec.wv.vectors.shape[0]))
+        self.log.info("Writing out vectors")
+        with self.info.get_output_writer("model") as writer:
             writer.write_keyed_vectors(word2vec.wv)
 
 
@@ -37,6 +42,6 @@ class SentenceIterator(object):
     def __iter__(self):
         pbar = get_progress_bar(len(self.tokenized_corpus), title="Iterating over sentences", counter=True)
         for doc_name, doc in pbar(self.tokenized_corpus):
-            if type(doc) is not InvalidDocument:
-                for sentence in doc:
+            if not is_invalid_doc(doc):
+                for sentence in doc.sentences:
                     yield sentence
