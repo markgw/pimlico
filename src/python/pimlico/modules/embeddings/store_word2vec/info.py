@@ -1,13 +1,7 @@
 from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes import NamedFileCollection, Embeddings
-
-
-class Word2VecFiles(NamedFileCollection):
-    datatype_name = "word2vec_files"
-
-    def __init__(self, *args, **kwargs):
-        super(Word2VecFiles, self).__init__(["embeddings.bin", "embeddings.vocab"], *args, **kwargs)
+from pimlico.datatypes import Embeddings
+from pimlico.datatypes.embeddings import Word2VecFiles
 
 
 class ModuleInfo(BaseModuleInfo):
