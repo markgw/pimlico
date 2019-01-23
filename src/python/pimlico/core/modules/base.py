@@ -476,21 +476,6 @@ class BaseModuleInfo(object):
 
         return output_name, datatype
 
-    def instantiate_output_datatype(self, output_name, output_datatype):
-        """
-        Subclasses may want to override this to provide special behaviour for instantiating
-        particular outputs' datatypes.
-
-        .. deprecated:: new datatypes
-
-           Roughly replaced by instantiate_output_reader(), but many of the use cases
-           can be covered in other ways now
-
-        """
-        #return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self)
-        return None
-    instantiate_output_datatype._original = True
-
     def output_ready(self, output_name=None):
         """
         Check whether the named output is ready to be read from one of its possible storage locations.
