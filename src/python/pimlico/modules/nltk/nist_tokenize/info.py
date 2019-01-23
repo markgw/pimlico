@@ -6,9 +6,9 @@
 Sentence splitting and tokenization using the
 `NLTK NIST tokenizer <https://www.nltk.org/api/nltk.tokenize.html#module-nltk.tokenize.nist>`_.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
+Very simple tokenizer that's fairly language-independent and doesn't need
+a trained model. Use this if you just need a rudimentary tokenization
+(though more sophisticated than :mod:`~pimlico.modules.text.simple_tokenize`).
 
 """
 
@@ -22,7 +22,7 @@ from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "nltk_nist_tokenizer"
-    module_readable_name = "OpenNLP NIST tokenizer"
+    module_readable_name = "NIST tokenizer"
     module_inputs = [("text", GroupedCorpus(RawTextDocumentType()))]
     module_outputs = [("documents", GroupedCorpus(TokenizedDocumentType()))]
     module_options = {

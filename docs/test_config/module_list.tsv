@@ -1,3 +1,4 @@
+test-config-nist_tokenize.conf	pimlico.modules.nltk.nist_tokenize, pimlico.modules.nltk.nist_tokenize
 test-config-normalize.conf	pimlico.modules.text.normalize
 test-config-simple_tokenize.conf	pimlico.modules.text.simple_tokenize
 test-config-raw_text_files.conf	

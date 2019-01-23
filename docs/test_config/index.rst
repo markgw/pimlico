@@ -17,6 +17,7 @@ Available pipelines
    :maxdepth: 2
    :titlesonly:
 
+   nltk.nist_tokenize.conf.rst
    text.normalize.conf.rst
    text.simple_tokenize.conf.rst
    input.raw_text_files.conf.rst
