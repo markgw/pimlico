@@ -901,8 +901,8 @@ class BaseModuleInfo(object):
         """
         # Instantiate any input datatypes this module will need and check the datatype's dependencies
         return sum([
-            mod.get_software_dependencies() for input_name in self.inputs.keys()
-            for mod in self.get_input_datatype(input_name, always_list=True)
+            dtype.get_software_dependencies() for input_name in self.inputs.keys()
+            for dtype in self.get_input_datatype(input_name, always_list=True)
         ], [])
 
     def get_output_software_dependencies(self):
@@ -921,9 +921,15 @@ class BaseModuleInfo(object):
 
         """
         # Instantiate any output datatypes this module will need and check the datatype's dependencies
-        return sum([
-            self.get_output_datatype(output_name)[1].get_software_dependencies()
+        dtypes = [
+            self.get_output_datatype(output_name)[1]
             for output_name in dict(self.available_outputs).keys()
+        ]
+        # Get dependencies for each datatype, plus the additional dependencies
+        # declared to apply to the writer specifically, since we're writing here
+        return sum([
+            dtype.get_software_dependencies() + dtype.get_writer_software_dependencies()
+            for dtype in dtypes
         ], [])
 
     def check_ready_to_run(self):
