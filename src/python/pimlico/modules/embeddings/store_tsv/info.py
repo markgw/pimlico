@@ -1,5 +1,5 @@
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.old_datatypes.embeddings import Embeddings, TSVVecFiles
+from pimlico.datatypes import Embeddings, TSVVecFiles
 
 
 class ModuleInfo(BaseModuleInfo):
@@ -8,14 +8,16 @@ class ModuleInfo(BaseModuleInfo):
     (see :class:`~pimlico.datatypes.embeddings.Embeddings`) and stores them
     as TSV files.
 
-    These are suitable as input to the [Tensorflow Projector](https://projector.tensorflow.org/).
+    This is for using the vectors outside your pipeline, for example, for
+    distributing them publicly or using as input to an external visualization
+    tool. For passing embeddings between Pimlico modules,
+    the internal :class:`~pimlico.datatypes.embeddings.Embeddings` datatype
+    should be used.
 
-    .. todo::
-
-       Update to new datatypes system and add test pipeline
+    These are suitable as input to the `Tensorflow Projector <https://projector.tensorflow.org/>`_.
 
     """
     module_type_name = "store_tsv"
     module_readable_name = "Store in TSV format"
-    module_inputs = [("embeddings", Embeddings)]
-    module_outputs = [("embeddings", TSVVecFiles)]
+    module_inputs = [("embeddings", Embeddings())]
+    module_outputs = [("embeddings", TSVVecFiles())]

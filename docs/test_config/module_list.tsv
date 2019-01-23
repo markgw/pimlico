@@ -3,6 +3,7 @@ test-config-simple_tokenize.conf	pimlico.modules.text.simple_tokenize
 test-config-raw_text_files.conf	
 test-config-fasttext.conf	pimlico.modules.input.embeddings.fasttext
 test-config-glove.conf	pimlico.modules.input.embeddings.glove
+test-config-store_tsv.conf	pimlico.modules.embeddings.store_tsv
 test-config-word2vec.conf	pimlico.modules.embeddings.word2vec
 test-config-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec
 test-config-tokenize.conf	pimlico.modules.opennlp.tokenize

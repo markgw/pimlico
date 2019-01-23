@@ -22,6 +22,7 @@ Available pipelines
    input.raw_text_files.conf.rst
    input.fasttext.conf.rst
    input.glove.conf.rst
+   embeddings.store_tsv.conf.rst
    embeddings.word2vec.conf.rst
    embeddings.store_word2vec.conf.rst
    opennlp.tokenize.conf.rst
