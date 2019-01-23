@@ -1,11 +1,7 @@
-\!\! Word2vec embedding trainer
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Word2vec embedding trainer
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.word2vec
-
-.. note::
-
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+-------------------------------------+
 | Path       | pimlico.modules.embeddings.word2vec |
@@ -20,28 +16,24 @@ Find out more about `word2vec <https://code.google.com/archive/p/word2vec/>`_.
 This module is simply a wrapper to call `Gensim Python (+C) <https://radimrehurek.com/gensim/models/word2vec.html>`_'s
 implementation of word2vec on a Pimlico corpus.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
-
 
 Inputs
 ======
 
-+------+--------------------------------------+
-| Name | Type(s)                              |
-+======+======================================+
-| text | **invalid input type specification** |
-+------+--------------------------------------+
++------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name | Type(s)                                                                                                                                                                |
++======+========================================================================================================================================================================+
+| text | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`TokenizedDocumentType <pimlico.datatypes.corpora.tokenized.TokenizedDocumentType>`> |
++------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Outputs
 =======
 
-+-------+---------------------------------------+
-| Name  | Type(s)                               |
-+=======+=======================================+
-| model | **invalid output type specification** |
-+-------+---------------------------------------+
++-------+---------------------------------------------------------------+
+| Name  | Type(s)                                                       |
++=======+===============================================================+
+| model | :class:`embeddings <pimlico.datatypes.embeddings.Embeddings>` |
++-------+---------------------------------------------------------------+
 
 Options
 =======
@@ -82,3 +74,9 @@ This example usage includes more options.
    negative_samples=5
    size=200
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-word2vec.conf`
