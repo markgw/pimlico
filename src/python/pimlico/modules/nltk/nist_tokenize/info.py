@@ -15,16 +15,16 @@ Sentence splitting and tokenization using the
 from pimlico.core.dependencies.python import nltk_dependency, NLTKResource
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.modules.options import str_to_bool
-from pimlico.old_datatypes.documents import RawTextDocumentType
-from pimlico.old_datatypes.tar import TarredCorpusType
-from pimlico.old_datatypes.tokenized import TokenizedCorpus
+from pimlico.datatypes import GroupedCorpus
+from pimlico.datatypes.corpora.data_points import RawTextDocumentType
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "nltk_nist_tokenizer"
     module_readable_name = "OpenNLP NIST tokenizer"
-    module_inputs = [("text", TarredCorpusType(RawTextDocumentType))]
-    module_outputs = [("documents", TokenizedCorpus)]
+    module_inputs = [("text", GroupedCorpus(RawTextDocumentType()))]
+    module_outputs = [("documents", GroupedCorpus(TokenizedDocumentType()))]
     module_options = {
         "lowercase": {
             "help": "Lowercase all output. Default: False",
@@ -37,9 +37,6 @@ class ModuleInfo(DocumentMapModuleInfo):
             "default": False,
         },
     }
-
-    def __init__(self, *args, **kwargs):
-        super(ModuleInfo, self).__init__(*args, **kwargs)
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [
