@@ -759,6 +759,20 @@ class PipelineConfig(object):
                     for exp_name in alternative_config_names:
                         expanded_to_original_sections[exp_name] = module_name
                         expanded_sections[exp_name] = module_name
+
+                    # We also need to do this for any aliases to this module
+                    aliases_to_expand = [alias for (alias, trg) in aliases.iteritems() if trg == module_name]
+                    for alias in aliases_to_expand:
+                        del aliases[alias]
+                        for alt_name in module_alt_names:
+                            exp_alias = "%s[%s]" % (alias, alt_name)
+                            exp_module = "%s[%s]" % (module_name, alt_name)
+                            aliases[exp_alias] = exp_module
+
+                            # Keep a record of what expansions we've done
+                            original_to_expanded_sections.setdefault(alias, []).append(exp_alias)
+                            expanded_to_original_sections[exp_alias] = alias
+                            expanded_sections[exp_alias] = alias
                 else:
                     # No alternatives
                     expanded_module_configs.append((module_name, module_config))

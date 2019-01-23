@@ -295,7 +295,7 @@ class PimlicoDatatype(object):
         only needs to specify any additional dependencies the writer has.
 
         You should call the super method for checking superclass dependencies.
-        
+
         """
         return []
 
