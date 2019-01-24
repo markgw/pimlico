@@ -42,6 +42,10 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         if len(datasets) == 0:
             raise PipelineStructureError("document map module '%s' got no GroupedCorpus inputs" % self.module_name)
 
+        # Cache the writers once we initialized them
+        self._writers = None
+        self._named_writers = None
+
     def _load_input_readers(self):
         # Prepare the list of document map inputs that will be fed into the executor
         # We may have multiple inputs that are grouped corpora, in which case they're aligned
@@ -53,11 +57,18 @@ class DocumentMapModuleInfo(BaseModuleInfo):
     input_corpora = property(_load_input_readers)
 
     def get_writers(self, append=False):
-        # Only include the outputs that are tarred corpus types
-        # This allows there to be other outputs aside from those mapped to
-        outputs = [name for name in self.output_names
-                   if satisfies_typecheck(self.get_output_datatype(name)[1], GroupedCorpus(RawDocumentType()))]
-        return tuple(self.get_output_writer(name, append=append) for name in outputs)
+        if self._writers is None:
+            self._writers = tuple([writer for (nm, writer) in self.get_named_writers(append=append)])
+        return self._writers
+
+    def get_named_writers(self, append=False):
+        if self._named_writers is None:
+            # Only include the outputs that are tarred corpus types
+            # This allows there to be other outputs aside from those mapped to
+            outputs = [name for name in self.output_names
+                       if satisfies_typecheck(self.get_output_datatype(name)[1], GroupedCorpus(RawDocumentType()))]
+            self._named_writers = tuple((name, self.get_output_writer(name, append=append)) for name in outputs)
+        return self._named_writers
 
     def get_detailed_status(self):
         status_lines = super(DocumentMapModuleInfo, self).get_detailed_status()
@@ -74,8 +85,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         Convenience utility to avoid having to look up the output data point type to do this.
 
         """
-        output_type = self.get_output_datatype(output_name=output_name)[1]
-        output_data_point_type = output_type.data_point_type
+        output_data_point_type = dict(self.get_named_writers())[output_name or self.default_output_name].datatype.data_point_type
         return output_data_point_type(**kwargs)
 
 
