@@ -1169,8 +1169,20 @@ def check_type(provided_type, type_requirements):
             # Return the requirement that was met, which is handy in some circumstances
             return intype
     # No requirement was met
-    raise TypeCheckError("required type is %s (or a descendent), but provided type is %s" % (
-        "/".join(t.type_checking_name() for t in type_requirements), provided_type.type_checking_name()))
+    # Try to use type_checking_name() to identify types
+    provided_type_name = type_checking_name(provided_type)
+    req_types = "/".join(type_checking_name(t) for t in type_requirements)
+    raise TypeCheckError("required type is {} (or a descendent), but provided type is {}".format(req_types, provided_type_name))
+
+
+def type_checking_name(typ):
+    try:
+        return typ.type_checking_name()
+    except AttributeError:
+        if not hasattr(typ, "type_checking_name"):
+            return "{} (no type_checking_name for type)".format(type(typ).__name__)
+        else:
+            raise
 
 
 def _compatible_input_type(type_requirement, supplied_type):
