@@ -1683,7 +1683,8 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                                                        (relative_filename, e))
                     all_filenames.extend(incl_filenames)
                     # Save this subconfig and incorporate it later
-                    sub_configs.append((include_filename, incl_config))
+                    # Note what the current section is, so we include it in the right order
+                    sub_configs.append((include_filename, incl_config, current_section))
                     # Also save vars section, which may override variables that were defined earlier
                     sub_vars.append(incl_vars)
                     available_variants.update(incl_variants)
@@ -1742,13 +1743,15 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
         (section, OrderedDict(config_parser.items(section))) for section in config_parser.sections() if section != u"vars"
     ]
     # Add in sections from the included configs
-    for subconfig_filename, subconfig in sub_configs:
+    for subconfig_filename, subconfig, include_after in sub_configs:
         # Check there's no overlap between the sections defined in the subconfig and those we already have
         overlap_sections = set(map(itemgetter(0), config_sections)) & set(map(itemgetter(0), subconfig))
         if overlap_sections:
             raise PipelineStructureError("section '%s' defined in %s has already be defined in an including "
                                          "config file" % (" + ".join(overlap_sections), subconfig_filename))
-        config_sections.extend(subconfig)
+        # Find the index where we'll include this
+        after_index = (i for (i, (sec, conf)) in enumerate(config_sections) if sec == include_after).next()
+        config_sections = config_sections[:after_index+1] + subconfig + config_sections[after_index+1:]
 
     # Config parser permits values that span multiple lines and removes indent of subsequent lines
     # This is good, but we don't want the newlines to be included in the values
