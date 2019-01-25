@@ -236,11 +236,17 @@ class FilterModuleOutputReader(GroupedCorpus.Reader):
     def __init__(self, datatype, setup, pipeline, **kwargs):
         # Don't call GroupedCorpus init, but jump up to IterableCorpus
         IterableCorpus.Reader.__init__(self, datatype, setup, pipeline, **kwargs)
-        # TODO Set archives and archive_filenames to conform to GroupedCorpus.Reader interface
+        # Prepare the reader for all the inputs
+        self.input_corpora = setup.wrapped_module_info.input_corpora
+        # Construct the align corpus reader
+        self.input_iterator = AlignedGroupedCorpora(self.input_corpora)
+        # Set archives and archive_filenames to conform to GroupedCorpus.Reader interface
+        # These are taken directly from the first input corpus and is assumed to be unchanged
+        self.archives = self.input_corpora[0].archives
+        self.archive_filenames = self.input_corpora[0].archive_filenames
 
     def __len__(self):
-        # TODO
-        pass
+        return len(self.input_iterator)
 
     def extract_file(self, archive_name, filename):
         raise NotImplementedError("cannot extract file from filter module reader")
@@ -312,13 +318,13 @@ def wrap_module_info_as_filter(module_info_instance):
     #   we can wrap a module with non-grouped corpora outputs if those outputs are never needed.
     #   But then we probably get the error at an odd time
     output_datatypes = [
-        (output_name, module_info_instance.get_output_datatype(output_name))
+        (output_name, module_info_instance.get_output_datatype(output_name))[1]
         for output_name in module_info_instance.output_names
     ]
     for (output_name, output_datatype) in output_datatypes:
         if not satisfies_typecheck(output_datatype, GroupedCorpus()):
             raise PipelineStructureError("problem treating module '{}' as a filter. Output '{}' is not a grouped "
-                                         "corpus".format(module_info_instance.module_name, output_name))
+                                         "corpus, but {}".format(module_info_instance.module_name, output_name, output_datatype))
 
     class ModuleInfo(BaseModuleInfo):
         module_type_name = "%s_filter" % module_info_instance.module_type_name
