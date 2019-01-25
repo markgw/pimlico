@@ -18,3 +18,6 @@ pipelines/input/glove.conf, vectors
 pipelines/embeddings/word2vec.conf, word2vec
 pipelines/embeddings/store_word2vec.conf, store
 pipelines/embeddings/store_tsv.conf, store
+
+# Formatters
+pipelines/corpora/formatters/tokenized.conf, format
