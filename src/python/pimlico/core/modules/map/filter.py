@@ -75,7 +75,7 @@ class FilterModuleOutputReader(GroupedCorpus.Reader):
             )
 
             # Set map processing going, using the generic function
-            mapper = DocumentMapper(executor, input_iter)
+            mapper = DocumentMapper(executor, input_iter, record_invalid=True)
             # Only ever use a single process for a filter module
             for (archive, doc_name), next_output in mapper.map_documents():
                 # Accumulate counts of invalid documents

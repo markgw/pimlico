@@ -5,7 +5,6 @@ from threading import Thread
 from time import sleep
 from traceback import format_exc
 
-import sys
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.base import BaseModuleInfo, BaseModuleExecutor, satisfies_typecheck
 from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
@@ -240,7 +239,8 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
 
 class DocumentMapper(object):
-    def __init__(self, executor, input_iter, processes=1):
+    def __init__(self, executor, input_iter, processes=1, record_invalid=False):
+        self.record_invalid = record_invalid
         self.processes = processes
         self.input_iter = input_iter
         self.executor = executor
@@ -278,7 +278,8 @@ class DocumentMapper(object):
             # Inputs will be taken from the input_iter as they're needed
             # Set a thread going to feed things onto the input queue
             self.input_feeder = InputQueueFeeder(executor.pool.input_queue, self.input_iter,
-                                                 complete_callback=executor.pool.notify_no_more_inputs)
+                                                 complete_callback=executor.pool.notify_no_more_inputs,
+                                                 record_invalid=self.record_invalid)
 
             # Wait to make sure the input feeder's fed something into the input queue
             self.input_feeder.started.wait()
@@ -441,8 +442,12 @@ class InputQueueFeeder(Thread):
     Background thread to read input documents from an iterator and feed them onto an input queue for worker
     processes/threads.
 
+    If record_invalid=True, any invalid documents in the input stream are recorded in a queue.
+    If using this, check_invalid() should be called regularly during mapping. If it is not,
+    the queue will just fill up.
+
     """
-    def __init__(self, input_queue, iterator, complete_callback=None):
+    def __init__(self, input_queue, iterator, complete_callback=None, record_invalid=False):
         super(InputQueueFeeder, self).__init__()
         self.complete_callback = complete_callback
         self.daemon = True
@@ -454,9 +459,14 @@ class InputQueueFeeder(Thread):
         self.cancelled = threading.Event()
         self.ended = threading.Event()
         self.exception_queue = Queue(1)
-        # Accumulate a list of invalid docs that have been fed, just for information
-        self.invalid_docs = Queue()
-        self._invalid_docs_list = []
+
+        self.record_invalid = record_invalid
+        if record_invalid:
+            # Accumulate a list of invalid docs that have been fed, just for information
+            self.invalid_docs = Queue()
+            self._invalid_docs_list = []
+        else:
+            self.invalid_docs = self._invalid_docs_list = None
         self.start()
 
     def get_next_output_document(self):
@@ -506,9 +516,17 @@ class InputQueueFeeder(Thread):
         Checks whether a given document was invalid in the input. Once the check has been performed, the
         item is removed from the list, for efficiency, so this should only be called once per document.
         """
-        # Update the invalid docs list from the queue
-        while not self.invalid_docs.empty():
-            self._invalid_docs_list.append(self.invalid_docs.get_nowait())
+        try:
+            # Update the invalid docs list from the queue
+            while not self.invalid_docs.empty():
+                self._invalid_docs_list.append(self.invalid_docs.get_nowait())
+        except:
+            if self.invalid_docs is None:
+                # Should never have called this method
+                raise ValueError("called check_invalid() on an input feeder created with record_invalid=False")
+            else:
+                raise
+
         self._invalid_docs_list = [d for d in self._invalid_docs_list if d is not None]
         if (archive, filename) in self._invalid_docs_list:
             self._invalid_docs_list.remove((archive, filename))
@@ -522,8 +540,9 @@ class InputQueueFeeder(Thread):
                 if self.cancelled.is_set():
                     # Stop feeding right away
                     return
-                if any(is_invalid_doc(doc) for doc in docs):
-                    self.invalid_docs.put((archive, filename))
+                if self.record_invalid:
+                    if any(is_invalid_doc(doc) for doc in docs):
+                        self.invalid_docs.put((archive, filename))
                 # If the queue is full, this will block until there's room to put the next one on
                 # It also blocks if the queue is closed/destroyed/something similar, so we need to check now and
                 #  again that we've not been asked to give up
@@ -595,18 +614,19 @@ class InputQueueFeeder(Thread):
                           "the application forcibly")
         # Empty all queues, in case there's anything still sitting in any of them
         for q in [self.input_queue, self._docs_processing, self.exception_queue, self.invalid_docs]:
-            while True:
-                try:
-                    q.get_nowait()
-                except Empty:
-                    break
-            if hasattr(q, "task_done"):
+            if q is not None:
                 while True:
                     try:
-                        q.task_done()
-                    except ValueError:
-                        # No more undone tasks left
+                        q.get_nowait()
+                    except Empty:
                         break
+                if hasattr(q, "task_done"):
+                    while True:
+                        try:
+                            q.task_done()
+                        except ValueError:
+                            # No more undone tasks left
+                            break
         # Wait for thread to shut down
         self.join(timeout=timeout)
         # Check whether the join timed out
