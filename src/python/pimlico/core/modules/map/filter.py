@@ -102,8 +102,9 @@ class FilterModuleOutputReader(GroupedCorpus.Reader):
             raise ModuleExecutionError("error in filter {}: {}".format(self.setup.wrapped_module_info.module_name, e),
                                        cause=e, debugging_info=debugging)
         finally:
-            executor.log.info("Filter input contained %d invalid documents, output contained %d" %
-                              (invalid_inputs, invalid_outputs))
+            executor.log.info("Filter input contained {:,} invalid documents, output contained {:,}".format(
+                invalid_inputs, invalid_outputs
+            ))
 
     class Setup:
         def __init__(self, datatype, wrapped_module_info, output_name):
