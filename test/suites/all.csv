@@ -11,6 +11,7 @@ pipelines/corpora/vocab_mapper.conf, ids
 pipelines/corpora/vocab_counter.conf, counts
 pipelines/corpora/shuffle.conf, shuffle
 pipelines/corpora/stats.conf, stats
+pipelines/corpora/filter_tokenize.conf, store
 pipelines/text/normalize.conf, norm
 pipelines/text/simple_tokenize.conf, tokenize
 pipelines/input/fasttext.conf, vectors
