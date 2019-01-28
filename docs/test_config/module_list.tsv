@@ -1,6 +1,7 @@
 test-config-nist_tokenize.conf	pimlico.modules.nltk.nist_tokenize, pimlico.modules.nltk.nist_tokenize
 test-config-normalize.conf	pimlico.modules.text.normalize
 test-config-simple_tokenize.conf	pimlico.modules.text.simple_tokenize
+test-config-filter_map.conf	pimlico.modules.corpora.store
 test-config-raw_text_files.conf	
 test-config-fasttext.conf	pimlico.modules.input.embeddings.fasttext
 test-config-glove.conf	pimlico.modules.input.embeddings.glove
@@ -10,6 +11,7 @@ test-config-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec
 test-config-tokenize.conf	pimlico.modules.opennlp.tokenize
 test-config-store.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.store
 test-config-shuffle.conf	pimlico.modules.corpora.shuffle
+test-config-filter_tokenize.conf	pimlico.modules.corpora.store
 test-config-vocab_mapper.conf	pimlico.modules.corpora.vocab_mapper
 test-config-concat.conf	pimlico.modules.corpora.concat, pimlico.modules.corpora.format
 test-config-group.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.format
@@ -20,3 +22,4 @@ test-config-vocab_counter.conf	pimlico.modules.corpora.vocab_counter
 test-config-stats.conf	pimlico.modules.corpora.corpus_stats
 test-config-list_filter.conf	pimlico.modules.corpora.list_filter
 test-config-split.conf	pimlico.modules.corpora.split
+test-config-tokenized.conf	pimlico.modules.corpora.format

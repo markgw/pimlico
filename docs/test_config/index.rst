@@ -20,6 +20,7 @@ Available pipelines
    nltk.nist_tokenize.conf.rst
    text.normalize.conf.rst
    text.simple_tokenize.conf.rst
+   core.filter_map.conf.rst
    input.raw_text_files.conf.rst
    input.fasttext.conf.rst
    input.glove.conf.rst
@@ -29,6 +30,7 @@ Available pipelines
    opennlp.tokenize.conf.rst
    corpora.store.conf.rst
    corpora.shuffle.conf.rst
+   corpora.filter_tokenize.conf.rst
    corpora.vocab_mapper.conf.rst
    corpora.concat.conf.rst
    corpora.group.conf.rst
@@ -39,6 +41,7 @@ Available pipelines
    corpora.stats.conf.rst
    corpora.list_filter.conf.rst
    corpora.split.conf.rst
+   corpora.formatters.tokenized.conf.rst
 
 
 Input data
