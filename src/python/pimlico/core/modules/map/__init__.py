@@ -353,9 +353,6 @@ def skip_invalid(fn):
     Decorator to apply to document map executor process_document() methods where you want to skip doing any
     processing if any of the input documents are invalid and just pass through the error information.
 
-    Be careful not to confuse this with the process_document() methods on datatypes. You don't need a decorator
-    on them to skip invalid documents, as it's not called on them anyway.
-
     """
     def _fn(self, archive, filename, *docs):
         invalid = [doc for doc in docs if is_invalid_doc(doc)]
