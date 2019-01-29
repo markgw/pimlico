@@ -314,6 +314,7 @@ class DocumentMapper(object):
                     else:
                         # Got a result from a process
                         break
+
                 # We've got some result, but it might not be the one we're looking for
                 # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
                 result_buffer[(result.archive, result.filename)] = result.data
@@ -646,7 +647,14 @@ class DocumentProcessorPool(object):
 
     """
     def __init__(self, processes):
-        self.output_queue = self.create_queue()
+        # Limit the output queue. If the processing is very fast, we can end
+        # up spending longer writing the output than processing the docs, so
+        # the queue just get bigger and bigger.
+        # In this case, the worker has to wait a bit to send its output back
+        self.output_queue = self.create_queue(10*processes)
+        # Limit the input queue to 2*processes: there's no point in filling
+        # it up with far more, just enough that the processes can be sure of
+        # getting something when they're ready
         self.input_queue = self.create_queue(2*processes)
         self.exception_queue = self.create_queue()
         self.processes = processes
