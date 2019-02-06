@@ -38,7 +38,10 @@ class PythonShellCmd(PimlicoCLISubcommand):
 
         if opts.script:
             # Script given on the command line, execute it
-            execfile(opts.script)
+            # Use the __main__ context, so that if the script uses the standard if __name__ == "__main__" way
+            # to define a main script, this will be executed
+            import __main__
+            execfile(opts.script, __main__.__dict__)
 
         if not opts.script or opts.i:
             # Enter the interpreter
