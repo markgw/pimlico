@@ -338,9 +338,20 @@ class GroupedCorpus(IterableCorpus):
             info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
             info.size = len(data)
             self.current_archive_tar.addfile(info, data_file)
+            # Flush to disk to ensure the latest file always gets written
+            self.flush()
 
             # Keep a count of how many we've added so we can write metadata
             self.doc_count += 1
+
+        def flush(self):
+            """ Flush disk write of the tarfile currently being written. Called after adding a new file """
+            if self.current_archive_tar is not None:
+                # First call flush(), which does a basic flush to RAM cache
+                f = self.current_archive_tar.fileobj
+                f.flush()
+                # Then we also need to force the system to write it to disk
+                os.fsync(f.fileno())
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             if self.current_archive_tar is not None:
