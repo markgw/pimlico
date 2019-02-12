@@ -203,11 +203,17 @@ class GroupedCorpus(IterableCorpus):
                 shutil.rmtree(tmp_dir)
 
         def list_archive_iter(self):
+            gzipped = self.metadata.get("gzip", False)
             for archive_name, archive_filename in zip(self.archives, self.archive_filenames):
-                tarball = tarfile.open(os.path.join(self.data_dir, archive_filename), 'r')
-                filenames = tarball.getnames()
-                for filename in filenames:
-                    yield archive_name, filename
+                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                    for tarinfo in tarball:
+                        filename = tarinfo.name
+                        # Do the same name preprocessing that archive_iter does
+                        doc_name = filename.decode("utf8")
+                        if gzipped and doc_name.endswith(".gz"):
+                            # If we used the .gz extension while writing the file, remove it to get the doc name
+                            doc_name = doc_name[:-3]
+                        yield archive_name, doc_name
 
     class Writer:
         """
