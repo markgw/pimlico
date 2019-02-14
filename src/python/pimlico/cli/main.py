@@ -7,6 +7,8 @@ Main command-line script for running Pimlico, typically called from `pimlico.sh`
 Provides access to many subcommands, acting as the primary interface to Pimlico's functionality.
 
 """
+from pimlico.cli.recover import RecoverCmd
+
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
 
@@ -127,7 +129,7 @@ class VisualizeCmd(PimlicoCLISubcommand):
 
 
 SUBCOMMANDS = [
-    StatusCmd, VariantsCmd, RunCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd,
+    StatusCmd, VariantsCmd, RunCmd, RecoverCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd,
     ListStoresCmd, MoveStoresCmd, UnlockCmd,
     DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, NewModuleCmd, VisualizeCmd, EmailCmd
 ]
@@ -212,6 +214,8 @@ if __name__ == "__main__":
             opts.module_name = module_number_to_name(pipeline, opts.module_name)
         if hasattr(opts, "modules") and opts.modules is not None and len(opts.modules):
             opts.modules = module_numbers_to_names(pipeline, opts.modules)
+        if hasattr(opts, "module") and opts.module is not None:
+            opts.module = module_number_to_name(pipeline, opts.module)
     except ValueError, e:
         print >>sys.stderr, "Error in module specification: %s" % e
         sys.exit(1)
