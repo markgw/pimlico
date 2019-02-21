@@ -42,10 +42,12 @@ class GroupedCorpus(IterableCorpus):
                     return False
                 return True
 
-            def _get_archive_filenames(self, data_dir):
-                return list(self._iter_archive_filenames(data_dir))
+            @classmethod
+            def _get_archive_filenames(cls, data_dir):
+                return list(cls._iter_archive_filenames(data_dir))
 
-            def _iter_archive_filenames(self, data_dir):
+            @classmethod
+            def _iter_archive_filenames(cls, data_dir):
                 if data_dir is None:
                     return
                 else:
@@ -281,12 +283,8 @@ class GroupedCorpus(IterableCorpus):
                                 self.metadata["length"] = data.get("length", 0)
                 else:
                     # Can't rely on the metadata: count up docs in archive to get initial length
-                    for root, dirs, files in os.walk(self.data_dir):
-                        for filename in files:
-                            tar_filename = os.path.join(root, filename)
-                            if tar_filename.endswith(".tar.gz") or tar_filename.endswith(".tar"):
-                                with tarfile.open(tar_filename, "r") as tarball:
-                                    self.metadata["length"] += len(tarball.getmembers())
+                    # This can take a long time on a large corpus
+                    self.metadata["length"] = self._count_written_docs()
             self.doc_count = self.metadata["length"]
 
         def add_document(self, archive_name, doc_name, doc):
@@ -358,6 +356,25 @@ class GroupedCorpus(IterableCorpus):
                 self.current_archive_tar.close()
             self.metadata["length"] = self.doc_count
             super(GroupedCorpus.Writer, self).__exit__(exc_type, exc_val, exc_tb)
+
+        def _count_written_docs(self):
+            """
+            Emulates what a reader does to iterate over docs, in order to count up how many
+            docs have already been written. Used when appending an existing corpus and not
+            trusting the stored length in the metadata.
+
+            """
+            # Look for already written archives
+            archive_filenames = GroupedCorpus.Reader.Setup._get_archive_filenames(self.data_dir)
+            archive_filenames.sort()
+            archives = [os.path.splitext(os.path.basename(f))[0] for f in archive_filenames]
+
+            total_docs = 0
+            for archive_name, archive_filename in zip(archives, archive_filenames):
+                # Count the docs in each archive
+                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                    total_docs += sum(1 for __ in tarball)
+            return total_docs
 
 
 def exclude_invalid(doc_iter):
