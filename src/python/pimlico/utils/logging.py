@@ -5,17 +5,6 @@
 from __future__ import absolute_import
 import logging
 
-# If coloredlogs is available, enable it
-# We don't make this one of Pimlico's core dependencies, but simply allow
-# it to be installed manually on the system and use it if it's there
-try:
-    import coloredlogs
-except ImportError:
-    # No coloredogs: never mind
-    pass
-else:
-    coloredlogs.install()
-
 
 def get_console_logger(name, debug=False):
     """
@@ -34,14 +23,28 @@ def get_console_logger(name, debug=False):
     log = logging.getLogger(name)
     log.setLevel(level)
 
-    if not log.handlers:
-        # Just log to the console
-        sh = logging.StreamHandler()
-        sh.setLevel(logging.DEBUG)
-        # Put a timestamp on everything
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        sh.setFormatter(formatter)
+    fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
-        log.addHandler(sh)
+    # If coloredlogs is available, enable it
+    # We don't make this one of Pimlico's core dependencies, but simply allow
+    # it to be installed manually on the system and use it if it's there
+    try:
+        import coloredlogs
+    except ImportError:
+        # No coloredogs: never mind
+        # Check there's a handler and add a stream handler if not
+        if not log.handlers:
+            # Just log to the console
+            sh = logging.StreamHandler()
+            sh.setLevel(logging.DEBUG)
+            # Put a timestamp on everything
+            formatter = logging.Formatter(fmt)
+            sh.setFormatter(formatter)
+
+            log.addHandler(sh)
+    else:
+        coloredlogs.install(
+            level=level, log=log, fmt=fmt
+        )
 
     return log
