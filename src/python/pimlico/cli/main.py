@@ -7,6 +7,7 @@ Main command-line script for running Pimlico, typically called from `pimlico.sh`
 Provides access to many subcommands, acting as the primary interface to Pimlico's functionality.
 
 """
+from pimlico.cli.fixlength import FixLengthCmd
 from pimlico.cli.recover import RecoverCmd
 
 if __name__ == "__main__":
@@ -129,7 +130,7 @@ class VisualizeCmd(PimlicoCLISubcommand):
 
 
 SUBCOMMANDS = [
-    StatusCmd, VariantsCmd, RunCmd, RecoverCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd,
+    StatusCmd, VariantsCmd, RunCmd, RecoverCmd, FixLengthCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd,
     ListStoresCmd, MoveStoresCmd, UnlockCmd,
     DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, NewModuleCmd, VisualizeCmd, EmailCmd
 ]

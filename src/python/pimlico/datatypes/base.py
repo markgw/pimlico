@@ -823,9 +823,13 @@ class PimlicoDatatype(object):
                                              (type(self).__name__, ", ".join(self._to_output)))
 
         def write_metadata(self):
-            with open(self._metadata_path, "w") as f:
+            self._write_metadata(self._metadata_path, self.metadata)
+
+        @staticmethod
+        def _write_metadata(metadata_path, metadata):
+            with open(metadata_path, "w") as f:
                 # We used to pickle the metadata dictionary, but now we store it as JSON, so it's readable
-                json.dump(self.metadata, f)
+                json.dump(metadata, f)
                 # Make sure that the file doesn't get buffered anywhere, but is fully written to disk now
                 # We need to be sure that the up-to-date metadata is available immediately
                 f.flush()
