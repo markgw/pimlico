@@ -5,6 +5,17 @@
 from __future__ import absolute_import
 import logging
 
+# If coloredlogs is available, enable it
+# We don't make this one of Pimlico's core dependencies, but simply allow
+# it to be installed manually on the system and use it if it's there
+try:
+    import coloredlogs
+except ImportError:
+    # No coloredogs: never mind
+    pass
+else:
+    coloredlogs.install()
+
 
 def get_console_logger(name, debug=False):
     """
