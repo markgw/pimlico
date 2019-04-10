@@ -34,6 +34,25 @@ def get_progress_bar(maxval, counter=False, title=None, start=True):
     return pbar
 
 
+def get_open_progress_bar(title=None):
+    """
+    Builds a standard progress bar for the case where the total length
+    (max value) is not known, i.e. an open-ended progress bar.
+
+    """
+    if cfg.NON_INTERACTIVE_MODE:
+        # If we're not in interactive mode (e.g. piping to a file), don't output the progress bar
+        # In future we might want to print things instead, but for now we just don't output anything
+        return LittleOutputtingProgressBar(UnknownLength)
+
+    widgets = []
+    if title is not None:
+        widgets.append("%s: " % title)
+    widgets.extend([Bar(marker=RotatingMarker()), ' (', Counter(), ')'])
+    pbar = SafeProgressBar(widgets=widgets, maxval=UnknownLength)
+    return pbar
+
+
 class SafeProgressBar(ProgressBar):
     """
     Override basic progress bar to wrap update() method with a couple of extra features.

@@ -9,6 +9,7 @@ from operator import itemgetter
 import sys
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.datatypes.base import DataNotReadyError
+from pimlico.utils.progress import get_open_progress_bar
 
 
 class RecoverCmd(PimlicoCLISubcommand):
@@ -142,18 +143,15 @@ class RecoverCmd(PimlicoCLISubcommand):
 
 def count_docs(corpus, last_buffer_size=10):
     last_docs = []
+    # Show counting progress so we know something's happening
+    pbar = get_open_progress_bar("Counting")
 
     i = 0
-    report_freq = 1000
     try:
-        for i, (archive, doc_name) in enumerate(corpus.list_archive_iter()):
+        for i, (archive, doc_name) in pbar(enumerate(corpus.list_archive_iter())):
             # Keep a buffer of the last N docs
             last_docs.append((archive, doc_name))
             last_docs = last_docs[-last_buffer_size:]
-            if i % report_freq == 0 and i > 0:
-                print "{:,}k".format(i/1000)
-                if i >= report_freq*10 and report_freq <= 100000:
-                    report_freq *= 10
     except tarfile.ReadError:
         # If the tar writing was broken off in the middle, tarfile might complain about
         # an unexpected end of the file
