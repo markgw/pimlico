@@ -1,11 +1,7 @@
-!! OpenNLP NIST tokenizer
-~~~~~~~~~~~~~~~~~~~~~~~~~
+NIST tokenizer
+~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.nltk.nist_tokenize
-
-.. note::
-
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+------------------------------------+
 | Path       | pimlico.modules.nltk.nist_tokenize |
@@ -16,28 +12,28 @@
 Sentence splitting and tokenization using the
 `NLTK NIST tokenizer <https://www.nltk.org/api/nltk.tokenize.html#module-nltk.tokenize.nist>`_.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
+Very simple tokenizer that's fairly language-independent and doesn't need
+a trained model. Use this if you just need a rudimentary tokenization
+(though more sophisticated than :mod:`~pimlico.modules.text.simple_tokenize`).
 
 
 Inputs
 ======
 
-+------+--------------------------------------+
-| Name | Type(s)                              |
-+======+======================================+
-| text | **invalid input type specification** |
-+------+--------------------------------------+
++------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name | Type(s)                                                                                                                                                              |
++======+======================================================================================================================================================================+
+| text | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`RawTextDocumentType <pimlico.datatypes.corpora.data_points.RawTextDocumentType>`> |
++------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Outputs
 =======
 
-+-----------+---------------------------------------+
-| Name      | Type(s)                               |
-+===========+=======================================+
-| documents | **invalid output type specification** |
-+-----------+---------------------------------------+
++-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name      | Type(s)                                                                                                                                                                |
++===========+========================================================================================================================================================================+
+| documents | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`TokenizedDocumentType <pimlico.datatypes.corpora.tokenized.TokenizedDocumentType>`> |
++-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Options
 =======
@@ -72,3 +68,9 @@ This example usage includes more options.
    lowercase=F
    non_european=F
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-nist_tokenize.conf`

@@ -1,5 +1,5 @@
 """
-Embedding feature extractors and trainers
+Embeddings
 
 Modules for extracting features from which to learn word embeddings from corpora, and for training embeddings.
 

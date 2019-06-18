@@ -17,21 +17,31 @@ Available pipelines
    :maxdepth: 2
    :titlesonly:
 
+   nltk.nist_tokenize.conf.rst
    text.normalize.conf.rst
    text.simple_tokenize.conf.rst
+   core.filter_map.conf.rst
    input.raw_text_files.conf.rst
    input.fasttext.conf.rst
    input.glove.conf.rst
+   embeddings.store_tsv.conf.rst
+   embeddings.word2vec.conf.rst
+   embeddings.store_word2vec.conf.rst
    opennlp.tokenize.conf.rst
    corpora.store.conf.rst
+   corpora.shuffle.conf.rst
+   corpora.filter_tokenize.conf.rst
+   corpora.vocab_mapper.conf.rst
    corpora.concat.conf.rst
    corpora.group.conf.rst
    corpora.vocab_builder.conf.rst
    corpora.subset.conf.rst
    corpora.interleave.conf.rst
+   corpora.vocab_counter.conf.rst
    corpora.stats.conf.rst
    corpora.list_filter.conf.rst
    corpora.split.conf.rst
+   corpora.formatters.tokenized.conf.rst
 
 
 Input data

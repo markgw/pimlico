@@ -1,7 +1,7 @@
 .. _test-config-fasttext.conf:
 
-fasttext_input_test
-~~~~~~~~~~~~~~~~~~~
+fasttext\_input\_test
+~~~~~~~~~~~~~~~~~~~~~
 
 
 

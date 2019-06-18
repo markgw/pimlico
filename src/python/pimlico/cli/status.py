@@ -257,7 +257,7 @@ Input {input_name}:
                 # Get additional detailed information from the reader
                 datatype_details = input_reader.get_detailed_status()
                 if datatype_details:
-                    input_info += "\n".join("    {}".format(line) for line in datatype_details)
+                    input_info += "".join("\n    {}".format(line) for line in datatype_details)
             input_infos.append(input_info)
 
             # If filter module: output further information about where it gets its inputs from

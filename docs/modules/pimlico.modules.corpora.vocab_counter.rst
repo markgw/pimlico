@@ -1,11 +1,7 @@
-!! Token frequency counter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Token frequency counter
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.vocab_counter
-
-.. note::
-
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+---------------------------------------+
 | Path       | pimlico.modules.corpora.vocab_counter |
@@ -23,34 +19,30 @@ But, for example, when working with character-level tokens, this estimate will
 be very poor.
 
 The output will be a 1D array whose size is the length of the vocabulary, or
-the length plus one, if oov_excluded=T (used if the corpus has been mapped
-so that OOVs are represented by the ID vocab_size+1, instead of having a
+the length plus one, if ``oov_excluded=T`` (used if the corpus has been mapped
+so that OOVs are represented by the ID ``vocab_size+1``, instead of having a
 special token).
-
-.. todo::
-
-   Update to new datatypes system and add test pipeline
 
 
 Inputs
 ======
 
-+--------+--------------------------------------+
-| Name   | Type(s)                              |
-+========+======================================+
-| corpus | **invalid input type specification** |
-+--------+--------------------------------------+
-| vocab  | **invalid input type specification** |
-+--------+--------------------------------------+
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type(s)                                                                                                                                                                 |
++========+=========================================================================================================================================================================+
+| corpus | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`IntegerListsDocumentType <pimlico.datatypes.corpora.ints.IntegerListsDocumentType>`> |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| vocab  | :class:`dictionary <pimlico.datatypes.dictionary.Dictionary>`                                                                                                           |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Outputs
 =======
 
-+--------------+---------------------------------------+
-| Name         | Type(s)                               |
-+==============+=======================================+
-| distribution | **invalid output type specification** |
-+--------------+---------------------------------------+
++--------------+------------------------------------------------------------+
+| Name         | Type(s)                                                    |
++==============+============================================================+
+| distribution | :class:`numpy_array <pimlico.datatypes.arrays.NumpyArray>` |
++--------------+------------------------------------------------------------+
 
 Options
 =======
@@ -84,3 +76,9 @@ This example usage includes more options.
    input_vocab=module_a.some_output
    oov_excluded=T
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-vocab_counter.conf`

@@ -11,7 +11,7 @@ types can be converted to raw text using the :mod:`~pimlico.modules.corpora.form
 module.
 
 """
-
+from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool, choose_from_list
 from pimlico.datatypes import GroupedCorpus
@@ -45,4 +45,13 @@ class ModuleInfo(BaseModuleInfo):
             "type": choose_from_list(["skip", "empty"]),
             "default": "skip",
         },
+        "tar": {
+            "help": "Add all files to a single tar archive, instead of just outputting to disk in the given "
+                    "directory. This is a good choice for very large corpora, for which storing to files on "
+                    "disk can cause filesystem problems. If given, the value is used as the basename for "
+                    "the tar archive. Default: do not output tar",
+        },
     }
+
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + [PythonPackageOnPip("contextlib2")]

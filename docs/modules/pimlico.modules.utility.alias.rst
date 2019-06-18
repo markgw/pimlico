@@ -1,5 +1,5 @@
-!! Module output alias
-~~~~~~~~~~~~~~~~~~~~~~
+\!\! Module output alias
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.utility.alias
 

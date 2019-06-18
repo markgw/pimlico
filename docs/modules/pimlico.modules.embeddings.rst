@@ -1,5 +1,5 @@
-Embedding feature extractors and trainers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Embeddings
+~~~~~~~~~~
 
 
 .. py:module:: pimlico.modules.embeddings

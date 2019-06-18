@@ -1,7 +1,7 @@
 .. _test-config-simple_tokenize.conf:
 
-simple_tokenize
-~~~~~~~~~~~~~~~
+simple\_tokenize
+~~~~~~~~~~~~~~~~
 
 
 

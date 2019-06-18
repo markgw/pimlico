@@ -1,7 +1,7 @@
 .. _test-config-vocab_builder.conf:
 
-vocab_builder
-~~~~~~~~~~~~~
+vocab\_builder
+~~~~~~~~~~~~~~
 
 
 

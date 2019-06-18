@@ -1,5 +1,5 @@
-!! OpenNLP NER
-~~~~~~~~~~~~~~
+\!\! OpenNLP NER
+~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.ner
 

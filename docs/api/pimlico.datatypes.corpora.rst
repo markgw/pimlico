@@ -11,6 +11,7 @@ Submodules
    pimlico.datatypes.corpora.floats
    pimlico.datatypes.corpora.grouped
    pimlico.datatypes.corpora.ints
+   pimlico.datatypes.corpora.json
    pimlico.datatypes.corpora.table
    pimlico.datatypes.corpora.tokenized
 

@@ -12,7 +12,7 @@ import re
 from argparse import SUPPRESS, OPTIONAL, ZERO_OR_MORE, ONE_OR_MORE, REMAINDER, PARSER
 from operator import itemgetter
 from sphinx import __version__
-from sphinx.apidoc import format_heading
+from sphinx.ext.apidoc import format_heading
 
 from pimlico import install_core_dependencies
 from pimlico.cli.main import SUBCOMMANDS

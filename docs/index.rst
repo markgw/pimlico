@@ -15,15 +15,6 @@ existing, widely used **NLP** (Natural Language Processing) tools.
 
 .. note::
 
-   This is the ``python3`` branch of Pimlico, which will add Python 2-3 compatibility.
-   This will probably be a lengthy process, during which the codebase will be highly
-   unstable (or, at first, largely disfunctional).
-
-   If you want a working version of Pimlico, use the ``master`` branch or a
-   tagged release.
-
-.. note::
-
    These are the docs for the **release candidate for v1.0**.
 
    This brings with it a big project
@@ -52,6 +43,11 @@ pipeline and checking that everything's executed in the right order.
 The core toolkit is written in Python. Pimlico is open source, released under the GPLv3 license. It is
 available from `its Github repository <https://github.com/markgw/pimlico>`_.
 To get started with a Pimlico project, follow the :doc:`getting-started guide <guides/setup>`.
+
+Currently, Pimlico only supports **Python 2**.
+`Work is underway <https://github.com/markgw/pimlico/issues/8>`_
+to make it **Python 3 compatible**, but it's a large and complex
+codebase, so this will take some time.
 
 Pimlico is short for *PIpelined Modular LInguistic COrpus processing*.
 

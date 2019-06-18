@@ -1,5 +1,5 @@
-!! Collect files
-~~~~~~~~~~~~~~~~
+\!\! Collect files
+~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.utility.collect_files
 

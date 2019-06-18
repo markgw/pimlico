@@ -5,6 +5,7 @@
 from pimlico.cli.browser.tools.formatter import load_formatter
 from pimlico.core.modules.base import TypeCheckError
 from pimlico.core.modules.execute import ModuleExecutionError
+from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 from pimlico.datatypes.corpora.data_points import RawTextDocumentType
 
@@ -18,6 +19,7 @@ def worker_setup(worker):
         raise ModuleExecutionError("error loading formatter: %s" % e)
 
 
+@skip_invalid
 def process_document(worker, archive_name, doc_name, doc):
     return RawTextDocumentType()(text=worker.formatter.format_document(doc))
 

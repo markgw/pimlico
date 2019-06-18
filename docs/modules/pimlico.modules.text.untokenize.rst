@@ -1,5 +1,5 @@
-!! Tokenized text to text
-~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Tokenized text to text
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.text.untokenize
 

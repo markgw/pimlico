@@ -1,5 +1,5 @@
-Document-level text filters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Document\-level text filters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 .. py:module:: pimlico.modules.text

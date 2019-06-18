@@ -1,7 +1,7 @@
 .. _test-config-tokenize.conf:
 
-opennlp_tokenize
-~~~~~~~~~~~~~~~~
+opennlp\_tokenize
+~~~~~~~~~~~~~~~~~
 
 
 

@@ -4,10 +4,8 @@
 from collections import Counter
 
 import numpy
-
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.datatypes.corpora import InvalidDocument
-from pimlico.old_datatypes.arrays import NumpyArrayWriter
+from pimlico.datatypes.corpora import InvalidDocument, is_invalid_doc
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -21,16 +19,16 @@ class ModuleExecutor(BaseModuleExecutor):
         pbar = get_progress_bar(len(corpus))
         # Iterate over the whole corpus, counting up tokens
         counts = Counter(
-            token for doc_name, doc in pbar(corpus) for line in doc for token in line
-            if not isinstance(doc, InvalidDocument)
+            token for doc_name, doc in pbar(corpus) if not is_invalid_doc(doc)
+            for line in doc.lists for token in line
         )
         self.log.info("Counts collected")
         # Put the result in a numpy array
         dist = numpy.array([counts.get(i, 0) for i in range(dist_len)])
 
         # Store the output array
-        with NumpyArrayWriter(self.info.get_absolute_output_dir("distribution")) as writer:
-            writer.set_array(dist)
+        with self.info.get_output_writer("distribution") as writer:
+            writer.write_array(dist)
 
         # Output most and least frequent tokens
         ordered_ids = list(reversed(numpy.argsort(dist)))

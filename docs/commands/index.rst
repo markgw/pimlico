@@ -1,5 +1,5 @@
-Command-line interface
-~~~~~~~~~~~~~~~~~~~~~~
+Command\-line interface
+~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
@@ -46,6 +46,8 @@ command line.
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`python`     | Load the pipeline config and enter a Python interpreter with access to it in the environment |
 +-------------------+----------------------------------------------------------------------------------------------+
+| :doc:`recover`    | Examine and fix a partially executed map module's output state after forcible termination    |
++-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`reset`      | Delete any output from the given module and restore it to unexecuted state                   |
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`run`        | Execute an individual pipeline module, or a sequence                                         |
@@ -72,6 +74,7 @@ command line.
    status
    variants
    run
+   recover
    browse
    shell
    python

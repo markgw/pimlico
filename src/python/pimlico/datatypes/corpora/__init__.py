@@ -6,6 +6,10 @@ from .base import IterableCorpus
 from .grouped import GroupedCorpus
 from . import data_points
 from . import tokenized
+from . import floats
+from . import ints
+from . import json
+from . import table
 
 """
 This list collects together all the built-in data point types. These can be specified 
@@ -16,4 +20,8 @@ DATA_POINT_TYPES = [
     data_points.RawDocumentType,
     data_points.RawTextDocumentType, data_points.TextDocumentType,
     tokenized.TokenizedDocumentType, tokenized.CharacterTokenizedDocumentType, tokenized.SegmentedLinesDocumentType,
+    floats.FloatListDocumentType, floats.FloatListDocumentType, floats.VectorDocumentType,
+    ints.IntegerListsDocumentType, ints.IntegerListDocumentType,
+    json.JsonDocumentType,
+    table.IntegerTableDocumentType,
 ]

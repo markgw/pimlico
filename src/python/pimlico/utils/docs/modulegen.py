@@ -7,13 +7,14 @@ Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 
 """
 import argparse
+import codecs
 import os
 import sys
 import warnings
 from importlib import import_module
 from pkgutil import iter_modules
 from sphinx import __version__
-from sphinx.apidoc import format_heading
+from sphinx.ext.apidoc import format_heading
 
 from pimlico import install_core_dependencies
 from pimlico.core.modules.options import format_option_type, str_to_bool, \
@@ -161,7 +162,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
     if awaiting_datatype_update:
         module_title = "!! {}".format(module_title)
 
-    with open(filename, "w") as output_file:
+    with codecs.open(filename, "w", "utf8") as output_file:
         # Make a page heading
         output_file.write(format_heading(0, module_title))
         # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
@@ -191,9 +192,9 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         if output_table:
             output_file.write("%s\n" % make_table(output_table, header=["Name", "Type(s)"]))
         elif optional_output_table:
-            output_file.write("No non-optional outputs\n")
+            output_file.write("No non-optional outputs\n\n")
         else:
-            output_file.write("No outputs\n")
+            output_file.write("No outputs\n\n")
         if optional_output_table:
             output_file.write("\n" + format_heading(2, "Optional"))
             output_file.write("%s\n" % make_table(optional_output_table, header=["Name", "Type(s)"]))

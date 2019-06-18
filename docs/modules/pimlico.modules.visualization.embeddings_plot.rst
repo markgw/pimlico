@@ -1,5 +1,5 @@
-!! Embedding space plotter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Embedding space plotter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.visualization.embeddings_plot
 

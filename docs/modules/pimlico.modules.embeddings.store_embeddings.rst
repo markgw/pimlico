@@ -1,5 +1,5 @@
-Store embeddings (internal)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Store embeddings \(internal\)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.store_embeddings
 

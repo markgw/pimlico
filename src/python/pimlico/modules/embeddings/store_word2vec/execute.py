@@ -1,5 +1,4 @@
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.modules.embeddings.store_word2vec.info import Word2VecFilesWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):
@@ -21,7 +20,7 @@ class ModuleExecutor(BaseModuleExecutor):
             keyed_vectors.index2word = [replace_spaces(word) for word in keyed_vectors.index2word]
 
         # Output to the file
-        with Word2VecFilesWriter(self.info.get_absolute_output_dir("embeddings")) as writer:
+        with self.info.get_output_writer("embeddings") as writer:
             # Use Gensim's output method to write in word2vec format
             vec_path = writer.get_absolute_path(writer.filenames[0])
             self.log.info("Writing vectors to {}".format(vec_path))

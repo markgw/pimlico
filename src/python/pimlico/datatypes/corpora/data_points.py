@@ -283,17 +283,33 @@ class DataPointType(object):
         @property
         def raw_data(self):
             if self._raw_data is None:
-                # Raw data not available yet: convert from internal data
-                self._raw_data = self.internal_to_raw(self._internal_data)
-                self.raw_available()
+                try:
+                    # Raw data not available yet: convert from internal data
+                    self._raw_data = self.internal_to_raw(self._internal_data)
+                    self.raw_available()
+                except Exception, e:
+                    # Catch any exceptions and wrap them
+                    # In particular, it's important to catch attribute errors, as these otherwise lead
+                    # to __getatttr__ being called and give mystifying errors
+                    raise DataConversionError(
+                        "{} error converting internal to raw data for document type {}: {}".format(
+                            type(e).__name__, self.data_point_type, e
+                        ))
             return self._raw_data
 
         @property
         def internal_data(self):
             if self._internal_data is None:
-                # Internal data not available yet: convert from raw
-                self._internal_data = self.raw_to_internal(self._raw_data)
-                self.internal_available()
+                try:
+                    # Internal data not available yet: convert from raw
+                    self._internal_data = self.raw_to_internal(self._raw_data)
+                    self.internal_available()
+                except Exception, e:
+                    # Catch any exceptions and wrap them
+                    raise DataConversionError(
+                        "{} error converting raw to internal data for document type {}: {}".format(
+                            type(e).__name__, self.data_point_type, e
+                        ))
             return self._internal_data
 
         def __reduce__(self):
@@ -462,6 +478,10 @@ class RawTextDocumentType(TextDocumentType):
 
 
 class DataPointError(Exception):
+    pass
+
+
+class DataConversionError(Exception):
     pass
 
 

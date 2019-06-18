@@ -81,7 +81,7 @@ class SoftwareDependency(object):
 
     def dependencies(self):
         """
-        Returns a list of instances of :class:SoftwareDependency subclasses representing this library's own
+        Returns a list of instances of :class:`SoftwareDependency` subclasses representing this library's own
         dependencies. If the library is already available, these will never be consulted, but if it is to be
         installed, we will check first that all of these are available (and try to install them if not).
 
@@ -179,7 +179,7 @@ class Any(SoftwareDependency):
 
     def install(self, local_config, trust_downloaded_archives=False):
         """
-        Installs the dependency given by :method:`get_installation_candidate`, if any.
+        Installs the dependency given by :meth:`get_installation_candidate`, if any.
         Ideally, we should provide a way to select which of the options should be
         installed. However, until we've worked out the best way to do this, the default
         option is always installed. The user may install another option manually and
