@@ -759,6 +759,20 @@ class PipelineConfig(object):
                     for exp_name in alternative_config_names:
                         expanded_to_original_sections[exp_name] = module_name
                         expanded_sections[exp_name] = module_name
+
+                    # We also need to do this for any aliases to this module
+                    aliases_to_expand = [alias for (alias, trg) in aliases.iteritems() if trg == module_name]
+                    for alias in aliases_to_expand:
+                        del aliases[alias]
+                        for alt_name in module_alt_names:
+                            exp_alias = "%s[%s]" % (alias, alt_name)
+                            exp_module = "%s[%s]" % (module_name, alt_name)
+                            aliases[exp_alias] = exp_module
+
+                            # Keep a record of what expansions we've done
+                            original_to_expanded_sections.setdefault(alias, []).append(exp_alias)
+                            expanded_to_original_sections[exp_alias] = alias
+                            expanded_sections[exp_alias] = alias
                 else:
                     # No alternatives
                     expanded_module_configs.append((module_name, module_config))
@@ -1669,7 +1683,8 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                                                        (relative_filename, e))
                     all_filenames.extend(incl_filenames)
                     # Save this subconfig and incorporate it later
-                    sub_configs.append((include_filename, incl_config))
+                    # Note what the current section is, so we include it in the right order
+                    sub_configs.append((include_filename, incl_config, current_section))
                     # Also save vars section, which may override variables that were defined earlier
                     sub_vars.append(incl_vars)
                     available_variants.update(incl_variants)
@@ -1728,13 +1743,15 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
         (section, OrderedDict(config_parser.items(section))) for section in config_parser.sections() if section != u"vars"
     ]
     # Add in sections from the included configs
-    for subconfig_filename, subconfig in sub_configs:
+    for subconfig_filename, subconfig, include_after in sub_configs:
         # Check there's no overlap between the sections defined in the subconfig and those we already have
         overlap_sections = set(map(itemgetter(0), config_sections)) & set(map(itemgetter(0), subconfig))
         if overlap_sections:
             raise PipelineStructureError("section '%s' defined in %s has already be defined in an including "
                                          "config file" % (" + ".join(overlap_sections), subconfig_filename))
-        config_sections.extend(subconfig)
+        # Find the index where we'll include this
+        after_index = (i for (i, (sec, conf)) in enumerate(config_sections) if sec == include_after).next()
+        config_sections = config_sections[:after_index+1] + subconfig + config_sections[after_index+1:]
 
     # Config parser permits values that span multiple lines and removes indent of subsequent lines
     # This is good, but we don't want the newlines to be included in the values

@@ -15,11 +15,11 @@ from __future__ import absolute_import
 import os
 
 from pimlico.core.dependencies.python import numpy_dependency
-from pimlico.datatypes import PimlicoDatatype
+from pimlico.datatypes import PimlicoDatatype, NamedFileCollection
 from pimlico.datatypes.files import NamedFileCollection
 from pimlico.utils.core import cached_property
 
-__all__ = ["Embeddings", "TSVVecFiles"]
+__all__ = ["Embeddings", "TSVVecFiles", "Word2VecFiles"]
 
 
 class Vocab(object):
@@ -271,3 +271,10 @@ class TSVVecFiles(NamedFileCollection):
                 for word in words:
                     writer.writerow([unicode(word).encode("utf-8")])
             self.file_written(self.filenames[1])
+
+
+class Word2VecFiles(NamedFileCollection):
+    datatype_name = "word2vec_files"
+
+    def __init__(self, *args, **kwargs):
+        super(Word2VecFiles, self).__init__(["embeddings.bin", "embeddings.vocab"], *args, **kwargs)

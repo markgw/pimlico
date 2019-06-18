@@ -1,5 +1,4 @@
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.embeddings import TSVVecFilesWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):
@@ -7,6 +6,6 @@ class ModuleExecutor(BaseModuleExecutor):
         embeddings = self.info.get_input("embeddings")
 
         # Output to the file
-        with TSVVecFilesWriter(self.info.get_absolute_output_dir("embeddings")) as writer:
+        with self.info.get_output_writer("embeddings") as writer:
             writer.write_vectors(embeddings.vectors)
             writer.write_vocab_with_counts(embeddings.word_counts)

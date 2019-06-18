@@ -1,7 +1,7 @@
 .. _test-config-glove.conf:
 
-glove_input_test
-~~~~~~~~~~~~~~~~
+glove\_input\_test
+~~~~~~~~~~~~~~~~~~
 
 
 

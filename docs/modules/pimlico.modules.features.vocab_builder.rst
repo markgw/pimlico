@@ -1,5 +1,5 @@
-!! Term-feature corpus vocab builder
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! Term\-feature corpus vocab builder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.vocab_builder
 

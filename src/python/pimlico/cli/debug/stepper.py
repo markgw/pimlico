@@ -46,29 +46,29 @@ def enable_step_for_pipeline(pipeline):
                 # Wrap some of the datatype's methods
                 wrap_output_names.append(output_name)
 
-        # We have to wrap the datatype by wrapping the instantiate_output_datatype() method, which is always
+        # We have to wrap the datatype by wrapping the instantiate_output_reader() method, which is always
         # used to instantiate it
-        module.instantiate_output_datatype = instantiate_output_datatype_decorator(
-            module.instantiate_output_datatype, module_name, wrap_output_names, pipeline._stepper
+        module.instantiate_output_reader = instantiate_output_reader_decorator(
+            module.instantiate_output_reader, module_name, wrap_output_names, pipeline._stepper
         )
 
         module.get_input = get_input_decorator(module.get_input, module_name, pipeline._stepper)
 
 
-def instantiate_output_datatype_decorator(instantiate_output_datatype, module_name, output_names, stepper):
+def instantiate_output_reader_decorator(instantiate_output_reader, module_name, output_names, stepper):
     def wrapped_method(output_name, *args, **kwargs):
         # First call the normal method
-        dtype = instantiate_output_datatype(output_name, *args, **kwargs)
+        dtype = instantiate_output_reader(output_name, *args, **kwargs)
         # Only wrap particular outputs
         if output_name in output_names:
             # Wrap the produced datatype
-            wrap_tarred_corpus(dtype, module_name, output_name, stepper)
+            wrap_grouped_corpus(dtype, module_name, output_name, stepper)
         return dtype
 
     return wrapped_method
 
 
-def wrap_tarred_corpus(dtype, module_name, output_name, stepper):
+def wrap_grouped_corpus(dtype, module_name, output_name, stepper):
     dtype.archive_iter = archive_iter_decorator(dtype.archive_iter, module_name, output_name, stepper)
 
 

@@ -136,7 +136,7 @@ class ThreadingMapModuleExecutor(DocumentMapModuleExecutor):
 
 
 def threading_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,
-                               worker_set_up_fn=None, worker_tear_down_fn=None):
+                               worker_set_up_fn=None, worker_tear_down_fn=None, allow_skip_output=False):
     """
     Factory function for creating an executor that uses the threading-based implementations of document-map
     pools and worker processes.
@@ -160,6 +160,9 @@ def threading_executor_factory(process_document_fn, preprocess_fn=None, postproc
 
     Alternatively, you can supply a worker type, a subclass of :class:.ThreadingMapThread, as the first argument.
     If you do this, worker_set_up_fn and worker_tear_down_fn will be ignored.
+
+    If ``allow_skip_output==True`` and the process document function returns None as one of
+    its outputs, that document will simply not be written to that output.
 
     """
     if isinstance(process_document_fn, type):
@@ -189,6 +192,7 @@ def threading_executor_factory(process_document_fn, preprocess_fn=None, postproc
     # Finally, define an executor type (subclass of DocumentMapModuleExecutor) that creates a pool of the right sort
     class ModuleExecutor(ThreadingMapModuleExecutor):
         POOL_TYPE = FactoryMadeMapPool
+        ALLOW_SKIP_OUTPUT = allow_skip_output
 
         def preprocess(self):
             super(ModuleExecutor, self).preprocess()

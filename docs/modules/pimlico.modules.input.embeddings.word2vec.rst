@@ -1,5 +1,5 @@
-Word2vec embedding reader (Gensim)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Word2vec embedding reader \(Gensim\)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.input.embeddings.word2vec
 

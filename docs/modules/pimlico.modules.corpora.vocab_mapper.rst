@@ -9,13 +9,19 @@ Tokenized corpus to ID mapper
 | Executable | yes                                  |
 +------------+--------------------------------------+
 
-.. todo::
+Maps all the words in a tokenized textual corpus to integer IDs, storing
+just lists of integers in the output.
 
-   Write description of vocab mapper module
+This is typically done before doing things like training models on textual
+corpora. It ensures that a consistent mapping from words to IDs is used
+throughout the pipeline. The training modules use this pre-mapped form
+of input, instead of performing the mapping as they read the data, because
+it is much more efficient if the corpus needs to be iterated over many times,
+as is typical in model training.
 
-.. todo::
-
-   Add test pipeline and test
+First use the :mod:`~pimlico.modules.corpora.vocab_builder` module to
+construct the word-ID mapping and filter the vocabulary as you wish,
+then use this module to apply the mapping to the corpus.
 
 
 Inputs
@@ -70,3 +76,9 @@ This example usage includes more options.
    input_vocab=module_a.some_output
    oov=value
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-vocab_mapper.conf`

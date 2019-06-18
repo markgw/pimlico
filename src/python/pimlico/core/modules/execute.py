@@ -352,14 +352,18 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                 if preliminary:
                     # Don't set status to COMPLETE if we were just doing a preliminary run, to avoid confusion
                     module.status = "COMPLETE_PRELIMINARY"
+                    module.add_execution_history_record("Preliminary exectuion complete")
                 else:
                     module.status = "COMPLETE"
+                    module.add_execution_history_record("Execution completed successfully")
             else:
                 # Custom status was given
                 module.status = end_status
+                module.add_execution_history_record("Execution completed with status %s" % end_status)
         except Exception, e:
             # Intercept all exceptions to add the name of the module that they came from
             e.module_name = module_name
+            module.add_execution_history_record("Execution interruption by %s exception" % type(e).__name__)
             # Reraise the exception to be caught higher up
             raise
 

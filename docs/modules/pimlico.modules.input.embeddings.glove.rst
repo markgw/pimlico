@@ -1,5 +1,5 @@
-GloVe embedding reader (Gensim)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+GloVe embedding reader \(Gensim\)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.input.embeddings.glove
 
@@ -17,6 +17,10 @@ Can be used, for example, to read the pre-trained embeddings
 `offered by Stanford <https://nlp.stanford.edu/projects/glove/>`_.
 
 Note that the format is almost identical to `word2vec`'s text format.
+
+Note that this requires a recent version of Gensim, since they changed their KeyedVectors
+data structure. This is not enforced by the dependency check, since we're not able
+to require a specific version yet.
 
 
 Inputs

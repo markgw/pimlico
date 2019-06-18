@@ -42,32 +42,39 @@ class JavaDependency(SoftwareDependency):
 
     def problems(self, local_config):
         probs = super(JavaDependency, self).problems(local_config)
+        classpath_problem = False
         # Check that class dirs and jar files exist
         for dir in self.class_dirs:
             dir_path = os.path.join(JAVA_LIB_DIR, dir)
             if not os.path.exists(dir_path) or not os.path.isdir(dir_path):
                 probs.append("class directory %s does not exist" % dir_path)
+                classpath_problem = True
         for jar_name in self.jars:
             jar_path = os.path.join(JAVA_LIB_DIR, jar_name)
             if not os.path.exists(jar_path):
                 probs.append("jar file %s does not exist" % jar_path)
+                classpath_problem = True
         # Check Java is available
         try:
             check_java()
         except DependencyError:
             probs.append("Java is not installed")
-        # Try loading each of the classes specified
-        classpath = ":".join(self.get_classpath_components())
-        for cls in self.classes:
-            try:
-                check_java_dependency(cls, classpath=classpath)
-            except DependencyCheckerError:
-                probs.append("unable to load Java dependency checker to check classes are loadable")
-            except DependencyError, e:
-                # Usually, the first line is enough to tell what the error was (start of stack trace)
-                error_output = e.stderr.partition("\n")[0].strip()
-                extra_message = ". Loader output: %s" % error_output if error_output else ""
-                probs.append("could not load Java class %s (classpath=%s)%s" % (cls, classpath, extra_message))
+        # If there's been a problem above with something on the classpath, don't try
+        # loading the classes, as you end up with confusing error messages saying a
+        # class can't be loaded when you've already said a library is missing
+        if not classpath_problem:
+            # Try loading each of the classes specified
+            classpath = ":".join(self.get_classpath_components())
+            for cls in self.classes:
+                try:
+                    check_java_dependency(cls, classpath=classpath)
+                except DependencyCheckerError:
+                    probs.append("unable to load Java dependency checker to check classes are loadable")
+                except DependencyError, e:
+                    # Usually, the first line is enough to tell what the error was (start of stack trace)
+                    error_output = e.stderr.partition("\n")[0].strip()
+                    extra_message = ". Loader output: %s" % error_output if error_output else ""
+                    probs.append("could not load Java class %s (classpath=%s)%s" % (cls, classpath, extra_message))
         return probs
 
     def installable(self):

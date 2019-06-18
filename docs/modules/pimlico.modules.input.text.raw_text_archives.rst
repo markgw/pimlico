@@ -6,7 +6,7 @@ Raw text archives
 +------------+----------------------------------------------+
 | Path       | pimlico.modules.input.text.raw_text_archives |
 +------------+----------------------------------------------+
-| Executable | no                                           |
+| Executable | yes                                          |
 +------------+----------------------------------------------+
 
 Input reader for raw text file collections stored in archives.
@@ -25,6 +25,21 @@ one.
 
 All paths given are assumed to be required for the dataset to be ready,
 unless they are preceded by a ``?``.
+
+It can take a long time to count up the files in an archive, if there are
+a lot of them, as we need to iterate over the whole archive. If a file is
+found with a path and name identical to the tar archive's, with the suffix
+``.count``, a document count will be read from there and used instead of
+counting. Make sure it is correct, as it will be blindly trusted, which
+will cause difficulties in your pipeline if it's wrong! The file is expected
+to contain a single integer as text.
+
+All files in the archive are included. If you wish to filter files or
+preprocess them somehow, this can be easily done by subclassing
+:class:`RawTextArchivesInputReader` and overriding appropriate bits,
+e.g. `RawTextArchivesInputReader.Setup.iter_archive_infos()`. You can
+then use this reader to create an input reader module with the factory
+function, as is done here.
 
 .. seealso::
 

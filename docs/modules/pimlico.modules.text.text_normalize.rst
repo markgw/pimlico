@@ -1,5 +1,5 @@
-!! Normalize raw text
-~~~~~~~~~~~~~~~~~~~~~
+\!\! Normalize raw text
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.text.text_normalize
 

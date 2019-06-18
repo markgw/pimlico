@@ -41,6 +41,10 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         if len(datasets) == 0:
             raise PipelineStructureError("document map module '%s' got no GroupedCorpus inputs" % self.module_name)
 
+        # Cache the writers once we initialized them
+        self._writers = None
+        self._named_writers = None
+
     def _load_input_readers(self):
         # Prepare the list of document map inputs that will be fed into the executor
         # We may have multiple inputs that are grouped corpora, in which case they're aligned
@@ -52,11 +56,22 @@ class DocumentMapModuleInfo(BaseModuleInfo):
     input_corpora = property(_load_input_readers)
 
     def get_writers(self, append=False):
-        # Only include the outputs that are tarred corpus types
-        # This allows there to be other outputs aside from those mapped to
-        outputs = [name for name in self.output_names
-                   if satisfies_typecheck(self.get_output_datatype(name)[1], GroupedCorpus(RawDocumentType()))]
-        return tuple(self.get_output_writer(name, append=append) for name in outputs)
+        if self._writers is None:
+            self._writers = tuple([writer for (nm, writer) in self.get_named_writers(append=append)])
+        return self._writers
+
+    def get_named_writers(self, append=False):
+        if self._named_writers is None:
+            # Only include the outputs that are tarred corpus types
+            # This allows there to be other outputs aside from those mapped to
+            outputs = self.get_grouped_corpus_output_names()
+            self._named_writers = tuple((name, self.get_output_writer(name, append=append)) for name in outputs)
+        return self._named_writers
+
+    def get_grouped_corpus_output_names(self):
+        """ Get a list of the names of outputs that are grouped corpora """
+        return [name for name in self.output_names
+                if satisfies_typecheck(self.get_output_datatype(name)[1], GroupedCorpus(RawDocumentType()))]
 
     def get_detailed_status(self):
         status_lines = super(DocumentMapModuleInfo, self).get_detailed_status()
@@ -73,8 +88,7 @@ class DocumentMapModuleInfo(BaseModuleInfo):
         Convenience utility to avoid having to look up the output data point type to do this.
 
         """
-        output_type = self.get_output_datatype(output_name=output_name)[1]
-        output_data_point_type = output_type.data_point_type
+        output_data_point_type = dict(self.get_named_writers())[output_name or self.default_output_name].datatype.data_point_type
         return output_data_point_type(**kwargs)
 
 
@@ -94,6 +108,8 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     :mod:.singleproc.
 
     """
+    ALLOW_SKIP_OUTPUT = False
+
     def __init__(self, module_instance_info, **kwargs):
         super(DocumentMapModuleExecutor, self).__init__(module_instance_info, **kwargs)
         self.input_corpora = self.info.input_corpora
@@ -123,14 +139,34 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
     def retrieve_processing_status(self):
         # Check the metadata to see whether we've already partially completed this
-        if self.info.status == "PARTIALLY_PROCESSED":
+        if self.info.status == "FAILED":
+            # If we failed last time, we might have stored progress, but should be a bit more cautious
+            start_after = None
+            docs_completed = self.info.get_metadata().get("docs_completed", 0)
+            if docs_completed > 0:
+                last_doc_completed = self.info.get_metadata().get("last_doc_completed", None)
+                if last_doc_completed is None:
+                    # Progress wasn't properly stored: start from beginning
+                    docs_completed = 0
+                else:
+                    first_archive, __, first_filename = last_doc_completed.partition("/")
+                    start_after = (first_archive, first_filename)
+                    self.log.info(
+                        "Module execution failed previously, but progress was stored; "
+                        "picking up where we left off, after doc {}/{} "
+                        "(skipping {:,} docs, {:,} to process)".format(
+                            start_after[0], start_after[1], docs_completed, (len(self.input_iterator) - docs_completed)
+                        )
+                    )
+        elif self.info.status == "PARTIALLY_PROCESSED":
             docs_completed = self.info.get_metadata()["docs_completed"]
             first_archive, __, first_filename = self.info.get_metadata()["last_doc_completed"].partition("/")
             start_after = (first_archive, first_filename)
             self.log.info(
-                "Module has been partially executed already; picking up where we left off, after doc %s/%s "
-                "(skipping %d docs, %d to process)" %
-                (start_after[0], start_after[1], docs_completed, (len(self.input_iterator) - docs_completed))
+                "Module has been partially executed already; picking up where we left off, after doc {}/{} "
+                "(skipping {:,} docs, {:,} to process)".format(
+                    start_after[0], start_after[1], docs_completed, (len(self.input_iterator) - docs_completed)
+                )
             )
         else:
             docs_completed = 0
@@ -147,19 +183,10 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
     def execute(self):
         # Call the set-up routine, if one's been defined
         self.log.info("Preparing parallel document map execution with %d processes" % self.processes)
-        self.preprocess()
-
-        # Start up a pool
-        try:
-            self.pool = self.create_pool(self.processes)
-        except WorkerStartupError, e:
-            raise ModuleExecutionError(e.message, cause=e.cause, debugging_info=e.debugging_info)
 
         complete = False
-        result_buffer = {}
-
-        input_feeder = None
         docs_completed_now = 0
+
         docs_completed_before, start_after = self.retrieve_processing_status()
         total_to_process = len(self.input_iterator) - docs_completed_before
 
@@ -174,79 +201,25 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                 else:
                     pbar = get_progress_bar(total_to_process, counter=True,
                                             title="%s map" % self.info.module_type_name.replace("_", " ").capitalize())
-                    self.log.info("Starting execution on %d docs" % total_to_process)
+                    self.log.info("Starting execution on {:,} docs".format(total_to_process))
                     # Inputs will be taken from this as they're needed
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
-                    # Set a thread going to feed things onto the input queue
-                    input_feeder = InputQueueFeeder(self.pool.input_queue, input_iter,
-                                                    complete_callback=self.pool.notify_no_more_inputs)
 
-                    # Wait to make sure the input feeder's fed something into the input queue
-                    input_feeder.started.wait()
-                    # Check what document we're looking for next
-                    next_document = input_feeder.get_next_output_document()
+                    # Set map processing going, using the generic function
+                    mapper = DocumentMapper(self, input_iter, processes=self.processes)
+                    for (archive, doc_name), next_output in mapper.map_documents():
+                        docs_completed_now += 1
+                        pbar.update(docs_completed_now)
 
-                    while next_document is not None:
-                        # Wait for a document coming off the output queue
-                        while True:
-                            try:
-                                # Wait a little bit to see if there's a result available
-                                result = qget(self.pool.output_queue, timeout=0.2)
-                            except Empty:
-                                # Timed out: check there's not been an error in one of the processes
-                                try:
-                                    error = self.pool.exception_queue.get_nowait()
-                                except Empty:
-                                    # No error: just keep waiting
-                                    pass
-                                else:
-                                    # Got an error from a process: raise it
-                                    # First empty the exception queue, in case there were multiple errors
-                                    sleep(0.05)
-                                    while not self.pool.exception_queue.empty():
-                                        qget(self.pool.exception_queue, timeout=0.1)
-                                    # Sometimes, a traceback from within the process is included
-                                    debugging = error.traceback if hasattr(error, "traceback") else None
-                                    raise ModuleExecutionError("error in worker process: %s" % error,
-                                                               cause=error, debugging_info=debugging)
-                            except:
-                                raise
-                            else:
-                                # Got a result from a process
-                                break
-                        # We've got some result, but it might not be the one we're looking for
-                        # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
-                        result_buffer[(result.archive, result.filename)] = result.data
-                        pbar.update(docs_completed_now + len(result_buffer))
+                        # Write the result to the output corpora
+                        for result, writer in zip(next_output, writers):
+                            # If allowing skipping outputs, we don't try to write the output if None is returned
+                            if result is not None or not self.ALLOW_SKIP_OUTPUT:
+                                writer.add_document(archive, doc_name, result)
 
-                        # Write out as many as we can of the docs that have been sent and whose output is available
-                        #  while maintaining the order they were put in in
-                        while next_document in result_buffer:
-                            archive, filename = next_document
-                            next_output = result_buffer.pop((archive, filename))
+                        # Update the module's metadata to say that we've completed this document
+                        self.update_processing_status(docs_completed_before+docs_completed_now, archive, doc_name)
 
-                            # Next document processed: output the result precisely as in the single-core case
-                            if is_invalid_doc(next_output):
-                                # Just got a single invalid document out: write it out to every output
-                                next_output = [next_output] * len(writers)
-                            elif type(next_output) is not tuple:
-                                # If the processor produces a single result and there's only one output, fine
-                                next_output = (next_output,)
-                            if len(next_output) != len(writers):
-                                raise ModuleExecutionError(
-                                    "%s executor's process_document() returned %d results for a document, but the "
-                                    "module has %d outputs" % (type(self).__name__, len(next_output), len(writers))
-                                )
-                            # Write the result to the output corpora
-                            for result, writer in zip(next_output, writers):
-                                writer.add_document(archive, filename, result)
-
-                            # Update the module's metadata to say that we've completed this document
-                            docs_completed_now += 1
-                            self.update_processing_status(docs_completed_before+docs_completed_now, archive, filename)
-
-                            # Check what document we're waiting for now
-                            next_document = input_feeder.get_next_output_document()
                     pbar.finish()
             complete = True
         except ModuleExecutionError, e:
@@ -263,18 +236,124 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                 self.log.info("Document mapping complete. Finishing off")
             else:
                 self.log.info("Document mapping failed. Finishing off")
-            self.postprocess(error=not complete)
-            if input_feeder is not None:
-                input_feeder.shutdown()
+
+
+class DocumentMapper(object):
+    def __init__(self, executor, input_iter, processes=1, record_invalid=False):
+        self.record_invalid = record_invalid
+        self.processes = processes
+        self.input_iter = input_iter
+        self.executor = executor
+        self.input_feeder = None
+
+    def map_documents(self):
+        """
+        Handling of the main mapping process, taking input documents from a stream,
+        managing workers, sending documents to them and ordering the results.
+
+        This is abstracted here so that it can be used by the document map executor
+        (see :func:`DocumentMapModuleExecutor.execute`) and also the filter mode
+        mapping.
+
+        This is an iterator that yields:
+           (archive, doc_name), (result0, result1, ...)
+
+        """
+        executor = self.executor
+        # Call the set-up routine, if one's been defined
+        executor.preprocess()
+
+        # Start up a pool
+        try:
+            executor.pool = executor.create_pool(self.processes)
+        except WorkerStartupError, e:
+            raise ModuleExecutionError(e.message, cause=e.cause, debugging_info=e.debugging_info)
+
+        complete = False
+        result_buffer = {}
+
+        num_outputs = len(executor.info.get_grouped_corpus_output_names())
+
+        try:
+            # Inputs will be taken from the input_iter as they're needed
+            # Set a thread going to feed things onto the input queue
+            self.input_feeder = InputQueueFeeder(executor.pool.input_queue, self.input_iter,
+                                                 complete_callback=executor.pool.notify_no_more_inputs,
+                                                 record_invalid=self.record_invalid)
+
+            # Wait to make sure the input feeder's fed something into the input queue
+            self.input_feeder.started.wait()
+            # Check what document we're looking for next
+            next_document = self.input_feeder.get_next_output_document()
+
+            while next_document is not None:
+                # Wait for a document coming off the output queue
+                while True:
+                    try:
+                        # Wait a little bit to see if there's a result available
+                        result = qget(executor.pool.output_queue, timeout=0.2)
+                    except Empty:
+                        # Timed out: check there's not been an error in one of the processes
+                        try:
+                            error = executor.pool.exception_queue.get_nowait()
+                        except Empty:
+                            # No error: just keep waiting
+                            pass
+                        else:
+                            # Got an error from a process: raise it
+                            # First empty the exception queue, in case there were multiple errors
+                            sleep(0.05)
+                            while not executor.pool.exception_queue.empty():
+                                qget(executor.pool.exception_queue, timeout=0.1)
+                            # Sometimes, a traceback from within the process is included
+                            debugging = error.traceback if hasattr(error, "traceback") else None
+                            raise ModuleExecutionError("error in worker process: %s" % error,
+                                                       cause=error, debugging_info=debugging)
+                    except:
+                        raise
+                    else:
+                        # Got a result from a process
+                        break
+
+                # We've got some result, but it might not be the one we're looking for
+                # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
+                result_buffer[(result.archive, result.filename)] = result.data
+
+                # Write out as many as we can of the docs that have been sent and whose output is available
+                #  while maintaining the order they were put in in
+                while next_document in result_buffer:
+                    archive, filename = next_document
+                    next_output = result_buffer.pop((archive, filename))
+
+                    # Next document processed: output the result precisely as in the single-core case
+                    if is_invalid_doc(next_output):
+                        # Just got a single invalid document out: write it out to every output
+                        next_output = [next_output] * num_outputs
+                    elif type(next_output) is not tuple:
+                        # If the processor produces a single result and there's only one output, fine
+                        next_output = (next_output,)
+                    if len(next_output) != num_outputs:
+                        raise ModuleExecutionError(
+                            "%s executor's process_document() returned %d results for a document, but the "
+                            "module has %d outputs" % (type(executor).__name__, len(next_output), num_outputs)
+                        )
+                    # Provide the result(s) for writing, or passing on to some other process
+                    yield next_document, next_output
+
+                    # Check what document we're waiting for now
+                    next_document = self.input_feeder.get_next_output_document()
+            complete = True
+        finally:
+            # Call the finishing-off routine, if one's been defined
+            executor.postprocess(error=not complete)
+            if self.input_feeder is not None:
+                self.input_feeder.shutdown()
 
 
 def skip_invalid(fn):
     """
     Decorator to apply to document map executor process_document() methods where you want to skip doing any
     processing if any of the input documents are invalid and just pass through the error information.
-
-    Be careful not to confuse this with the process_document() methods on datatypes. You don't need a decorator
-    on them to skip invalid documents, as it's not called on them anyway.
 
     """
     def _fn(self, archive, filename, *docs):
@@ -364,8 +443,12 @@ class InputQueueFeeder(Thread):
     Background thread to read input documents from an iterator and feed them onto an input queue for worker
     processes/threads.
 
+    If record_invalid=True, any invalid documents in the input stream are recorded in a queue.
+    If using this, check_invalid() should be called regularly during mapping. If it is not,
+    the queue will just fill up.
+
     """
-    def __init__(self, input_queue, iterator, complete_callback=None):
+    def __init__(self, input_queue, iterator, complete_callback=None, record_invalid=False):
         super(InputQueueFeeder, self).__init__()
         self.complete_callback = complete_callback
         self.daemon = True
@@ -377,9 +460,14 @@ class InputQueueFeeder(Thread):
         self.cancelled = threading.Event()
         self.ended = threading.Event()
         self.exception_queue = Queue(1)
-        # Accumulate a list of invalid docs that have been fed, just for information
-        self.invalid_docs = Queue()
-        self._invalid_docs_list = []
+
+        self.record_invalid = record_invalid
+        if record_invalid:
+            # Accumulate a list of invalid docs that have been fed, just for information
+            self.invalid_docs = Queue()
+            self._invalid_docs_list = []
+        else:
+            self.invalid_docs = self._invalid_docs_list = None
         self.start()
 
     def get_next_output_document(self):
@@ -429,9 +517,17 @@ class InputQueueFeeder(Thread):
         Checks whether a given document was invalid in the input. Once the check has been performed, the
         item is removed from the list, for efficiency, so this should only be called once per document.
         """
-        # Update the invalid docs list from the queue
-        while not self.invalid_docs.empty():
-            self._invalid_docs_list.append(self.invalid_docs.get_nowait())
+        try:
+            # Update the invalid docs list from the queue
+            while not self.invalid_docs.empty():
+                self._invalid_docs_list.append(self.invalid_docs.get_nowait())
+        except:
+            if self.invalid_docs is None:
+                # Should never have called this method
+                raise ValueError("called check_invalid() on an input feeder created with record_invalid=False")
+            else:
+                raise
+
         self._invalid_docs_list = [d for d in self._invalid_docs_list if d is not None]
         if (archive, filename) in self._invalid_docs_list:
             self._invalid_docs_list.remove((archive, filename))
@@ -445,8 +541,9 @@ class InputQueueFeeder(Thread):
                 if self.cancelled.is_set():
                     # Stop feeding right away
                     return
-                if any(is_invalid_doc(doc) for doc in docs):
-                    self.invalid_docs.put((archive, filename))
+                if self.record_invalid:
+                    if any(is_invalid_doc(doc) for doc in docs):
+                        self.invalid_docs.put((archive, filename))
                 # If the queue is full, this will block until there's room to put the next one on
                 # It also blocks if the queue is closed/destroyed/something similar, so we need to check now and
                 #  again that we've not been asked to give up
@@ -518,18 +615,19 @@ class InputQueueFeeder(Thread):
                           "the application forcibly")
         # Empty all queues, in case there's anything still sitting in any of them
         for q in [self.input_queue, self._docs_processing, self.exception_queue, self.invalid_docs]:
-            while True:
-                try:
-                    q.get_nowait()
-                except Empty:
-                    break
-            if hasattr(q, "task_done"):
+            if q is not None:
                 while True:
                     try:
-                        q.task_done()
-                    except ValueError:
-                        # No more undone tasks left
+                        q.get_nowait()
+                    except Empty:
                         break
+                if hasattr(q, "task_done"):
+                    while True:
+                        try:
+                            q.task_done()
+                        except ValueError:
+                            # No more undone tasks left
+                            break
         # Wait for thread to shut down
         self.join(timeout=timeout)
         # Check whether the join timed out
@@ -549,7 +647,14 @@ class DocumentProcessorPool(object):
 
     """
     def __init__(self, processes):
-        self.output_queue = self.create_queue()
+        # Limit the output queue. If the processing is very fast, we can end
+        # up spending longer writing the output than processing the docs, so
+        # the queue just get bigger and bigger.
+        # In this case, the worker has to wait a bit to send its output back
+        self.output_queue = self.create_queue(10*processes)
+        # Limit the input queue to 2*processes: there's no point in filling
+        # it up with far more, just enough that the processes can be sure of
+        # getting something when they're ready
         self.input_queue = self.create_queue(2*processes)
         self.exception_queue = self.create_queue()
         self.processes = processes

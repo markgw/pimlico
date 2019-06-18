@@ -1,11 +1,7 @@
-!! Store in TSV format
-~~~~~~~~~~~~~~~~~~~~~~
+Store in TSV format
+~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.embeddings.store_tsv
-
-.. note::
-
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+--------------------------------------+
 | Path       | pimlico.modules.embeddings.store_tsv |
@@ -17,30 +13,32 @@ Takes embeddings stored in the default format used within Pimlico pipelines
 (see :class:`~pimlico.datatypes.embeddings.Embeddings`) and stores them
 as TSV files.
 
-These are suitable as input to the [Tensorflow Projector](https://projector.tensorflow.org/).
+This is for using the vectors outside your pipeline, for example, for
+distributing them publicly or using as input to an external visualization
+tool. For passing embeddings between Pimlico modules,
+the internal :class:`~pimlico.datatypes.embeddings.Embeddings` datatype
+should be used.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
+These are suitable as input to the `Tensorflow Projector <https://projector.tensorflow.org/>`_.
 
 
 Inputs
 ======
 
-+------------+--------------------------------------+
-| Name       | Type(s)                              |
-+============+======================================+
-| embeddings | **invalid input type specification** |
-+------------+--------------------------------------+
++------------+---------------------------------------------------------------+
+| Name       | Type(s)                                                       |
++============+===============================================================+
+| embeddings | :class:`embeddings <pimlico.datatypes.embeddings.Embeddings>` |
++------------+---------------------------------------------------------------+
 
 Outputs
 =======
 
-+------------+---------------------------------------+
-| Name       | Type(s)                               |
-+============+=======================================+
-| embeddings | **invalid output type specification** |
-+------------+---------------------------------------+
++------------+-------------------------------------------------------------------+
+| Name       | Type(s)                                                           |
++============+===================================================================+
+| embeddings | :class:`tsv_vec_files <pimlico.datatypes.embeddings.TSVVecFiles>` |
++------------+-------------------------------------------------------------------+
 
 Example config
 ==============
@@ -54,3 +52,9 @@ This is an example of how this module can be used in a pipeline config file.
    input_embeddings=module_a.some_output
    
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-store_tsv.conf`

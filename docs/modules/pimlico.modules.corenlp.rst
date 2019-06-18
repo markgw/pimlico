@@ -1,5 +1,5 @@
-!! Stanford CoreNLP
-~~~~~~~~~~~~~~~~~~~
+\!\! Stanford CoreNLP
+~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corenlp
 
@@ -51,6 +51,7 @@ Outputs
 =======
 
 No non-optional outputs
+
 
 Optional
 --------

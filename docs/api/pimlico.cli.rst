@@ -22,6 +22,7 @@ Submodules
    pimlico.cli.main
    pimlico.cli.newmodule
    pimlico.cli.pyshell
+   pimlico.cli.recover
    pimlico.cli.reset
    pimlico.cli.run
    pimlico.cli.status

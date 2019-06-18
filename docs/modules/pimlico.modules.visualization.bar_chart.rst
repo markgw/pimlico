@@ -1,5 +1,5 @@
-!! Bar chart plotter
-~~~~~~~~~~~~~~~~~~~~
+\!\! Bar chart plotter
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.visualization.bar_chart
 

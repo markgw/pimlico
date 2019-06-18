@@ -163,6 +163,9 @@ class BaseModuleInfo(object):
         # Write the whole thing out to the file
         with open(os.path.join(self.get_module_output_dir(absolute=True), "metadata"), "w") as f:
             json.dump(metadata, f, indent=4)
+            # Flush to ensure it gets updated immediately
+            f.flush()
+            os.fsync(f.fileno())
 
     def __get_status(self):
         # Check the metadata for current module status
@@ -475,21 +478,6 @@ class BaseModuleInfo(object):
                 self.module_type_name, output_name))
 
         return output_name, datatype
-
-    def instantiate_output_datatype(self, output_name, output_datatype):
-        """
-        Subclasses may want to override this to provide special behaviour for instantiating
-        particular outputs' datatypes.
-
-        .. deprecated:: new datatypes
-
-           Roughly replaced by instantiate_output_reader(), but many of the use cases
-           can be covered in other ways now
-
-        """
-        #return output_datatype(self.get_output_dir(output_name), self.pipeline, module=self)
-        return None
-    instantiate_output_datatype._original = True
 
     def output_ready(self, output_name=None):
         """
@@ -916,8 +904,8 @@ class BaseModuleInfo(object):
         """
         # Instantiate any input datatypes this module will need and check the datatype's dependencies
         return sum([
-            mod.get_software_dependencies() for input_name in self.inputs.keys()
-            for mod in self.get_input_datatype(input_name, always_list=True)
+            dtype.get_software_dependencies() for input_name in self.inputs.keys()
+            for dtype in self.get_input_datatype(input_name, always_list=True)
         ], [])
 
     def get_output_software_dependencies(self):
@@ -936,9 +924,15 @@ class BaseModuleInfo(object):
 
         """
         # Instantiate any output datatypes this module will need and check the datatype's dependencies
-        return sum([
-            self.get_output_datatype(output_name)[1].get_software_dependencies()
+        dtypes = [
+            self.get_output_datatype(output_name)[1]
             for output_name in dict(self.available_outputs).keys()
+        ]
+        # Get dependencies for each datatype, plus the additional dependencies
+        # declared to apply to the writer specifically, since we're writing here
+        return sum([
+            dtype.get_software_dependencies() + dtype.get_writer_software_dependencies()
+            for dtype in dtypes
         ], [])
 
     def check_ready_to_run(self):
@@ -1178,8 +1172,20 @@ def check_type(provided_type, type_requirements):
             # Return the requirement that was met, which is handy in some circumstances
             return intype
     # No requirement was met
-    raise TypeCheckError("required type is %s (or a descendent), but provided type is %s" % (
-        "/".join(t.type_checking_name() for t in type_requirements), provided_type.type_checking_name()))
+    # Try to use type_checking_name() to identify types
+    provided_type_name = type_checking_name(provided_type)
+    req_types = "/".join(type_checking_name(t) for t in type_requirements)
+    raise TypeCheckError("required type is {} (or a descendent), but provided type is {}".format(req_types, provided_type_name))
+
+
+def type_checking_name(typ):
+    try:
+        return typ.type_checking_name()
+    except AttributeError:
+        if not hasattr(typ, "type_checking_name"):
+            return "{} (no type_checking_name for type)".format(type(typ).__name__)
+        else:
+            raise
 
 
 def _compatible_input_type(type_requirement, supplied_type):

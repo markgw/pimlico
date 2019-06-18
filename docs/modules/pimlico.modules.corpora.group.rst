@@ -1,5 +1,5 @@
-Archive grouper (filter)
-~~~~~~~~~~~~~~~~~~~~~~~~
+Archive grouper \(filter\)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.group
 

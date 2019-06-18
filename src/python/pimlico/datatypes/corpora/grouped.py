@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -34,18 +35,36 @@ class GroupedCorpus(IterableCorpus):
         class Setup:
             def data_ready(self, base_dir):
                 # Run the superclass check -- that the data dir exists
-                # Also check that we've got at least one archive in the data dir
-                return super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir) and \
-                       len(self._get_archive_filenames(self._get_data_dir(base_dir))) > 0
+                if not super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir):
+                    return False
+                # Also check that we've got at least one archive in the data dir, unless the length of the corpus is 0
+                if self.read_metadata(base_dir)["length"] > 0 and not self._has_archives(self._get_data_dir(base_dir)):
+                    return False
+                return True
 
-            def _get_archive_filenames(self, data_dir):
-                if data_dir is not None:
-                    return [f for f in
-                            [os.path.join(root, filename) for root, dirs, files in os.walk(data_dir) for filename in
-                             files]
-                            if f.endswith(".tar.gz") or f.endswith(".tar")]
+            @classmethod
+            def _get_archive_filenames(cls, data_dir):
+                return list(cls._iter_archive_filenames(data_dir))
+
+            @classmethod
+            def _iter_archive_filenames(cls, data_dir):
+                if data_dir is None:
+                    return
                 else:
-                    return []
+                    for root, dirs, files in os.walk(data_dir):
+                        for filename in files:
+                            f = os.path.join(root, filename)
+                            if f.endswith(".tar.gz") or f.endswith(".tar"):
+                                yield f
+
+            def _has_archives(self, data_dir):
+                # Return True if there's at least 1 archive in the dir
+                try:
+                    next(self._iter_archive_filenames(data_dir))
+                except StopIteration:
+                    return False
+                else:
+                    return True
 
         def __init__(self, *args, **kwargs):
             super(GroupedCorpus.Reader, self).__init__(*args, **kwargs)
@@ -186,11 +205,17 @@ class GroupedCorpus(IterableCorpus):
                 shutil.rmtree(tmp_dir)
 
         def list_archive_iter(self):
+            gzipped = self.metadata.get("gzip", False)
             for archive_name, archive_filename in zip(self.archives, self.archive_filenames):
-                tarball = tarfile.open(os.path.join(self.data_dir, archive_filename), 'r')
-                filenames = tarball.getnames()
-                for filename in filenames:
-                    yield archive_name, filename
+                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                    for tarinfo in tarball:
+                        filename = tarinfo.name
+                        # Do the same name preprocessing that archive_iter does
+                        doc_name = filename.decode("utf8")
+                        if gzipped and doc_name.endswith(".gz"):
+                            # If we used the .gz extension while writing the file, remove it to get the doc name
+                            doc_name = doc_name[:-3]
+                        yield archive_name, doc_name
 
     class Writer:
         """
@@ -258,12 +283,8 @@ class GroupedCorpus(IterableCorpus):
                                 self.metadata["length"] = data.get("length", 0)
                 else:
                     # Can't rely on the metadata: count up docs in archive to get initial length
-                    for root, dirs, files in os.walk(self.data_dir):
-                        for filename in files:
-                            tar_filename = os.path.join(root, filename)
-                            if tar_filename.endswith(".tar.gz") or tar_filename.endswith(".tar"):
-                                with tarfile.open(tar_filename, "r") as tarball:
-                                    self.metadata["length"] += len(tarball.getmembers())
+                    # This can take a long time on a large corpus
+                    self.metadata["length"] = self._count_written_docs()
             self.doc_count = self.metadata["length"]
 
         def add_document(self, archive_name, doc_name, doc):
@@ -315,15 +336,45 @@ class GroupedCorpus(IterableCorpus):
             info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
             info.size = len(data)
             self.current_archive_tar.addfile(info, data_file)
+            # Flush to disk to ensure the latest file always gets written
+            self.flush()
 
             # Keep a count of how many we've added so we can write metadata
             self.doc_count += 1
+
+        def flush(self):
+            """ Flush disk write of the tarfile currently being written. Called after adding a new file """
+            if self.current_archive_tar is not None:
+                # First call flush(), which does a basic flush to RAM cache
+                f = self.current_archive_tar.fileobj
+                f.flush()
+                # Then we also need to force the system to write it to disk
+                os.fsync(f.fileno())
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             if self.current_archive_tar is not None:
                 self.current_archive_tar.close()
             self.metadata["length"] = self.doc_count
             super(GroupedCorpus.Writer, self).__exit__(exc_type, exc_val, exc_tb)
+
+        def _count_written_docs(self):
+            """
+            Emulates what a reader does to iterate over docs, in order to count up how many
+            docs have already been written. Used when appending an existing corpus and not
+            trusting the stored length in the metadata.
+
+            """
+            # Look for already written archives
+            archive_filenames = GroupedCorpus.Reader.Setup._get_archive_filenames(self.data_dir)
+            archive_filenames.sort()
+            archives = [os.path.splitext(os.path.basename(f))[0] for f in archive_filenames]
+
+            total_docs = 0
+            for archive_name, archive_filename in zip(archives, archive_filenames):
+                # Count the docs in each archive
+                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                    total_docs += sum(1 for __ in tarball)
+            return total_docs
 
 
 def exclude_invalid(doc_iter):

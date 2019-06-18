@@ -184,7 +184,7 @@ class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):
 
 def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,
                                      worker_set_up_fn=None, worker_tear_down_fn=None, batch_docs=None,
-                                     multiprocessing_single_process=False):
+                                     multiprocessing_single_process=False, allow_skip_output=False):
     """
     Factory function for creating an executor that uses the multiprocessing-based implementations of document-map
     pools and worker processes.
@@ -220,6 +220,9 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
     By default, if only a single process is needed, we use the threaded implementation of a map process instead of
     multiprocessing. If this doesn't work out in your case, for some reason, specify
     `multiprocessing_single_process=True` and a mutiprocessing process will be used even when only creating one.
+
+    If ``allow_skip_output==True`` and the process document function returns None as one of
+    its outputs, that document will simply not be written to that output.
 
     """
     if isinstance(process_document_fn, type):
@@ -279,6 +282,7 @@ def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, po
     # Finally, define an executor type (subclass of DocumentMapModuleExecutor) that creates a pool of the right sort
     class ModuleExecutor(MultiprocessingMapModuleExecutor):
         POOL_TYPE = FactoryMadeMapPool
+        ALLOW_SKIP_OUTPUT = allow_skip_output
 
         def preprocess(self):
             super(ModuleExecutor, self).preprocess()

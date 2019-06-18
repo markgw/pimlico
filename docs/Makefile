@@ -3,9 +3,9 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-PYTHON        = ../bin/python
 # Use virtualenv so we see all the installed Python libraries
-SPHINXBUILD   = $(PYTHON) $(shell which sphinx-build)
+PYTHON        = ../bin/python
+SPHINXBUILD   = $(PYTHON) ../lib/virtualenv/default/bin/sphinx-build
 PAPER         =
 BUILDDIR      = _build
 SPHINXAPI     = sphinx-apidoc

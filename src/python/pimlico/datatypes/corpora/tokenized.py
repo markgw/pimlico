@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.corpora.data_points import TextDocumentType
 from pimlico.utils.core import cached_property
 
@@ -16,8 +17,7 @@ class TokenizedDocumentType(TextDocumentType):
     Each document is a list of sentences. Each sentence is a list of words.
 
     """
-    # TODO Update formatter and put back here
-    #formatters = [("tokenized_doc", "pimlico.datatypes.formatters.tokenized.TokenizedDocumentFormatter")]
+    formatters = [("tokenized_doc", "pimlico.datatypes.corpora.tokenized.TokenizedDocumentFormatter")]
 
     class Document:
         keys = ["sentences"]
@@ -40,6 +40,18 @@ class TokenizedDocumentType(TextDocumentType):
             return u"\n".join(u" ".join(sentence) for sentence in internal_data["sentences"]).encode("utf-8")
 
 
+class TokenizedDocumentFormatter(DocumentBrowserFormatter):
+    """
+    Format a tokenized document by putting sentences on consecutive lines
+    and separating tokens with spaces.
+
+    """
+    DATATYPE = TokenizedDocumentType()
+
+    def format_document(self, doc):
+        return u"\n".join(u" ".join(sent) for sent in doc.sentences)
+
+
 class LemmatizedTokensDocumentType(TokenizedDocumentType):
     """
     Identical to :class:`TokenizedDocumentType`. Separate subclass to allow
@@ -57,9 +69,6 @@ class CharacterTokenizedDocumentType(TokenizedDocumentType):
     sequence, see `SegmentedLinesDocumentType`.
 
     """
-    # TODO Update formatter and put back here
-    #formatters = [("char_tokenized_doc", "pimlico.datatypes.formatters.tokenized.CharacterTokenizedDocumentFormatter")]
-
     class Document:
         @property
         def sentences(self):
@@ -90,9 +99,6 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
     so this string is assumed not to be used in any element (which seems reasonable enough, generally).
 
     """
-    # TODO Update formatter and put back here
-    #formatters = [("segmented_lines", "pimlico.datatypes.formatters.tokenized.SegmentedLinesFormatter")]
-
     class Document:
         @property
         def text(self):
