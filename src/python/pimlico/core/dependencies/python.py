@@ -8,6 +8,7 @@ Tools for Python library dependencies.
 Provides superclasses for Python library dependencies and a selection of commonly used dependency instances.
 
 """
+from builtins import str
 import sys
 from imp import reload
 from pkgutil import find_loader

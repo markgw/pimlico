@@ -7,6 +7,7 @@ Base classes for defining software dependencies for module types and routines fo
 
 """
 from __future__ import print_function
+from builtins import object
 import subprocess
 
 from pimlico.core.dependencies.versions import unknown_software_version

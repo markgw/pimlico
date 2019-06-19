@@ -197,7 +197,7 @@ class JavaJarsDependency(JavaDependency):
                 raise InstallationError("could not download archive from '{}': {}".format(archive_url, e))
 
         # Got all the archives, extract the required members
-        for archive_filename, members in archive_files.iteritems():
+        for archive_filename, members in archive_files.items():
             extract_from_archive(archive_filename, members, JAVA_LIB_DIR, preserve_dirs=False)
             print("Extracted %s" % ", ".join(members))
 
