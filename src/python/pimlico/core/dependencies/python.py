@@ -8,11 +8,11 @@ Tools for Python library dependencies.
 Provides superclasses for Python library dependencies and a selection of commonly used dependency instances.
 
 """
-from imp import reload
-import pkg_resources
 import sys
+from imp import reload
 from pkgutil import find_loader
 
+import pkg_resources
 from pkg_resources import parse_version, parse_requirements
 
 from pimlico.core.dependencies.base import SoftwareDependency
@@ -145,7 +145,6 @@ class PythonPackageOnPip(PythonPackageDependency):
     def problems(self, local_config):
         problems = super(PythonPackageOnPip, self).problems(local_config)
         if not problems and self.min_version is not None:
-            print "Checking {}, {}".format(self.name, self.min_version)
             # Also check that it's a sufficient version
             inst_version = self.get_installed_version(local_config)
             if parse_version(self.min_version) > parse_version(inst_version):
