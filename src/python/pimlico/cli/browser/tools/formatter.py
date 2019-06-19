@@ -139,11 +139,11 @@ def load_formatter(datatype, formatter_name=None):
         try:
             fmt_path, __, fmt_cls_name = formatter_name.rpartition(".")
             fmt_mod = __import__(fmt_path, fromlist=[fmt_cls_name])
-        except ImportError, e:
+        except ImportError as e:
             raise TypeError("Could not load formatter %s: %s" % (formatter_name, e))
         try:
             fmt_cls = getattr(fmt_mod, fmt_cls_name)
-        except AttributeError, e:
+        except AttributeError as e:
             raise TypeError("Could not load formatter %s" % formatter_name)
 
     typecheck_formatter(formatted_type, fmt_cls)

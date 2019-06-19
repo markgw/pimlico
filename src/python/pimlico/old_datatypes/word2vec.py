@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -27,7 +28,7 @@ class NearestNeighboursCommand(ShellCommand):
         negative_words = [arg[1:] for arg in args if arg.startswith("-")]
         for w in positive_words + negative_words:
             if w not in model.vocab:
-                print "WARNING: %s not in vocabulary, leaving out" % w
+                print("WARNING: %s not in vocabulary, leaving out" % w)
         # Filter out OOVs
         positive_words = [w for w in positive_words if w in model.vocab]
         negative_words = [w for w in negative_words if w in model.vocab]
@@ -38,7 +39,7 @@ class NearestNeighboursCommand(ShellCommand):
         similar = model.most_similar(positive=positive_words, negative=negative_words)
 
         for word, score in similar:
-            print "%s  (%.3f)" % (word, score)
+            print("%s  (%.3f)" % (word, score))
 
 
 class VectorCommand(ShellCommand):
@@ -55,7 +56,7 @@ class VectorCommand(ShellCommand):
         if norm:
             vec = unitvec(vec)
 
-        print vec
+        print(vec)
 
 
 class SimilarityCommand(ShellCommand):
@@ -67,7 +68,7 @@ class SimilarityCommand(ShellCommand):
         for word in args[:2]:
             if not word in model.vocab:
                 raise ShellError("word '%s' is not in the vocabulary" % word)
-        print model.similarity(args[0], args[1])
+        print(model.similarity(args[0], args[1]))
 
 
 class Word2VecModel(PimlicoDatatype):

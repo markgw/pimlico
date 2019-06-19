@@ -101,7 +101,7 @@ class IntegerListsDocumentType(RawDocumentType):
                         raise IOError("file ended mid-row")
                     try:
                         yield unpacker.unpack(num_string)[0]
-                    except struct.error, e:
+                    except struct.error as e:
                         raise IOError("error interpreting int data: %s" % e)
 
             while True:
@@ -122,7 +122,7 @@ class IntegerListsDocumentType(RawDocumentType):
                     raw_data.write(self.data_point_type.length_struct.pack(len(row)))
                     for num in row:
                         raw_data.write(self.data_point_type.struct.pack(num))
-                except struct.error, e:
+                except struct.error as e:
                     raise ValueError("error encoding int row %s using struct format %s: %s" %
                                      (row, self.data_point_type.struct.format, e))
             return raw_data.getvalue()
@@ -196,7 +196,7 @@ class IntegerListDocumentType(RawDocumentType):
                     return
                 try:
                     num = self.data_point_type.struct.unpack(num_string)[0]
-                except struct.error, e:
+                except struct.error as e:
                     raise IOError("error interpreting int data: %s" % e)
                 yield num
 
@@ -206,7 +206,7 @@ class IntegerListDocumentType(RawDocumentType):
             for num in internal_data["list"]:
                 try:
                     raw_data.write(self.data_point_type.struct.pack(num))
-                except struct.error, e:
+                except struct.error as e:
                     raise ValueError("error encoding int data %s using struct format %s: %s" %
                                      (num, self.data_point_type.struct.format, e))
             return raw_data.getvalue()

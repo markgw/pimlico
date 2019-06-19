@@ -46,7 +46,7 @@ def load_datatype(path, options={}):
     else:
         try:
             cls = import_member(path)
-        except ImportError, e:
+        except ImportError as e:
             raise DatatypeLoadError("could not load datatype class %s: %s" % (path, e))
 
     # The type of the class will generally not be "type", since we use meta classes

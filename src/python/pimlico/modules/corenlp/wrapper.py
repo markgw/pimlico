@@ -10,6 +10,7 @@ NB: This module imports some of the Stanford modules' dependencies. Don't import
 Client-side code based on Smitha Milli's CoreNLP client: https://github.com/smilli/py-corenlp.
 
 """
+from __future__ import print_function
 import json
 import os
 import threading
@@ -131,7 +132,7 @@ class CoreNLP(object):
 
         try:
             r = requests.get(self.server_url, params=params, data=text)
-        except requests.exceptions.ConnectionError, e:
+        except requests.exceptions.ConnectionError as e:
             if self.server_killed.is_set():
                 # Raise a special exception, since we know the server was taken down deliberately
                 raise StopProcessing("CoreNLP server was killed")
@@ -147,7 +148,7 @@ class CoreNLP(object):
 
         try:
             output = json.loads(r.text, strict=False)
-        except Exception, e:
+        except Exception as e:
             err_path = self.output_corenlp_error_info(text, r.status_code, r.text)
             raise CoreNLPClientError("Could not parse JSON response from the CoreNLP server: %s. For more details, "
                                      "see %s" % (e, err_path))
@@ -174,14 +175,14 @@ class CoreNLP(object):
         )
         try:
             output = json.loads(r.text)
-        except Exception, e:
+        except Exception as e:
             raise CoreNLPClientError("Could not parse JSON response from the CoreNLP server: %s" % e)
         return output
 
     def ping(self):
         try:
             r = requests.get("%s/ping" % self.server_url)
-        except requests.exceptions.ConnectionError, e:
+        except requests.exceptions.ConnectionError as e:
             raise CoreNLPClientError("couldn't reach server for ping: %s" % e)
         if r.text.strip("\n ") != "pong":
             raise CoreNLPClientError("server ping got non-pong response: %s" % r.text)
@@ -197,16 +198,16 @@ class CoreNLP(object):
 
         file_path = get_log_file("corenlp")
         with open(file_path, "w") as f:
-            print >>f, "## Response status code: %s" % status_code
-            print >>f, "## Server response:\n%s" % response
-            print >>f, "## Read from stdout:"
-            print >>f, stdout
-            print >>f, "## Read from stderr:"
-            print >>f, stderr
-            print >>f, "## Server command:"
-            print >>f, self.proc.command_run
-            print >>f, "## Server URL:"
-            print >>f, self.server_url
-            print >>f, "## Input:"
-            print >>f, input_text
+            print("## Response status code: %s" % status_code, file=f)
+            print("## Server response:\n%s" % response, file=f)
+            print("## Read from stdout:", file=f)
+            print(stdout, file=f)
+            print("## Read from stderr:", file=f)
+            print(stderr, file=f)
+            print("## Server command:", file=f)
+            print(self.proc.command_run, file=f)
+            print("## Server URL:", file=f)
+            print(self.server_url, file=f)
+            print("## Input:", file=f)
+            print(input_text, file=f)
         return file_path

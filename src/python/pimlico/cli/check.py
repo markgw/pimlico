@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -56,13 +57,13 @@ class DepsCmd(PimlicoCLISubcommand):
         deps = get_dependencies(pipeline, modules, recursive=True)
 
         for dep in deps:
-            print
-            print title_box(dep.name.capitalize())
+            print()
+            print(title_box(dep.name.capitalize()))
             if dep.available(pipeline.local_config):
-                print "Installed"
-                print "Version: %s" % dep.get_installed_version(pipeline.local_config)
+                print("Installed")
+                print("Version: %s" % dep.get_installed_version(pipeline.local_config))
             elif dep.installable():
-                print "Can be automatically installed with the 'install' command"
+                print("Can be automatically installed with the 'install' command")
             else:
-                print "Cannot be automatically installed"
-                print dep.installation_instructions()
+                print("Cannot be automatically installed")
+                print(dep.installation_instructions())

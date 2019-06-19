@@ -42,7 +42,7 @@ class IntegerListsDocumentType(RawDocumentType):
                 num_string = reader.read(int_size)
                 try:
                     yield unpacker.unpack(num_string)[0]
-                except struct.error, e:
+                except struct.error as e:
                     if num_string == "":
                         raise IOError("file ended mid-row")
                     raise IOError("error interpreting int data: %s" % e)
@@ -98,7 +98,7 @@ class IntegerListsDocumentCorpusWriter(TarredCorpusWriter):
                 raw_data.write(self.length_struct.pack(len(row)))
                 for num in row:
                     raw_data.write(self.num_struct.pack(num))
-            except struct.error, e:
+            except struct.error as e:
                 raise ValueError("error encoding int row %s using struct format %s: %s" %
                                  (row, self.num_struct.format, e))
         return raw_data.getvalue()
@@ -139,7 +139,7 @@ class IntegerListDocumentType(RawDocumentType):
                 return
             try:
                 num = self.unpacker.unpack(num_string)[0]
-            except struct.error, e:
+            except struct.error as e:
                 raise IOError("error interpreting int data: %s" % e)
             yield num
 
@@ -177,7 +177,7 @@ class IntegerListDocumentCorpusWriter(TarredCorpusWriter):
         for num in doc:
             try:
                 raw_data.write(self.num_struct.pack(num))
-            except struct.error, e:
+            except struct.error as e:
                 raise ValueError("error encoding int data %s using struct format %s: %s" %
                                  (num, self.num_struct.format, e))
         return raw_data.getvalue()

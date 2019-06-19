@@ -82,8 +82,8 @@ class MultistageModuleInfo(BaseModuleInfo):
 
         """
         try:
-            return dropwhile(
-                lambda (m, s): m.status == "COMPLETE", zip(self.internal_modules, self.stages)).next()
+            return next(dropwhile(
+                lambda m_s1: m_s1[0].status == "COMPLETE", zip(self.internal_modules, self.stages)))
         except StopIteration:
             # No more left to execute
             return (None, None)
@@ -98,7 +98,7 @@ class MultistageModuleInfo(BaseModuleInfo):
             return "UNEXECUTED"
         else:
             last_completed = list(
-                takewhile(lambda (m, s): m.status == "COMPLETE", zip(self.internal_modules, self.stages))
+                takewhile(lambda m_s: m_s[0].status == "COMPLETE", zip(self.internal_modules, self.stages))
             )[-1][1]
             return "COMPLETED STAGE %s" % last_completed.name
 
@@ -234,7 +234,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
                                                ", ".join(duplicate_output_names))
     # Duplicate input names are fine -- they connect multiple internal module inputs to the same external input
     # We take the type, though, from the first one
-    main_inputs = remove_duplicates(main_inputs, key=lambda (input_name, itype): input_name)
+    main_inputs = remove_duplicates(main_inputs, key=lambda input_name_itype: input_name_itype[0])
 
     main_module_options = OrderedDict(
         # If a main option is connected to multiple stage options, use the first one's definition

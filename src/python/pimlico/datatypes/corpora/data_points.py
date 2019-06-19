@@ -287,7 +287,7 @@ class DataPointType(object):
                     # Raw data not available yet: convert from internal data
                     self._raw_data = self.internal_to_raw(self._internal_data)
                     self.raw_available()
-                except Exception, e:
+                except Exception as e:
                     # Catch any exceptions and wrap them
                     # In particular, it's important to catch attribute errors, as these otherwise lead
                     # to __getatttr__ being called and give mystifying errors
@@ -304,7 +304,7 @@ class DataPointType(object):
                     # Internal data not available yet: convert from raw
                     self._internal_data = self.raw_to_internal(self._raw_data)
                     self.internal_available()
-                except Exception, e:
+                except Exception as e:
                     # Catch any exceptions and wrap them
                     raise DataConversionError(
                         "{} error converting raw to internal data for document type {}: {}".format(

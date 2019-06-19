@@ -6,6 +6,7 @@
 Tool to generate Pimlico command docs. Based on Sphinx's apidoc tool.
 
 """
+from __future__ import print_function
 import argparse
 import os
 import re
@@ -35,7 +36,7 @@ def generate_docs(output_dir):
 
 def generate_docs_for_command(command_cls, output_dir):
     command_name = command_cls.command_name
-    print "Building docs for %s" % command_name
+    print("Building docs for %s" % command_name)
 
     # Instantiate the subcommand, so we can manipulate arguments
     command = command_cls()
@@ -187,7 +188,7 @@ def _format_args(action, default_metavar):
 
 
 def generate_contents_page(commands, command_descs, output_dir):
-    print "Building contents page (index.rst)"
+    print("Building contents page (index.rst)")
     command_table = [
         [":doc:`%s`" % name, desc] for (name, desc) in sorted(zip(commands, command_descs), key=itemgetter(0))
     ]
@@ -271,9 +272,9 @@ if __name__ == "__main__":
     # Install basic Pimlico requirements
     install_core_dependencies()
 
-    print "Sphinx %s" % __version__
-    print "Pimlico command doc generator"
-    print "Outputting module docs to %s" % output_dir
+    print("Sphinx %s" % __version__)
+    print("Pimlico command doc generator")
+    print("Outputting module docs to %s" % output_dir)
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)

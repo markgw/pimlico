@@ -80,7 +80,7 @@ def preprocess(executor):
 
         try:
             executor.regexes.append(re.compile(regex))
-        except Exception, e:
+        except Exception as e:
             raise ModuleExecutionError("could not compile regex: %s. %s" % (regex, e))
 
     for regex in executor.regexes:

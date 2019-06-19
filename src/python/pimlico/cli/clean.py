@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -44,15 +45,15 @@ class CleanCmd(PimlicoCLISubcommand):
                             to_clean.add(os.path.join(root_dir, dirname))
 
         if len(to_clean) == 0:
-            print "Found no directories to clean"
+            print("Found no directories to clean")
         else:
-            print "Directories that do not seem to correspond to pipeline modules:"
-            print "\n".join(" - %s" % path for path in to_clean)
-            print
+            print("Directories that do not seem to correspond to pipeline modules:")
+            print("\n".join(" - %s" % path for path in to_clean))
+            print()
             answer = raw_input("Do you want to remove these directories? [y/N]: ")
             if answer.lower() == "y":
                 for path in to_clean:
                     shutil.rmtree(path)
-                print "All unnecessary data directories cleaned up"
+                print("All unnecessary data directories cleaned up")
             else:
-                print "Cancelled"
+                print("Cancelled")

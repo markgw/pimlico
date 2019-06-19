@@ -8,8 +8,12 @@ Tools for Python library dependencies.
 Provides superclasses for Python library dependencies and a selection of commonly used dependency instances.
 
 """
+from imp import reload
+import pkg_resources
 import sys
 from pkgutil import find_loader
+
+from pkg_resources import parse_version, parse_requirements
 
 from pimlico.core.dependencies.base import SoftwareDependency
 
@@ -102,8 +106,13 @@ class PythonPackageOnPip(PythonPackageDependency):
     """
     Python package that can be installed via pip. Will be installed in the virtualenv if not available.
 
+    Allows specification of a minimum version. If an earlier version is installed,
+    it will be upgraded.
+
     """
-    def __init__(self, package, name=None, pip_package=None, **kwargs):
+    def __init__(self, package, name=None, pip_package=None, upgrade_only_if_needed=False, min_version=None, **kwargs):
+        self.min_version = min_version
+        self.upgrade_only_if_needed = upgrade_only_if_needed
         # Package names tend to be identical to the software name, so there's no need to specify both
         if name is None:
             name = package
@@ -117,13 +126,33 @@ class PythonPackageOnPip(PythonPackageDependency):
 
     def install(self, local_config, trust_downloaded_archives=False):
         import subprocess
+        options = []
+        if self.upgrade_only_if_needed:
+            options.extend(["--upgrade-strategy", "only-if-needed"])
+
+        if self.min_version is not None:
+            package = "{}>={}".format(self.pip_package, self.min_version)
+        else:
+            package = self.pip_package
 
         # Use subprocess to call Pip: the recommended way to use it programmatically
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', self.pip_package])
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install'] + options + [package])
 
         # Refresh sys.path so we can import the installed package
         import site
         reload(site)
+
+    def problems(self, local_config):
+        problems = super(PythonPackageOnPip, self).problems(local_config)
+        if not problems and self.min_version is not None:
+            print "Checking {}, {}".format(self.name, self.min_version)
+            # Also check that it's a sufficient version
+            inst_version = self.get_installed_version(local_config)
+            if parse_version(self.min_version) > parse_version(inst_version):
+                problems.append("{} is installed, but only version {}: {} required".format(
+                    self.name, inst_version, self.min_version
+                ))
+        return problems
 
     def _old_install(self, local_config, trust_downloaded_archives=False):
         """
@@ -254,16 +283,20 @@ class PythonPackageOnPip(PythonPackageDependency):
         return "PythonPackageOnPip<%s%s>" % (self.name, (" (%s)" % self.package) if self.package != self.name else "")
 
     def get_installed_version(self, local_config):
-        from pip.commands.show import search_packages_info
-        # Use Pip to get the version number of the installed version
-        installed_packages = list(search_packages_info(self.pip_package))
-        if len(installed_packages):
-            # Found the Pip package info: this contains the version
-            return installed_packages[0]["version"]
-        else:
+        reqs = list(parse_requirements(self.pip_package))
+        if len(reqs) != 1:
+            raise ValueError("pip_package='{}', which could not be parsed as a requirement".format(self.pip_package))
+        # Reload the working set in case something's been installed since loaded
+        reload(pkg_resources)
+        # Look up the package
+        dist = pkg_resources.working_set.find(reqs[0])
+        if dist is None:
             # Pip package not found
             # This can happen because the package wasn't installed with Pip, but is available because it's importable
             return super(PythonPackageOnPip, self).get_installed_version(local_config)
+        else:
+            # Found the Pip package info: this contains the version
+            return dist.version
 
 
 ###################################
@@ -290,7 +323,15 @@ keras_dependency = PythonPackageOnPip("keras", dependencies=[h5py_dependency])
 sklearn_dependency = PythonPackageOnPip(
     "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
 )
-gensim_dependency = PythonPackageOnPip("gensim", "Gensim", dependencies=[numpy_dependency, scipy_dependency])
+
+# Gensim relies on Requests, which needs urllib3>=1.23 to work,
+# but this isn't enforced in the dependencies
+requests_dependency = PythonPackageOnPip("requests", min_version="2.20")
+gensim_dependency = PythonPackageOnPip(
+    "gensim", "Gensim",
+    dependencies=[numpy_dependency, scipy_dependency, requests_dependency],
+    upgrade_only_if_needed=True
+)
 
 
 ### Special behaviour for bs4
@@ -339,7 +380,7 @@ class NLTKResource(SoftwareDependency):
         from nltk.downloader import _downloader
         try:
             resource_installed = _downloader.is_installed(self.name)
-        except Exception, e:
+        except Exception as e:
             problems.append("Error checking NLTK resource status for {}: {}".format(self.name, e))
         else:
             if not resource_installed:

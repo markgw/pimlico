@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -21,8 +22,8 @@ class NewModuleCmd(PimlicoCLISubcommand):
         # main custom code lives and create the new code there
         python_paths = pipeline.pipeline_config["python_path"].split(":")
         if len(python_paths) == 0:
-            print "Could not determine a location for creating the new module code, since the pipeline does not " \
-                  "specify a 'python_path' variable"
+            print("Could not determine a location for creating the new module code, since the pipeline does not " \
+                  "specify a 'python_path' variable")
             path = ask("Enter a base path for your custom Pimlico code (may be relative to project root): ")
             if os.path.isabs(path):
                 code_root = path
@@ -30,17 +31,17 @@ class NewModuleCmd(PimlicoCLISubcommand):
                 code_root = os.path.abspath(os.path.join(PROJECT_ROOT, path))
         else:
             code_root = os.path.abspath(python_paths[0])
-        print "New code will live in %s" % code_root
+        print("New code will live in %s" % code_root)
         # Make sure the root dir exists
         if not os.path.exists(code_root):
             os.makedirs(code_root)
 
         module_path = ask("Enter name for new module (full python path, e.g. 'mypackage.modules.mymodule'): ")
         module_root_dir = os.path.join(code_root, *(module_path.split(".")))
-        print "Module code will be created in %s" % module_root_dir
+        print("Module code will be created in %s" % module_root_dir)
         # Create Python directories as necessary to create the new module's directory
         if os.path.exists(module_root_dir):
-            print "Module directory already exists: not creating any code, so we don't overwrite existing code"
+            print("Module directory already exists: not creating any code, so we don't overwrite existing code")
             return
 
         rt = code_root
@@ -56,9 +57,9 @@ class NewModuleCmd(PimlicoCLISubcommand):
         imports = []
 
         # Work out what category of module we're creating
-        print "\nSelect a category of module to create:"
-        print " 1. Generic"
-        print " 2. Document map module"
+        print("\nSelect a category of module to create:")
+        print(" 1. Generic")
+        print(" 2. Document map module")
         # In future, you probably want to add, e.g. filter modules, multistage modules, ...
         module_category = int(ask("Category: "))
         assert module_category in [1, 2]
@@ -67,28 +68,28 @@ class NewModuleCmd(PimlicoCLISubcommand):
         module_type_name = module_path.split(".")[-1]
         module_readable_name = ask("Enter readable name (short, e.g. 'Number multiplier'): ")
 
-        print "\nCreate module options"
-        print "====================="
+        print("\nCreate module options")
+        print("=====================")
         module_options = []
         option_egs = []
         while True:
             option_name = ask("Option name (blank to stop creating options): ")
             if " " in option_name:
-                print "Option name cannot include spaces"
+                print("Option name cannot include spaces")
                 continue
             elif len(option_name) == 0:
                 break
             # Ask questions to guide the user through defining the module option
             option_def = []
 
-            print "Choose one of the standard option types, or edit the "
-            print "generated code afterwards to use a different one"
-            print " 1. string"
-            print " 2. integer"
-            print " 3. float"
-            print " 4. boolean"
-            print " 5. choice from list of possible values"
-            print " 6. comma-separated list"
+            print("Choose one of the standard option types, or edit the ")
+            print("generated code afterwards to use a different one")
+            print(" 1. string")
+            print(" 2. integer")
+            print(" 3. float")
+            print(" 4. boolean")
+            print(" 5. choice from list of possible values")
+            print(" 6. comma-separated list")
             option_type_choice = int(ask("Option type: "))
             # String is the default, so we don't need to specify a type
             if option_type_choice != 1:
@@ -104,7 +105,7 @@ class NewModuleCmd(PimlicoCLISubcommand):
                     imports.append("from pimlico.core.modules.options import str_to_bool")
                 elif option_type_choice == 5:
                     imports.append("from pimlico.core.modules.options import choose_from_list")
-                    print "Specifying values (strings, unquoted) to choose from:"
+                    print("Specifying values (strings, unquoted) to choose from:")
                     choices = []
                     while True:
                         next_value = ask("Next value (blank to stop): ", strip_space=False)
@@ -115,11 +116,11 @@ class NewModuleCmd(PimlicoCLISubcommand):
                     option_type = 'choose_from_list([%s], name="%s")' % (", ".join(choices), option_name)
                     option_eg = choices[0]
                 elif option_type_choice == 6:
-                    print "What type of values are in the list? (Customize afterwards if you need other types)"
-                    print " 1. string"
-                    print " 2. integer"
-                    print " 3. float"
-                    print " 4. other"
+                    print("What type of values are in the list? (Customize afterwards if you need other types)")
+                    print(" 1. string")
+                    print(" 2. integer")
+                    print(" 3. float")
+                    print(" 4. other")
                     option_list_type_choice = int(ask("Type: "))
                     if option_list_type_choice == 1:
                         imports.append("from pimlico.core.modules.options import comma_separated_strings")
@@ -138,13 +139,13 @@ class NewModuleCmd(PimlicoCLISubcommand):
                         option_type = "comma_separated_list(item_type=???)  # TODO Put your type in here"
                         option_eg = "x,y,z"
                 else:
-                    print "Unknown type"
+                    print("Unknown type")
                     continue
                 option_def.append(("type", option_type))
             else:
                 option_eg = "something"
 
-            print "Describe the option, so the module's users understand what it does"
+            print("Describe the option, so the module's users understand what it does")
             option_help = ask("Description: ")
             if len(option_help):
                 # Escape any double quotes
@@ -157,9 +158,9 @@ class NewModuleCmd(PimlicoCLISubcommand):
                     option_help = '"%s"' % option_help
                 option_def.append(("help", option_help))
 
-            print "You can give the option a default value."
-            print "Specify as Python code (i.e. quote it if it's a string)."
-            print "Leave blank to use None as the default"
+            print("You can give the option a default value.")
+            print("Specify as Python code (i.e. quote it if it's a string).")
+            print("Leave blank to use None as the default")
             option_default = ask("Default value: ")
             if option_default:
                 option_def.append(("default", option_default))
@@ -171,7 +172,7 @@ class NewModuleCmd(PimlicoCLISubcommand):
                 option_name,
                 "\n".join('            "%s": %s,' % (name, df) for (name, df) in option_def)
             ))
-            print
+            print()
 
         template_data = {
             "module_type_name": module_type_name,
@@ -205,14 +206,14 @@ class NewModuleCmd(PimlicoCLISubcommand):
             exec_template = DOC_MAP_EXEC_TEMPLATE
             exec_imports = []
 
-            print "Several types of document map module are available:"
-            print " 1. Multiprocessing: documents may be processed in parallel (using multiprocessing), by specifying "
-            print "    --processes at runtime"
-            print " 2. Threaded: similar, but parallelization is implemented using Python's threading package. This "
-            print "    will not take advantage of multiple processors or system-level parallelism, but is useful, for "
-            print "    example, if your process function calls background processes to do the legwork"
-            print " 3. Single-process: do not parallelize, even if --processes is set at runtime. Use where you know "
-            print "    that things will go wrong if documents are processed in parallel"
+            print("Several types of document map module are available:")
+            print(" 1. Multiprocessing: documents may be processed in parallel (using multiprocessing), by specifying ")
+            print("    --processes at runtime")
+            print(" 2. Threaded: similar, but parallelization is implemented using Python's threading package. This ")
+            print("    will not take advantage of multiple processors or system-level parallelism, but is useful, for ")
+            print("    example, if your process function calls background processes to do the legwork")
+            print(" 3. Single-process: do not parallelize, even if --processes is set at runtime. Use where you know ")
+            print("    that things will go wrong if documents are processed in parallel")
             map_type_choice = int(ask("Choose a map module type: "))
 
             if map_type_choice == 1:
@@ -240,21 +241,21 @@ class NewModuleCmd(PimlicoCLISubcommand):
             option_egs="\n".join("%s=%s" % (name, eg) for (name, eg) in option_egs)
         )
 
-        print "\nModule created"
-        print "=============="
-        print " 1. Edit the module metedata in %s" % info_path
-        print " 2. Write the module's execution code in %s" % exec_path
-        print " 3. Use the module in your pipeline with something like this:"
-        print
-        print config_eg
+        print("\nModule created")
+        print("==============")
+        print(" 1. Edit the module metedata in %s" % info_path)
+        print(" 2. Write the module's execution code in %s" % exec_path)
+        print(" 3. Use the module in your pipeline with something like this:")
+        print()
+        print(config_eg)
 
 
 
 def ask(prompt, strip_space=True):
     strp = "\n " if strip_space else "\n"
-    print
+    print()
     val = raw_input("  %s" % prompt).strip(strp)
-    print
+    print()
     return val
 
 

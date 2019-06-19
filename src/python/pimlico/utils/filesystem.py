@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -58,8 +59,8 @@ def copy_dir_with_progress(source_dir, target_dir, move=False):
         shutil.rmtree(target_dir)
 
     source_size = dirsize(source_dir)
-    print "%s %s from %s to %s" % ("Moving" if move else "Copying",
-                                   format_file_size(source_size), source_dir, target_dir)
+    print("%s %s from %s to %s" % ("Moving" if move else "Copying",
+                                   format_file_size(source_size), source_dir, target_dir))
 
     # Do the copying in a thread
     copy_thread = threading.Thread(target=shutil.copytree, args=(source_dir, target_dir))
@@ -133,7 +134,7 @@ def retry_open(filename, errnos=[13], retry_schedule=[2, 10, 30, 120, 300], **kw
         for retry_wait in retry_schedule + [None]:
             try:
                 return open(filename, **kwargs)
-            except IOError, e:
+            except IOError as e:
                 if e.errno not in errnos:
                     # Caught an error, but not one we should retry on
                     raise

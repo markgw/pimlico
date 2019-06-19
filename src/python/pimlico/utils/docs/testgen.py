@@ -9,6 +9,7 @@ Build this before building `modules`, so that the list of modules referenced in
 test pipelines is ready.
 
 """
+from __future__ import print_function
 import argparse
 import os
 import warnings
@@ -119,7 +120,7 @@ def build_test_config_doc(conf_file):
     # Try loading the test pipeline
     try:
         pipeline = TestPipeline.load_pipeline(conf_file, TEST_STORAGE_DIR)
-    except Exception, e:
+    except Exception as e:
         warnings.warn("Could not load test pipeline {}: {}. Not building doc".format(conf_file, e))
         return
 
@@ -157,7 +158,7 @@ def build_index(generated, output_dir):
         f.write(INDEX_TEMPLATE.format(
             generated="\n   ".join(generated)
         ))
-    print "Wrote index to {}".format(os.path.join(output_dir, "index.rst"))
+    print("Wrote index to {}".format(os.path.join(output_dir, "index.rst")))
 
 
 def build_test_config_docs(test_config_dir, output_dir):
@@ -169,7 +170,7 @@ def build_test_config_docs(test_config_dir, output_dir):
             if filename.endswith(".conf"):
                 # Get the path relative to the test base
                 rel_path = os.path.relpath(base_dir, test_config_dir)
-                print "Building {}/{}".format(rel_path, filename)
+                print("Building {}/{}".format(rel_path, filename))
                 # Build the doc's text
                 doc = build_test_config_doc(os.path.join(base_dir, filename))
                 if doc is not None:
@@ -178,7 +179,7 @@ def build_test_config_docs(test_config_dir, output_dir):
                     out_filename = "{}.{}.rst".format(".".join(x for x in os.path.split(rel_path) if x), filename)
                     with open(os.path.join(output_dir, out_filename), "w") as f:
                         f.write(doc_text)
-                    print "  Written to {}".format(out_filename)
+                    print("  Written to {}".format(out_filename))
                     generated.append(out_filename)
                     module_refs.append((ref_name, modules))
 
@@ -192,7 +193,7 @@ def build_test_config_docs(test_config_dir, output_dir):
     module_list_fn = os.path.join(output_dir, "module_list.tsv")
     with open(module_list_fn, "w") as f:
         f.write("\n".join("{}\t{}".format(ref_name, ", ".join(modules)) for (ref_name, modules) in module_refs))
-    print "Module reference list output to {}".format(module_list_fn)
+    print("Module reference list output to {}".format(module_list_fn))
 
 
 if __name__ == "__main__":
@@ -205,14 +206,14 @@ if __name__ == "__main__":
     # Install basic Pimlico requirements
     install_core_dependencies()
 
-    print "Sphinx %s" % __version__
-    print "Pimlico test config doc generator"
+    print("Sphinx %s" % __version__)
+    print("Pimlico test config doc generator")
 
     test_config_dir = os.path.join(TEST_DATA_DIR, "pipelines")
     if not os.path.exists(test_config_dir):
-        print "Test config dir could not be found: {}".format(test_config_dir)
+        print("Test config dir could not be found: {}".format(test_config_dir))
     else:
-        print "Building test config docs from pipelines found in {}".format(test_config_dir)
+        print("Building test config docs from pipelines found in {}".format(test_config_dir))
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)

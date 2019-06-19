@@ -222,7 +222,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
                     pbar.finish()
             complete = True
-        except ModuleExecutionError, e:
+        except ModuleExecutionError as e:
             if self.info.status == "PARTIALLY_PROCESSED":
                 self.log.info("Processed documents recorded: restart processing where you left off by calling run "
                               "again once you've fixed the problem (%d docs processed in this run, %d processed in "
@@ -266,7 +266,7 @@ class DocumentMapper(object):
         # Start up a pool
         try:
             executor.pool = executor.create_pool(self.processes)
-        except WorkerStartupError, e:
+        except WorkerStartupError as e:
             raise ModuleExecutionError(e.message, cause=e.cause, debugging_info=e.debugging_info)
 
         complete = False
@@ -401,7 +401,7 @@ def invalid_doc_on_error(fn):
             # Processing was cancelled, killed or otherwise called to a halt
             # Don't report this as an error processing a doc, but raise it
             raise
-        except Exception, e:
+        except Exception as e:
             # Error while processing the document: output an invalid document, with some error information
             # This covers the case of wrapping a process_document() function for a map factory,
             # since the first argument is always the worker process
@@ -422,7 +422,7 @@ def invalid_docs_on_error(fn):
             # Processing was cancelled, killed or otherwise called to a halt
             # Don't report this as an error processing a doc, but raise it
             raise
-        except Exception, e:
+        except Exception as e:
             # Error while processing the document: output invalid documents, with some error information
             return [invalid_document(self.info.module_name,  "%s\n%s" % (e, format_exc()))] * len(input_tuples)
     return _fn
@@ -563,7 +563,7 @@ class InputQueueFeeder(Thread):
             self.feeding_complete.set()
             if self.complete_callback is not None:
                 self.complete_callback()
-        except Exception, e:
+        except Exception as e:
             # Error in iterating over the input data -- actually quite common, since it could involve filter modules
             # Make it available to the main thread
             e.traceback = format_exc()

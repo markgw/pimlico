@@ -103,7 +103,7 @@ class InterleavedGroupedCorpusReader(GroupedCorpus.Reader):
             next_corpus = min((prog, i) for (i, prog) in enumerate(progresses) if not finished[i])[1]
             try:
                 # We ignore this archive name, since we're regrouping
-                archive_name, doc_name, doc = iterators[next_corpus].next()
+                archive_name, doc_name, doc = next(iterators[next_corpus])
             except StopIteration:
                 # Reached the end of this corpus
                 # Mark as finished, so we stop trying to take from this one

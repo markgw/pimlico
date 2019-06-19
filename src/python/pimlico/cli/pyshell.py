@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -47,8 +48,8 @@ class PythonShellCmd(PimlicoCLISubcommand):
             # Enter the interpreter
             from code import interact
 
-            print "Loaded pipeline config"
-            print "PipelineConfig object is available as variable 'pipeline' (or 'p')"
+            print("Loaded pipeline config")
+            print("PipelineConfig object is available as variable 'pipeline' (or 'p')")
             local = {"pipeline": pipeline, "p": pipeline}
 
             interact(local=local)

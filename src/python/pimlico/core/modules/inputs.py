@@ -73,7 +73,7 @@ class InputReader(PimlicoDatatype.Reader):
         # There's no need to check all the documents, but it's worth checking one in case the user
         # of the factory function has made a mistake in building the iter_fn
         it = iter(self.iterate())
-        doc_name, doc = it.next()
+        doc_name, doc = next(it)
         if not self.datatype.data_point_type.is_type_for_doc(doc):
             raise TypeError("data iterator for input reader yielded the wrong type of document. Expected "
                             "a document of data point type {}, but got {}".format(

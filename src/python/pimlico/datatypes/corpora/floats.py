@@ -89,7 +89,7 @@ class FloatListsDocumentType(RawDocumentType):
                         raise IOError("file ended mid-row")
                     try:
                         num = self.data_point_type.struct.unpack(num_string)[0]
-                    except struct.error, e:
+                    except struct.error as e:
                         raise IOError("error interpreting float data: %s" % e)
                     row.append(num)
                 yield row
@@ -102,7 +102,7 @@ class FloatListsDocumentType(RawDocumentType):
                     raw_data.write(self.data_point_type.length_struct.pack(len(row)))
                     for num in row:
                         raw_data.write(self.data_point_type.struct.pack(num))
-                except struct.error, e:
+                except struct.error as e:
                     raise ValueError("error encoding float row %s using struct format %s: %s" %
                                      (row, self.data_point_type.struct.format, e))
             return raw_data.getvalue()
@@ -149,7 +149,7 @@ class FloatListDocumentType(RawDocumentType):
                     return
                 try:
                     num = self.data_point_type.struct.unpack(num_string)[0]
-                except struct.error, e:
+                except struct.error as e:
                     raise IOError("error interpreting float data: %s" % e)
                 yield num
 
@@ -159,7 +159,7 @@ class FloatListDocumentType(RawDocumentType):
             for num in internal_data["list"]:
                 try:
                     raw_data.write(self.data_point_type.struct.pack(num))
-                except struct.error, e:
+                except struct.error as e:
                     raise ValueError("error encoding float data %s using struct format %s: %s" %
                                      (num, self.data_point_type.struct.format, e))
             return raw_data.getvalue()
@@ -206,13 +206,13 @@ class VectorDocumentType(RawDocumentType):
         def raw_to_internal(self, raw_data):
             try:
                 return {"vector": self.data_point_type.struct.unpack(raw_data),}
-            except struct.error, e:
+            except struct.error as e:
                 raise IOError("error interpreting float vector data: %s" % e)
 
         def internal_to_raw(self, internal_data):
             try:
                 return self.data_point_type.struct.pack(internal_data["vector"])
-            except struct.error, e:
+            except struct.error as e:
                 raise ValueError("error encoding float data using struct format %s: %s" %
                                  (self.data_point_type.struct.format, e))
 

@@ -1,9 +1,10 @@
+from __future__ import print_function
 import warnings
 
 try:
     import urwid
 except ImportError:
-    print "Urwid is not installed: installing now"
+    print("Urwid is not installed: installing now")
     from pimlico.core.dependencies.python import PythonPackageOnPip
     urwid_dep = PythonPackageOnPip("urwid")
     urwid_dep.install({})
@@ -11,7 +12,7 @@ except ImportError:
     try:
         import urwid
     except ImportError:
-        print "Tried to install Urwid, but still not available"
+        print("Tried to install Urwid, but still not available")
         raise
 
 PALETTE = [

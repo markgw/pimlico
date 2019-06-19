@@ -121,7 +121,7 @@ def import_member(path):
         raise ImportError("no module name in {}".format(path))
     try:
         mod = import_module(mod_path)
-    except ImportError, e:
+    except ImportError as e:
         raise ImportError("class' module does not exist: %s. %s" % (mod_path, e))
 
     if not hasattr(mod, cls_name):

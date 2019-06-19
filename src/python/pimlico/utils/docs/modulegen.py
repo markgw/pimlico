@@ -6,6 +6,7 @@
 Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 
 """
+from __future__ import print_function
 import argparse
 import codecs
 import os
@@ -79,7 +80,7 @@ def generate_docs_for_pymod(module, output_dir, test_refs={}):
 
 
 def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_refs={}):
-    print "Building docs for %s" % module_path
+    print("Building docs for %s" % module_path)
     filename = os.path.join(output_dir, "%s.rst" % module_path)
     # First import the python module
     pymod = import_module(module_path)
@@ -150,12 +151,12 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
     # Try generating some example config for how this module can be used
     try:
         example_config_short = generate_example_config(ModuleInfo, input_table, module_path, minimal=True)
-    except Exception, e:
+    except Exception as e:
         warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
         example_config_short = None
     try:
         example_config_long = generate_example_config(ModuleInfo, input_table, module_path, minimal=False)
-    except Exception, e:
+    except Exception as e:
         warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
         example_config_long = None
 
@@ -464,18 +465,18 @@ if __name__ == "__main__":
     # Install basic Pimlico requirements
     install_core_dependencies()
 
-    print "Sphinx %s" % __version__
-    print "Pimlico module doc generator"
+    print("Sphinx %s" % __version__)
+    print("Pimlico module doc generator")
     try:
         base_mod = import_module(opts.path)
-    except ImportError, e:
-        print "Could not import base module %s: %s" % (opts.path, e)
-        print "Did you add your own modules to the pythonpath? (Current paths: %s)" % \
-              u", ".join(sys.path).encode("ascii", "ignore")
-        print "Cannot generate docs"
+    except ImportError as e:
+        print("Could not import base module %s: %s" % (opts.path, e))
+        print("Did you add your own modules to the pythonpath? (Current paths: %s)" % \
+              u", ".join(sys.path).encode("ascii", "ignore"))
+        print("Cannot generate docs")
         sys.exit(1)
-    print "Generating docs for %s (including all submodules)" % opts.path
-    print "Outputting module docs to %s" % output_dir
+    print("Generating docs for %s (including all submodules)" % opts.path)
+    print("Outputting module docs to %s" % output_dir)
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)

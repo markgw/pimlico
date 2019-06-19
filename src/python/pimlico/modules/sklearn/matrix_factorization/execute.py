@@ -34,7 +34,7 @@ class ModuleExecutor(BaseModuleExecutor):
         transform_cls = self.info.load_transformer_class()
         try:
             transformer = transform_cls(**self.info.init_kwargs)
-        except TypeError, e:
+        except TypeError as e:
             raise PipelineConfigParseError("invalid arguments to %s: %s" % (transform_type, e))
 
         # Apply transformation to the matrix

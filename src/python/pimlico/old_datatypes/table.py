@@ -63,7 +63,7 @@ class IntegerTableDocumentType(RawDocumentType):
                 break
             try:
                 row = self.unpacker.unpack(row_string)
-            except struct.error, e:
+            except struct.error as e:
                 if len(row_string) < self.row_size:
                     # Got a partial row at end of file
                     raise IOError("found partial row at end of file: last row has byte length %d, not %d" %
@@ -110,7 +110,7 @@ class IntegerTableDocumentCorpusWriter(TarredCorpusWriter):
             # Should be rows of ints of the correct length
             try:
                 raw_data.write(self.struct.pack(*row))
-            except struct.error, e:
+            except struct.error as e:
                 # Instead of checking the rows before encoding, catch any encoding errors and give helpful messages
                 if len(row) != self.row_length:
                     raise ValueError("tried to write a row of length %d to a table writer with row length %d" %

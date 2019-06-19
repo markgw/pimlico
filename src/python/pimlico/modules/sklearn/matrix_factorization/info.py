@@ -90,7 +90,7 @@ class ModuleInfo(BaseModuleInfo):
         # Try loading the given transformer class name to check it's a valid one
         try:
             self.load_transformer_class()
-        except ImportError, e:
+        except ImportError as e:
             raise PipelineConfigParseError("Could not load decomposition class %s. Check it's available in the version "
                                            "of scikit-learn you have installed" % self.options["class"])
 

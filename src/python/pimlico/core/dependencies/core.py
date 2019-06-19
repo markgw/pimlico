@@ -11,6 +11,8 @@ from pimlico.core.dependencies.python import PythonPackageOnPip, PythonPackageSy
 CORE_PIMLICO_DEPENDENCIES = [
     # Without Pip, we can't install anything else, so we need that to be installed first
     PythonPackageSystemwideInstall("pip", "Pip"),
+    # From Pip, you can make sure that Pip itself has a sufficiently high version
+    PythonPackageOnPip("pip", "Pip", pip_package="pip>=19"),
     # Virtualenv must be installed so that we can install other packages in the local Pimlico environment
     # Note that, even within a running virtualenv, the virtualenv Python package might not be installed
     # In this case, it can be installed using Pip
@@ -20,4 +22,6 @@ CORE_PIMLICO_DEPENDENCIES = [
     PythonPackageOnPip("termcolor", "termcolor"),
     PythonPackageOnPip("tabulate", "tabulate"),
     PythonPackageOnPip("progressbar", "Progressbar"),
+    # We use the future library to provide Python 2-3 compatibility
+    PythonPackageOnPip("future"),
 ]

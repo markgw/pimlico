@@ -14,7 +14,7 @@ def process_document(worker, archive, filename, doc):
     for data_point in doc:
         # Look for the special keys we use as terms
         try:
-            term = (val for (key, val) in data_point if key in term_keys).next()
+            term = next((val for (key, val) in data_point if key in term_keys))
         except StopIteration:
             # No term keys found in the data point: skip it
             continue

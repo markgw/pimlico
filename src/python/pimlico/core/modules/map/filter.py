@@ -86,7 +86,7 @@ class FilterModuleOutputReader(GroupedCorpus.Reader):
 
                 # We only take one of the outputs, if there are multiple, and yield this
                 yield archive, doc_name, next_output[output_num]
-        except Exception, e:
+        except Exception as e:
             # Any other uncaught exception should be passed up as a ModuleExecutionError, since we're actually
             #  executing a module here, even though we're pretending to iterate over data
             # This causes the restart procedure to catch the error just as if something went wrong in map execution

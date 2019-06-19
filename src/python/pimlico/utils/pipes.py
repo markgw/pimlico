@@ -20,7 +20,7 @@ def qget(queue, *args, **kwargs):
     while True:
         try:
             return queue.get(*args, **kwargs)
-        except IOError, e:
+        except IOError as e:
             if e.errno == 4:
                 # Got an EINTR: try getting again
                 continue

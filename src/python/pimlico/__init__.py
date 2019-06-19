@@ -4,6 +4,7 @@ made up of linguistic processing tasks to run on large datasets (corpora). It pr
 existing, widely used NLP (Natural Language Processing) tools.
 
 """
+from __future__ import print_function
 import os
 import sys
 from pimlico.core.dependencies.base import check_and_install
@@ -39,9 +40,9 @@ def install_core_dependencies():
     # We just pass in an empty dictionary
     unavailable = [dep for dep in CORE_PIMLICO_DEPENDENCIES if not dep.available({})]
     if len(unavailable):
-        print >>sys.stderr, "Some core Pimlico dependencies are not available: %s\n" % \
-                            ", ".join(dep.name for dep in unavailable)
+        print("Some core Pimlico dependencies are not available: %s\n" % \
+                            ", ".join(dep.name for dep in unavailable), file=sys.stderr)
         uninstalled = check_and_install(CORE_PIMLICO_DEPENDENCIES, {})
         if len(uninstalled):
-            print >>sys.stderr, "Unable to install all core dependencies: exiting"
+            print("Unable to install all core dependencies: exiting", file=sys.stderr)
             sys.exit(1)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -41,7 +42,7 @@ class ModuleExecutor(BaseModuleExecutor):
 
         self.log.info("Running R script")
         output_lines = []
-        print "##### R script execution begins #####"
+        print("##### R script execution begins #####")
         try:
             # Start the R script running
             cmd = ["Rscript", "--vanilla", script_path]
@@ -51,7 +52,7 @@ class ModuleExecutor(BaseModuleExecutor):
             for line in outputter:
                 line = line.decode("utf-8")
                 output_lines.append(line)
-                print line.encode("utf-8"),
+                print(line.encode("utf-8"), end=' ')
 
             process.stdout.close()
             return_code = process.wait()
@@ -61,7 +62,7 @@ class ModuleExecutor(BaseModuleExecutor):
                     " ".join(cmd)
                 ))
         finally:
-            print "##### R script execution ends #####"
+            print("##### R script execution ends #####")
             # Whether or not the script succeeded, send all its output to a file
             output_path = self.info.get_output("output").absolute_path
 

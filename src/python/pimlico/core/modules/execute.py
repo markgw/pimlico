@@ -7,6 +7,7 @@ This module provides the functionality to check that Pimlico modules are ready t
 It is used by the `run` command.
 
 """
+from __future__ import print_function
 
 import os
 import socket
@@ -51,7 +52,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
     # Run basic checks on the config for the whole pipeline
     try:
         check_pipeline(pipeline)
-    except PipelineCheckError, e:
+    except PipelineCheckError as e:
         raise ModuleExecutionError("error in pipeline config: %s" % e)
 
     # Load all the modules from the pipeline
@@ -61,7 +62,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
             # Load the module instance
             try:
                 module = pipeline[module_name]
-            except KeyError, e:
+            except KeyError as e:
                 raise ModuleExecutionError("could not load module '%s'" % module_name)
 
             # If we loaded a multi-stage module, default to executing its next unexecuted stage
@@ -74,7 +75,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
                              next_stage.name)
 
             modules.append(module)
-        except Exception, e:
+        except Exception as e:
             # Intercept all exceptions to add the name of the module that they came from
             e.module_name = module_name
             # Reraise the exception to be caught higher up
@@ -153,8 +154,8 @@ def check_modules_ready(pipeline, modules, log, preliminary=False):
             problems = module.check_ready_to_run()
             if len(problems):
                 for problem_name, problem_desc in problems:
-                    print "Module '%s' cannot run: %s\n  %s" % \
-                          (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100).splitlines()))
+                    print("Module '%s' cannot run: %s\n  %s" % \
+                          (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100).splitlines())))
                     raise ModuleExecutionError("runtime checks failed for module '%s'" % module_name)
 
             # Check that previous modules have been completed and input data is ready for us to use
@@ -177,7 +178,7 @@ def check_modules_ready(pipeline, modules, log, preliminary=False):
 
             # For following modules, assume this one's been run
             already_run.append(module_name)
-        except Exception, e:
+        except Exception as e:
             # Intercept all exceptions to add the name of the module that they came from
             e.module_name = module_name
             # Reraise the exception to be caught higher up
@@ -288,7 +289,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                     try:
                         # Give the module an initial in-progress status
                         end_status = executor(module, debug=debug, force_rerun=force_rerun).execute()
-                    except Exception, e:
+                    except Exception as e:
                         # Catch all exceptions that occur within the executor and wrap them in a ModuleExecutionError
                         # so they can be nicely handled by the error reporting below
                         # Ideally, most expected exceptions will be one of these two types anyway, but of course
@@ -299,7 +300,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         debugging_info = "Uncaught exception in executor. Traceback from original exception: \n%s" % \
                                          "".join(format_tb(sys.exc_info()[2]))
                         raise ModuleExecutionError(str(e), cause=e, debugging_info=debugging_info)
-                except (ModuleInfoLoadError, ModuleExecutionError), e:
+                except (ModuleInfoLoadError, ModuleExecutionError) as e:
                     if type(e) is ModuleExecutionError:
                         # If there's any error, note in the history that execution didn't complete
                         module.add_execution_history_record("Error executing %s: %s" % (module_name, e))
@@ -314,10 +315,10 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         end_status = "UNEXECUTED"
 
                     debug_mess = StringIO()
-                    print >>debug_mess, "Top-level error"
-                    print >>debug_mess, "---------------"
-                    print >>debug_mess, format_exc()
-                    print >>debug_mess, format_execution_error(e)
+                    print("Top-level error", file=debug_mess)
+                    print("---------------", file=debug_mess)
+                    print(format_exc(), file=debug_mess)
+                    print(format_execution_error(e), file=debug_mess)
                     debug_mess = debug_mess.getvalue()
 
                     # Put the whole error info into a file so we can see what went wrong
@@ -328,7 +329,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                     if debug or exit_on_error:
                         # In debug mode, also output the full info to the terminal
                         # Do this also if we're dropping out after encountering an error
-                        print >>sys.stderr, debug_mess
+                        print(debug_mess, file=sys.stderr)
                     else:
                         log.error("Full debug info output to %s" % error_filename)
 
@@ -360,7 +361,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                 # Custom status was given
                 module.status = end_status
                 module.add_execution_history_record("Execution completed with status %s" % end_status)
-        except Exception, e:
+        except Exception as e:
             # Intercept all exceptions to add the name of the module that they came from
             e.module_name = module_name
             module.add_execution_history_record("Execution interruption by %s exception" % type(e).__name__)

@@ -588,7 +588,7 @@ class PimlicoDatatype(object):
                     one is available.
                 """
                 try:
-                    return (path for (path, ready) in zip(self.data_paths, self._paths_ready) if ready).next()
+                    return next((path for (path, ready) in zip(self.data_paths, self._paths_ready) if ready))
                 except StopIteration:
                     raise DataNotReadyError("tried to get base dir from reader setup, but no path provides ready data")
 
@@ -760,7 +760,7 @@ class PimlicoDatatype(object):
             # Check here that metadata from kwargs is all JSON serializable, to avoid mysterious errors later
             try:
                 json.dumps(self.metadata)
-            except TypeError, e:
+            except TypeError as e:
                 raise DatatypeWriteError(
                     "metadata parameters passed to writer as kwargs must be JSON serializable: {}".format(e)
                 )

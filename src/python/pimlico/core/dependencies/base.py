@@ -6,6 +6,7 @@
 Base classes for defining software dependencies for module types and routines for fetching them.
 
 """
+from __future__ import print_function
 import subprocess
 
 from pimlico.core.dependencies.versions import unknown_software_version
@@ -222,9 +223,9 @@ class SystemCommandDependency(SoftwareDependency):
         command = self.test_command.split()
         try:
             subprocess.check_output(command, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             problems.append("Command '%s' failed: %s" % (self.test_command, e.output))
-        except OSError, e:
+        except OSError as e:
             problems.append("Command '%s' failed: %s" % (self.test_command, e))
         return problems
 
@@ -248,9 +249,9 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
     deps = [d for d in deps if not d.available(local_config)]
 
     for dep in deps:
-        print ", ".join("%s (%s)" % (d.name, "Y" if d.available(local_config) else "N") for d in deps)
+        print(", ".join("%s (%s)" % (d.name, "Y" if d.available(local_config) else "N") for d in deps))
         if dep.available(local_config):
-            print "%s became available while installing other dependencies" % dep.name
+            print("%s became available while installing other dependencies" % dep.name)
         else:
             # Haven't got this library
             # First check whether there are recursive deps we can install
@@ -258,34 +259,34 @@ def check_and_install(deps, local_config, trust_downloaded_archives=False):
             uninstallable.extend(subdeps_uninstallable)
             # Now check again whether the library's available
             if not dep.available(local_config):
-                print "\n%s" % title_box(dep.name)
+                print("\n%s" % title_box(dep.name))
                 if dep.installable():
                     try:
                         install(dep, local_config, trust_downloaded_archives=trust_downloaded_archives)
-                    except InstallationError, e:
-                        print "Could not install %s:\n%s" % (dep.name, e)
+                    except InstallationError as e:
+                        print("Could not install %s:\n%s" % (dep.name, e))
                         uninstallable.append(dep)
                     else:
-                        print "Installed"
+                        print("Installed")
                         installed.append(dep.name)
                 else:
-                    print "%s cannot be installed automatically" % dep.name
+                    print("%s cannot be installed automatically" % dep.name)
                     instructions = dep.installation_instructions()
                     if instructions:
-                        print "Installation instructions:\n"
-                        print "\n".join("  %s" % line for line in instructions.splitlines())
+                        print("Installation instructions:\n")
+                        print("\n".join("  %s" % line for line in instructions.splitlines()))
                     else:
-                        print "No installation instructions are available"
+                        print("No installation instructions are available")
                     uninstallable.append(dep)
-                print
+                print()
             else:
-                print "%s became available while installing sub-dependencies" % dep.name
+                print("%s became available while installing sub-dependencies" % dep.name)
 
     if installed:
-        print "Installed: %s" % ", ".join(installed)
+        print("Installed: %s" % ", ".join(installed))
     if uninstallable:
-        print "Could not install: %s" % ", ".join(dep.name for dep in uninstallable)
-    print
+        print("Could not install: %s" % ", ".join(dep.name for dep in uninstallable))
+    print()
     return uninstallable
 
 
@@ -307,7 +308,7 @@ def install(dep, local_config, trust_downloaded_archives=False):
         # Check that this is still not available, in case installing one of the others has provided incidentally
         if not sub_dep.available(local_config):
             extra_message = "" if sub_dep is dep else " (prerequisite for %s)" % dep.name
-            print "Installing %s%s" % (sub_dep.name, extra_message)
+            print("Installing %s%s" % (sub_dep.name, extra_message))
             sub_dep.install(local_config, trust_downloaded_archives=trust_downloaded_archives)
             # Check the installation worked
             remaining_problems = sub_dep.problems(local_config)

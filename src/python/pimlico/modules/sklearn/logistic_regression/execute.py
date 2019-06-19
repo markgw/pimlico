@@ -43,7 +43,7 @@ class ModuleExecutor(BaseModuleExecutor):
         )
         try:
             log_reg = LogisticRegression(**lr_init_kwargs)
-        except TypeError, e:
+        except TypeError as e:
             raise PipelineConfigParseError("invalid arguments to LogisticRegression: {}".format(e))
 
         # Shuffle the rows of the training data, so that the source providing the

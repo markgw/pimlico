@@ -72,7 +72,7 @@ def start_interface(info):
     )
     try:
         interface.start()
-    except JavaProcessError, e:
+    except JavaProcessError as e:
         raise ModuleExecutionError("error starting coref process: %s" % e)
     return interface
 

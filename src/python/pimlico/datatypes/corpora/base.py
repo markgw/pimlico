@@ -1,3 +1,4 @@
+from __future__ import print_function
 from collections import OrderedDict
 from traceback import format_exc
 
@@ -26,7 +27,7 @@ class CountInvalidCmd(ShellCommand):
         invalids = sum(
             (1 if is_invalid_doc(doc) else 0) for __, doc in pbar(corpus)
         )
-        print "%d / %d documents are invalid" % (invalids, len(corpus))
+        print("%d / %d documents are invalid" % (invalids, len(corpus)))
 
 
 @opt_type_help("Data point type, class name of a core type or fully qualified path")
@@ -116,27 +117,27 @@ class IterableCorpus(PimlicoDatatype):
         if opts.formatter == "help":
             standard_formatters = self.data_point_type.formatters
             if len(standard_formatters) == 0:
-                print "\nDatatype does not define any standard formatters."
-                print "If you don't specify one, the default formatter will be used (raw data)"
+                print("\nDatatype does not define any standard formatters.")
+                print("If you don't specify one, the default formatter will be used (raw data)")
             else:
-                print "\nStandard formatters for datatype: %s" % ", ".join(name for (name, cls) in standard_formatters)
-                print "These can be selected by name using the --formatter option."
-                print "If no formatter is selected, %s will be used" % standard_formatters[0][0]
+                print("\nStandard formatters for datatype: %s" % ", ".join(name for (name, cls) in standard_formatters))
+                print("These can be selected by name using the --formatter option.")
+                print("If no formatter is selected, %s will be used" % standard_formatters[0][0])
             sys.exit(0)
 
         # Check we've got urwid installed
         try:
             import urwid
         except ImportError:
-            print "You need Urwid to run the browser: install by running 'make urwid' in the Python lib dir"
+            print("You need Urwid to run the browser: install by running 'make urwid' in the Python lib dir")
             sys.exit(1)
 
         # Load the formatter if one was requested
         try:
             formatter = load_formatter(self, opts.formatter)
-        except TypeError, e:
-            print >> sys.stderr, "Error loading formatter"
-            print >> sys.stderr, e
+        except TypeError as e:
+            print("Error loading formatter", file=sys.stderr)
+            print(e, file=sys.stderr)
             sys.exit(1)
 
         browse_data(reader, formatter, skip_invalid=opts.skip_invalid)
@@ -201,7 +202,7 @@ class IterableCorpus(PimlicoDatatype):
             try:
                 # Produce a document instance of the appropriate type
                 document = self.datatype.data_point_type(raw_data=data)
-            except BaseException, e:
+            except BaseException as e:
                 # If there's any problem reading in the document, yield an invalid doc with the error
                 document = invalid_document(
                     "datatype %s reader" % self.datatype.data_point_type.name,

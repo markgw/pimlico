@@ -76,9 +76,9 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
             finally:
                 try:
                     self.tear_down()
-                except Exception, e:
+                except Exception as e:
                     self.exception_queue.put(WorkerShutdownError("error in tear_down() call", cause=e), block=True)
-        except Exception, e:
+        except Exception as e:
             # If there's any uncaught exception, make it available to the main process
             # Include the formatted stack trace, since we can't get this later from the exception outside this process
             e.traceback = format_exc()

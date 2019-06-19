@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -114,7 +115,7 @@ def archive_iter_decorator(archive_iter, module_name, output_name, stepper):
 
                 # Allow the full doc to be displayed on request
                 def _display_full():
-                    print full_doc_str
+                    print(full_doc_str)
 
                 option_message(
                     message, stepper, options=[("full", "show full doc", _display_full)],
@@ -174,9 +175,9 @@ def option_message(message_lines, stepper, options=None, stack_trace_option=True
 
     # Avoid threading problems with multiple messages being displayed at once by hold a lock for this whole process
     with stepper.interaction_lock:
-        print
+        print()
         # Show message, indenting all but first line
-        print "\n    ".join(message_lines)
+        print("\n    ".join(message_lines))
 
         if options is None:
             options = []
@@ -222,5 +223,5 @@ def option_message(message_lines, stepper, options=None, stack_trace_option=True
                     if exit:
                         break
                 # Go round again
-                print "Option '%s' not recognized" % choice
-        print
+                print("Option '%s' not recognized" % choice)
+        print()

@@ -3,6 +3,7 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from __future__ import absolute_import
+from __future__ import print_function
 
 import Queue
 import multiprocessing
@@ -137,11 +138,11 @@ class CandCServerError(Exception):
 def output_candc_error_info(command, returncode, stdout, stderr):
     file_path = get_log_file("candc")
     with open(file_path, "w") as f:
-        print >>f, "Command:"
-        print >>f, " ".join(command)
-        print >>f, "Return code: %s" % returncode
-        print >>f, "Read from stdout:"
-        print >>f, stdout
-        print >>f, "Read from stderr:"
-        print >>f, stderr
+        print("Command:", file=f)
+        print(" ".join(command), file=f)
+        print("Return code: %s" % returncode, file=f)
+        print("Read from stdout:", file=f)
+        print(stdout, file=f)
+        print("Read from stderr:", file=f)
+        print(stderr, file=f)
     return file_path

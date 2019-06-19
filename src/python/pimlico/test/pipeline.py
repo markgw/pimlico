@@ -95,14 +95,14 @@ class TestPipeline(object):
                 try:
                     for doc_name, doc in dataset:
                         pass
-                except Exception, e:
+                except Exception as e:
                     raise TestPipelineRunError("test of input dataset {}.{} failed: error while iterating over "
                                                "iterable corpus: {}".format(module.module_name, output_name, e))
 
     def test_module_execution(self, module_name):
         try:
             exit_status = check_and_execute_modules(self.pipeline, [module_name], log=self.log)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             raise TestPipelineRunError("error while running module '{}': {}".format(module_name, e))
         if exit_status != 0:
@@ -135,7 +135,7 @@ def run_test_pipeline(path, module_names, log, no_clean=False):
         try:
             pipeline = TestPipeline.load_pipeline(path, TEST_STORAGE_DIR)
             test_pipeline = TestPipeline(pipeline, module_names, log)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             raise TestPipelineRunError("could not load test pipeline {}: {}".format(path, e))
 
@@ -149,7 +149,7 @@ def run_test_pipeline(path, module_names, log, no_clean=False):
                 log.info("Installing {}".format(dep.name))
                 try:
                     dep.install(pipeline.local_config)
-                except InstallationError, e:
+                except InstallationError as e:
                     dep_problems.append("Could not install dependency '{}': {}".format(dep.name, e))
             else:
                 instructions = dep.installation_instructions()
@@ -183,7 +183,7 @@ def run_test_suite(pipelines_and_modules, log, no_clean=False):
         log.info("Running test pipeline {}, modules {}".format(path, ", ".join(module_names)))
         try:
             run_test_pipeline(path, module_names, log, no_clean=no_clean)
-        except TestPipelineRunError, e:
+        except TestPipelineRunError as e:
             log.error("Test failed: {}".format(e))
             failed.append((path, module_names))
         else:

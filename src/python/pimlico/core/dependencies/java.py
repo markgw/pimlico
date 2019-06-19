@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -70,7 +71,7 @@ class JavaDependency(SoftwareDependency):
                     check_java_dependency(cls, classpath=classpath)
                 except DependencyCheckerError:
                     probs.append("unable to load Java dependency checker to check classes are loadable")
-                except DependencyError, e:
+                except DependencyError as e:
                     # Usually, the first line is enough to tell what the error was (start of stack trace)
                     error_output = e.stderr.partition("\n")[0].strip()
                     extra_message = ". Loader output: %s" % error_output if error_output else ""
@@ -172,8 +173,8 @@ class JavaJarsDependency(JavaDependency):
                             # If we've been told to rely on previously downloaded archives to be the right thing,
                             # reuse this archive
                             if archive_filename not in reusing:
-                                print "Reusing archive file %s (as %s)" % \
-                                      (archive_filename, archive_url)
+                                print("Reusing archive file %s (as %s)" % \
+                                      (archive_filename, archive_url))
                                 reusing.append(archive_filename)
                         else:
                             # Download the archive
@@ -189,19 +190,19 @@ class JavaJarsDependency(JavaDependency):
 
         # Download all archives we need
         for archive_url, archive_filename in archives_to_download:
-            print "Downloading %s from %s" % (archive_filename, archive_url)
+            print("Downloading %s from %s" % (archive_filename, archive_url))
             try:
                 download_file(archive_url, archive_filename)
-            except Exception, e:
+            except Exception as e:
                 raise InstallationError("could not download archive from '{}': {}".format(archive_url, e))
 
         # Got all the archives, extract the required members
         for archive_filename, members in archive_files.iteritems():
             extract_from_archive(archive_filename, members, JAVA_LIB_DIR, preserve_dirs=False)
-            print "Extracted %s" % ", ".join(members)
+            print("Extracted %s" % ", ".join(members))
 
         for jar_url, jar_name in to_download:
-            print "Downloading %s from %s" % (jar_name, jar_url)
+            print("Downloading %s from %s" % (jar_name, jar_url))
             download_file(jar_url, os.path.join(JAVA_LIB_DIR, jar_name))
 
         # Delete any archives we downloaded
@@ -248,7 +249,7 @@ def check_java():
     """
     try:
         check_output(["java", "-version"], stderr=STDOUT)
-    except CalledProcessError, e:
+    except CalledProcessError as e:
         # If there was an error running this, Java was not found
         raise DependencyError("java executable could not be run: %s" % e.output)
 

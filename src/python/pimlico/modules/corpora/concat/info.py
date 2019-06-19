@@ -119,7 +119,7 @@ class ConcatenatedGroupedCorpusReader(GroupedCorpus.Reader):
                 # It's possible there won't be enough left in the corpus (after start_after) to skip
                 try:
                     while skip - skipped > 0:
-                        dataset_iter.next()
+                        next(dataset_iter)
                         skipped += 1
                 except StopIteration:
                     pass

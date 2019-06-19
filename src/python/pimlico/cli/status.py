@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -49,8 +50,8 @@ class StatusCmd(PimlicoCLISubcommand):
         try:
             # Main is the default pipeline config and is always available (but not included in this list)
             variants = ["main"] + pipeline.available_variants
-            print "Available pipeline variants: %s" % ", ".join(variants)
-            print "Showing status for '%s' variant" % pipeline.variant
+            print("Available pipeline variants: %s" % ", ".join(variants))
+            print("Showing status for '%s' variant" % pipeline.variant)
 
             module_sel = opts.module_name
             first_module = last_module = None
@@ -82,20 +83,20 @@ class StatusCmd(PimlicoCLISubcommand):
                 available_module_names = pipeline.modules
                 if opts.all:
                     # Show all modules, not just those that can be executed
-                    print "\nAll modules in pipeline with statuses:"
+                    print("\nAll modules in pipeline with statuses:")
                     module_names = list(pipeline.modules)
                     bullets = ["-"]*len(module_names)
                 else:
                     module_names = [("%d." % i, module) for i, module in enumerate(pipeline.get_module_schedule(), start=1)]
 
                     if len(module_names) == 0:
-                        print "\nPipeline loaded successfully, but it does not contain any modules"
+                        print("\nPipeline loaded successfully, but it does not contain any modules")
                         return
 
                     # If the --deps-of option is given, filter modules shown to only those that lead to the given one
                     if opts.deps_of is not None:
                         dest_module = module_number_to_name(pipeline, opts.deps_of)
-                        print "\nRestricting status view to dependencies of module '%s'" % dest_module
+                        print("\nRestricting status view to dependencies of module '%s'" % dest_module)
                         # Check through the pipeline to find all dependent modules
                         include_mods = [dest_module] + pipeline[dest_module].get_transitive_dependencies()
                         module_names = [(title, module) for (title, module) in module_names if module in include_mods]
@@ -109,7 +110,7 @@ class StatusCmd(PimlicoCLISubcommand):
                             module_names = list(pipeline.modules)
                             bullets = ["-"]*len(module_names)
                         else:
-                            print "\nModule execution schedule with statuses:"
+                            print("\nModule execution schedule with statuses:")
 
                 # Allow the range of modules to be filtered
                 if first_module is not None:
@@ -140,29 +141,29 @@ class StatusCmd(PimlicoCLISubcommand):
                         status_lists.setdefault(module.status, []).append("%s %s" % (bullet, module_name))
 
                     for status in sorted(status_lists):
-                        print "\n%s:" % status
-                        print "\n".join(status_lists[status])
+                        print("\n%s:" % status)
+                        print("\n".join(status_lists[status]))
                 else:
                     for bullet, module_name in zip(bullets, module_names):
                         # Short summary for each module
                         module = pipeline[module_name]
-                        print colored(status_colored(module, " %s %s" % (bullet, module_name)))
+                        print(colored(status_colored(module, " %s %s" % (bullet, module_name))))
                         # Show the type of the module
-                        print "       type: %s" % module.module_type_name
+                        print("       type: %s" % module.module_type_name)
                         # Check module status (has it been run?)
-                        print "       status: %s" % status_colored(module, module.status if module.module_executable else "not executable")
+                        print("       status: %s" % status_colored(module, module.status if module.module_executable else "not executable"))
                         # Check status of each input datatypes
                         for input_name in module.input_names:
-                            print "       input %s: %s" % (
+                            print("       input %s: %s" % (
                                 input_name,
                                 colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
-                            )
-                        print "       outputs: %s" % ", ".join([
+                            ))
+                        print("       outputs: %s" % ", ".join([
                             colored(name, "green") if module.get_output_reader_setup(name).ready_to_read() else colored(name, "red")
                             for name in module.output_names
-                        ])
+                        ]))
                         if module.is_locked():
-                            print "       locked: ongoing execution"
+                            print("       locked: ongoing execution")
             else:
                 # Output more detailed status information for this module
                 to_output = [module_sel]
@@ -174,11 +175,11 @@ class StatusCmd(PimlicoCLISubcommand):
                         module = pipeline[module_name]
                         status, more_outputs = module_status(module)
                         # Output the module's detailed status
-                        print status
+                        print(status)
                         if opts.history:
                             # Also output full execution history
-                            print "\nFull execution history:"
-                            print module.execution_history
+                            print("\nFull execution history:")
+                            print(module.execution_history)
                         already_output.append(module_name)
                         # Allow this module to request that we output further modules
                         to_output.extend(more_outputs)
