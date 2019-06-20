@@ -1,15 +1,17 @@
-from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import input
+from past.builtins import basestring
 
+from io import open
 import os
 import shutil
 import tarfile
 import threading
 from zipfile import ZipFile
 
-from pimlico import OUTPUT_DIR
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -144,7 +146,7 @@ def retry_open(filename, errnos=[13], retry_schedule=[2, 10, 30, 120, 300], **kw
                     # Ran out of retries: ask the user what to do
                     warnings.warn("Error opening file: %s. Not making any more attempts. If possible, fix the problem "
                                   "and we can try again" % e)
-                    answer = raw_input("Try opening %s again? [Y/n] " % filename)
+                    answer = input("Try opening %s again? [Y/n] " % filename)
                     if answer.lower() == "n":
                         # Don't try again, give up and raise the error
                         raise

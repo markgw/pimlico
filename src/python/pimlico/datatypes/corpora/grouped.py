@@ -2,6 +2,7 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
 standard_library.install_aliases()
@@ -17,7 +18,7 @@ import os
 import shutil
 import tarfile
 import zlib
-from io import StringIO, BytesIO
+from io import StringIO, BytesIO, open
 
 from tempfile import mkdtemp
 
@@ -141,12 +142,14 @@ class GroupedCorpus(IterableCorpus):
                             continue
 
                     # Extract the tarball to the temp dir
-                    with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                    with tarfile.open(archive_filename,
+                                      fileobj=retry_open(archive_filename, mode="rb"),
+                                      mode="r|",
+                                      encoding="utf-8") as tarball:
                         for tarinfo in tarball:
                             filename = tarinfo.name
                             # By default, doc name is just the same as filename
-                            # Filenames could be unicode and we should preserve that in the doc name
-                            doc_name = filename.decode("utf8")
+                            doc_name = filename
 
                             if gzipped and doc_name.endswith(".gz"):
                                 # If we used the .gz extension while writing the file, remove it to get the doc name
@@ -180,7 +183,7 @@ class GroupedCorpus(IterableCorpus):
 
                             tarball.extract(tarinfo, tmp_dir)
                             # Read in the data
-                            with open(os.path.join(tmp_dir, filename), "r") as f:
+                            with open(os.path.join(tmp_dir, filename), "r", encoding="utf-8") as f:
                                 raw_data = f.read()
                             if gzipped:
                                 if doc_name.endswith(".gz"):
@@ -214,11 +217,11 @@ class GroupedCorpus(IterableCorpus):
         def list_archive_iter(self):
             gzipped = self.metadata.get("gzip", False)
             for archive_name, archive_filename in zip(self.archives, self.archive_filenames):
-                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r", encoding="utf-8")) as tarball:
                     for tarinfo in tarball:
                         filename = tarinfo.name
                         # Do the same name preprocessing that archive_iter does
-                        doc_name = filename.decode("utf8")
+                        doc_name = filename
                         if gzipped and doc_name.endswith(".gz"):
                             # If we used the .gz extension while writing the file, remove it to get the doc name
                             doc_name = doc_name[:-3]
