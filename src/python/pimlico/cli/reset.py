@@ -1,7 +1,8 @@
-from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import input
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.utils.core import remove_duplicates
@@ -41,7 +42,7 @@ class ResetCmd(PimlicoCLISubcommand):
                     print("The following modules depend on %s. Their execution state will be reset too if you continue." % \
                           ", ".join(module_names))
                     print("  %s" % ", ".join(dependent_modules))
-                    answer = raw_input("Do you want to continue? [y/N] ")
+                    answer = input("Do you want to continue? [y/N] ")
                     if answer.lower() != "y":
                         print("Cancelled")
                         return

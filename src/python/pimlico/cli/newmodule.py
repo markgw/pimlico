@@ -1,7 +1,9 @@
-from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
+from __future__ import print_function
+from builtins import input
 
 import os
 from textwrap import wrap
@@ -254,7 +256,7 @@ class NewModuleCmd(PimlicoCLISubcommand):
 def ask(prompt, strip_space=True):
     strp = "\n " if strip_space else "\n"
     print()
-    val = raw_input("  %s" % prompt).strip(strp)
+    val = input("  %s" % prompt).strip(strp)
     print()
     return val
 

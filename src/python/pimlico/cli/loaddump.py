@@ -1,7 +1,12 @@
-from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+
+from future import standard_library
+standard_library.install_aliases()
+from builtins import input
+
 import json
 import os
 import shutil
@@ -10,7 +15,7 @@ import tarfile
 
 import sys
 from datetime import datetime
-from cStringIO import StringIO
+from io import StringIO
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.utils.core import remove_duplicates
@@ -193,7 +198,7 @@ class LoadCmd(PimlicoCLISubcommand):
                 if os.path.exists(module_output_dir):
                     if not force_overwrite:
                         # In this case, check we're happy to overwrite
-                        sure = raw_input("Module output dir already exists. Overwrite? [y/N] ")
+                        sure = input("Module output dir already exists. Overwrite? [y/N] ")
                         if sure.lower() != "y":
                             print("Skipping %s" % module_name)
                             continue

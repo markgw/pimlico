@@ -1,7 +1,10 @@
-from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import map
+from builtins import zip
+
 import os
 from operator import itemgetter
 
@@ -100,9 +103,9 @@ class StatusCmd(PimlicoCLISubcommand):
                         # Check through the pipeline to find all dependent modules
                         include_mods = [dest_module] + pipeline[dest_module].get_transitive_dependencies()
                         module_names = [(title, module) for (title, module) in module_names if module in include_mods]
-                        bullets, module_names = zip(*module_names)
+                        bullets, module_names = list(zip(*module_names))
                     else:
-                        bullets, module_names = zip(*module_names)
+                        bullets, module_names = list(zip(*module_names))
 
                         # Fall back to "all" mode if a specific module has been requested that's not in execution schedule
                         if (first_module is not None and first_module not in module_names and first_module in available_module_names) \
