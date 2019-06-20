@@ -18,6 +18,9 @@ compatible with the datatype being browsed and provides a method to format each 
 in your custom code and refer to them by their fully qualified class name.
 
 """
+from builtins import str
+from builtins import object
+
 import inspect
 
 from pimlico.datatypes.corpora import DataPointType
@@ -69,7 +72,7 @@ class DefaultFormatter(DocumentBrowserFormatter):
         try:
             return doc.raw_data.decode("utf8")
         except:
-            return unicode(doc.raw_data)
+            return doc.raw_data
 
 
 class InvalidDocumentFormatter(DocumentBrowserFormatter):

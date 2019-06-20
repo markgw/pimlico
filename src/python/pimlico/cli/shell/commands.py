@@ -16,7 +16,7 @@ class MetadataCmd(ShellCommand):
 
     def execute(self, shell, *args, **kwargs):
         metadata = shell.data.metadata
-        print("\n".join("%s: %s" % (key, val) for (key, val) in metadata.iteritems()))
+        print("\n".join("%s: %s" % (key, val) for (key, val) in metadata.items()))
 
 
 class PythonCmd(ShellCommand):

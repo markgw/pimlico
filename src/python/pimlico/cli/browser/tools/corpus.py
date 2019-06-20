@@ -3,6 +3,11 @@ Browser tool for iterable corpora.
 
 """
 from __future__ import print_function
+from builtins import next
+from builtins import str
+from builtins import range
+from builtins import object
+
 import os
 from traceback import format_exc
 
@@ -125,7 +130,7 @@ def browse_data(reader, formatter, skip_invalid=False):
                 doc = formatter.format_document(doc_data)
             except:
                 doc = "Error formatting datatype %s for display:\n%s" % (type(doc_data).__name__, format_exc())
-            body_text.set_text(unicode(doc).replace(u"\t", u"    "))
+            body_text.set_text(str(doc).replace(u"\t", u"    "))
 
     def _keypress(key):
         if key == "esc" or key == "q":

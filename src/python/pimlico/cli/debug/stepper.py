@@ -1,7 +1,10 @@
-from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import input
+from builtins import str
+from builtins import object
 
 import inspect
 import threading
@@ -210,7 +213,7 @@ def option_message(message_lines, stepper, options=None, stack_trace_option=True
         option_fns = dict((trigger, fn) for (trigger, message, fn) in options)
 
         while True:
-            choice = raw_input("%s: " % ", ".join(message for (trigger, message, fn) in options)).lower().strip("\n ")
+            choice = input("%s: " % ", ".join(message for (trigger, message, fn) in options)).lower().strip("\n ")
             if choice in option_fns:
                 # Run the callback for this option
                 exit = option_fns[choice]()
