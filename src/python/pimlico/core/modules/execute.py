@@ -8,6 +8,7 @@ It is used by the `run` command.
 
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from future import standard_library
 standard_library.install_aliases()
@@ -322,7 +323,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                     debug_mess = StringIO()
                     print("Top-level error", file=debug_mess)
                     print("---------------", file=debug_mess)
-                    print(format_exc(), file=debug_mess)
+                    print(unicode(format_exc()), file=debug_mess)
                     print(format_execution_error(e), file=debug_mess)
                     debug_mess = debug_mess.getvalue()
 

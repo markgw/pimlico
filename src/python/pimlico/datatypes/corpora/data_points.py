@@ -464,10 +464,10 @@ class TextDocumentType(RawDocumentType):
             return self.internal_data["text"]
 
         def internal_to_raw(self, internal_data):
-            return internal_data["text"].encode("utf-8")
+            return internal_data["text"]
 
         def raw_to_internal(self, raw_data):
-            return {"text": raw_data.decode("utf-8")}
+            return {"text": raw_data}
 
 
 class RawTextDocumentType(TextDocumentType):

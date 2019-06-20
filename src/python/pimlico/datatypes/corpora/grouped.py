@@ -1,17 +1,24 @@
-from __future__ import absolute_import
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-import cPickle as pickle
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import next
+from builtins import object
+from builtins import str
+
+import pickle
 import gzip
 import json
 import os
 import shutil
 import tarfile
 import zlib
-from cStringIO import StringIO
-from itertools import izip
+from io import StringIO, BytesIO
+
 from tempfile import mkdtemp
 
 from pimlico.datatypes.base import DynamicOutputDatatype
@@ -31,8 +38,8 @@ class GroupedCorpus(IterableCorpus):
     # This may be overridden by subclasses to provide filters for documents applied before main doc processing
     document_preprocessors = []
 
-    class Reader:
-        class Setup:
+    class Reader(object):
+        class Setup(object):
             def data_ready(self, base_dir):
                 # Run the superclass check -- that the data dir exists
                 if not super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir):
@@ -217,7 +224,7 @@ class GroupedCorpus(IterableCorpus):
                             doc_name = doc_name[:-3]
                         yield archive_name, doc_name
 
-    class Writer:
+    class Writer(object):
         """
         Writes a large corpus of documents out to disk, grouping them together in tar archives.
 
@@ -305,6 +312,15 @@ class GroupedCorpus(IterableCorpus):
                     # Some other problem caused this
                     raise
 
+            # TODO In the future, remove this explicit type check
+            # It's here now to ease the transition to Python 3, as this is going to be a tricky point to get right
+            # Check that the data is a unicode string, as expected
+            if not isinstance(data, str):
+                raise TypeError("tried to add a document of type {}, but its raw_data was of type {}, not a "
+                                "unicode string. This is probably a result of the Python 2-3 conversion".format(
+                    self.datatype.data_point_type.name, type(data).__name__
+                ))
+
             if data is None:
                 # For an empty result, signified by None, output an empty file
                 data = u""
@@ -318,10 +334,10 @@ class GroupedCorpus(IterableCorpus):
                 tar_filename = os.path.join(self.data_dir, "%s.tar" % archive_name)
                 # If we're appending a corpus and the archive already exists, append to it
                 try:
-                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w")
+                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w", encoding="utf8")
                 except tarfile.ReadError:
                     # Couldn't open the existing file to append to, write instead
-                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
+                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w", encoding="utf8")
 
             # Add a new document to archive
             if self.gzip:
@@ -331,7 +347,7 @@ class GroupedCorpus(IterableCorpus):
                 with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=gzip_io) as gzip_file:
                     gzip_file.write(data)
                 data = gzip_io.getvalue()
-            data_file = StringIO(data)
+            data_file = BytesIO(data.encode("utf-8"))
             # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
             info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
             info.size = len(data)
@@ -408,7 +424,7 @@ class AlignedGroupedCorpora(object):
 
     def archive_iter(self, start_after=None, skip=None, name_filter=None):
         # Iterate over all grouped corpora at once
-        for corpus_items in izip(
+        for corpus_items in zip(
                 *[corpus.archive_iter(start_after=start_after, skip=skip)
                   for corpus in self.readers]):
             # Check we've got the same archive and doc name combination from every corpus
@@ -500,7 +516,7 @@ class CorpusWithTypeFromInput(DynamicOutputDatatype):
             else:
                 # No type to serve as the common type
                 raise TypeError(
-                    "incompatible data point types for concatenation: %s" % ", ".join(t.__name__ for t in types))
+                    "incompatible data point types for concatenation: %s" % ", ".join(t.__name__ for t in dp_types))
 
         # Check whether the inputs are all grouped corpora
         if all(isinstance(datatype, GroupedCorpus) for datatype in datatypes):
