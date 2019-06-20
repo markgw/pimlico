@@ -1,4 +1,9 @@
-import StringIO
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+
+import io
 import math
 import os
 import tarfile
@@ -24,7 +29,7 @@ class ModuleExecutor(BaseModuleExecutor):
             # Normal behaviour: calculate num bins from bin size
             num_bins = int(math.ceil(float(len(input_corpus)) / bin_size))
         # Recompute the expected bin size from the number of bins
-        bin_size = len(input_corpus) / num_bins
+        bin_size = len(input_corpus) // num_bins
         self.log.info("Storing documents in {:,} temporary bins with expected size {:,}".format(num_bins, bin_size))
 
         # Create a directory for our temporary bins
@@ -63,7 +68,7 @@ class ModuleExecutor(BaseModuleExecutor):
             bin = random.randint(0, num_bins)
             # Put the data into a StringIO for adding to the archive
             data = doc.raw_data
-            buff = StringIO.StringIO(data)
+            buff = io.StringIO(data)
             # Create a tarinfo
             tarinfo = tarfile.TarInfo(doc_name)
             tarinfo.size = len(data)

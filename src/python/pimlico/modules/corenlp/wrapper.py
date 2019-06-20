@@ -11,6 +11,9 @@ Client-side code based on Smitha Milli's CoreNLP client: https://github.com/smil
 
 """
 from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import json
 import os
 import threading

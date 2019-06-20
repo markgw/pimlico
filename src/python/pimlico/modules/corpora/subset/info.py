@@ -15,6 +15,8 @@ if one is stored in the metadata as ``valid_documents``, that count is used inst
 over the data to count them up.
 
 """
+from builtins import object
+
 from itertools import islice
 
 from pimlico.core.modules.base import BaseModuleInfo
@@ -71,7 +73,7 @@ class SubsetIterableCorpusReader(IterableCorpus.Reader):
     """
     metadata = {}
 
-    class Setup:
+    class Setup(object):
         def __init__(self, datatype, input_reader_setup, options):
             self.datatype = datatype
             self.options = options

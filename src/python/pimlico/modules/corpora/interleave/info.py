@@ -17,7 +17,9 @@ In theory, we could find the most specific common ancestor and use that as the o
 not currently implemented and may not be worth the trouble. Perhaps we will add this in future.
 
 """
-from itertools import izip
+from builtins import zip
+from builtins import next
+from builtins import object
 
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.base import MultipleInputs
@@ -126,7 +128,7 @@ class InterleavedGroupedCorpusReader(GroupedCorpus.Reader):
 
         # We regrouped docs into archives, using a new set of archive names, since it
         # doesn't make sense to use those in the input when interleaving
-        for archive_name, (doc_name, doc) in izip(self.archive_grouper, self._iter_docs(name_filter=name_filter)):
+        for archive_name, (doc_name, doc) in zip(self.archive_grouper, self._iter_docs(name_filter=name_filter)):
             if not started:
                 if start_after is not None:
                     if start_after == (archive_name, doc_name):
@@ -147,7 +149,7 @@ class InterleavedGroupedCorpusReader(GroupedCorpus.Reader):
         for archive, doc_name, doc in self.archive_iter():
             yield archive, doc_name
 
-    class Setup:
+    class Setup(object):
         def __init__(self, datatype, input_reader_setups, archive_size, archive_basename):
             self.archive_basename = archive_basename
             self.archive_size = archive_size

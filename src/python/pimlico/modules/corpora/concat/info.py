@@ -8,6 +8,11 @@ Concatenate two (or more) corpora to produce a bigger corpus.
 They must have the same data point type, or one must be a subtype of the other.
 
 """
+from builtins import zip
+from builtins import next
+from builtins import range
+from builtins import object
+
 from itertools import chain
 
 from pimlico.core.modules.base import BaseModuleInfo
@@ -140,7 +145,7 @@ class ConcatenatedGroupedCorpusReader(GroupedCorpus.Reader):
             for archive_name, doc_name in reader.list_archive_iter():
                 yield u"{}{}".format(corpus_prefix, archive_name), doc_name
 
-    class Setup:
+    class Setup(object):
         def __init__(self, datatype, input_reader_setups):
             self.input_reader_setups = input_reader_setups
             self.datatype = datatype
@@ -179,7 +184,7 @@ class ConcatenatedIterableCorpusReader(IterableCorpus.Reader):
     def __iter__(self):
         return chain(*self.input_readers)
 
-    class Setup:
+    class Setup(object):
         def __init__(self, datatype, input_reader_setups):
             self.input_reader_setups = input_reader_setups
             self.datatype = datatype

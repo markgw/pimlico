@@ -5,13 +5,16 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import Queue
+from future import standard_library
+standard_library.install_aliases()
+
+import queue
 import multiprocessing
 import subprocess
-from Queue import Empty
+from queue import Empty
 from subprocess import PIPE
 
-from cStringIO import StringIO
+from io import StringIO
 
 from pimlico.core.external.java import OutputConsumer
 from pimlico.core.logs import get_log_file
@@ -70,11 +73,11 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
                                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Set off a thread to collect output from stdout and stderr
-        worker.stdout_queue = Queue.Queue()
+        worker.stdout_queue = queue.Queue()
         worker.stdout_buffer = StringIO()
         worker.stdout_consumer = OutputConsumer([worker.stdout_queue, worker.stdout_buffer], worker._server_process.stdout)
         worker.stdout_consumer.start()
-        worker.stderr_queue = Queue.Queue()
+        worker.stderr_queue = queue.Queue()
         worker.stderr_buffer = StringIO()
         worker.stderr_consumer = OutputConsumer([worker.stderr_queue, worker.stderr_buffer], worker._server_process.stderr)
         worker.stderr_consumer.start()
@@ -86,7 +89,7 @@ class CandcWorkerProcess(MultiprocessingMapProcess):
         # The server outputs a line to stderr when it's ready, so we should wait for this before continuing
         try:
             err = worker.stderr_queue.get(timeout=timeout)
-        except Queue.Empty:
+        except queue.Empty:
             err_path = output_candc_error_info(server_args, worker._server_process.returncode,
                                                worker.stdout_buffer.getvalue(), worker.stderr_buffer.getvalue())
             raise CandCServerError("server startup timed out after %.0f seconds. See %s for more details" %
