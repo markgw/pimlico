@@ -1,6 +1,8 @@
-# Import datatypes here to make it easier to specify their paths in config files
 import warnings
 
+from future.utils import PY3
+
+# Import datatypes here to make it easier to specify their paths in config files
 from . import arrays
 from . import base
 from . import caevo
@@ -28,8 +30,15 @@ from .tokenized import *
 from .word_annotations import *
 from .xml import *
 
-warnings.warn("DEPRECATED: imported pimlico.old_datatypes. Switch to using new datatypes in pimlico.datatypes",
+warnings.warn("DEPRECATED: imported pimlico.old_datatypes. Switch to using new datatypes in pimlico.datatypes. ",
               stacklevel=2)
+
+if PY3:
+    warnings.warn(
+        "Since it should not be used, the old_datatypes package has not been updated with Python3 compatibility, "
+        "so this import will probably fail. The code would not have worked anyway, even if it loaded",
+        stacklevel=2
+    )
 
 
 __all__ = \

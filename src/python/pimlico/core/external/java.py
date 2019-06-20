@@ -1,11 +1,18 @@
-from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import object
+
 import sys
 import time
-from Queue import Empty
-from cStringIO import StringIO
+from queue import Empty
+from io import StringIO
 from collections import deque
 from subprocess import Popen, PIPE
 from threading import Thread
@@ -75,6 +82,8 @@ class Py4JInterface(object):
         system_properties adds Java system property settings to the Java command.
 
         """
+        from py4j.compat import Queue
+
         self.prefix_classpath = prefix_classpath
         self.java_opts = java_opts
         self.system_properties = system_properties
@@ -87,7 +96,6 @@ class Py4JInterface(object):
         self.port = port
         self.timeout = timeout
 
-        from py4j.compat import Queue
         self.stderr_queue = Queue()
         self.stdout_queue = Queue()
 
