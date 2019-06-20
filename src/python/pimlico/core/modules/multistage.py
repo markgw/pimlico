@@ -2,6 +2,9 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+from builtins import next
+from builtins import zip
+from builtins import object
 from collections import Counter, OrderedDict
 from itertools import takewhile, dropwhile
 
@@ -196,7 +199,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
         # Store a separate mapping for each stage, to make processing easier later
         option_mapping_by_stage[stage.name] = {}
         if stage.option_connections is not None:
-            for stage_option_name, main_option_name in stage.option_connections.iteritems():
+            for stage_option_name, main_option_name in stage.option_connections.items():
                 # Main options can map to multiple stage options
                 option_mapping.setdefault(main_option_name, []).append((stage.name, stage_option_name))
                 # Note that we've got a mapping for this stage option
@@ -206,7 +209,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
                 option_mapping_by_stage[stage.name].setdefault(main_option_name, []).append(stage_option_name)
         # All stage options must be accessible as multistage module options, so we use a default mapping for any
         # not explicitly mapped
-        for stage_option_name in stage.module_info_cls.module_options.keys():
+        for stage_option_name in list(stage.module_info_cls.module_options.keys()):
             if stage_option_name not in stage_mapped_options:
                 if stage.use_stage_option_names or use_stage_option_names:
                     # We've been explicitly instructed to directly use the stage's option names
@@ -228,7 +231,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
             (module_stages[-1].module_info_cls.module_outputs + module_stages[-1].module_info_cls.module_optional_outputs)[0])
         output_stage_names[main_outputs[-1][0]] = (module_stages[-1].name, main_outputs[-1][0])
     # Check we've not ended up with duplicate output names
-    duplicate_output_names = [n for (n, c) in Counter([name for (name, dtype) in main_outputs]).iteritems() if c > 1]
+    duplicate_output_names = [n for (n, c) in Counter([name for (name, dtype) in main_outputs]).items() if c > 1]
     if duplicate_output_names:
         raise MultistageModulePreparationError("multistage module has a duplicate output name: %s" %
                                                ", ".join(duplicate_output_names))
@@ -239,7 +242,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
     main_module_options = OrderedDict(
         # If a main option is connected to multiple stage options, use the first one's definition
         (main_option_name, named_stages[stg_opts[0][0]].module_info_cls.module_options[stg_opts[0][1]])
-        for (main_option_name, stg_opts) in option_mapping.iteritems()
+        for (main_option_name, stg_opts) in option_mapping.items()
     )
 
     # Define a ModuleInfo for the multi-stage module
@@ -263,7 +266,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
             for stage_num, stage in enumerate(self.stages):
                 # Get the sub-module's options by mapping the names of the appropriate main module options
                 sub_options = {}
-                for opt_name, opt_val in self.options.iteritems():
+                for opt_name, opt_val in self.options.items():
                     if opt_name in option_mapping_by_stage[stage.name]:
                         # This main option could even map to multiple stage options (slightly niche use case)
                         for stage_option_name in option_mapping_by_stage[stage.name][opt_name]:

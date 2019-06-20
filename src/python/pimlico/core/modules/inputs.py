@@ -5,7 +5,15 @@
 """
 Base classes and utilities for input modules in a pipeline.
 
+.. todo::
+
+   During Python 2-3 conversion, an ``object`` base class was added to ``InputReader.Setup``
+   and ``FactoryInputReader.Setup``, since this is required/implicit in Python 3.
+   Check that these still work as they used to.
+
 """
+from builtins import next
+from builtins import object
 import types
 
 from pimlico.core.modules.base import BaseModuleExecutor
@@ -16,9 +24,10 @@ from pimlico.datatypes.corpora import IterableCorpus
 from pimlico.modules.corpora.group.info import CorpusGroupReader, ModuleInfo as GrouperModuleInfo
 
 from .base import BaseModuleInfo
+from future.utils import with_metaclass
 
 
-class InputReader(PimlicoDatatype.Reader):
+class InputReader(with_metaclass(PimlicoDatatypeReaderMeta, PimlicoDatatype.Reader)):
     """
     Special base class for readers that read in input data to provide access to
     it through an input reader module.
@@ -27,7 +36,6 @@ class InputReader(PimlicoDatatype.Reader):
     use the :func:`iterable_input_reader` factory function.
 
     """
-    __metaclass__ = PimlicoDatatypeReaderMeta
 
     def iterate(self):
         """ Should be overridden """
@@ -38,7 +46,7 @@ class InputReader(PimlicoDatatype.Reader):
         # Provide easy access to the options from the config
         self.options = self.setup.reader_options
 
-    class Setup:
+    class Setup(object):
         execute_count = False
         # If True, the reader will not be ready to read until its length has been stored
 
@@ -148,14 +156,14 @@ class InputModuleInfo(BaseModuleInfo):
         input_module_options = dict(self.module_options)
 
         if not self.grouped:
-            reader_option_keys = input_module_options.keys()
+            reader_option_keys = list(input_module_options.keys())
             grouper_option_keys = []
         else:
             # Keep track of what keys have been added for the grouper, so we can separate out the values
-            grouper_option_keys = GrouperModuleInfo.module_options.keys()
+            grouper_option_keys = list(GrouperModuleInfo.module_options.keys())
             reader_option_keys = [k for k in input_module_options.keys() if k not in grouper_option_keys]
 
-        reader_options = dict((key, v) for (key, v) in self.options.iteritems() if key in reader_option_keys)
+        reader_options = dict((key, v) for (key, v) in self.options.items() if key in reader_option_keys)
         input_reader_setup = self.input_reader_class.Setup(datatype,
                                                            self.get_absolute_output_dir(output_name), reader_options)
         if not self.grouped:
@@ -163,7 +171,7 @@ class InputModuleInfo(BaseModuleInfo):
             return input_reader_setup
         else:
             # Use the input reader to read documents, but pass through CorpusGroupReader as well
-            grouper_options = dict((key, v) for (key, v) in self.options.iteritems() if key in grouper_option_keys)
+            grouper_options = dict((key, v) for (key, v) in self.options.items() if key in grouper_option_keys)
             return CorpusGroupReader.Setup(datatype, input_reader_setup, grouper_options)
 
     def missing_module_data(self):
@@ -225,7 +233,7 @@ class DocumentCounterModuleExecutor(BaseModuleExecutor):
                 self.info.pipeline, self.info.module_name) as writer:
             # Set any default metadata values for the correct output datatype
             writer.metadata.update(
-                dict((key, spec[0]) for (key, spec) in output_datatype.Writer.metadata_defaults.iteritems())
+                dict((key, spec[0]) for (key, spec) in output_datatype.Writer.metadata_defaults.items())
             )
             writer.metadata["length"] = num_docs
             if num_valid_docs is not None:
@@ -367,7 +375,7 @@ def iterable_input_reader(input_module_options, data_point_type,
             def iterate(self):
                 return iter_fn(self)
 
-            class Setup:
+            class Setup(object):
                 # NB execute_count is set below
 
                 def check_data_ready(self):

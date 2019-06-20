@@ -6,6 +6,9 @@
 Utilities and type processors for module options.
 
 """
+from builtins import str
+from past.builtins import basestring
+
 import json
 
 from pimlico.utils.strings import sorted_by_similarity

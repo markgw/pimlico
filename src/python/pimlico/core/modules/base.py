@@ -22,6 +22,10 @@ worrying about incurring the associated costs (and dependencies) every time a pi
 is loaded.
 
 """
+from builtins import zip
+from past.builtins import basestring
+from builtins import object
+
 import json
 import os
 import shutil
@@ -926,7 +930,7 @@ class BaseModuleInfo(object):
         # Instantiate any output datatypes this module will need and check the datatype's dependencies
         dtypes = [
             self.get_output_datatype(output_name)[1]
-            for output_name in dict(self.available_outputs).keys()
+            for output_name, __ in self.available_outputs
         ]
         # Get dependencies for each datatype, plus the additional dependencies
         # declared to apply to the writer specifically, since we're writing here
