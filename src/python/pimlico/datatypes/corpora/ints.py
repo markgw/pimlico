@@ -13,9 +13,10 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import range
 from builtins import object
+from builtins import bytes
 
 import struct
-from io import StringIO
+from io import StringIO, BytesIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.utils.core import cached_property
@@ -82,7 +83,7 @@ class IntegerListsDocumentType(RawDocumentType):
         keys = ["lists"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             lists = list(self.read_rows(reader))
             return {
                 "lists": lists,
@@ -119,7 +120,7 @@ class IntegerListsDocumentType(RawDocumentType):
                 yield list(_read_row(row_length))
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             for row in internal_data["lists"]:
                 # Should be rows of ints
                 try:
@@ -182,7 +183,7 @@ class IntegerListDocumentType(RawDocumentType):
         keys = ["list"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             lst = list(self.read_rows(reader))
             return {
                 "list": lst,
@@ -205,7 +206,7 @@ class IntegerListDocumentType(RawDocumentType):
                 yield num
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             # Doc should be a list of ints
             for num in internal_data["list"]:
                 try:
