@@ -9,9 +9,13 @@ They are designed to be fast to read.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+
 import struct
-from StringIO import StringIO
-from cStringIO import StringIO
+from io import StringIO
 
 from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.corpora.data_points import RawDocumentType
@@ -58,7 +62,7 @@ class FloatListsDocumentType(RawDocumentType):
         self.length_struct = get_struct(2, False, 1)
         self.length_size = self.length_struct.size
 
-    class Document:
+    class Document(object):
         keys = ["lists"]
 
         def raw_to_internal(self, raw_data):
@@ -127,7 +131,7 @@ class FloatListDocumentType(RawDocumentType):
         self.struct = struct.Struct("<d")
         self.value_size = self.struct.size
 
-    class Document:
+    class Document(object):
         keys = ["list"]
 
         def raw_to_internal(self, raw_data):
@@ -200,7 +204,7 @@ class VectorDocumentType(RawDocumentType):
         self.struct = struct.Struct("<" + "d"*dim)
         self.value_size = self.struct.size
 
-    class Document:
+    class Document(object):
         keys = ["vector"]
 
         def raw_to_internal(self, raw_data):

@@ -2,6 +2,7 @@
 # Copyright (C) 2018 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 from __future__ import absolute_import
+from builtins import object
 
 import json
 
@@ -19,7 +20,7 @@ class JsonDocumentType(RawDocumentType):
     """
     formatters = [("json", "pimlico.datatypes.corpora.json.JsonFormatter")]
 
-    class Document:
+    class Document(object):
         keys = ["data"]
 
         def raw_to_internal(self, raw_data):

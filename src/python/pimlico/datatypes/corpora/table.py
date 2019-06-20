@@ -8,8 +8,12 @@ This is designed to be fast to read, but is not a very flexible datatype.
 
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+
 import struct
-from StringIO import StringIO
+from io import StringIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.utils.core import cached_property
@@ -79,7 +83,7 @@ class IntegerTableDocumentType(RawDocumentType):
         self.row_length = writer.metadata["row_length"]
         self.struct = get_struct(self.bytes, self.signed, self.row_length)
 
-    class Document:
+    class Document(object):
         keys = ["table"]
 
         def raw_to_internal(self, raw_data):

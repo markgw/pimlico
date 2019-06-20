@@ -9,9 +9,13 @@ They are designed to be fast to read.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+
 import struct
-from StringIO import StringIO
-from cStringIO import StringIO
+from io import StringIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.utils.core import cached_property
@@ -74,7 +78,7 @@ class IntegerListsDocumentType(RawDocumentType):
             del state["length_struct"]
         return state
 
-    class Document:
+    class Document(object):
         keys = ["lists"]
 
         def raw_to_internal(self, raw_data):
@@ -174,7 +178,7 @@ class IntegerListDocumentType(RawDocumentType):
             del state["struct"]
         return state
 
-    class Document:
+    class Document(object):
         keys = ["list"]
 
         def raw_to_internal(self, raw_data):

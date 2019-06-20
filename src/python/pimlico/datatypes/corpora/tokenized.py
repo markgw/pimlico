@@ -1,6 +1,8 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from builtins import object
+
 from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.corpora.data_points import TextDocumentType
 from pimlico.utils.core import cached_property
@@ -19,7 +21,7 @@ class TokenizedDocumentType(TextDocumentType):
     """
     formatters = [("tokenized_doc", "pimlico.datatypes.corpora.tokenized.TokenizedDocumentFormatter")]
 
-    class Document:
+    class Document(object):
         keys = ["sentences"]
 
         @cached_property
@@ -69,7 +71,7 @@ class CharacterTokenizedDocumentType(TokenizedDocumentType):
     sequence, see `SegmentedLinesDocumentType`.
 
     """
-    class Document:
+    class Document(object):
         @property
         def sentences(self):
             return self.internal_data["sentences"]
@@ -99,7 +101,7 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
     so this string is assumed not to be used in any element (which seems reasonable enough, generally).
 
     """
-    class Document:
+    class Document(object):
         @property
         def text(self):
             return u"\n".join(u"".join(token for token in sent) for sent in self.internal_data["sentences"])

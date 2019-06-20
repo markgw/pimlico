@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function
 
+from builtins import object
 import os
 
 from pimlico.core.dependencies.python import gensim_dependency
@@ -24,12 +25,12 @@ class GensimLdaModel(PimlicoDatatype):
         for topic, topic_repr in model.show_topics(num_topics=-1, num_words=10):
             print(u"#{}: {}".format(topic, topic_repr).encode("utf-8"))
 
-    class Reader:
+    class Reader(object):
         def load_model(self):
             from gensim.models.ldamodel import LdaModel
             return LdaModel.load(os.path.join(self.data_dir, "model"))
 
-    class Writer:
+    class Writer(object):
         required_tasks = ["model"]
 
         def write_model(self, model):

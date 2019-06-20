@@ -10,6 +10,7 @@ any more. There may still be a use for this, though, so I may be added in future
 
 """
 
+from builtins import object
 import os
 from collections import OrderedDict
 
@@ -85,8 +86,8 @@ class NamedFileCollection(PimlicoDatatype):
         from pimlico.cli.browser.tools.files import browse_files
         browse_files(reader)
 
-    class Reader:
-        class Setup:
+    class Reader(object):
+        class Setup(object):
             def get_required_paths(self):
                 # Split on /s, so we use the filesystem's appropriate joiner for paths
                 # Just returns the paths relative to the data dir: the base setup will handle checking for them
@@ -138,7 +139,7 @@ class NamedFileCollection(PimlicoDatatype):
                 filename = self.filenames[filename]
             return OpenFileReader(self, filename, mode=mode)
 
-    class Writer:
+    class Writer(object):
         def __init__(self, *args, **kwargs):
             super(NamedFileCollection.Writer, self).__init__(*args, **kwargs)
             self.filenames = self.datatype.filenames
@@ -212,7 +213,7 @@ class NamedFile(NamedFileCollection):
         ("filename", {
             "help": "The file's name",
         })
-    ] + NamedFileCollection.datatype_options.items())
+    ] + list(NamedFileCollection.datatype_options.items()))
 
     def __init__(self, *args, **kwargs):
         super(NamedFile, self).__init__(*args, filenames=[], **kwargs)
@@ -230,7 +231,7 @@ class NamedFile(NamedFileCollection):
         # Set filenames from our filename
         self.filenames = [self.filename]
 
-    class Reader:
+    class Reader(object):
         def process_setup(self):
             super(NamedFile.Reader, self).process_setup()
             self.filename = self.datatype.filename
@@ -239,7 +240,7 @@ class NamedFile(NamedFileCollection):
         def absolute_path(self):
             return self.get_absolute_path(self.filename)
 
-    class Writer:
+    class Writer(object):
         def __init__(self, *args, **kwargs):
             super(NamedFile.Writer, self).__init__(*args, **kwargs)
             self.filename = self.datatype.filename
@@ -280,14 +281,14 @@ class TextFile(NamedFile):
             "help": "The file's name. Typically left as the default. Default: data.txt",
             "default": "data.txt",
         })
-    ] + NamedFileCollection.datatype_options.items())
+    ] + list(NamedFileCollection.datatype_options.items()))
 
-    class Reader:
+    class Reader(object):
         def read_file(self, filename=None, mode="r"):
             # Ignore filename, since there's only one
             data = super(TextFile.Reader, self).read_file()
             return data.decode("utf-8")
 
-    class Writer:
+    class Writer(object):
         def write_file(self, data):
             super(TextFile.Writer, self).write_file(data.encode("utf-8"))
