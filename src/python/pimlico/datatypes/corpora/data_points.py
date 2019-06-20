@@ -49,7 +49,7 @@ class DataPointTypeMeta(type):
                     # Nothing overridden
                     new_dict = {}
                 else:
-                    new_dict = my_doc_cls.__dict__
+                    new_dict = dict(my_doc_cls.__dict__)
 
                 # Perform subclassing so that a new Document is created that is a subclass of the parent's document
                 cls.__document_type = type("Document", (parent_doc_cls,), new_dict)
