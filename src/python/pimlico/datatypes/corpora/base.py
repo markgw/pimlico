@@ -1,4 +1,15 @@
+"""
+.. todo::
+
+   During Python 2-3 conversion, an ``object`` base class was added to ``Reader``
+   and ``Writer`` classes.
+   Check that these still work as they used to.
+
+"""
+
 from __future__ import print_function
+from builtins import object
+
 from collections import OrderedDict
 from traceback import format_exc
 
@@ -86,7 +97,7 @@ class IterableCorpus(PimlicoDatatype):
                     "This should almost always be given, typically as the first positional arg when instantiating "
                     "the datatype. Defaults to the generic data point type at the top of the hierarchy"
         })
-    ] + PimlicoDatatype.datatype_options.items())
+    ] + list(PimlicoDatatype.datatype_options.items()))
 
     def __init__(self, *args, **kwargs):
         super(IterableCorpus, self).__init__(*args, **kwargs)
@@ -142,7 +153,7 @@ class IterableCorpus(PimlicoDatatype):
 
         browse_data(reader, formatter, skip_invalid=opts.skip_invalid)
 
-    class Reader:
+    class Reader(object):
         def __init__(self, *args, **kwargs):
             super(IterableCorpus.Reader, self).__init__(*args, **kwargs)
             self.init_before_data_point()
@@ -168,7 +179,7 @@ class IterableCorpus(PimlicoDatatype):
             except KeyError:
                 raise DatatypeLoadError("no length found in metadata for %s corpus. It is an iterable corpus, so if it "
                                         "is ready to use, the length should have been stored. Metadata keys found: %s" %
-                                        (self.datatype.datatype_name, self.metadata.keys()))
+                                        (self.datatype.datatype_name, list(self.metadata.keys())))
 
         def get_detailed_status(self):
             return super(IterableCorpus.Reader, self).get_detailed_status() + ["Length: {:,}".format(len(self))]
@@ -210,7 +221,7 @@ class IterableCorpus(PimlicoDatatype):
                 )
             return document
 
-    class Writer:
+    class Writer(object):
         """
         Stores the length of the corpus.
 

@@ -5,10 +5,14 @@
 """
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
-"""
-import copy
+.. todo::
 
-from pimlico.utils.core import remove_duplicates
+   During Python 2-3 conversion, an ``object`` base class was added to all ``Document`` classes.
+   Check that these still work as they used to.
+
+"""
+from builtins import object
+from future.utils import with_metaclass
 
 __all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
            "InvalidDocument"]
@@ -52,7 +56,7 @@ class DataPointTypeMeta(type):
         return cls.__document_type
 
 
-class DataPointType(object):
+class DataPointType(with_metaclass(DataPointTypeMeta, object)):
     """
     Base data-point type for iterable corpora. All iterable corpora should have data-point types that are
     subclasses of this.
@@ -71,7 +75,6 @@ class DataPointType(object):
        data point type options for when a datatype is being loaded using a config file.
 
     """
-    __metaclass__ = DataPointTypeMeta
     #: List of (name, cls_path) pairs specifying a standard set of formatters that the user might want to choose from to
     #: view a dataset of this type. The user is not restricted to this set, but can easily choose these by name,
     #: instead of specifying a class path themselves.
@@ -354,7 +357,7 @@ class InvalidDocument(DataPointType):
     possible to work out, where one of these pops up, where the error occurred.
 
     """
-    class Document:
+    class Document(object):
         keys = ["module_name", "error_info"]
 
         def raw_to_internal(self, raw_data):
@@ -428,7 +431,7 @@ class RawDocumentType(DataPointType):
     datatype.
 
     """
-    class Document:
+    class Document(object):
         keys = ["raw_data"]
 
         def raw_to_internal(self, raw_data):
@@ -453,7 +456,7 @@ class TextDocumentType(RawDocumentType):
     contain information other than the raw text.
 
     """
-    class Document:
+    class Document(object):
         keys = ["text"]
 
         @property
