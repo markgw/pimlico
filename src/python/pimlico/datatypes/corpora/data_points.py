@@ -196,7 +196,8 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
 
         A data point type's constructed document class is available as `MyDataPointType.Document`.
 
-        Each document type should provide a method to convert from raw data (a unicode string) to the
+        Each document type should provide a method to convert from raw data (a bytes object in Py3,
+        or ``future``'s backport of ``bytes`` in Py2) to the
         internal representation (an arbitrary dictionary) called `raw_to_internal()`, and another to convert
         the other way called `internal_to_raw()`. Both forms of the data are available using the
         properties `raw_data` and `internal_data`, and these methods are called as necessary to
@@ -374,9 +375,11 @@ class InvalidDocument(DataPointType):
 
         def internal_to_raw(self, internal_data):
             # Encode back to utf-8 for the raw data
-            return (u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\n"
-                    u"Full error details:\n%s" %
-                    (internal_data["module_name"], internal_data["error_info"])).encode("utf-8")
+            return bytes(
+                (u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\n"
+                 u"Full error details:\n%s" %
+                 (internal_data["module_name"], internal_data["error_info"])).encode("utf-8")
+            )
 
         @property
         def module_name(self):
@@ -436,10 +439,10 @@ class RawDocumentType(DataPointType):
 
         def raw_to_internal(self, raw_data):
             # Just include the raw data itself, so it's possible to convert back to raw data later
-            return {"raw_data": raw_data}
+            return {"raw_data": raw_data.decode("utf-8")}
 
         def internal_to_raw(self, internal_data):
-            return internal_data["raw_data"]
+            return bytes(internal_data["raw_data"].encode("utf-8"))
 
 
 class TextDocumentType(RawDocumentType):
@@ -464,10 +467,10 @@ class TextDocumentType(RawDocumentType):
             return self.internal_data["text"]
 
         def internal_to_raw(self, internal_data):
-            return internal_data["text"]
+            return bytes(internal_data["text"].encode("utf-8"))
 
         def raw_to_internal(self, raw_data):
-            return {"text": raw_data}
+            return {"text": raw_data.decode("utf-8")}
 
 
 class RawTextDocumentType(TextDocumentType):

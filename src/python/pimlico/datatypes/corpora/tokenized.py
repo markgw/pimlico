@@ -28,18 +28,18 @@ class TokenizedDocumentType(TextDocumentType):
         @cached_property
         def text(self):
             if self._raw_data is not None:
-                # The text is just the raw data, so it's quickest to get it from that
-                return self._raw_data
+                # The text is just the raw data, decoded, so it's quickest to get it from that
+                return self._raw_data.decode("utf-8")
             else:
                 return "\n".join(" ".join(sentence) for sentence in self.internal_data["sentences"])
 
         def raw_to_internal(self, raw_data):
             return {
-                "sentences": [sentence.split(" ") for sentence in raw_data.split("\n")],
+                "sentences": [sentence.split(" ") for sentence in raw_data.decode("utf-8").split("\n")],
             }
 
         def internal_to_raw(self, internal_data):
-            return "\n".join(" ".join(sentence) for sentence in internal_data["sentences"])
+            return bytes("\n".join(" ".join(sentence) for sentence in internal_data["sentences"]).encode("utf-8"))
 
 
 class TokenizedDocumentFormatter(DocumentBrowserFormatter):
@@ -77,13 +77,14 @@ class CharacterTokenizedDocumentType(TokenizedDocumentType):
             return self.internal_data["sentences"]
 
         def raw_to_internal(self, raw_data):
+            text = raw_data.decode("utf-8")
             return {
-                "sentences": [list(sentence) for sentence in raw_data.split("\n")],
-                "text": raw_data,
+                "sentences": [list(sentence) for sentence in text.split("\n")],
+                "text": text,
             }
 
         def internal_to_raw(self, internal_data):
-            return "\n".join("".join(sentence) for sentence in internal_data["sentences"])
+            return bytes("\n".join("".join(sentence) for sentence in internal_data["sentences"]).encode("utf-8"))
 
 
 class SegmentedLinesDocumentType(TokenizedDocumentType):
@@ -110,7 +111,7 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
             return self.internal_data["sentences"]
 
         def raw_to_internal(self, raw_data):
-            sentences = [[el.replace("@slash@", "/") for el in line.split("/")] for line in raw_data.split("\n")]
+            sentences = [[el.replace("@slash@", "/") for el in line.split("/")] for line in raw_data.decode("utf-8").split("\n")]
             return {
                 "sentences": sentences,
                 # For producing the "text" attribute, we assume it makes sense to join on the empty string
@@ -118,7 +119,7 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
             }
 
         def internal_to_raw(self, internal_data):
-            return "\n".join(
+            return bytes("\n".join(
                 "/".join(el.replace("/", "@slash@") for el in line).replace("\n", "")
                 for line in internal_data["sentences"]
-            )
+            ).encode("utf-8"))
