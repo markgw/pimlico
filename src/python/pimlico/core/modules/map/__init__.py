@@ -1,6 +1,12 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import object
+
 import threading
 import warnings
-from Queue import Queue, Empty, Full
+
+from queue import Queue, Empty, Full
 from threading import Thread
 from time import sleep
 from traceback import format_exc

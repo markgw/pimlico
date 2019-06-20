@@ -11,7 +11,15 @@ output to a corpus, this mode performs the document-level processing
 on the fly and yields the results in order, providing a new
 iterable (grouped) corpus for the next module, without storing anything.
 
+.. todo::
+
+   During Python 2-3 conversion, an ``object`` base class was added to
+   ``FilterModuleOutputReader.Setup``, since this is required/implicit in Python 3.
+   Check that this stills work as it used to.
+
 """
+from builtins import object
+
 from traceback import format_exc
 
 from pimlico.core.config import PipelineStructureError
@@ -106,7 +114,7 @@ class FilterModuleOutputReader(GroupedCorpus.Reader):
                 invalid_inputs, invalid_outputs
             ))
 
-    class Setup:
+    class Setup(object):
         def __init__(self, datatype, wrapped_module_info, output_name):
             self.wrapped_module_info = wrapped_module_info
             self.output_name = output_name

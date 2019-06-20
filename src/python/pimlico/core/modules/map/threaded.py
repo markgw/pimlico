@@ -9,8 +9,13 @@ multiprocessing.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+
 import threading
-from Queue import Empty, Queue
+from queue import Empty, Queue
 from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \

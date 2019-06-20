@@ -12,8 +12,13 @@ In particular, use :fun:.multiprocessing_executor_factory wherever possible.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+
 import multiprocessing
-from Queue import Empty
+from queue import Empty
 from traceback import format_exc
 
 import signal
