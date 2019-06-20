@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import unicode_literals
 from builtins import object
 
 from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
@@ -27,19 +28,18 @@ class TokenizedDocumentType(TextDocumentType):
         @cached_property
         def text(self):
             if self._raw_data is not None:
-                # The text is just the raw data, decoded, so it's quickest to get it from that
-                return self._raw_data.decode("utf-8")
+                # The text is just the raw data, so it's quickest to get it from that
+                return self._raw_data
             else:
-                return u"\n".join(u" ".join(sentence) for sentence in self.internal_data["sentences"])
+                return "\n".join(" ".join(sentence) for sentence in self.internal_data["sentences"])
 
         def raw_to_internal(self, raw_data):
-            text = raw_data.decode("utf-8")
             return {
-                "sentences": [sentence.split(u" ") for sentence in text.split(u"\n")],
+                "sentences": [sentence.split(" ") for sentence in raw_data.split("\n")],
             }
 
         def internal_to_raw(self, internal_data):
-            return u"\n".join(u" ".join(sentence) for sentence in internal_data["sentences"]).encode("utf-8")
+            return "\n".join(" ".join(sentence) for sentence in internal_data["sentences"])
 
 
 class TokenizedDocumentFormatter(DocumentBrowserFormatter):
@@ -51,7 +51,7 @@ class TokenizedDocumentFormatter(DocumentBrowserFormatter):
     DATATYPE = TokenizedDocumentType()
 
     def format_document(self, doc):
-        return u"\n".join(u" ".join(sent) for sent in doc.sentences)
+        return "\n".join(" ".join(sent) for sent in doc.sentences)
 
 
 class LemmatizedTokensDocumentType(TokenizedDocumentType):
@@ -77,14 +77,13 @@ class CharacterTokenizedDocumentType(TokenizedDocumentType):
             return self.internal_data["sentences"]
 
         def raw_to_internal(self, raw_data):
-            text = raw_data.decode("utf-8")
             return {
-                "sentences": [list(sentence) for sentence in text.split(u"\n")],
-                "text": text,
+                "sentences": [list(sentence) for sentence in raw_data.split("\n")],
+                "text": raw_data,
             }
 
         def internal_to_raw(self, internal_data):
-            return u"\n".join(u"".join(sentence) for sentence in internal_data["sentences"])
+            return "\n".join("".join(sentence) for sentence in internal_data["sentences"])
 
 
 class SegmentedLinesDocumentType(TokenizedDocumentType):
@@ -111,16 +110,15 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
             return self.internal_data["sentences"]
 
         def raw_to_internal(self, raw_data):
-            text = raw_data.decode("utf-8")
-            sentences = [[el.replace(u"@slash@", u"/") for el in line.split(u"/")] for line in text.split(u"\n")]
+            sentences = [[el.replace("@slash@", "/") for el in line.split("/")] for line in raw_data.split("\n")]
             return {
                 "sentences": sentences,
                 # For producing the "text" attribute, we assume it makes sense to join on the empty string
-                "text": u"\n".join(u"".join(line) for line in sentences)
+                "text": "\n".join("".join(line) for line in sentences)
             }
 
         def internal_to_raw(self, internal_data):
-            return u"\n".join(
-                u"/".join(el.replace(u"/", u"@slash@") for el in line).replace(u"\n", u"")
+            return "\n".join(
+                "/".join(el.replace("/", "@slash@") for el in line).replace("\n", "")
                 for line in internal_data["sentences"]
             )
