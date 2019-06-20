@@ -13,14 +13,28 @@ because it's unnecessary to depend on the whole of Gensim just for one data stru
 However, it is possible to retrieve a Gensim dictionary directly from the Pimlico
 data structure if you need to use it with Gensim.
 
+.. todo::
+
+   During Python 2-3 conversion, an ``object`` base class was added to ``Reader``
+   and ``Writer`` classes.
+   Check that these still work as they used to.
+
 """
 from __future__ import absolute_import
+
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import range
+from past.builtins import basestring
+from builtins import object
 
 import os
 from collections import defaultdict
 import itertools
-from itertools import izip
-import cPickle as pickle
+
+import pickle as pickle
 from operator import itemgetter
 
 from pimlico.datatypes.base import PimlicoDatatype
@@ -40,19 +54,19 @@ class Dictionary(PimlicoDatatype):
     """
     datatype_name = "dictionary"
 
-    class Reader:
+    class Reader(object):
         def get_data(self):
             with open(os.path.join(self.data_dir, "dictionary"), "r") as f:
                 return pickle.load(f)
 
-        class Setup:
+        class Setup(object):
             def get_required_paths(self):
                 return ["dictionary"]
 
         def get_detailed_status(self):
             data = self.get_data()
 
-            sorted_ids = list(reversed(sorted(data.dfs.items(), key=itemgetter(1))))
+            sorted_ids = list(reversed(sorted(list(data.dfs.items()), key=itemgetter(1))))
             if len(sorted_ids) <= 8:
                 term_list = u", ".join(u"'%s' (%d)" % (data.id2token[i], cnt) for (i, cnt) in sorted_ids)
             else:
@@ -69,7 +83,7 @@ class Dictionary(PimlicoDatatype):
                 "Vocab size: %d" % len(data)
             ]
 
-    class Writer:
+    class Writer(object):
         """
         When the context manager is created, a new, empty :class:`DictionaryData` instance
         is created. You can build your dictionary by calling `add_documents()` on the
@@ -140,11 +154,11 @@ class DictionaryData(object):
         return len(self.token2id)
 
     def __str__(self):
-        some_keys = list(itertools.islice(self.token2id.iterkeys(), 5))
+        some_keys = list(itertools.islice(self.token2id.keys(), 5))
         return "Dictionary(%i unique tokens: %s%s)" % (len(self), some_keys, '...' if len(self) > 5 else '')
 
     def refresh_id2token(self):
-        self._id2token = dict((id, token) for (token, id) in self.token2id.iteritems())
+        self._id2token = dict((id, token) for (token, id) in self.token2id.items())
 
     def add_term(self, term):
         """
@@ -204,30 +218,30 @@ class DictionaryData(object):
         # Construct (word, frequency) mapping.
         counter = defaultdict(int)
         for w in document:
-            counter[w if isinstance(w, unicode) else unicode(w, 'utf-8')] += 1
+            counter[w if isinstance(w, str) else str(w, 'utf-8')] += 1
 
         token2id = self.token2id
         if allow_update or return_missing:
-            missing = dict((w, freq) for w, freq in counter.iteritems() if w not in token2id)
+            missing = dict((w, freq) for w, freq in counter.items() if w not in token2id)
             if allow_update:
                 for w in missing:
                     # new id = number of ids made so far;
                     # NOTE this assumes there are no gaps in the id sequence!
                     token2id[w] = len(token2id)
 
-        result = dict((token2id[w], freq) for w, freq in counter.iteritems() if w in token2id)
+        result = dict((token2id[w], freq) for w, freq in counter.items() if w in token2id)
 
         if allow_update:
             self.num_docs += 1
-            self.num_pos += sum(counter.itervalues())
+            self.num_pos += sum(counter.values())
             self.num_nnz += len(result)
             # increase document count for each unique token that appeared in the document
             dfs = self.dfs
-            for tokenid in result.iterkeys():
+            for tokenid in result.keys():
                 dfs[tokenid] = dfs.get(tokenid, 0) + 1
 
         # return tokenids, in ascending id order
-        result = sorted(result.iteritems())
+        result = sorted(result.items())
         if return_missing:
             return result, missing
         else:
@@ -250,14 +264,14 @@ class DictionaryData(object):
         no_above_abs = int(no_above * self.num_docs)  # convert fractional threshold to absolute threshold
 
         # determine which tokens to keep
-        good_ids = (v for v in self.token2id.itervalues() if no_below <= self.dfs.get(v, 0) <= no_above_abs)
+        good_ids = (v for v in self.token2id.values() if no_below <= self.dfs.get(v, 0) <= no_above_abs)
         good_ids = sorted(good_ids, key=self.dfs.get, reverse=True)
         if keep_n is not None:
             good_ids = good_ids[:keep_n]
         # Convert to set for (much) faster inclusion check
         good_ids = set(good_ids)
         # Keep a record of what items we remove, along with their counts
-        removed = [(token, id, self.dfs[id]) for (token, id) in self.token2id.iteritems() if id not in good_ids]
+        removed = [(token, id, self.dfs[id]) for (token, id) in self.token2id.items() if id not in good_ids]
         # do the actual filtering, then rebuild dictionary to remove gaps in ids
         self.filter_tokens(good_ids=good_ids)
         return removed
@@ -272,18 +286,18 @@ class DictionaryData(object):
         if bad_ids is not None:
             bad_ids = set(bad_ids)
             self.token2id = dict((token, tokenid)
-                                 for token, tokenid in self.token2id.iteritems()
+                                 for token, tokenid in self.token2id.items()
                                  if tokenid not in bad_ids)
             self.dfs = dict((tokenid, freq)
-                            for tokenid, freq in self.dfs.iteritems()
+                            for tokenid, freq in self.dfs.items()
                             if tokenid not in bad_ids)
         if good_ids is not None:
             good_ids = set(good_ids)
             self.token2id = dict((token, tokenid)
-                                 for token, tokenid in self.token2id.iteritems()
+                                 for token, tokenid in self.token2id.items()
                                  if tokenid in good_ids)
             self.dfs = dict((tokenid, freq)
-                            for tokenid, freq in self.dfs.iteritems()
+                            for tokenid, freq in self.dfs.items()
                             if tokenid in good_ids)
         self.compactify()
 
@@ -296,12 +310,12 @@ class DictionaryData(object):
         Calling this method will remove the gaps.
         """
         # build mapping from old id -> new id
-        idmap = dict(izip(self.token2id.itervalues(), xrange(len(self.token2id))))
+        idmap = dict(zip(self.token2id.values(), range(len(self.token2id))))
 
         # reassign mappings to new ids
-        self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.iteritems())
+        self.token2id = dict((token, idmap[tokenid]) for token, tokenid in self.token2id.items())
         self._id2token = {}
-        self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.iteritems())
+        self.dfs = dict((idmap[tokenid], freq) for tokenid, freq in self.dfs.items())
 
     def as_gensim_dictionary(self):
         """

@@ -15,7 +15,18 @@ See :doc:`/core/datatypes` for a guide to how Pimlico datatypes work.
 
 This module defines the base classes for all datatypes.
 
+.. todo::
+
+   During Python 2-3 conversion, an ``object`` base class was added to ``PimlicoDatatype.Reader``,
+   ``PimlicoDatatype.Reader.Setup`` and ``PimlicoDatatype.Writer``.
+   Check that these still work as they used to.
+
 """
+from builtins import next
+from builtins import zip
+from builtins import object
+from future.utils import with_metaclass
+
 import json
 import os
 import pickle
@@ -196,7 +207,7 @@ class PimlicoDatatypeReaderMeta(type):
         return getattr(cls, _cache_name)
 
 
-class PimlicoDatatype(object):
+class PimlicoDatatype(with_metaclass(PimlicoDatatypeMeta, object)):
     """
     The abstract superclass of all datatypes. Provides basic functionality for identifying where
     data should be stored and such.
@@ -212,7 +223,6 @@ class PimlicoDatatype(object):
     If you're **creating a new datatype**, refer to the :doc:`datatype documentation </core/datatypes>`.
 
     """
-    __metaclass__ = PimlicoDatatypeMeta
 
     datatype_name = "base_datatype"
     """ Identifier (without spaces) to distinguish this datatype """
@@ -241,19 +251,19 @@ class PimlicoDatatype(object):
                 raise DatatypeLoadError("unknown datatype option '{}' for {}".format(key, self.datatype_name))
         self.options = dict(kwargs)
         # Positional args can also be used to specify options, using the order in which the options are defined
-        for key, arg in zip(self.datatype_options.iterkeys(), args):
+        for key, arg in zip(self.datatype_options.keys(), args):
             if key in kwargs:
                 raise DatatypeLoadError("datatype option '{}' given by positional arg was also specified "
                                         "by a kwarg".format(key))
             self.options[key] = arg
 
         # Check any required options have been given
-        for opt_name, opt_dict in self.datatype_options.iteritems():
+        for opt_name, opt_dict in self.datatype_options.items():
             if opt_dict.get("required", False) and opt_name not in self.options:
                 raise DatatypeLoadError("{} datatype requires option '{}' to be specified".format(
                     self.datatype_name, opt_name))
         # Finally, set default options from the datatype options
-        for opt_name, opt_dict in self.datatype_options.iteritems():
+        for opt_name, opt_dict in self.datatype_options.items():
             if opt_name not in self.options:
                 self.options[opt_name] = opt_dict.get("default", None)
 
@@ -417,7 +427,7 @@ class PimlicoDatatype(object):
         """
         raise NotImplementedError("datatype {} does not provide a dataset browser".format(self.datatype_name))
 
-    class Reader:
+    class Reader(object):
         """
         The abstract superclass of all dataset readers.
 
@@ -460,7 +470,7 @@ class PimlicoDatatype(object):
             """
             return []
 
-        class Setup:
+        class Setup(object):
             """
             Abstract superclass of all dataset reader setup classes.
 
@@ -679,7 +689,7 @@ class PimlicoDatatype(object):
         def __repr__(self):
             return "Reader({})".format(self.datatype.full_datatype_name())
 
-    class Writer:
+    class Writer(object):
         """
         The abstract superclass of all dataset writers.
 

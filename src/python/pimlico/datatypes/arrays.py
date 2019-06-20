@@ -5,7 +5,15 @@
 """
 Wrappers around Numpy arrays and Scipy sparse matrices.
 
+.. todo::
+
+   During Python 2-3 conversion, an ``object`` base class was added to ``NumpyArray.Reader``
+   and ``Writer`` and ``ScipySparseMatrix.Reader`` and ``Writer``.
+   Check that these still work as they used to.
+
 """
+
+from builtins import object
 
 from pimlico.core.dependencies.python import numpy_dependency, scipy_dependency
 from pimlico.datatypes.files import NamedFileCollection
@@ -29,14 +37,14 @@ class NumpyArray(NamedFileCollection):
     def get_software_dependencies(self):
         return super(NumpyArray, self).get_software_dependencies() + [numpy_dependency]
 
-    class Reader:
+    class Reader(object):
         @cached_property
         def array(self):
             import numpy
             with open(self.get_absolute_path("array.npy"), "r") as f:
                 return numpy.load(f)
 
-    class Writer:
+    class Writer(object):
         def write_array(self, array):
             import numpy
             numpy.save(self.get_absolute_path("array.npy"), array)
@@ -61,13 +69,13 @@ class ScipySparseMatrix(NamedFileCollection):
     def get_software_dependencies(self):
         return super(ScipySparseMatrix, self).get_software_dependencies() + [scipy_dependency, numpy_dependency]
 
-    class Reader:
+    class Reader(object):
         @cached_property
         def array(self):
             from scipy import io
             return io.mmread(self.get_absolute_path("array.mtx"))
 
-    class Writer:
+    class Writer(object):
         def write_matrix(self, mat):
             from scipy.sparse import coo_matrix
             from scipy.io import mmwrite

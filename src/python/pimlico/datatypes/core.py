@@ -5,7 +5,17 @@
 Some basic core datatypes that are commonly used for passing simple data, like
 strings and dicts, through pipelines.
 
+.. todo::
+
+   During Python 2-3 conversion, an ``object`` base class was added to ``Reader``
+   and ``Writer`` classes.
+   Check that these still work as they used to.
+
 """
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+
 import os
 
 from pimlico.datatypes.base import PimlicoDatatype
@@ -21,21 +31,21 @@ class Dict(PimlicoDatatype):
     """
     datatype_name = "dict"
 
-    class Reader:
-        class Setup:
+    class Reader(object):
+        class Setup(object):
             def get_required_paths(self):
                 return ["data"]
 
         def get_dict(self):
-            import cPickle as pickle
+            import pickle as pickle
             with open(os.path.join(self.data_dir, "data"), "r") as f:
                 return pickle.load(f)
 
-    class Writer:
+    class Writer(object):
         required_tasks = ["dict"]
 
         def write_dict(self, d):
-            import cPickle as pickle
+            import pickle as pickle
             # Write out the data file
             with open(os.path.join(self.data_dir, "data"), "w") as f:
                 pickle.dump(d, f, -1)
@@ -50,8 +60,8 @@ class StringList(PimlicoDatatype):
     """
     datatype_name = "string_list"
 
-    class Reader:
-        class Setup:
+    class Reader(object):
+        class Setup(object):
             def get_required_paths(self):
                 return ["data"]
 
@@ -59,7 +69,7 @@ class StringList(PimlicoDatatype):
             with open(os.path.join(self.data_dir, "data"), "r") as f:
                 return f.read().decode("utf-8").splitlines()
 
-    class Writer:
+    class Writer(object):
         required_tasks = ["list"]
 
         def write_list(self, l):
