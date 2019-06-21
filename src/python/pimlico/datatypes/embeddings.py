@@ -75,8 +75,8 @@ class Embeddings(PimlicoDatatype):
         @cached_property
         def vectors(self):
             import numpy
-            with open(os.path.join(self.data_dir, "vectors.npy"), "r") as f:
-                return numpy.load(f)
+            with open(os.path.join(self.data_dir, "vectors.npy"), "rb") as f:
+                return numpy.load(f, allow_pickle=False)
 
         @cached_property
         def normed_vectors(self):
@@ -92,9 +92,9 @@ class Embeddings(PimlicoDatatype):
         @cached_property
         def word_counts(self):
             import csv
-            with open(os.path.join(self.data_dir, "vocab.csv"), "r", encoding="utf8") as f:
+            with open(os.path.join(self.data_dir, "vocab.csv"), "rb") as f:
                 reader = csv.reader(f)
-                return [(row[0], int(row[1])) for row in reader]
+                return [(row[0].decode("utf-8"), int(row[1].decode("utf-8"))) for row in reader]
 
         @cached_property
         def index2vocab(self):
@@ -184,7 +184,7 @@ class Embeddings(PimlicoDatatype):
             """
             import numpy
             with open(os.path.join(self.data_dir, "vectors.npy"), "wb") as f:
-                numpy.save(f, arr)
+                numpy.save(f, arr, allow_pickle=False)
             self.task_complete("vectors")
 
         def write_word_counts(self, word_counts):
