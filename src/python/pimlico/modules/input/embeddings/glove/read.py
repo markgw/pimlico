@@ -1,3 +1,4 @@
+from builtins import range
 import warnings
 
 from gensim import utils
@@ -81,7 +82,7 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
         else:
             pbar = get_progress_bar(vocab_size, title="Reading")
 
-        for line_no in pbar(xrange(vocab_size)):
+        for line_no in pbar(range(vocab_size)):
             line = fin.readline()
             if line == b'':
                 raise EOFError("unexpected end of input; is count incorrect or file otherwise damaged?")

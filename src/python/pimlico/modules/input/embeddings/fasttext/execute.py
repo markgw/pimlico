@@ -1,3 +1,4 @@
+from builtins import next
 from itertools import islice
 
 import numpy

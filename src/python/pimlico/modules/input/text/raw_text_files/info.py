@@ -17,6 +17,7 @@ a ``?`` at the start of a filename/glob, indicating that it will be included if 
 not depended on for considering the data ready to use.
 
 """
+from builtins import next
 import fnmatch
 import os
 from glob import glob, iglob
