@@ -9,6 +9,7 @@ Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 from __future__ import print_function
 from builtins import str
 from past.builtins import basestring
+
 import argparse
 import codecs
 import os
@@ -147,7 +148,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
             ("(required) " if d.get("required", False) else "") + d.get("help", ""),
             format_option_type(d.get("type", str)),
         ]
-        for (option_name, d) in list(ModuleInfo.module_options.items())
+        for (option_name, d) in ModuleInfo.module_options.items()
     ]
 
     # Try generating some example config for how this module can be used
