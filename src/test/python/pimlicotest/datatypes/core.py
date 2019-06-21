@@ -99,13 +99,13 @@ class DatatypeTest(object):
                 raise AssertionError("datatype {} does not have an attribute '{}', named in test definition".format(
                     datatype_name, attr
                 ))
-            except Exception, e:
+            except Exception as e:
                 raise AssertionError("error getting attribute '{}' of {}: {}".format(attr, datatype_name, e))
             # If it's a method, we should call it
             if type(value) is types.MethodType:
                 try:
                     value = value(*args)
-                except Exception, e:
+                except Exception as e:
                     raise AssertionError("error calling method {}({}) on datatype {}: {}".format(
                         attr, ", ".join(str(a) for a in args), datatype_name, e)
                     )

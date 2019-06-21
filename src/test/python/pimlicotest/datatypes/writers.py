@@ -12,6 +12,7 @@ can be useful for using the writer tests to generate
 datasets for corresponding reader tests.
 
 """
+from __future__ import print_function
 import shutil
 import unittest
 from tempfile import mkdtemp
@@ -46,7 +47,7 @@ class WriterTest(object):
         # Allow an environment variable to control whether we remove the output
         keep_output = bool(len(os.environ.get("KEEP_OUTPUT", "")))
         if keep_output:
-            print "Leaving output from {} in {}".format(type(self).__name__, self.output_dir)
+            print("Leaving output from {} in {}".format(type(self).__name__, self.output_dir))
         else:
             shutil.rmtree(self.output_dir)
 
