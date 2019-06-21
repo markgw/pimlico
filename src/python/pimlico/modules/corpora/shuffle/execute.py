@@ -68,7 +68,7 @@ class ModuleExecutor(BaseModuleExecutor):
             bin = random.randint(0, num_bins)
             # Put the data into a StringIO for adding to the archive
             data = doc.raw_data
-            buff = io.StringIO(data)
+            buff = io.BytesIO(data)
             # Create a tarinfo
             tarinfo = tarfile.TarInfo(doc_name)
             tarinfo.size = len(data)
