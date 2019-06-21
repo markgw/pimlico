@@ -10,6 +10,8 @@ can now customize your plot if you like, by modifying this file and running:
     python plot.py
 
 """
+from builtins import zip
+
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
@@ -24,7 +26,7 @@ bar_width = 0.5
 with open("data.csv", "r") as f:
     csv_reader = csv.reader(f)
     # Should be two values in each row
-    labels, xs, ys, colours = zip(*csv_reader)
+    labels, xs, ys, colours = list(zip(*csv_reader))
 
 xs = numpy.array([float(v) for v in xs])
 ys = numpy.array([float(v) for v in ys])

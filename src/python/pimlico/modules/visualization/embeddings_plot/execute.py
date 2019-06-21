@@ -2,9 +2,15 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import map
+
 import csv
 import os
-from cStringIO import StringIO
+from io import StringIO, BytesIO
 from itertools import dropwhile
 from sklearn.manifold.mds import MDS
 from sklearn.manifold.t_sne import TSNE
@@ -72,7 +78,7 @@ class ModuleExecutor(BaseModuleExecutor):
                     if s.startswith(prefix):
                         return s[len(prefix):], cname
                 return s, "b"
-            vocab, colours = zip(*map(word2col, vocab))
+            vocab, colours = list(zip(*list(map(word2col, vocab))))
         elif colour_list is not None:
             colours = [colour_list[i] for i in source_ids]
         else:
@@ -83,10 +89,10 @@ class ModuleExecutor(BaseModuleExecutor):
         self.log.info("Outputting data and plotting code")
         with PlotOutputWriter(self.info.get_absolute_output_dir("plot")) as writer:
             # Prepare data to go to CSV file
-            io = StringIO()
+            io = BytesIO()
             csv_writer = csv.writer(io)
             for label, value, c in zip(vocab, red_vecs, colours):
-                csv_writer.writerow([unicode(label).encode("utf8"), str(float(value[0])), str(float(value[1])), c])
+                csv_writer.writerow([str(label).encode("utf8"), str(float(value[0])), str(float(value[1])), c])
             writer.data = io.getvalue()
 
             # Use a standard template plot python file

@@ -1,4 +1,6 @@
-import StringIO
+from future import standard_library
+standard_library.install_aliases()
+import io
 import codecs
 import os
 import tarfile
@@ -69,7 +71,7 @@ class ModuleExecutor(BaseModuleExecutor):
                     doc_data_enc = doc_data.encode("utf-8")
                     tar_info = tarfile.TarInfo(doc_path)
                     tar_info.size = len(doc_data_enc)
-                    tar_archive.addfile(tar_info, StringIO.StringIO(doc_data_enc))
+                    tar_archive.addfile(tar_info, io.BytesIO(doc_data_enc))
 
                     # Destroy tarfile's cache of members, since it causes memory problems with big
                     # archives and we don't need it anyway

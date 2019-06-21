@@ -10,6 +10,9 @@ can now customize your plot if you like, by modifying this file and running:
     python plot.py
 
 """
+from builtins import zip
+from builtins import range
+
 import matplotlib
 import csv
 # Force matplotlib to not use any Xwindows backend.
@@ -22,7 +25,7 @@ COLOURS = ['g', 'b', 'y', 'm', 'c', '#B1C7CA', '#90F0A0']
 # Read in the input data
 with open("data.csv", "r") as f:
     csv_reader = csv.reader(f)
-    labels, values = zip(*csv_reader)
+    labels, values = list(zip(*csv_reader))
 
 values = [float(v) for v in values]
 bar_positions = [float(i) - 0.5*bar_width for i in range(len(values))]

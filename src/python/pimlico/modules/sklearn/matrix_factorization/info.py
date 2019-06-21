@@ -67,7 +67,7 @@ class ModuleInfo(BaseModuleInfo):
             "help": "Scikit-learn class to use to fit the matrix factorization. Should be the name of a class in "
                     "the package sklearn.decomposition that has a fit_transform() method and a components\\_ attribute. "
                     "Supported classes: %s" % ", ".join(SKLEARN_CLASSES),
-            "type": choose_from_list(SKLEARN_CLASSES.keys()),
+            "type": choose_from_list(list(SKLEARN_CLASSES.keys())),
             "required": True,
         },
         "options": {

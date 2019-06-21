@@ -2,6 +2,8 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+from builtins import range
+from builtins import object
 from contextlib import contextmanager
 import sys
 import ast

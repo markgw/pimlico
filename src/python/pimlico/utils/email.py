@@ -25,6 +25,10 @@ Configure email sending functionality by adding the following fields to your Pim
 
 from __future__ import absolute_import
 
+from builtins import str
+from past.builtins import basestring
+from builtins import object
+
 import smtplib
 from email.mime.text import MIMEText
 from smtplib import SMTPHeloError, SMTPAuthenticationError, SMTPException
@@ -97,7 +101,7 @@ def send_text_email(email_config, subject, content=None):
     # Encode unicode content as utf-8
     if content is None:
         content = ""
-    body = unicode(content).encode("utf-8")
+    body = str(content).encode("utf-8")
 
     # Create a plain message
     msg = MIMEText(body)

@@ -17,6 +17,8 @@ data structure, so things go bad if you use it like that.
    Update to new datatypes system and add test pipeline
 
 """
+from builtins import str
+
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.old_datatypes.tar import TarredCorpusWriter
 from pimlico.old_datatypes.documents import TextDocumentType
@@ -33,12 +35,12 @@ class ModuleInfo(DocumentMapModuleInfo):
         "joiner": {
             "help": "String to join words on. (Default: space)",
             "default": u" ",
-            "type": unicode,
+            "type": str,
         },
         "sentence_joiner": {
             "help": "String to join lines/sentences on. (Default: linebreak)",
             "default": u"\n",
-            "type": unicode,
+            "type": str,
         },
     }
 

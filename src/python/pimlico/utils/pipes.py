@@ -2,7 +2,11 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-from Queue import Queue, Empty
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+
+from queue import Queue, Empty
 from threading import Thread
 
 

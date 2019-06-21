@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from builtins import map
 
 # CCGBank has some POS tags not in the PTB tagset
 CCGBANK_TO_PTB_POS_MAP = {
@@ -40,7 +41,7 @@ def pos_tags_to_ptb(tags):
     to CCGBank's special version of the tagset. If that doesn't work, raises a NonPTBTagError.
 
     """
-    return map(pos_tag_to_ptb, tags)
+    return list(map(pos_tag_to_ptb, tags))
 
 
 class NonPTBTagError(Exception):
