@@ -4,6 +4,8 @@ Large set of unit tests for core datatypes.
 Tests instantiating the datatypes and reading in data from an example dataset.
 
 """
+from builtins import str
+from builtins import object
 import os
 import types
 import unittest

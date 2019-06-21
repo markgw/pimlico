@@ -2,6 +2,8 @@
 Writer test cases for grouped corpora with different data point types.
 
 """
+from __future__ import division
+from builtins import range
 import random
 import string
 import unittest
@@ -28,7 +30,7 @@ class GroupedCorpusWriterTest(WriterTest):
 
         for doc_num, (doc_name, doc) in enumerate(self.get_documents()):
             writer.add_document(
-                archive_base_name.format(doc_num / 5),
+                archive_base_name.format(doc_num // 5),
                 doc_name,
                 doc
             )

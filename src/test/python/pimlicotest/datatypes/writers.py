@@ -13,6 +13,9 @@ datasets for corresponding reader tests.
 
 """
 from __future__ import print_function
+from builtins import zip
+from builtins import range
+from builtins import object
 import shutil
 import unittest
 from tempfile import mkdtemp
@@ -165,4 +168,4 @@ class EmbeddingsWriterTest(WriterTest, unittest.TestCase):
         counts = list(range(10))
 
         writer.write_vectors(vectors)
-        writer.write_word_counts(zip(words, counts))
+        writer.write_word_counts(list(zip(words, counts)))
