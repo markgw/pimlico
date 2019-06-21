@@ -183,7 +183,7 @@ class Embeddings(PimlicoDatatype):
             Write out vectors from a Numpy array
             """
             import numpy
-            with open(os.path.join(self.data_dir, "vectors.npy"), "w") as f:
+            with open(os.path.join(self.data_dir, "vectors.npy"), "wb") as f:
                 numpy.save(f, arr)
             self.task_complete("vectors")
 
@@ -195,10 +195,10 @@ class Embeddings(PimlicoDatatype):
                 determined by the order of words
             """
             import csv
-            with open(os.path.join(self.data_dir, "vocab.csv"), "w", encoding="utf8") as f:
+            with open(os.path.join(self.data_dir, "vocab.csv"), "wb") as f:
                 writer = csv.writer(f)
                 for word, count in word_counts:
-                    writer.writerow([str(word), str(count)])
+                    writer.writerow([str(word).encode("utf-8"), str(count).encode("utf-8")])
             self.task_complete("vocab")
 
         def write_vocab_list(self, vocab_items):
@@ -260,17 +260,17 @@ class TSVVecFiles(NamedFileCollection):
         def write_vocab_with_counts(self, word_counts):
             import csv
 
-            with open(self.get_absolute_path(self.filenames[1]), "w") as f:
+            with open(self.get_absolute_path(self.filenames[1]), "wb") as f:
                 writer = csv.writer(f, dialect="excel-tab")
                 writer.writerow(["Word", "Count"])
                 for word, count in word_counts:
-                    writer.writerow([str(word).encode("utf-8"), str(count)])
+                    writer.writerow([str(word).encode("utf-8"), str(count).encode("utf-8")])
             self.file_written(self.filenames[1])
 
         def write_vocab_without_counts(self, words):
             import csv
 
-            with open(self.get_absolute_path(self.filenames[1]), "w") as f:
+            with open(self.get_absolute_path(self.filenames[1]), "wb") as f:
                 writer = csv.writer(f, dialect="excel-tab")
                 writer.writerow(["Word"])
                 for word in words:
