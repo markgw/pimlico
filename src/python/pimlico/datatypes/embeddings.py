@@ -250,11 +250,11 @@ class TSVVecFiles(NamedFileCollection):
         def write_vectors(self, array):
             import csv
 
-            with open(self.get_absolute_path(self.filenames[0]), "w") as f:
+            with open(self.get_absolute_path(self.filenames[0]), "wb") as f:
                 writer = csv.writer(f, dialect="excel-tab")
                 # Write each row
                 for vec in array:
-                    writer.writerow([str(val) for val in vec])
+                    writer.writerow([str(val).encode("utf-8") for val in vec])
             self.file_written(self.filenames[0])
 
         def write_vocab_with_counts(self, word_counts):
