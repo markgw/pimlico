@@ -16,7 +16,7 @@ from builtins import range
 from builtins import object
 
 import struct
-from io import StringIO, BytesIO
+from io import BytesIO
 
 from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.corpora.data_points import RawDocumentType
@@ -67,7 +67,7 @@ class FloatListsDocumentType(RawDocumentType):
         keys = ["lists"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             lists = list(self.read_rows(reader))
             return {
                 "lists": lists,
@@ -136,7 +136,7 @@ class FloatListDocumentType(RawDocumentType):
         keys = ["list"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             lst = list(self.read_rows(reader))
             return {
                 "list": lst,

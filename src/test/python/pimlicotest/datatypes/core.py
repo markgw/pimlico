@@ -4,7 +4,7 @@ Large set of unit tests for core datatypes.
 Tests instantiating the datatypes and reading in data from an example dataset.
 
 """
-from builtins import str
+from builtins import str, bytes
 from builtins import object
 import os
 import types
@@ -144,7 +144,7 @@ class GroupedCorpusDatatypeTest(DatatypeTest):
         for doc_name, doc in islice(reader, 3):
             # Check we can reader the raw_data attribute, which all doc types should have
             # Note that this should be a string, which may be encoded unicode or some other string data
-            self.assertIsInstance(doc.raw_data, str)
+            self.assertIsInstance(doc.raw_data, bytes)
             # Internal data should always be available in some form, though its keys may vary
             self.assertIsInstance(doc.internal_data, dict)
             # Example corpora shouldn't generally include invalid documents, so it's a sign something has gone wrong

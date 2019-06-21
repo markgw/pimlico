@@ -13,7 +13,7 @@ standard_library.install_aliases()
 from builtins import object
 
 import struct
-from io import StringIO, BytesIO
+from io import BytesIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.utils.core import cached_property
@@ -87,7 +87,7 @@ class IntegerTableDocumentType(RawDocumentType):
         keys = ["table"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             table = list(self.read_rows(reader))
             return {
                 "table": table,
