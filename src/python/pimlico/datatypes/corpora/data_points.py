@@ -11,6 +11,8 @@ Document types used to represent datatypes of individual documents in an Iterabl
    Check that these still work as they used to.
 
 """
+from traceback import format_exc
+
 from builtins import object
 from future.utils import with_metaclass
 
@@ -296,8 +298,8 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
                     # In particular, it's important to catch attribute errors, as these otherwise lead
                     # to __getatttr__ being called and give mystifying errors
                     raise DataConversionError(
-                        "{} error converting internal to raw data for document type {}: {}".format(
-                            type(e).__name__, self.data_point_type, e
+                        "{} error converting internal to raw data for document type {}: {}. [{}]".format(
+                            type(e).__name__, self.data_point_type, e, format_exc(),
                         ))
             return self._raw_data
 
@@ -311,8 +313,8 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
                 except Exception as e:
                     # Catch any exceptions and wrap them
                     raise DataConversionError(
-                        "{} error converting raw to internal data for document type {}: {}".format(
-                            type(e).__name__, self.data_point_type, e
+                        "{} error converting raw to internal data for document type {}: {}. [{}]".format(
+                            type(e).__name__, self.data_point_type, e, format_exc(),
                         ))
             return self._internal_data
 

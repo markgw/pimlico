@@ -10,12 +10,13 @@ They are designed to be fast to read.
 from __future__ import absolute_import
 
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import range
 from builtins import object
 
 import struct
-from io import StringIO
+from io import StringIO, BytesIO
 
 from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.datatypes.corpora.data_points import RawDocumentType
@@ -99,13 +100,13 @@ class FloatListsDocumentType(RawDocumentType):
                 yield row
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             for row in internal_data["lists"]:
                 # Should be rows of floats
                 try:
-                    raw_data.write(self.data_point_type.length_struct.pack(len(row)))
+                    raw_data.write(bytes(self.data_point_type.length_struct.pack(len(row))))
                     for num in row:
-                        raw_data.write(self.data_point_type.struct.pack(num))
+                        raw_data.write(bytes(self.data_point_type.struct.pack(num)))
                 except struct.error as e:
                     raise ValueError("error encoding float row %s using struct format %s: %s" %
                                      (row, self.data_point_type.struct.format, e))
@@ -158,11 +159,11 @@ class FloatListDocumentType(RawDocumentType):
                 yield num
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             # Doc should be a list of ints
             for num in internal_data["list"]:
                 try:
-                    raw_data.write(self.data_point_type.struct.pack(num))
+                    raw_data.write(bytes(self.data_point_type.struct.pack(num)))
                 except struct.error as e:
                     raise ValueError("error encoding float data %s using struct format %s: %s" %
                                      (num, self.data_point_type.struct.format, e))

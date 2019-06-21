@@ -6,6 +6,7 @@
 Reading of pipeline config from a file into the data structure used to run and manipulate the pipeline's data.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 from builtins import map

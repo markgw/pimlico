@@ -13,7 +13,7 @@ standard_library.install_aliases()
 from builtins import object
 
 import struct
-from io import StringIO
+from io import StringIO, BytesIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.utils.core import cached_property
@@ -120,11 +120,11 @@ class IntegerTableDocumentType(RawDocumentType):
                 yield row
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             for row in internal_data["table"]:
                 # Should be rows of ints of the correct length
                 try:
-                    raw_data.write(self.data_point_type.struct.pack(*row))
+                    raw_data.write(bytes(self.data_point_type.struct.pack(*row)))
                 except struct.error as e:
                     # Instead of checking the rows before encoding, catch any encoding errors and give helpful messages
                     if len(row) != self.data_point_type.row_length:

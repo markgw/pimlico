@@ -124,9 +124,9 @@ class IntegerListsDocumentType(RawDocumentType):
             for row in internal_data["lists"]:
                 # Should be rows of ints
                 try:
-                    raw_data.write(self.data_point_type.length_struct.pack(len(row)))
+                    raw_data.write(bytes(self.data_point_type.length_struct.pack(len(row))))
                     for num in row:
-                        raw_data.write(self.data_point_type.struct.pack(num))
+                        raw_data.write(bytes(self.data_point_type.struct.pack(num)))
                 except struct.error as e:
                     raise ValueError("error encoding int row %s using struct format %s: %s" %
                                      (row, self.data_point_type.struct.format, e))
