@@ -8,8 +8,6 @@ Provides access to many subcommands, acting as the primary interface to Pimlico'
 
 """
 from __future__ import print_function
-from pimlico.cli.fixlength import FixLengthCmd
-from pimlico.cli.recover import RecoverCmd
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
@@ -34,6 +32,8 @@ from pimlico.cli.shell.runner import ShellCLICmd
 from pimlico.cli.status import StatusCmd
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.cli.testemail import EmailCmd
+from pimlico.cli.fixlength import FixLengthCmd
+from pimlico.cli.recover import RecoverCmd
 from pimlico.cli.util import module_number_to_name, module_numbers_to_names
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError, PipelineStructureError
 from pimlico.core.modules.options import ModuleOptionParseError
