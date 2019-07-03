@@ -88,6 +88,8 @@ if [ ! -f "$python" ]; then
 fi
 echo "Successfully set up virtualenv for running Pimlico. Running basic Pimlico setup"
 
+$VENV_DIR/bin/pip install --upgrade pip
+
 echo "Installing essential initial dependencies"
 $VENV_DIR/bin/pip install -r $DIR/../lib/libutils/requirements.txt
 
