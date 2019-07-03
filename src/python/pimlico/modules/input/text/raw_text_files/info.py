@@ -20,6 +20,7 @@ not depended on for considering the data ready to use.
 from builtins import next
 import fnmatch
 import os
+import io
 from glob import glob, iglob
 
 from pimlico.core.modules.inputs import iterable_input_reader
@@ -199,11 +200,8 @@ def corpus_iter(reader):
                 distinguish_id += 1
             used_doc_names.add(doc_name)
 
-        with open(path, "r") as f:
+        with io.open(path, "r", encoding=encoding, errors=options["encoding_errors"]) as f:
             data = f.read()
-            # Decode to unicode string, which will be used as data for document
-            data = data.decode(encoding, errors=options["encoding_errors"])
-
             if start != 0 or end != -1:
                 # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
                 if start != 0:
