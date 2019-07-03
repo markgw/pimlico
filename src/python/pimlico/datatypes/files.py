@@ -10,12 +10,11 @@ any more. There may still be a use for this, though, so I may be added in future
 
 """
 
-from builtins import object
-
-from io import TextIOWrapper
-
+import io
 import os
 from collections import OrderedDict
+
+from builtins import object
 
 from pimlico.core.modules.options import comma_separated_strings
 from pimlico.datatypes import PimlicoDatatype, DynamicInputDatatypeRequirement
@@ -180,7 +179,7 @@ class NamedFileCollection(PimlicoDatatype):
             return [self.get_absolute_path(f) for f in self.filenames]
 
 
-class OpenFileWriter(TextIOWrapper):
+class OpenFileWriter(io.FileIO):
     def __init__(self, writer, filename):
         self.writer = writer
         self.filename = filename
@@ -192,7 +191,7 @@ class OpenFileWriter(TextIOWrapper):
             self.writer.file_written(self.filename)
 
 
-class OpenFileReader(TextIOWrapper):
+class OpenFileReader(io.FileIO):
     def __init__(self, reader, filename, mode="r"):
         self.reader = reader
         self.filename = filename
