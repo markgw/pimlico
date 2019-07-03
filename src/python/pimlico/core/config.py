@@ -25,6 +25,7 @@ import re
 import sys
 import textwrap
 import warnings
+import io
 
 from configparser import SafeConfigParser, RawConfigParser
 from io import StringIO
@@ -1643,10 +1644,10 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
 
     directive_re = re.compile(r"^%%\s*(?P<dir>\S+)(\s(?P<rest>.*))?$")
 
-    with open(filename, "r") as f:
+    with io.open(filename, "r", encoding="utf-8") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
         for line in f:
-            line = line.decode("utf8").rstrip(u"\n")
+            line = line.rstrip(u"\n")
             if line.startswith("%%"):
                 # Directive: process this now
 
