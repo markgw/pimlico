@@ -255,7 +255,7 @@ class BaseModuleInfo(object):
         :return: dictionary of inputs
         """
         inputs = {}
-        for opt_name, opt_value in opt_dict.items():
+        for opt_name, opt_value in list(opt_dict.items()):
             if opt_name == "input":
                 # Allow the name "input" to be used where there's only one input
                 if len(cls.module_inputs) == 1:
