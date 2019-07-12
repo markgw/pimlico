@@ -175,7 +175,7 @@ def run_test_pipeline(path, module_names, log, no_clean=False, debug=False):
             clear_storage_dir()
 
 
-def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False):
+def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False, stop_on_error=False):
     """
     :param pipeline_and_modules: list of (pipeline, modules) pairs, where pipeline is a path to a config file and
         modules a list of module names to test
@@ -188,6 +188,9 @@ def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False):
         except TestPipelineRunError as e:
             log.error("Test failed: {}".format(e))
             failed.append((path, module_names))
+            if stop_on_error:
+                log.error("Aborting test suite after error on {} [{}]".format(path, ",".join(module_names)))
+                break
         else:
             log.info("Test succeeded")
     return failed
