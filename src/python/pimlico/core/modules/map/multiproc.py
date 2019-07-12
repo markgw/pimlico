@@ -131,7 +131,7 @@ class MultiprocessingMapPool(DocumentProcessorPool):
             return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
 
     @staticmethod
-    def create_queue(maxsize=None):
+    def create_queue(maxsize=0):
         q = multiprocessing.Queue(maxsize)
         q.cancel_join_thread()
         return q
