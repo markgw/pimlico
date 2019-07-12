@@ -13,9 +13,11 @@ strings and dicts, through pipelines.
 
 """
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import object
 
+import io
 import os
 
 from pimlico.datatypes.base import PimlicoDatatype
@@ -38,7 +40,7 @@ class Dict(PimlicoDatatype):
 
         def get_dict(self):
             import pickle as pickle
-            with open(os.path.join(self.data_dir, "data"), "r") as f:
+            with open(os.path.join(self.data_dir, "data"), "rb") as f:
                 return pickle.load(f)
 
     class Writer(object):
@@ -47,7 +49,7 @@ class Dict(PimlicoDatatype):
         def write_dict(self, d):
             import pickle as pickle
             # Write out the data file
-            with open(os.path.join(self.data_dir, "data"), "w") as f:
+            with open(os.path.join(self.data_dir, "data"), "wb") as f:
                 pickle.dump(d, f, -1)
             self.task_complete("dict")
 
@@ -74,6 +76,6 @@ class StringList(PimlicoDatatype):
 
         def write_list(self, l):
             # Write out the data file
-            with open(os.path.join(self.data_dir, "data"), "w") as f:
-                f.write((u"\n".join(l)).encode("utf-8"))
+            with io.open(os.path.join(self.data_dir, "data"), "w", encoding="utf-8") as f:
+                f.write(u"\n".join(l))
             self.task_complete("list")
