@@ -74,6 +74,9 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
             self.initialized.set()
             self.ended.set()
 
+    def terminate(self):
+        self.shutdown()
+
     def shutdown(self, timeout=3.):
         # This may have been done by the pool, but it doesn't hurt to set it again
         self.stopped.set()
