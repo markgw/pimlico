@@ -690,6 +690,11 @@ class DocumentProcessorPool(object):
                     q.get_nowait()
                 except Empty:
                     break
+                except OSError:
+                    # This happens sometimes when emptying the queue
+                    # I think it's a bug (https://bugs.python.org/issue36281), but we needn't
+                    # worry about it: if the queue is closed, there's presumably nothing more to come
+                    break
 
 
 class DocumentMapProcessMixin(object):
