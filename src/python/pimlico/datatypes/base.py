@@ -100,6 +100,13 @@ class PimlicoDatatypeMeta(type):
                 # Don't inherit the cached setup cls for this reader type, as we should recompute to do subtyping
                 if "_setup_cls" in my_dict:
                     del my_dict["_setup_cls"]
+                # Don't inherit the __dict__ and __weakref__ attributes
+                # These will be created on the new type as necessary
+                if "__dict__" in my_dict:
+                    del my_dict["__dict__"]
+                if "__weakref__" in my_dict:
+                    del my_dict["__weakref__"]
+                    
                 reader_cls = PimlicoDatatypeReaderMeta("Reader", (parent_reader,), my_dict)
             setattr(cls, _cache_name, reader_cls)
 
@@ -149,6 +156,13 @@ class PimlicoDatatypeMeta(type):
                             raise TypeError(
                                 "writer param defaults should be pairs of default values and documentation "
                                 "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+
+                    # Don't inherit the __dict__ and __weakref__ attributes
+                    # These will be created on the new type as necessary
+                    if "__dict__" in new_cls_dict:
+                        del new_cls_dict["__dict__"]
+                    if "__weakref__" in new_cls_dict:
+                        del new_cls_dict["__weakref__"]
 
                 # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
                 writer_cls = type("Writer", (parent_writer,), new_cls_dict)
