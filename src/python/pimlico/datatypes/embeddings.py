@@ -92,9 +92,9 @@ class Embeddings(PimlicoDatatype):
         @cached_property
         def word_counts(self):
             import csv
-            with open(os.path.join(self.data_dir, "vocab.csv"), "rb") as f:
+            with open(os.path.join(self.data_dir, "vocab.csv"), "r", encoding="utf-8") as f:
                 reader = csv.reader(f)
-                return [(row[0].decode("utf-8"), int(row[1].decode("utf-8"))) for row in reader]
+                return [(row[0], int(row[1])) for row in reader]
 
         @cached_property
         def index2vocab(self):
@@ -195,10 +195,10 @@ class Embeddings(PimlicoDatatype):
                 determined by the order of words
             """
             import csv
-            with open(os.path.join(self.data_dir, "vocab.csv"), "wb") as f:
+            with open(os.path.join(self.data_dir, "vocab.csv"), "w", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 for word, count in word_counts:
-                    writer.writerow([str(word).encode("utf-8"), str(count).encode("utf-8")])
+                    writer.writerow([str(word), str(count)])
             self.task_complete("vocab")
 
         def write_vocab_list(self, vocab_items):
