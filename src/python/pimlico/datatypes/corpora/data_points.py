@@ -406,18 +406,35 @@ def invalid_document(module_name, error_info):
     return InvalidDocument()(module_name=module_name, error_info=error_info)
 
 
-def invalid_document_or_text(module_name, text):
+def invalid_document_or_raw(data):
     """
-    If the text represents an invalid document, parse it and return an InvalidDocument object.
-    Otherwise, return the text as is.
+    Takes the given raw data, given as a bytes object, and returns it as an
+    InvalidDocument object, if it represents an invalid document, or returns
+    the data as is otherwise.
 
     """
-    if is_invalid_doc(text):
-        return text
-    elif text.startswith("***** EMPTY DOCUMENT *****"):
-        return InvalidDocument()(module_name=module_name, error_info=text)
+    is_invalid = False
+    try:
+        if data.startswith(b"***** EMPTY DOCUMENT *****"):
+            # This is the raw data for an invalid doc
+            is_invalid = True
+    except TypeError:
+        if not isinstance(data, bytes):
+            raise DataConversionError("invalid_document_or_raw() should be given a bytes object, "
+                                      "not {}".format(type(data).__name__))
+        else:
+            raise
+
+    if is_invalid:
+        return InvalidDocument()(raw_data=data)
     else:
-        return text
+        return data
+
+
+# Alias for backwards compatibility
+# Doesn't any longer correctly describe the function
+def invalid_document_or_text(module_name, data):
+    return invalid_document_or_raw(data)
 
 
 def is_invalid_doc(doc):

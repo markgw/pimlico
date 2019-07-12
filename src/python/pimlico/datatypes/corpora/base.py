@@ -19,7 +19,7 @@ from pimlico.cli.shell.base import ShellCommand
 from pimlico.core.modules.options import opt_type_help
 from pimlico.datatypes.base import PimlicoDatatype, DatatypeLoadError, DatatypeWriteError
 from pimlico.datatypes.corpora.data_points import DataPointType, is_invalid_doc, \
-    invalid_document_or_text, invalid_document
+    invalid_document_or_raw, invalid_document
 from pimlico.utils.core import import_member
 from pimlico.utils.progress import get_progress_bar
 
@@ -200,13 +200,13 @@ class IterableCorpus(PimlicoDatatype):
         def data_to_document(self, data):
             """
             Applies the corpus' datatype's processing to the raw data, given as a
-            unicode string, and produces a document instance.
+            bytes object, and produces a document instance.
 
-            :param data: unicode string of raw data
+            :param data: bytes raw data
             :return: document instance
             """
             # Catch invalid documents
-            data = invalid_document_or_text("{} reader".format(self.datatype.data_point_type.name), data)
+            data = invalid_document_or_raw(data)
             if is_invalid_doc(data):
                 return data
             # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
@@ -216,8 +216,8 @@ class IterableCorpus(PimlicoDatatype):
             except BaseException as e:
                 # If there's any problem reading in the document, yield an invalid doc with the error
                 document = invalid_document(
-                    "datatype %s reader" % self.datatype.data_point_type.name,
-                    "{}: {}".format(e, format_exc())
+                    u"datatype %s reader" % self.datatype.data_point_type.name,
+                    u"{}: {}".format(e, format_exc())
                 )
             return document
 
