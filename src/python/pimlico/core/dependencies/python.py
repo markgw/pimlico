@@ -333,7 +333,10 @@ requests_dependency = PythonPackageOnPip("requests", min_version="2.20")
 gensim_dependency = PythonPackageOnPip(
     "gensim", "Gensim",
     dependencies=[numpy_dependency, scipy_dependency, requests_dependency],
-    upgrade_only_if_needed=True
+    upgrade_only_if_needed=True,
+    # In 3.3.0 embedding storage was changed, so it's important we're on the right
+    # side of that release
+    min_version="3.3.0",
 )
 
 
