@@ -250,31 +250,31 @@ class TSVVecFiles(NamedFileCollection):
         def write_vectors(self, array):
             import csv
 
-            with open(self.get_absolute_path(self.filenames[0]), "wb") as f:
+            with open(self.get_absolute_path(self.filenames[0]), "w", encoding="utf-8") as f:
                 writer = csv.writer(f, dialect="excel-tab")
                 # Write each row
                 for vec in array:
-                    writer.writerow([str(val).encode("utf-8") for val in vec])
+                    writer.writerow([str(val) for val in vec])
             self.file_written(self.filenames[0])
 
         def write_vocab_with_counts(self, word_counts):
             import csv
 
-            with open(self.get_absolute_path(self.filenames[1]), "wb") as f:
+            with open(self.get_absolute_path(self.filenames[1]), "w", encoding="utf-8") as f:
                 writer = csv.writer(f, dialect="excel-tab")
                 writer.writerow(["Word", "Count"])
                 for word, count in word_counts:
-                    writer.writerow([str(word).encode("utf-8"), str(count).encode("utf-8")])
+                    writer.writerow([str(word), str(count)])
             self.file_written(self.filenames[1])
 
         def write_vocab_without_counts(self, words):
             import csv
 
-            with open(self.get_absolute_path(self.filenames[1]), "wb") as f:
+            with open(self.get_absolute_path(self.filenames[1]), "w", encoding="utf-8") as f:
                 writer = csv.writer(f, dialect="excel-tab")
                 writer.writerow(["Word"])
                 for word in words:
-                    writer.writerow([str(word).encode("utf-8")])
+                    writer.writerow([str(word)])
             self.file_written(self.filenames[1])
 
 
