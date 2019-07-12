@@ -15,9 +15,11 @@ from __future__ import absolute_import
 from builtins import str
 from past.builtins import basestring
 from builtins import object
-from io import open
 
+import io
 import os
+
+from backports import csv
 
 from pimlico.core.dependencies.python import numpy_dependency
 from pimlico.datatypes import PimlicoDatatype, NamedFileCollection
@@ -75,7 +77,7 @@ class Embeddings(PimlicoDatatype):
         @cached_property
         def vectors(self):
             import numpy
-            with open(os.path.join(self.data_dir, "vectors.npy"), "rb") as f:
+            with io.open(os.path.join(self.data_dir, "vectors.npy"), "rb") as f:
                 return numpy.load(f, allow_pickle=False)
 
         @cached_property
@@ -91,8 +93,7 @@ class Embeddings(PimlicoDatatype):
 
         @cached_property
         def word_counts(self):
-            import csv
-            with open(os.path.join(self.data_dir, "vocab.csv"), "r", encoding="utf-8") as f:
+            with io.open(os.path.join(self.data_dir, "vocab.csv"), "r", encoding="utf-8", newline="") as f:
                 reader = csv.reader(f)
                 return [(row[0], int(row[1])) for row in reader]
 
@@ -194,8 +195,7 @@ class Embeddings(PimlicoDatatype):
             :param word_counts: list of (unicode, int) pairs giving each word and its count. Vocab indices are
                 determined by the order of words
             """
-            import csv
-            with open(os.path.join(self.data_dir, "vocab.csv"), "w", encoding="utf-8") as f:
+            with io.open(os.path.join(self.data_dir, "vocab.csv"), "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
                 for word, count in word_counts:
                     writer.writerow([str(word), str(count)])
@@ -248,9 +248,7 @@ class TSVVecFiles(NamedFileCollection):
 
     class Writer(object):
         def write_vectors(self, array):
-            import csv
-
-            with open(self.get_absolute_path(self.filenames[0]), "w", encoding="utf-8") as f:
+            with io.open(self.get_absolute_path(self.filenames[0]), "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f, dialect="excel-tab")
                 # Write each row
                 for vec in array:
@@ -258,21 +256,17 @@ class TSVVecFiles(NamedFileCollection):
             self.file_written(self.filenames[0])
 
         def write_vocab_with_counts(self, word_counts):
-            import csv
-
-            with open(self.get_absolute_path(self.filenames[1]), "w", encoding="utf-8") as f:
+            with io.open(self.get_absolute_path(self.filenames[1]), "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f, dialect="excel-tab")
-                writer.writerow(["Word", "Count"])
+                writer.writerow([u"Word", u"Count"])
                 for word, count in word_counts:
                     writer.writerow([str(word), str(count)])
             self.file_written(self.filenames[1])
 
         def write_vocab_without_counts(self, words):
-            import csv
-
-            with open(self.get_absolute_path(self.filenames[1]), "w", encoding="utf-8") as f:
+            with io.open(self.get_absolute_path(self.filenames[1]), "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f, dialect="excel-tab")
-                writer.writerow(["Word"])
+                writer.writerow([u"Word"])
                 for word in words:
                     writer.writerow([str(word)])
             self.file_written(self.filenames[1])

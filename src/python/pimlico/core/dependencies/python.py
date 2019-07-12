@@ -37,9 +37,13 @@ class PythonPackageDependency(SoftwareDependency):
     def problems(self, local_config):
         probs = super(PythonPackageDependency, self).problems(local_config)
         # To avoid having any impact on the system state during this check, we don't try actually importing the package
-        pkg_loader = find_loader(self.package)
-        if pkg_loader is None:
-            probs.append("package importer could not locate %s" % self.package)
+        try:
+            pkg_loader = find_loader(self.package)
+        except ImportError:
+            probs.append("could not find loader to try locating %s" % self.package)
+        else:
+            if pkg_loader is None:
+                probs.append("package importer could not locate %s" % self.package)
         return probs
 
     def import_package(self):
