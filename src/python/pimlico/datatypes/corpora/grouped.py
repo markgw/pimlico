@@ -8,6 +8,8 @@ from __future__ import absolute_import
 import warnings
 
 from future import standard_library
+from future.utils import PY2
+
 standard_library.install_aliases()
 from builtins import zip
 from builtins import next
@@ -150,7 +152,10 @@ class GroupedCorpus(IterableCorpus):
                                       fileobj=retry_open(archive_filename, mode="rb"),
                                       mode="r|") as tarball:
                         for tarinfo in tarball:
-                            filename = tarinfo.name.decode("utf-8")
+                            if PY2:
+                                filename = tarinfo.name.decode("utf-8")
+                            else:
+                                filename = tarinfo.name
                             # By default, doc name is just the same as filename
                             doc_name = filename
 
