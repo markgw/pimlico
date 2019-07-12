@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import unicode_literals
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.datatypes.corpora import is_invalid_doc
@@ -43,7 +44,7 @@ class ModuleExecutor(BaseModuleExecutor):
             )
             show_removed = removed[:30] + [("...", None, None)] if len(removed) > 30 else removed
             self.log.info("Filters removed %d items from vocabulary: %s" % (
-                len(removed), ", ".join(char.encode("utf8") for (char, __, __) in show_removed)
+                len(removed), ", ".join(char for (char, __, __) in show_removed)
             ))
 
             if self.info.options["include"] is not None:
