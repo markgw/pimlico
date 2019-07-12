@@ -110,11 +110,13 @@ def format_execution_error(error):
         # Extra debugging information was provided by the exception
         print("\n## Further debugging info ##", file=output)
         print(error.debugging_info.strip("\n"), file=output)
-    output_str = output.getvalue()
 
     if hasattr(error, "cause") and error.cause is not None:
         # Recursively print any debugging info on the cause exception
-        output_str = "%s\n%s" % (output_str, format_execution_error(error.cause))
+        print("\nShowing cause of error below\n", file=output)
+        print(format_execution_error(error.cause), file=output)
+
+    output_str = output.getvalue()
     return output_str
 
 

@@ -1,4 +1,6 @@
 from future import standard_library
+from future.utils import raise_from
+
 standard_library.install_aliases()
 from builtins import zip
 from builtins import object
@@ -512,11 +514,13 @@ class InputQueueFeeder(Thread):
                         self.exception_queue.get(timeout=0.1)
                     # Sometimes, a traceback from within the process is included
                     if hasattr(error, "traceback"):
-                        debugging = "Traceback from worker process:\n%s" % error.traceback
+                        debugging = "Traceback from input feeder process:\n%s" % error.traceback
                     else:
                         debugging = None
-                    raise ModuleExecutionError("error in worker process: %s" % error,
-                                               cause=error, debugging_info=debugging)
+                    raise_from(
+                        ModuleExecutionError("error in input feeder process: %s" % error,
+                                             cause=error, debugging_info=debugging),
+                        error)
 
     def check_invalid(self, archive, filename):
         """

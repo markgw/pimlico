@@ -483,6 +483,17 @@ def send_module_report_email(pipeline, module, short_error, long_error):
 
 
 class ModuleExecutionError(Exception):
+    """
+    Base for any errors encountered during execution of a module.
+
+    Note that the ``cause`` attribute is used to trace the cause of an exception, so
+    a chain can be built.
+
+    This is now provided as standard using the ``raise ... from ...``
+    syntax in Python 3, which can be accessed in Python 2 using future's ``raise_from()``.
+    The ``cause`` attribute should gradually be replaced by this, which works better.
+    
+    """
     def __init__(self, *args, **kwargs):
         self.cause = kwargs.pop("cause", None)
         self.debugging_info = kwargs.pop("debugging_info", None)
