@@ -627,6 +627,10 @@ class InputQueueFeeder(Thread):
                         q.get_nowait()
                     except Empty:
                         break
+                    except OSError:
+                        # Sometime get "handle is closed" on python 3
+                        # but probably fine to ignore this, since there's nothing more left presumably
+                        break
                 if hasattr(q, "task_done"):
                     while True:
                         try:
