@@ -202,6 +202,13 @@ class PimlicoDatatypeReaderMeta(type):
             # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
             my_dict = dict(my_setup.__dict__)
             my_dict["reader_type"] = cls
+            # Don't inherit the __dict__ and __weakref__ attributes
+            # These will be created on the new type as necessary
+            if "__dict__" in my_dict:
+                del my_dict["__dict__"]
+            if "__weakref__" in my_dict:
+                del my_dict["__weakref__"]
+
             setup_cls = type("Setup", (parent_setup,), my_dict)
             setattr(cls, _cache_name, setup_cls)
         return getattr(cls, _cache_name)
