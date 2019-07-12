@@ -11,6 +11,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from future import standard_library
+from future.utils import raise_from
+
 standard_library.install_aliases()
 from builtins import str
 
@@ -305,7 +307,10 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         # Include the formatted traceback as debugging info for the reraised exception
                         debugging_info = "Uncaught exception in executor. Traceback from original exception: \n%s" % \
                                          "".join(format_tb(sys.exc_info()[2]))
-                        raise ModuleExecutionError(str(e), cause=e, debugging_info=debugging_info)
+                        raise_from(
+                            ModuleExecutionError(str(e), debugging_info=debugging_info),
+                            e
+                        )
                 except (ModuleInfoLoadError, ModuleExecutionError) as e:
                     if type(e) is ModuleExecutionError:
                         # If there's any error, note in the history that execution didn't complete
