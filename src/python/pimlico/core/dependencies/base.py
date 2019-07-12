@@ -126,6 +126,15 @@ class SoftwareDependency(object):
     def __hash__(self):
         return 0
 
+    def __eq__(self, other):
+        """
+        For the time being, dependencies are only equal if they are identical objects.
+        Subclasses may implement a more nuanced notion of equality and this default
+        might be improved in future.
+
+        """
+        return self is other
+
 
 class Any(SoftwareDependency):
     """

@@ -71,6 +71,9 @@ class PythonPackageDependency(SoftwareDependency):
     def __eq__(self, other):
         return isinstance(other, PythonPackageDependency) and self.package == other.package
 
+    def __hash__(self):
+        return hash(self.package)
+
 
 class PythonPackageSystemwideInstall(PythonPackageDependency):
     """
