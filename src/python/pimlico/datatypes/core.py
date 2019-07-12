@@ -68,8 +68,8 @@ class StringList(PimlicoDatatype):
                 return ["data"]
 
         def get_list(self):
-            with open(os.path.join(self.data_dir, "data"), "r") as f:
-                return f.read().decode("utf-8").splitlines()
+            with io.open(os.path.join(self.data_dir, "data"), "r", encoding="utf-8") as f:
+                return f.read().splitlines()
 
     class Writer(object):
         required_tasks = ["list"]
