@@ -112,7 +112,7 @@ class TestPipeline(object):
             raise TestPipelineRunError("module '{}' failed".format(module_name))
 
 
-def run_test_pipeline(path, module_names, log, no_clean=False, debug=False):
+def run_test_pipeline(path, module_names, log, no_clean=False, debug=False, no_clean_after=False):
     """
     Run a test pipeline, loading the pipeline config from a given path (which may be relative to the
     Pimlico test data directory) and running each of the named modules, including any of those
@@ -171,11 +171,11 @@ def run_test_pipeline(path, module_names, log, no_clean=False, debug=False):
         test_pipeline.test_all_modules()
 
     finally:
-        if not no_clean:
+        if not no_clean and not no_clean_after:
             clear_storage_dir()
 
 
-def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False, stop_on_error=False):
+def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False, stop_on_error=False, no_clean_after=False):
     """
     :param pipeline_and_modules: list of (pipeline, modules) pairs, where pipeline is a path to a config file and
         modules a list of module names to test
@@ -184,7 +184,7 @@ def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False, stop
     for path, module_names in pipelines_and_modules:
         log.info("Running test pipeline {}, modules {}".format(path, ", ".join(module_names)))
         try:
-            run_test_pipeline(path, module_names, log, no_clean=no_clean, debug=debug)
+            run_test_pipeline(path, module_names, log, no_clean=no_clean, debug=debug, no_clean_after=no_clean_after)
         except TestPipelineRunError as e:
             log.error("Test failed: {}".format(e))
             failed.append((path, module_names))

@@ -106,7 +106,7 @@ class PimlicoDatatypeMeta(type):
                     del my_dict["__dict__"]
                 if "__weakref__" in my_dict:
                     del my_dict["__weakref__"]
-                    
+
                 reader_cls = PimlicoDatatypeReaderMeta("Reader", (parent_reader,), my_dict)
             setattr(cls, _cache_name, reader_cls)
 
