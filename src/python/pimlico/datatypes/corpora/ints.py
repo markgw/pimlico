@@ -102,7 +102,7 @@ class IntegerListsDocumentType(RawDocumentType):
             def _read_row(length):
                 for i in range(length):
                     num_string = reader.read(int_size)
-                    if num_string == "":
+                    if num_string == b"":
                         raise IOError("file ended mid-row")
                     try:
                         yield unpacker.unpack(num_string)[0]
@@ -112,7 +112,7 @@ class IntegerListsDocumentType(RawDocumentType):
             while True:
                 # First read an int that tells us how long the row is
                 row_length_string = reader.read(length_size)
-                if row_length_string == "":
+                if row_length_string == b"":
                     # Reached end of file
                     break
                 row_length = length_unpacker.unpack(row_length_string)[0]
