@@ -56,7 +56,7 @@ class Dictionary(PimlicoDatatype):
 
     class Reader(object):
         def get_data(self):
-            with open(os.path.join(self.data_dir, "dictionary"), "r") as f:
+            with open(os.path.join(self.data_dir, "dictionary"), "rb") as f:
                 return pickle.load(f)
 
         class Setup(object):
@@ -99,7 +99,7 @@ class Dictionary(PimlicoDatatype):
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             super(Dictionary.Writer, self).__exit__(exc_type, exc_val, exc_tb)
-            with open(os.path.join(self.data_dir, "dictionary"), "w") as f:
+            with open(os.path.join(self.data_dir, "dictionary"), "wb") as f:
                 pickle.dump(self.data, f, -1)
 
         def add_documents(self, documents, prune_at=2000000):
