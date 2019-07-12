@@ -119,7 +119,7 @@ class NamedFileCollectionWriterTest1(WriterTest, unittest.TestCase):
         return self.datatype_cls(["text_file.txt"])
 
     def write_data(self, writer):
-        writer.write_file(writer.filenames[0], "Some text data in a single text file\n\nJust some text\n")
+        writer.write_file(writer.filenames[0], "Some text data in a single text file\n\nJust some text\n", text=True)
 
 
 class NamedFileCollectionWriterTest2(WriterTest, unittest.TestCase):
@@ -131,7 +131,7 @@ class NamedFileCollectionWriterTest2(WriterTest, unittest.TestCase):
     def write_data(self, writer):
         import struct
         # Write a text file
-        writer.write_file(writer.filenames[0], "Some text data in a single text file\n\nJust some text\n")
+        writer.write_file(writer.filenames[0], "Some text data in a single text file\n\nJust some text\n", text=True)
         # Also write some binary data
         data = struct.pack("?fff", True, 0.5, 1.0, 2.0)
         writer.write_file(writer.filenames[1], data)
@@ -145,7 +145,8 @@ class NamedFileWriterTest(WriterTest, unittest.TestCase):
 
     def write_data(self, writer):
         # Write a text file
-        writer.write_file("Some text data in a single text file\n\nJust some text\nThis one's for a NamedFile test\n")
+        writer.write_file("Some text data in a single text file\n\nJust some text\nThis one's for a NamedFile test\n",
+                          text=True)
 
 
 class TextFileWriterTest(WriterTest, unittest.TestCase):
@@ -153,7 +154,8 @@ class TextFileWriterTest(WriterTest, unittest.TestCase):
 
     def write_data(self, writer):
         # Write a text file
-        writer.write_file("Some text data in a single text file\n\nJust some text\nThis one's for a TextFile test\n")
+        writer.write_file("Some text data in a single text file\n\nJust some text\nThis one's for a TextFile test\n",
+                          text=True)
 
 
 class EmbeddingsWriterTest(WriterTest, unittest.TestCase):

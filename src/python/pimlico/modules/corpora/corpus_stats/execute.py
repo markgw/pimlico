@@ -47,5 +47,5 @@ class ModuleExecutor(BaseModuleExecutor):
         }
 
         with self.info.get_output_writer("stats") as writer:
-            writer.write_file(json.dumps(data, indent=4))
+            writer.write_file(json.dumps(data, indent=4), text=True)
             self.log.info("Stats output to %s" % writer.absolute_path)

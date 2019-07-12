@@ -115,7 +115,7 @@ class NamedFileCollection(PimlicoDatatype):
             """ For backwards compatibility: use absolute_paths by preference """
             return self.absolute_paths
 
-        def read_file(self, filename=None, mode="r"):
+        def read_file(self, filename=None, mode="r", text=False):
             """
             Read a file from the collection.
 
@@ -123,14 +123,19 @@ class NamedFileCollection(PimlicoDatatype):
                 collection; or an integer, in which case the ith file in the collection is read. If
                 not given, the first file is read
             :param mode:
+            :param text: if True, the file is treated as utf-8-encoded text and a unicode object is
+                returned. Otherwise, a bytes object is returned.
             :return:
             """
-
             with self.open_file(filename, mode=mode) as f:
-                return f.read()
+                data = f.read()
+            if text:
+                return data.decode("utf-8")
+            else:
+                return data
 
-        def read_files(self, mode="r"):
-            return [self.read_file(f, mode=mode) for f in self.filenames]
+        def read_files(self, mode="r", text=False):
+            return [self.read_file(f, mode=mode, text=text) for f in self.filenames]
 
         def open_file(self, filename=None, mode="r"):
             # By default, read the first file in the collection
@@ -149,11 +154,18 @@ class NamedFileCollection(PimlicoDatatype):
             for filename in self.filenames:
                 self.require_tasks("write_%s" % filename)
 
-        def write_file(self, filename, data):
+        def write_file(self, filename, data, text=False):
+            """
+            If text=True, the data is expected to be unicode and is encoded as utf-8.
+            Otherwise, data should be a bytes object.
+
+            """
             # The filename could contain a subdirectory, so check the dir exists
             file_dir = os.path.dirname(self.get_absolute_path(filename))
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
+            if text:
+                data = data.encode("utf-8")
             # Write the file
             with self.open_file(filename) as f:
                 f.write(data)
@@ -247,8 +259,8 @@ class NamedFile(NamedFileCollection):
             super(NamedFile.Writer, self).__init__(*args, **kwargs)
             self.filename = self.datatype.filename
 
-        def write_file(self, data):
-            super(NamedFile.Writer, self).write_file(self.filename, data)
+        def write_file(self, data, text=False):
+            super(NamedFile.Writer, self).write_file(self.filename, data, text=text)
 
         @property
         def absolute_path(self):
