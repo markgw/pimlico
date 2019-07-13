@@ -298,11 +298,10 @@ class TextFile(NamedFile):
     ] + list(NamedFileCollection.datatype_options.items()))
 
     class Reader(object):
-        def read_file(self, filename=None, mode="r"):
+        def read_file(self, filename=None, mode="r", text=False):
             # Ignore filename, since there's only one
-            data = super(TextFile.Reader, self).read_file()
-            return data.decode("utf-8")
+            return super(TextFile.Reader, self).read_file(text=text)
 
     class Writer(object):
-        def write_file(self, data):
-            super(TextFile.Writer, self).write_file(data.encode("utf-8"))
+        def write_file(self, data, text=False):
+            super(TextFile.Writer, self).write_file(data, text=text)
