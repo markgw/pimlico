@@ -113,7 +113,8 @@ def new_filename(directory, initial_filename="tmp_file"):
 
 def retry_open(filename, errnos=[13], retry_schedule=[2, 10, 30, 120, 300], **kwargs):
     """
-    Try opening a file, using the builtin open() function. If an IOError is raised and its `errno` is in the given
+    Try opening a file, using the builtin open() function (Py3, or io.open on Py2).
+    If an IOError is raised and its `errno` is in the given
     list, wait a moment then retry. Keeps doing this, waiting a bit longer each time, hoping that the problem will
     go away.
 

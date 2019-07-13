@@ -148,9 +148,8 @@ class GroupedCorpus(IterableCorpus):
                             continue
 
                     # Extract the tarball to the temp dir
-                    with tarfile.open(archive_filename,
-                                      fileobj=retry_open(archive_filename, mode="rb"),
-                                      mode="r|") as tarball:
+                    with retry_open(archive_filename, mode="rb") as tar_f:
+                        tarball = tarfile.open(archive_filename, fileobj=tar_f, mode="r|")
                         for tarinfo in tarball:
                             if PY2:
                                 filename = tarinfo.name.decode("utf-8")
