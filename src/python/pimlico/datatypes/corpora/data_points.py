@@ -5,11 +5,6 @@
 """
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to all ``Document`` classes.
-   Check that these still work as they used to.
-
 """
 from traceback import format_exc
 
@@ -52,6 +47,13 @@ class DataPointTypeMeta(type):
                     new_dict = {}
                 else:
                     new_dict = dict(my_doc_cls.__dict__)
+
+                # Don't inherit the __dict__ and __weakref__ attributes
+                # These will be created on the new type as necessary
+                if "__dict__" in new_dict:
+                    del new_dict["__dict__"]
+                if "__weakref__" in new_dict:
+                    del new_dict["__weakref__"]
 
                 # Perform subclassing so that a new Document is created that is a subclass of the parent's document
                 cls.__document_type = type("Document", (parent_doc_cls,), new_dict)
