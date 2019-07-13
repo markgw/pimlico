@@ -7,7 +7,9 @@ Reading of pipeline config from a file into the data structure used to run and m
 """
 from __future__ import print_function
 from __future__ import unicode_literals
+
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import map
 from builtins import input
@@ -27,8 +29,7 @@ import textwrap
 import warnings
 import io
 
-from configparser import SafeConfigParser, RawConfigParser
-from io import StringIO
+from configparser import RawConfigParser, ConfigParser
 from collections import OrderedDict
 from operator import itemgetter
 from socket import gethostname
@@ -1009,10 +1010,10 @@ class PipelineConfig(object):
             def _load_config_file(fn):
                 # Read in the local config and supply a section heading to satisfy config parser
                 with open(fn, "r") as f:
-                    local_text_buffer = StringIO("[main]\n%s" % f.read())
+                    local_text_buffer = "[main]\n%s" % f.read()
                 # User config parser to interpret file contents
-                local_config_parser = SafeConfigParser()
-                local_config_parser.readfp(local_text_buffer)
+                local_config_parser = ConfigParser()
+                local_config_parser.read_string(local_text_buffer)
                 # Get a dictionary of settings from the file
                 return OrderedDict(local_config_parser.items("main"))
 
@@ -1736,7 +1737,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     # Parse the result as a config file
     config_parser = RawConfigParser()
     try:
-        config_parser.readfp(StringIO(u"\n".join(config_lines)))
+        config_parser.read_string(u"\n".join(config_lines), source=filename)
     except configparser.Error as e:
         raise PipelineConfigParseError("could not parse config file %s. %s" % (filename, e))
 

@@ -26,6 +26,7 @@ CORE_PIMLICO_DEPENDENCIES = [
     PythonPackageOnPip("progressbar", "Progressbar"),
     # We use the future library to provide Python 2-3 compatibility
     PythonPackageOnPip("future"),
+    # Backport of CSV reading, so we can handle unicode in the same way on Py 2 and 3
     PythonPackageOnPip("backports.csv"),
 ]
 
