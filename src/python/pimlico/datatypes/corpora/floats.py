@@ -81,7 +81,7 @@ class FloatListsDocumentType(RawDocumentType):
             while True:
                 # First read an int that tells us how long the row is
                 row_length_string = reader.read(self.data_point_type.length_size)
-                if row_length_string == "":
+                if len(row_length_string) == 0:
                     # Reached end of file
                     break
                 row_length = self.data_point_type.length_struct.unpack(row_length_string)[0]
@@ -150,7 +150,7 @@ class FloatListDocumentType(RawDocumentType):
             while True:
                 # Read the whole document, one float at a time
                 num_string = reader.read(self.data_point_type.value_size)
-                if num_string == "":
+                if len(num_string) == 0:
                     return
                 try:
                     num = self.data_point_type.struct.unpack(num_string)[0]
