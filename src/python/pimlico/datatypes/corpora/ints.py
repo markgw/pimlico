@@ -197,7 +197,7 @@ class IntegerListDocumentType(RawDocumentType):
             while True:
                 # Read the whole document, one int at a time
                 num_string = reader.read(self.data_point_type.int_size)
-                if num_string == "":
+                if len(num_string) == 0:
                     return
                 try:
                     num = self.data_point_type.struct.unpack(num_string)[0]

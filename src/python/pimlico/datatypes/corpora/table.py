@@ -105,7 +105,7 @@ class IntegerTableDocumentType(RawDocumentType):
             while True:
                 # Read data for a single row
                 row_string = reader.read(self.row_size)
-                if row_string == "":
+                if len(row_string) == 0:
                     # Reach end of file
                     break
                 try:
