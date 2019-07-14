@@ -18,14 +18,14 @@ run Python scripts or a shell in the same environment used when Pimlico is run.
 Create a new virtual environment that can be used to run Pimlico pipelines. 
 By default, a single virtual environment called `default` is created the first time you run Pimlico. However, you may wish to use this to create others, if you need multiple Python software environments. You can then use it by naming it in an environment variable `PIMENV=<name>` before the `pimlico.sh` command.
 
-* `test_pipeline.sh`  
+* `test/test_pipeline.sh`  
 Interface for **running module tests**. These consist of small pipelines, distributed with any necessary 
 data and config, designed to test specific build-in modules. Since much Pimlico code is either core modules 
 or difficult to run and test outside the context of a pipeline, these tests largely take the place of 
 unit tests for the codebase. 
   * See the `test` directory and the `pimlico.test.pipeline` module.
 
-* `all_tests.sh`  
+* `test/all_tests.sh`  
 Run all **unit tests**. Note that Pimlico does not have many unit tests. More may be added in future, but 
 the bulk of testing is done via module tests.
   * See `test_pipeline.sh`
