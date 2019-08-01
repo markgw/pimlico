@@ -68,15 +68,15 @@ Options
 +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 | Name             | Description                                                                                                                                                                                | Type               |
 +==================+============================================================================================================================================================================================+====================+
-| archive_size     | Number of documents to include in each archive (default: 1k)                                                                                                                               | int                |
+| encoding_errors  | What to do in the case of invalid characters in the input while decoding (e.g. illegal utf-8 chars). Select 'strict' (default), 'ignore', 'replace'. See Python's str.decode() for details | string             |
 +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 | archive_basename | Base name to use for archive tar files. The archive number is appended to this. (Default: 'archive')                                                                                       | string             |
 +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
-| encoding         | Encoding to assume for input files. Default: utf8                                                                                                                                          | string             |
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 | files            | (required) Comma-separated list of absolute paths to files to include in the collection. Place a '?' at the start of a filename to indicate that it's optional                             | absolute file path |
 +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
-| encoding_errors  | What to do in the case of invalid characters in the input while decoding (e.g. illegal utf-8 chars). Select 'strict' (default), 'ignore', 'replace'. See Python's str.decode() for details | string             |
+| archive_size     | Number of documents to include in each archive (default: 1k)                                                                                                                               | int                |
++------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
+| encoding         | Encoding to assume for input files. Default: utf8                                                                                                                                          | string             |
 +------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------+
 
 Example config
@@ -96,9 +96,9 @@ This example usage includes more options.
    
    [my_raw_text_archives_reader_module]
    type=pimlico.modules.input.text.raw_text_archives
-   archive_size=1000
-   archive_basename=archive
-   encoding=utf8
-   files=path1,path2,...
    encoding_errors=strict
+   archive_basename=archive
+   files=path1,path2,...
+   archive_size=1000
+   encoding=utf8
 

@@ -41,13 +41,13 @@ Options
 +------------------+-----------------------------------------------------------------------------------------------------------------------------------+------+
 | Name             | Description                                                                                                                       | Type |
 +==================+===================================================================================================================================+======+
-| min_count        | word2vec's min_count option: prunes the dictionary of words that appear fewer than this number of times in the corpus. Default: 5 | int  |
+| negative_samples | number of negative samples to include per positive. Default: 5                                                                    | int  |
 +------------------+-----------------------------------------------------------------------------------------------------------------------------------+------+
 | size             | number of dimensions in learned vectors. Default: 200                                                                             | int  |
 +------------------+-----------------------------------------------------------------------------------------------------------------------------------+------+
 | iters            | number of iterations over the data to perform. Default: 5                                                                         | int  |
 +------------------+-----------------------------------------------------------------------------------------------------------------------------------+------+
-| negative_samples | number of negative samples to include per positive. Default: 5                                                                    | int  |
+| min_count        | word2vec's min_count option: prunes the dictionary of words that appear fewer than this number of times in the corpus. Default: 5 | int  |
 +------------------+-----------------------------------------------------------------------------------------------------------------------------------+------+
 
 Example config
@@ -69,10 +69,10 @@ This example usage includes more options.
    [my_word2vec_module]
    type=pimlico.modules.embeddings.word2vec
    input_text=module_a.some_output
-   min_count=5
+   negative_samples=5
    size=200
    iters=5
-   negative_samples=5
+   min_count=5
 
 Test pipelines
 ==============

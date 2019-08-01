@@ -51,17 +51,17 @@ Options
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | Name      | Description                                                                                                                                                                                                                                    | Type                                 |
 +===========+================================================================================================================================================================================================================================================+======================================+
-| skip      | Number of most frequent words to skip, taking the next most frequent after these. Default: 0                                                                                                                                                   | int                                  |
-+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | words     | Number of most frequent words to plot. Default: 50                                                                                                                                                                                             | int                                  |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
-| reduction | Dimensionality reduction technique to use to project to 2D. Available: mds (Multi-dimensional Scaling), tsne (t-distributed Stochastic Neighbor Embedding). Default: mds                                                                       | 'mds' or 'tsne'                      |
+| colors    | List of colours to use for different embedding sets. Should be a list of matplotlib colour strings, one for each embedding set given in input_vectors                                                                                          | absolute file path                   |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | metric    | Distance metric to use. Choose from 'cosine', 'euclidean', 'manhattan'. Default: 'cosine'                                                                                                                                                      | 'cosine', 'euclidean' or 'manhattan' |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 | cmap      | Mapping from word prefixes to matplotlib plotting colours. Every word beginning with the given prefix has the prefix removed and is plotted in the corresponding colour. Specify as a JSON dictionary mapping prefix strings to colour strings | JSON string                          |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
-| colors    | List of colours to use for different embedding sets. Should be a list of matplotlib colour strings, one for each embedding set given in input_vectors                                                                                          | absolute file path                   |
+| skip      | Number of most frequent words to skip, taking the next most frequent after these. Default: 0                                                                                                                                                   | int                                  |
++-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
+| reduction | Dimensionality reduction technique to use to project to 2D. Available: mds (Multi-dimensional Scaling), tsne (t-distributed Stochastic Neighbor Embedding). Default: mds                                                                       | 'mds' or 'tsne'                      |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
 
 Example config
@@ -83,12 +83,12 @@ This example usage includes more options.
    [my_embeddings_plot_module]
    type=pimlico.modules.visualization.embeddings_plot
    input_vectors=module_a.some_output
-   skip=0
    words=50
-   reduction=mds
+   colors=path1,path2,...
    metric=cosine
    cmap={"key1":"value"}
-   colors=path1,path2,...
+   skip=0
+   reduction=mds
 
 Test pipelines
 ==============

@@ -1,26 +1,33 @@
-Raw text files
-~~~~~~~~~~~~~~
+VRT annotated text files
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. py:module:: pimlico.modules.input.text.raw_text_files
+.. py:module:: pimlico.modules.input.text_annotations.vrt_text
 
-+------------+-------------------------------------------+
-| Path       | pimlico.modules.input.text.raw_text_files |
-+------------+-------------------------------------------+
-| Executable | no                                        |
-+------------+-------------------------------------------+
++------------+-------------------------------------------------+
+| Path       | pimlico.modules.input.text_annotations.vrt_text |
++------------+-------------------------------------------------+
+| Executable | yes                                             |
++------------+-------------------------------------------------+
 
-Input reader for raw text file collections. Reads in files from arbitrary locations specified by a
-list of globs.
+Input reader for VRT text collections (`VeRticalized Text, as used by Korp:
+<https://www.kielipankki.fi/development/korp/corpus-input-format/#VRT_file_format>`_), just for
+reading the (tokenized) text content, throwing away all the annotations.
 
-The input paths must be absolute paths (or globs), but remember that you can make use of various
-:doc:`special substitutions in the config file </core/config>` to give paths relative to your project
-root, or other locations.
+Uses sentence tags to divide each text into sentences.
 
-The file paths may use `globs <https://docs.python.org/2/library/glob.html>`_ to match multiple files.
-By default, it is assumed that every filename should exist and every glob should match at least one
-file. If this does not hold, the dataset is assumed to be not ready. You can override this by placing
-a ``?`` at the start of a filename/glob, indicating that it will be included if it exists, but is
-not depended on for considering the data ready to use.
+
+.. seealso::
+
+   :mod:`pimlico.modules.input.text_annotations.vrt`:
+      Reading VRT files with all their annotations
+
+.. todo::
+
+   Update to new datatypes system and add test pipeline
+
+.. todo::
+
+   Currently skipped from module doc generator, until updated
 
 
 This is an input module. It takes no pipeline inputs and is used to read in data
@@ -33,11 +40,11 @@ No inputs
 Outputs
 =======
 
-+--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Name   | Type(s)                                                                                                                                                              |
-+========+======================================================================================================================================================================+
-| corpus | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`RawTextDocumentType <pimlico.datatypes.corpora.data_points.RawTextDocumentType>`> |
-+--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++--------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type(s)                                                                                                                                                                |
++========+========================================================================================================================================================================+
+| corpus | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`TokenizedDocumentType <pimlico.datatypes.corpora.tokenized.TokenizedDocumentType>`> |
++--------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Options
 =======
@@ -65,16 +72,16 @@ This is an example of how this module can be used in a pipeline config file.
 
 .. code-block:: ini
    
-   [my_raw_text_files_reader_module]
-   type=pimlico.modules.input.text.raw_text_files
+   [my_vrt_files_reader_module]
+   type=pimlico.modules.input.text_annotations.vrt_text
    files=path1,path2,...
 
 This example usage includes more options.
 
 .. code-block:: ini
    
-   [my_raw_text_files_reader_module]
-   type=pimlico.modules.input.text.raw_text_files
+   [my_vrt_files_reader_module]
+   type=pimlico.modules.input.text_annotations.vrt_text
    archive_basename=archive
    files=path1,path2,...
    encoding=utf8

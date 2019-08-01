@@ -49,9 +49,9 @@ Options
 +==============+==============================================================================================================================================================================================================================================+======+
 | size         | (required) Number of documents to include                                                                                                                                                                                                    | int  |
 +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------+
-| skip_invalid | Skip over any invalid documents so that the output subset contains the chosen number of (valid) documents (or as many as possible) and no invalid ones. By default, invalid documents are passed through and counted towards the subset size | bool |
-+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------+
 | offset       | Number of documents to skip at the beginning of the corpus (default: 0, start at beginning)                                                                                                                                                  | int  |
++--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------+
+| skip_invalid | Skip over any invalid documents so that the output subset contains the chosen number of (valid) documents (or as many as possible) and no invalid ones. By default, invalid documents are passed through and counted towards the subset size | bool |
 +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------+
 
 Example config
@@ -74,8 +74,8 @@ This example usage includes more options.
    type=pimlico.modules.corpora.subset
    input_corpus=module_a.some_output
    size=100
-   skip_invalid=T
    offset=0
+   skip_invalid=T
 
 Test pipelines
 ==============

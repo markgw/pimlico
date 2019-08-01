@@ -183,7 +183,7 @@ def corpus_len(options):
     return sum(1 for __ in get_paths_from_options(options))
 
 
-def corpus_iter(reader):
+def iter_files(reader):
     options = reader.options
 
     encoding = options["encoding"]
@@ -216,7 +216,12 @@ def corpus_iter(reader):
                 else:
                     data = u"\n".join(lines[start:end+1])
 
-            yield doc_name, reader.datatype.data_point_type(text=data)
+            yield doc_name, data
+
+
+def corpus_iter(reader):
+    for doc_name, data in iter_files(reader):
+        yield doc_name, reader.datatype.data_point_type(text=data)
 
 
 ModuleInfo = iterable_input_reader(
