@@ -17,6 +17,7 @@ Submodules
 
    pimlico.cli.check
    pimlico.cli.clean
+   pimlico.cli.fixlength
    pimlico.cli.loaddump
    pimlico.cli.locations
    pimlico.cli.main

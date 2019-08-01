@@ -1,75 +1,9 @@
-\!\! Key\-value to term\-feature converter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\!\! term\_feature\_compiler
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.features.term_feature_compiler
 
 .. note::
 
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
-
-+------------+------------------------------------------------+
-| Path       | pimlico.modules.features.term_feature_compiler |
-+------------+------------------------------------------------+
-| Executable | yes                                            |
-+------------+------------------------------------------------+
-
-.. todo::
-
-   Document this module
-
-.. todo::
-
-   Update to new datatypes system and add test pipeline
-
-
-Inputs
-======
-
-+------------+--------------------------------------+
-| Name       | Type(s)                              |
-+============+======================================+
-| key_values | **invalid input type specification** |
-+------------+--------------------------------------+
-
-Outputs
-=======
-
-+---------------+---------------------------------------+
-| Name          | Type(s)                               |
-+===============+=======================================+
-| term_features | **invalid output type specification** |
-+---------------+---------------------------------------+
-
-Options
-=======
-
-+----------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| Name                 | Description                                                                                                                                                                                                                                                                                              | Type                            |
-+======================+==========================================================================================================================================================================================================================================================================================================+=================================+
-| term_keys            | Name of keys (feature names in the input) which denote terms. The first one found in the keys of a particular data point will be used as the term for that data point. Any other matches will be removed before using the remaining keys as the data point's features. Default: just 'term'              | comma-separated list of strings |
-+----------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| include_feature_keys | If True, include the key together with the value from the input key-value pairs as feature names in the output. Otherwise, just use the value. E.g. for input [prop=wordy, poss=my], if True we get features [prop_wordy, poss_my] (both with count 1); if False we get just [wordy, my]. Default: False | bool                            |
-+----------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-
-Example config
-==============
-
-This is an example of how this module can be used in a pipeline config file.
-
-.. code-block:: ini
-   
-   [my_term_feature_list_module]
-   type=pimlico.modules.features.term_feature_compiler
-   input_key_values=module_a.some_output
-   
-
-This example usage includes more options.
-
-.. code-block:: ini
-   
-   [my_term_feature_list_module]
-   type=pimlico.modules.features.term_feature_compiler
-   input_key_values=module_a.some_output
-   term_keys=term
-   include_feature_keys=F
+   This module has not yet been updated to the new datatype system, so cannot be used yet. Soon it will be updated.
 

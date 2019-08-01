@@ -1,6 +1,7 @@
 test-config-nist_tokenize.conf	pimlico.modules.nltk.nist_tokenize, pimlico.modules.nltk.nist_tokenize
 test-config-normalize.conf	pimlico.modules.text.normalize
 test-config-simple_tokenize.conf	pimlico.modules.text.simple_tokenize
+test-config-embeddings_plot.conf	pimlico.modules.visualization.embeddings_plot
 test-config-filter_map.conf	pimlico.modules.corpora.store
 test-config-raw_text_files.conf	
 test-config-fasttext.conf	pimlico.modules.input.embeddings.fasttext

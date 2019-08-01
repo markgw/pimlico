@@ -5,6 +5,13 @@
 """
 Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 
+It is assumed that this script will be run using Python 3. Although it has
+a basic Python 2 compatibility, it's not really intended for Python 2 use.
+Modules that are marked as still awaiting update to the new datatypes system
+will now not be imported at all, since they are typically not Python 3
+compatible (due to their use of ``old_datatypes``, which has not been
+updated to Python 3).
+
 """
 from __future__ import print_function
 from builtins import str
@@ -90,10 +97,20 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
     # Check whether we've been instructed to skip this module
     if hasattr(pymod, "SKIP_MODULE_DOCS") and pymod.SKIP_MODULE_DOCS:
         return
-    # While datatype update is going on, mark the modules that haven't yet been updated
-    awaiting_datatype_update = hasattr(pymod, "AWAITING_UPDATE") and pymod.AWAITING_UPDATE
-    if awaiting_datatype_update:
+    # If a module is marked as awaiting update to the new datatypes, don't
+    # even try importing it, as this usually won't work in Python 3
+    if hasattr(pymod, "AWAITING_UPDATE") and pymod.AWAITING_UPDATE:
         warnings.warn("Module {} is still waiting to be updated to the new datatypes system".format(module_path))
+        with codecs.open(filename, "w", "utf8") as output_file:
+            module_title = module_path.rpartition(".")[2]
+            module_title = "!! {}".format(module_title)
+            # Make a page heading
+            output_file.write(format_heading(0, module_title))
+            # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
+            output_file.write(".. py:module:: %s\n\n" % module_path)
+            output_file.write(".. note::\n\n   This module has not yet been updated to the new "
+                              "datatype system, so cannot be used yet. Soon it will be updated.\n\n")
+        return
 
     # Import the info pymodule so we can get the ModuleInfo class
     info = import_module("%s.info" % module_path)  # We know this exists
@@ -118,15 +135,15 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         module_title = module_title[0].capitalize() + module_title[1:]
         module_title = module_title.replace("_", " ")
     input_table = [
-        [input_name, input_datatype_list(input_types, context=module_path, no_warn=awaiting_datatype_update)]
+        [input_name, input_datatype_list(input_types, context=module_path)]
         for input_name, input_types in ModuleInfo.module_inputs
     ]
     output_table = [
-        [output_name, output_datatype_text(output_types, context=module_path, no_warn=awaiting_datatype_update)]
+        [output_name, output_datatype_text(output_types, context=module_path)]
         for output_name, output_types in ModuleInfo.module_outputs
     ]
     optional_output_table = [
-        [output_name, output_datatype_text(output_types, context=module_path, no_warn=awaiting_datatype_update)]
+        [output_name, output_datatype_text(output_types, context=module_path)]
         for output_name, output_types in ModuleInfo.module_optional_outputs
     ]
     info_doc = info.__doc__
@@ -163,17 +180,11 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
         example_config_long = None
 
-    if awaiting_datatype_update:
-        module_title = "!! {}".format(module_title)
-
     with codecs.open(filename, "w", "utf8") as output_file:
         # Make a page heading
         output_file.write(format_heading(0, module_title))
         # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
         output_file.write(".. py:module:: %s\n\n" % module_path)
-        if awaiting_datatype_update:
-            output_file.write(".. note::\n\n   This module has not yet been updated to the new datatype system, so cannot be used "
-                              "in the `datatypes` branch. Soon it will be updated.\n\n")
         # Output a summary table of key information
         output_file.write("%s\n" % make_table(key_info))
         # Insert text from docstrings
