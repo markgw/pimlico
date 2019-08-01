@@ -11,6 +11,7 @@ can now customize your plot if you like, by modifying this file and running:
 
 """
 from builtins import zip
+from backports import csv
 
 import matplotlib
 # Force matplotlib to not use any Xwindows backend.
@@ -18,12 +19,12 @@ matplotlib.use('Agg')
 matplotlib.rc('font', family="Gentium", size=8)
 import matplotlib.pyplot as plt
 import numpy
-import csv
+import io
 
 bar_width = 0.5
 
 # Read in the input data
-with open("data.csv", "r") as f:
+with io.open("data.csv", "r") as f:
     csv_reader = csv.reader(f)
     # Should be two values in each row
     labels, xs, ys, colours = list(zip(*csv_reader))
@@ -38,7 +39,7 @@ ax = fig.add_subplot(111)
 plt.scatter(xs, ys, s=1)
 
 for x, y, label, c in zip(xs, ys, labels, colours):
-    plt.text(x, y, label.decode("utf8"), horizontalalignment="center", color=c)
+    plt.text(x, y, label, horizontalalignment="center", color=c)
 
 plt.title("<TITLE>")
 plt.savefig("plot.pdf", transparent=True)
