@@ -15,11 +15,11 @@ existing, widely used **NLP** (Natural Language Processing) tools.
 
 .. note::
 
-   This is the ``python3`` branch of Pimlico, which will add Python 2-3 compatibility.
-   This will probably be a lengthy process, during which the codebase will be highly
-   unstable (or, at first, largely disfunctional).
+   This is the ``python3`` branch of Pimlico, which adds Python 2-3 compatibility.
+   This is a lengthy ongoing process. It's now reasonably functional and I welcome
+   people using this branch and reporting bugs (in Python 2 or 3).
 
-   If you want a working version of Pimlico, use the ``master`` branch or a
+   If you want a more stable version of Pimlico, use the ``master`` branch or a
    tagged release.
 
 .. note::
