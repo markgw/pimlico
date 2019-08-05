@@ -14,16 +14,18 @@ updated to Python 3).
 
 """
 from __future__ import print_function
-from builtins import str
-from past.builtins import basestring
 
 import argparse
 import codecs
 import os
 import sys
 import warnings
+from builtins import str
+from collections import OrderedDict
 from importlib import import_module
 from pkgutil import iter_modules
+
+from past.builtins import basestring
 from sphinx import __version__
 from sphinx.ext.apidoc import format_heading
 
@@ -165,7 +167,7 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
             ("(required) " if d.get("required", False) else "") + d.get("help", ""),
             format_option_type(d.get("type", str)),
         ]
-        for (option_name, d) in ModuleInfo.module_options.items()
+        for (option_name, d) in _sort_options(ModuleInfo.module_options)
     ]
 
     # Try generating some example config for how this module can be used
@@ -365,7 +367,7 @@ def generate_example_config(info, input_types, module_path, minimal=False):
 
     # Generate example values for all the options
     options = []
-    for opt_name, opt_dict in info.module_options.items():
+    for opt_name, opt_dict in _sort_options(info.module_options):
         # If producing minimal version, only include required options
         if not minimal or opt_dict.get("required", False):
             opt_val = None
@@ -455,6 +457,19 @@ def _opt_type_to_config(otype):
         return "{},{},...".format(list_val, list_val)
     else:
         return None
+
+
+def _sort_options(options_dict):
+    """
+    Ensure consistent ordering of options in table and examples.
+    """
+    # Ensure a consistent ordering of the options in the table
+    if isinstance(options_dict, OrderedDict):
+        # Ordering is consistent, because options have been specified with an OrderedDict
+        return options_dict.items()
+    else:
+        # Sort alphabetically, so we have a consistent ordering. Otherwise it's random
+        return sorted(options_dict.items())
 
 
 def indent(spaces, text):
