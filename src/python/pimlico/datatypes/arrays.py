@@ -5,12 +5,6 @@
 """
 Wrappers around Numpy arrays and Scipy sparse matrices.
 
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to ``NumpyArray.Reader``
-   and ``Writer`` and ``ScipySparseMatrix.Reader`` and ``Writer``.
-   Check that these still work as they used to.
-
 """
 
 from builtins import object

@@ -11,13 +11,14 @@ from .embeddings import Embeddings, TSVVecFiles
 from .gensim import GensimLdaModel
 from .corpora.base import IterableCorpus
 from .corpora.grouped import GroupedCorpus
+from .arrays import NumpyArray, ScipySparseMatrix
 
 # All builtin datatypes that may be easily loaded using their
 # class names of datatype names from config files
 BUILTIN_DATATYPES = [
     PimlicoDatatype, IterableCorpus, GroupedCorpus,
     StringList, Dict, NamedFileCollection, NamedFile, TextFile, Dictionary,
-    Embeddings, TSVVecFiles, GensimLdaModel,
+    Embeddings, TSVVecFiles, GensimLdaModel, NumpyArray, ScipySparseMatrix,
 ]
 BUILTIN_DATATYPES_BY_DATATYPE_NAME = dict(
     # Go through them in reverse, so that, if we make a mistake and have a duplicate name, the
