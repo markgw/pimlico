@@ -23,6 +23,7 @@ Available pipelines
    text.simple_tokenize.conf.rst
    visualization.embeddings_plot.conf.rst
    core.filter_map.conf.rst
+   input.xml.conf.rst
    input.raw_text_files.conf.rst
    input.fasttext.conf.rst
    input.glove.conf.rst

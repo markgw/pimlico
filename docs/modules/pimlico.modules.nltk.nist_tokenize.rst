@@ -41,9 +41,9 @@ Options
 +--------------+-------------------------------------------------------------------------------------------+------+
 | Name         | Description                                                                               | Type |
 +==============+===========================================================================================+======+
-| non_european | Use the tokenizer's international_tokenize() method instead of tokenize(). Default: False | bool |
-+--------------+-------------------------------------------------------------------------------------------+------+
 | lowercase    | Lowercase all output. Default: False                                                      | bool |
++--------------+-------------------------------------------------------------------------------------------+------+
+| non_european | Use the tokenizer's international_tokenize() method instead of tokenize(). Default: False | bool |
 +--------------+-------------------------------------------------------------------------------------------+------+
 
 Example config
@@ -65,8 +65,8 @@ This example usage includes more options.
    [my_nltk_nist_tokenizer_module]
    type=pimlico.modules.nltk.nist_tokenize
    input_text=module_a.some_output
-   non_european=F
    lowercase=F
+   non_european=F
 
 Test pipelines
 ==============

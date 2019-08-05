@@ -54,9 +54,9 @@ Options
 +====================+============================================================================================================================================================================================================================================================================================================================+========+
 | archive_basename   | Basename to use for archives in the output corpus. Default: 'archive'                                                                                                                                                                                                                                                      | string |
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
-| keep_archive_names | By default, it is assumed that all doc names are unique to the whole corpus, so the same doc names are used once the documents are put into their new archives. If doc names are only unique within the input archives, use this and the input archive names will be included in the output document names. Default: False | bool   |
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | bin_size           | Target expected size of temporary bins into which documents are shuffled. The actual size may vary, but they will on average have this size. Default: 100                                                                                                                                                                  | int    |
++--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
+| keep_archive_names | By default, it is assumed that all doc names are unique to the whole corpus, so the same doc names are used once the documents are put into their new archives. If doc names are only unique within the input archives, use this and the input archive names will be included in the output document names. Default: False | bool   |
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | num_bins           | Directly set the number of temporary bins to put document into. If set, bin_size is ignored                                                                                                                                                                                                                                | int    |
 +--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
@@ -81,8 +81,8 @@ This example usage includes more options.
    type=pimlico.modules.corpora.shuffle
    input_corpus=module_a.some_output
    archive_basename=archive
-   keep_archive_names=F
    bin_size=100
+   keep_archive_names=F
    num_bins=0
 
 Test pipelines

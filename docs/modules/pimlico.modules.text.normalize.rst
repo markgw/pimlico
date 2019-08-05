@@ -44,11 +44,11 @@ Options
 +-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 | Name              | Description                                                                                                             | Type                   |
 +===================+=========================================================================================================================+========================+
+| case              | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
++-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 | remove_empty      | Skip over any empty sentences (i.e. blank lines)                                                                        | bool                   |
 +-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 | remove_only_punct | Skip over any sentences that are empty if punctuation is ignored                                                        | bool                   |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
-| case              | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
 +-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 
 Example config
@@ -70,9 +70,9 @@ This example usage includes more options.
    [my_normalize_module]
    type=pimlico.modules.text.normalize
    input_corpus=module_a.some_output
+   case=
    remove_empty=F
    remove_only_punct=F
-   case=
 
 Test pipelines
 ==============

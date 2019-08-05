@@ -37,15 +37,15 @@ Options
 +--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
 | Name         | Description                                                                                                                                                                                                                                                                                                   | Type              |
 +==============+===============================================================================================================================================================================================================================================================================================================+===================+
-| tar          | Add all files to a single tar archive, instead of just outputting to disk in the given directory. This is a good choice for very large corpora, for which storing to files on disk can cause filesystem problems. If given, the value is used as the basename for the tar archive. Default: do not output tar | string            |
-+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
-| suffix       | Suffix to use for each document's filename                                                                                                                                                                                                                                                                    | string            |
+| archive_dirs | Create a subdirectory for each archive of the grouped corpus to store that archive's documents in. Otherwise, all documents are stored in the same directory (or subdirectories where the document names include directory separators)                                                                        | bool              |
 +--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
 | invalid      | What to do with invalid documents (where there's been a problem reading/processing the document somewhere in the pipeline). 'skip' (default): don't output the document at all. 'empty': output an empty file                                                                                                 | 'skip' or 'empty' |
 +--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
-| archive_dirs | Create a subdirectory for each archive of the grouped corpus to store that archive's documents in. Otherwise, all documents are stored in the same directory (or subdirectories where the document names include directory separators)                                                                        | bool              |
-+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
 | path         | (required) Directory to write the corpus to                                                                                                                                                                                                                                                                   | string            |
++--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
+| suffix       | Suffix to use for each document's filename                                                                                                                                                                                                                                                                    | string            |
++--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
+| tar          | Add all files to a single tar archive, instead of just outputting to disk in the given directory. This is a good choice for very large corpora, for which storing to files on disk can cause filesystem problems. If given, the value is used as the basename for the tar archive. Default: do not output tar | string            |
 +--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------+
 
 Example config
@@ -67,9 +67,9 @@ This example usage includes more options.
    [my_text_corpus_module]
    type=pimlico.modules.output.text_corpus
    input_corpus=module_a.some_output
-   tar=value
-   suffix=value
-   invalid=skip
    archive_dirs=T
+   invalid=skip
    path=value
+   suffix=value
+   tar=value
 
