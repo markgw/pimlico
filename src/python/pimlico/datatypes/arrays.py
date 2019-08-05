@@ -12,6 +12,7 @@ from builtins import object
 from pimlico.core.dependencies.python import numpy_dependency, scipy_dependency
 from pimlico.datatypes.files import NamedFileCollection
 from pimlico.utils.core import cached_property
+from io import open
 
 __all__ = ["NumpyArray", "ScipySparseMatrix"]
 
@@ -35,7 +36,7 @@ class NumpyArray(NamedFileCollection):
         @cached_property
         def array(self):
             import numpy
-            with open(self.get_absolute_path("array.npy"), "r") as f:
+            with open(self.get_absolute_path("array.npy"), "rb") as f:
                 return numpy.load(f)
 
     class Writer(object):
