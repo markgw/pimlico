@@ -4,24 +4,22 @@
 """
 Text normalization for raw text documents.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
+Similar to :mod:`~pimlico.modules.text.normalize` module, but operates on raw text,
+not pre-tokenized text, so provides a slightly different set of tools.
 
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
 
 from pimlico.core.modules.options import choose_from_list, str_to_bool
-from pimlico.old_datatypes.documents import TextDocumentType
-from pimlico.old_datatypes.tar import TarredCorpusType, RawTextTarredCorpus
-from pimlico.old_datatypes.tar import TarredCorpusWriter
+from pimlico.datatypes import GroupedCorpus
+from pimlico.datatypes.corpora.data_points import TextDocumentType, RawTextDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "text_normalize"
     module_readable_name = "Normalize raw text"
-    module_inputs = [("corpus", TarredCorpusType(TextDocumentType))]
-    module_outputs = [("corpus", RawTextTarredCorpus)]
+    module_inputs = [("corpus", GroupedCorpus(TextDocumentType()))]
+    module_outputs = [("corpus", GroupedCorpus(RawTextDocumentType()))]
     module_options = {
         "case": {
             "help": "Transform all text to upper or lower case. Choose from 'upper' or 'lower', "
@@ -38,7 +36,3 @@ class ModuleInfo(DocumentMapModuleInfo):
             "type": str_to_bool,
         },
     }
-
-    def get_writer(self, output_name, output_dir, append=False):
-        if output_name == "corpus":
-            return TarredCorpusWriter(output_dir, append=append)
