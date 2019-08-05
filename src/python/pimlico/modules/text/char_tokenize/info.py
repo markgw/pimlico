@@ -7,25 +7,16 @@ train character-level models, since the output appears exactly like a tokenized
 document, where each token is a single character. You can then feed it into any
 module that expects tokenized text.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
-
 """
 from pimlico.core.modules.map import DocumentMapModuleInfo
-
-from pimlico.old_datatypes.documents import TextDocumentType
-from pimlico.old_datatypes.tar import TarredCorpusType, tarred_corpus_with_data_point_type
-from pimlico.old_datatypes.tokenized import CharacterTokenizedDocumentType, CharacterTokenizedCorpusWriter
+from pimlico.datatypes import GroupedCorpus
+from pimlico.datatypes.corpora.data_points import TextDocumentType
+from pimlico.datatypes.corpora.tokenized import CharacterTokenizedDocumentType
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "char_tokenize"
     module_readable_name = "Text to character level"
-    module_inputs = [("corpus", TarredCorpusType(TextDocumentType))]
-    module_outputs = [("corpus", tarred_corpus_with_data_point_type(CharacterTokenizedDocumentType))]
+    module_inputs = [("corpus", GroupedCorpus(TextDocumentType()))]
+    module_outputs = [("corpus", GroupedCorpus(CharacterTokenizedDocumentType()))]
     module_options = {}
-
-    def get_writer(self, output_name, output_dir, append=False):
-        if output_name == "corpus":
-            return CharacterTokenizedCorpusWriter(output_dir, append=append)
