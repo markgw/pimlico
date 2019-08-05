@@ -46,9 +46,9 @@ Options
 +----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | Name           | Description                                                                                                                                                        | Type   |
 +================+====================================================================================================================================================================+========+
-| token_model    | Tokenization model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/)          | string |
-+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | tokenize_only  | By default, sentence splitting is performed prior to tokenization. If tokenize_only is set, only the tokenization step is executed                                 | bool   |
++----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
+| token_model    | Tokenization model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/)          | string |
 +----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | sentence_model | Sentence segmentation model. Specify a full path, or just a filename. If a filename is given it is expected to be in the opennlp model directory (models/opennlp/) | string |
 +----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
@@ -72,8 +72,8 @@ This example usage includes more options.
    [my_opennlp_tokenizer_module]
    type=pimlico.modules.opennlp.tokenize
    input_text=module_a.some_output
-   token_model=en-token.bin
    tokenize_only=F
+   token_model=en-token.bin
    sentence_model=en-sent.bin
 
 Test pipelines

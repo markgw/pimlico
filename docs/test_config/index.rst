@@ -18,6 +18,7 @@ Available pipelines
    :titlesonly:
 
    nltk.nist_tokenize.conf.rst
+   text.char_tokenize.conf.rst
    text.normalize.conf.rst
    text.simple_tokenize.conf.rst
    visualization.embeddings_plot.conf.rst

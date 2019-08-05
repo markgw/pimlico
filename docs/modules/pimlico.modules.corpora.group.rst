@@ -56,9 +56,9 @@ Options
 +------------------+------------------------------------------------------------------------------------------------------+--------+
 | Name             | Description                                                                                          | Type   |
 +==================+======================================================================================================+========+
-| archive_basename | Base name to use for archive tar files. The archive number is appended to this. (Default: 'archive') | string |
-+------------------+------------------------------------------------------------------------------------------------------+--------+
 | archive_size     | Number of documents to include in each archive (default: 1k)                                         | int    |
++------------------+------------------------------------------------------------------------------------------------------+--------+
+| archive_basename | Base name to use for archive tar files. The archive number is appended to this. (Default: 'archive') | string |
 +------------------+------------------------------------------------------------------------------------------------------+--------+
 
 Example config
@@ -80,8 +80,8 @@ This example usage includes more options.
    [my_group_module]
    type=pimlico.modules.corpora.group
    input_documents=module_a.some_output
-   archive_basename=archive
    archive_size=1000
+   archive_basename=archive
 
 Test pipelines
 ==============

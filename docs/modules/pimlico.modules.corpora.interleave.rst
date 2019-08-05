@@ -49,9 +49,9 @@ Options
 +------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | Name             | Description                                                                                                                                     | Type   |
 +==================+=================================================================================================================================================+========+
-| archive_basename | Documents are regrouped into new archives. Base name to use for archive tar files. The archive number is appended to this. (Default: 'archive') | string |
-+------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 | archive_size     | Documents are regrouped into new archives. Number of documents to include in each archive (default: 1k)                                         | string |
++------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+--------+
+| archive_basename | Documents are regrouped into new archives. Base name to use for archive tar files. The archive number is appended to this. (Default: 'archive') | string |
 +------------------+-------------------------------------------------------------------------------------------------------------------------------------------------+--------+
 
 Example config
@@ -73,8 +73,8 @@ This example usage includes more options.
    [my_interleave_module]
    type=pimlico.modules.corpora.interleave
    input_corpora=module_a.some_output
-   archive_basename=archive
    archive_size=1000
+   archive_basename=archive
 
 Test pipelines
 ==============

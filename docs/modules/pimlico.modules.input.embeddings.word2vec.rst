@@ -37,9 +37,9 @@ Options
 +--------+----------------------------------------------------------+--------+
 | Name   | Description                                              | Type   |
 +========+==========================================================+========+
-| path   | (required) Path to the word2vec embedding file (.bin)    | string |
-+--------+----------------------------------------------------------+--------+
 | binary | Assume input is in word2vec binary format. Default: True | bool   |
++--------+----------------------------------------------------------+--------+
+| path   | (required) Path to the word2vec embedding file (.bin)    | string |
 +--------+----------------------------------------------------------+--------+
 
 Example config
@@ -59,6 +59,6 @@ This example usage includes more options.
    
    [my_word2vec_embedding_reader_module]
    type=pimlico.modules.input.embeddings.word2vec
-   path=value
    binary=T
+   path=value
 
