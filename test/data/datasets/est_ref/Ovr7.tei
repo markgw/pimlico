@@ -1,0 +1,108 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 984; s&otilde;nu kokku: 79</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=p occurs=7></tagusage>
+         <tagusage gi=sp occurs=3></tagusage>
+         <tagusage gi=speaker occurs=3></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr7 </head>
+<div1 type='thread'> <head> Mozilla Firefox Profile - Planet Foorumid </head>
+<sp> <speaker>naine</speaker> 
+<p> <s> seal all pool on sellest seletatud </s> </p>
+ </sp> <sp> <speaker>sooty</speaker> 
+<p> <s> Nu k&otilde;ige lihtsam vast ikka </s> </p>
+<p> <s> <hi rend='bold'>Start&gt;Run&gt; firefox -profilemanager</hi> </s> </p>
+<p> <s> kui winsuxi all ... </s> </p>
+ </sp> <sp> <speaker>kodukootud</speaker> 
+<p> <s> Ei hakanud uut teemat tegema , aga minu k&uuml;simus on , et miks mul firefoxi aken konkreetselt t&otilde;mbleb ? ? </s> <s> &Auml;kki keegi oskab aidata v&otilde;i &uuml;ldse selgitada , milles asi ? avad mingi akna uues tab'is , mille koodis on , et ta peab enda suurust muutma , muudab ta kogu akna suurust , aga ainult natukene . </s> </p>
+<p> <s> ju sellest on see tingitud ? </s> </p>
+<p> <s> v&otilde;i . . mis m&otilde;ttes t&otilde;mbleb ? </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>

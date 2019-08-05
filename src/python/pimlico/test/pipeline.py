@@ -78,6 +78,13 @@ class TestPipeline(object):
             self.log.info("Processing module '{}'".format(module_name))
             module = self.pipeline[module_name]
             if isinstance(module, InputModuleInfo):
+                # If an input module has execute_count=True, it's actually an executable
+                # module, since it needs to be executed before its data is ready to read
+                if module.module_executable:
+                    self.log.info("Input module '{}' needs to be executed before data is ready: "
+                                  "running".format(module_name))
+                    self.test_module_execution(module_name)
+                    self.log.info("Data preparation executed. Testing input module")
                 self.test_input_module(module_name)
             else:
                 self.test_module_execution(module_name)

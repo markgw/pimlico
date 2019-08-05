@@ -1,0 +1,416 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 39150; s&otilde;nu kokku: 3831</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=gap occurs=85></tagusage>
+         <tagusage gi=p occurs=200></tagusage>
+         <tagusage gi=sp occurs=103></tagusage>
+         <tagusage gi=speaker occurs=103></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr6 </head>
+<div1 type='thread'> <head> Raha teenimine internetis - 11. leht - Planet Foorumid </head>
+<sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> Kas FF on pettus ? </hi> </s> <s> <hi rend='quote'> Me oleme oma rahast ilma ? </hi> </s> </p>
+<p> <s> T&otilde;en&auml;oline on , et FF on pettus . </s> <s> Aga ma s&uuml;gavalt kahtlen selles , et ta n&uuml;&uuml;d ja just n&uuml;&uuml;d meie rahaga minema jalutab . </s> <s> Seda ei juhtu . </s> <s> Siiski tasuks v&otilde;imalikult kiiresti teha nii , et oma raha tasa oled sealt teeninud . </s> <s> Mina seda juba olen ja neljandal saan ca 1000 eequ veel kasumit . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> corp-fund . com'i omanik kolib Eestisse <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> <hi rend='quote'> Ta tuleb lihtsalt mingile &auml;rivisiidile siia . </hi> </s> <s> <hi rend='quote'> R&auml;&auml;kisin umbes n&auml;dal aega tagasi temaga . </hi> </s> </p>
+<p> <s> ta ju &uuml;tles e-mailis , et ta &quot;moving&quot; Eestisse ? v&otilde;i m&auml;letan valesti ? hmm </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> oot see corp-fund oli sellien kus ostad neid aktsiaid ? </s> <s> Keegi enda raha sinna kah sisse kandnud ? </s> <s> V&otilde;i ei ? </s> <s> Ja Sildude sa weeklyisse saad sisse ? voi ei ? </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> kas keegi teab kas selline koht nagu <gap desc='hyperlink'> on usaldusv&auml;&auml;rne ? </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> <hi rend='quote'> kas keegi teab kas selline koht nagu <gap desc='hyperlink'> on usaldusv&auml;&auml;rne ? </hi> </s> </p>
+<p> <s> St , v&auml;ldi seda kohta nagu katku . </s> <s> Ja mingil kummalisel p&otilde;hjusel , on seal foorum kah kinni . </s> </p>
+ </sp> <sp> <speaker>paavo9</speaker> 
+<p> <s> <hi rend='quote'> ait&auml;h abi eest . ma seda investeerimise v&auml;rki nii t&auml;pselt ei tunne . n&uuml;&uuml;d j&auml;lle natuke targem . ega keegi mingit sellist kohta ei tea kus investeerimis miinimum on umbes 5 dollarit ? </hi> </s> </p>
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> </hi> </s> </p>
+<p> <s> miinimum investeering 1&dollar; ja protsent 1 . 6 </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> leidsin mingi sellise koha mis maksab iga kuu 15 p&auml;eval e-gold arvele . keda huvitab lugegu t&auml;psemalt . mingi 20 senti teenib p&auml;evas </s> </p>
+ </sp> <sp> <speaker>sando</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> - 80 saab k&auml;ttte selle teenid n&auml;dalaga , proovida ju v&otilde;ib ? </hi> </s> </p>
+<p> <s> <hi rend='quote'> &Auml;ra palun valeta . </hi> </s> </p>
+<p> <s> Eksju . </s> </p>
+<p> <s> <hi rend='quote'> V&auml;ga . </hi> </s> </p>
+<p> <s> Mage m&otilde;tteviis . </s> </p>
+ </sp> <sp> <speaker>innu5</speaker> 
+<p> <s> naljakas ... just tulin siia foorumisse et oma referal linki panna </s> ... . </p>
+<p> <s> kusjuures see 80&dollar; tulep kiiresti k&auml;tte k&uuml;ll sest mailid on v&auml;hemalt 20 senti kuigi paljud 50 ja olen isegi kaks dollarist saanud ... &uuml;leeile vist liitusin ja t&auml;na juba 20 dollarit koos <gap desc='image'> </s> ... . <s> loodame et makstakse ka ... </s> </p>
+ </sp> <sp> <speaker>paavo9</speaker> 
+<p> <s> mina k&uuml;ll ei teadnud <gap desc='image'> </s> </p>
+<p> <s> aga samas kas see on kindel ? ma otsisin k&uuml;ll seal faq-dest ja k&uuml;simustest aga sellist t&auml;pset kohta ei leidnud <gap desc='image'> </s> </p>
+<p> <s> no igaljuhul ait&auml;h ja ma l&auml;&auml;n nyyd nurka h&auml;benema ... <gap desc='image'> </s> </p>
+<p> <s> ps . ma teadsin et see on liiga hea et olla t&otilde;si ... </s> </p>
+ </sp> <sp> <speaker>paavo9</speaker> 
+<p> <s> &uuml;ks k&uuml;simus &uuml;he investeerimis programmi kohta . </s> <s> The1 kas sa tead kas selline koht nagu <gap desc='hyperlink'> on usaldusv&auml;&auml;rne ? </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> <hi rend='quote'> &uuml;ks k&uuml;simus &uuml;he investeerimis programmi kohta . </hi> </s> <s> <hi rend='quote'> The1 kas sa tead kas selline koht nagu <gap desc='hyperlink'> on usaldusv&auml;&auml;rne ? </hi> </s> </p>
+<p> <s> Ei oska &ouml;elda midagi selle kohta ... </s> <s> Ausalt &ouml;eldes natuke kahtlane tundub olevat , aga samas niipalju kui ma tean selle kohta , siis on ta siiamaani raha maksnud , ja iga p&auml;ev . </s> </p>
+<p> <s> M&otilde;tlen ise &uuml;he katse teha ja panna 10 dollarit sinna . </s> <s> Siis saaks iga p&auml;ev 50 senti . &uuml;he kuuga 150% kasumit . </s> <s> Pole sugugi mitte paha <gap desc='image'> </s> </p>
+<p> <s> Ja peale seda pole mul enam midagi kaotada . </s> </p>
+<p> <s> Igatahes k&otilde;ige kindlam moodus raha teenida on v&otilde;imaliult paljudesse erinevatesse kohtadesse investeerida . </s> <s> Muidugi mitte ilmselgetesse pettustesse <gap desc='image'> </s> </p>
+<p> <s> Antud kohta ma siiski midagi &uuml;le 10 dollari esialgu ei investeeriks . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Raha teenimine internetis - 13. leht - Planet Foorumid </head>
+<sp> <speaker>innu5</speaker> 
+<p> <s> 5 p&auml;eva holla pella ! </s> <s> Palju seal neid pay to click on ? </s> <s> B&auml;nnerid ainult v&otilde;i mailid ? </s> </p>
+ </sp> <sp> <speaker>Prax</speaker> 
+<p> <s> soovitan sellistele &quot;rahateenimisv&otilde;imalustele&quot; mitte eriti suuri lootusi panna . m&otilde;ni aeg teenisin &uuml;hel lehel e-maile lugedes . l&auml;ks p&auml;ris t&uuml;kk aega ja l&otilde;puks sain kokku &tilde;30 dollarit . andsin siis m&auml;rku , et tahan raha v&auml;lja v&otilde;tta ja e-gold kontole kanda . selle peale sain teada , et pean raha ootama 4 kuud . <gap desc='image'> </s> </p>
+<p> <s> no j&auml;tsin siis m&otilde;neks ajaks asja k&otilde;rvale ja natuke v&auml;hem kui nelja kuu p&auml;rast hakkasin kord p&auml;evas seda lehte k&uuml;lastama , et j&auml;lgida , millal ma raha k&auml;tte saan . kui oodatud p&auml;ev k&auml;tte tuli , sain teate stiilis &quot;vabandame viivituse p&auml;rast , kanname raha &uuml;le v&otilde;imalikult kiiresti&quot; . paar p&auml;eva peale seda oli mu konto blokeeritud . rahast ei n&auml;inud haisugi . </s> </p>
+<p> <s> kui raha vaja , soovitan midagi muud v&auml;lja m&otilde;elda . kooli k&otilde;rvalt t&ouml;&ouml; hankida n&auml;iteks . </s> </p>
+ </sp> <sp> <speaker>Prax</speaker> 
+<p> <s> <hi rend='quote'> Jah . </hi> </s> <s> <hi rend='quote'> Paljud l&auml;hevad ohvriks sellel lehel sellega , et ei loe lauset Redeem only for ads . </hi> </s> <s> <hi rend='quote'> Muidu v&auml;ga head reklaami saab seal teha . </hi> </s> <s> <hi rend='quote'> Mina sain muidu 100&dollar; viie p&auml;evaga kokku . </hi> </s> </p>
+<p> <s> BAnnerid , mailid on k&otilde;ik 10 , 20 , 30 , 40 ja 50centi . </s> <s> BAnnereid soovitan vaadata iga 4-6tunni tagant . </s> <s> &Uuml;kskord tuli &uuml;le 40 banneri , kuigi k&auml;isin tund aega tagasi sees ja oli 0 . </s> <s> Paar paid2signupi tegin ka , 10dollarisi , mitte sendisi . </s> </p>
+ </sp> <sp> <speaker>innu5</speaker> 
+<p> <s> Aga kui palju on FF-is see protsent mis sa igap&auml;ev saad ? </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> kaua aega raha tavaliselt icegoldist e-goldi l&auml;heb ? </s> </p>
+ </sp> <sp> <speaker>Prax</speaker> 
+<p> <s> Niisiis asi selline et : </s> </p>
+<p> <s> Tuli uks kiire asi vahele ja avasin moneybookersis endale seal accoundi . </s> <s> M&auml;ngin Runescape ja seal myysin nagu asju teistele iniemstele p&auml;ris raha eest . </s> <s> Ja uks vend oli rikas ja ostis 20&dollar; eest <gap desc='image'> nii mul see raha moneybookersis kuda saan k&otilde;ige kindlamalt ja kiiremini selle k&auml;tte ? </s> <s> Ta muidugi kannab esmasp&auml;eval 30&dollar; veel nii et 50&dollar; vot see on ikka teenimine : d Ja FF-ist peaks 18m&auml;rtsil kah tulema 28&dollar; rsk ma varsti miljon&auml;&auml;r nii <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Kill inc. </speaker> 
+<p> <s> T&auml;pselt nii v&otilde;id mind msnis kah lisada saan seal abiks sul olla </s> </p>
+<p> <s> mSn =&gt; <hi rend='bold'>eestisilk&commat;ot . ee</hi> </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> <hi rend='quote'> Muide Foreign Fund kirjutab ( about us-i all ) et mingi 10&dollar; free when you open an account . </hi> </s> <s> <hi rend='quote'> Mina k&uuml;ll pole sellist raha saanud . </hi> </s> </p>
+<p> <s> <hi rend='quote'> ja mida see PENDING t&auml;hendab seal &quot;your bonus&quot; -se ees </hi> </s> </p>
+<p> <s> Seda 10&dollar; ( nagu ka sinu investeeritud raha ning referalitelt tulevat boonust ) ei saa sa kunagi k2tte . </s> <s> Olen ka t2itsa nuub sellel alal aga nii palju sain aru , et see 10&dollar; on raha , mille pealt intress tuleb . </s> </p>
+<p> <s> Panin ka prooviks 11&dollar; Foreign Fund'i . </s> <s> Sellele lisandus kohe 10&dollar; . </s> <s> Ehk siis kokku on mul seal 21&dollar; . </s> <s> Nyyd hakkab sellele iga p2ev 1 , 44% intressi lisanduma . 21&dollar; ennast enam k2tte ei saa . </s> <s> Ainult intressid kuuluvad mulle . </s> </p>
+<p> <s> Aga nuh , kui k8ik h2sti l2heb , peaksin enda 10&dollar;+ kuu aja p2rast k2tte saama . </s> </p>
+ </sp> <sp> <speaker>hannez</speaker> 
+<p> <s> kui aus olla siis see ei ole 5 prossa p&auml;evas vaid hoopis 1 , 7% ( ma ise kasutan seda aga pole veel raha mifagi v&auml;lja v&otilde;tnud ) tundub mulle , et see leht ei ole mingi scam . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> Keegi pole siis kasutanud moneybookersit <gap desc='image'> Mul seal esmasp&auml;eval 50&dollar; kuidagi peaks selle v&auml;lja v&otilde;tma <gap desc='image'> Olen kuulndu et saab kohe endale kanda ( hansasse ) </hi> </s> </p>
+<p> <s> Kui raha k2tte saad , siis r22gi l2hemalt . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> Tere liitusin uhe huvitava programmiga arvan <gap desc='image'> Ee tegemist on investeerimis kohaga . </hi> </s> <s> <hi rend='quote'> Nad maksavad sinu summast 4% see on &uuml;pris suur % minu arust . 1&dollar; on miinimum mis sa saad sinna sisse kanda . iga p&auml;eva l&otilde;pus kannavad nad selel intressi sinu e-goldi arvele . </hi> </s> <s> <hi rend='quote'> Paistab et asi t&ouml;&ouml;tab s&otilde;ber on 5 p&auml;eva enda raha k&auml;tte saanud . </hi> </s> <s> <hi rend='quote'> Saatsin ise kah sinan algul 1 , 1 &dollar; vaatab mis edasi saab . <gap desc='hyperlink'> &lt;-- siin see asub . </hi> </s> <s> <hi rend='quote'> Kui tahad liituda siis &uuml;levalt vali invest . </hi> </s> <s> <hi rend='quote'> Vaatad et ei pea kuskil registeerima . </hi> </s> <s> <hi rend='quote'> See ongi asja imelik kylg . </hi> </s> <s> <hi rend='quote'> Aga kui hakakd sinna raha kandma siis selel ajal nad v&otilde;ttavad sinu e-goldu numbri ja raha hakkab laekuma . </hi> </s> <s> <hi rend='quote'> Kui oled selle kohani j&otilde;udnud kus on e-goldi paroolide sisestamine siis seal &uuml;leval on lahter<hi rend='bold'>Memo : Ole hea lisa sinna minu e-goldi number siis ma saan mingi pisikese raha endale <gap desc='image'></hi></hi> </s> </p>
+<p> <s> <hi rend='quote'> <hi rend='bold'>Minu e-goldu number on : 1183668</hi> </hi> </s> </p>
+<p> <s> Ma kysisin endalt , et kus see Foreign Fund'i konks seisneb ? </s> <s> 1 , 44% p2evas ikkagi . <gap desc='image'> Krt , peab selle hyiprofits'i ka 2ra katsetama . </s> </p>
+<p> <s> Ja eks ma lisan siis sinu e-kulla aadressi ka kuskile , SilguQ . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> noh aga see leht mis on the 1 signatuuris on sama p&otilde;him&otilde;ttega aga s&auml;&auml;l saad 5% aga samas minimum deposit on 10&dollar; . </s> </p>
+ </sp> <sp> <speaker>Indre</speaker> 
+<p> <s> egold8 kannab ka iga p&auml;ev oma protsendi &uuml;le , kuid selleks on 1 , 6% vist . </s> <s> Igatahes , &dollar;5-est peaks homseks olema &dollar;1 k&auml;tte saadud olema . </s> <s> Aga seal saab ka sisse logida ja referraleid vaadata jne . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Raha teenimine internetis - 15. leht - Planet Foorumid </head>
+<sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> ise j&auml;in kah sealt ilma ! rahast aga mitte palju 1&dollar; <gap desc='image'></hi> </s> </p>
+<p> <s> <hi rend='quote'> ee see t&ouml;&ouml;tab veel ? palju seal % p&auml;evane on voi kuda nii palju ? </hi> </s> </p>
+<p> <s> 115% n&auml;dalas . </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> 115% n&auml;dalas . </hi> </s> </p>
+<p> <s> ee kuipraegu kannaks kas sisi huvitav saaks k&auml;tte ? </s> <s> Ja mis seal miinimum ? ! </s> </p>
+ </sp> <sp> <speaker>Prax</speaker> 
+<p> <s> <hi rend='quote'> ee kuipraegu kannaks kas sisi huvitav saaks k&auml;tte ? </hi> </s> <s> <hi rend='quote'> Ja mis seal miinimum ? ! </hi> </s> </p>
+<p> <s> 115% n2dalas on ju utoopiline </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> See raha sisaldab ka su algset investeeringut . <gap desc='image'> Kokkuv&otilde;ttes kasumit saad 15% </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> 15% n2dalas tundub kyll p2ris hea . </hi> </s> </p>
+<p> <s> <hi rend='quote'> Kuigi ma soovitan foreign fundi ja hyiprofits . comi . ( 4% p2evas aga praegu veel maksab <gap desc='image'> ) </hi> </s> </p>
+<p> <s> Foreign Fundi ma eriti ei soovitaks enam . </s> <s> Kuidagi kahtlaseks on asi minemas seal . </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> Eip , ma saan sealt oma non-compounded accoundilt raha iga kell k2tte . </hi> </s> <s> <hi rend='quote'> Kahtlane v6ibolla ta tundub sellep2rast , et ff kolib uude kohta ning sellega seoses on admidel seal palju t88d ning nad ei j6ua k6ike probleeme lahendada . <gap desc='hyperlink'> </hi> </s> </p>
+<p> <s> Ja sa usud k&otilde;ike , mis sulle r&auml;&auml;gitakse <gap desc='image'> </s> </p>
+<p> <s> Raha v&otilde;id sa sealt k&auml;tte saada iga kell . </s> <s> Ma ei v&auml;ida , et sa seda teha ei v&otilde;i ega saa . </s> <s> Aga kui sa paned sinna raha sisse , l&auml;heb sul non-compunded kontoga ikka &uuml;le kuu aega , et omadega plussi saada . </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> So what ? </hi> </s> <s> <hi rend='quote'> Ma olen sinna juba enda arust piisavalt suure summa pannud ( &dollar;100 ) ning ei kavatse sellest ilma j22da , parem panen sinna raha juurde , sest kui ff j22b kestma siis saab ikka korralikku kasu . ff ei ole lihtsalt HYIP . </hi> </s> <s> <hi rend='quote'> FF on PANK ! </hi> </s> </p>
+<p> <s> <hi rend='quote'> tegutsenud juba eelmise aasta juunist niiet ma ei kaota oma usaldust nende vastu . </hi> </s> </p>
+<p> <s> pank v&otilde;i mitte ... asi on ikka kahtlane . </s> </p>
+ </sp> <sp> <speaker>innu5</speaker> 
+<p> <s> innu5 aga sul see intress tiksus 0'i ju . </s> <s> See probla oli 1 teisel vennal ka aga fixiti 2ra ... </s> <s> Fredene oleks sul selle kindlalt korda teinud kui oleksid 6igesse kohta kirja saatnud . . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> PALUN ! seletage &auml;ra mis vahe on compunded ja non-compounded-il </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> Olen varem kah sellist jama kuulnud et juhtub nii aa si fixitakse &auml;ra <gap desc='image'> Palju v&auml;lja v&otilde;tsid sealt raha ? </hi> </s> </p>
+<p> <s> Praegu kysisin enda investeeritud raha tagasi . 11 . 10&amp;dollar ; mille nad pidid l&auml;hiajal &auml;ra saatma . </s> <s> Kui selle raha nyyd tagasi annavad siis sain 2xkasumi . </s> <s> Nyyd otsin usaldusv&auml;&auml;rset ja k&otilde;rge % invensteerimis firmat . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Ma ytlen , et enne bank launchi sa seda raha ei n2e . </s> </p>
+<p> <s> <hi rend='quote'> I wanted to let everybody know that the time has come and we will be launching the bank within the next 48 hours . </hi> </s> <s> <hi rend='quote'> All withdrawals and deposits will be disabled during this time . </hi> </s> <s> <hi rend='quote'> We want to make sure that you all know everything is going to be fine and the day has come to make that jump that we all have been waiting for and on behalf of foreign fund we would like to thank you very much for your patience and support throughout this transitional period that has been happening behind the scenes . </hi> </s> </p>
+<p> <s> <hi rend='quote'> Best regards </hi> </s> </p>
+<p> <s> <hi rend='quote'> Admin</hi> </s> </p>
+ </sp> <sp> <speaker>Janza</speaker> 
+<p> <s> 2ra uploadi bannerit , lingi ainult see vms . </s> <s> Noh , aint html , las pilt olla nende servus . </s> </p>
+ </sp> <sp> <speaker>marconi</speaker> 
+<p> <s> Ise olen kasutanud Foreign Fundi 2 kuud , mul on kantud kontole 280 USD . </s> <s> Olen teeninud p&otilde;him&otilde;tteliselt oma investeeritud osa tagasi . </s> <s> N&uuml;&uuml;d saatsin Foreignile kirja , et soovin oma investeeringu sealt v&auml;lja v&otilde;tta , asjaga tegeletakse ning peaksin n&uuml;&uuml;d l&auml;hip&auml;evadel oma investeeringu 100 % tagasi saama . </s> <s> Seega , olen teeninud Foreign Fundiga kasumit 100 % . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Raha teenimine internetis - 16. leht - Planet Foorumid </head>
+<sp> <speaker>hannez</speaker> 
+<p> <s> Tahtsin veel lisada , et sealt peaks saama invest raha ka tagasi . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='bold'>Srry et 2 posti j&auml;rjest</hi> </s> </p>
+<p> <s> Tere ! </s> <s> Raha himulised <gap desc='image'> Leidsin uhe v&otilde;imsa ja laheda asja <gap desc='image'> Nimelt tegemist on interneti Casinoga ! </s> <s> Miimimum summa on mis sinna saad kanda 0 , 1 grammi kulda see migni 1 . 3&amp;dollar ; endal oli kahjuks e-goldi konto 0 ja kandsins inna 4&dollar; ja mida ma n&auml;en t&auml;na tegin kah m&otilde;ned m&auml;ngud ja e-goldis on 10 . 3&amp;dollar ; woot woot D : Asi on seal nii et kui kanad raha on raha kohe seal casinos sul ja v&auml;lja tahad v&otilde;tta on kohe e-goldis et mingit ootamist ei ole . </s> <s> Ise m&auml;ngin seal blackjacki ja panen alg panuseks allati 0 . 02 ( miiimum ) ja nii muut kui l&auml;hen kui migni 3 v&otilde;i 4 korda j&auml;rjest kaotan v&otilde;tan rha v&auml;lja ! </s> <s> Kui sul migni 0 , 2 &dollar; k&auml;es v&otilde;tta k&otilde;ik v&auml;lja ja m&auml;ngi homme uuesti v&otilde;i &otilde;htu poole ! <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>Janza</speaker> 
+<p> <s> <hi rend='quote'> <hi rend='bold'>Srry et 2 posti j&auml;rjest</hi></hi> </s> </p>
+<p> <s> <hi rend='quote'> Tere ! </hi> </s> <s> <hi rend='quote'> Raha himulised <gap desc='image'> Leidsin uhe v&otilde;imsa ja laheda asja <gap desc='image'> Nimelt tegemist on interneti Casinoga ! </hi> </s> <s> <hi rend='quote'> Miimimum summa on mis sinna saad kanda 0 , 1 grammi kulda see migni 1 . 3&amp;dollar ; endal oli kahjuks e-goldi konto 0 ja kandsins inna 4&dollar; ja mida ma n&auml;en t&auml;na tegin kah m&otilde;ned m&auml;ngud ja e-goldis on 10 . 3&amp;dollar ; woot woot D : Asi on seal nii et kui kanad raha on raha kohe seal casinos sul ja v&auml;lja tahad v&otilde;tta on kohe e-goldis et mingit ootamist ei ole . </hi> </s> <s> <hi rend='quote'> Ise m&auml;ngin seal blackjacki ja panen alg panuseks allati 0 . 02 ( miiimum ) ja nii muut kui l&auml;hen kui migni 3 v&otilde;i 4 korda j&auml;rjest kaotan v&otilde;tan rha v&auml;lja ! </hi> </s> <s> <hi rend='quote'> Kui sul migni 0 , 2 &dollar; k&auml;es v&otilde;tta k&otilde;ik v&auml;lja ja m&auml;ngi homme uuesti v&otilde;i &otilde;htu poole ! <gap desc='hyperlink'> </hi> </s> </p>
+<p> <s> j&auml;in oma dollarist ilma <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> j&auml;in oma dollarist ilma <gap desc='image'> </hi> </s> </p>
+<p> <s> Heh see oli koba v&auml;rk mida sa m&auml;ngisid ja mis panustega ? </s> <s> Ei tea ise pole kunagi 0 langenud ja sa pead selle hetke kah ara tabama millal v&auml;lja v&otilde;ttad ! </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> Ehee , kas on m&otilde;tet &uuml;ldse 0 , 2 USDga <gap desc='hyperlink'> , siis esimeseks panuseks pane 2 , kui kaotad , pane 5 , j&auml;rjekordse kaotuse korral 11 jne , kui aga v&otilde;idad , alusta j&auml;lle 2'sest panusest . </s> <s> Panuste jada n&auml;eks siis v&auml;lja selline 2 5 11 23 47 95 . Ise pole ma &uuml;le 95 pidanud panustama , sest &uuml;kski kaotuste jada pole igavene . </s> <s> Nii , et lahedat m&auml;ngimist , postitage mulle , kuidas see strateegia Teie puhul toimib . </s> </p>
+<p> <s> Ah jaa , see m&auml;ngustrateegia n&otilde;uab p&auml;ris k&uuml;lma n&auml;rvi , kuid tulemus on positiivne . </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> Irw Clone . </s> <s> Hmm Sildude sa l&auml;ksid minu referrali alt muidu ? </s> <s> Kui jah siis huvitav see systeem neil ei t&ouml;&ouml;ta vist <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>marconi</speaker> 
+<p> <s> <hi rend='quote'> Irw Clone . </hi> </s> <s> <hi rend='quote'> Hmm Sildude sa l&auml;ksid minu referrali alt muidu ? </hi> </s> <s> <hi rend='quote'> Kui jah siis huvitav see systeem neil ei t&ouml;&ouml;ta vist <gap desc='image'> </hi> </s> </p>
+<p> <s> l&auml;ksin jah su referraliks ... huvitav miks ei t&ouml;&ouml;ta ? <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> hmm ma toppisin sinna ainult 0 . 1 grammi ... see on liiga v&auml;ike summa , et sulle sellest mingit protsenti maksta . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Selle refalilide boonuse maksmisega <gap desc='hyperlink'> on nii , et makstakse mitte koheselt , vaid paari p&auml;eva jooksul . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> sain min payouti <gap desc='hyperlink'> v&auml;ljamakse oli kohene vist mingi 2 minutit <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> palju said seal pappi ? kaua kogusid ? </hi> </s> </p>
+<p> <s> <hi rend='quote'> mini payout 0 , 01 <gap desc='image'> ma ei tea kui kaua ma kogusin point oli selles et ma liitusin selle programmiga l&auml;bi mingi p2s-i kaudu ja eriti ei ole s&uuml;venenud sellesse a tna vaatasin nagu et mis programm on lugesin 2 maili ja vajutasin mingile p2c-ile ja siis avastasin et ohoo minpayout ja v&otilde;tsin selle siis v&auml;lja ... nii et noh ehk minig 5mini ? </hi> </s> </p>
+<p> <s> p&auml;rast kusjuures avastasin et seal mingeid 7 sendiseid p2s-pe liitusin nendega ka &auml;ra varsti ehk uus payout <gap desc='image'> ( seal ei ole minuarvates nii et aint kord kuus saad payouti ) </s> </p>
+<p> <s> edit kell 12 . 37 </s> </p>
+<p> <s> nyyd j&auml;lle payout koos <gap desc='image'> nii et payouti saab n&otilde;uda nii tihti kui tahad <gap desc='image'> </s> </p>
+<p> <s> ma nyyd otan aint neid p2s boonuseid et siis saaks ehk veidi suurema summa <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>marconi</speaker> 
+<p> <s> <hi rend='quote'> Seda 10&dollar; ( nagu ka sinu investeeritud raha ning referalitelt tulevat boonust ) ei saa sa kunagi k2tte . </hi> </s> <s> <hi rend='quote'> Olen ka t2itsa nuub sellel alal aga nii palju sain aru , et see 10&dollar; on raha , mille pealt intress tuleb . </hi> </s> </p>
+<p> <s> Panin ka prooviks 11&dollar; Foreign Fund'i . </s> <s> Sellele lisandus kohe 10&dollar; . </s> <s> Ehk siis kokku on mul seal 21&dollar; . </s> <s> Nyyd hakkab sellele iga p2ev 1 , 44% intressi lisanduma . 21&dollar; ennast enam k2tte ei saa . </s> <s> Ainult intressid kuuluvad mulle . </s> </p>
+<p> <s> <hi rend='quote'> Aga nuh , kui k8ik h2sti l2heb , peaksin enda 10&dollar;+ kuu aja p2rast k2tte saama . </hi> </s> </p>
+<p> <s> Parandan ennast . </s> <s> Foreign-Fund'is saab invest . raha k2tte , kui konto sulged . </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> Sellise huvitava koha leidsin <gap desc='image'> </s> </p>
+<p> <s> Maksavad 9% p&auml;evas , 20 p&auml;eva jooksul . </s> <s> Seega saab 11 p&auml;evaga juba kasumisse . </s> </p>
+<p> <s> Samas , selline huvitav asi on seal lehel kirjas : </s> </p>
+<p> <s> Siiski , on see programm k&otilde;igest 3 p&auml;eva vanune ja ma ei usu , et ta n&uuml;&uuml;d juba esimese kuuga &auml;ra kaoks . </s> </p>
+<p> <s> Muide , esimese makse sain sealt t&auml;na k&auml;tte juba <gap desc='image'> Ja k&otilde;igest paar tundi tagasi investeerisin <gap desc='image'> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Raha teenimine internetis - 17. leht - Planet Foorumid </head>
+<sp> <speaker>Clone</speaker> 
+<p> <s> Niih , leidsin sellise koha : <gap desc='hyperlink'> </s> </p>
+<p> <s> Seal peaks saama 6% p&auml;evas ja on tegutsenud juba &uuml;le aasta , aga min deposiit on 10 eurot ( mida mul hetkel pole ) . </s> <s> Igatahes keda huvitab , siis regamiseks peab panema ka kelle kes referris , ehk siis 1068420 minu puhul ( vist ) . </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> Eks selles m&otilde;ttes on privaatne , et saad aint regada kui keegi referrib . </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> hmm kuulge ega kellegil pole sellist v&otilde;imalust . </s> <s> Et mul on nagu paypalis 33&dollar; et ma kanna selle raha sinu paypali ja sina kanand e-goldis minu kotnole 30&dollar; . </s> <s> Point selles saad 3&dollar; kasumit . <gap desc='image'> Loodan et saite mu m&otilde;test aru <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>bungle</speaker> 
+<p> <s> praegu teenin iga kuu natuke &uuml;le tonni ... </s> </p>
+ </sp> <sp> <speaker>bungle</speaker> 
+<p> <s> Ma teenin praeguse seisuga 1800 krooni kuus ja see raha j6uab mu rahakoti vahele kogu aeg . </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> hehee ... avastasin , et mu e-kulla kontole oli natuke raha tekkinud . v&auml;ga t&uuml;hine summa , midagi sellega eriti teha ei saa ( 0 . 14 vist ) . tavaliselt selliste asjadega ei tegele aga huvi p&auml;rast l&uuml;kkasin selle investeerimisprogrammi <gap desc='hyperlink'> . igatahes lubatakse , et investeering kasvab iga p&auml;ev 2% . mulle sobivaks omaduseks oli see , et minimaalne investeerimise summa on k&otilde;igest 0 . 1 dollarit . konks on muidugi see , et v&auml;lja v&otilde;tmiseks peab kontol olema v&auml;hemalt 1 dollar aga kui n&auml;iteks 1 dollar investeerida , peaks piirangud kohe kaduma . mul endal e-kulla kontol piisavalt raha pole et seda proovida kahjuks ... igatahes on asjal automaatne e-gold kontole v&auml;ljamaksmise s&uuml;steem . eks n&auml;is mis juhtub ... </s> </p>
+<p> <s> kui keegi suurema summaga proovib , andke siin ka teada . arvutasin v&auml;lja , et 0 . 1-&gt; 1 kasvamiseks pean umbes 3 kuud ootama <gap desc='image'> </s> </p>
+<p> <s> igatahes huvitav on , et reaalajas saab j&auml;lgida , kuidas su raha kasvab . teed refreshi lehele ja j&auml;lle natuke juures . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Lg . </s> <s> The1 ja SilguQ . </s> </p>
+<p> <s> Lisasin teid oma MSN- i listi ja loodan saada abi oma probleemiga . </s> </p>
+<p> <s> T&auml;nades Kill inc . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> m&otilde;tlesin et prooviks ka teenida raha netis aga mida peab selleks tegema ja kuidas see asi toimib ? ? </s> </p>
+<p> <s> lugedes seda teemat on siin palju erinevaid linke ja kohti kus teenida , kysimus siis : milline oleks neist k&otilde;ige m&otilde;tekam ? ? </s> </p>
+<p> <s> ja kuidas see raha teieni j&otilde;uab ? ? </s> </p>
+<p> <s> kaido . </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> registreerisin &auml;ra sinna e-gold . i ja siis veel Au 4 Click-i . </s> </p>
+<p> <s> mis nyyd ? ? </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> cash-i on &dollar;0 . 007 ja points-e 4 . 2 ja lasen niimoodi edasi jah ? ? </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> aga millal saab uusi linke klikkida ? ? seal mustade kastiseste ja punaste kastikestega lingid . </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> T&auml;pselt nii ! </s> <s> V&otilde;id ka teisi asju proovida . </s> <s> &Uuml;ks koht on veel hea ! </s> </p>
+<p> <s> ise olen teeninud seal 5 p&auml;evaga migni 41&dollar; w00t w0t0 <gap desc='image'> raha kannavad nad e-goldi liikemid on ka p&auml;ris palju ja paistab oelvat hea asi ! </s> </p>
+ </sp> <sp> <speaker>ozike</speaker> 
+<p> <s> kuidas seal see asi toimib ? ? regasin &auml;ra ja vaatan mis juhtub . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Raha teenimine internetis - 18. leht - Planet Foorumid </head>
+<sp> <speaker>innu5</speaker> 
+<p> <s> ei te paid2singup mitte kuskil need v&auml;ga m&otilde;tetud ! </s> </p>
+ </sp> <sp> <speaker>Janza</speaker> 
+<p> <s> mis tuleb teha 10to25 . com-mis et hakkaks tulema email-e ? ? </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> ma ei p&auml;&auml;se sinna lehelegi ja kui p&auml;&auml;sen , siis iga kliki j&auml;rel kysib parooli ja kasutajanime . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> ma ei saa teha ka paid2singup-pe ja paid2click-se sest seal on kirjas Sorry , no sites are available for you to sign-up for at this time ( paid2singup ) </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> regasin &auml;ra sinna , vaatan mis hakkab juhtuma . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Liitu ja soovita edasi &auml;kki v&otilde;dad refferal contestis ! </s> <s> T&auml;na vist alles avati 1&dollar; min payout ! <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>ozike</speaker> 
+<p> <s> icegold . ee'st saad raha e-goldi pealt enda pangakontole . </s> <s> Kui tahad n&auml;ha palju e-goldis raha on siis lihtsalt logi sisse <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>ozike</speaker> 
+<p> <s> hetkel sa ei saa midagi teha ! </s> <s> Neil seal praegu see olemine kuidagi v&auml;ga imelik ! </s> <s> Ff-bank . com leht on maas ja intrsse ei tule juurde jne <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> So what ? </hi> </s> <s> <hi rend='quote'> Ma olen sinna juba enda arust piisavalt suure summa pannud ( &dollar;100 ) ning ei kavatse sellest ilma j22da , parem panen sinna raha juurde , sest kui ff j22b kestma siis saab ikka korralikku kasu . ff ei ole lihtsalt HYIP . </hi> </s> <s> <hi rend='quote'> FF on PANK ! </hi> </s> </p>
+<p> <s> <hi rend='quote'> tegutsenud juba eelmise aasta juunist niiet ma ei kaota oma usaldust nende vastu . </hi> </s> </p>
+<p> <s> told ya so <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> ff'is asi seisab ... intresse ei kogune ... ff-bank . com on maas . </s> <s> E-mailidele ei vastata . </s> <s> Nad nagu rahaga p&otilde;genenud eksole . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Mina sain n&auml;iteks t&auml;na ff'ist kirja , paanikaks pole p&otilde;hjust , mulle lubati j&auml;rgmise n&auml;dala jooksul p&otilde;hisumma e-goldi kontole kanda . </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> Imelik , et &uuml;hendust pole siis SInuga v&otilde;etud , siiani on nad oma investorite eest ikka h&auml;sti hoolt kandnud ja minulgi pole midagi halba neile &ouml;elda . </s> </p>
+ </sp> <sp><speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> Imelik , et &uuml;hendust pole siis SInuga v&otilde;etud , siiani on nad oma investorite eest ikka h&auml;sti hoolt kandnud ja minulgi pole midagi halba neile &ouml;elda . </hi> </s> </p>
+<p> <s> Kuhu aadressile sa neile kirja saatsid ? </s> <s> Ma vist v6tan ka igaks juhuks raha v2lja ... hiljem panen tagasi kui ff-bank t88le hakkab ... </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Raha teenimine internetis - 19. leht - Planet Foorumid </head>
+<sp> <speaker>marconi</speaker> 
+<p> <s> mis te sellest lehest arvate ? ? <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> <hi rend='quote'> mis te sellest lehest arvate ? ? <gap desc='hyperlink'> </hi> </s> </p>
+<p> <s> loe eestpoolt ka , sellest on siin pikk jutt olnud . </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> ff'is praegu kuuldavasti muutatuste tegemine . </s> <s> Tegid mingi First-Bank'i ja saadavad nyyd raha sinna . </s> <s> Seet6tt6 ei lubata raha v2lja v6tta . </s> <s> Liiga riskantne kasutajatele . </s> <s> Aga samas investeerida lubavad kyll . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> hmm kui lasen accounti sulgeda kas saan selle raha kah v&auml;lja v&otilde;tta mis mul % hetkel kogunud on ? </hi> </s> <s> <hi rend='quote'> Kui jah siis hmm peaks v&auml;lja v&otilde;tma natukene panema hyprofitisse ja <gap desc='image'> </hi> </s> </p>
+<p> <s> ainult principal ... intresse ei saa tagasi <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>ozike</speaker> 
+<p> <s> makstakse 3% iga p&auml;ev ... minium summa investeerimiseks 10&dollar; . </s> <s> Tundub normaalne koht olevat . </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> maksab p&auml;evas 9% investeeringust 20 p&auml;eva j&auml;rjest . </s> <s> Miinimuminvesteering on &dollar;1 . </s> </p>
+<p> <s> Siiani olen sealt iga p&auml;ev saanud raha ja praegu saan iga p&auml;ev e-goldi ca &dollar;1 . 50 </s> </p>
+<p> <s> ( Saaks muidu 2 . 50 , aga krdi realhyip kuhu ma investeerisin l&auml;ks minema mu suure vaevaga teenitud rahaga <gap desc='image'> ) </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> <hi rend='quote'> Ma kasutan ka seda ddixtrustcapital . org . </hi> </s> <s> <hi rend='quote'> Panin 10&dollar; sinna aga alati tasub meeles pidada , et raha ei tohi kunagi panna ainult &uuml;hte kohta . </hi> </s> </p>
+<p> <s> Mul on raha hetkel neljas kohas <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Prax</speaker> 
+<p> <s> <hi rend='quote'> muide memoinvest on kadunud ( see programm mis mu allkirjas on ) </hi> </s> </p>
+<p> <s> See on juba kaua aega kadunud . </s> <s> &Otilde;nneks ma sinna midagi ei investeerinud <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> silgul kyll midagi juurde pole tulnud <gap desc='image'> ikka 13&dollar; seal eest n&auml;itab : S </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> nuh et teatud p&auml;evadega 13&dollar; kogunud mudiu peaks juba olema 30&dollar; arvan ! <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>ozike</speaker> 
+<p> <s> <hi rend='quote'> ma praegu tegelen ainult AYS-is . </hi> </s> </p>
+<p> <s> <hi rend='quote'> kas kohtades kus tuleb investeerida on m&otilde;tekam raha teeinida kui klikates ja/v&otilde;i maile lugedes ? ? </hi> </s> </p>
+<p> <s> Iga kell m&otilde;ttekam . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Viimane update : </s> </p>
+<p> <s> ATTENTION ALL INVESTORS </s> </p>
+<p> <s> Best regards </s> </p>
+<p> <s> admin </s> </p>
+<p> <s> R&otilde;hutan : </s> </p>
+<p> <s> <hi rend='bold'>The next few days are going to be life changing for a lot of people . </hi> &lt;-- Selles osas nad ehk ei valetagi ... <gap desc='image'> </s> </p>
+ </sp> <sp><speaker>Clone</speaker> 
+<p> <s> The1 sa oled liiga paranoiline . </s> <s> Minu arvamus foreign-fundist on alati heaks j&auml;&auml;nud , see on ju ainuke koht kus adminid aktiivselt ka inimesi aitavad ning edastavad informatsiooni kiiremini kui muudes programmides . </s> <s> FF'i usaldusv&auml;&auml;rsust n&auml;itab ka ju tema edukas ning &uuml;pris pikk tegutsemisaeg . </s> <s> Eks 48h p&auml;rast paistab , mis toimuma hakkab kuid mina arvan , et k&otilde;ik l&auml;heb h&auml;sti <gap desc='image'> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Raha teenimine internetis - 20. leht - Planet Foorumid </head>
+<sp> <speaker>sildude</speaker> 
+<p> <s> See on t6esti Foreign F hea kylg , et klientide eest hoolitsetakse . </s> </p>
+<p> <s> Aga nende kodulehed ajavad kyll natukene hirmu peale . </s> <s> Amat&ouml;&ouml;ride tehtud . </s> <s> Rohkem ei hakka kommenteerima . </s> </p>
+ </sp> <sp> <speaker>sildude</speaker> 
+<p> <s> vaatab , mis juhtub . </s> <s> Saatsin 3&dollar; . </s> </p>
+<p> <s> T6en2aoliselt kaob see koht sama kiirelt , kui tekkis . </s> </p>
+<p> <s> Kuid siiski riski v22rt . </s> </p>
+<p> <s> Ja mu e-gold on 1267172 . <gap desc='image'> Referige </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> Panin sinna venturecashi 5&dollar; . </s> <s> Selliste k&otilde;rgete intressidega programmidega ongi nii , et algul maksavad ning p&auml;rast kui inimesed suuremad summad panevad kaovad kuhugi &auml;ra . </s> <s> &Uuml;ks eestlane on ka sellise koha teinud ning hiljem kinni pannud vms . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> Nii avastasin &uuml;he normi lehe r&auml;&auml;kisn vennaga msnis ja tundub olevat aus ja norm inimene ise migni 23&lt; ... vana ! </hi> </s> <s> <hi rend='quote'> Niih soovitan liituda ja kuuluta edasi asi on ju alles uus ! </hi> </s> <s> <hi rend='quote'> Kui sa maksad selel 50 eeku &auml;ra sisi j&auml;rgmine kuu saad 25 eeku tagasi nii et &uuml;tleme liitumine 25 eeku <gap desc='image'> </hi> </s> </p>
+<p> <s> tundub , et cas . zum . ee's puuduvad hetkel reklaamid ( sponsorid ) . </s> <s> Pole veel m&otilde;tet liituda , kui reklmaamima ei hakka . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> <hi rend='quote'> no ega see ei loe kui sina saad l&auml;bi enda kasutaja saad sa 20 eeku nii et liitu minu kaudu ja tee midn &otilde;nnelikuks siis soovita mingile 10 edasi ja oled tugitooli raha koguja <gap desc='image'> </hi> </s> </p>
+<p> <s> <hi rend='quote'> ole &otilde;nnelik poisu <gap desc='image'></hi> </s> </p>
+<p> <s> Aa . . muidugi ... ma ei saanud s&uuml;steemist aru ... n&uuml;&uuml;d m&otilde;ikan </s> </p>
+ </sp> <sp> <speaker>Indre</speaker> 
+<p> <s> T&auml;nu SilguQ -le olen praegu juba kasumis . </s> <s> Investeerimine ruulib <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Silgu &auml;ra vingu eks , 48h pole t&auml;is . </s> <s> Seda ei pandud eesti aja j&auml;rgi vaid hoopis mingi usa aja j&auml;rgi niiet oota ! </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Enive , sitel seisab 30 m&auml;rts . </s> <s> Ega neil pole veel l&auml;bi 48 tundi . </s> <s> St meil vb oleks saanud 48 tundi l&auml;bi mingi kell 00 aga seal on teine aeg niiet ootame . </s> </p>
+ </sp> <sp> <speaker>Heimar</speaker> 
+<p> <s> <hi rend='quote'> minu arust saab k&uuml;ll 48 tundi t&auml;is alles 2 . aprillil , mitte esimesel </hi> </s> </p>
+<p> <s> just ... oota p&auml;ev veel <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Ma n&uuml;&uuml;d ei teagi , kas sellest firmast kuulsin siit , aga otsing tulemusi ei andnud nii et eeldan et keegi siin seda ei tea <gap desc='image'> Igatahes , avastasin et iga p&auml;ev tiksub e-goldi &dollar;0 . 27 , vaatasin e-goldist ja olin sinna investeerinud &dollar;3 ja siis vist tuleb 20 paymenti ( mul oli 10-es ) ja iga&uuml;ks 9% investeeritud summast ( 1 payment p&auml;evas vist ) . </s> </p>
+ </sp> <sp> <speaker>Clone</speaker> 
+<p> <s> On see usaldusv&auml;&auml;rne koht . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Indre</speaker> 
+<p> <s> Jah , oli suht &otilde;htu ja esimene post ei l&auml;inud sisse kuna forum logis mu v&auml;lja juba ja teise unustasin panna ... igatahes minu link <gap desc='image'> </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>

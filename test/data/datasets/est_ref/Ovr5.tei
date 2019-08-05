@@ -1,0 +1,142 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 4978; s&otilde;nu kokku: 474</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=gap occurs=4></tagusage>
+         <tagusage gi=p occurs=30></tagusage>
+         <tagusage gi=sp occurs=13></tagusage>
+         <tagusage gi=speaker occurs=13></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr5 </head>
+<div1 type='thread'> <head> trafic.pri.ee - Isiklik veeb - Planet Foorumid </head>
+<sp> <speaker>Trafic</speaker> 
+<p> <s> N&auml;&auml;h ... </s> <s> 3/10 </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> See kell omab rohkem kujunduslikku , kui praktilist eesm&auml;rki . </s> </p>
+ </sp> <sp> <speaker>Questo</speaker> 
+<p> <s> kell sobib sinna , linkide font v&otilde;iks nata v&auml;iksem olla aga see on ainult minu arvamus <gap desc='image'> esimese lehe kohta k&auml;ib k&uuml;ll . </s> </p>
+ </sp> <sp> <speaker>Gray-Bow</speaker> 
+<p> <s> kogu kupatuse teeks &uuml;ks 2-3x v&auml;iksemaks ja pildi keskele + ilusad raamid &uuml;mber . oleks k&otilde;vasti ilusam , aga noh mis seal ikka . </s> </p>
+ </sp> <sp> <speaker>Unipr0n</speaker> 
+<p> <s> Kas siis esimene leht mille praegu valmis said , v&otilde;i esimene t&auml;iesti valminud leht ? </s> </p>
+<p> <s> Kui esimene leht , siis on t&auml;itsa okay , men&uuml;&uuml; on j&otilde;le keeruline , disain on karjuv , simplicity felicity that is . . </s> </p>
+<p> <s> Kui see on sinug 32094 kodukas siis on ikka v&auml;ga kehv . </s> </p>
+ </sp> <sp> <speaker>atsa1</speaker> 
+<p> <s> Njah . </s> <s> Vb jah k&otilde;ige suurem viga oli see et liiga suurelt tegin . </s> <s> Ja n&uuml;&uuml;d saan aru ka miks - 1152*864 resolutsioonil ei tundugi nii suur . 1024*768-ga on olukord natukene teine . <gap desc='image'> </s> </p>
+<p> <s> Eks ma j&auml;rgmine kord &uuml;rita paremini siis ... </s> </p>
+ </sp> <sp> <speaker>rds567</speaker> 
+<p> <s> cannot find server blablablaa ... </s> </p>
+<p> <s> korras juba </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> SISU ! </s> <s> SISU ! </s> <s> SISU ! </s> </p>
+<p> <s> Avaleht peaks olema iga saidi k&otilde;ige olulisem leht , aga antud lehelt ma leian vaid - &uuml;llatus , &uuml;llatus - tervituse , ning uudised , mis mind absoluutselt ei huvita . </s> <s> Ka kujundus ei anna v&auml;himatki vihjet selles osas , mida ma sealt lehelt leida v&otilde;in . </s> <s> Ainuke , mis mulle silma torkab on sellised v&auml;ljendid nagu &quot;Welkamm&quot; ja &quot;Niih ... &quot; , mis langetavad koheselt minu lootusi selles osas , et ma v&otilde;iksin nimetatud lehek&uuml;ljelt mingit asjalikku infot leida . </s> </p>
+<p> <s> Alamleht &quot;Minust&quot; on t&uuml;&uuml;piline &quot;see lehek&uuml;lg pole veel valmis&quot;-leht . </s> <s> Kui lehek&uuml;lg pole valmis , siis ei peaks ta ka &uuml;leval olema . </s> </p>
+<p> <s> Luuletused ja muud materjalid avanevad t&auml;iesti uues aknas , millest ma ei p&auml;&auml;se back nupuga eelmisele lehele tagasi ; r&auml;&auml;kimata sellest , et rikutud on lehek&uuml;lje &uuml;htne navigatsioonis&uuml;steem . </s> </p>
+<p> <s> Kui luuletusi ma olen meelsasti n&otilde;us valima pealkirjade j&auml;rgi , siis igasuguse graafilise materjali puhul tahaksin ma n&auml;ha hoopis pisipildikesi . </s> </p>
+<p> <s> Kui selle kella asemele panna suur tekst &quot;See lehek&uuml;lg r&auml;&auml;gib minu <gap desc='hyperlink'> , siis oleks tehtud juba tubli samm &otilde;iges suunas . </s> </p>
+<p> <s> Olgu selle v&auml;limusega kuidas on , aga kui puudub huvipakkuv v&otilde;i v&auml;hemalt huvitavaks muudetud sisu , siis pole ka lehek&uuml;lg midagist v&auml;&auml;rt . </s> </p>
+ </sp> <sp> <speaker>Trafic</speaker> 
+<p> <s> mulle k&uuml;ll midagi lahti ei tulnud </s> ... . . . <s> milles jama ? ? ? ? </s> </p>
+ </sp> <sp> <speaker>Foorumlane . </speaker> 
+<p> <s> Jah , lehte pole enam kuna otsustasin hostingut veidi kasulikumal otstarbel kasutada , domeeninimi muutus samuti . </s> <s> Keda huvitab siis aadress on <gap desc='hyperlink'> , tegemist on rock/metal foorumiga ja trafic . pri-ga seost ei ole . </s> <s> P&auml;ris tutika alla seda lehte nimetada ei saa sest mina ainult muutsin selle foorumi template-i ( nii v&auml;limuse kui sisu poolest ) . </s> <s> V&otilde;ibolla tulevikus leiutan midagi uut aga praeguse hetkega trafic . pri . ee lehte t&otilde;esti pole . </s> </p>
+ </sp> <sp> <speaker>mati</speaker> 
+<p> <s> See leht on ju maas ! </s> </p>
+ </sp> <sp> <speaker>Trafic</speaker> 
+<p> <s> Server not found </s> </p>
+<p> * <s> Check the address for typing errors such as </s> </p>
+<p> * <s> If you are unable to load any pages , check your computer's network </s> </p>
+<p> <s> connection . </s> </p>
+<p> * <s> If your computer or network is protected by a firewall or proxy , make sure that Firefox is permitted to access the Web . </s> </p>
+<p> <s> Eeldasin et esimene postitus oli uuendatud . </s> </p>
+ </sp> <sp> <speaker>Trafic</speaker> 
+<p> <s> <hi rend='quote'> Server not found</hi> </s> </p>
+<p> <s> Firefox can't find the server at trafic . pri . ee . </s> <s> Issand k&uuml;ll . </s> <s> Lugege eelmisi postitusi . . </s> </p>
+<p> <s> Jah , lehte pole enam kuna otsustasin hostingut veidi kasulikumal otstarbel kasutada , domeeninimi muutus samuti . </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>
