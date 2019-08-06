@@ -15,7 +15,7 @@ import tarfile
 
 import sys
 from datetime import datetime
-from io import StringIO
+from io import BytesIO
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.utils.core import remove_duplicates
@@ -116,7 +116,7 @@ class DumpCmd(PimlicoCLISubcommand):
                 }, indent=4)
                 meta_info = tarfile.TarInfo("dump_metadata.json")
                 meta_info.size = len(dump_meta)
-                tarball.addfile(meta_info, StringIO(dump_meta))
+                tarball.addfile(meta_info, BytesIO(dump_meta.encode("utf-8")))
 
                 # Add the module's output directory to the tarball (recursively)
                 tarball.add(module_abs_output_dir, arcname=module_name)
