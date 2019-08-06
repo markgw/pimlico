@@ -672,10 +672,16 @@ class BaseModuleInfo(object):
 
         """
         input_setups = self.get_input_reader_setup(input_name=input_name, always_list=always_list)
+        if input_setups is None:
+            return None
         if type(input_setups) is list:
-            return [
-                setup.get_reader(self.pipeline, self.module_name) for setup in input_setups
+            readers = [
+                setup.get_reader(self.pipeline, self.module_name) for setup in input_setups if setup is not None
             ]
+            if len(readers) == 0:
+                return None
+            else:
+                return readers
         else:
             return input_setups.get_reader(self.pipeline, self.module_name)
 
