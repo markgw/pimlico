@@ -11,6 +11,7 @@ from pimlico.core.dependencies.python import PythonPackageOnPip, PythonPackageSy
 #: These will be checked when Pimlico is run, using the same dependency-checking mechanism that Pimlico modules
 #: use, and installed automatically if they're not found.
 CORE_PIMLICO_DEPENDENCIES = [
+    # We use the future library to provide Python 2-3 compatibility, but this has to be installed before we get this far
     # Without Pip, we can't install anything else, so we need that to be installed first
     PythonPackageSystemwideInstall("pip", "Pip"),
     # From Pip, you can make sure that Pip itself has a sufficiently high version
@@ -24,8 +25,6 @@ CORE_PIMLICO_DEPENDENCIES = [
     PythonPackageOnPip("termcolor", "termcolor"),
     PythonPackageOnPip("tabulate", "tabulate"),
     PythonPackageOnPip("progressbar", "Progressbar"),
-    # We use the future library to provide Python 2-3 compatibility
-    PythonPackageOnPip("future"),
     # Backport of CSV reading, so we can handle unicode in the same way on Py 2 and 3
     PythonPackageOnPip("backports.csv"),
 ]

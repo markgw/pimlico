@@ -7,6 +7,22 @@ existing, widely used NLP (Natural Language Processing) tools.
 from __future__ import print_function
 import os
 import sys
+import subprocess
+
+# Core dependencies will be checked when Pimlico is run and installed if necessary.
+# However, future is needed right away, before we can even start importing
+# the code to install the core deps, since that code needs to be Py2-3 compatible
+try:
+    import future
+except ImportError:
+    print("Future library is not installed: installing now")
+    # Call pip to install future
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'future'])
+    # Reload the environment, so we see the newly install package(s)
+    import site
+    from imp import reload
+    reload(site)
+
 from pimlico.core.dependencies.base import check_and_install
 from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
 
