@@ -10,8 +10,10 @@ import sys
 try:
     import virtualenv
 except ImportError:
-    print("Virtualenv must be installed to start using a Pimlico project")
-    print("See https://virtualenv.pypa.io/en/latest/ for details")
+    print("ERROR: Virtualenv must be installed to start using a Pimlico project.")
+    print("  Configuration script could not import virtualenv Python package.")
+    print("  Current Python interpreter: {}".format(sys.executable))
+    print("  See https://virtualenv.pypa.io/en/latest/ for details of Virtualenv installation")
     sys.exit(1)
 from virtualenv import create_environment
 
