@@ -12,6 +12,7 @@ import json
 import os
 from pimlico.core.dependencies.python import keras_dependency
 from pimlico.datatypes import PimlicoDatatype
+from pimlico.datatypes.base import DatatypeWriteError
 
 from pimlico.utils.core import import_member
 
@@ -131,14 +132,18 @@ class KerasModelBuilderClass(PimlicoDatatype):
     class Writer(object):
         required_tasks = ["architecture", "weights"]
 
-        def __init__(self, base_dir, build_params, builder_class_path, **kwargs):
-            super(Writer, self).__init__(base_dir, **kwargs)
+        def __init__(self, *args, **kwargs):
+            build_params = kwargs.pop("build_params", {})
+            if "builder_class_path" not in kwargs:
+                raise DatatypeWriteError("builder_class_path must be supplied for a Keras model builder class writer")
+            build_params["builder_class_path"] = kwargs.pop("builder_class_path")
+
+            super(KerasModelBuilderClass.Writer, self).__init__(*args, **kwargs)
             self.weights_filename = os.path.join(self.data_dir, "weights.hdf5")
-            build_params["builder_class_path"] = builder_class_path
             self.build_params = build_params
 
         def __enter__(self):
-            super(Writer, self).__enter__()
+            super(KerasModelBuilderClass.Writer, self).__enter__()
             # Store the model-building hyperparameters as JSON
             with open(os.path.join(self.data_dir, "build_params.json"), "w") as f:
                 json.dump(self.build_params, f, indent=4)
