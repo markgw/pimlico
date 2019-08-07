@@ -83,7 +83,7 @@ def process_document(worker, archive, filename, doc):
         # Call CoreNLP on the chunk (sentence, paragraph)
         try:
             json_result = worker.executor.corenlp.annotate(doc.encode("utf-8"), worker.executor.properties)
-        except CoreNLPProcessingError, e:
+        except CoreNLPProcessingError as e:
             # Error while processing the input from the document
             # Output an invalid document, with some error information
             return InvalidDocument(worker.info.module_name, "CoreNLP processing error: %s\n%s" %

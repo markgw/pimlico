@@ -16,6 +16,11 @@ See :doc:`/core/datatypes` for a guide to how Pimlico datatypes work.
 This module defines the base classes for all datatypes.
 
 """
+from builtins import next
+from builtins import zip
+from builtins import object
+from future.utils import with_metaclass
+
 import json
 import os
 import pickle
@@ -89,6 +94,13 @@ class PimlicoDatatypeMeta(type):
                 # Don't inherit the cached setup cls for this reader type, as we should recompute to do subtyping
                 if "_setup_cls" in my_dict:
                     del my_dict["_setup_cls"]
+                # Don't inherit the __dict__ and __weakref__ attributes
+                # These will be created on the new type as necessary
+                if "__dict__" in my_dict:
+                    del my_dict["__dict__"]
+                if "__weakref__" in my_dict:
+                    del my_dict["__weakref__"]
+
                 reader_cls = PimlicoDatatypeReaderMeta("Reader", (parent_reader,), my_dict)
             setattr(cls, _cache_name, reader_cls)
 
@@ -138,6 +150,13 @@ class PimlicoDatatypeMeta(type):
                             raise TypeError(
                                 "writer param defaults should be pairs of default values and documentation "
                                 "strings: invalid dictionary for {} writer".format(cls.datatype_name))
+
+                    # Don't inherit the __dict__ and __weakref__ attributes
+                    # These will be created on the new type as necessary
+                    if "__dict__" in new_cls_dict:
+                        del new_cls_dict["__dict__"]
+                    if "__weakref__" in new_cls_dict:
+                        del new_cls_dict["__weakref__"]
 
                 # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
                 writer_cls = type("Writer", (parent_writer,), new_cls_dict)
@@ -191,12 +210,19 @@ class PimlicoDatatypeReaderMeta(type):
             # Perform subclassing so that a new Setup is created that is a subclass of the parent's setup
             my_dict = dict(my_setup.__dict__)
             my_dict["reader_type"] = cls
+            # Don't inherit the __dict__ and __weakref__ attributes
+            # These will be created on the new type as necessary
+            if "__dict__" in my_dict:
+                del my_dict["__dict__"]
+            if "__weakref__" in my_dict:
+                del my_dict["__weakref__"]
+
             setup_cls = type("Setup", (parent_setup,), my_dict)
             setattr(cls, _cache_name, setup_cls)
         return getattr(cls, _cache_name)
 
 
-class PimlicoDatatype(object):
+class PimlicoDatatype(with_metaclass(PimlicoDatatypeMeta, object)):
     """
     The abstract superclass of all datatypes. Provides basic functionality for identifying where
     data should be stored and such.
@@ -212,7 +238,6 @@ class PimlicoDatatype(object):
     If you're **creating a new datatype**, refer to the :doc:`datatype documentation </core/datatypes>`.
 
     """
-    __metaclass__ = PimlicoDatatypeMeta
 
     datatype_name = "base_datatype"
     """ Identifier (without spaces) to distinguish this datatype """
@@ -241,19 +266,19 @@ class PimlicoDatatype(object):
                 raise DatatypeLoadError("unknown datatype option '{}' for {}".format(key, self.datatype_name))
         self.options = dict(kwargs)
         # Positional args can also be used to specify options, using the order in which the options are defined
-        for key, arg in zip(self.datatype_options.iterkeys(), args):
+        for key, arg in zip(self.datatype_options.keys(), args):
             if key in kwargs:
                 raise DatatypeLoadError("datatype option '{}' given by positional arg was also specified "
                                         "by a kwarg".format(key))
             self.options[key] = arg
 
         # Check any required options have been given
-        for opt_name, opt_dict in self.datatype_options.iteritems():
+        for opt_name, opt_dict in self.datatype_options.items():
             if opt_dict.get("required", False) and opt_name not in self.options:
                 raise DatatypeLoadError("{} datatype requires option '{}' to be specified".format(
                     self.datatype_name, opt_name))
         # Finally, set default options from the datatype options
-        for opt_name, opt_dict in self.datatype_options.iteritems():
+        for opt_name, opt_dict in self.datatype_options.items():
             if opt_name not in self.options:
                 self.options[opt_name] = opt_dict.get("default", None)
 
@@ -417,7 +442,7 @@ class PimlicoDatatype(object):
         """
         raise NotImplementedError("datatype {} does not provide a dataset browser".format(self.datatype_name))
 
-    class Reader:
+    class Reader(object):
         """
         The abstract superclass of all dataset readers.
 
@@ -460,7 +485,7 @@ class PimlicoDatatype(object):
             """
             return []
 
-        class Setup:
+        class Setup(object):
             """
             Abstract superclass of all dataset reader setup classes.
 
@@ -588,7 +613,7 @@ class PimlicoDatatype(object):
                     one is available.
                 """
                 try:
-                    return (path for (path, ready) in zip(self.data_paths, self._paths_ready) if ready).next()
+                    return next((path for (path, ready) in zip(self.data_paths, self._paths_ready) if ready))
                 except StopIteration:
                     raise DataNotReadyError("tried to get base dir from reader setup, but no path provides ready data")
 
@@ -679,7 +704,7 @@ class PimlicoDatatype(object):
         def __repr__(self):
             return "Reader({})".format(self.datatype.full_datatype_name())
 
-    class Writer:
+    class Writer(object):
         """
         The abstract superclass of all dataset writers.
 
@@ -760,7 +785,7 @@ class PimlicoDatatype(object):
             # Check here that metadata from kwargs is all JSON serializable, to avoid mysterious errors later
             try:
                 json.dumps(self.metadata)
-            except TypeError, e:
+            except TypeError as e:
                 raise DatatypeWriteError(
                     "metadata parameters passed to writer as kwargs must be JSON serializable: {}".format(e)
                 )

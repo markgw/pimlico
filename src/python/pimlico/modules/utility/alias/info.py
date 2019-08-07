@@ -39,19 +39,20 @@ filter module).
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
+   Add test pipeline
 
 """
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.old_datatypes.base import PimlicoDatatype, TypeFromInput
+from pimlico.datatypes import PimlicoDatatype
+from pimlico.datatypes.base import TypeFromInput
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "alias"
     module_readable_name = "Module output alias"
     module_executable = False
-    module_inputs = [("input", PimlicoDatatype)]
+    module_inputs = [("input", PimlicoDatatype())]
     module_outputs = [("output", TypeFromInput())]
 
     def instantiate_output_datatype(self, output_name, output_datatype):

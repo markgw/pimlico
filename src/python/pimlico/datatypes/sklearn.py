@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from builtins import object
 from pimlico.core.dependencies.python import sklearn_dependency
 from pimlico.datatypes import NamedFile
 
@@ -18,12 +19,12 @@ class SklearnModel(NamedFile):
     def get_software_dependencies(self):
         return super(SklearnModel, self).get_software_dependencies() + [sklearn_dependency]
 
-    class Reader:
+    class Reader(object):
         def load_model(self):
             from sklearn.externals import joblib
             return joblib.load(self.get_absolute_path("model.pkl"))
 
-    class Writer:
+    class Writer(object):
         def save_model(self, model):
             from sklearn.externals import joblib
             joblib.dump(model, self.get_absolute_path("model.pkl"))

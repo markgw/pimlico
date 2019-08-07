@@ -24,10 +24,12 @@ and the grouping will be preserved as the corpus passes through the pipeline.
    can use the ``store`` module.
 
 """
+from builtins import range
+from builtins import object
+
 import math
 
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.base import PimlicoDatatype
 from pimlico.datatypes.corpora import IterableCorpus
 from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
 
@@ -91,7 +93,7 @@ class CorpusGroupReader(IterableCorpus.Reader):
     producing a corresponding grouped corpus.
 
     """
-    class Setup:
+    class Setup(object):
         def __init__(self, datatype, input_reader_setup, options):
             self.options = options
             self.input_reader_setup = input_reader_setup

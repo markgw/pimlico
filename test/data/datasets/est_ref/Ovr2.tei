@@ -1,0 +1,131 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 4003; s&otilde;nu kokku: 355</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=gap occurs=10></tagusage>
+         <tagusage gi=p occurs=19></tagusage>
+         <tagusage gi=sp occurs=13></tagusage>
+         <tagusage gi=speaker occurs=13></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr2 </head>
+<div1 type='thread'> <head> Punker 412 - 3. leht - Planet Foorumid </head>
+<sp> <speaker>UkuS</speaker> 
+<p> <s> Seda ma arvasin ise kah , leht s&auml;&auml;stab nii kiiruse arvelt <gap desc='image'> </s> </p>
+<p> <s> Mul on juba mingi textilinkidega varjant tehtud , kuid seda veel ei n&auml;e , kuna m&otilde;ned rubriigid on veel tegemises ... </s> </p>
+ </sp> <sp> <speaker>SnoopDogg</speaker> 
+<p> <s> Nagu varem nuppude vahel v&otilde;iks ka siin olla linkide vahel v&auml;iksemad vahed . </s> <s> V&otilde;ib-olla m&otilde;ni image enne linki isegi ? <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>DigitalC</speaker> 
+<p> <s> Mulle ei meeldinud , et need men&uuml;&uuml;pealkirjad olid nii suured ja sellised nagu nad &uuml;ldse olid . </s> <s> Pange sinna k&otilde;ige tavalisemad nagu on game . zone-is . </s> <s> Muidu on kohe parem . </s> </p>
+ </sp> <sp> <speaker>SnoopDogg</speaker> 
+<p> <s> <hi rend='bold'>Pole nad midagi nii suured <gap desc='image'> No vaatan p&auml;rast , ehk teeme nad siis kicamax ! </hi> </s> </p>
+<p> <s> Muide UkuS , nendel linkidel polegi mingit t&uuml;hja rida vahel , dw lihtsalt tekitab nii suured vahed ! krt ... </s> </p>
+<p> <s> <hi>no proovin p&auml;rast mingi teise progrega siis ! </hi> Miks on imaged * . png formaadis ? </s> <s> Tuleks teha ikka gif failideks . </s> </p>
+<p> <s> Linkidel on vahed vahel , sest on kasutatud tage . </s> </p>
+ </sp> <sp> <speaker>SnoopDogg</speaker> 
+<p> <s> Vaatasin source'i ja &lt;p align=&quot; . . &quot;&gt; domineerib . . no mis see siis t&auml;hendama peaks ? </s> <s> Soovitan kogu html k&auml;sitsi kirjutada . . </s> </p>
+ </sp> <sp> <speaker>SnoopDogg</speaker> 
+<p> <s> Kurat k&uuml;ll , m&otilde;tlesin panna testimisex mingi foorumi , kuid tasuta foorumit ocima hakates , tuli t&otilde;deda , et eestikeelseid korralikke foorumeid peaaegu polegi , on ainult banneritega ingliskeelsed <gap desc='image'> ... </s> <s> Kas on m&otilde;tet inglisekeelset panna ? vist mitte </s> ... . <s> Ehk keegi oskab &ouml;elda m&otilde;ne aadressi , kust saax eestikeelset , v&otilde;i mingit , kus on lubatud see kogu kamm eesti keelde &uuml;mber kribada ? </s> </p>
+ </sp> <sp> <speaker>SnoopDogg</speaker> 
+<p> <s> ja kui veel midagi vaja , siis </s> </p>
+ </sp> <sp> <speaker>Vellotis P&auml;tt</speaker> 
+<p> <s> <hi rend='bold'>dw lihtsalt tekitab nii suured vahed ! </hi> mul ka sama mure - v&otilde;ibolla keegi &uuml;tleks kuidas dw-l saab seda vahe laiust muuta . </s> <s> Mul kodukal linkide osa n&auml;itab k&otilde;igi kolme brauseriga erinevalt , praegu on pandud nii , et n&auml;eks ie-ga korralikult aga netscape ja opera n&auml;itavad ikka t&auml;itsa puusse ja m&otilde;levad veel erinevalt ka <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Dexter</speaker> 
+<p> <s> Mul oli vahepeal &uuml;ks asi t&uuml;kk aega k&auml;sil &auml;ra teha , kuid n&uuml;&uuml;d sai see tehtud : Lisasin Desperadose tutvustusele ScreenShot-id ( netscaabakaga neid ei n&auml;e , need on iframe -i sees ) ja tegin seda sama lehte ka natuke maitsekamaks . <gap desc='image'> </s> </p>
+<p> <s> Ainuke mure tuleb sisse siis , kui vaadata Desp . lehte Netscapeiga . </s> <s> Kellel on Netscaabakas see vaadaku ja kui keegi oskab , siis &otilde;petagu kuidas selle lolli pulli korda saab ! </s> <s> See tekib siis , kui lisasin tabelid . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Vep</speaker> 
+<p> <s> <hi rend='bold'>sorry , segamini l&auml;x , neetud . . krt ... </hi> </s> </p>
+<p> <s> <hi>parandan &auml;ra , kohe ... </hi> snoopd , tsekka maili <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SnoopDogg</speaker> 
+<p> <s> hea ainult et Jo avatare ei ole n&auml;ha <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SnoopDogg</speaker> 
+<p> <s> korras <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Lendav lehm</speaker> 
+<p> <s> Minumeelest nendest kolmest versioonist k&otilde;ige parem . </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>

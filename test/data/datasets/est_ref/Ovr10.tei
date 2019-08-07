@@ -1,0 +1,980 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 92176; s&otilde;nu kokku: 8963</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=gap occurs=65></tagusage>
+         <tagusage gi=p occurs=596></tagusage>
+         <tagusage gi=sp occurs=247></tagusage>
+         <tagusage gi=speaker occurs=247></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr10 </head>
+<div1 type='thread'> <head> Millist arvutikomplekti osta ? - Planet Foorumid </head>
+<sp> <speaker>virtoos</speaker> 
+<p> <s> Esimese puhul on v&otilde;in omast kogemusest &ouml;elda , et Emaplaadi kohta pole siiamaani &uuml;htegi halba s&otilde;na . </s> <s> 2 . emaplaat pidi juttude j&auml;rgi kuradi kuumaks minema . </s> </p>
+ </sp> <sp> <speaker>virtoos</speaker> 
+<p> <s> on nii suured k&otilde;vakettad vajalikud ? nimeta hinnapiir , saaks ise midagi soovitada <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>mchund</speaker> 
+<p> <s> 15K eest saaksid sa arvuti kokku panna , kus on 8800 seeria kaart , 2gb ram , hea C2D prose , hea jahutus etc . </s> </p>
+<p> <s> Mine ja uuri HinnaVaatluse foorume , kui sa veel ostnud ei ole . </s> </p>
+ </sp> <sp> <speaker>WolfBlitz</speaker> 
+<p> <s> selle raha eest saakseid sellise kosmoselaeva et jubejube </s> </p>
+<p> <s> ning &uuml;laltoodud komplekte annab ka odavamalt kokku panna </s> </p>
+<p> <s> pk . eliit . com </s> </p>
+<p> <s> v&otilde;ta &uuml;hendust panen tellimuse peale kokku ja paigaldan ka tarkvara koos lisaseadmetega mida sa sellele k&uuml;lge tahad pookida </s> </p>
+<p> <s> loomulikult annan t&ouml;&ouml;le omapoolse garantii ja juppidele on vastavalt eesti seadusandlusele vist kaks aastat garantiid kui pole soodukas </s> </p>
+<p> <s> loomulikult on jupid uued </s> </p>
+ </sp> <sp> <speaker>Sass</speaker> 
+<p> <s> ei hakka siin &quot;tarka n&otilde;u&quot; andma , aga tegin teema kleebiseks , kuna neid k&uuml;simusi tuleb pidevalt . </s> <s> Arvuti valik peaks s&otilde;ltuma sellest , milleks sul seda arvutit vaja on , linnas&otilde;iduks keegi ferrari F1'e ei taha ja fiat puntoga keegi kiiruserekordeid p&uuml;&uuml;dma vast ei l&auml;he ... </s> </p>
+<p> <s> ps . neist komplektidest ei soovitaks &uuml;htegi ... </s> </p>
+ </sp> <sp> <speaker>Sass</speaker> 
+<p> <s> kui sa just vistat kasutama veel hakata ei taha graafika ning m&auml;ngimise jaoks l&auml;pparit ei taha siis saaksid hakkama ka 13 kiloga </s> </p>
+<p> <s> kas on m&otilde;tet panna pmst . autoraha magama sellep&auml;rast et osta c2d l&auml;ppar et tekstidokumente teha </s> </p>
+<p> <s> kaalu l&auml;bi vajadused ja siis otsusta sisu j&auml;rgi </s> </p>
+<p> <s> &auml;ra osta pavilioni sest usu mind r&otilde;&otilde;mu j&auml;tkub ainult garantiiajaks </s> </p>
+ </sp> <sp> <speaker>kurjam</speaker> 
+<p> <s> Tervitused . </s> </p>
+<p> <s> Kasutan siis valmisteemat . </s> </p>
+<p> <s> Soov j&auml;rgmine . </s> <s> Perekond vajab komplekti , kuhu kuuluks arvuti , kuvar , printer ( multifunktsionaalne ) , k&otilde;larid ja veebikaamera . </s> </p>
+<p> <s> Kasutatakse p&otilde;hiliseks netis kolamiseks , dokumendit&ouml;&ouml;tluseks , muusika kuulamiseks ja filmide vaatamiseks . </s> <s> M&auml;ngud on ka aeg ajalt p&auml;evakorras , kuid nii palju , kui mina tean , siis ei ole need v&auml;ga n&otilde;udlikud m&auml;ngud . </s> </p>
+<p> <s> Hea oleks , kui hinna sisse mahuks LCD kuvar , kuid kui ei , siis ajab ka tavaline kuvar asja &auml;ra . </s> </p>
+<p> <s> P&uuml;&uuml;an ka ise otsida , kuid ootan ka teie abi . </s> </p>
+<p> <s> Ette t&auml;nades , </s> </p>
+<p> <s> b </s> </p>
+<p> <s> edit : eelarve on 20 000 . - </s> </p>
+ </sp> <sp> <speaker>aavu</speaker> 
+<p> <s> le Blonde <gap desc='hyperlink'> okei ... teeme asja teistmoodi : </s> </p>
+<p> <s> Soovitage IBM/Lenovo , HP v&otilde;i Delli valikust s&uuml;learvuti , mille kaal j&auml;&auml;ks kuskil 2-2 , 7 kg kanti ja v&otilde;imalikult suure diagonaaliga ekraaniga ( selles kaalupiiris ) . </s> <s> N&auml;itajad v&otilde;iksid olla viisakad , aga ei pea olema tipp . </s> <s> Mingi aimu saab minu eelmisest postitusest . </s> <s> T&auml;nan ! </s> <s> Dell Latitude D630 </s> </p>
+<p> <s> Siiamaani pole &uuml;htki kobinat minu poolt . </s> <s> T&otilde;si , m&auml;ngida eriti ei saa , kui siis madalama graafikaga , kuna X3100 ei ole siiski m&auml;ngurile m&otilde;eldud . </s> </p>
+<p> <s> Aga muus osas v&auml;ga viisakas arvuti . 2 . 4kg vist oli , 14 . 1 tolline ekraan . </s> </p>
+<p> <s> Kahetuumalistest nii palju , k&otilde;ik uued arvutid tulevad C2D prosedega ja need on nobedamad , ka windowsi keskkonnas . </s> </p>
+ </sp> <sp> <speaker>Jackfore</speaker> 
+<p> <s> hahaahah ODAVAD PAKKUMISED TEIL SIIN haha . v&auml;ike vihje teile , seoses dollari langusega kerkib selline asi &uuml;lesse nagu <gap desc='hyperlink'> </s> </p>
+<p> <s> ise juba pikemaid aegu alienware produkte soetanud . </s> <s> Tulge sealt kapist n&uuml;&uuml;d v&auml;lja va vaadake mida maailm teile pakuda suudab </s> </p>
+ </sp> <sp> <speaker>Celos</speaker> 
+<p> <s> <hi rend='quote'> Kumb prose oleks parem : AMD Athlon 64 X2 Dual Core 6000+ v&otilde;i </hi> </s> </p>
+<p> <s> Intel Core 2 Duo E8400 ? </s> <s> N&auml;itajate j&auml;rgi nagu Intel , kuid mina ju ei tea . </s> <s> Ja kui on &ouml;eldud , et<hi rend='italic'>video 256 MB onboard + PCI-E 16x , </hi>kas see t&auml;hendab , et on integreeritud videokaart ja kui mul soovi on ostan sinna mingi muu kardi otsa , millel vastav siin ? </s> </p>
+ </sp> <sp> <speaker>mchund</speaker> 
+<p> <s> Kas 512MB GF 9600Gt on hea kaart ? </s> <s> Reviewde j&auml;rgi nagu oleks ja 3dmark06 pidavat olema 11-12k . </s> <s> Kuid kui ma seda soovisin , siis &ouml;eldi , et ei toodeta enam seda kaarti . </s> <s> Kuinii , siis miks ? </s> <s> Probleemne kaart ? </s> <s> Kui peaks probleemne olema , siis mida asemele soovitate , midagi sarnase v&otilde;imsusega ? </s> </p>
+ </sp> <sp> <speaker>koolondee</speaker> 
+<p> <s> Ma ei osta seda eraldi , palusin sellist &uuml;hte komplekti . </s> <s> V&auml;iksema m&auml;luga jah ei saa . </s> <s> Ma ei tea kui vana on vana , kart tuli v&auml;lja veebruaris . </s> <s> K&otilde;ige hullem ei tohiks olla . </s> <s> Eks n&auml;is , kui probleemne , siis lasen garantii abil &auml;ra vahetada . </s> </p>
+<p> <s> Ma ennem v&auml;ljendasin ennast valesti , kaarti saab k&uuml;ll , kuid kuna ( v&auml;idetavalt ) seda ei toodeta on n&uuml;&uuml;d komplekti ooteaeg 1-2 n&auml;dalat . </s> </p>
+ </sp> <sp> <speaker>tussu</speaker> 
+<p> <s> kas v&otilde;ib tegu olla &auml;kki sellega - </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Millist s&uuml;learvutit kasutad ? - Planet Foorumid </head>
+<sp> <speaker>Vilbiks</speaker> 
+<p> <s> dell inspiron 6400 </s> </p>
+<p> <s> +aku peab kaua ja j&otilde;udlust on </s> </p>
+<p> <s> -ainuke asi , mis mind t&otilde;siselt h&auml;irib on windows vista aga see mure on lahendatav . pisut raske on ta ka ( 2 , 8kg ) aga mitte nii raske , et h&auml;iriks . </s> </p>
+ </sp> <sp> <speaker>Shin Natsume</speaker> 
+<p> <s> Amilo Pa 1510 - <gap desc='hyperlink'> </s> </p>
+<p> <s> Vista maha ja XP peale , m&otilde;ned kuud olnud , siiamaani rahul . </s> </p>
+<p> <s> Edit : </s> </p>
+<p> <s> + Laiekraan </s> </p>
+<p> <s> + Peamiselt Vista masin ( Wi-Fi t&ouml;&ouml;lesaamisega oli probleeme -XP-ga ) </s> </p>
+<p> <s> + S-Video Out </s> </p>
+<p> <s> + Silent Mode </s> </p>
+<p> <s> - Natuke suur on </s> </p>
+<p> <s> - Ja nagu cashil , &otilde;ues ei saa hakkama . </s> </p>
+ </sp> <sp> <speaker>cash</speaker> 
+<p> <s> Muidu kasutan Dell Latitude 610 ( kui n&uuml;&uuml;d ei eksi ) ... </s> <s> 14 tolli ekraan ... muidu n&auml;eb kena v&auml;lja ja jooksutab asjad kenasti v&auml;lja , mida tarvis . </s> </p>
+<p> <s> Kusagil nurgas ka Acer Aspire 5010 , aga sellel mingi probleem , pole veel viitsinud j&auml;nnata . </s> </p>
+<p> <s> &Uuml;ldiselt kuna arvutiga pole enam ammu viitsinud m&auml;ngida , pigem kirjutan , kasutan netti , vahel vaatan filme jne , siis ajavad m&otilde;lemad kenasti asja &auml;ra <gap desc='image'> </s> </p>
+<p> <s> ( mingeid lisaconfe ei hakanud siia kirja panema , kuna midagi erilist neil arvutitel pole , &uuml;ldiselt puudub ka vastav huvi ) </s> </p>
+ </sp> <sp> <speaker>smashing</speaker> 
+<p> <s> . Osteti minu jaoks ilma mu endaga konsulteerimata , seega ei saanud optimaalsemat varianti valida . </s> <s> Kokku ehk aasta tagasi . </s> <s> Muust peale k&otilde;vakettaruumi minu jaoks puudu ei j&auml;&auml; . </s> </p>
+ </sp> <sp> <speaker>retes</speaker> 
+<p> <s> Praeguseks 3 . 5 aastat vana s&uuml;learvuti , ordist soetatud , pentium 4 1 . 5 ghz , 80 gb , 512 ram- ajab asja isegi praegu &uuml;sna kenasti &auml;ra , aku on pisut n&otilde;rgaks j&auml;&auml;nud , k&otilde;vaketas v&otilde;iks suurem olla , kuid k&otilde;ik vajaliku saab siiani tehtud . </s> </p>
+<p> <s> Katki on l&auml;inud siiani vist 3 korral , 2 korda pisiviga ja korra k&otilde;vaketas , n&uuml;&uuml;d on hetkel katki mingi BIOS-i probleemiga , mida V&otilde;rus parandada ei osatud . </s> <s> Esmasp&auml;eval Tartusse . </s> <s> Vana s&otilde;ber , teenib siiani h&auml;sti , loodetavasti teenib ka nii m&otilde;nedki tulevad aastad . </s> </p>
+ </sp> <sp> <speaker>bluelite</speaker> 
+<p> <s> ordi enduro </s> ... . . <s> ja numbreid </s> </p>
+<p> <s> aasta kasutanud , maksis 16 000 ( 12&quot; molu , sestap vist kallim nats ) </s> </p>
+<p> <s> +v&auml;ike ja mugav kasutada </s> </p>
+<p> <s> +vaikne </s> </p>
+<p> <s> +kui korra kuus puhastada ei l&auml;hegi kuumaks </s> </p>
+<p> <s> +v&auml;&auml;&auml;&auml;ga hea touchpadiga </s> </p>
+<p> <s> -korpus kriipub kergesti </s> </p>
+<p> <s> -see pagana clearlooks ekraan , &otilde;ues on n&auml;htavus nullil&auml;hedane </s> </p>
+<p> <s> -v&auml;ike aku </s> </p>
+<p> <s> samas sai ostetud just selleks , et reisu peal ok komandeeringus kasutada , riistvara paistab tugev olevat , siiani pole miskit purunend . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> IBM t43 </s> </p>
+<p> <s> laptopi s&uuml;non&uuml;&uuml;m </s> </p>
+ </sp> <sp> <speaker>twilightzone</speaker> 
+<p> <s> Mul on mingine Ordi Enduro v&auml;rk . </s> </p>
+<p> <s> Intel Pentium M 1 . 7 ( see centrino noh ) </s> </p>
+<p> <s> 1GB rammi </s> </p>
+<p> <s> 80 giga ketast </s> </p>
+<p> <s> Aasta saab kohe-kohe t&auml;is . </s> </p>
+<p> <s> Suht nummi masin , aku peab praegu veic &uuml;le kolme ja poole tunni vastu . </s> </p>
+<p> <s> Rahul olen . </s> </p>
+<p> <s> &lt;3 </s> </p>
+ </sp> <sp> <speaker>Aeternus</speaker> 
+<p> <s> hp pavillion dv6000 </s> </p>
+<p> <s> 1g rammi , 2 tuumaline amd , 120gb k&otilde;vakat , 15 , 4 &quot; , 256mb geforce 7200 , 1 . 3mpx kaamera , stereomikker , bluetooth , firewire , ir , pult , win xp mediacenter 2005 . </s> </p>
+<p> <s> j&otilde;udluse &uuml;le kurta ei saa , wifi kaart on suht vilets , korpus n&auml;eb stiilne v&auml;lja aga on suht n&otilde;rguke . aku vastupidavus on ca 3 tundi netis surfamist ja veits v&auml;hem kui samal ajal 50% vol&uuml;&uuml;miga winamp m&auml;ngib taustaks . Miinuseks tooks ka selle , et audio v&auml;ljav&otilde;tted on toodus arvuti ette , parem variant oleks vasakul v&otilde;i paremal k&uuml;ljel , kuna ees ta j&auml;&auml;b minu liikumisele ette ja on t&auml;nu sellele veits kannatada saanud juba . </s> <s> Ostetud 2006 aasta jaanuaris elionist , hind oli veits &uuml;le 18 kilo . </s> </p>
+<p> <s> hinde annaks sellele masinale : parem &auml;mber &uuml;le kui pits puudu , aga ikka j&auml;i puudu . </s> </p>
+ </sp> <sp> <speaker>dascan</speaker> 
+<p> <s> IBM t43 </s> </p>
+<p> <s> laptopi s&uuml;non&uuml;&uuml;m </s> </p>
+<p> <s> mul siis T43P </s> </p>
+<p> <s> m&otilde;eldud t&ouml;&ouml;tamiseks </s> </p>
+ </sp> <sp> <speaker>mar6o</speaker> 
+<p> <s> dell latitude c640 </s> </p>
+<p> <s> - vahel muutub l&auml;rmakaks . </s> </p>
+<p> <s> - kaasas polnud dvd&Zcaron;d kirjutavat seadet </s> </p>
+<p> <s> + akusid saab vajadusel kaks panna </s> </p>
+<p> <s> + odav , kui ma selle ostsin . </s> </p>
+ </sp> <sp> <speaker>Sass</speaker> 
+<p> <s> Dell D600 </s> </p>
+<p> <s> PM 1 , 3 Ghz , 768MB RAMi , 30GB HDD , R9000 Mobile 32MB , blabla </s> </p>
+<p> <s> igatahes korpus on maru juust , don't buy dell ! </s> </p>
+ </sp> <sp> <speaker>Fray</speaker> 
+<p> <s> dell d620 , korpus on suurep&auml;rane . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Millist s&uuml;learvutit kasutad ? - 2. leht - Planet Foorumid </head>
+<sp> <speaker>kath</speaker> 
+<p> <s> dell d620 , korpus on suurep&auml;rane . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>XeoX</speaker> 
+<p> <s> N&uuml;&uuml;d v&otilde;ib &ouml;lda , et vana Apple iBook G4ja annan emale , sest t&auml;na ostsin endale MacBook Pro . </s> <s> Hind oli 2499 dollarit . </s> <s> Hetkel ainuke negatiivne asi on see , et sellel on USA klaviatuur ja korpus muutub k&otilde;vasti kuumemaks , kui vanal arutil . </s> <s> Pimedas helendavad klahvid on j&auml;llegi superseksikad . </s> </p>
+ </sp> <sp> <speaker>tomweb</speaker> 
+<p> -+ <s> IMBi enda tarkvara jms , mis eriti ei &otilde;igusta ennast . </s> <s> &Otilde;nneks saab muuga &uuml;le lasta . </s> <s> Windowsi all pole nad eriti pingutanud . </s> <s> Ainult see power managment service on vajalik . </s> <s> Trackpointi oma ka . </s> <s> Linuxi all on kuidagi paremini kokku pandud . </s> <s> Samas , teadagi millele IBM/Lenovo panustab . </s> <s> Win-i klahv tuli alles Lenovo all ( t&otilde;si , &uuml;hel IBM mudelil oli t&otilde;esti ka Win klahv ) . </s> <s> Windowsi all kasutan vaid &uuml;hte dll'i kogu sellest kremplist : </s> </p>
+<p> <s> <hi rend='quote'> start rundll32 &quot;C : \ Program Files \ ThinkPad \ Utilities \ BATINFEX . DLL&amp;quot ; , DisplayBattInfo</hi> </s> </p>
+<p> <s> Rohkem pole vaja . </s> <s> N&auml;eb &auml;ra mitu ts&uuml;klit akul j&auml;rel etc . </s> </p>
+ </sp> <sp> <speaker>kath</speaker> 
+<p> <s> Ja saigi &auml;ra ostetud <gap desc='hyperlink'> -esialgu rahul . </s> </p>
+<p> <s> H&auml;irib vaid jahutus mis teatud intervallidega ennast m&auml;rku annab ( aga see kindlasti nn . odavate l&auml;pakate viga ) . </s> </p>
+<p> <s> Ja miski p&auml;rast ei saa teksti suurust muuta . V&otilde;i l&auml;pakatel mingi oma nipp ? </s> </p>
+ </sp> <sp> <speaker>geenius</speaker> 
+<p> <s> MacBook white 2 . 0GHz Intel Core 2 Duo/ 1GB/ 80GB/ Combo/ BT/ AE </s> </p>
+ </sp> <sp> <speaker>Taavi[esT ] </speaker> 
+<p> <s> Olaf , sa oskad selle MacBooki kohta &uuml;ht-teist &ouml;elda ? </s> <s> Olen kaalunud ise kah , seda varianti . </s> <s> Mis mul suurt ikka &ouml;elda , mina olen selles suhtes ainult positiivselt meelestatud . </s> </p>
+<p> <s> Sellise raha eest on teda k&uuml;ll ja k&uuml;ll . </s> <s> Lisaks on OS X v&auml;ga m&otilde;nus . </s> </p>
+<p> <s> Esimene n&auml;dal , kus teda kasutasin , olin veel veidi kahevahel ja seda siis m&otilde;ttes : &quot;Kurat , kas ikka tasus ennast &auml;ra ! ? &quot; . </s> </p>
+<p> <s> Kuid peale esimest n&auml;dalat harjusin OS X'iga nii &auml;ra , et Windowsi peale tagasi kolida ei taha kindlasti . </s> <s> V&auml;limuselt on ta siis ilus , nagu Apple toodang ikka . </s> <s> V&otilde;imsust on tal minu jaoks k&uuml;llaga , aku peab v&auml;ga h&auml;sti vastu ja muud asjad on ka viis pluss . </s> </p>
+<p> <s> Ainuke miinus on ehk see , et kui midagi suuremat teha ja raal s&uuml;les on , siis l&auml;heb ta p&auml;ris kuumaks ikka . </s> <s> Aga ka selle probleemi saab lahendada lihtsa softi jupiga . </s> </p>
+<p> <s> Ei , mina olen temaga kokkuv&otilde;ttes v&auml;ga rahul . </s> <s> Kui praegu oled seisus , &quot;v&otilde;tta v&otilde;i mitte ? &quot; . . Siis minu soovitus oleks kindlasti , et v&otilde;ta &auml;ra ! </s> </p>
+ </sp> <sp> <speaker>Jackfore</speaker> 
+<p> <s> Mul uus Dell XPS 1330 </s> </p>
+<p> <s> V&auml;ga kiire masin , kuna 2 , 2 GHz Core Duo ja 7200 RPM ketas 200GB . </s> <s> HV foorumis on Nucearus Multicore testi TOP-1 s&uuml;lekate osas . </s> </p>
+<p> <s> Vaata : <gap desc='hyperlink'> valetad . sa oled siin , et reklaami teha . </s> </p>
+ </sp> <sp> <speaker>Aeternus</speaker> 
+<p> <s> aga ma kasutan ka s&uuml;learvutit . pics soon ! <gap desc='image'> </s> </p>
+<p> <s> keiti , mis vanast arvutist sai ? </s> </p>
+ </sp> <sp> <speaker>Aeternus</speaker> 
+<p> <s> n&auml;h , selline arvuti : ( </s> </p>
+<p> <s> titt nuppe alla ei neela w ? </s> </p>
+<p> <s> aga m&auml;lu korjasid ka &auml;ra ? ning k&uuml;llap saab sealt muudki toredat nokkida . </s> </p>
+<p> <s> p&auml;rast keegi tehnikaime ehitab mingi </s> ... . <s> <hi rend='bold'>maeitea ! ! ! </hi> , mikseri vms . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>YOU</speaker> 
+<p> <s> rohkem pole eluks vaja . </s> <s> Teeb k&otilde;ik ja on suuteline ka enamaks . </s> <s> R&auml;&auml;kimata sellest , et n&auml;eb kuradi ilus kah v&auml;lja </s> </p>
+ </sp> <sp> <speaker>Garfu</speaker> 
+<p> <s> valetad . sa oled siin , et reklaami teha . </s> <s> K&otilde;va s&uuml;&uuml;distus ! </s> <s> Teadmiseks , et mu Dell XPS 1330 sa CES 2008-l aasta parima s&uuml;leka tiitli ... </s> </p>
+ </sp> <sp> <speaker>kaos</speaker> 
+<p> <s> Hm . </s> </p>
+<p> <s> Dell Vostro 1500 </s> </p>
+<p> <s> 15&quot; ( 1200x800 ) </s> </p>
+<p> <s> Intel Core 2 Duo 2 . 0Ghz </s> </p>
+<p> <s> 2048Mb RAM ( DDR2 ) </s> </p>
+<p> <s> nVidia 8600M GT ( 512mb ) ( Overclocked ) </s> </p>
+<p> <s> 160Gb HDD ( 5400RPM ) </s> </p>
+<p> <s> Win XP Pro </s> </p>
+<p> <s> Alumiinium korpus . </s> </p>
+<p> <s> 2Mpx webcam . </s> </p>
+<p> <s> 4 . 5h aku ( Undervoltides saab kuni 6h ) </s> </p>
+<p> <s> M&auml;ngib Crysist k&otilde;ik settingud HIGH peal ( peale Shaderite ja AA v&auml;ljaj&auml;ttes , FPS on 23&tilde;40 ) </s> </p>
+<p> <s> Kaalub 2 . 6kg </s> </p>
+ </sp> <sp> <speaker>pappalardo</speaker> 
+<p> <s> IBM Thinkpad R40e </s> </p>
+<p> <s> m&otilde;nus kiire protsessor ( 2003 aasta kohta ) , miinuseks on v&auml;ike RAM : / </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Linuxipedede pl&auml;mateema - Planet Foorumid </head>
+<sp> <speaker>sonicyouth</speaker> 
+<p> <s> Oot-oot , contrast . </s> <s> Hm , uurin kohe j&auml;rgi . </s> </p>
+ </sp> <sp> <speaker>sonicyouth</speaker> 
+<p> <s> Kubuntul mingit lihtsat wifi teemat ei ole , et teha lapakast access point v&otilde;i ad-hoc nagu nad seda nimetavad . </s> <s> Lihtsalt vaja kahe kasti vahel andmeid vedada ja l&auml;bi wifi-ruuteri on 500 kb/sec . </s> <s> Aeglane v&auml;rk ja ruuterile lauaarvutit l&auml;hemale kah ei suuda tirida . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> Wifi enam v&auml;ga pull polegi , enamik Linuxeid saavad ( v&auml;hemalt levinumate kaartide puhul ) juba installides wifi t&ouml;&ouml;le . </s> <s> Puuduseks j&auml;&auml;b enamusel WPA , mida wpasupplicant'iga mina pole stabiilselt t&ouml;&ouml;le suutnud saada <gap desc='image'> . </s> </p>
+<p> <s> Erandiks on ainult PCLinuxOS ( mida ka praegu kasutan ) , millel WPA t&ouml;&ouml;tas m&auml;letamist m&ouml;&ouml;da juba Live Bootiga . </s> <s> Ning t&otilde;mmates &uuml;he paki sain ka Bluetoothi kaudu GPRSi &auml;&auml;retult lihtsalt funkama . </s> <s> Ei mingit command lineis jamamist . </s> </p>
+<p> <s> M&otilde;ne kuu jooksul on olnud paar t&otilde;rkumist k&uuml;ll wifiga , kus olen pidanud kaardi maha laskma control centerist ja p&auml;rast restarti uuesti lisama , siis hakkas funkama . </s> </p>
+ </sp> <sp> <speaker>peekaa</speaker> 
+<p> <s> Mul t&ouml;&ouml;tas <hi rend='italic'>Debian Sid</hi>i all wpa kuniks NetworkManager deemon peale sai pandud . </s> </p>
+<p> <s> Ei ole viitsinud m&uuml;rada tollega rohkem . </s> </p>
+<p> <s> Ubuntu kasutab sama ning seal t&ouml;&ouml;tab perfektselt . </s> </p>
+<p> <s> Hetkel ootan Fluxbuntu finaali . </s> </p>
+<p> <s> Oli mingi teine KDE vihvihaldur , mis oskas ad-hoci teha . </s> <s> Ei meenu . </s> </p>
+<p> <s> <hi rend='italic'> apt-cache search wifi</hi><hi rend='bold'> v&otilde;i </hi><hi rend='italic'>wireless</hi> </s> </p>
+ </sp> <sp> <speaker>Indre</speaker> 
+<p> <s> kesse ikka WPA'd kasutada tahaks vabatahtlikult : D </s> </p>
+ </sp> <sp> <speaker>atihimself</speaker> 
+<p> <s> kesse ikka WPA'd kasutada tahaks vabatahtlikult : D Ei saanud naljast aru . </s> </p>
+<p> <s> wpa &gt; wep , ju . </s> </p>
+ </sp> <sp> <speaker>Ebichu</speaker> 
+<p> <s> Because apt-get is too easy ? </s> </p>
+ </sp> <sp> <speaker>Ebichu</speaker> 
+<p> <s> no paberil on jah wpa &gt; wep . aga kui n&uuml;&uuml;d praktiliselt m&otilde;elda siis olgem ausad , enamus tavakasutaja ruutrid l&auml;hevad WPA peale lolliks - &uuml;le paari wifikliendi kes natuke liiklust ka tekitavad , ja t&uuml;&uuml;p on nii koomas et ei suuda uusi tcp &uuml;hendusi luua . </s> </p>
+<p> <s> ja maitea , v&otilde;ibolla on asi minus aga pole kunagi olnud tarvis WPA'ga piiratud vihvit kasutada . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> jep . turvalisem on ta kindlasti . iseasi kui oluline see on , et noh , vaevalt et sa ikka mingit riigisaladust &uuml;le vihvi ketrad . </s> </p>
+<p> <s> ja kusjuures see elioni speedtouch on &uuml;llatavalt tubli t&otilde;esti . </s> </p>
+<p> <s> origiaal tarkvaraga linksysile teeb &auml;ra , imho . </s> </p>
+<p> <s> Binary file /dev/urandom matches </s> </p>
+<p> <s> real 52m35 . 561s </s> </p>
+<p> <s> user 0m10 . 756s </s> </p>
+<p> <s> sys 51m18 . 439s </s> </p>
+<p> <s> b&ouml;&ouml; igav on </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> noh eks ta ole , parem karta kui kahetseda . </s> </p>
+<p> <s> samas ilmselge overkill , minumeelest . </s> </p>
+<p> <s> kui keegi tahab , teeb ta WPA samamoodi lahti . kui keegi t&otilde;esti tahab , siis saab vajaliku info ISP k&auml;est ka k&auml;tte . </s> </p>
+<p> <s> ma ei tee otseselt wpa'd maha , samuti ei laida sinu turvaparanoiat , lihtsalt iseasi kui v&auml;ga otstarbekas see kepp on . </s> </p>
+<p> <s> jajah ma saan aru et vpn'i serveri tegemine pole eriline kepp ja vpn'i tunneli p&uuml;sti t&otilde;mbamine pole ka eriline kepp jne , prolly ongi 'mingi tegevus' ja v&auml;hemalt enda jaoks p&otilde;nev ehitada ja konffida ja vaadata et midagi hapuks ei l&auml;he . </s> </p>
+<p> <s> samamoodi poleks mul vaja ehitada l&auml;pakale softimirrorit USB kettale , lihtsam oleks kord n&auml;dalas mingi dvd t&auml;htsate asjadega k&otilde;rvetada . </s> </p>
+<p> <s> bottom line on et seda h&uuml;per turvalisust otseselt VAJA ei ole . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> okei enuff , kogu see teema on absoluudselt personaalne ja t&auml;iesti maitseasi . olles isiklikult n&auml;inud mismoodi need asjad k&auml;ia v&otilde;ivad , ei viitsi enam v&otilde;rgu &uuml;leturvamisega vaeva n&auml;ha . </s> </p>
+<p> <s> linuxipedede teema siiski . v&otilde;i tegelt vist on rohkem ubuntupedede ja debianipedede teema . </s> </p>
+<p> <s> ma otsin urandomist v&auml;rkki edasi n&uuml;&uuml;d . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> Ma tean , et sulle see m&otilde;te ei meeldi , ning et sa oled selle soovitamise eest mulle juba nega laksinud , aga kui Gentoo ja binaarid m&otilde;lemad nii s&uuml;damel&auml;hedased on , annad ehk Archile uue v&otilde;imaluse ? <gap desc='image'> </s> </p>
+<p> <s> <hi rend='bold'>Arch vs Debian</hi> </s> </p>
+ </sp> <sp> <speaker>sonicyouth</speaker> 
+<p> <s> Tead mina ei oska siin reklaamimehe t&ouml;&ouml;d Gentoole teha . </s> </p>
+<p> <s> Alustan siin Gentoo teemat &uuml;he hoiatusega t&ouml;&ouml;kindluse koha pealt : vahel juhtub , et &uuml;ks v&otilde;i teine teek saab versiooni uuenduse 1 . x -&gt; 2 . x mis toob kaasa ABI muutumise . </s> <s> See t&auml;hendab , et binaarikud , mis on 1 . x vastu kokku lastud ei l&auml;he enam t&ouml;&ouml;le , sest need on vaja uue teegi versiooni vastu kokku lasta . </s> <s> Nii ... </s> <s> Oletame , et see teek on kasutuses ENAMUSTES graafilistes jublakates ( n&auml;iteks libexpat v&otilde;i libpng ) . </s> <s> Kui selline asi juhtub , siis on 4 v&otilde;imalust : </s> </p>
+<p> <s> a ) sa ei uuenda &uuml;ldse oma s&uuml;steemi , sest mis t&ouml;&ouml;tab see t&ouml;&ouml;tab ja &auml;ra surgi . </s> <s> See l&auml;henemine on kaunikesti igav , sest ei saa ju m&ouml;llata ja oma liinuksis&uuml;steemiga no-lifeda ... </s> </p>
+<p> <s> b ) teine l&auml;henemine n&otilde;uab teadlikust , et mida t&auml;pselt uuendatakse ja see aitab teada , et kuna oodata sellist suuremat sorti jama . </s> <s> See annab aega valida , kunas selline uuendus ette v&otilde;tta . </s> </p>
+<p> <s> c ) teha julmalt uuendus &auml;ra ja p&auml;rast probleem kasv&otilde;i ajutiselt s&uuml;mlinkidega lahendada ... </s> <s> Tavaliselt on binaar lingitud teegi s&uuml;mlingi vastu ja see s&uuml;mlingi laiend t&auml;hendab versiooni : </s> </p>
+<p> <s> <hi rend='italic'>lrwxrwxrwx 1 root root 17 16 . okt 15 : 06 /usr/lib/libexpat . so -&gt; libexpat . so . 1 . 5 . 2</hi> </s> </p>
+<p> <s> lrwxrwxrwx 1 root root 17 16 . okt 15 : 06 /usr/lib/libexpat . so . 1 -&gt; libexpat . so . 1 . 5 . 2 </s> </p>
+<p> <s> -rwxr-xr-x 1 root root 128300 16 . okt 15 : 06 /usr/lib/libexpat . so . 1 . 5 . 2 </s> </p>
+<p> <s> tavaliselt lingivad programmid ennast . so . </s> <s> ( versioon ) vastu ... kui versioon muutub 0 . x -&gt; 1 . x siis kaob &auml;ra s&uuml;mlink . so . 0 ja asendatakse . </s> <s> so . 1-ga . V&otilde;ib luua s&uuml;mlingi . so . 0 mis lingib siiski so . 1 . 5 . 2 vastu . </s> <s> See on aga paha paha h&auml;kk , sest v&otilde;ib tuua kaasa igat sorti ebastabiilsust jne ... </s> <s> Samas annab ta ajutise &quot;t&ouml;&ouml;tava&quot; s&uuml;steemi ja annab aega probleemist taastumiseks </s> </p>
+<p> <s> d ) sa lihtsalt ei sulge enam problemaatilisi programme ja loodad k&otilde;ik probleemid enne nende tekkimist &auml;ra lahendada . </s> </p>
+<p> <s> Mis moodi probleeme lahendada ... </s> <s> Tasub tsekkida forums . gentoo . orgi ja sealt otsida --&gt; v&auml;ga t&otilde;en&auml;oliselt pole sa esimene , kes selle jama otsa satub . </s> <s> Vihjeks siis , et programm revdep-rebuild pakist app-portage/gentoolkit tegeleb katkiste binaarikutega . </s> </p>
+<p> <s> Selliseid jamasid juhtub v&auml;ga harva . </s> <s> See aasta on juhtunud kaks korda ja m&otilde;lemad on puudutanud graafilisi programme -- libexpati 1 . x ja libpng 2 . x l&auml;ksid stablesse . </s> <s> Ajaliselt suht &uuml;ksteise j&auml;rgi ... </s> </p>
+<p> <s> A mis on tore ? </s> <s> Tore on see , et unstablesse j&otilde;uavad uued pakid suhteliselt kiiresti . </s> <s> Ja alati on olemas bugs . gentoo . org , kuhu pannakse uusi ebuilde nii et kiirustajad saavad nad portage overlaysse ( /usr/local/portage ) alla paigutada ja uusi pakke testida/kasutada -- j&auml;&auml;b &auml;ra ise k&auml;sitsi kompileerimise vaev , mis toob kaasa palju ripakil faile s&uuml;steemis . </s> </p>
+<p> <s> Kompileerida on l&otilde;bus . </s> <s> Eks ma kunaski j&auml;tkan , kui uusi m&otilde;tteid tuleb . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Millist s&uuml;learvutit kasutad ? - 3. leht - Planet Foorumid </head>
+<sp> <speaker>zuks</speaker> 
+<p> <s> IBM X40 </s> </p>
+<p> <s> V&auml;ike ja lahe on - 12 , 1 tolli . </s> <s> Kerge , umbes 1 , 3 kg . </s> <s> Aku peab &tilde;4 h . </s> </p>
+<p> <s> 1 , 2 GHz Ultra Low Voltage Intel Mobile Pentium M </s> </p>
+<p> <s> 512MB memory </s> </p>
+<p> <s> 40GB HDD </s> </p>
+<p> <s> Miinuseks ehk see , et arvutil endal CD-seadet pole , tuleb dock k&uuml;lge panna . </s> <s> Seda juhul , kui kodust eemal viibida ja viimast kaasas pole . </s> <s> Muidu on igati okei . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> n&uuml;&uuml;d v&otilde;in ka siin teemas kaasa r&auml;&auml;kida . </s> </p>
+<p> <s> Macbook 13 , 3 &quot; white </s> </p>
+<p> <s> k&otilde;igega siiani rahul . </s> </p>
+ </sp> <sp> <speaker>novar</speaker> 
+<p> <s> Dell Latitude D630 ( WXGA+ puudub , muidu conf sama mis <gap desc='hyperlink'> ) , v&auml;ga hea arvuti . </s> <s> Julgen soovitada . </s> </p>
+ </sp> <sp> <speaker>lecter</speaker> 
+<p> <s> <hi rend='bold'>Asus Eee PC 4G</hi> </s> </p>
+<p> <s> + Pisike </s> </p>
+<p> <s> + Tugev </s> </p>
+<p> <s> + Odav </s> </p>
+<p> <s> + <hi rend='italic'>Out-of-box</hi> Linux </s> </p>
+<p> <s> <hi rend='bold'>Gateway 6510GZ</hi> </s> </p>
+<p> <s> + Teeb oma t&ouml;&ouml; &auml;ra </s> </p>
+<p> <s> - &Otilde;huke ja logisev plastik . </s> </p>
+<p> <s> - Et Linuxis &otilde;ige resolutsiooni saaks , peab 915inteli peale panema , mis teeb juustu kaardi veel aeglasemaks . </s> </p>
+ </sp> <sp> <speaker>Samoosa</speaker> 
+<p> <s> Genuine Intel ( R ) CPU T2400 &commat; 1 . 83GHz , 1G m&auml;lu , 120G k&otilde;vakat , ATI Mobility Radeon X1600 . </s> </p>
+<p> <s> Paar aastat juba teeninud . </s> <s> Umbes aasta tagasi l&auml;bis uppumissurma . </s> <s> Remont oli kulukas aga v&auml;hemalt t&ouml;&ouml;le sai ... </s> <s> Cd-seade jupsib n&uuml;&uuml;d sellest ajast . </s> <s> Muidu vinks-vonks riistapuu . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Genuine Intel ( R ) CPU T2400 &commat; 1 . 83GHz , 1G m&auml;lu , 120G k&otilde;vakat , ATI Mobility Radeon X1600 . </s> </p>
+<p> <s> Paar aastat juba teeninud . </s> <s> Umbes aasta tagasi l&auml;bis uppumissurma . </s> <s> Remont oli kulukas aga v&auml;hemalt t&ouml;&ouml;le sai ... </s> <s> Cd-seade jupsib n&uuml;&uuml;d sellest ajast . </s> <s> Muidu vinks-vonks riistapuu . </s> </p>
+<p> <s> sama l&auml;ptop aga k&auml;is j&auml;lle remondis . </s> <s> Peale remonti ainult 60G k&otilde;vakas <gap desc='image'> . remondi maksumus 4100 . - ( uus k&otilde;vaketas , xp pro litsents , t&ouml;&ouml; maksumus ) . </s> <s> K&otilde;ik remondisummad kokku &tilde;12000 . - ehk julgelt &uuml;le poole algsest ostusummast ... </s> </p>
+ </sp> <sp> <speaker>Forss</speaker> 
+<p> <s> <hi rend='bold'>Samsung R410</hi> </s> </p>
+<p> <s> Intel Core Duo T2390 1 . 8GHz </s> </p>
+<p> <s> 2048MB DDR2 </s> </p>
+<p> <s> 200GB 5400RPM </s> </p>
+<p> <s> ATI Radeon X1250 ( kuni 512MB ) </s> </p>
+<p> <s> 14 . 1'' 1280x800 WXGA Glare </s> </p>
+<p> <s> DVD-kirjutaja ( Dual Layer ) </s> </p>
+<p> <s> 3 . 5h 6-elemdiga 4000mAh </s> </p>
+<p> <s> 2 . 4kg </s> </p>
+<p> <s> 3x USB , v&otilde;rgukaart 10/100/1000 , Wifi , Bluetooth , modem , VGA v&auml;ljund , 1 , 3 MP veebikaamera , sisseehitatud mikrofon , k&otilde;larid , mikrofoni pesa , ExpressCard 34 pesa , SD/MMC/MS m&auml;lukaardilugeja . </s> </p>
+<p> <s> Hinna kohta ( allahindlusega 8990 . - ) &uuml;pris soliidne arvuti . </s> <s> Korpus on must ja l&auml;ikiv nagu Pavilioni seerial , seest hall . </s> <s> Vaikne , mitte liiga raske . </s> <s> Kaasas oli isegi lapp korpuse s&otilde;rmej&auml;lgedest puhastamiseks ning kaks plaati , &uuml;hel neist Vista ja teisel programm , mis lubab peale panna k&otilde;ikv&otilde;imalikku vajalikku tarkvara , n&auml;iteks p&auml;rast <hi rend='italic'>format</hi>it . </s> <s> Aku v&otilde;iks pisut kauem vastu pidada ( keskmise eredusega 2 , 5 h ) ja n&auml;htavus &otilde;ues on minimaalne , aga muidu olen k&uuml;ll igati rahul ... </s> </p>
+ </sp> <sp> <speaker>zimm</speaker> 
+<p> <s> IBM Thinkpad Z60m </s> </p>
+<p> <s> + laiekraan ( seega ka k&otilde;larid m&otilde;istlikus kohas ) . ekraanil hea kvaliteet . </s> </p>
+<p> <s> + korpus - tugev . ilus must ja kandliline ka ( meeldib see 80ndate videomakidisain , noh ) </s> </p>
+<p> <s> + v&auml;ga vaikne </s> </p>
+<p> <s> + k&otilde;ik mulle vajalikud augud ja asjad olemas - firewire , dvd kirjutaja/lugeja jms . </s> </p>
+<p> <s> - kaal ( tegelikult keskmise l&auml;paka kaal , aga v&otilde;iks kergem olla ) </s> </p>
+<p> <s> - aku , mis algul pidas kyll ligi 4h vastu , aga n&uuml;&uuml;d tuleks v&auml;lja vahetada . </s> <s> Siin olen ma ise s&uuml;&uuml;di . </s> </p>
+<p> -+ <s> IMBi enda tarkvara jms , mis eriti ei &otilde;igusta ennast . </s> <s> &Otilde;nneks saab muuga &uuml;le lasta . </s> </p>
+<p> <s> Ostetud u poolteist aastat tagasi . </s> <s> Ei plaani veel vahetust . korralik t&ouml;&ouml;loom on . </s> <s> Suht t&auml;pselt sama peaksin mainima . </s> </p>
+<p> <s> Ei kahetse ega plaani l&auml;hiajal uut soetada . </s> </p>
+ </sp> <sp> <speaker>kath</speaker> 
+<p> <s> <hi rend='bold'>Compal HEL80 : </hi> </s> </p>
+<p> <s> Intel Core 2 Duo T5500 2M 1 , 6 Ghz </s> </p>
+<p> <s> 2048MB DDR2 667MHz </s> </p>
+<p> <s> 160GB 5400RPM </s> </p>
+<p> <s> nVidia GeForce 7600 256MB &commat; 460/440 ( default 350/350 ) </s> </p>
+<p> <s> 15 , 4 &quot; 1680 x 1050 WSXGA+ </s> </p>
+<p> <s> DVD+-RW DL </s> </p>
+<p> <s> V&otilde;imas ning kiire nii protsessori kui graafika poolest . </s> <s> Kaart on h&auml;sti clockitav , t&ouml;&ouml;tab imeh&auml;sti ning stabiilselt ilma t&otilde;rgeteta . 15 . 4&amp;quot ; widescreen koos 1680x1050 resolutsiooniga tagab suure t&ouml;&ouml;laua ning tohutu mugavuse photoshopis kui ka mujal programmides . </s> </p>
+<p> <s> Miinuseid on kah m&otilde;ni , n&auml;iteks , et FN nupp on ctrl nupu positsiooniga vahetuses ... aga sellega harjusin kiiresti . </s> </p>
+ </sp> <sp> <speaker>DR.t</speaker> 
+<p> <s> Dell Vostro 1500 </s> </p>
+<p> <s> core 2 duo T9300 ( 2 . 5 ghz , 6m l2 cache ) </s> </p>
+<p> <s> 2gb ddr2 ram </s> </p>
+<p> <s> 160gb 7200rpm hdd </s> </p>
+<p> <s> nvidia geforce 8600m gt ( 512mb ) </s> </p>
+<p> <s> + ilus ( imho ) </s> </p>
+<p> <s> + esipaneelil olev &quot;helipult&quot; ( vol/lugude vahetus/play/pause/stop jms ) on m&otilde;nusalt mugav </s> </p>
+<p> <s> + m&otilde;nusalt v&otilde;imekas </s> </p>
+<p> <s> + tugev korpus </s> </p>
+<p> <s> - minu isiklikul isendil on ekraan maru h&auml;sti peegeldav ( v&otilde;iks matt olla ) </s> </p>
+<p> <s> 15 . 4'' kohta eriti v&auml;iksem olla ei saa ja kaal on kah t&auml;iesti okei . </s> <s> Lisaks sain kaasa ka 5a garantiid ( mida ma loodan , et kunagi vaja ei l&auml;he ) . </s> </p>
+ </sp> <sp> <speaker>Mattias</speaker> 
+<p> <s> Endal on ca . </s> <s> 2 . 5 aastane Fujitsu Siemens . </s> <s> 1 . 6 GHz Celeroni protsessor , 512 RAM , 60gb K&otilde;vaketas ( l&auml;heb vahetusse ) , wifi jms nagu arvuti ikka . </s> <s> Olen sellega v&auml;ga rahul . </s> <s> Imestan , et siin teemas &uuml;ldse Fujitsudest v&auml;he r&auml;&auml;gitakse . </s> <s> Kas on siis halva kvaliteediga ? </s> <s> Siiani pole &uuml;htegi halba s&otilde;na &ouml;elda peale selle , et on Celeroni prosega . . </s> </p>
+ </sp> <sp> <speaker>Kyioshi</speaker> 
+<p> <s> ASUS Eee PC 901 </s> </p>
+ </sp> <sp> <speaker>f0rc3</speaker> 
+<p> <s> IBM T43 </s> </p>
+<p> <s> V&auml;ga soliidse v&auml;limusega . </s> <s> Ei l&auml;igi ega s&auml;dele . </s> <s> Ideaalne t&ouml;&ouml;arvuti , ent sobib kenasti ka WoWiks . </s> <s> Kerge ja t&auml;nu uuele akule , vastupidav . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Soovitage s&uuml;learvutit - 3. leht - Planet Foorumid </head>
+<sp> <speaker>matude</speaker> 
+<p> <s> VAIOD , ei pea vastu ? </s> <s> Vot ei tea , see v&auml;ide on minule k&uuml;ll v&otilde;&otilde;ras . </s> <s> Pole sellist asja varem kuulnud . </s> <s> &Uuml;ks on kindel v&auml;hemalt , VAIO koosneb 100% &uuml;ksteisega &uuml;hilduvatest komponentidest . </s> </p>
+<p> <s> Kallid on kah raisad kuid kui aus olla , siis mina ostaksin omale kindlalt VAIO kui vaid raha oleks arvuti peale niipalju raisata . </s> <s> S&otilde;bral on VAIO , see ikka loksumist ja p&otilde;rutamist k&otilde;vasti saanud - siiamaani t&ouml;&ouml;tab ilma t&otilde;rgeteta . </s> </p>
+ </sp> <sp> <speaker>Tribal Hero</speaker> 
+<p> <s> Soovitage l&auml;pakat n&uuml;&uuml;d . </s> </p>
+<p> <s> Raha kulutaks sellele &tilde;13 000 . - </s> </p>
+<p> <s> Ekraani suurus 14 . 1&amp;quot ; ( tegelt ma ei tea kui suur vahe 15 . 4&amp;quot ; ga on ) </s> </p>
+<p> <s> Kaal v&otilde;iks 2 . 5kg juurde j&auml;&auml;da , kergem muidugi parem </s> </p>
+<p> <s> Ilma tarkvarata oleks ideaalne , kui ei siis vahet pole kas XP v&otilde;i Vista </s> </p>
+<p> <s> Graafikakaart pole oluline , sest ei m&auml;ngi ikka . </s> </p>
+<p> <s> Hetlel on silma j&auml;&auml;nud : </s> </p>
+<p> <s> Ei ole &uuml;ldse s&uuml;learvutitega kursis , nii et soovitage midagi . </s> </p>
+ </sp> <sp> <speaker>kath</speaker> 
+<p> <s> Ekraani suurus 14 . 1&amp;quot ; ( tegelt ma ei tea kui suur vahe 15 . 4&amp;quot ; ga on ) Mul oli enne 15 , 4 &quot; , tundus v&auml;ga paras . </s> <s> N&uuml;&uuml;d on 14 , 1 &quot; , tundub v&auml;ga paras . </s> <s> Kui hetkel 15 , 4 -tollisega v&otilde;rdlen , tundub viimane visuaalselt m&otilde;ttetult suur . </s> <s> Ja kaal on ka omakorda suurem . </s> <s> ( Eks ta oleneb konkreetsest mudelist , kuid enne oli mul 2 , 9 -kilone , n&uuml;&uuml;d aga 2 , 3 -kilone arvuti . ) </s> </p>
+ </sp> <sp> <speaker>DoGGy</speaker> 
+<p> <s> ma julgen seda delli soovitada . muidugi , mine poodi ja katsu n&auml;pu vahel ka , kuis on . p&otilde;rsast kotis ei tasu osta . </s> <s> Kuressaares pole vist neid vostrosid kuskil : / </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> forss , a telli . </s> </p>
+ </sp> <sp> <speaker>Forss</speaker> 
+<p> <s> ah , kurat . ma ka ei tea . ega sa kogu aeg seal saarel ka ei k&uuml;kita . m&otilde;nikord mandrile satud , k&auml;id poes . v&otilde;i on sul v&auml;ga kiire selle asjaga ? </s> </p>
+<p> <s> &uuml;htlasi loe mingeid arvustusi netist . saab suht normaalse pildi . </s> </p>
+ </sp> <sp> <speaker>Tribal Hero</speaker> 
+<p> <s> okei t&auml;nud </s> </p>
+<p> <s> tellin siis j&auml;rgmine n&auml;dal flexist selle vostro 1400 &auml;ra . </s> </p>
+ </sp> <sp> <speaker>klimbermann</speaker> 
+<p> <s> ehkki mina leian selle olevat v&otilde;rdlemisi ilusa . </s> <s> Jajah , mulle varem IBM oma robustsuse t&otilde;ttu ei meeldinud , ent n&uuml;&uuml;d on endal <gap desc='hyperlink'> ja see on t&otilde;eline kaunitar . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>kath</speaker> 
+<p> <s> eks me vist avaldasime veidi survet ka . </s> <s> Kahtlemata . </s> <s> Ma enne Lenovot tahtsin ka Dell Vostrot . </s> <s> Pole k&auml;ega katsunud , seega ei tea , millest ilma j&auml;in , ent oma Lenovoga olen v&auml;ga rahul . </s> </p>
+<p> <s> Kui v&auml;limusest l&auml;htuda , siis &uuml;tlen ainult seda , et &auml;ra h&otilde;bedast arvutit osta , see kulub ja l&auml;heb koledaks . </s> </p>
+ </sp> <sp> <speaker>DoGGy</speaker> 
+<p> <s> K&uuml;simus : </s> </p>
+<p> <s> Kas 24 500 krooni eest on v&otilde;imalik saada paremat l&auml;ptoppi kui see ? </s> </p>
+<p> <s> 17&quot; WideWGA ekraan 1440x900 reso </s> </p>
+<p> <s> Intel Core 2 Duo T7200 2 . 0GHZ 4MB L2 667mhz FSB </s> </p>
+<p> <s> Dual SLI GeForce 8700M GT 512MB ( kokku siis 1GB ) </s> </p>
+<p> <s> 4GB DDR2 667 mhz RAM </s> </p>
+<p> <s> 120GB 5400rpm HDD Sata HDD </s> </p>
+<p> <s> 8x Dual Layer DVD writer </s> </p>
+<p> <s> 24-bit High-Definition audio 5 . 1 surround ( sisse ehitatud kaart ) </s> </p>
+<p> <s> Internal Intel&reg; PRO Wireless 3945 a/b/g Mini-Card </s> </p>
+<p> <s> Bluetooth 2 . 0 </s> </p>
+<p> <s> Alienware m9750 . </s> </p>
+ </sp> <sp> <speaker>l8tka</speaker> 
+<p> <s> osta macbook , sest see t&ouml;&ouml;tab ... h&ouml;h&ouml;&ouml; </s> </p>
+ </sp> <sp> <speaker>retes</speaker> 
+<p> <s> Mehed , ma ei tea ... </s> <s> 16 kiloga saab 20 tollise iMaci . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Soovitage s&uuml;learvutit - 4. leht - Planet Foorumid </head>
+<sp> <speaker>retes</speaker> 
+<p> <s> Lihtsalt mainin <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Forss</speaker> 
+<p> <s> Hetkel pinnale j&auml;&auml;nud need kaks : </s> </p>
+<p> <s> Andke palun n&otilde;u ja/v&otilde;i soovitage midagi muud u samast hinnaklassist . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> Osta MacBook . </s> </p>
+<p> <s> milleks ? </s> </p>
+ </sp> <sp> <speaker>zuks</speaker> 
+<p> <s> milleks ? </s> <s> Sest see on nii nunnnnu <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Disasterpiece</speaker> 
+<p> <s> Oleks ka abi vaja , ehk millist j&auml;rgnevatest osta ? </s> </p>
+ </sp> <sp> <speaker>circles</speaker> 
+<p> <s> Sellest valikust R61 word </s> </p>
+ </sp> <sp> <speaker>ParisDiamondEva</speaker> 
+<p> <s> Acerit &auml;ra osta . </s> <s> Aga , mida sa selle graafikaga teed ? </s> <s> Kui m&auml;nge ei m&auml;ngi , siis pole oluline ju . </s> <s> Pealegi , osta l&auml;pakat , millel on peal videokaart nii v&otilde;imas , et uuemad m&auml;ngud ilma mureta jooksevad ... idiootsus . </s> <s> Osta parem lauaarvuti , saad v&otilde;imsama . </s> <s> L&auml;pakas on siiski millekski muuks m&otilde;eldud . </s> <s> V&otilde;i kui sulle meeldib nelja kilo kotis tassida , siis palun . </s> </p>
+ </sp> <sp> <speaker>ParisDiamondEva</speaker> 
+<p> <s> Minuarust on k&uuml;ll l&auml;pakas &uuml;sna mugav , eriti siis kui oled liikuv inimene . </s> <s> Lauaarvuti on pigem neile , kes pidevalt kodus viibivad . troskalil on lihtsalt ekslikud veendumused sellekohapealt . </s> </p>
+<p> <s> Lauaarvuti ja L&auml;paka vahel ei saa paraleeli t&otilde;mmata , et &quot;n&auml;ed lauaarvuti on odavam , osta see&quot; , kuna t&auml;nap&auml;eval maksab kompaktsus ja mugavus &uuml;pris palju . </s> <s> Hea graafika v&otilde;iks l&auml;pakal igaljuhul olla , kui on plaanis peale t&ouml;&ouml;tegemise arvutit ka meelelahutuslikel eesm&auml;rkidel kasutada . </s> </p>
+ </sp> <sp> <speaker>circles</speaker> 
+<p> <s> troskalil on lihtsalt ekslikud veendumused sellekohapealt . </s> </p>
+<p> <s> Lauaarvuti ja L&auml;paka vahel ei saa paraleeli t&otilde;mmata , et &quot;n&auml;ed lauaarvuti on odavam , osta see&quot; , kuna t&auml;nap&auml;eval maksab kompaktsus ja mugavus &uuml;pris palju . </s> <s> Hea graafika v&otilde;iks l&auml;pakal igaljuhul olla , kui on plaanis peale t&ouml;&ouml;tegemise arvutit ka meelelahutuslikel eesm&auml;rkidel kasutada . </s> <s> Nimeta mind vanamoodsaks , kuid mitte &quot;ekslike veendumustega&quot; . </s> <s> Teise poolega olen t&auml;itsa n&otilde;us . </s> <s> N&auml;iteks ei suutnud ma v&auml;ga pikalt valid MacBook Pro ja 20+ tollise moluga iMaci vahel ( viimane muide soodsam+v&otilde;imsam ) . </s> <s> N&uuml;&uuml;dseks on valik langenud 15&quot; MBP kasuks , sest t&auml;pselt see mida stAb &uuml;tles . </s> </p>
+<p> <s> Mis puutub liikuvusse , siis viimasel ajal tassin l&auml;pakat &uuml;liharva kaasas . </s> <s> Igas punktis on olemas arvuti ( t&ouml;&ouml;l , kodus , maal , k&uuml;las ) ja ka internet . </s> <s> Ning seal , kus internet , on minu mured lahendatud - vpn , rdp , google docs , weave , etc . </s> <s> Seega , &uuml;ha enam hakkab rolli m&auml;ngima teenused , mis ei s&otilde;ltu konkreetselt kasutatavast arvutist . </s> <s> Aga see on juba teine teema . </s> </p>
+ </sp> <sp> <speaker>Exterminator ! </speaker> 
+<p> <s> Kui sa l&auml;hed USA'sse vahetus&otilde;pilaseks , siis ma eeldan millegip&auml;rast , et sa pead seda suhteliselt tihti ringi tassima k&auml;e otsas . </s> <s> Lingilt ilmneb , et kaal 3 , 1 kg . </s> <s> Palun , palun otsi midagi kergemat . </s> <s> Ja Pavilioni seeriat ma ei soovitaks t&otilde;esti mitte kellelegi osta . </s> <s> Laguneb kiiresti , on 'pedemajakana' vilkuvaid tulesid t&auml;is topitud ja kvaliteet on olematu . </s> <s> &Uuml;ldiselt ei saa 9000 . - eest korralikku uut laptopi . </s> <s> Soovitan sul endale otsida m&otilde;ni kasutatud IBM x40 v&otilde;i HP NX/NC seeria mudel selle raha eest ja r&otilde;&otilde;mu j&auml;tkub kauemaks . </s> </p>
+ </sp> <sp> <speaker>Exterminator ! </speaker> 
+<p> <s> Kellel on kogemusi HP Pavilioniga ? </s> <s> Enne USA-sse vahetus&otilde;pilaseks minekut oleks tarvis l&auml;pakas soetada ja m&otilde;tlesin just <gap desc='hyperlink'> peale . </s> <s> Tundub korralik arvuti , disain meeldib v&auml;ga ja allahindlus on p&auml;ris suur . </s> <s> See oleks minu esimene suurem kogemus l&auml;pakaga , kuid &uuml;tleks , et hinna ja kvaliteedi suhe on v&auml;ga hea . </s> <s> Uurisin ka inimeste arvamusi v&auml;ljamaa lehtedel ja kiidetakse . </s> </p>
+<p> <s> Kaevusin natuke s&uuml;gavamale ja ilmneb , et Pavilionidest r&auml;&auml;gitakse Toru Foorumis ja Hinnavaatluse foorumis palju-palju kurja , samas kui Delli ja IBM'i arvuteid kiidetakse . </s> <s> Delli puhul on probleemne see , et hinnad on &uuml;pris kallid . </s> <s> Kas leidub kodumaal ka m&otilde;ni asjalik Delli arvuti mille 9000 . - eest k&auml;tte saaks ? erm . </s> </p>
+<p> <s> mina soovitaksin sul usast osta l&auml;pakas , sest seal saad arvatavasti odavamalt ( eriti aftermarketi puhul ) ja ei pea kaasa ostma &uuml;leminekut 120V-le v&otilde;i uut adaptrit . </s> </p>
+ </sp> <sp> <speaker>ParisDiamondEva</speaker> 
+<p> <s> L&otilde;puks otsustasin hoopis Asuse kasuks , loodan , et on ka hea arvuti . </s> <s> Ehk kui kellegil on vastava arvutiga ( <gap desc='hyperlink'> ) kogemust v&otilde;iks teada anda . </s> <s> Olgu jumal sulle armuline . </s> </p>
+ </sp> <sp> <speaker>klimbermann</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> L&otilde;puks otsustasin hoopis Asuse kasuks , loodan , et on ka hea arvuti . </hi> </s> <s> <hi rend='quote'> Ehk kui kellegil on vastava arvutiga ( <gap desc='hyperlink'> ) kogemust v&otilde;iks teada anda . protsessor on v&otilde;rdlemisi aeglane ( ehkki 64bit , nagu fray &otilde;igesti parandas ) , kuigi graafikakaart pole halb - ometi ei anna ta ilmselt p&auml;riselt multimeediaarvuti m&otilde;&otilde;tu v&auml;lja . sellel on SiS kiibistik , aku on problemaatiline , ... &uuml;hes&otilde;naga , palun &auml;ra osta seda . kui sa juhuslikult s&ouml;&ouml;gialust ei taha , kuna seda ta aasta-paari p&auml;rast on ( ja kummist ilusa pildiga matt passib taldriku alla m&auml;rksa paremini ) . </hi> </s> </p>
+<p> <s> kui sa tahad , et s&uuml;ler vastu peaks , tuleb k&otilde;ne alla kas ibm/lenovo thinkpad v&otilde;i dell . delli puhul saad sama raha eest rohkem , thinkpadi puhul veidi v&auml;hem , aga m&auml;rksa l&auml;bim&otilde;eldumas kombinatsioonis . kas v&otilde;i <gap desc='hyperlink'> , n&auml;iteks , kuna thinkpadi sa vist niiv&otilde;inii ei tahaks ( ? ) . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> TV-kaart - Planet Foorumid </head>
+<sp> <speaker>importneeger</speaker> 
+<p> <s> Egas neid l&auml;pakatele eestis v&auml;ga palju polegi saada . </s> <s> K&otilde;ige parema &uuml;levaate saad arvatavasti hinnavaatlusest . </s> <s> S&uuml;learvutite oma kallimad ka , kui PC'dele . </s> </p>
+ </sp> <sp> <speaker>importneeger</speaker> 
+<p> <s> USB kaudu funktsioneerivad ? </s> <s> Tean , et peaks olema USB2 , soovitavalt . </s> <s> &Uuml;hel n&auml;gin . </s> <s> T&auml;iesti X firma toodang ning t&ouml;&ouml;tas . </s> <s> Alati saab ostes m&uuml;&uuml;jaga kokkuleppe teha , et kui t&ouml;&ouml;ta , siis tagastad toote ning saad papi tagasi . </s> </p>
+ </sp> <sp> <speaker>eripruul</speaker> 
+<p> <s> Aga mul on ka n&uuml;&uuml;d selline mure , et plaan tv-kaart osta , kuid valik selles osas nii kirju ja kuna endal otsene kogemus puudub , siis k&uuml;sin m&ouml;&ouml;daminnes infot siit . </s> <s> Vaevalt keegi vastab , kuid proovida ju v&otilde;ib . </s> </p>
+<p> <s> &Uuml;hes&otilde;naga , PCMCIA v&otilde;i USB ja t&ouml;&ouml;taks 3rd party softiga ( VLC v&otilde;i mplayer n&auml;iteks ) . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - Planet Foorumid </head>
+<sp> <speaker>coox</speaker> 
+<p> <s> tund tagasi sain l&otilde;tva sisse . </s> </p>
+<p> <s> hetkel enam ei saa </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> ma katsetan iga 5 mindi tagant , nagu s&otilde;ltlane kunagi </s> </p>
+<p> <s> ikka ei midagi : &commat; </s> </p>
+ </sp> <sp> <speaker>kuuseke</speaker> 
+<p> <s> ma ikka ei saa </s> </p>
+ </sp> <sp> <speaker>Ironman</speaker> 
+<p> <s> Mul on 4 listis sees . </s> <s> Kolm weebikaga ja &uuml;ks aMSN-iga . ise ka selle weebik&auml;kiga </s> </p>
+<p> <s> hm . . ja keegi on teema t&uuml;hjaks t&otilde;stnud . . </s> </p>
+ </sp> <sp> <speaker>Karll</speaker> 
+<p> <s> hmmm ... huvitav ... &auml;kki on mingi v&auml;&auml;rastunud m&otilde;istusega kodanik lasknud laiali arvutiviiruse , mis 1 . aprillil MSN-i lukustab </s> ... . <s> see oleks tema arusaam aprillinaljast </s> </p>
+ </sp> <sp> <speaker>Mad Guy</speaker> 
+<p> <s> Guy Vaatan jah , et kuidagi v&auml;he inimesi on listis . . </s> </p>
+<p> <s> v&auml;he inimesi on , sest tegemist on reede &otilde;htuga ! <gap desc='image'> </s> </p>
+<p> <s> aga jah , tegelikult on v&auml;ga n&uuml;ri , et hetkel msni ei saa . webmessengeri v&otilde;imalust ma isegi ei kaalu . ei salli teda . </s> </p>
+ </sp> <sp> <speaker>kurjam</speaker> 
+<p> <s> l&otilde;puks sain msn-i : ) </s> </p>
+<p> <s> Mul mingi 10 kontakti juba sees . </s> </p>
+ </sp> <sp> <speaker>kurjam</speaker> 
+<p> <s> L&otilde;puks . . traaaa </s> </p>
+<p> <s> heameel1234567 </s> </p>
+ </sp> <sp> <speaker>matude</speaker> 
+<p> <s> hm , passwordi uuesti kirjutamisel logis sisse . </s> </p>
+<p> <s> automaatse logimis nupuga ei l&auml;inud : / tobe Nimeta m&otilde;ni asi seoses Micro&dollar;oftiga , mis ei ole tobe . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Ayrie</speaker> 
+<p> <s> Kuidas sai m&otilde;ne muu e-maili aadressiga MSN-i sisse logida . </s> </p>
+<p> <s> Kunagi m&auml;letasin ja tegin &auml;ra ka . . enam ei m&auml;leta . </s> </p>
+<p> <s> Appi ! <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>LizZard</speaker> 
+<p> <s> mul siis mure j&auml;rgmine : </s> </p>
+<p> <s> <hi rend='quote'> alati , kui msni sisse login on &uuml;hel ja samal block peal . </hi> </s> </p>
+<p> <s> on kellelgi sellist jama olnud ? ja kas keegi oskab n&otilde;u anda ? ! </s> </p>
+ </sp> <sp> <speaker>Styrman</speaker> 
+<p> <s> t&auml;nasest siis messenger 7 official ( ly ) v&auml;ljas </s> </p>
+<p> <s> edit - v&auml;ideti et microsofti lehelt saab ikka beta . pole aega &uuml;le kontrollida . </s> </p>
+<p> <s> aga mess . be annab &otilde;ige asja - <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> mina tirisin sellelt esimeselt lingilt ja tuli t&auml;esti full . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 11. leht - Planet Foorumid </head>
+<sp> <speaker>Styrman</speaker> 
+<p> <s> ei jama </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Mina ei saa sisse : S </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> mul viskas ka tihti v&auml;lja nats aeg tagasi </s> </p>
+ </sp> <sp> <speaker>kruvi</speaker> 
+<p> <s> Mind Trick Mul tekkis probleem , mul oli msn6 . 2 m&otilde;tlesin et proovin 7 . 5 ka &auml;ra , aga see seitse ei meeldinud , siis lasin msn7 . 5 maha ja installisin 6 . 2 uuesti , n&uuml;&uuml;d kui sisse tahan minna &uuml;tleb j&auml;rgmiselt : A newer version available . </s> <s> You must install the newer version in order to continiue . </s> <s> Yould you like to do this now ? </s> <s> Siin tuleb 2 valikut : Yes v&otilde;i No , valin No aga siis ta keeldub sisse logimast , mida peaks tegema et msn6 . 2-ga sisse saada ? kunagi oli ka see jant aga l&auml;ks ise &auml;ra , on ravi<hi rend='bold'> ? ? ? </hi> <hi rend='bold'>HELP needed : </hi> </s> - \ <s> <hi rend='bold'> </hi> , mis sest et teil v&auml;lja viskas , ma ei saa &uuml;ldse sisse . </s> </p>
+ </sp> <sp> <speaker>Freezer</speaker> 
+<p> <s> Mul oli sama jama ! </s> <s> Ma ei tea , millest see v&otilde;ib tingitud olla . </s> </p>
+ </sp> <sp> <speaker>madis73</speaker> 
+<p> <s> winamp options preferences titles muuda sealt j&auml;rjestust selliseks nagu tahad </s> </p>
+ </sp> <sp> <speaker>madis73</speaker> 
+<p> <s> Oskab keegi &ouml;elda v&otilde;imalikult v&auml;he ressursse vajava web-messengeri adre ? </s> </p>
+ </sp> <sp> <speaker>monstrum</speaker> 
+<p> <s> ei v&auml;galahe ! ! </s> </p>
+<p> <s> saan msn 7 . 0'i k&auml;ima , 2 sekundit ja jookseb kokku , tegin plus'ile uninstalli , stuffplug'ile ja ka l&otilde;puks 7 . 0'le , ja siis uuesti 7 . 0 peale . aga ei , ikka see vana tross jookseb kokku . </s> </p>
+<p> <s> et nagu mis viga v&otilde;iks olla . </s> <s> ? </s> </p>
+<p> <s> t&auml;nan . </s> </p>
+ </sp> <sp> <speaker>ZorroZip</speaker> 
+<p> <s> mul samuti </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> mul ei lase &uuml;ldse sisse , ja endal on nett ka v&auml;ga aeglane . </s> </p>
+<p> <s> nt . &quot;100 aastat&quot; ootan , et foorumis mingi leheke lahti tuleks . </s> <s> : / </s> </p>
+<p> <s> vahepeal &uuml;tleb msn , et minu interneti&uuml;henduses on viga , vahepeal j&auml;lle , et &quot;server is too busy&quot; vms . . </s> </p>
+<p> <s> e : n&uuml;&uuml;d imekombel sain sisse . </s> </p>
+ </sp> <sp> <speaker>YOU</speaker> 
+<p> <s> mul oli ka korraks mingi probla seal , a l&auml;ks &otilde;nneks &uuml;le </s> </p>
+ </sp> <sp> <speaker>Dedicated</speaker> 
+<p> <s> &quot;See pole ahelkiri ! </s> <s> Aita New Yorgi upputusel surma saanud inimesi materiaalselt , et nad saaksid oma elu tagasi osta ! </s> <s> Raha kanda kontole 100100666 . </s> <s> Saada see kiri k&otilde;ikidele kes su msnis on ! &quot; </s> </p>
+<p> <s> New Yorgi uputus , jah . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 12. leht - Planet Foorumid </head>
+<sp> <speaker>Jubin</speaker> 
+<p> <s> P&auml;ris hea . </s> <s> Kandsin vaesekestele kogu oma raha , mis mul kontol oli , ehk siis 74 senti . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> &quot;See pole ahelkiri ! </s> <s> Aita New Yorgi upputusel surma saanud inimesi materiaalselt , et nad saaksid oma elu tagasi osta ! </s> <s> Raha kanda kontole 100100666 . </s> <s> Saada see kiri k&otilde;ikidele kes su msnis on ! &quot; </s> </p>
+<p> <s> New Yorgi uputus , jah . </s> <s> Irw no tra k&uuml;ll . </s> </p>
+<p> <s> See pole ahelkiri ja siis saada see kiri k&otilde;ikidele kes su msnis on ! </s> </p>
+<p> <s> Ja see petuped* tahab kuidagi sellise lolli skeemiga rikkaks saada v ? </s> <s> Nagunii mingi 12 aastane tatikas on . </s> </p>
+<p> <s> Esimest korda elus , n&auml;en ma sellist asja , et mu MSN'is pole kedagi . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>dm11</speaker> 
+<p> <s> Kas kuidagi ei anna 6 . 2te t&ouml;&ouml;tama panna , 7 on kergelt n&otilde;me<gap desc='hyperlink'> ? </s> </p>
+ </sp> <sp> <speaker>YOU</speaker> 
+<p> <s> irw , aga palju &uuml;ks elu maksab ; D ? </s> </p>
+ </sp> <sp> <speaker>dm11</speaker> 
+<p> <s> 72 000 000 kr <gap desc='image'> Koos k&auml;ibemaksuga v&otilde;i ilma ? </s> </p>
+ </sp> <sp> <speaker>blip ! </speaker> 
+<p> <s> pange ( au ) nime ette , sest kitt suri &auml;ra : </s> ' <s> ) </s> </p>
+ </sp> <sp> <speaker>joosep12</speaker> 
+<p> <s> See oli naljaga Joosep . </s> </p>
+<p> <s> au = t&auml;histab autot MSN'is vms . </s> </p>
+ </sp> <sp> <speaker>joosep12</speaker> 
+<p> <s> Joosep ta m&otilde;tles seda naljaga , sest nagu koguaeg , kui keegi MSN'is &auml;ra sureb , siis pannakse roos nime ette . </s> </p>
+<p> <s> Flabos teeb lihtsalt nalja , et kitt suri &auml;ra , pange auto endale nime ette . </s> </p>
+ </sp> <sp> <speaker>Flabos</speaker> 
+<p> <s> Kuradi koomikute kari <gap desc='image'> Flabos , sul on vist kohutavalt igav , et sa selliseid asju genereerid . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> r . i . p troskali p&ouml;ial </s> </p>
+ </sp> <sp> <speaker>yzone</speaker> 
+<p> <s> Varemgi samasugune asi olnud . </s> </p>
+<p> <s> Vaadake kuidas kiri kirjutatud on - &quot;Anyways&quot; , &quot;Dude&quot; jne . </s> </p>
+<p> <s> T&uuml;ng kindlasti . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> aga mis point sellel nagu on , siis . </s> <s> ? Pointi ei olegi . </s> <s> Lihtsalt mingil suvalisel t&uuml;&uuml;bil oli igav ja m&otilde;tles , et teeb hirmus laheda ahelkirja mida k&otilde;ik edasi saadavad . </s> </p>
+<p> <s> Muidugi leidub v&auml;ga palju neid kes sellesse t&otilde;esti usuvad ja 18 . inimesele selle edasi saadavad . </s> <s> Nende 18 . seast leidub j&auml;lle paar t&uuml;kki kes sama teevad jne . </s> </p>
+ </sp> <sp> <speaker>-CH-swompy</speaker> 
+<p> <s> Siuke probleem on msn messengeriga , et blokkisin kord &uuml;he t&uuml;&uuml;bi &auml;ra . </s> <s> Paar minti hiljem v&otilde;tsin maha . </s> <s> Aga n&uuml;&uuml;d on nii , et iga kord kui sisse login on ta uuesti blokitud . </s> <s> Olen &uuml;ritanud igatpidi teda unblokkida . </s> <s> Nii paremat klikki kasutades , kui ka Tools&gt;Options ja seal allow listi lisades . </s> <s> Peale seda ikka apply , ok ja exit . </s> <s> Aga kui uuesti sisse login , siis ikka on sama kamm . </s> <s> Oskab keegi soovitada midagi ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 13. leht - Planet Foorumid </head>
+<sp> <speaker>tussu</speaker> 
+<p> <s> praegu jampsib msn ? </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> mingi pool tundi tagasi jumpsis , enam mitte </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Korra logis v&auml;lja , n&uuml;&uuml;d korras . </s> </p>
+ </sp> <sp> <speaker>Olaf</speaker> 
+<p> <s> APPI MA EI SUUDA . &Otilde;U MAAIIII GAAAD . </s> <s> ! ! ! ! </s> </p>
+<p> <s> TEHKE K&Auml;BEDASTI KORDA . </s> </p>
+ </sp> <sp> <speaker>Erz</speaker> 
+<p> <s> Jah . </s> <s> Ma sain ka alles ma-ei-tea-mitmendal katsel sisse </s> </p>
+ </sp> <sp> <speaker>Flash</speaker> 
+<p> <s> n&uuml;&uuml;d on korras </s> </p>
+<p> <s> viskas v&auml;lja ja enam sisse ei saa </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Omg , t&auml;iesti haige , ma ei saa GAIMiga sisse ja &uuml;ldse millegagi , 6 . 2 ei lase enam sisse , k&auml;seb uuema versiooniga sisse minna jne . </s> <s> Haige ! </s> </p>
+ </sp> <sp> <speaker>weeb</speaker> 
+<p> <s> Kas ma olen ainuke kes hetkel MSN-i sisse ei p&auml;&auml;se ? </s> </p>
+ </sp> <sp> <speaker>Tinn</speaker> 
+<p> <s> ja- </s> </p>
+ </sp> <sp> <speaker>kruvi</speaker> 
+<p> <s> Okei asi kisub juba s&uuml;rriks ... lugu selline ... et jumala lamp ajal ... viskab MSN-st v&auml;lja ei &uuml;htegi teadet ega midagi lihtsalt plaks v&auml;lja ... ja enam sisse ei saa . . v&auml;idab ainult ... &quot;Signing in to MSN Messenger service failed because the service is temporarily unavailable . </s> <s> Please try again later . &quot; </s> </p>
+<p> <s> Tegin siis miski suvalise konto hotmaili ... proovin sellega ja sellega saan kenasti sisse ... </s> </p>
+<p> <s> wtf ? ? ? siin toimub ? </s> </p>
+<p> <s> EDIT : sain asja korda nii ... et k&auml;isin korra sellisel aadressil <gap desc='hyperlink'> ja tegin seal online scanni ja mida fakki leidis 134 spy-faili : O ... igatahes peale nende leidmist sain MSN ka sisse ... oletan et viga seal oligi ... </s> </p>
+ </sp> <sp> <speaker>dwarve</speaker> 
+<p> <s> nimelt msn siis &quot;paneb pange&quot; ( kasutades noortekeelset v&auml;ljendit ) . nimelt , &quot;signing in&quot; silt on ees . ja kui on nagu sisse loginud , siis jookseb kinni ja midagi ei saa teha . proovisin ka re-installiga ja vanema versioni insstalliga , aga ikka mitte midagi , ikka sama jama . help ! ! ! ! ! </s> </p>
+ </sp> <sp> <speaker>Lolo</speaker> 
+<p> <s> Sain enda asjast esialgu vist jagu ... </s> </p>
+<p> <s> Lolo t&auml;nud sulle n&otilde;uande eest ... sai need asjad k&otilde;ik proovitud ... <gap desc='hyperlink'> &lt; sain ilusti sisse probleemideta ... </s> </p>
+<p> <s> venna arvutis oli sama jama mis mul endalgi ... sai vahetatud k&otilde;ik IP-d </s> </p>
+<p> <s> MSN-i logimisel sai proovitud nii vanemad Messenger versioonid , Trillian , web Messenger jne ... tulemus oli sama ... igalpool . </s> </p>
+<p> <s> Lendasin siis s&otilde;bra juurde proovisin sealt sisse logida toimis t&ouml;&ouml;tas ... k&otilde;ik oli sai ka s&otilde;braga seal arutatud ... m&otilde;eldud tehtud tulin koju ... </s> <s> V&otilde;tsin lahti enda kataloogi nimega Documents And Application -&gt; &quot;Proffiil&quot; -&gt; Application Data -&gt; Microsoft -&gt; MSN Messenger ja tegin ta lihtsalt t&uuml;hjaks ... </s> </p>
+<p> <s> Peale seda oligi proov sisse logimiseks ja toimis . </s> </p>
+<p> <s> Ise kahtlustan et kuskil oli ... m&otilde;ne proffiiliga tekkinud kala ... kuid siiski siiski miks ma siis venna arvutis sisse logida ei saanud ... ? ? ? </s> </p>
+<p> <s> Elame n&auml;eme igatahes praegu on asi veatult t&ouml;&ouml;danud . </s> </p>
+<p> <s> EDIT : eih ... ikkagi 60 min kuskil l&otilde;busat jutuajamist ja siis plaks viskab MSN-ist v&auml;lja ... ja enam sisse ei saa ... </s> </p>
+ </sp> <sp> <speaker>Indre</speaker> 
+<p> <s> Mm ... </s> <s> V&otilde;ib-olla siit l&auml;bi k&auml;inud , aga mingi programm on vist , millega saab nii teha , et r&auml;&auml;gib minu nime ja fondiga , kuigi ta nimi on ikkagi &otilde;ige ... </s> <s> No vast saite aru ja teate mis asi see on ... </s> <s> Selle vastu aitab vist ainult block <gap desc='image'> ? </s> </p>
+<p> <s> Ise k&uuml;sin , ise vastan : messenger discovery asja nimi - oli olemas aga vanem versioon ja ei teadnud , et selline lisa sellel k&uuml;ljes <gap desc='image'> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 14. leht - Planet Foorumid </head>
+<sp> <speaker>Dude&commat;Home</speaker> 
+<p> <s> mul juba &uuml;le kuu olnud selline jama , et mitte &uuml;hegi kontoga ei saa msni sisse ( windowsi msni ka mitte ) reinstall proovitud , ei aita . troubleshooti arust on k&otilde;ik korras . ainult webmessenger . msn . com-i saab sisse . aga see jube aeglane ja jama . </s> </p>
+<p> <s> oskate soovitada &auml;kki midagi ? </s> </p>
+<p> <s> E : ei ole firewall peal </s> </p>
+ </sp> <sp> <speaker>Dark</speaker> 
+<p> <s> Proovi seda teha - <gap desc='hyperlink'> Kuigi nad v&auml;idavad , et ei toimi . </s> </p>
+<p> <s> Veel lugemist - <gap desc='hyperlink'> eheh ... oligi kuup&auml;eva viga . imelik . kuidas kuup&auml;ev sisselogimist m&otilde;jutab ? </s> </p>
+<p> <s> t&auml;nud igatahes </s> </p>
+ </sp> <sp> <speaker>joosep12</speaker> 
+<p> <s> Olgu kuna ise olen vaesema ruuna taga siis soovitan proovida Msn 6 . 2 j&auml;lle . </s> </p>
+<p> <s> T&auml;na otsides leidsin 2 6 . 2 Microsofti lehelt , &uuml;ks oli t&otilde;mmates 5 . 1 MB nimega SetupDL . exe see kisas update-i , teine oli Setup . exe 8 . 3 MB Siiamaani funkib ilusti ... </s> </p>
+<p> <s> OS : Windows Xp Professional Service Pack 2 </s> </p>
+<p> <s> Vaadake ja proovige , ise olen rahul . </s> </p>
+ </sp> <sp> <speaker>rEsPeCt ! </speaker> 
+<p> <s> connection log v&otilde;ta kuskilt settingutest maha </s> </p>
+<p> <s> aga kuidas see nii h&auml;iriv olla saab ? </s> </p>
+<p> <s> ja ... google on hea asi </s> </p>
+ </sp> <sp> <speaker>Jubin</speaker> 
+<p> <s> MSN's on liikumas j&auml;lle &uuml;ks viirus , mis j&otilde;udis ka minuni , kuid sain juba sellest lahti , olge valvsad <gap desc='image'> a la &quot;Click here and see who's blockin you <gap desc='image'>&quot; ? </s> </p>
+ </sp> <sp> <speaker>Jubin</speaker> 
+<p> <s> siis saab X vajutada . </s> </p>
+ </sp> <sp> <speaker>kruvi</speaker> 
+<p> <s> on reserveeritud domeeninimi , see sulle k&uuml;ll mingit halba ei saa teha . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> LOLOLOL </s> </p>
+<p> <s> See oli emoticon : D </s> </p>
+<p> <s> ( Tahtsin kurja nalja n2ha , sest ma teadsin , et sa lugesid seda teemat ja n2gid toda postitust ) </s> </p>
+<p> <s> HAHahahahaa ! ! ! </s> </p>
+ </sp> <sp> <speaker>Muddy Match</speaker> 
+<p> <s> Match kuidas ma saan nime &uuml;hest grupist teise liigutada ? </s> </p>
+<p> <s> Hiirega lohistada pole v&otilde;imalik . ma k&uuml;ll saan hiirega liigutades , vaata , et sa siis lahti lased , kui terve grupp muutub oran&scaron;iks <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Muddy Match</speaker> 
+<p> <s> no sama asi oli ka siin Kas te m&otilde;tlete seda ? </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> Mai saa aru miks mul msni ei logi sisse , nett olemas aga ikka ei midagi . </s> </p>
+ </sp> <sp> <speaker>Indre</speaker> 
+<p> <s> Mul oli juba varemate msni versioonidega nii , et ma n&auml;gin et s&otilde;ber on appear offline , aga r&auml;&auml;kida ma temaga sain . </s> </p>
+ </sp> <sp> <speaker>Erz</speaker> 
+<p> <s> kas ma olen ainuke kes msn-i sisse ei saa ? </s> </p>
+<p> <s> ja just siis kui oleks vaja kiiresti midagi kokku leppida kellegagi . . traaa ! </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 15. leht - Planet Foorumid </head>
+<sp> <speaker>Cigaro</speaker> 
+<p> <s> mina ka . </s> </p>
+ </sp> <sp> <speaker>MaaPoiss</speaker> 
+<p> <s> vend just oli msnis , logisin temaga v&auml;lja ja proovin ise . tutkit . <gap desc='image'> </s> </p>
+<p> <s> e : kirjutamise ajal sain sisse ; D </s> </p>
+ </sp> <sp> <speaker>tussu</speaker> 
+<p> <s> N&uuml;&uuml;d ei saa mina sisse : / </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> kui guugeldad ( msn block checker ) , siis m&otilde;ned vastavad lehek&uuml;ljed on olemas </s> </p>
+<p> <s> kuid <gap desc='hyperlink'> ( &uuml;ks h&auml;sti tegija msni temaatiline leht ) v&auml;idab surmkindlalt ei sellised asjad ei toimi ja block checki pole v&otilde;imalik teha </s> </p>
+<p> <s> v&otilde;ta siis kinni , kumb &otilde;igust r&auml;&auml;gib </s> </p>
+ </sp> <sp> <speaker>Muhv899</speaker> 
+<p> <s> Ei . . &uuml;tleb , et list pole saadaval . </s> </p>
+ </sp> <sp> <speaker>LaValliere</speaker> 
+<p> <s> Ei . . &uuml;tleb , et list pole saadaval . </s> <s> Huh . . siis pole minuviga ma natuke j&auml;dnasin oma masinaga ... <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> Kas keegi teab m&otilde;nda lehek&uuml;lge , kust saaks MSN'i kasutada sel juhul , kui eelmainitut arvutisse installeeritud ei ole . </s> </p>
+<p> <s> e-messenger . net , iloveim . com , webmessenger . msn . com ja msn2go . com'ile pole kahjuks ligip&auml;&auml;su . </s> <s> Kui keegi midagi muud oskab soovitada , oleks v&auml;ga t&auml;nulik . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>LaValliere</speaker> 
+<p> <s> 20min tagasi ei saanud sisse aga n&uuml;&uuml;d tundub korras olevat . </s> </p>
+ </sp> <sp> <speaker>kanek</speaker> 
+<p> <s> Mu MSN on t&auml;na eriti kift . </s> <s> Kui kellegi veebikaamerat avada p&uuml;&uuml;an v&otilde;i mingit faili vastu v&otilde;tta , jookseb kokku . </s> <s> Ei , &uuml;ldse ei aja n&auml;rvi : P </s> </p>
+ </sp> <sp> <speaker>LaValliere</speaker> 
+<p> <s> Kuramus , n&uuml;&uuml;d ei taha sisse logida ! <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Tinn</speaker> 
+<p> <s> Oijah , korrates eelmisi isikuid , ei saa mina kah sisse . </s> </p>
+ </sp> <sp> <speaker>Muhv899</speaker> 
+<p> <s> V&otilde;eh , t&auml;na mingi &uuml;ldine viga . </s> <s> L&otilde;puks olin sunnitud webmessengeriga sisse logima ja online list on &uuml;sna h&otilde;re ( vaesekesed k&otilde;ik nukrutsevad ilma MSNita ) . </s> </p>
+ </sp> <sp> <speaker>Tinn</speaker> 
+<p> <s> <hi rend='quote'> ... L&otilde;puks olin sunnitud webmessengeriga sisse logima ... </hi> </s> <s> <hi rend='quote'> Ma ei saanud sellega kaa sisse . </hi> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 16. leht - Planet Foorumid </head>
+<sp> <speaker>PinkY</speaker> 
+<p> <s> Kurat , siis kui vaja , see asi ei t&ouml;&ouml;ta . </s> </p>
+<p> <s> Masendav . krr ! </s> </p>
+<p> <s> Kaks korda k&auml;inud sisse v&auml;lja , praegult proovisin 13 korda j&auml;rjest ja lasi sisse . </s> <s> L&otilde;puks . </s> </p>
+ </sp> <sp> <speaker>Tinn</speaker> 
+<p> <s> mida fu*ki , ma proovin juba 100 korda j&auml;rjest : S ikka ei saa </s> ... . ... . ... . . </p>
+<p> <s> &auml;kki on viga elukohas . ma olen tallinnas mustam&auml;el . </s> <s> Ei ole asi selles . </s> <s> Ma ka ei saanud , pidasin natuke vahet , ning siis sain . </s> </p>
+ </sp> <sp> <speaker>Alz</speaker> 
+<p> <s> Vot selline kiri tuleb , kui sisse tahan minna ja vahel hakkab seda troubleshooti tegema . </s> <s> &Auml;ra h&auml;dalda . </s> <s> Proovi hiljem ehk saad ... </s> </p>
+<p> <s> Ega siis emmessenn ei ole ainus asi . </s> <s> Mine siis veebiliselt , kui muidu ei saa . </s> </p>
+ </sp> <sp> <speaker>surmaputk</speaker> 
+<p> <s> ma ei h&auml;dalda , vaid r&auml;&auml;gin , nagu asi on <gap desc='image'> </s> </p>
+<p> <s> Edit \ \ Surmaputk , mul t&auml;pselt sama . </s> <s> See mingi &uuml;ldine viga . </s> </p>
+ </sp> <sp> <speaker>Velg</speaker> 
+<p> <s> &uuml;lik&otilde;va . </s> <s> Korraks sain sisse , ning mul oli nagu offline mod peal . </s> <s> Tahan online panna , siis &uuml;tleb : &quot;sinu staatust ei saa muuta&quot; , ning logib ise v&auml;lja . . rrrrr ... </s> </p>
+ </sp> <sp> <speaker>surmaputk</speaker> 
+<p> <s> J&auml;lle &uuml;ks j&auml;rjekordne msn'i &uuml;ldine service viga . <gap desc='image'> K&uuml;ll varsti sisse saab , jess . </s> <s> Juba saingi <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>bIaC</speaker> 
+<p> <s> Yeppiii , peale 2 ja poolt tundi l&otilde;puks sees : S <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Dude&commat;Home</speaker> 
+<p> <s> Ma olen koguaeg sees olnud 8-st saadik . . msn 7 . 5 viimase update-ga . </s> </p>
+ </sp> <sp> <speaker>Odin</speaker> 
+<p> <s> Mul on tekkinud &uuml;ks selline huvitav mure , et viimasel ajal pole MSN &uuml;htegi inimest lasknud blockida . </s> <s> &Uuml;tleb : &quot; ( nimi ) could not be blocked . </s> <s> Please try again later . &quot; Ja nii kogu aeg . </s> </p>
+<p> <s> Nimelt paar kuud tagasi sai tehtud uus aadress . </s> <s> &Uuml;llataval kombel sain registreerida eriti lihtsa kasutajanime . </s> <s> Ja siis hakkas k&otilde;ik pihta : pool tundi peale registreerumist oli hotmaili Inbox &auml;&auml;reni t&auml;is ja lakkamatult lisasid mind enda listi minule tundmatud l&otilde;unamaised inimesed . </s> <s> Pikapeale kujunes juba v&auml;lja refleks , et kui keegi &uuml;tleb mulle &quot;Hola ! &quot; , siis kohe delete/block . </s> <s> Keskmiselt tuli p&auml;evas kuskil 3-4 inimest &auml;ra blockida . </s> </p>
+<p> <s> Kuid tundub , et n&uuml;&uuml;d on selle lihtsameelse blokeerimisega k&otilde;ik ja iga kord kui MSN-i sisse login , viskab uuesti lahti k&otilde;igi lisanud inimeste aknakesed , mis tuleb &uuml;kshaaval j&auml;lle kinni kl&otilde;psida . </s> </p>
+<p> <s> Minule endale tundub , et blocklist on &auml;kki t&auml;is . </s> <s> &Uuml;ks v&otilde;imalus oleks muidugi keelata nende teadete kuvamine , et keegi mind on lisanud . </s> <s> Sel juhul ei saaks aga teada , kui keegi tuttavatest juhtub lisajaks olema . </s> </p>
+<p> <s> Mis teha ? </s> <s> Uus aadress ? </s> <s> Kustutada blokeeritute listist inimesi &auml;ra ja koos sellega automaatselt viia nad enda allow listi ? </s> </p>
+ </sp> <sp> <speaker>Puumanike</speaker> 
+<p> <s> Mina ka ei saa . </s> <s> Hakkab j&auml;lle mingi jant pihta </s> -___- </p>
+ </sp> <sp> <speaker>Jubin</speaker> 
+<p> <s> Mis moodi ma kustutan end Mobile alt &auml;ra ? </s> </p>
+ </sp> <sp> <speaker>dwarve</speaker> 
+<p> <s> Mismoodi sellest Mobile grupist seal &uuml;ldse lahti saab ! ! ! ! </s> <s> Ise k&uuml;sin , ise vastan . lahen MSNist seaded v&otilde;i profiili alla ja sealt mobile ja siis tuleb mingi mobile leht ette ja delete account vms . vist nii . </s> </p>
+<p> <s> Ei t&ouml;&ouml;ta ! </s> <s> Ikka n&auml;itab , et ma olen Mobile all , kui olen offline . </s> </p>
+<p> <s> &Auml;kki m&otilde;ni tark inimene aitab mind selle koha pealt ? ? ? </s> </p>
+ </sp> <sp> <speaker>Pontz</speaker> 
+<p> <s> <hi rend='quote'> Mis moodi ma kustutan end Mobile alt &auml;ra ? </hi> </s> <s> <hi rend='quote'> Tools &gt; Options &gt; Phone &gt; <hi rend='italic'>Allow people on my contacts list to send messages to my mobile device</hi> linnuke maha</hi> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 17. leht - Planet Foorumid </head>
+<sp> <speaker>ZorroZip</speaker> 
+<p> <s> sama siin , elun&otilde;me </s> </p>
+ </sp> <sp> <speaker>Nina666</speaker> 
+<p> <s> ... </s> </p>
+ </sp> <sp> <speaker>Nina666</speaker> 
+<p> <s> Kui &otilde;igesti m&auml;letan , siis linnukese panemisel hakkas Mobile t&ouml;&ouml;le alles teistkordsel v&auml;ljalogimisel , v-o linnukese maha v&otilde;tmisega sama lugu ... </s> </p>
+ </sp> <sp> <speaker>RehaonU</speaker> 
+<p> <s> Oeh pole t&uuml;kk aega sellist jama olnud </s> </p>
+<p> <s> et messengeri ei saa . </s> <s> Kuid seda juhtub ka paremates peredes </s> </p>
+<p> <s> nagu n&auml;ha . </s> </p>
+<p> <s> Probleem j&auml;rgmine : </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Seda offline-asja juhtub pidevalt . </s> <s> Mul n&auml;itab ka vahel , et &uuml;ks s&otilde;ber on offline , kuigi tegelikult peaks ta sees olema . </s> <s> M&uuml;stika . </s> <s> Kui keegi selle n&auml;htuse &auml;ra seletaks , oleks suht armas . </s> </p>
+ </sp> <sp> <speaker>mchund</speaker> 
+<p> <s> Seda offline-asja juhtub pidevalt . </s> <s> Mul n&auml;itab ka vahel , et &uuml;ks s&otilde;ber on offline , kuigi tegelikult peaks ta sees olema . </s> <s> M&uuml;stika . </s> <s> Kui keegi selle n&auml;htuse &auml;ra seletaks , oleks suht armas . </s> <s> Kusjuures plus n&auml;itab , et on sees . v&otilde;i noh , see osa , mis n&auml;itab millal viimati online oli . </s> </p>
+ </sp> <sp> <speaker>Doc&tilde;C</speaker> 
+<p> <s> ml selline probleem , et msn ei lase sisse logida <gap desc='image'> panen trouble ja siis on viga default gateways . kuidas seda parandada saab ? </s> </p>
+ </sp> <sp> <speaker>bluelite</speaker> 
+<p> <s> See s&otilde;ltub &auml;kki Windowsi <hi rend='italic'>theme</hi>-st . </s> <s> Mul vilgub helesinisena n&auml;iteks . </s> </p>
+ </sp> <sp> <speaker>SilguQ</speaker> 
+<p> <s> Selline huvitav situatsioon on , et mina olen online , &uuml;ks s&otilde;ber on online , aga meil m&otilde;lemal n&auml;itab , et teine oleks justkui offline . </s> </p>
+<p> <s> Enam ei oska midagi ette ka v&otilde;tta . </s> <s> Kui kunagi kellelgi sama jama ja otsida viitsib , siis aitas selline asi , et m&otilde;lemad kustutasime teineteise &auml;ra ja siis uuesti lisamine aitas <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Deux</speaker> 
+<p> <s> Kas ma olen ka praegu ainuke , kes msni ei saa ? </s> <s> Mingi troubleshoot v&auml;rgi viskab ette </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> krt , mis jama . . ftp'sse ka ei saa ... </s> </p>
+ </sp> <sp> <speaker>mikser</speaker> 
+<p> <s> Kuidas omale Windows Messengeri saada ? On XP SP2 aga ei ole seda kaasas . Tean jah , et paljude arust on see saast , aga ikkagi ^^ </s> </p>
+</sp> <sp> <speaker>Henz</speaker> 
+<p> <s> ei saa ka msnni hetkel </s> - . - </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 18. leht - Planet Foorumid </head>
+<sp> <speaker>Shin Natsume</speaker> 
+<p> <s> N&uuml;&uuml;d t&ouml;&ouml;tab j&auml;lle . </s> </p>
+<p> <s> <hi rend='bold'>Fletcher</hi> </s> </p>
+<p> <s> Win messengeri saab : </s> </p>
+<p> <s> Control panel &gt; add remove programs &gt; Add remove windows components &gt; windows messenger ette linnuke ja next . </s> </p>
+ </sp> <sp> <speaker>gudher</speaker> 
+<p> <s> Deem , msn loobib troubleshooterit ette . </s> <s> : / sama siin . </s> <s> : ( </s> </p>
+<p> <s> &uuml;le pika aja sain just arvutisse ; P </s> </p>
+ </sp> <sp> <speaker>gudher</speaker> 
+<p> <s> mul viskas praegu t&auml;iesti lampi v&auml;lja ja sisse ei saa enam . keegi veel ? </s> </p>
+ </sp> <sp> <speaker>bbb</speaker> 
+<p> <s> oli , tagasi on . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> mul k&uuml;ll hetkel midagi korras veel ei ole . Ikka ei saa sisse . </s> </p>
+<p> <s> Mis ma n&uuml;&uuml;d teen ! ? </s> </p>
+ </sp> <sp> <speaker>bbb</speaker> 
+<p> <s> mul k&uuml;ll hetkel midagi korras veel ei ole . Ikka ei saa sisse . </s> </p>
+<p> <s> Mis ma n&uuml;&uuml;d teen ! ? paanika-paanika ! weeb meie t&auml;htis jutuajamine j&auml;i pooleli , loodame et teised ei arva et sa ei olegi p0p ja n00rtep2rane ning sa l&auml;ksid vara magama . oi-oi kui seda arvavad , siis on elu hukas <gap desc='image'> </s> </p>
+<p> <s> edit : mis te siis nii t&otilde;redad kohe , ma &uuml;hekorra ja kohe vastu kuppu . ei sp&auml;mmi enam siin teemas </s> </p>
+ </sp> <sp> <speaker>Teemees</speaker> 
+<p> <s> Ma olen tagasi sees </s> ... . <s> see et ma foorumisse kaebama tulin ikkagi aitas . </s> </p>
+ </sp> <sp> <speaker>madis73</speaker> 
+<p> <s> mul on probleemid praegu msniga , koguaeg pillub v&auml;lja . </s> </p>
+ </sp> <sp> <speaker>Heltrooper</speaker> 
+<p> <s> mis mul probleem on , et kui tahan msni logida jooksutab programmi kokku ja k&otilde;ik . </s> </p>
+ </sp> <sp> <speaker>BurneR</speaker> 
+<p> <s> Kui Msn Plus sul peal on , siis pane see task managerist kinni . </s> <s> Mul oli vahepeal selline jama . </s> <s> Aga kui ei aita , siis tee reinstall , see v&auml;ike progra ja lihtne teha ka . </s> <s> Edu ! reinstall ei ole aidanud , teisel arvutil t&auml;pselt sama jama . </s> </p>
+ </sp> <sp> <speaker>BurneR</speaker> 
+<p> <s> Ma panin siin foorumis seesuguse probleemi otsingusse ning leidsin ka vasteid , kuid imelikul kombel ei olnud seal juttu lahendustest . </s> <s> Uurisin ka teistest allikatest ning sain seal lahendusi , mis kahjuks sel puhul ei t&ouml;&ouml;ta . </s> </p>
+<p> <s> T&auml;psemalt siis mu &otilde;el on selline lugu , et kui hakkad logima msn messengeri , siis ta jookseb kohe kokku . </s> <s> &Uuml;ritasin ka uninstallida ja uuesti peale lasta ning isegi vahetasin vanema versiooni vastu v&auml;lja , kuid ikka sama lugu . </s> <s> Vastukajast olen aru saanud , et seesugune probleem on olnud paljudel . </s> <s> Arvuti sai alles ostetud ning seal taga istuvad ka iga&uuml;ks , seega kahtlustan et arvutis on mingi bug , kuigi viiruset&otilde;rjeprogrammidega sai &uuml;le k&auml;idud , aga see probleemi ei lahendanud . </s> </p>
+<p> <s> Kes v&auml;hegi teab sellest midagi , siis v&otilde;iks ka siin m&auml;rku anda , sest arvan , et m&otilde;ningatel v&otilde;ib see probleem tulevikus ette tulla . </s> </p>
+ </sp> <sp> <speaker>luuletaja</speaker> 
+<p> <s> ega sul msn[+ ] antiviiruses kurja tegelasena kirjas pole ? </s> </p>
+<p> <s> v&otilde;i m&otilde;ni xp/praegusemsniversiooniga mittesobiv skin/plugin/misiganes ? </s> </p>
+<p> <s> igatahes uninstalli k&otilde;ik[add/remove programs ] . killi register[run/regedit ] &auml;ra . otsi kas leiad[search/hijackthis ] msni faile , kui ei siis t&otilde;mba uuesti ja installi ja kui ikka ei toimi , siis on parim soovitus kasutada amsni v&otilde;i mingit muud klooni . </s> <s> Minu teada ei olegi mu &otilde;el ( endast ma ei r&auml;&auml;gi , sest minulegi on see paras uudis ) MSN+ ega midagi . </s> <s> Pluginaid/xp asi ei ole , sest varem ju MSN t&ouml;&ouml;tas perfektselt . </s> <s> Tavaliselt ma add/remove programsit kasutangi . </s> </p>
+<p> <s> Seda run/regedit pole kasutanud , ning hijackthisiga peaks ka asja &uuml;le vaatama . </s> </p>
+<p> <s> See on imelik , et varem msn ju t&ouml;&ouml;tas ja n&uuml;&uuml;d &auml;kitselt jooksutab sisselogimisel mingi asi msni kokku . &Uuml;ritan ka p&ouml;&ouml;rduda professionaalide poole , kes arvutitega tegelevad ( aga ei tea ka kas spetsiaalselt tarkvaraga ) . </s> </p>
+ </sp> <sp> <speaker>Lord UKF</speaker> 
+<p> <s> mul xp SP2 ja selliene jama et kaks msn-i on korraga lahti <gap desc='image'> </s> </p>
+<p> <s> versioonid 7 , 5 ja mingi 5 ... </s> </p>
+<p> <s> removisin selle viienda &auml;ra aga ta on ikka alles </s> </p>
+<p> <s> mida teha </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 19. leht - Planet Foorumid </head>
+<sp> <speaker>tussu</speaker> 
+<p> <s> Ma panin siin foorumis seesuguse probleemi otsingusse ning leidsin ka vasteid , kuid imelikul kombel ei olnud seal juttu lahendustest . </s> <s> Uurisin ka teistest allikatest ning sain seal lahendusi , mis kahjuks sel puhul ei t&ouml;&ouml;ta . </s> </p>
+<p> <s> T&auml;psemalt siis mu &otilde;el on selline lugu , et kui hakkad logima msn messengeri , siis ta jookseb kohe kokku . </s> <s> &Uuml;ritasin ka uninstallida ja uuesti peale lasta ning isegi vahetasin vanema versiooni vastu v&auml;lja , kuid ikka sama lugu . </s> <s> Vastukajast olen aru saanud , et seesugune probleem on olnud paljudel . </s> <s> Arvuti sai alles ostetud ning seal taga istuvad ka iga&uuml;ks , seega kahtlustan et arvutis on mingi bug , kuigi viiruset&otilde;rjeprogrammidega sai &uuml;le k&auml;idud , aga see probleemi ei lahendanud . </s> </p>
+<p> <s> Kes v&auml;hegi teab sellest midagi , siis v&otilde;iks ka siin m&auml;rku anda , sest arvan , et m&otilde;ningatel v&otilde;ib see probleem tulevikus ette tulla . </s> </p>
+<p> <s> Kusjuures , endal tekkis t&auml;na SAMA kala . <gap desc='image'> T&auml;na pandi uus mobo sisse ja ei t&ouml;&ouml;danud winXP x64'jaga , ok arvasin , et wini kala ja nagunii format oli plaanis . </s> <s> Format tehtud , 32bit win peal ja IKKA ei t&ouml;&ouml;ta , win messenger aga t&ouml;&ouml;tab ilusti . </s> <s> V&otilde;ta n&uuml;&uuml;d n&auml;pus . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>aavu</speaker> 
+<p> <s> nii . palun abi . nimelt sain ka selle asjanudse , et saab mobiilile s&otilde;numeid saata ( teised n&auml;evad mind kullaselt ehk ( mobile ) ) kuna see veel eesti v&otilde;rkudes ei t&ouml;&ouml;ta , tuleb ainult e-mailile sellekohane s&otilde;num , s&otilde;ber saatis prooviks mingi 4 tykki , tulid kohale k&uuml;ll , aga n&uuml;&uuml;d nad tulevad &uuml;ha uuesti ja uuesti , e-mail on sama , s&otilde;num on sama , aga nimi on muutunud , kui s&otilde;ber on oma nime msnis muutnud . ja valimastute intervallidega ja n&uuml;&uuml;d on mu mailbox v&auml;ga ummistunud . palun abi ! </s> </p>
+ </sp> <sp> <speaker>malc</speaker> 
+<p> <s> maas jah , ja TAAS k&otilde;ige lollimal hetkel signis v&auml;lja </s> </p>
+ </sp> <sp> <speaker>Changer</speaker> 
+<p> <s> oh noes . sama jama siin . </s> </p>
+ </sp> <sp> <speaker>meisterjaan</speaker> 
+<p> <s> mina olen ka v&auml;ljas . kurat ! </s> </p>
+ </sp> <sp> <speaker>Dedicated</speaker> 
+<p> <s> L&auml;&auml;nemaailma kokkuvarisemine algab v&auml;ikestest asjadest ... </s> </p>
+<p> <s> *ajee , me oleme p&auml;&auml;stetud ! </s> </p>
+ </sp> <sp> <speaker>Ebichu</speaker> 
+<p> <s> I got owned : ( </s> </p>
+ </sp> <sp> <speaker>ddes3</speaker> 
+<p> <s> Dang , sain sisse . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>plazas</speaker> 
+<p> <s> olen ses k&uuml;ll </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Dang , sain sisse . <gap desc='image'> </s> </p>
+<p> <s> Ma tahan kaaa ! </s> </p>
+ </sp> <sp> <speaker>Shin Natsume</speaker> 
+<p> <s> hui </s> </p>
+ </sp> <sp> <speaker>skandium</speaker> 
+<p> <s> mul on mingi k&uuml;mme minutit juba t&auml;itsa korras . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Ma proovisin mingi 7 korda ja l&otilde;puks sain sisse . . </s> = <s> ) </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Mul on probleem MSNiga , aga ma olen vapper ja ei tee uut teemat - 20. leht - Planet Foorumid </head>
+<sp> <speaker>surmaputk</speaker> 
+<p> <s> mul on v&auml;ga paljud sees </s> </p>
+ </sp> <sp> <speaker>BurneR</speaker> 
+<p> <s> No ei saa sisse raisk , jube kepp . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>BurneR</speaker> 
+<p> <s> Sai t&otilde;mmatud heas usus mingi messengeri lisa - MSN Content Plus . </s> <s> Ok , see selleks ... enne ei m&auml;rganud , et sellise asja eest raha tahetakse , kustutasin asja oma arvutist &auml;ra . </s> <s> Uninstall faili k&auml;ep&auml;rast polnud ja kurat seda teab miks , aga k&otilde;ige targem tegu tundus tol hetkel olevat Program Files kaustast see vastav alamkaust &auml;ra kustutada lihtsalt . </s> <s> P&auml;rast seda on k&otilde;ik programmi osad kadunud ... peale selle toreda pop-up akna , mis n&otilde;uab registreerimist v&otilde;i uninstalli ja seej&auml;rel messengeri sulgeb . </s> <s> Et p&otilde;him&otilde;tteliselt probleem oleks - kuidas uninstallida asja , mida ei n&auml;i su arvutis enam olevat ? </s> </p>
+ </sp> <sp> <speaker>Zippy</speaker> 
+<p> <s> Mul ei t&ouml;&ouml;ta : Turn on &quot; what im listening to &quot; . </s> </p>
+<p> <s> Linnuke on peal aga ei n&auml;ita . </s> <s> Proovisin winampi , media playeri ja itunesiga . </s> </p>
+<p> <s> Mis teha ? </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> lol </s> </p>
+<p> <s> kui msni alt on linnuke pandud siis pange media playeri ( tools plugins ja siis linnuke selle msni jura ette ) alt ka . </s> </p>
+<p> <s> Kui player k2ib ja arvuti kokku jookseb v6i kuidagi imelikult m2ngimise pealt arvuti kinni paned l2hevad pluginnid maha . </s> </p>
+ </sp> <sp> <speaker>wiseguy6</speaker> 
+<p> <s> Sai t&otilde;mmatud heas usus mingi messengeri lisa - MSN Content Plus . </s> <s> Ok , see selleks ... enne ei m&auml;rganud , et sellise asja eest raha tahetakse , kustutasin asja oma arvutist &auml;ra . </s> <s> Uninstall faili k&auml;ep&auml;rast polnud ja kurat seda teab miks , aga k&otilde;ige targem tegu tundus tol hetkel olevat Program Files kaustast see vastav alamkaust &auml;ra kustutada lihtsalt . </s> <s> P&auml;rast seda on k&otilde;ik programmi osad kadunud ... peale selle toreda pop-up akna , mis n&otilde;uab registreerimist v&otilde;i uninstalli ja seej&auml;rel messengeri sulgeb . </s> <s> Et p&otilde;him&otilde;tteliselt probleem oleks - kuidas uninstallida asja , mida ei n&auml;i su arvutis enam olevat ? k&otilde;igepealt &otilde;pi &auml;ra et programmi install ei koosne next -&gt; next -&gt; next -&gt; finish nuppude vajutamisest . . </s> </p>
+<p> <s> aga lase proge uuest peale ja loe eulast kuidas maha lasta ... </s> </p>
+<p> <s> eemalda add/remove kaudu </s> </p>
+<p> <s> ad-aware </s> </p>
+<p> <s> google <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>BurneR</speaker> 
+<p> <s> ee ma pole juba nii umbes 2 kuud emmi sisse saand , mis teha . . mingi troubleshoot jama viskab ette ja kui panen sealt selle repair siis seda linnukest selle IEs offline settings ette ei tule , ylej22nutel aga tuleb . . </s> </p>
+ </sp> <sp> <speaker>Taav0</speaker> 
+<p> <s> ma olen hetkel t&auml;iesti &uuml;ksi msnnis ... mitte hingelistki rohkem kui mina ise . </s> </p>
+<p> <s> Haige . . nagu mingi 125 kontakti ja k&otilde;ik offline <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>The-user</speaker> 
+<p> <s> Et kui selle &auml;ra installin , siis ei lase enam sisse logida . </s> <s> Viskab mingi errori ja finito . </s> </p>
+<p> <s> MSN 7 . 5 </s> </p>
+<p> <s> Ehk oskab keegi aidata ? </s> </p>
+ </sp> <sp> <speaker>Max</speaker> 
+<p> <s> Kui keegi <gap desc='hyperlink'> lisab Sind oma </s> </p>
+<p> <s> msni , </s> </p>
+<p> <s> &auml;ra v&otilde;ta vastu . </s> <s> See onviirus . saada see k&otilde;igile , sest kui </s> </p>
+<p> <s> keegi Sinu s&otilde;pradest selle vastu v&otilde;tab , saad ka Sina viiruse . </s> <s> See </s> </p>
+<p> <s> viirus teeb endale ise tee l&auml;bi interneti , v&otilde;ttes suvalise msni lisab </s> </p>
+<p> <s> ta listi . </s> <s> Saada see k&otilde;igile kes Su listis </s> </p>
+<p> <s> Express yourself instantly with MSN Messenger ! </s> </p>
+<p> <s> Download today it's FREE ! </s> <s> T&auml;na siis selline tore kiri postkastis ... see msn'i junk hakkab juba n&auml;rvidele k&auml;ima ... </s> </p>
+<p> <s> Inimesed kuidas te usute sellist bullsh*t juttu- kas t&otilde;esti on vaja seda mitmek&uuml;mnele inimesele edasi saata ? </s> </p>
+ </sp> <sp> <speaker>reitz90</speaker> 
+<p> <s> ma pole msni juba paar kuud saand , 2kki keegi palun aitaks v2heke . . </s> </p>
+<p> <s> repairi teen 2ra aga ikka ei saa sisse , olen teinud formaadi ja veel sada imet , nett on muidu sees kyll . on mingeid programme voi nippe kuda seda v2rki korda saada . . pliis help ? ! </s> </p>
+ </sp> <sp> <speaker>XHK</speaker> 
+<p> <s> &Auml;kki su msnni kontoga hoopis midagi lahti ? </s> <s> Muidu v&otilde;id ka n&auml;iteks gaimi msnni asemel proovida . proovisin teiste kontodega ka aga tulemus sama . </s> </p>
+<p> <s> gaimi ? </s> <s> 2kki seletaks l2hemalt . . </s> </p>
+ </sp> <sp> <speaker>XHK</speaker> 
+<p> <s> Linuxile m&otilde;eldud messenger . </s> <s> Ise kasutan ka seda . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Probleem - Planet Foorumid </head>
+<sp> <speaker>Leader112</speaker> 
+<p> <s> <hi rend='quote'> SP22</hi> </s> </p>
+<p> <s> On see upsi v&otilde;i arvuti h&auml;&auml;l ? </s> </p>
+<p> <s> edit : tundub nagu UPS'i aku n&otilde;uab vahetust . </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> v&otilde;ta automatic restart maha </s> </p>
+<p> <s> siis peaks bsod'd n&auml;itama ja saab edasi m&otilde;elda </s> </p>
+<p> <s> muidugi , alati v&otilde;id repair installiga windowsi &uuml;le lasta </s> </p>
+ </sp> <sp> <speaker>atihimself</speaker> 
+<p> <s> See linnukese eemaldamine ei aidanud . </s> <s> T&auml;na ka jama , kuigi l&auml;ks paremini t&ouml;&ouml;le . </s> <s> Mingi 4-5 restarti , siis t&ouml;&ouml;tab . </s> <s> Mingi 3h p&auml;rast peale t&ouml;&ouml;le minekut veel &uuml;ks ja hetkel t&ouml;&ouml;tab siiani . </s> <s> S&otilde;ber arvas ka , et midagi toitega + n&uuml;&uuml;d avastasin , &uuml;ks vent ei t&ouml;&ouml;ta . </s> <s> Protsessori oma t&ouml;&ouml;tab ja mingi teine ka , aga see mis peaks &otilde;hku kasti sisse v&otilde;i v&auml;lja viima , ei t&ouml;&ouml;ta . </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Tere , mina siin . </s> <s> J&auml;lle arvutiga mingi jama . </s> <s> Panen t&ouml;&ouml;le , hakkab laadima Windowsi , laeb &auml;ra ja siis j&auml;&auml;b pilt mustaks . </s> <s> Monitorist kostub selline heli , mis tekib v&auml;ljal&uuml;litamise ajal , selline krabin . </s> <s> All<hi rend='italic'> on</hi>-tuli p&otilde;leb ja punane &quot;m&otilde;tlemis&quot; tuli ka vilgub . </s> <s> Safe modis praegu t&ouml;&ouml;tan . </s> <s> Tegin k&otilde;ik spyware ja viiruse checkid &auml;ra ja mitte midagi ei leidnud , mis on imelik , sest tavaliselt mingi spyware ikka leiab . </s> <s> Tegin selle stardi ka , et <hi rend='italic'>last good know conf . </hi> ... </s> <s> Ei aitanud . </s> <s> Kas keegi oskab aidata ? </s> </p>
+ </sp> <sp> <speaker>miilis</speaker> 
+<p> <s> Ei hakanud ka teemat tegema , aga probleem j&auml;rgmine : ARVUTI ON AEGLANE ! , varem polnud . </s> </p>
+<p> <s> Mis aidata v&otilde;iks ? <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>miilis</speaker> 
+<p> <s> tsitseerin <gap desc='hyperlink'> : </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> Minu arust &uuml;ks suurimaid tavakasutajate valearusaamu on see , et kui neil arvutis liiga palju dokumente v&otilde;i fotosid on , siis see muutub aeglaseks . </s> <s> Ja nii nad siis kirjutavad asju plaadile v&otilde;i kustutavad hambad ristis neid &auml;ra . </s> <s> Ning endal on 200 gigased kettad v&auml;hemalt , millest kasutuses 10 giga . </s> <s> Oeh . well , kui mul arvuti v&auml;ga aeglaseks muutus avastasin , et mul mingi 500 mb vabam&auml;lu , t&uuml;hjendasin veidi ja sain kiiremaks </s> ... . </p>
+ </sp> <sp> <speaker>Ebichu</speaker> 
+<p> <s> 500 mega vaba vahem&auml;lu v&otilde;i k&otilde;vaketast ? </s> </p>
+ </sp> <sp> <speaker>Nusk</speaker> 
+<p> <s> osta uus klaviatuur siin , taun </s> </p>
+ </sp> <sp> <speaker>Fireforce</speaker> 
+<p> <s> Sellep&auml;rast ongi m&otilde;istlik luua kettale eraldi partitsioonid s&uuml;steemi jaoks ning muu pahna tarbeks <gap desc='image'> S&uuml;steemi partitsioon omab windows installi ja nipet-n&auml;pet veel ... teine partitsioon kolmanda osapoole softi ja k&otilde;ike muud jama . </s> <s> See annab kaks asja : </s> </p>
+<p> <s> 1 . S&uuml;steemiketta mahtuvus on enam-v&auml;hem kontrollitud ala ( kui kasutaja sellele korralikult hooldust teeb ja tunnistab teise partitsiooni t&auml;htsust ) </s> </p>
+<p> <s> 2 . P&otilde;hipartitsioonile formati tegemisel on teisel partitsioonil info alles , milleks on siis pildid , dokumendid vms . </s> </p>
+<p> <s> N&auml;iteks 200 GB ketta puhul s&uuml;steemi kettaks 20GB , 180GB muu jama jaoks . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> J&auml;lle jama . </s> <s> Vahel netis olles ( v&otilde;i noh &uuml;le&uuml;ldse ) pilt j&auml;&auml;b seisma ja midagi teha ei saa . </s> <s> Task manager ei tule ette , hiir ei liigu , altf4 ei m&otilde;ju . </s> <s> Midagi ei t&ouml;&ouml;ta . </s> <s> Siis vajutan restardi nuppu ja kui peaks see piiks tulema , et restart , siis ta j&auml;&auml;bki piiksuma . </s> <s> Mitte mittu piiksu , vaid &uuml;ks konstantne : piiiiiiiiiiiiiiiiiiiiiii ... </s> <s> Siis l&uuml;litan arvuti v&auml;lja ja mingi 10min p&auml;rast suudab j&auml;lle t&ouml;&ouml;le hakata . </s> <s> Mis viga ? </s> <s> Kontrolli &uuml;le m&auml;lu . </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Kirjutan plaadi ja buudin sellelt ? </s> </p>
+<p> <s> Praegu sain t&ouml;&ouml;le , panin selle katkise videokaardi sisse ja praegu on pilt ees . </s> <s> Kas v&otilde;is probleem olla integreeritud videokaardis ? </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>

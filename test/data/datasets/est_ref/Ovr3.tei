@@ -1,0 +1,191 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 9925; s&otilde;nu kokku: 909</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=gap occurs=17></tagusage>
+         <tagusage gi=p occurs=54></tagusage>
+         <tagusage gi=sp occurs=32></tagusage>
+         <tagusage gi=speaker occurs=32></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr3 </head>
+<div1 type='thread'> <head> Probleem drWatson'iga , Aidake palun ! ( drwtsn32.exe ) - Planet Foorumid </head>
+<sp> <speaker>BurneR</speaker> 
+<p> <s> Kas varem t&ouml;&ouml;tas ? </s> <s> Peale mida enam ei t&ouml;&ouml;ta ? </s> </p>
+<p> <s> Kui proovida buutimisel Last Known Good configuration ( buutimisel pressad F8 kuni tekib men&uuml;&uuml; , kust saad selle valida ) , kas siis t&ouml;&ouml;tab ? </s> </p>
+<p> <s> Kas ta mingi veakoodi ka annab ? </s> <s> Nt . </s> <s> STOP : xxxxxxx ( mingi error s&otilde;nadega ) </s> </p>
+<p> <s> Vaata kas C : \ Documents and Settings \ All Users \ Application Data \ Microsoft \ Dr Watson </s> </p>
+<p> <s> kataloogis on Dr . Watson . log , mis see &uuml;tleb ? </s> </p>
+<p> <s> Kui peale SP2 pealepanekut siis proovi SP2 uuesti peale panna </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> ruuteri pordid - Planet Foorumid </head>
+<sp> <speaker>kasutaja</speaker> 
+<p> <s> Hea oleks mainida ka ruuteri t&auml;pset nime . . </s> </p>
+<p> <s> Yldjuhul saab aga muuta ruuteri konfi toksides ruuteri IP netibrowseri aadressiribale . </s> <s> ( ntx <gap desc='hyperlink'> ) </s> </p>
+<p> <s> See on muidugi yldjuhul . </s> </p>
+ </sp> <sp> <speaker>kasutaja</speaker> 
+<p> <s> K&otilde;ige m&otilde;ttekam oleks seadme dokumentatsioon l&auml;bi lugeda ( saad sina peale ka muu konfimisse puutuva infiga ) , aga portide avamiseks logid end ruuterisse sisse ( vaikimisi on vajalikuks veebiaadressiks <gap desc='hyperlink'> ) ja siis valid kas Advanced Settings=&gt;Virtual Server Settings ( kui ruuteriks D-Link DI-804V ) v&otilde;i Advanced=&gt;Virtual Server ( kui tahad avada &uuml;he-paark porti ) v&otilde;i Application ( sidumaks vajalike portide avamine mingi kindla rakendusega ) ( D-Link DI-804HV ) . </s> </p>
+<p> <s> Seal tr&uuml;kid juba vajalikud pordinumbrid sisse ja masina IP , kuhu nood edasi juhatatakse ( ehk enda IP ) . </s> </p>
+<p> <s> PS ! </s> <s> Kui hakkab silma selline asi nagu DMZ , siis v&otilde;id p&otilde;him&otilde;tteliselt ka seda kasutada , sellisel juhul juhatatakse kogu liiklus otse su masinasse ja ei ole vaja konkreetseid porte avada . </s> </p>
+ </sp> <sp> <speaker>kasutaja</speaker> 
+<p> <s> Enamus ruuterid ei oma defaultis passi , niiet piisab ok vajutamisest . </s> <s> N&uuml;&uuml;d samas kui keegi teine ruuterit haldab , siis ilmselt pass kah ja aitab ainult k&uuml;simine . </s> </p>
+ </sp> <sp> <speaker>CyberRax</speaker> 
+<p> <s> seal on portide suunaimseks ju tabelid olemas . </s> <s> Kuid muidu on D-Link ruuterid pask ( sai 3 eri mudelit proovitud ) </s> </p>
+ </sp> <sp> <speaker>zo_oz</speaker> 
+<p> <s> ohhh issand . </s> <s> Ma panin ise segast . </s> <s> Sorry : &dollar; NB ma ei pannud enne Local Server IP Adressi l&otilde;ppu &auml;ra : &dollar; </s> </p>
+ </sp> <sp> <speaker>PsycoEvil</speaker> 
+<p> <s> Trendnet ruuteritel on ip-ks 192 . 168 . 1 . 1 , sealt Advanced setup ja seal on v&otilde;imalik k&otilde;ikv&otilde;imalikke trikke teha , t&auml;psemalt ei m&auml;leta . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Teie ( naljakad ) &otilde;nnetused arvutiga - 13. leht - Planet Foorumid </head>
+<sp> <speaker>mcquiz</speaker> 
+<p> <s> Eelmise n&auml;dala reedel &uuml;tles k&otilde;vaketas siis l&otilde;plikult &uuml;les . </s> </p>
+<p> <s> remondist &ouml;eldi , et andmeid enam taastada ei &otilde;nnestu ning tuleb uus k&otilde;vakas panna , hea seegi et uus 2x suurem 20GB , esialgu piisab ... </s> </p>
+<p> <s> krdi kahju , sinna j&auml;i palju t&auml;htsaid dokumente ja pooleliolevaid m&auml;nge <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>t&ouml;llakas333</speaker> 
+<p> <s> K&otilde;ige hullem asi mis on minuga juhtunud , on see , et ma ei teadnud , et cd-romis oli 1 cd juba sees ja ma panin teise plaadi ka sisse , siis kui rom l&auml;ks kinni , hakkas rom v&auml;ga k&otilde;vasti sisisema ja ma kiiresti hakkasin peksma seda nuppu . </s> <s> Kui ma plaadid v&auml;lja sain , oli 1 plaat nagu mingi vin&uuml;&uuml;l <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Spirit</speaker> 
+<p> <s> <hi rend='quote'> K&otilde;ige hullem asi mis on minuga juhtunud , on see , et ma ei teadnud , et cd-romis oli 1 cd juba sees ja ma panin teise plaadi ka sisse , siis kui rom l&auml;ks kinni , hakkas rom v&auml;ga k&otilde;vasti sisisema ja ma kiiresti hakkasin peksma seda nuppu . </hi> </s> <s> <hi rend='quote'> Kui ma plaadid v&auml;lja sain , oli 1 plaat nagu mingi vin&uuml;&uuml;l <gap desc='image'> </hi> </s> </p>
+<p> <s> endal kah nii juhtund , aga vin&uuml;&uuml;liks ei l&auml;ind <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Nokia 3650</speaker> 
+<p> <s> <hi rend='quote'> Ma ei saa aru ? ? </hi> </s> <s> <hi rend='quote'> &Uuml;xkord panin pommi taolise asja arvuti peale ja arvuti lendas &otilde;hku ! ! </hi> </s> <s> <hi rend='quote'> Ma ei saa aru k&uuml;ll miks see &otilde;hku lendas ? </hi> </s> </p>
+<p> <s> et nagu nali oli ve ? </s> </p>
+ </sp> <sp> <speaker>Nokia 3650</speaker> 
+<p> <s> <hi rend='quote'> lammas </hi> </s> </p>
+<p> <s> ilus krussis karvaga loom ju ja sashl&otilde;ki jaoks asendamatu </s> </p>
+ </sp> <sp> <speaker> . : t6nis : . </speaker> 
+<p> <s> <hi rend='quote'> &Auml;ra paugu nii palju lammas </hi> </s> </p>
+<p> <s> kas sa ikka pead niipalju l&auml;bustama ja teistega &uuml;lbama . </s> <s> M&otilde;ni tore adminn v&otilde;iks sulle panniga piki pead panna . </s> </p>
+ </sp> <sp> <speaker>Zorru</speaker> 
+<p> <s> <hi rend='quote'> NO KIA on newb <gap desc='image'> </hi> </s> </p>
+<p> <s> <hi rend='quote'> &otilde;udne newb . </hi> </s> <s> <hi rend='quote'> Seda enam , kui ta newb on , siis peaks just korralikult k&auml;ituma ja ennast heast k&uuml;ljest n&auml;itama mitte niisama l&auml;bustama ja teisi kasutajaid solvama . </hi> </s> </p>
+<p> <s> <hi rend='quote'> -e-</hi> </s> </p>
+<p> <s> typo . </s> </p>
+ </sp> <sp> <speaker>Cat</speaker> 
+<p> <s> <hi rend='quote'> jah newb aga kellegi uus kloon </hi> </s> </p>
+<p> <s> on v ? krt ... ma siin foorumis vist nii v&auml;he tegelenud <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Jubin</speaker> 
+<p> <s> oeh , alati suudab keegi mingi teema ara rikkuda . . </s> </p>
+ </sp> <sp> <speaker>Jubin</speaker> 
+<p> <s> olen arvutitega tegelend 10 aastat . k&otilde;vakettaid olen &otilde;htule saatnud mingi 20 ringis , emaplaate ja protsessoreid olen ka ikka kuhjaga sisse k&otilde;rvetanud r&auml;&auml;kimata igasugustest muudest kaartidest . k&otilde;ige koomim lugu vast oli see kui floppy elektri juhtme valesti sisse lykkasin ja siis juhtmed akkasid v&otilde;imsalt sulama <gap desc='image'> tark &otilde;pib teiste vigadest , loll iseenda . selle suure katsetamise ja l&otilde;hkumisega olen praeguseks ikka p&auml;ris head teadmised saanud arvutite alal <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Jubin</speaker> 
+<p> <s> <hi rend='quote'> Arvutite alal teadmisi saab ka neid &otilde;ppides koolides <gap desc='image'> </hi> </s> </p>
+<p> <s> enamus teadmisi on mul k&uuml;ll praktikas tulnud , ehk siis katsetades . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Icharus</speaker> 
+<p> <s> mingi vana cd romiga oli nii , et kui panin cd sisse , siis hakkas kiiresti k&auml;ima , aga kui cd romi lahti tegin , siis plaadi kiirus ei v&auml;henenud ja plaat lendas v&auml;lja ( mitte tugevalt , aga cdromist v&auml;lja ja kukkus maha ) siis kui se seda esimest korda tegi , ehmatasin t&auml;iega ja siis akkasin endamisi naerma ... <gap desc='image'> </s> </p>
+ </sp> <sp><speaker>MikQke</speaker> 
+<p> <s> Minu k&auml;ru on juba 4 aastat lauapeal hingitsenud , higistades &ouml;&ouml;d ja p&auml;evad , aga otsi pole veel andnud . </s> <s> Printer k&uuml;ll komistas &uuml;kskord ja lendas oma pukilt alla , aga k&otilde;ik j&auml;i terveks peale mu n&auml;rvide . </s> <s> Monitori viskasin ka &uuml;kskord vastu maad . aga katki ei l&auml;inud n&auml;ed <gap desc='image'> . </s> <s> Klaverile olen &uuml;kskord nii andnud , et &quot;jalad&quot; lendasid , Kaks kustukat teibiga alla ja siiamaani k&auml;ib . </s> <s> Floppe CD_ROM'i pole veel 'v&auml;gistanud' ja t&ouml;&ouml;stusvooluga pole ka tudvustand masinat , nagu teised naljavennad siin . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> eruun - 6. leht - Planet Foorumid </head>
+<sp> <speaker>Ohmu</speaker> 
+<p> <s> NHL 2002' te ei saa lahti pakkida </s> </p>
+ </sp> <sp> <speaker>xeron66</speaker> 
+<p> <s> WinRar 2 . 9 Beta <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Funkyzone</speaker> 
+<p> <s> krypto tuleb , &auml;ra muretse ... </s> </p>
+ </sp> <sp> <speaker>Funkyzone</speaker> 
+<p> <s> powerarchiveriga l&auml;heb ka ludinal </s> </p>
+ </sp> <sp> <speaker>REx837</speaker> 
+<p> <s> Muide , kui keegi veel ei tea on eRuunil olemas ka foorum . </s> <s> See on sobiv koht selliste asjade arutamiseks . </s> </p>
+ </sp> <sp> <speaker>pvd</speaker> 
+<p> <s> kahjuks on n&uuml;&uuml;d eruuna m&otilde;neks ajaks kinni <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>kamfriek</speaker> 
+<p> <s> sest et hot . ee tiimile see asi ei meeldinud . </s> </p>
+ </sp> <sp> <speaker>Ott</speaker> 
+<p> <s> ei tea , millal siis avatakse . . Kas t&auml;na ? </s> </p>
+ </sp> <sp> <speaker>Agent</speaker> 
+<p> <s> reede ja p&uuml;hap&auml;eva vahel lubati ... </s> </p>
+ </sp> <sp> <speaker>MC_Luxxu</speaker> 
+<p> <s> see mis tuleb ikka 30 . 11-02 . 12 lubati . </s> <s> See login on ainlt adminnidele mul on selline tunne ... </s> </p>
+ </sp> <sp> <speaker>Gamesland</speaker> 
+<p> <s> Seda tahaks loota isegi </s> </p>
+ </sp> <sp> <speaker>Gamesland</speaker> 
+<p> <s> <hi rend='quote'> A minul on Tihase parool ja ma saan seal sees k&auml;ia <gap desc='image'></hi> </s> </p>
+<p> <s> <hi rend='quote'> ei , ma ei &uuml;tle seda sulle isegi kui sa mulle priva peaxid saatma . </hi> </s> </p>
+<p> <s> mis sa siis sellest r&auml;&auml;gid , kui ei ytle ? </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>

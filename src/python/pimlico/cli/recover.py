@@ -1,6 +1,9 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import zip
+
 import os
 import shutil
 import tarfile
@@ -48,13 +51,13 @@ class RecoverCmd(PimlicoCLISubcommand):
 
         def _dry_print(mess):
             if dry:
-                print "DRY: Not doing: {}".format(mess)
+                print("DRY: Not doing: {}".format(mess))
             else:
-                print mess
+                print(mess)
 
-        print "Trying to recover partial execution state of module {}".format(module_name)
+        print("Trying to recover partial execution state of module {}".format(module_name))
         if module.status == "COMPLETE":
-            print "Module appears to have been fully executed: not recovering"
+            print("Module appears to have been fully executed: not recovering")
             return
 
         if module.is_locked():
@@ -63,21 +66,21 @@ class RecoverCmd(PimlicoCLISubcommand):
 
         # Get the outputs that are being written
         outputs = module.get_grouped_corpus_output_names()
-        print "Checking outputs: {}".format(", ".join(outputs))
+        print("Checking outputs: {}".format(", ".join(outputs)))
         last_docs = []
         for output_name in outputs:
-            print "\n### Checking output '{}'".format(output_name)
+            print("\n### Checking output '{}'".format(output_name))
             try:
                 output = module.get_output(output_name)
-            except DataNotReadyError, e:
-                print "Could not read output '{}': cannot check written documents".format(output_name)
+            except DataNotReadyError as e:
+                print("Could not read output '{}': cannot check written documents".format(output_name))
                 raise ValueError("could not read output '{}': {}".format(output_name, e))
-            print "Reported length: {:,d}".format(len(output))
-            print "Counting actual length. This could take some time..."
+            print("Reported length: {:,d}".format(len(output)))
+            print("Counting actual length. This could take some time...")
             output_last_docs, num_docs = count_docs(output, last_buffer_size=last_docs_buffer_size)
-            print "\n{:,} docs. Last docs: {}".format(num_docs, "".join(
+            print("\n{:,} docs. Last docs: {}".format(num_docs, "".join(
                 "\n   {}, {}".format(archive, doc_name) for (archive, doc_name) in output_last_docs
-            ))
+            )))
             last_docs.append((num_docs, output_last_docs))
 
         # Look for the output that has the least written to it
@@ -85,22 +88,22 @@ class RecoverCmd(PimlicoCLISubcommand):
         min_count_last_docs = min(last_docs, key=itemgetter(0))
         new_last_doc = min_count_last_docs[1][-2]
         new_doc_count = min_count_last_docs[0] - 1
-        print "Shortest output has {:,} docs: {:,} will be the new size of all outputs"\
-            .format(new_doc_count+1, new_doc_count)
+        print("Shortest output has {:,} docs: {:,} will be the new size of all outputs"\
+            .format(new_doc_count+1, new_doc_count))
 
         for output_name, (count, output_last_docs) in zip(outputs, last_docs):
             # Check that all output modules have max 1 more doc than this one
             if count > new_doc_count + last_docs_buffer_size:
-                print "{} has more than {} documents more than the shortest output ({:,}): outputs " \
-                      "are heavily unsynchronized".format(output_name, last_docs_buffer_size, count)
+                print("{} has more than {} documents more than the shortest output ({:,}): outputs " \
+                      "are heavily unsynchronized".format(output_name, last_docs_buffer_size, count))
             # Check that the new last doc matches with one of the last two for each other output
             if new_last_doc not in output_last_docs:
-                print "{}'s last written documents do not contain the new last document in the corpus {}. " \
+                print("{}'s last written documents do not contain the new last document in the corpus {}. " \
                       "Outputs are very out of sync, or something odd has gone on. Trying again with a larger " \
-                      "--last-docs might help".format(output_name, new_last_doc)
+                      "--last-docs might help".format(output_name, new_last_doc))
                 sys.exit(1)
 
-        print "New last document in output corpora will be {}".format(new_last_doc)
+        print("New last document in output corpora will be {}".format(new_last_doc))
 
         for output_name, (count, output_last_docs) in zip(outputs, last_docs):
             output = module.get_output(output_name)
@@ -131,11 +134,11 @@ class RecoverCmd(PimlicoCLISubcommand):
                     writer.metadata["length"] = new_doc_count
 
         metadata = module.get_metadata()
-        print "Old module metadata: {}".format(metadata)
+        print("Old module metadata: {}".format(metadata))
         metadata["status"] = "PARTIALLY_PROCESSED"
         metadata["docs_completed"] = new_doc_count
         metadata["last_doc_completed"] = u"%s/%s" % new_last_doc
-        print "New metadata: {}".format(metadata)
+        print("New metadata: {}".format(metadata))
         _dry_print("Correcting status and progress of module")
         if not dry:
             module.set_metadata_values(metadata)
@@ -171,7 +174,7 @@ def truncate_tar_after(path, last_filename, gzipped=False):
 
     """
     backup_path = "{}.backup".format(path)
-    print "Creating backup: {}".format(backup_path)
+    print("Creating backup: {}".format(backup_path))
     shutil.copy2(path, backup_path)
 
     with open(path, mode="r+") as f:

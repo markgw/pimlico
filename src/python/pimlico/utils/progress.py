@@ -1,6 +1,9 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import division
+from past.utils import old_div
+from builtins import object
 
 import warnings
 
@@ -132,7 +135,7 @@ class LittleOutputtingProgressBar(SafeProgressBar):
         self._time_sensitive = False
 
     def _current_percentage(self):
-        return self.currval * 100 / self.maxval
+        return self.currval * 100 // self.maxval
 
     def _format_line(self):
         # Ignore widgets and output a simple message
@@ -156,7 +159,7 @@ class LittleOutputtingProgressBar(SafeProgressBar):
         self.num_intervals = 10
         if self.maxval is not UnknownLength:
             if self.maxval < 0: raise ValueError('Value out of range')
-            self.update_interval = self.maxval / self.num_intervals
+            self.update_interval = self.maxval // self.num_intervals
 
     def finish(self):
         super(LittleOutputtingProgressBar, self).finish()

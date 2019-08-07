@@ -18,6 +18,7 @@ as far as possible, these should be converted into standard datatypes like
    The following classes were moved to :mod:`~pimlico.datatypes.core` in version 0.6rc
 
 """
+from __future__ import print_function
 import cPickle as pickle
 import os
 import re
@@ -471,7 +472,7 @@ class CountInvalidCmd(ShellCommand):
         invalids = sum(
             (1 if isinstance(doc, InvalidDocument) else 0) for __, doc in pbar(corpus)
         )
-        print "%d / %d documents are invalid" % (invalids, len(corpus))
+        print("%d / %d documents are invalid" % (invalids, len(corpus)))
 
 
 class IterableCorpus(PimlicoDatatype):
@@ -558,7 +559,7 @@ class IterableCorpus(PimlicoDatatype):
         if type(document) is not InvalidDocument and not self.raw_data:
             try:
                 document = self.data_point_type_instance.process_document(document)
-            except BaseException, e:
+            except BaseException as e:
                 # If there's any problem reading in the document, yield an invalid doc with the error
                 document = InvalidDocument("datatype %s reader" % self.datatype_name, "%s: %s" % (e, format_exc()))
         return document
@@ -666,7 +667,7 @@ def load_datatype(path):
     """
     try:
         cls = import_member(path)
-    except ImportError, e:
+    except ImportError as e:
         raise DatatypeLoadError("could not load datatype class %s: %s" % (path, e))
 
     if type(cls) is not type(object):

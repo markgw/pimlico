@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from pimlico.datatypes.corpora.data_points import DataPointType, InvalidDocument, is_invalid_doc, \
-    invalid_document_or_text, invalid_document
+    invalid_document_or_raw, invalid_document
 from .base import IterableCorpus
 from .grouped import GroupedCorpus
 from . import data_points

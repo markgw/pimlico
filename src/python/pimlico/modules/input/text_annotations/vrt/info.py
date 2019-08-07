@@ -17,6 +17,7 @@ Reads in files from arbitrary locations in the same way as :mod:`pimlico.modules
 
 """
 
+from builtins import object
 import os
 
 from pimlico.core.modules.base import BaseModuleInfo

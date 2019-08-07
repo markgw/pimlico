@@ -1,14 +1,17 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import input
+from past.builtins import basestring
 
+from io import open
 import os
 import shutil
 import tarfile
 import threading
 from zipfile import ZipFile
 
-from pimlico import OUTPUT_DIR
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -58,8 +61,8 @@ def copy_dir_with_progress(source_dir, target_dir, move=False):
         shutil.rmtree(target_dir)
 
     source_size = dirsize(source_dir)
-    print "%s %s from %s to %s" % ("Moving" if move else "Copying",
-                                   format_file_size(source_size), source_dir, target_dir)
+    print("%s %s from %s to %s" % ("Moving" if move else "Copying",
+                                   format_file_size(source_size), source_dir, target_dir))
 
     # Do the copying in a thread
     copy_thread = threading.Thread(target=shutil.copytree, args=(source_dir, target_dir))
@@ -110,7 +113,8 @@ def new_filename(directory, initial_filename="tmp_file"):
 
 def retry_open(filename, errnos=[13], retry_schedule=[2, 10, 30, 120, 300], **kwargs):
     """
-    Try opening a file, using the builtin open() function. If an IOError is raised and its `errno` is in the given
+    Try opening a file, using the builtin open() function (Py3, or io.open on Py2).
+    If an IOError is raised and its `errno` is in the given
     list, wait a moment then retry. Keeps doing this, waiting a bit longer each time, hoping that the problem will
     go away.
 
@@ -133,7 +137,7 @@ def retry_open(filename, errnos=[13], retry_schedule=[2, 10, 30, 120, 300], **kw
         for retry_wait in retry_schedule + [None]:
             try:
                 return open(filename, **kwargs)
-            except IOError, e:
+            except IOError as e:
                 if e.errno not in errnos:
                     # Caught an error, but not one we should retry on
                     raise
@@ -143,7 +147,7 @@ def retry_open(filename, errnos=[13], retry_schedule=[2, 10, 30, 120, 300], **kw
                     # Ran out of retries: ask the user what to do
                     warnings.warn("Error opening file: %s. Not making any more attempts. If possible, fix the problem "
                                   "and we can try again" % e)
-                    answer = raw_input("Try opening %s again? [Y/n] " % filename)
+                    answer = input("Try opening %s again? [Y/n] " % filename)
                     if answer.lower() == "n":
                         # Don't try again, give up and raise the error
                         raise

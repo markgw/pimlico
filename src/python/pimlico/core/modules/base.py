@@ -22,6 +22,10 @@ worrying about incurring the associated costs (and dependencies) every time a pi
 is loaded.
 
 """
+from builtins import zip
+from past.builtins import basestring
+from builtins import object
+
 import json
 import os
 import shutil
@@ -251,7 +255,7 @@ class BaseModuleInfo(object):
         :return: dictionary of inputs
         """
         inputs = {}
-        for opt_name, opt_value in opt_dict.items():
+        for opt_name, opt_value in list(opt_dict.items()):
             if opt_name == "input":
                 # Allow the name "input" to be used where there's only one input
                 if len(cls.module_inputs) == 1:
@@ -668,10 +672,16 @@ class BaseModuleInfo(object):
 
         """
         input_setups = self.get_input_reader_setup(input_name=input_name, always_list=always_list)
+        if input_setups is None:
+            return None
         if type(input_setups) is list:
-            return [
-                setup.get_reader(self.pipeline, self.module_name) for setup in input_setups
+            readers = [
+                setup.get_reader(self.pipeline, self.module_name) for setup in input_setups if setup is not None
             ]
+            if len(readers) == 0:
+                return None
+            else:
+                return readers
         else:
             return input_setups.get_reader(self.pipeline, self.module_name)
 
@@ -865,7 +875,7 @@ class BaseModuleInfo(object):
                     ))
             try:
                 first_satisfied.append(check_type(dep_module_output, input_type_requirements))
-            except TypeCheckError, e:
+            except TypeCheckError as e:
                 raise PipelineStructureError(
                     "type-checking error matching input '{}' to module '{}' with output '{}' from "
                     "module '{}': {}".format(
@@ -926,7 +936,7 @@ class BaseModuleInfo(object):
         # Instantiate any output datatypes this module will need and check the datatype's dependencies
         dtypes = [
             self.get_output_datatype(output_name)[1]
-            for output_name in dict(self.available_outputs).keys()
+            for output_name, __ in self.available_outputs
         ]
         # Get dependencies for each datatype, plus the additional dependencies
         # declared to apply to the writer specifically, since we're writing here
@@ -1287,7 +1297,7 @@ def load_module_executor(path_or_info):
 
             try:
                 mod = import_module(executor_path)
-            except ImportError, e:
+            except ImportError as e:
                 # Executors used to be defined in a module called "exec", until I realised this was stupid, as it's
                 #  as reserved word!
                 # Check whether one such exists and use it if it does
@@ -1305,7 +1315,7 @@ def load_module_executor(path_or_info):
             # We were given a module info instance: work out where it lives and get the executor relatively
             try:
                 mod = import_module("..execute", module_info.__module__)
-            except ImportError, e:
+            except ImportError as e:
                 # Check whether an 'exec' module exists
                 try:
                     mod = import_module("..exec", module_info.__module__)
@@ -1332,7 +1342,7 @@ def load_module_info(path):
     info_path = "%s.info" % path
     try:
         mod = import_module(info_path)
-    except ImportError, e:
+    except ImportError as e:
         raise ModuleInfoLoadError("module type '%s' could not be found (could not import %s: %s)" % (path, info_path, e))
 
     if not hasattr(mod, "ModuleInfo"):

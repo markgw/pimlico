@@ -1,10 +1,18 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import unicode_literals
 
-import csv
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import map
+
+from backports import csv
 import os
-from cStringIO import StringIO
+from io import StringIO
+from io import open
 from itertools import dropwhile
 from sklearn.manifold.mds import MDS
 from sklearn.manifold.t_sne import TSNE
@@ -13,7 +21,6 @@ from sklearn.metrics.pairwise import cosine_distances, euclidean_distances, manh
 import numpy
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.old_datatypes.plotting import PlotOutputWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):
@@ -72,7 +79,7 @@ class ModuleExecutor(BaseModuleExecutor):
                     if s.startswith(prefix):
                         return s[len(prefix):], cname
                 return s, "b"
-            vocab, colours = zip(*map(word2col, vocab))
+            vocab, colours = list(zip(*list(map(word2col, vocab))))
         elif colour_list is not None:
             colours = [colour_list[i] for i in source_ids]
         else:
@@ -81,26 +88,27 @@ class ModuleExecutor(BaseModuleExecutor):
         title = "{} reduction, {} distances".format(reduction_name, metric)
 
         self.log.info("Outputting data and plotting code")
-        with PlotOutputWriter(self.info.get_absolute_output_dir("plot")) as writer:
+        with self.info.get_output_writer("plot") as writer:
             # Prepare data to go to CSV file
             io = StringIO()
             csv_writer = csv.writer(io)
             for label, value, c in zip(vocab, red_vecs, colours):
-                csv_writer.writerow([unicode(label).encode("utf8"), str(float(value[0])), str(float(value[1])), c])
-            writer.data = io.getvalue()
+                csv_writer.writerow([str(label), str(float(value[0])), str(float(value[1])), c])
+            writer.write_file("data.csv", io.getvalue(), text=True)
 
             # Use a standard template plot python file
-            with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "plot_template.py"), "r") as f:
+            with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "plot_template.py"), "r", encoding="utf-8") as f:
                 plotting_code = f.read()
             # Remove any comments at the beginning, which explain what the file is
             plotting_code = "\n".join(dropwhile(lambda l: len(l) == 0 or l.startswith("#"), plotting_code.splitlines()))
-            writer.plotting_code = plotting_code.replace("<TITLE>", title)
+            writer.write_file("plot.py", plotting_code.replace("<TITLE>", title), text=True)
 
-        # Written the plot code and data
-        # Now do the plotting
-        self.log.info("Running plotter")
-        plot_output = self.info.get_output("plot")
-        plot_output.plot()
+            script_path = writer.get_absolute_path("plot.py")
+            pdf_path = writer.get_absolute_path("plot.pdf")
 
-        self.log.info("Plot output to %s" % plot_output.pdf_path)
-        self.log.info("Customize plot by editing %s and recompiling (python plot.py)" % plot_output.script_path)
+            # Written the plot code and data
+            # Plotting gets executed when the writer is exited (now...)
+            self.log.info("Running plotter")
+
+        self.log.info("Plot output to %s" % pdf_path)
+        self.log.info("Customize plot by editing %s and recompiling (python plot.py)" % script_path)

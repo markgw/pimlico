@@ -1,8 +1,11 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-
+from future.utils import raise_
+from builtins import range
+from builtins import object
 from contextlib import contextmanager
+
 import sys
 import ast
 
@@ -41,7 +44,7 @@ def multiwith(*managers):
             # Don't rely on sys.exc_info() still containing
             # the right information. Another exception may
             # have been raised and caught by an exit method
-            raise exc[0], exc[1], exc[2]
+            raise_(exc[0], exc[1], exc[2])
 
 
 def is_identifier(ident):
@@ -121,7 +124,7 @@ def import_member(path):
         raise ImportError("no module name in {}".format(path))
     try:
         mod = import_module(mod_path)
-    except ImportError, e:
+    except ImportError as e:
         raise ImportError("class' module does not exist: %s. %s" % (mod_path, e))
 
     if not hasattr(mod, cls_name):

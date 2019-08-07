@@ -2,6 +2,7 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+from builtins import zip
 import ctypes
 import multiprocessing
 import os
@@ -80,7 +81,7 @@ def preprocess(executor):
 
         try:
             executor.regexes.append(re.compile(regex))
-        except Exception, e:
+        except Exception as e:
             raise ModuleExecutionError("could not compile regex: %s. %s" % (regex, e))
 
     for regex in executor.regexes:

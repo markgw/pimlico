@@ -17,8 +17,10 @@ a ``?`` at the start of a filename/glob, indicating that it will be included if 
 not depended on for considering the data ready to use.
 
 """
+from builtins import next
 import fnmatch
 import os
+import io
 from glob import glob, iglob
 
 from pimlico.core.modules.inputs import iterable_input_reader
@@ -181,7 +183,7 @@ def corpus_len(options):
     return sum(1 for __ in get_paths_from_options(options))
 
 
-def corpus_iter(reader):
+def iter_files(reader):
     options = reader.options
 
     encoding = options["encoding"]
@@ -198,11 +200,8 @@ def corpus_iter(reader):
                 distinguish_id += 1
             used_doc_names.add(doc_name)
 
-        with open(path, "r") as f:
+        with io.open(path, "r", encoding=encoding, errors=options["encoding_errors"]) as f:
             data = f.read()
-            # Decode to unicode string, which will be used as data for document
-            data = data.decode(encoding, errors=options["encoding_errors"])
-
             if start != 0 or end != -1:
                 # start=0 (i.e. no cutting) is the same as start=1 (start from first line)
                 if start != 0:
@@ -217,7 +216,12 @@ def corpus_iter(reader):
                 else:
                     data = u"\n".join(lines[start:end+1])
 
-            yield doc_name, reader.datatype.data_point_type(text=data)
+            yield doc_name, data
+
+
+def corpus_iter(reader):
+    for doc_name, data in iter_files(reader):
+        yield doc_name, reader.datatype.data_point_type(text=data)
 
 
 ModuleInfo = iterable_input_reader(

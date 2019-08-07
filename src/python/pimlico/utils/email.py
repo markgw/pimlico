@@ -25,6 +25,10 @@ Configure email sending functionality by adding the following fields to your Pim
 
 from __future__ import absolute_import
 
+from builtins import str
+from past.builtins import basestring
+from builtins import object
+
 import smtplib
 from email.mime.text import MIMEText
 from smtplib import SMTPHeloError, SMTPAuthenticationError, SMTPException
@@ -84,7 +88,7 @@ def send_pimlico_email(subject, content, local_config, log):
         # Read email config from the local config
         config = EmailConfig.from_local_config(local_config)
         data = send_text_email(config, subject, content=content)
-    except Exception, e:
+    except Exception as e:
         log.error("Could not send email: %s" % e)
         return {"success": False}
     else:
@@ -97,7 +101,7 @@ def send_text_email(email_config, subject, content=None):
     # Encode unicode content as utf-8
     if content is None:
         content = ""
-    body = unicode(content).encode("utf-8")
+    body = str(content).encode("utf-8")
 
     # Create a plain message
     msg = MIMEText(body)
@@ -120,13 +124,13 @@ def send_text_email(email_config, subject, content=None):
         # Login details have been supplied, so authenticate with SMTP server
         try:
             s.login(email_config.username, email_config.password)
-        except SMTPHeloError, e:
+        except SMTPHeloError as e:
             raise EmailError("invalid HELO response from SMTP server: %s" % e)
-        except SMTPAuthenticationError, e:
+        except SMTPAuthenticationError as e:
             raise EmailError("could not authenticate with SMTP server (host '%s' using username '%s'): %s" % (
                 email_config.host, email_config.username, e
             ))
-        except SMTPException, e:
+        except SMTPException as e:
             raise EmailError("could not find a suitable SMTP authentication method: %s" % e)
 
     # Send the message

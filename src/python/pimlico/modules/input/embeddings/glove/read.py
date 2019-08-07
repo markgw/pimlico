@@ -1,3 +1,4 @@
+from builtins import range
 import warnings
 
 from gensim import utils
@@ -6,6 +7,8 @@ from gensim.scripts.glove2word2vec import get_glove_info
 from numpy import zeros, float32, ascontiguousarray
 
 from pimlico.utils.progress import get_progress_bar
+
+from smart_open import open
 
 
 def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='strict', limit=None, log=None):
@@ -41,7 +44,7 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
     if fvocab is not None:
         _info("Reading vocab file")
         counts = {}
-        with utils.smart_open(fvocab) as fin:
+        with open(fvocab) as fin:
             for line in fin:
                 word, count = utils.to_unicode(line).strip().split()
                 counts[word] = int(count)
@@ -51,7 +54,7 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
     vocab_size, vector_size = get_glove_info(fname)
     _info("Reading {} vectors with {} dimensions".format(vocab_size, vector_size))
 
-    with utils.smart_open(fname) as fin:
+    with open(fname) as fin:
         if limit:
             vocab_size = min(vocab_size, limit)
         result = WordEmbeddingsKeyedVectors(vector_size)
@@ -81,7 +84,7 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
         else:
             pbar = get_progress_bar(vocab_size, title="Reading")
 
-        for line_no in pbar(xrange(vocab_size)):
+        for line_no in pbar(range(vocab_size)):
             line = fin.readline()
             if line == b'':
                 raise EOFError("unexpected end of input; is count incorrect or file otherwise damaged?")

@@ -1,11 +1,7 @@
-\!\! Normalize raw text
-~~~~~~~~~~~~~~~~~~~~~~~
+Normalize raw text
+~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.text.text_normalize
-
-.. note::
-
-   This module has not yet been updated to the new datatype system, so cannot be used in the `datatypes` branch. Soon it will be updated.
 
 +------------+-------------------------------------+
 | Path       | pimlico.modules.text.text_normalize |
@@ -15,28 +11,27 @@
 
 Text normalization for raw text documents.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
+Similar to :mod:`~pimlico.modules.text.normalize` module, but operates on raw text,
+not pre-tokenized text, so provides a slightly different set of tools.
 
 
 Inputs
 ======
 
-+--------+--------------------------------------+
-| Name   | Type(s)                              |
-+========+======================================+
-| corpus | **invalid input type specification** |
-+--------+--------------------------------------+
++--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type(s)                                                                                                                                                        |
++========+================================================================================================================================================================+
+| corpus | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`TextDocumentType <pimlico.datatypes.corpora.data_points.TextDocumentType>`> |
++--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Outputs
 =======
 
-+--------+---------------------------------------+
-| Name   | Type(s)                               |
-+========+=======================================+
-| corpus | **invalid output type specification** |
-+--------+---------------------------------------+
++--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name   | Type(s)                                                                                                                                                              |
++========+======================================================================================================================================================================+
+| corpus | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`RawTextDocumentType <pimlico.datatypes.corpora.data_points.RawTextDocumentType>`> |
++--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Options
 =======
@@ -44,9 +39,9 @@ Options
 +-------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 | Name        | Description                                                                                                             | Type                   |
 +=============+=========================================================================================================================+========================+
-| case        | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
-+-------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 | blank_lines | Remove all blank lines (after whitespace stripping, if requested)                                                       | bool                   |
++-------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
+| case        | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
 +-------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 | strip       | Strip whitespace from the start and end of lines                                                                        | bool                   |
 +-------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
@@ -70,7 +65,13 @@ This example usage includes more options.
    [my_text_normalize_module]
    type=pimlico.modules.text.text_normalize
    input_corpus=module_a.some_output
-   case=
    blank_lines=T
+   case=
    strip=T
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-text_normalize.conf`

@@ -1,3 +1,4 @@
+from builtins import object
 from pimlico.datatypes import NamedFileCollection
 from pimlico.datatypes.base import DatatypeWriteError
 from pimlico.utils.core import cached_property
@@ -33,11 +34,11 @@ class ScoredRealFeatureSets(NamedFileCollection):
         else:
             super(ScoredRealFeatureSets, self).browse_file(reader, filename)
 
-    class Reader:
+    class Reader(object):
         def __iter__(self):
             for features, score in self.iter_ids():
                 # Translate feature IDs into names
-                yield dict((self.feature_types[f], v) for (f, v) in features.iteritems()), score
+                yield dict((self.feature_types[f], v) for (f, v) in features.items()), score
 
         def read_samples(self):
             """
@@ -80,7 +81,7 @@ class ScoredRealFeatureSets(NamedFileCollection):
         def __len__(self):
             return self.num_samples
 
-    class Writer:
+    class Writer(object):
         def set_feature_types(self, feature_types):
             """
             Explicitly set the list of feature types that will be written out.
@@ -120,12 +121,12 @@ class ScoredRealFeatureSets(NamedFileCollection):
             # Map feature names to IDs, adding new feature types as necessary
             self._used_feature_types.extend(f for f in features.keys() if f not in self._used_feature_types)
             features_by_id = dict(
-                (self._used_feature_types.index(f), val) for (f, val) in features.iteritems()
+                (self._used_feature_types.index(f), val) for (f, val) in features.items()
             )
             # Write out a line containing the score and each of the feature id -> value mappings
             self.data_file.write("{:f} {}\n".format(
                 score,
-                " ".join(u"{:d}:{:f}".format(f, v) for (f, v) in features_by_id.iteritems())
+                " ".join(u"{:d}:{:f}".format(f, v) for (f, v) in features_by_id.items())
             ))
 
         def __enter__(self):

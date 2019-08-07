@@ -1,0 +1,9 @@
+Estonian Reference Corpus
+=========================
+A small subset
+
+https://www.cl.ut.ee/korpused/segakorpus/
+
+This is a tiny subset containing a few files from the corpus. It's used here as an example of
+reading in a corpus from XML files. The core Pimlico input module for XML files can be used
+to read the Est Ref corpus in its original form.

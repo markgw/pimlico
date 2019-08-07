@@ -1,4 +1,5 @@
 pipelines/input/raw_text_files.conf, europarl
+pipelines/input/xml.conf, input
 pipelines/corpora/group.conf, output
 pipelines/corpora/concat.conf, output
 pipelines/corpora/subset.conf, output
@@ -14,6 +15,8 @@ pipelines/corpora/stats.conf, stats
 pipelines/corpora/filter_tokenize.conf, store
 pipelines/text/normalize.conf, norm
 pipelines/text/simple_tokenize.conf, tokenize
+pipelines/text/char_tokenize.conf, tokenize
+pipelines/text/text_normalize.conf, norm
 pipelines/input/fasttext.conf, vectors
 pipelines/input/glove.conf, vectors
 pipelines/embeddings/word2vec.conf, word2vec

@@ -2,6 +2,7 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+from builtins import str
 from pimlico.core.config import PipelineConfigParseError
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.old_datatypes.arrays import NumpyArrayWriter
@@ -34,7 +35,7 @@ class ModuleExecutor(BaseModuleExecutor):
         transform_cls = self.info.load_transformer_class()
         try:
             transformer = transform_cls(**self.info.init_kwargs)
-        except TypeError, e:
+        except TypeError as e:
             raise PipelineConfigParseError("invalid arguments to %s: %s" % (transform_type, e))
 
         # Apply transformation to the matrix

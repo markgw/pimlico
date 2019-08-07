@@ -11,6 +11,14 @@ if __name__ == "__main__":
     parser.add_argument("--no-clean", help="Do not clean up the storage directory after running tests. By default, "
                                            "all output from the test pipelines is deleted at the end",
                         action="store_true")
+    parser.add_argument("--no-clean-after", "-n",
+                        help="Do not clean up the storage directory after running tests, but do empty it before "
+                             "tests start. By default, all output from the test pipelines is deleted at the end",
+                        action="store_true")
+    parser.add_argument("--exit-error", "-x", help="Stop after the first error encountered. By default, the error "
+                                                   "will be reporting and the next test will continue. This will "
+                                                   "cause the whole suite to be aborted if a test fails",
+                        action="store_true")
     opts = parser.parse_args()
 
     log = get_console_logger("Test")
@@ -20,7 +28,8 @@ if __name__ == "__main__":
     pipelines_and_modules = [(row[0].strip(), [m.strip() for m in row[1:]]) for row in rows]
     log.info("Running {} test pipelines".format(len(pipelines_and_modules)))
 
-    failed = run_test_suite(pipelines_and_modules, log, no_clean=opts.no_clean)
+    failed = run_test_suite(pipelines_and_modules, log, no_clean=opts.no_clean, stop_on_error=opts.exit_error,
+                            no_clean_after=opts.no_clean_after)
     if failed:
         log.error("Some tests did not complete successfully: {}. See above for details".format(
             ", ".join("{}[{}]".format(pipeline, ",".join(modules)) for (pipeline, modules) in failed)

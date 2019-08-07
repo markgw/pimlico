@@ -32,6 +32,8 @@ command line.
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`email`      | Test email settings and try sending an email using them                                      |
 +-------------------+----------------------------------------------------------------------------------------------+
+| :doc:`fixlength`  | Check the length of written outputs and fix it if it's wrong                                 |
++-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`inputs`     | Show the (expected) locations of the inputs of a given module                                |
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`install`    | Install missing module library dependencies                                                  |
@@ -75,6 +77,7 @@ command line.
    variants
    run
    recover
+   fixlength
    browse
    shell
    python

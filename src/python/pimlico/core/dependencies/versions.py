@@ -1,7 +1,8 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-
+from past.builtins import cmp
+from builtins import object
 
 
 class SoftwareVersion(object):
@@ -17,18 +18,22 @@ class SoftwareVersion(object):
     def __str__(self):
         return self.string_id
 
-    def __cmp__(self, other):
+    def __eq__(self, other):
+        if self.string_id == "unknown" and other.string_id == "unknown":
+            return True
+        else:
+            return compare_dotted_versions(self.string_id, other.string_id) == 0
+
+    def __lt__(self, other):
         if self.string_id == "unknown":
-            if other.string_id == "unknown":
-                return 0
-            else:
-                # Any known version is considered later than an unknown version
-                return -1
+            # Any known version is considered later than an unknown version
+            return False
         elif other.string_id == "unknown":
-            return 1
+            # Any known version is considered later than an unknown version
+            return True
         else:
             # Compare the string IDs on the assumption that they're dotted version numbers
-            return compare_dotted_versions(self.string_id, other.string_id)
+            return compare_dotted_versions(self.string_id, other.string_id) < 0
 
 
 # Define here, so that it can easily be used symbolically
@@ -66,7 +71,7 @@ def compare_dotted_versions(version0, version1):
                     # Continue to next part
                     continue
                 # Otherwise, compare string lexicographically and return result without looking at deeper parts
-                return cmp(version0_part, version1_part)
+                return -1 if version0_part < version1_part else 1
             else:
                 # V1 is an int, V0 isn't: int wins
                 return -1
@@ -81,7 +86,7 @@ def compare_dotted_versions(version0, version1):
             continue
         else:
             # Not the same: the one that wins at this level wins the whole thing
-            return cmp(version0_part_int, version1_part_int)
+            return -1 if version0_part_int < version1_part_int else 1
 
     if len(remaining1) > 0:
         # Version 1 has same prefix, but more subversions, so is later

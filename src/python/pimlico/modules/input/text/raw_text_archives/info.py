@@ -40,6 +40,8 @@ function, as is done here.
    :mod:`~pimlico.modules.input.text.raw_text_files` for raw files not in archives
 
 """
+from builtins import next
+from builtins import object
 import os
 import tarfile
 
@@ -56,7 +58,7 @@ class RawTextArchivesInputReader(InputReader):
     Special input reader to read in raw text documents from tar archives.
 
     """
-    class Setup:
+    class Setup(object):
         def get_paths_from_options(self, error_on_missing=False):
             """
             Iterates over paths to all the files specified in the ``files`` option.

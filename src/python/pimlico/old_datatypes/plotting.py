@@ -57,7 +57,7 @@ class PlotOutputWriter(PimlicoDatatypeWriter):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         super(PlotOutputWriter, self).__exit__(exc_type, exc_val, exc_tb)
-        with open(os.path.join(self.data_dir, "data.csv"), "w") as f:
+        with open(os.path.join(self.data_dir, "data.csv"), "wb") as f:
             f.write(self.data)
         with open(os.path.join(self.data_dir, "plot.py"), "w") as f:
             f.write(self.plotting_code)

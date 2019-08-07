@@ -5,15 +5,31 @@
 """
 Reading of pipeline config from a file into the data structure used to run and manipulate the pipeline's data.
 """
-import ConfigParser
+from __future__ import print_function
+from __future__ import unicode_literals
+
+from future import standard_library
+
+standard_library.install_aliases()
+from builtins import map
+from builtins import input
+from builtins import zip
+from builtins import next
+from builtins import str
+from builtins import range
+from past.builtins import basestring
+from builtins import object
+
+import configparser
 import copy
 import os
 import re
 import sys
 import textwrap
 import warnings
-from ConfigParser import SafeConfigParser, RawConfigParser
-from StringIO import StringIO
+import io
+
+from configparser import RawConfigParser, ConfigParser
 from collections import OrderedDict
 from operator import itemgetter
 from socket import gethostname
@@ -148,7 +164,7 @@ class PipelineConfig(object):
         if self._dependent_cache is None:
             self._dependent_cache = {}
             # Use the module_dependencies mapping by simply reversing it
-            for module_name, dependencies in self.module_dependencies.iteritems():
+            for module_name, dependencies in self.module_dependencies.items():
                 for dep in dependencies:
                     self._dependent_cache.setdefault(dep, []).append(module_name)
         return self._dependent_cache
@@ -365,7 +381,7 @@ class PipelineConfig(object):
         )
 
         # Check that we have a module for every alias
-        for alias, alias_target in aliases.iteritems():
+        for alias, alias_target in aliases.items():
             if alias_target not in raw_module_options:
                 raise PipelineStructureError("alias '%s' specified for undefined module '%s'" % (alias, alias_target))
 
@@ -434,7 +450,7 @@ class PipelineConfig(object):
                 try:
                     # First see if this is a datatype
                     # If so, all options other than 'dir' and other special keys are used as datatype options
-                    datatype_options = OrderedDict((k, v) for (k, v) in module_config.iteritems()
+                    datatype_options = OrderedDict((k, v) for (k, v) in module_config.items()
                                                    if k not in ["dir", "tie_alts", "alt_naming"]
                                                    and not k.startswith("modvar_"))
                     datatype_class = load_datatype(module_type_name, options=datatype_options)
@@ -445,7 +461,7 @@ class PipelineConfig(object):
                     # Not a datatype
                     try:
                         module_info_class = load_module_info(module_type_name)
-                    except ModuleInfoLoadError, e:
+                    except ModuleInfoLoadError as e:
                         raise PipelineConfigParseError("could not load a module type for the name '{}': "
                                                        "no datatype or module type could be loaded".format(module_type_name))
                 else:
@@ -462,7 +478,7 @@ class PipelineConfig(object):
                         missing_inputs = []
                 else:
                     required_inputs = ["input_%s" % input_name
-                                       for input_name in dict(module_info_class.module_inputs).keys()]
+                                       for (input_name, __) in module_info_class.module_inputs]
                     missing_inputs = [name for name in required_inputs if name not in module_config]
 
                 for input_key in missing_inputs:
@@ -498,7 +514,7 @@ class PipelineConfig(object):
                     tie_alts = [group.split("|") for group in tie_alts_raw.split(" ")]
 
                 # Module variable parameters
-                modvar_params = [(key, val) for (key, val) in module_config.iteritems() if key.startswith("modvar_")]
+                modvar_params = [(key, val) for (key, val) in module_config.items() if key.startswith("modvar_")]
                 for modvar_key, modvar_val in modvar_params:
                     module_config.pop(modvar_key)
                 modvar_params = [(key[7:], val) for (key, val) in modvar_params]
@@ -557,7 +573,7 @@ class PipelineConfig(object):
                             new_alternatives.extend(new_items[0])
                         elif any(len(i) == 1 for i in new_items) and not all(len(i) == 1 for i in new_items):
                             # Some items have only one alternative, but others have more
-                            num_alts = (len(i) for i in new_items if len(i) > 1).next()
+                            num_alts = next((len(i) for i in new_items if len(i) > 1))
                             # Multiply the ones that have only one alternative, to use that same value for each of the
                             #  other items
                             new_items = [i if len(i) > 1 else i*num_alts for i in new_items]
@@ -585,10 +601,10 @@ class PipelineConfig(object):
                             else:
                                 # Try to find a name from one of the items in the list
                                 try:
-                                    new_name = (item_alt_names[alt_num]
+                                    new_name = next((item_alt_names[alt_num]
                                                 for item_alt_names in new_item_alt_names
                                                 if len(item_alt_names) > alt_num
-                                                and item_alt_names[alt_num] is not None).next()
+                                                and item_alt_names[alt_num] is not None))
                                 except StopIteration:
                                     # No name found: just leave the value as it is, unnamed
                                     new_alts_with_names.append(new_alt)
@@ -626,7 +642,7 @@ class PipelineConfig(object):
                         if tie_alts == "all":
                             # Tie all params with alternatives together
                             # Simply put them all in one group and multiply_alternatives will tie them
-                            param_alt_groups = [params_with_alternatives.items()]
+                            param_alt_groups = [list(params_with_alternatives.items())]
                         else:
                             # First check that all the params that have been named in tying groups exist and have
                             #  alternatives
@@ -649,17 +665,17 @@ class PipelineConfig(object):
                             for param_name, param_vals in params_with_alternatives.items():
                                 # See whether this param name is being tied
                                 try:
-                                    group_num = (
-                                        i for i, param_set in enumerate(tie_alts) if param_name in param_set).next()
+                                    group_num = next((
+                                        i for i, param_set in enumerate(tie_alts) if param_name in param_set))
                                 except StopIteration:
                                     # No in a tied group: just add it to its own group (i.e. don't tie)
                                     untied_groups.append([(param_name, param_vals)])
                                 else:
                                     tied_group_dict.setdefault(group_num, []).append((param_name, param_vals))
-                            param_alt_groups = tied_group_dict.values() + untied_groups
+                            param_alt_groups = list(tied_group_dict.values()) + untied_groups
                         try:
                             alternative_configs = multiply_alternatives(param_alt_groups)
-                        except ParameterTyingError, e:
+                        except ParameterTyingError as e:
                             raise PipelineStructureError("could not tie parameters to %s: %s" % (module_name, e))
                     else:
                         alternative_configs = [[]]
@@ -687,7 +703,7 @@ class PipelineConfig(object):
                     elif alt_naming.startswith("option"):
                         # Take the names just from the alt names on a particular option
                         # In many cases, this will lead to clashes, but not always: for example, if tying alts
-                        alt_name_from_options = map(lambda x: x.strip(), alt_naming[6:].strip("()").split(","))
+                        alt_name_from_options = [x.strip() for x in alt_naming[6:].strip("()").split(",")]
                     else:
                         raise PipelineConfigParseError("could not interpret alt_naming option to %s: %s" %
                                                        (module_name, alt_naming))
@@ -740,7 +756,7 @@ class PipelineConfig(object):
                     for n in module_alt_names:
                         try:
                             _check_valid_alt_name(n)
-                        except ValueError, e:
+                        except ValueError as e:
                             raise PipelineConfigParseError("invalid alt name for module {}: {}".format(module_name, e))
                     alternative_config_names = [
                         "%s[%s]" % (module_name, alt_name) for alt_name in module_alt_names
@@ -761,7 +777,7 @@ class PipelineConfig(object):
                         expanded_sections[exp_name] = module_name
 
                     # We also need to do this for any aliases to this module
-                    aliases_to_expand = [alias for (alias, trg) in aliases.iteritems() if trg == module_name]
+                    aliases_to_expand = [alias for (alias, trg) in aliases.items() if trg == module_name]
                     for alias in aliases_to_expand:
                         del aliases[alias]
                         for alt_name in module_alt_names:
@@ -796,7 +812,7 @@ class PipelineConfig(object):
                             options_dict, module_name=module_name, previous_module_name=previous_module_name,
                             module_expansions=original_to_expanded_sections
                         )
-                    except ModuleOptionParseError, e:
+                    except ModuleOptionParseError as e:
                         raise PipelineConfigParseError("error in '%s' options: %s" % (module_name, e))
 
                     # Now, before processing all the module parameters, perform any module variable substitution
@@ -805,7 +821,7 @@ class PipelineConfig(object):
                     # Check that all the modules that feed into this one's inputs have been defined already
                     input_module_names = []
                     modvar_dependent_inputs = []
-                    for input_name, input_specs in inputs.iteritems():
+                    for input_name, input_specs in inputs.items():
                         input_module_group = []
                         for input_spec_num, input_spec in enumerate(input_specs):
                             if "$(" in input_spec[0] or "$(" in input_spec[2]:
@@ -863,7 +879,7 @@ class PipelineConfig(object):
                             # spoil the item numbering
                             add_after.setdefault(input_name, []).append((input_spec_num, new_input_specs[1:]))
                     # Go back and fill in the extra input specs we need
-                    for input_name, to_add in add_after.iteritems():
+                    for input_name, to_add in add_after.items():
                         added = 0
                         for original_spec_num, new_specs in to_add:
                             for offset, new_spec in enumerate(new_specs):
@@ -926,13 +942,13 @@ class PipelineConfig(object):
 
                     module_infos[expanded_module_name] = module_info
                     loaded_modules.append(module_name)
-            except ModuleInfoLoadError, e:
+            except ModuleInfoLoadError as e:
                 raise PipelineConfigParseError("error loading module metadata for module '%s': %s" % (module_name, e))
 
         try:
             # Run all type-checking straight away so we know this is a valid pipeline
             check_pipeline(pipeline)
-        except PipelineCheckError, e:
+        except PipelineCheckError as e:
             raise PipelineConfigParseError("pipeline loaded, but failed checks: %s" % e, cause=e)
 
         return pipeline
@@ -994,10 +1010,10 @@ class PipelineConfig(object):
             def _load_config_file(fn):
                 # Read in the local config and supply a section heading to satisfy config parser
                 with open(fn, "r") as f:
-                    local_text_buffer = StringIO("[main]\n%s" % f.read())
+                    local_text_buffer = "[main]\n%s" % f.read()
                 # User config parser to interpret file contents
-                local_config_parser = SafeConfigParser()
-                local_config_parser.readfp(local_text_buffer)
+                local_config_parser = ConfigParser()
+                local_config_parser.read_string(local_text_buffer)
                 # Get a dictionary of settings from the file
                 return OrderedDict(local_config_parser.items("main"))
 
@@ -1032,7 +1048,7 @@ class PipelineConfig(object):
                 # Insert the named storage location, ensuring it comes before any others
                 local_config_data = OrderedDict(
                     [("store_short", local_config_data["short_term_store"])] +
-                    local_config_data.items()
+                    list(local_config_data.items())
                 )
             del local_config_data["short_term_store"]
         if "long_term_store" in local_config_data:
@@ -1084,7 +1100,7 @@ class PipelineConfig(object):
 
         try:
             check_pipeline(pipeline)
-        except PipelineCheckError, e:
+        except PipelineCheckError as e:
             raise PipelineConfigParseError("empty pipeline created, but failed checks: %s" % e, cause=e)
 
         return pipeline
@@ -1240,7 +1256,7 @@ def update_module_variables(input_modules, modvar_params, expanded_params):
     for input_name, module_group in input_modules:
         group_variables = {}
         for module in module_group:
-            for var_name, var_val in module.module_variables.iteritems():
+            for var_name, var_val in module.module_variables.items():
                 # If we get multiple values for the same module variable within a group (that is, on a multiple input
                 #  to the same module input), we need to preserve them all, so we turn the modvar into a list
                 if var_name in group_variables:
@@ -1276,7 +1292,7 @@ def modvar_params_to_modvars(params, vars, expanded_params, variables_from_input
                 # After we've parsed everything we can, nothing else is allowed
                 if len(rest.strip()):
                     raise ValueError("unexpected string: %s" % rest.strip())
-            except ValueError, e:
+            except ValueError as e:
                 raise PipelineConfigParseError("could not parse module variable '%s = %s': %s" % (key, val, e))
 
 
@@ -1404,7 +1420,7 @@ def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
             raise ValueError("expected closing ) after len's arg")
         rest = rest[1:]
         # Just compute the length of the list, which should be a string for future use
-        val = str(len(len_list))
+        val = "{}".format(len(len_list))
     else:
         match = int_literal_re.search(param)
         if match:
@@ -1467,7 +1483,7 @@ def _parse_modvar_param(param, vars, expanded_params, variables_from_inputs):
 
 
 def substitute_modvars(options, modvars, expanded_params, variables_from_inputs):
-    for key, val in options.iteritems():
+    for key, val in options.items():
         val = substitute_modvars_in_value(key, val, modvars, expanded_params, variables_from_inputs)
         # Make the substitution in the parameters
         options[key] = val
@@ -1489,7 +1505,7 @@ def substitute_modvars_in_value(key, val, modvars, expanded_params, variables_fr
             modvar_result, rest = _parse_modvar_param(
                 modvar_onwards, modvars, expanded_params, variables_from_inputs
             )
-        except ValueError, e:
+        except ValueError as e:
             raise PipelineConfigParseError("could not parse module variable expression '%s = %s': %s" % (key, val, e))
         # The next thing should be the closing bracket after the substitution expression
         # i.e. the closer of $(...)
@@ -1532,9 +1548,9 @@ class ParameterTyingError(Exception):
 def var_substitute(option_val, vars):
     try:
         return option_val % vars
-    except KeyError, e:
+    except KeyError as e:
         raise PipelineConfigParseError("error making substitutions in %s: var %s not specified" % (option_val, e))
-    except BaseException, e:
+    except BaseException as e:
         raise PipelineConfigParseError("error (%s) making substitutions in %s: %s" % (type(e).__name__, option_val, e))
 
 
@@ -1573,7 +1589,7 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     try:
         config_sections, available_variants, vars, all_filenames, section_docstrings, abstract = \
             _preprocess_config_file(filename, variant=variant, copies=copies, initial_vars=initial_vars)
-    except IOError, e:
+    except IOError as e:
         raise PipelineConfigParseError("could not read config file %s: %s" % (filename, e))
     # If the top-level config file was marked abstract, complain: it shouldn't be run itself
     if abstract:
@@ -1582,7 +1598,7 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     config_sections_dict = OrderedDict(config_sections)
 
     # Copy config values according to copy directives
-    for target_section, source_sections in copies.iteritems():
+    for target_section, source_sections in copies.items():
         # There may be multiple source sections: process in order of directives, so later ones override earlier
         copy_values = {}
         for source_section, exceptions in source_sections:
@@ -1629,10 +1645,10 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
 
     directive_re = re.compile(r"^%%\s*(?P<dir>\S+)(\s(?P<rest>.*))?$")
 
-    with open(filename, "r") as f:
+    with io.open(filename, "r", encoding="utf-8") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
         for line in f:
-            line = line.decode("utf8").rstrip(u"\n")
+            line = line.rstrip(u"\n")
             if line.startswith("%%"):
                 # Directive: process this now
 
@@ -1678,7 +1694,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                         incl_config, incl_variants, incl_vars, incl_filenames, incl_section_docstrings, __ = \
                             _preprocess_config_file(include_filename, variant=variant, copies=copies,
                                                     initial_vars=initial_vars)
-                    except IOError, e:
+                    except IOError as e:
                         raise PipelineConfigParseError("could not find included config file '%s': %s" %
                                                        (relative_filename, e))
                     all_filenames.extend(incl_filenames)
@@ -1721,8 +1737,8 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     # Parse the result as a config file
     config_parser = RawConfigParser()
     try:
-        config_parser.readfp(StringIO(u"\n".join(config_lines)))
-    except ConfigParser.Error, e:
+        config_parser.read_string(u"\n".join(config_lines), source=filename)
+    except configparser.Error as e:
         raise PipelineConfigParseError("could not parse config file %s. %s" % (filename, e))
 
     # If there's a "vars" section in this config file, remove it now and return it separately
@@ -1750,7 +1766,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
             raise PipelineStructureError("section '%s' defined in %s has already be defined in an including "
                                          "config file" % (" + ".join(overlap_sections), subconfig_filename))
         # Find the index where we'll include this
-        after_index = (i for (i, (sec, conf)) in enumerate(config_sections) if sec == include_after).next()
+        after_index = next((i for (i, (sec, conf)) in enumerate(config_sections) if sec == include_after))
         config_sections = config_sections[:after_index+1] + subconfig + config_sections[after_index+1:]
 
     # Config parser permits values that span multiple lines and removes indent of subsequent lines
@@ -1887,7 +1903,7 @@ def check_pipeline(pipeline):
     # Check the pipeline for cycles: this will raise an exception if a cycle is found
     try:
         check_for_cycles(pipeline)
-    except PipelineStructureError, e:
+    except PipelineStructureError as e:
         raise PipelineCheckError(e, "cycle check failed")
 
     # Check the types of all the output->input connections
@@ -1895,7 +1911,7 @@ def check_pipeline(pipeline):
         mod = pipeline[module]
         try:
             mod.typecheck_inputs()
-        except PipelineStructureError, e:
+        except PipelineStructureError as e:
             raise PipelineCheckError(e, "Input typechecking for module '%s' failed: %s" % (module, e))
 
 
@@ -1962,32 +1978,32 @@ def print_missing_dependencies(pipeline, modules):
     missing_dependencies = [dep for dep in deps if not dep.available(pipeline.local_config)]
 
     if len(missing_dependencies):
-        print "Some library dependencies were not satisfied\n"
+        print("Some library dependencies were not satisfied\n")
         auto_installable_modules = []
         auto_installable_deps = []
         for dep in missing_dependencies:
-            print title_box(dep.name.capitalize())
+            print(title_box(dep.name.capitalize()))
             # Print the list of problems and check at the same time whether it's auto-installable
             mod_auto_installable = print_dependency_leaf_problems(dep, pipeline.local_config)
             # Output any installation notes provided by the dependency
             notes = dep.installation_notes().strip()
             if len(notes):
-                print textwrap.fill(notes, 80)
+                print(textwrap.fill(notes, 80))
 
             if mod_auto_installable:
                 auto_installable_modules.extend(dep_sources[dep])
                 auto_installable_deps.append(dep)
-            print
+            print()
 
         auto_installable_deps = remove_duplicates(auto_installable_deps)
 
         if len(auto_installable_deps):
-            print "%s missing dependencies are automatically installable: %s" % (
+            print("%s missing dependencies are automatically installable: %s" % (
                 "All" if len(missing_dependencies) == len(auto_installable_deps) else "Some",
                 ", ".join(dep.name for dep in auto_installable_deps)
-            )
+            ))
             try:
-                install_now = raw_input("Do you want to install these now? [y/N] ").lower().strip() == "y"
+                install_now = input("Do you want to install these now? [y/N] ").lower().strip() == "y"
             except EOFError:
                 # We get an EOF if the user enters it, or if we're not running in interactive mode
                 install_now = False
@@ -1995,14 +2011,14 @@ def print_missing_dependencies(pipeline, modules):
             if install_now:
                 uninstalled = check_and_install(auto_installable_deps, pipeline.local_config)
                 if len(uninstalled):
-                    print "Installation failed"
+                    print("Installation failed")
                     return False
                 else:
                     # If we were only able to install some, return False so we know some are still unsatisfied
                     return len(missing_dependencies) == len(auto_installable_deps)
             else:
-                print "Modules with automatically installable dependencies: %s" % ", ".join(auto_installable_modules)
-                print "Use 'install' command to install all automatically installable dependencies"
+                print("Modules with automatically installable dependencies: %s" % ", ".join(auto_installable_modules))
+                print("Use 'install' command to install all automatically installable dependencies")
         return False
     else:
         return True
@@ -2012,28 +2028,28 @@ def print_dependency_leaf_problems(dep, local_config):
     auto_installable = False
     sub_deps = dep.dependencies()
     if len(sub_deps) and not all(sub_dep.available(local_config) for sub_dep in sub_deps):
-        print "Dependency '%s' not satisfied because of problems with its own dependencies" % dep.name
+        print("Dependency '%s' not satisfied because of problems with its own dependencies" % dep.name)
         # If this dependency has its own dependencies and they're not available, print their problems
         for sub_dep in dep.dependencies():
             if not sub_dep.available(local_config):
-                print "'%s' depends on '%s', which is not available" % (dep.name, sub_dep.name)
+                print("'%s' depends on '%s', which is not available" % (dep.name, sub_dep.name))
                 auto_installable = print_dependency_leaf_problems(sub_dep, local_config) or auto_installable
     else:
         # The problems are generated by this dependency, not its own dependencies
-        print "Dependency '%s' not satisfied because of the following problems:" % dep.name
+        print("Dependency '%s' not satisfied because of the following problems:" % dep.name)
         for problem in dep.problems(local_config):
-            print " - %s" % problem
+            print(" - %s" % problem)
 
         instructions = dep.installation_instructions()
         if dep.installable():
-            print "Can be automatically installed using install command"
+            print("Can be automatically installed using install command")
             auto_installable = True
         else:
-            print "Cannot be installed automatically"
+            print("Cannot be installed automatically")
         # If instructions are available, print them, even if the dependency is automatically installable
         if instructions:
             instructions = instructions.strip(" \n")
-            print "\nInstallation instructions:\n{}\n".format(
+            print("\nInstallation instructions:\n{}\n".format(
                 "\n".join("  {}".format(line) for line in instructions.splitlines())
-            )
+            ))
     return auto_installable

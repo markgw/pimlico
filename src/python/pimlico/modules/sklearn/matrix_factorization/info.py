@@ -67,7 +67,7 @@ class ModuleInfo(BaseModuleInfo):
             "help": "Scikit-learn class to use to fit the matrix factorization. Should be the name of a class in "
                     "the package sklearn.decomposition that has a fit_transform() method and a components\\_ attribute. "
                     "Supported classes: %s" % ", ".join(SKLEARN_CLASSES),
-            "type": choose_from_list(SKLEARN_CLASSES.keys()),
+            "type": choose_from_list(list(SKLEARN_CLASSES.keys())),
             "required": True,
         },
         "options": {
@@ -90,7 +90,7 @@ class ModuleInfo(BaseModuleInfo):
         # Try loading the given transformer class name to check it's a valid one
         try:
             self.load_transformer_class()
-        except ImportError, e:
+        except ImportError as e:
             raise PipelineConfigParseError("Could not load decomposition class %s. Check it's available in the version "
                                            "of scikit-learn you have installed" % self.options["class"])
 

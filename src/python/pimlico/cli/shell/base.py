@@ -1,6 +1,8 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import object
 
 import os
 import readline
@@ -64,7 +66,7 @@ class DataShell(Cmd):
                 # Use closures to bind the command name
                 def _get_help_cmd(slf, name):
                     def _help_cmd():
-                        print slf.commands[name].help_text
+                        print(slf.commands[name].help_text)
                     return _help_cmd
                 setattr(self, "help_%s" % command_name, _get_help_cmd(self, command_name))
 
@@ -87,7 +89,7 @@ class DataShell(Cmd):
 
     def do_EOF(self, line):
         """ Exits the shell """
-        print "\nExiting"
+        print("\nExiting")
         return True
 
     def preloop(self):
@@ -124,23 +126,23 @@ class DataShell(Cmd):
                 self._run_command(parts[0], parts[1:])
             else:
                 # If this isn't recognised as a command, try executing with Python interpreter
-                exec line in self.env
+                exec(line, self.env)
 
     def cmdloop(self, intro=None):
         if intro or self.intro:
-            print intro or self.intro
+            print(intro or self.intro)
 
         while True:
             try:
                 Cmd.cmdloop(self, intro="")
-            except ShellError, e:
-                print e
+            except ShellError as e:
+                print(e)
             except KeyboardInterrupt:
-                print
+                print()
                 self.postloop()
             except:
                 # Print out the stack trace and return to the shell
-                print "Error running command:"
+                print("Error running command:")
                 traceback.print_exc()
                 self.postloop()
             else:

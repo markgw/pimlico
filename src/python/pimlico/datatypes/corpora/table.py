@@ -8,8 +8,12 @@ This is designed to be fast to read, but is not a very flexible datatype.
 
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+
 import struct
-from StringIO import StringIO
+from io import BytesIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.utils.core import cached_property
@@ -79,11 +83,11 @@ class IntegerTableDocumentType(RawDocumentType):
         self.row_length = writer.metadata["row_length"]
         self.struct = get_struct(self.bytes, self.signed, self.row_length)
 
-    class Document:
+    class Document(object):
         keys = ["table"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             table = list(self.read_rows(reader))
             return {
                 "table": table,
@@ -101,12 +105,12 @@ class IntegerTableDocumentType(RawDocumentType):
             while True:
                 # Read data for a single row
                 row_string = reader.read(self.row_size)
-                if row_string == "":
+                if len(row_string) == 0:
                     # Reach end of file
                     break
                 try:
                     row = self.data_point_type.struct.unpack(row_string)
-                except struct.error, e:
+                except struct.error as e:
                     if len(row_string) < self.row_size:
                         # Got a partial row at end of file
                         raise IOError("found partial row at end of file: last row has byte length %d, not %d" %
@@ -116,12 +120,12 @@ class IntegerTableDocumentType(RawDocumentType):
                 yield row
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             for row in internal_data["table"]:
                 # Should be rows of ints of the correct length
                 try:
-                    raw_data.write(self.data_point_type.struct.pack(*row))
-                except struct.error, e:
+                    raw_data.write(bytes(self.data_point_type.struct.pack(*row)))
+                except struct.error as e:
                     # Instead of checking the rows before encoding, catch any encoding errors and give helpful messages
                     if len(row) != self.data_point_type.row_length:
                         raise ValueError("tried to write a row of length %d to a table writer with row length %d" %

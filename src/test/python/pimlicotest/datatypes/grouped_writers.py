@@ -2,11 +2,13 @@
 Writer test cases for grouped corpora with different data point types.
 
 """
+from __future__ import division
+from builtins import range
 import random
 import string
 import unittest
 
-from pimlico.datatypes.corpora.data_points import RawDocumentType
+from pimlico.datatypes.corpora.data_points import RawDocumentType, TextDocumentType
 from pimlico.datatypes.corpora.floats import FloatListsDocumentType, FloatListDocumentType
 from pimlico.datatypes.corpora.grouped import GroupedCorpus
 from pimlico.datatypes.corpora.ints import IntegerListDocumentType, IntegerListsDocumentType
@@ -28,7 +30,7 @@ class GroupedCorpusWriterTest(WriterTest):
 
         for doc_num, (doc_name, doc) in enumerate(self.get_documents()):
             writer.add_document(
-                archive_base_name.format(doc_num / 5),
+                archive_base_name.format(doc_num // 5),
                 doc_name,
                 doc
             )
@@ -48,9 +50,22 @@ class RawDocumentTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
     def get_documents(self):
         for i in range(15):
             # Generate a random string for this document
-            data = u"".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(50))
+            data = bytes(
+                u"".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(50)).encode("utf-8")
+            )
             name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
             yield name, RawDocumentType()(raw_data=data)
+
+
+class TextDocumentTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):
+    data_point_type = TextDocumentType()
+
+    def get_documents(self):
+        for i in range(15):
+            # Generate a random string for this document
+            text = u"".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(50))
+            name = u"".join(random.choice(string.ascii_uppercase) for _ in range(10))
+            yield name, self.data_point_type(text=text)
 
 
 class IntegerTableTypeWriterTest(GroupedCorpusWriterTest, unittest.TestCase):

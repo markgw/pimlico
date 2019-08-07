@@ -1,30 +1,26 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-
 """
 Input reader for XML file collections.  Gigaword, for example, is stored in this way.
 The data retrieved from the files is plain unicode text.
 
 .. todo::
 
-   Update to new datatypes system and add test pipeline
-
-.. todo::
-
-   Currently skipped from module doc generator, until updated
+   Add test pipeline
 
 """
+
 import fnmatch
+import io
 import os
-from glob import glob, iglob
+from glob import iglob, glob
 from gzip import GzipFile
 
 from pimlico.core.dependencies.python import beautiful_soup_dependency, safe_import_bs4
-from pimlico.core.modules.inputs import iterable_input_reader_factory, ReaderOutputType
-from pimlico.core.modules.options import comma_separated_strings
-from pimlico.old_datatypes.documents import RawTextDocumentType
-from pimlico.utils.core import cached_property
+from pimlico.core.modules.inputs import iterable_input_reader
+from pimlico.core.modules.options import comma_separated_strings, opt_type_help
+from pimlico.datatypes.corpora.data_points import RawTextDocumentType
 
 
 def get_paths_from_options(options, error_on_missing=False):
@@ -61,7 +57,7 @@ def get_paths_from_options(options, error_on_missing=False):
     return paths
 
 
-def check_paths_from_options(options):
+def data_ready(options):
     """
     Like get_paths_from_options, but faster (in some cases), as it just checks whether there are
     any file for each path/glob.
@@ -105,11 +101,10 @@ def get_doc_nodes(filename, document_node_type, encoding, attr_constraints=None)
         # Permit gzip files by opening them using the gzip library
         with GzipFile(filename, fileobj=open(filename, mode="rb")) as f:
             data = f.read()
+            data = data.decode(encoding)
     else:
-        with open(filename, mode="r") as f:
+        with io.open(filename, mode="r", encoding=encoding) as f:
             data = f.read()
-
-    data = data.decode(encoding)
 
     # Read the XML using Beautiful Soup, so we can handle messy XML in a tolerant fashion
     # We specify XML, instead of HTML
@@ -118,89 +113,75 @@ def get_doc_nodes(filename, document_node_type, encoding, attr_constraints=None)
     return soup.find_all(document_node_type, attrs=attr_constraints)
 
 
-class XMLOutputType(ReaderOutputType):
-    """
-    Output type used by reader to read the documents straight from external files using the input
-    options.
+def corpus_len(options):
+    """ Faster iteration over doc nodes, just to count up how many there are """
+    encoding = options["encoding"]
+    # Special case: use filename as doc name
+    doc_node_type = options["document_node_type"]
+    attr_constraints = options["filter_on_doc_attr"]
 
-    May be overridden to provide readers that do some processing of the text, by overriding
-    ``filter_text()``
+    # Use the file basenames as doc names where possible, but make sure they're unique
+    paths = get_paths_from_options(options)
+    count = 0
+    if len(paths):
+        for path in paths:
+            count += len(list(get_doc_nodes(path, doc_node_type, encoding, attr_constraints)))
+    return count
 
-    """
-    data_point_type = RawTextDocumentType
 
-    def filter_text(self, data):
-        """
-        May be overridden by subclasses to perform postprocessing of document data.
-        Otherwise, the document type's process_document() method is used.
+def iter_files(reader):
+    options = reader.options
 
-        """
-        return self.data_point_type_instance.process_document(data)
+    encoding = options["encoding"]
+    doc_name_attr = options["document_name_attr"]
+    # Special case: use filename as doc name
+    doc_name_from_fn = doc_name_attr == "filename"
+    doc_node_type = options["document_node_type"]
+    attr_constraints = options["filter_on_doc_attr"]
 
-    def data_ready(self, **kwargs):
-        return check_paths_from_options(self.reader_options)
+    # Use the file basenames as doc names where possible, but make sure they're unique
+    used_doc_names = set()
+    paths = get_paths_from_options(options)
+    if len(paths):
+        for path in paths:
+            if doc_name_from_fn:
+                base_doc_name = os.path.basename(path)
+                distinguish_id = 0
+                # Keep increasing the distinguishing ID until we have a unique name
+                while base_doc_name in used_doc_names:
+                    base, ext = os.path.splitext(base_doc_name)
+                    base_doc_name = "%s-%d%s" % (base, distinguish_id, ext)
+                    distinguish_id += 1
+                used_doc_names.add(base_doc_name)
 
-    @cached_property
-    def attr_constraints(self):
-        return dict(key_val.split("=") for key_val in self.reader_options["filter_on_doc_attr"]) \
-            if self.reader_options.get("filter_on_doc_attr", None) is not None else None
-
-    def count_documents(self):
-        """ Faster iteration over doc nodes, just to count up how many there are """
-        options = self.reader_options
-
-        encoding = options["encoding"]
-        # Special case: use filename as doc name
-        doc_node_type = options["document_node_type"]
-
-        # Use the file basenames as doc names where possible, but make sure they're unique
-        paths = get_paths_from_options(options)
-        count = 0
-        if len(paths):
-            for path in paths:
-                count += len(list(get_doc_nodes(path, doc_node_type, encoding, self.attr_constraints)))
-        return count
-
-    def __iter__(self):
-        options = self.reader_options
-
-        encoding = options["encoding"]
-        doc_name_attr = options["document_name_attr"]
-        # Special case: use filename as doc name
-        doc_name_from_fn = doc_name_attr == "filename"
-        doc_node_type = options["document_node_type"]
-
-        # Use the file basenames as doc names where possible, but make sure they're unique
-        used_doc_names = set()
-        paths = get_paths_from_options(options)
-        if len(paths):
-            for path in paths:
+            for file_doc_id, doc_node in enumerate(
+                    get_doc_nodes(path, doc_node_type, encoding, attr_constraints)):
                 if doc_name_from_fn:
-                    base_doc_name = os.path.basename(path)
-                    distinguish_id = 0
-                    # Keep increasing the distinguishing ID until we have a unique name
-                    while base_doc_name in used_doc_names:
-                        base, ext = os.path.splitext(base_doc_name)
-                        base_doc_name = "%s-%d%s" % (base, distinguish_id, ext)
-                        distinguish_id += 1
-                    used_doc_names.add(base_doc_name)
-
-                for file_doc_id, doc_node in enumerate(
-                        get_doc_nodes(path, doc_node_type, encoding, self.attr_constraints)):
-                    if doc_name_from_fn:
-                        if file_doc_id == 0:
-                            doc_name = base_doc_name
-                        else:
-                            doc_name = u"{}-{}".format(base_doc_name, file_doc_id)
+                    if file_doc_id == 0:
+                        doc_name = base_doc_name
                     else:
-                        # The node should supply us with the document name, using the attribute name specified
-                        doc_name = doc_node.get(doc_name_attr)
-                    # Pull the text out of the document node
-                    doc_text = doc_node.text
-                    yield doc_name, self.filter_text(doc_text)
+                        doc_name = u"{}-{}".format(base_doc_name, file_doc_id)
+                else:
+                    # The node should supply us with the document name, using the attribute name specified
+                    doc_name = doc_node.get(doc_name_attr)
+                # Pull the text out of the document node
+                doc_text = doc_node.text
+                yield doc_name, doc_text
 
 
-ModuleInfo = iterable_input_reader_factory(
+def corpus_iter(reader):
+    for doc_name, data in iter_files(reader):
+        yield doc_name, reader.datatype.data_point_type(text=data)
+
+
+@opt_type_help("comma-separated list of key=value constraints")
+def key_vals(text):
+    if text is None:
+        return None
+    return dict(key_val.strip().split("=") for key_val in text.split(","))
+
+
+ModuleInfo = iterable_input_reader(
     {
         "files": {
             "help": "Comma-separated list of absolute paths to files to include in the collection. Paths may include "
@@ -236,12 +217,13 @@ ModuleInfo = iterable_input_reader_factory(
         "filter_on_doc_attr": {
             "help": "Comma-separated list of key=value constraints. If given, only docs with the attribute 'key' on "
                     "their doc node and the attribute value 'value' will be included",
-            "type": comma_separated_strings,
+            "type": key_vals,
         },
     },
-    XMLOutputType,
-    module_type_name="xml_reader",
-    module_readable_name="XML documents",
+    RawTextDocumentType(),
+    data_ready, corpus_len, corpus_iter,
+    module_type_name="raw_text_files_reader",
+    module_readable_name="Raw text files",
     software_dependencies=[beautiful_soup_dependency],
     execute_count=True,
 )

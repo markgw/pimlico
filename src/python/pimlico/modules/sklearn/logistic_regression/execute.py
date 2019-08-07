@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from builtins import str
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.linear_model import LogisticRegression
@@ -25,7 +26,7 @@ class ModuleExecutor(BaseModuleExecutor):
         for row_num, (features, score) in enumerate(features.iter_ids()):
             scores.append(score)
 
-            for feat_id, val in features.iteritems():
+            for feat_id, val in features.items():
                 data.append(val)
                 rows.append(row_num)
                 cols.append(feat_id)
@@ -43,7 +44,7 @@ class ModuleExecutor(BaseModuleExecutor):
         )
         try:
             log_reg = LogisticRegression(**lr_init_kwargs)
-        except TypeError, e:
+        except TypeError as e:
             raise PipelineConfigParseError("invalid arguments to LogisticRegression: {}".format(e))
 
         # Shuffle the rows of the training data, so that the source providing the

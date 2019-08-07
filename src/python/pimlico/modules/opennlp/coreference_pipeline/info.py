@@ -11,6 +11,8 @@ pos tagging, parsing and coreference resolution. The results of all the stages a
    Update to new datatypes system and add test pipeline
 
 """
+from __future__ import division
+from past.utils import old_div
 import os
 
 from pimlico.core.modules.map import DocumentMapModuleInfo
@@ -123,16 +125,16 @@ class ModuleInfo(DocumentMapModuleInfo):
         else:
             limit = int(limit_string)
         # Divide the allowed memory between the processes
-        process_limit = limit / self.pipeline.processes
+        process_limit = limit // self.pipeline.processes
         # Convert back to a string for the Java option
         # Use units, so debugging output is clearer if we ever need to output the java command
         if process_limit >= 1e10:
             # If the memory per process is over 10G, we can happily round to the nearest G
-            process_limit_string = "%dG" % int(process_limit / 1e9)
+            process_limit_string = "%dG" % process_limit // 1e9
         elif process_limit >= 1e7:
-            process_limit_string = "%dM" % int(process_limit / 1e6)
+            process_limit_string = "%dM" % process_limit // 1e6
         elif process_limit >= 1e4:
-            process_limit_string = "%dK" % int(process_limit / 1e3)
+            process_limit_string = "%dK" % process_limit // 1e3
         else:
             # Just put the whole number
             process_limit_string = "%d" % process_limit

@@ -1,0 +1,1842 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 193662; s&otilde;nu kokku: 17913</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=gap occurs=146></tagusage>
+         <tagusage gi=p occurs=1112></tagusage>
+         <tagusage gi=sp occurs=535></tagusage>
+         <tagusage gi=speaker occurs=535></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr20 </head>
+<div1 type='thread'> <head> Rock v&otilde;i Kalev - 10. leht - Planet Foorumid </head>
+<sp> <speaker>monstrum</speaker> 
+<p> <s> ei saanud postitamata j&auml;tta , heeheheheee . <gap desc='hyperlink'> Ja sa tahad n&uuml;&uuml;d ka v&auml;ita , et Kalev pole selliste n&otilde;rkade klubide k&auml;est tappa saanud ? </s> </p>
+ </sp> <sp> <speaker>Lupe</speaker> 
+<p> <s> rock sai valga k&auml;est p&auml;he . . valga v&otilde;idab meistritiitli for sure ! </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> kalev . </s> </p>
+ </sp> <sp> <speaker>ziili</speaker> 
+<p> <s> Keegi kalevi m&auml;nge vaadanud on viimasel ajal ? </s> </p>
+<p> <s> J&auml;i silma masendav kaotus Bologna Virtust'le , juhtisid p&otilde;hiliselt terve m&auml;ngu . </s> </p>
+<p> <s> Aga l&otilde;puks ometi ka v&otilde;it kirjas neil , 73 : 72 kus v&otilde;itsid Valmierat . </s> </p>
+<p> <s> Sama vastasega on homme &uuml;lit&auml;htis m&auml;ng Kalevi spordihallis <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> eile oli suht jama m&auml;ng jah . </s> <s> Praktiliselt kaitse Rockil puudus ja &otilde;iget r&uuml;nnet ka ei olnud . </s> </p>
+ </sp> <sp> <speaker>Tegelane</speaker> 
+<p> <s> keegi &uuml;ldse t&auml;htede m&auml;ngule l&auml;heb t&auml;na ? </s> </p>
+ </sp> <sp> <speaker>Dr.D^</speaker> 
+<p> <s> rock on hea ... t&uuml; on kehv ... hea shokolaad=kalev=kruuda ... </s> </p>
+<p> <s> v&otilde;ta siis n&auml;pust , kelle poolt olla . </s> </p>
+ </sp> <sp> <speaker>Nabzter</speaker> 
+<p> <s> nojah . . t&auml;na l&auml;ks kahjuks nii . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> haha , rockil on hooaeg metsas . karikat ei saanud , euroliigas ei saanud edasi , balti liigas ka ei saanud edasi , see k&otilde;ik r&auml;&auml;gib enda eest </s> </p>
+ </sp> <sp> <speaker>Nabzter</speaker> 
+<p> <s> Ausalt &ouml;eldes olen mina , kui tartlane T&Uuml; Rockis pettunud , pandi kokku nn &quot;staaride meeskond&quot; , kuid tulemust pole hooaja v&auml;ltel eriti olnud va see periood , kui v&otilde;ideti 10 ( oli vist ? ) m&auml;ngu j&auml;rjest . </s> <s> Kaitsem&auml;ng on n&otilde;rk koht siiani . </s> <s> M&otilde;ned mehed nagu n&auml;iteks Tein , Bailey ning M&uuml;&uuml;rsepp panevad pidu ning siis ei j&otilde;ua trenni jne ning tekivad meeskonnas lahkhelid . </s> <s> Eks selles ole s&uuml;&uuml;di ka treener , kes pole rockis eriti karmi korda seadnud . </s> </p>
+<p> <s> Mina leian , et sellise klassiga mehed ei tohiks hooaja sees koguaeg pidutseda , no muidugi , vahel v&otilde;ib , kuid ma ei tea . . see ei ole normaalne enam . </s> <s> Bailey -t ostes teatsid ju k&otilde;ik , et ta on eelmisest klubist kanepi tarbimise eest v&auml;lja visatud , Teinil olid laiskuse probleemid ... </s> </p>
+<p> <s> Nojah , loodan , et j&auml;rgmine hooaeg on parem seis neil . </s> </p>
+<p> <s> Niikaua hoian baltiliigas Kalevile p&ouml;ialt . </s> </p>
+ </sp> <sp> <speaker>-wow-</speaker> 
+<p> <s> suppeer uudis <gap desc='image'> </s> </p>
+<p> <s> ega see kergelt ei tulnud . . </s> </p>
+ </sp> <sp> <speaker>Dr.D^</speaker> 
+<p> <s> T&auml;na oli kalevi m&auml;ng p&auml;ris normaalne . </s> <s> Pall liikus ja KOHATI kaitse pidas . </s> <s> Travis Reed on tegija ikka all , m&auml;ngib kui loom . </s> <s> Ja kombo Keerles - Sokk - Arbet meeldis ka . </s> </p>
+ </sp> <sp> <speaker>retes</speaker> 
+<p> <s> Kalevi m&auml;nguga v&otilde;is t&auml;na enam-v&auml;hem rahul olla . . kuigi oleks v&otilde;inud kodus suuremalt v&otilde;ita . . samas l&auml;tlaste p&otilde;himees sai viga , mis on kasulik . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Poks - 2. leht - Planet Foorumid </head>
+<sp> <speaker>tzink</speaker> 
+<p> <s> ma olen juba ammu arusaanud , et see crash on &uuml;ks paras t&uuml;hikargajast &uuml;hiskonna v&auml;ljaheide . Talle on m&otilde;ttetu &uuml;ritada midagi selgeks teha netis . Ta muutub ainult p&auml;rast seda , kui teda elu seda tegema sunnib . </s> </p>
+<p> <s> <hi rend='quote'> 13 aastaselt kulli m&auml;ngida ? </hi> </s> <s> <hi rend='quote'> T&auml;nan , ei . </hi> </s> </p>
+<p> <s> sa vist ei saanud aru . Meil oli trennis paar 13 aastast tegelast , kes selle asemel , et trenni teha , panid trenni ajal paelu kinni ning enne trenni tegelesid kulli m&auml;ngimisega . Kordan veelkord , selliseid sinna vaja ei ole . K&uuml;ll aga trennis on ka &uuml;ks umbes 13 aastane poiss , kes juba v&auml;hemalt 2 a trennis k&auml;ib , temast saab ka tulevikus midagi . </s> </p>
+<p> <s> <hi rend='quote'> &Uuml;hes&otilde;naga k&otilde;ik s&otilde;ltub tahtmisest , see et sa lissalt poksitrenni k&uuml;lastad sinust veel Tysonit ei tee . </hi> </s> </p>
+<p> <s> palju t&ouml;&ouml;d , palju vaeva - siis ehk saab poksitrennis k&auml;ijast poksija v&otilde;i lihtsalt tugev inimene . </s> </p>
+ </sp> <sp> <speaker>megaherz</speaker> 
+<p> <s> <hi rend='quote'> tra j&auml;tke m&otilde;tetu m&ouml;la </hi> </s> ... . ... . . <s> <hi rend='quote'> r&auml;&auml;kige teemast . </hi> </s> </p>
+<p> <s> k&otilde;ik teemakohane sai juba &ouml;eldud sulle . </s> </p>
+ </sp> <sp> <speaker>tzink</speaker> 
+<p> <s> <hi rend='quote'> Kas sina megaherz hakkad seal kulli m&auml;ngima v&otilde;i ei ? </hi> </s> <s> <hi rend='quote'> Muidu palju kuu maksab ? </hi> </s> </p>
+<p> <s> <hi rend='quote'> [ offtopic ] Ma vihkan kulli[/offtopic ] </hi> </s> </p>
+<p> <s> traaa . </s> </p>
+<p> <s> <hi rend='quote'> ma m&otilde;tlesin seda , et need v&auml;ikesed trollid m&auml;ngisid enne trenni <hi rend='underline'>vabatahtlikult , ise enda l&otilde;buks</hi> kulli . Trenni ajal selle asemele , et pingutada aga panid paelu kinni . </hi> </s> </p>
+<p> <s> maksab veerand 1000 eek ist <gap desc='image'> . </s> </p>
+ </sp> <sp> <speaker>megaherz</speaker> 
+<p> <s> <hi rend='quote'> traaa . </hi> </s> </p>
+<p> <s> <hi rend='quote'> ma m&otilde;tlesin seda , et need v&auml;ikesed trollid m&auml;ngisid enne trenni <hi rend='underline'>vabatahtlikult , ise enda l&otilde;buks</hi> kulli . Trenni ajal selle asemele , et pingutada aga panid paelu kinni . </hi> </s> </p>
+<p> <s> <hi rend='quote'> maksab veerand 1000 eek ist <gap desc='image'> . </hi> </s> </p>
+<p> <s> Seda ma m&otilde;tlesingi , et seal ise ikka m&auml;ngisid mitte , et keegi oleks k&auml;skinud v&otilde;i midagi sellist . </s> <s> Ja milliseid paelu ? </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> Kui kick boxingus k&auml;ima hakkasin , oli ikka jube raske . </s> </p>
+<p> <s> F&uuml;&uuml;siline ettevalmistus pidi ikka p&auml;ris k&otilde;va olema . </s> </p>
+<p> <s> M&otilde;ned vennad kukkusid juba soojenduse ajal kokku . </s> </p>
+<p> <s> Endal vedas ka paaril esimesel tunnil pilt virvendama . </s> <s> Nalja sellega pole , pead leppima , et algul raske on . </s> </p>
+<p> <s> Praegu enam ei k&auml;i , loobusin , polnud lihtsalt aega . </s> </p>
+<p> <s> Sinine silm , verine nina vms on asja juures t&auml;itsa tavaline . </s> </p>
+<p> <s> Mind pandi n&auml;iteks s&otilde;braga esimesel tunnil boksima ja m&otilde;lemad l&otilde;petasime peale boksimist kraanikausi &auml;&auml;res k&uuml;lma vee all . </s> </p>
+<p> <s> Loodan et sind &auml;ra ei hirmutanud . </s> <s> Aga v&otilde;ibolla on boksi trenn l&otilde;dvem , kuid kick boxing on k&uuml;ll alguses v&auml;&auml;&auml;&auml;ga raske . </s> </p>
+<p> <s> Muidugi , kindlasti oleneb asi ka treenritest . </s> <s> Meil oli 2 erinevat treenrit , &uuml;hega oli natukene logedam , teisega oli &otilde;udusunen&auml;gu . </s> </p>
+ </sp> <sp> <speaker>Kill inc. </speaker> 
+<p> <s> Keegi teab kuna tysoni matsh toimub ... t&auml;na vist pidi olema ? </s> </p>
+ </sp> <sp> <speaker>|-X-|</speaker> 
+<p> <s> Keegi teab kuna tysoni matsh toimub ... t&auml;na vist pidi olema ? </s> <s> Vene epalt kuulsin , &ouml;eldi , et P&uuml;hap&auml;eval . See v&otilde;ib olla ka t&auml;na &ouml;&ouml;sel <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>muff</speaker> 
+<p> <s> No , millal ta siis poksib <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Red Devil</speaker> 
+<p> <s> Kindlalt tegeleb foorumlastest poksiga terall , eesti meister oli ta ka vist oam kehakaalus , niiet kui sisse tuleb siis lasen tal kirjutada <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Changer</speaker> 
+<p> <s> Arvata oli , et Tyson kotti saab , v&auml;ga raske mingit head vormi nii tagasi saada , kui oled kaua eemal olnud ja viimaseid mat&scaron;e ainult kaotanud . </s> </p>
+ </sp> <sp> <speaker>ZorroZip</speaker> 
+<p> <s> Ise &otilde;piatavad ... ei tea kohe parem on ikka kui keegi k&otilde;rval ette n&auml;itab kuidas teha midagi . </s> <s> Isegi siis on m&otilde;ndadel raske selgeks saada . </s> <s> No tegelt m&otilde;ned l&ouml;&ouml;gid v&otilde;id isegi selgeks saada aga asjalikumad asjad nagu kombinatsioonid ja situatsioonis k&auml;itumine on ikka pikaajaliselt &otilde;pitavad . </s> </p>
+ </sp> <sp> <speaker>basic</speaker> 
+<p> <s> V&auml;ga v&auml;&auml;rt idee kusjuures basic . </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> Teab keegi &ouml;elda , kus Tallinnas m&otilde;ned poksiklubid asuvad ? </s> <s> Krt , hakkas asi t&auml;itsa huvitama , kuigi ma saaksin r&auml;medalt molli . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Poks - 3. leht - Planet Foorumid </head>
+<sp> <speaker>Disasterpiece</speaker> 
+<p> <s> Kui esimese trenni n&auml;dalaga n&auml;gu ei ole verine siis vaheta trenni . </s> <s> See pole mingi nali . </s> <s> Osad trennid on sellised kus kohe treener ei luba midagi erilist teha ja siis tambid enda raha t&uuml;hja . </s> <s> Ilma peksa saamiseta ei &otilde;pi poksi peenet kunsti &auml;ra . loll jutt suhu tagasi , k&auml;i paar aastakest poksis ja siis hakkab su arusaam asjadest &otilde;igele poole kalduma . </s> <s> Poksi saab minna Karl Lemanisse ( T&otilde;nism&auml;e hambapolikliiniku sisehoovis ) . </s> <s> Kunagi oli Kopli l&otilde;pus POKO poksiklubi , aga see vist enam ei toimi , parandage kui eksin . </s> <s> V&otilde;imalik oli ka kunagi sisekaitseakadeemias k&auml;ia . </s> <s> Kalevi poksiklubi sai veel siis otsa kui ma miski 13 aastane p&auml;takas olin , enam pole midagi sellest kuulnud . </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> Kui l&auml;hed Lemanisse v&otilde;i Sisekaitsesse , siis vaevalt k&uuml;ll esimese n&auml;dalaga molli saad , sest vaevalt sind &uuml;ldse paarigi pannakse kuu jooksul . </s> </p>
+ </sp> <sp> <speaker>Disasterpiece</speaker> 
+<p> <s> No krt . </s> <s> Paistab ilgelt huvitav see poks . </s> <s> Lemanis on vist k&otilde;ik venelased , ei tea , kuidas nad eestlastesse suhtuvad , aga kui nendega h&auml;sti l&auml;bi saab , siis on korras . </s> <s> Ja kui kergelt muidu ninaluu l&auml;heb ? </s> <s> Nahui kui vinge . </s> </p>
+ </sp> <sp> <speaker>lordofthethongs</speaker> 
+<p> <s> Ei tea kas kodustes tingimustes on ka v&otilde;imalik midagi treenida ( &auml;kki mingeid video materjale vms . kuskil ) ? </s> <s> Kui ostaks koti ja kindad endale . </s> <s> Muidu kui ma 182/78 siis , raske see kott olema peaks ? </s> <s> Koti tagumine tundub selline hea f&uuml;&uuml;siline olevat ning eks ta arendab neid l&ouml;&ouml;ke ka ajapikku ma usun . </s> <s> Trenni tahaks ka minna , aga mitte enne s&uuml;gise l&otilde;ppu . </s> </p>
+ </sp> <sp> <speaker>BlackBerry</speaker> 
+<p> <s> Mina k&auml;isin eelmine aasta . . pool aastat kahjuks , kuna hakkas kooli segama . . Aga see aasta peaks rohkem aega olema ja &auml;kki saan edasi tegeleda sellega . . &Uuml;ks lemmikuid spordialasid <gap desc='image'> </s> </p>
+<p> <s> Raplas k&auml;isin/hakkan k&auml;ima . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Rock v&otilde;i Kalev - 14. leht - Planet Foorumid </head>
+<sp> <speaker>timo89</speaker> 
+<p> <s> Rockist l&auml;ks &auml;ra hr . Kikerpill . </s> </p>
+<p> <s> Samuti tegi esialgsete andmete j&auml;rgi Allar Velleramm uue lepingu , aga vist nii , et saab m&auml;ngida ka teiste klubide eest . </s> <s> Segane lugu veel . </s> </p>
+<p> <s> Aga Kiksist oli kahju . </s> <s> Talle asendajat on keeruline leida . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Kalev p&auml;&auml;ses ULEB karikasarja , Rock mitte . </s> </p>
+<p> <s> Tegemist siis Euroopas tugevuselt teise sarjaga , kus t&auml;nu laiendusele alustab sel hooajal 54 klubi &uuml;heksas kuueliikmelises alagrupis . </s> <s> Eelmist hooaega sai j&auml;lgida Eurosport2 pealt , niiet on pisikene v&otilde;imalus Kalevgi Euroopas tuntuks teha , kui nad peaks juhtuma m&otilde;ne korvpallihiiuga kokku . </s> <s> Liiga v&otilde;itja p&auml;&auml;seb Euroliigasse ( unistada ju v&otilde;ib <gap desc='image'> ) . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Tore kuulda lausa </s> = <s> ) </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> hetkel n&auml;itab Kalev Zalgirisele p&auml;ris korralikult hambaid . kui nad vaid l&otilde;ppu k&auml;est ei laseks . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Kalev/Cramo sai koduv&auml;ljakul Ludwigsburgist jagu 92 : 88 ! ! ! </s> </p>
+ </sp> <sp> <speaker>Comma</speaker> 
+<p> <s> kas see aasta on ka tartus kuskil meeskonna vastuv&otilde;tmine ? </s> <s> Eelmistel aastatel on olnud p&uuml;ssirohus , aga seeaasta ? </s> </p>
+ </sp> <sp> <speaker>ParisDiamondEva</speaker> 
+<p> <s> Uskumatu kuidas Kalev suudab ikka omale keerata . </s> <s> M&otilde;tlesin et l&otilde;puks end kokku v&otilde;tnud kuid jah . </s> <s> Olid , aga kurat , ei piisanud sellest . </s> <s> Igaljuhul ilus t&ouml;&ouml; Rocki poolt . </s> <s> J&auml;rgmine aasta on neil ehk ka vastane olemas . </s> </p>
+ </sp> <sp> <speaker>davey</speaker> 
+<p> <s> panin telku k&auml;ima 38 54 , </s> </p>
+<p> <s> siis l&auml;ksin kuhugi v&auml;lja korraks tlen tagasi mingi 62 58 ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&auml;&auml;hoki MM ! - Planet Foorumid </head>
+<sp> <speaker>Vilbiks</speaker> 
+<p> <s> j&auml;&auml;hoki on vist ainuke spordiala millega ma ennast aktiivselt kursis olen hoidnud . </s> </p>
+<p> <s> viimasel ajal on millegi p&auml;rast &auml;ra vajunud - pole aega ja nii . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> J&auml;&auml;hoki maailmameistriv&otilde;istlustel Kanadas on l&otilde;pule j&otilde;utud vahegrupi m&auml;ngudega . </s> <s> Turniiri k&otilde;ik senised kuus kohtumist on v&otilde;itnud Kanada , kes F-vahegrupi esikohta otsustavas m&auml;ngus alistas Soome 6 : 3 ( 2 : 1 , 2 : 0 , 2 : 2 ) . </s> </p>
+<p> <s> P&otilde;hjanaabrite lootusi grupi v&otilde;itmisega veerandfinaaliks kergem vastane saada tabas tagasil&ouml;&ouml;k juba 33 . sekundil , mil skoori avas Ryan Getzlaf . </s> <s> Oma v&otilde;imalusi selgelt paremini realiseerinud v&auml;ljakuperemehed kasvatasid teise perioodi l&otilde;puks edu 4 : 1-le ja p&auml;rast Shane Doani tabamust otsustava kolmandiku alguses oli selge , et USA m&auml;ngu sarnast come-backi soomlased teist &otilde;htut j&auml;rjest teha ei suuda . </s> </p>
+<p> <s> USA purustas viimases voorus Norra 9 : 1 . Brandon Dubinsky sai kirja k&uuml;baratriki , kaks v&auml;ravat ja &uuml;he resultatiivse s&ouml;&ouml;du lisas Dustin Brown . </s> </p>
+<p> <s> Norra sai kaotusest hoolimata veerandfinaali , sest L&auml;ti minetas oma edasip&auml;&auml;sulootused 3 : 5 kaotusega Saksamaa vastu . </s> <s> Peale kaht kolmandikku juhtis v&auml;hemalt viiki vajanud L&auml;ti veel 3 : 2 , kuid kustus viimasel perioodil t&auml;ielikult . </s> </p>
+<p> <s> Soomel seisab ees veerandfinaal USA-ga , Norra peab vastu astuma Kanadale . </s> </p>
+<p> <s> E-vahegrupis pani medalim&auml;ngudele p&auml;&auml;sejate osas l&otilde;pliku paremusj&auml;rjestuse paika Venemaa - &Scaron;veitsi vastasseis , kus favoriidid j&auml;id peale 5 : 3 . Kahe kolmandiku j&auml;rel turvaliselt juhtinud venelased said viimase perioodi alguses kahel korral karistada , kuid enamaks niigi juba MM-il &uuml;llatusi pakkunud &Scaron;veits suuteline ei olnud . </s> </p>
+<p> <s> Veerandfinaaliks on &Scaron;veitsil v&otilde;imalus kaks p&auml;eva j&otilde;udu koguda ning Venemaalt revan&scaron;i &uuml;ritada , teise poolfinalisti selgitavad Rootsi ja T&scaron;ehhi . </s> </p>
+<p> <s> Vahegrupi viimased kohad selgitasid omavahel Valgevene ja Taani . </s> <s> Juba kolmandat korda vaheturniiril pidi Valgevene tunnistama vastaste nappi paremust peale viigiga l&otilde;ppenud normaalaega , sedapuhku numbritega 2 : 3 . </s> </p>
+<p> <s> <hi rend='bold'>Tulemused : </hi> </s> </p>
+<p> <s> Valgevene - Taani la 2 : 3 ( 0 : 0 , 0 : 1 , 2 : 1 , 0 : 1 ) </s> </p>
+<p> <s> 23 . 06 0 : 1 Kim Staal ( Morten Green , Daniel Nielsen ) a&uuml; </s> </p>
+<p> <s> 55 . 42 1 : 1 Aleksei Ugarov ( Mihail Grabovski , Viktor Kostjut&scaron;enok ) </s> </p>
+<p> <s> 57 . 59 2 : 1 Dmitri Mele&scaron;ko ( Sergei Zadelenov , Vladimir Denisov ) </s> </p>
+<p> <s> 59 . 22 2 : 2 Peter Regin </s> </p>
+<p> <s> 62 . 11 2 : 3 Peter Regin </s> </p>
+<p> <s> <hi rend='bold'>L&auml;ti - Saksamaa 3 : 5 ( 1 : 1 , 2 : 1 , 0 : 3 ) </hi> </s> </p>
+<p> <s> 5 . 01 1 : 0 Herberts Vasiljevs ( Martins Karsums , Rodrigo Lavins ) </s> </p>
+<p> <s> 18 . 45 1 : 1 Christopher Schmidt ( Christoph Ullmann ) a&uuml; </s> </p>
+<p> <s> 25 . 48 2 : 1 Mikelis Redlihs </s> </p>
+<p> <s> 27 . 23 2 : 2 Michael Wolf ( Michael Hackert ) </s> </p>
+<p> <s> 31 . 39 3 : 2 Martins Karsums ( Herberts Vasiljevs , Aleksandrs Nizivijs ) </s> </p>
+<p> <s> 47 . 51 3 : 3 Michael Hackert ( Florian Busch ) </s> </p>
+<p> <s> 50 . 40 3 : 4 Yannic Seidenberg ( Christoph Ullmann , Andreas Renz ) </s> </p>
+<p> <s> 52 . 51 3 : 5 Christoph Ullmann ( Sven Felski ) </s> </p>
+<p> <s> <hi rend='bold'>USA - Norra 9 : 1 ( 3 : 0 , 3 : 1 , 3 : 0 ) </hi> </s> </p>
+<p> <s> 11 . 12 1 : 0 Brandon Dubinsky ( Mark Burish ) </s> </p>
+<p> <s> 12 . 15 2 : 0 Dustin Brown </s> </p>
+<p> <s> 19 . 03 3 : 0 Patrick Kane ( Dustin Brown , Zach Parise ) a&uuml; </s> </p>
+<p> <s> 25 . 28 4 : 0 Brandon Dubinsky ( Jordan Leopold , Keith Ballard ) </s> </p>
+<p> <s> 28 . 08 4 : 1 Mats Trygg ( Marius Holtet , Anders Bastiansen ) a&uuml; </s> </p>
+<p> <s> 31 . 56 5 : 1 Paul Martin ( Peter Mueller , Patrick Kane ) </s> </p>
+<p> <s> 32 . 18 6 : 1 Zach Parise ( Patrick O&Zcaron;Sullivan , Phil Kessel ) a&uuml; </s> </p>
+<p> <s> 42 . 33 7 : 1 Dustin Brown ( Keith Ballard , Tom Gilbert ) </s> </p>
+<p> <s> 45 . 44 8 : 1 Phil Kessel ( Patrick Kane , James Wisniewski ) </s> </p>
+<p> <s> 48 . 25 9 : 1 Brandon Dubinsky ( Tom Gilbert ) a&uuml; </s> </p>
+<p> <s> <hi rend='bold'>Venemaa - &Scaron;veits 5 : 3 ( 3 : 0 , 1 : 0 , 1 : 3 ) </hi> </s> </p>
+<p> <s> 15 . 21 1 : 0 Dmitri Kalinin ( Denis Zaripov , Aleksandr Radulov ) </s> </p>
+<p> <s> 17 . 49 2 : 0 Ilja Kovalt&scaron;uk ( Konstantin Kornejev , Aleksandr Sjomin ) </s> </p>
+<p> <s> 18 . 45 3 : 0 Maksim Su&scaron;inski ( Konstantin Gorovikov ) </s> </p>
+<p> <s> 30 . 27 4 : 0 Sergei Fjodorov ( Aleksandr Ovet&scaron;kin , Aleksandr Sjomin ) </s> </p>
+<p> <s> 40 . 32 4 : 1 Raffaele Sannitz ( Beat Forster , Paul DiPietro ) a&uuml; </s> </p>
+<p> <s> 45 . 30 4 : 2 Julien Vauclair av </s> </p>
+<p> <s> 57 . 25 5 : 2 Maksim Su&scaron;inski tv </s> </p>
+<p> <s> 58 . 25 5 : 3 Romano Lemm ( Andreas Amb&uuml;hl ) </s> </p>
+<p> <s> <hi rend='bold'>Kanada - Soome 6 : 3 ( 2 : 1 , 2 : 0 , 2 : 2 ) </hi> </s> </p>
+<p> <s> 0 . 33 1 : 0 Ryan Getzlaf ( Brent Burns , Rick Nash ) </s> </p>
+<p> <s> 5 . 37 1 : 1 Antti Pihlstr&ouml;m av </s> </p>
+<p> <s> 9 . 29 2 : 1 Shane Doan ( Chris Kunitz ) av </s> </p>
+<p> <s> 30 . 17 3 : 1 Dany Heatley ( Ryan Getzlaf , Rick Nash ) </s> </p>
+<p> <s> 38 . 12 4 : 1 Patrick Sharp ( Jamal Mayers ) av </s> </p>
+<p> <s> 41 . 07 5 : 1 Shane Doan ( Jonathan Toews ) </s> </p>
+<p> <s> 48 . 33 5 : 2 Antti Pihlstr&ouml;m ( Mikko Koivu ) </s> </p>
+<p> <s> 58 . 02 6 : 2 Dany Heatley ( Rick Nash , Ryan Getzlaf ) </s> </p>
+<p> <s> 59 . 36 6 : 3 Tuomo Ruutu ( Mikko Koivu , Jussi Jokinen ) </s> </p>
+<p> <s> <hi rend='bold'>Tabeliseisud : </hi> </s> </p>
+<p> <s> E-vahegrupp </s> </p>
+<p> <s> 1 . Venemaa 5 3 2 0 0 21 : 13 13 </s> </p>
+<p> <s> 2 . Rootsi 5 3 0 0 2 23 : 16 9 </s> </p>
+<p> <s> 3 . T&scaron;ehhi 5 2 1 1 1 19 : 14 9 </s> </p>
+<p> <s> <hi>4 . </hi> </s> <s> <hi> &Scaron;veits 5 3 0 0 2 16 : 15 9</hi> </s> </p>
+<p> <s> 5 . Valgevene 5 0 0 3 2 13 : 17 3 </s> </p>
+<p> <s> 6 . Taani 5 0 1 0 4 9 : 26 2 <hi rend='bold'>F-vahegrupp</hi> </s> </p>
+<p> <s> 1 . Kanada 5 5 0 0 0 30 : 9 15 </s> </p>
+<p> <s> 2 . Soome 5 3 1 0 1 16 : 12 11 </s> </p>
+<p> <s> <hi>3 . </hi> </s> <s> <hi> USA 5 3 0 0 2 25 : 13 9</hi> </s> </p>
+<p> <s> 4 . Norra 5 1 0 1 3 8 : 20 4 </s> </p>
+<p> <s> 5 . Saksamaa 5 1 0 0 4 13 : 27 3 </s> </p>
+<p> <s> 6 . L&auml;ti 5 1 0 0 4 8 : 19 3 </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Venemaa saab Soomelt kotti nagu alati poolfinaalis . </s> <s> Finaalis on Rootsi ja Soome . </s> <s> Seal loodan Soome v&otilde;itu . </s> </p>
+ </sp> <sp> <speaker>Geenius666</speaker> 
+<p> <s> mis kanal n&auml;itab Soome - Venemaa m&auml;ngu ning millal ja mis kell ? </s> </p>
+<p> <s> M&otilde;ni Viasat Sport ? </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> yle tv2 pealt isegi m&otilde;nda j&auml;lgind . . </s> </p>
+ </sp> <sp> <speaker>&tilde;MarDo&tilde;</speaker> 
+<p> <s> hoki alajuhid peaks kuidagi suutma omavahel kokku leppida - praegune versioon kus paljudel riikidel on mmil v&auml;ljas teine meeskond ei ole v&auml;ga kutsuv . </s> </p>
+<p> <s> ma natuke ikka vaatan , muidugi . ilus m&auml;ng - v&auml;ga kiire ja kirglik . mulle meeldib . </s> </p>
+<p> <s> jalgpalli m&auml;ngitakse riikides kus j&auml;&auml; korralikult ei kasva . </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> Vilbiks , tegelt on neid hoki teemasi mitu . </s> <s> Minu tehtud &quot;Hoki MM&quot; , siis Cab Driveri &quot;J&auml;&auml;hoki MM&quot; ja niisama ka hoki teema . </s> <s> Niiet otsi ennem , kui v&auml;idad , et p&otilde;hjendamatul pole siin hoki teemat . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Tramaeiv&otilde;i ! </s> <s> Soome vene 0-4 Uskumatu kui targalt venkud m&auml;ngisid </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> T&auml;na pronksim&auml;ng , loodan v&auml;ga , et soome v&otilde;idab rootsi &auml;ra <gap desc='image'> . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> vilbiks kuda kanadal 5 on kui siuksed v&auml;ravad l&ouml;&ouml;di ? kontrolli kah kui kopy paste teed . </s> </p>
+<p> <s> <hi rend='bold'>Kanada-Rootsi 5 : 4 ( 1 : 1 , 4 : 2 , 1 : 1 ) </hi> </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> ei tea jah ... </s> </p>
+<p> <s> ise kaldun kanada poolehoidjate leeri . </s> </p>
+<p> <s> - - - veel &uuml;ks kord ! </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> nujah </s> ... . <s> shampanja j&auml;&auml;b seekord avamata <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Venkud siis maailmameistrid . Parimaid finaal m&auml;nge ever . </s> </p>
+<p> <s> Mitte , et ma venkude poolt olin kuid mis seal salata m&auml;nguliselt olid nad asja &auml;ra teeninud ! </s> </p>
+<p> <s> VENE-CANADA </s> </p>
+<p> <s> 5-4 kusjuures v&otilde;iduv&auml;rav tuli lisaaja esimestel minutitel ! </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> UEFA Champions League 2007/08 - 4. leht - Planet Foorumid </head>
+<sp> <speaker>Zeppelist</speaker> 
+<p> <s> &uuml;lik&otilde;vv ! kollaseid kaarte ikka lendas </s> </p>
+ </sp> <sp> <speaker>iPwn</speaker> 
+<p> <s> njah &otilde;nneks pole veerandfinaalidest saadik vaadanud CLi . </s> </p>
+<p> <s> 'Pool nagunii v&otilde;idab CLi . </s> </p>
+ </sp> <sp> <speaker>vegy</speaker> 
+<p> <s> Oh kui hea , et ManU sai edasi . </s> </p>
+<p> <s> Kaua aega oli viimasest finaalist m&ouml;&ouml;das juba . </s> <s> Ja Inglise liiga on ikka eriti tugev , kas pole . </s> </p>
+<p> <s> Kui n&uuml;&uuml;d m&otilde;lemad v&otilde;ita , siis peab k&uuml;ll au andma <gap desc='image'> </s> </p>
+<p> <s> Aga t&auml;nase m&auml;ngu kohta arvan ma , et edasi saab Liverpool . </s> </p>
+<p> <s> Nemad on sellised &quot;CL only&quot; meeskond <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Samoosa</speaker> 
+<p> <s> Chelski edasi ! </s> </p>
+ </sp> <sp> <speaker>Neville</speaker> 
+<p> <s> Hea m&auml;ng oli </s> </p>
+ </sp> <sp> <speaker>Oden</speaker> 
+<p> <s> Olen kurb . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>retes</speaker> 
+<p> <s> ManU vastu pole mul midagi olnud kunagi , oli isegi lemmik vanasti . </s> </p>
+<p> <s> Igatahes gogo ManU . </s> </p>
+ </sp> <sp> <speaker>bright</speaker> 
+<p> <s> Pole paha ! </s> <s> Abramovit&scaron; v&otilde;iks asja &auml;ra v&otilde;ita ; oleks rahu majas . </s> </p>
+ </sp> <sp> <speaker>Mad Guy</speaker> 
+<p> <s> njah , ainuke kes Bayerni poolt h&auml;sti m&auml;ngis oli Ribery . </s> </p>
+ </sp> <sp> <speaker>bright</speaker> 
+<p> <s> Hm ... </s> <s> P6nev , ManU ja Chelsea vahel pinget j2tkub . </s> <s> ManU napsas Premier League'i v6idu 2ra , ning nyyd , kui Chalsea peaks kaotama , lahkub ManU m&otilde;lema tiitliga . </s> <s> Chelsea'it ootab Moskvas ees ylit2htis m2ng . </s> <s> Ise hoian p8ialt ManU'le . </s> </p>
+ </sp> <sp> <speaker>Ryan</speaker> 
+<p> <s> Tuleb igav m&auml;ng ; v&otilde;itja otsustatakse penaltitega . </s> </p>
+ </sp> <sp> <speaker>ParisDiamondEva</speaker> 
+<p> <s> 1 : 1 pole sugugi paha ! </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> pole paha ! </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> UEFA Champions League 2007/08 - 5. leht - Planet Foorumid </head>
+<sp> <speaker>Oden</speaker> 
+<p> <s> Jess ! ! ! ! ! </s> </p>
+<p> <s> See post oli hea vedamine aga kurat JESS ! </s> </p>
+ </sp> <sp> <speaker>d&zcaron;iisus kraist</speaker> 
+<p> <s> Yeeeeeeeeeeeessshhh </s> </p>
+<p> <s> Super p&auml;ev , rock v&otilde;itis tiitli , samuti ka manu , mida veel tahta . </s> </p>
+<p> <s> JESSSSS </s> </p>
+ </sp> <sp> <speaker>kruvi</speaker> 
+<p> <s> Tuleb igav m&auml;ng ; v&otilde;itja otsustatakse penaltitega . </s> <s> Siiski oleks oodanud sinis&auml;rkide v&otilde;itu . </s> </p>
+<p> <s> Ronaldo eksimine ei &uuml;llatanud kohe sugugi . </s> </p>
+ </sp> <sp> <speaker>testarossa</speaker> 
+<p> <s> ei tea , t&auml;itsa p&otilde;nev finaal oli iseenesest </s> </p>
+ </sp> <sp> <speaker>aleks</speaker> 
+<p> <s> Ronaldo on crybaby . </s> <s> Aga jah p&auml;ris p&otilde;nev m&auml;ng . </s> <s> Olingi ManU poolt . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Parim enesekaitseks - 5. leht - Planet Foorumid </head>
+<sp> <speaker>Disasterpiece</speaker> 
+<p> <s> Nuga on ikka eriti m&otilde;ttetu asi mida kakluses v&auml;lja v&otilde;tta . </s> </p>
+<p> <s> &Uuml;tle mis sa teed sellega ? </s> </p>
+<p> <s> Kui mingi idioot mind pussitab siis ma annan asja nii kiiresti menti , et sa ei j&otilde;ua silma ka pilgutada . </s> <s> T&auml;nava &quot;reeglid&quot; v&otilde;i &quot;au&quot; hui siis kehtib . </s> </p>
+<p> <s> Pealegi on v&auml;ga kerge lambist maha tappa mingit venda sellega ja mis sa siis oma sitase noore eluga peale hakkad ? </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> Edit : teemasse ka , tegelikult on v&auml;ga hea asi taipoks , taekwon-do ning poks . jooksutrenn on ka loomulikult hea valik . julgen kahelda taekwondo kasulikkuses , aga see selleks . poks ja taipoks on kahtlemata head . lisaks oleks vaja osata m&otilde;nev&otilde;rra ka maadlust ja maasv&otilde;itlust . </s> </p>
+<p> <s> aga mis puudutab jooksutrenni siis saan aru k&uuml;ll , et viskad pooleldi nalja , aga tegelikult sellest pole kahjuks tolku midagi , sest parandada tuleks just oma 100 - 200 m aega , aga see pole nii lihtne . mina jooksen sadat meetrit mingi 13-14 sekundit ja v&auml;hegi andekas t&uuml;&uuml;p saab mu iga kell k&auml;tte . kui ma aastaid trenni teeks siis saaks oma aja ehk 12 , 5 -13 sekundi peale , aga plahvatuslikuma lihasega p&auml;ttinimene p&uuml;&uuml;aks mu siiski kinni . </s> </p>
+ </sp> <sp> <speaker>Gray-Bow</speaker> 
+<p> <s> t6esti , kui ikka 3 venda peale tulevad , siis ei ytee midagi . </s> </p>
+ </sp> <sp> <speaker>matude</speaker> 
+<p> <s> ei , sa ei jookse oluliselt kiiremini . kauem ei puutu enam asjasse . ei usu , et kedagi aetaks taga kauem kui paarsada meetrit . k&uuml;simus on selles , et mingi t&uuml;liolukord v&otilde;ib tekkida ikkagi paari meetri pealt . kaks meetrit on n&auml;ruselt v&auml;ike vahemaa ja sind p&uuml;&uuml;takse tuimalt kinni . </s> <s> ( kui sa ei ole andekas sprinter ) jah , on v&auml;ga t&otilde;en&auml;oline , et kui on vaja pikemalt p&otilde;geneda siis sa suudad joosta kilomeetri normaalse nelja minuti asemel kolmega , aga sadat meetrit sa 13 sekundi asemel 11 -ga ei jookse . sry , paanika peale ei saa loota . </s> </p>
+<p> <s> Ja see eriti ei loe , mis v&otilde;itluskunsti &otilde;pid jne , sest igas v&otilde;itluskunstis erinevad v&otilde;tted ja tehnika , nii et v&otilde;itluskunste ei saa panna paremuse j&auml;rjekorda minuarust . v&otilde;itluskunste saab selles m&otilde;ttes panna paremuse j&auml;rjekorda , et osasid neist harjutatakse vastupanuga ja osasid ainult surnult . n&auml;iteks enamik traditsiooniga flirtivaid karatesid ja muu taoline on kr&auml;pp mille v&otilde;ib kohe &auml;ra unustada , kui eesm&auml;rgiks on v&otilde;itlema &otilde;ppimine . m&otilde;ne muu eesm&auml;rgi korral on karate kahtlemata tore . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>rds567</speaker> 
+<p> <s> sa ei jookse kuhugi , kui sulle laks 6igesse kohta pannakse v6i ymber piiratakse . </s> <s> Ei jookse k&uuml;ll , aga v&auml;hemalt , kui sa oled kiire jooksija , siis on sul v&otilde;imalus p&otilde;geneda ja kui veel enesekaitset ka valdad , siis on sul v&auml;hemalt v&otilde;imalus p&auml;&auml;seda keret&auml;iest vms . </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> Looda siis , et ta just hiljuti sellega ennast v&otilde;i kedagi teist torkas , sest nt . AIDS ei s&auml;ili &otilde;hu k&auml;es v&auml;ga h&auml;sti . </s> <s> Aga hirmujutud on alati toredad , eks . </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> Vana teema , siiski p&auml;evakajaline ma pakun . </s> </p>
+<p> <s> MMA e . vabav&otilde;itlus on vast k&otilde;ige efektiivsem t&auml;navasituatsioonis . </s> <s> &Auml;kki kellegil kogemusi v&otilde;i m&otilde;nda lugu pajatada ? </s> </p>
+<p> <s> Relvad on ohtlikud , enamasti ei osata neid kasutada ning jama j&auml;rgneb k&otilde;vasti . </s> <s> Mingi tool v&otilde;i kaigas on palju kindlam ese . </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> T&auml;navasituatsioonis on k&otilde;ige efektiivsem kas Nike-Do v&otilde;i Gun-Fu . </s> </p>
+<p> <s> Priit kunagi r&auml;&auml;kis ( Eesti &uuml;ks MMA vedajatest ) , et ta pole kunagi pidanud oma oskusi rakendama , 99% juhtudest saab siiski r&auml;&auml;kida ka . <hi rend='italic'>I concur . </hi> </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> rusikad v&otilde;i kiired jalad , kergelt tappa saada pole ka paha </s> </p>
+ </sp> <sp> <speaker>Mihkel119</speaker> 
+<p> <s> Mul vanaema &uuml;tles enne kui Tallinna tulen , et maapoiss , raksu on , kui keegi kella tuleb &ouml;&ouml;sel t&auml;naval k&uuml;sima , siis k&uuml;ta kohe molli . </s> <s> Kui ei k&uuml;ta , saad ise . . </s> </p>
+ </sp> <sp> <speaker>Hook</speaker> 
+<p> <s> S&otilde;braga sai vaidlema mindud lihtsalt . </s> <s> Pakkusin , et vabav&otilde;itlus valmistaks h&auml;sti ette t&auml;navate jaoks . </s> <s> Siiski suht julm otsene kontakt pidevalt vastasega . </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> Julgust on vaja . </s> <s> Tean t&uuml;&uuml;pe , kes on t&auml;naval mitmeid ja mitmeid t&uuml;&uuml;pe n&ouml; &quot;&auml;ra tagunud&quot; ja tegu pole mingite kappidega ega trenni poistega . </s> </p>
+ </sp> <sp> <speaker>TISKO</speaker> 
+<p> <s> &Uuml;ldiselt on trennist kasu k&uuml;ll . </s> <s> Ehk siis kui mingi paar-kolm aastat poksimas k&auml;inud 70kg t&uuml;&uuml;bilt korralikult sisse saada , siis v&otilde;tab ka mingi 90+ kg tegelase p&auml;ris pikalt m&otilde;ttesse . </s> <s> Ja samal ajal on ta veel paar korda sisse saanud . </s> </p>
+<p> <s> Aga jah , parim enesekaitseks on ilmselt s&otilde;nad . </s> <s> V&otilde;i minema jooksmine . </s> <s> V&auml;iksena sai kakeldud k&uuml;ll , kuid pole vist mingi 6ndast klassist seda teinud , ei ole vajadust . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Parim enesekaitseks - 6. leht - Planet Foorumid </head>
+<sp> <speaker>Mattias</speaker> 
+<p> <s> Kui ta on MMA eestvedaja Eestis , siis arvatavasti on ta v&auml;ga heas vormis . </s> <s> Mingil p&otilde;hjusel arvan , et t&uuml;linorijad ei l&auml;he tavaliselt temasuguste kallale . ta ei n&auml;e &uuml;ldse selline v&auml;lja . </s> </p>
+<p> <s> pealtn&auml;ha on ta just selline kelle kallal v&otilde;iks natuke hambaid teritada ja k&auml;tt proovida . </s> </p>
+ </sp> <sp> <speaker>romz</speaker> 
+<p> <s> T&auml;navasituatsioonis on k&otilde;ige efektiivsem kas Nike-Do v&otilde;i Gun-Fu . </s> <s> Gun fu is the style of sophisticated close-quarters gunplay seen in Hong Kong action cinema[1 ] and in Western films influenced by it . </s> <s> It often resembles a martial arts battle played out with firearms instead of traditional weapons . </s> <s> It may also be described by other terms such as bullet ballet or gymnastic gunplay . </s> <s> [ 2 ] V&auml;he ohtlikuks ei l&auml;he v&otilde;i ? </s> </p>
+ </sp> <sp> <speaker>Hook</speaker> 
+<p> <s> kung-fu _le jms . eelistaksin ikkagi poksi ja maadlust . </s> </p>
+ </sp> <sp> <speaker>Kyioshi</speaker> 
+<p> <s> &Uuml;ks hiiglaslik p&otilde;hjus , miks natukenegi m&otilde;nes v&otilde;itlustrennis k&auml;imine v&auml;ga kasuks tuleb , on v&otilde;itlusega harjumine . </s> </p>
+<p> <s> Inimene , kes pole harjunud l&ouml;&ouml;ke saama v&otilde;i vastu andma , enamasti kivistub t&auml;ielikult p&auml;rast esimest l&ouml;&ouml;ki ja suudab vastu r&uuml;nnata alles natuke hiljem juba vihasena . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 EM valikturniir - 42. leht - Planet Foorumid </head>
+<sp> <speaker>Zeppelist</speaker> 
+<p> <s> Juhtus see , mis juhtuma pidi . </s> <s> Hispaania v&otilde;itis ! ! ! </s> <s> 11 </s> </p>
+<p> <s> iniesta t&ouml;&ouml;ga polnud k&uuml;ll rahul . </s> </p>
+ </sp> <sp> <speaker>Nobizares</speaker> 
+<p> <s> Nohjah , &otilde;nne need kes Hispaaniat pooldasid . </s> <s> Ainuke asi , mis mind h&auml;iris oli see , et v&auml;ravaid oli v&auml;he ja seegi oli veits &otilde;nnetu . </s> <s> Aga jah viva la espana ( vms ) . </s> </p>
+ </sp> <sp> <speaker>leeklamp</speaker> 
+<p> <s> v&otilde;it l&auml;ks &otilde;igesse kohta antud m&auml;ngu p&otilde;hjal <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Geenius666</speaker> 
+<p> <s> Ei , kohe &uuml;ldse mitte . </s> </p>
+ </sp> <sp> <speaker>Knait</speaker> 
+<p> <s> rahul ofc . . saksamaa poolt ikka ei oleks lol . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> m&auml;ng imes vilinal . olen pettunud . </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Indrek , ma andestan sulle . &gt; : ) </s> </p>
+<p> <s> Saksamaa ei n&auml;idanud ju eriti mingit m&auml;ngu , alguses t&otilde;esti oli hea , l&otilde;pus vajus &auml;ra ja ei n&auml;inud seda &quot;me tahame v&otilde;ita&quot; suhtumist . </s> </p>
+ </sp> <sp> <speaker>Mad Guy</speaker> 
+<p> <s> aga tegelt oli kahju sakslaseid vaadata , nad olid nii kurvad <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Garfu</speaker> 
+<p> <s> hea oli ju </s> </p>
+ </sp> <sp> <speaker>Q Ball</speaker> 
+<p> <s> Ainu&otilde;ige v&otilde;it selle EM -i parimale meeskonnale ! </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Hitler oli t&auml;na Hispaanlane </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Mis selle Ramose s&auml;rgil oli peale m&auml;ngu ? </s> <s> Mingi t&uuml;&uuml;bi pilt ja mingi kiri . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 EM valikturniir - 43. leht - Planet Foorumid </head>
+<sp> <speaker>Ryan</speaker> 
+<p> <s> Where's your Hitler now ? suht n&otilde;me on nii &ouml;elda . </s> </p>
+<p> <s> Hitler oli t&auml;na Hispaanlane Franco on see nimi mida sa otsid . </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> hispaania oli seda v&otilde;itu v&auml;&auml;rt , ma ootasin k&uuml;ll neilt rohkem v&auml;ravaid , kuid v&otilde;it on siiski v&otilde;it ja see l&auml;ks seekord &otilde;igesse kohta . </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Driver <gap desc='hyperlink'> bl&auml;-bl&auml;-bl&auml; See postitus on &uuml;ks paras naljanumber . </s> <s> Ei , ma ei v&auml;ida , et Saksamaa oleks hiilgavalt m&auml;nginud ja et Hispaania ei v&auml;&auml;rinuks v&otilde;itu ja tiitlit , seda mitte . </s> <s> Aga &uuml;lej&auml;&auml;nu ... kes &uuml;tleb , et sakslased toorutsesid ja n&auml;rvasid ja et m&otilde;ni neist on paras eit , see peab k&uuml;ll v&auml;he k&otilde;&otilde;rdi vaatama . </s> </p>
+<p> <s> Elik kui vaadata , kuidas Kloset nii m&otilde;nigi kord t&ouml;&ouml;deldi ( p&auml;rast vilet isegi nt ) , siis v&otilde;iks ju toorutsejateks pidada hoopis hispaanlasi . </s> <s> R&auml;&auml;kimata eitede etendustest nii Torrese kui m&otilde;ne kaitsja esituses , lisaks muidugi muud t&uuml;&uuml;pilised ja m&otilde;istetavad ajaviitmisp&uuml;&uuml;dlused . </s> </p>
+<p> <s> &Uuml;hes&otilde;naga , meeskond , kes toob r&uuml;nnaku teravdamiseks sisse kaks sellist puujalga nagu Gomes ja Kuranyi , ei saagi Euroopa meistriks tulla . </s> <s> Ja kuigi Hispaania oli nii eilse m&auml;ngu kui ka kogu turniiri kokkuv&otilde;ttes seda tiitlit v&auml;&auml;rt , siis mulle kui sakslastele p&ouml;idlahoidjale j&auml;tsid m&otilde;ned m&auml;ngu l&otilde;pupoole toimunud s&uuml;ndmused v&auml;he m&otilde;ru maigu suhu . </s> <s> Aga suures osas siiski see minu probleem vist ... </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Messi veel peale , suur naer . </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> Sportneti t&uuml;&uuml;bid on asjast valesti aru saanud . </s> <s> Tegelikult on Zeniti plaan selline , et annavad Arshavini ja 20 miljonit Messi vastu . </s> <s> Kummaline plaan nii v&otilde;i naa ... </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Vesilaud ? - Planet Foorumid </head>
+<sp> <speaker>teepakike</speaker> 
+<p> <s> AH - leidsin , asja nimi on Bodyboard . </s> </p>
+<p> <s> N&uuml;&uuml;d j&auml;rgmine k&uuml;simus , kust s&auml;&auml;rast asja Eesti saab ? </s> </p>
+ </sp> <sp> <speaker>kruvi</speaker> 
+<p> <s> JAJAH ! </s> <s> Kruvi , veel parem , skimboard tundub veel vingem . </s> <s> V&auml;iksem ja ei ole nii kuradi lai ka . </s> </p>
+<p> <s> Andke teada , kust s&auml;&auml;rast asja soetada saab ! </s> </p>
+<p> <s> Leidsin &uuml;he koha - <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>Friizuurikas</speaker> 
+<p> <s> Nii , v&otilde;tsin Surfhouse'iga &uuml;hendust , ka sealt v&otilde;ib neid leida . </s> </p>
+<p> <s> <hi rend='italic'>&quot;Tere</hi> </s> </p>
+<p> <s> Meil on kodumaiseid firma ELME skimme , hinnaks 1500 , - </s> </p>
+<p> <s> On olemas nii directionale kui ka twin-e </s> </p>
+<p> <s> P&auml;ikest , </s> </p>
+<p> <s> <hi>Surfhouse&quot;</hi> </s> </p>
+ </sp> <sp> <speaker>teepakike</speaker> 
+<p> <s> Mh , skimmid surfis mingi 600-700 ei maksa ? s&otilde;ber v&auml;hemalt k&auml;is peale , et tule v&otilde;ta &auml;ra sellise hinnaga , ise pole vaatamas k&auml;ind t&auml;psemalt . </s> <s> Igastahes kuidas oli ja kus proovisid , Eesti lahedad vee olud ei seganud ? </s> </p>
+ </sp> <sp> <speaker>teepakike</speaker> 
+<p> <s> Tekkis k&uuml;simus , et kus rannas nagu v&otilde;ib suuremaid laineid Eestis kohata ? </s> <s> Ristna , Hiiumaa . </s> </p>
+ </sp> <sp> <speaker>RehaonU</speaker> 
+<p> <s> mhm , s&otilde;ber surfist &uuml;tles , et need elme omad on bs . olevat siledad ja pidid haisema nagu pr&uuml;gikast . hiljuti tulid uued , normaalse kujuga ja &uuml;le poole odavamad . </s> <s> Elmes on t&auml;iesti uus tootevalik v&otilde;rreldes sellega , mis seal oli , kui link &uuml;les pandi . </s> </p>
+ </sp> <sp> <speaker>olxxx</speaker> 
+<p> <s> Olxxx , sa mingi p&auml;ev k&uuml;sisid , et kust ma vaha sain . </s> <s> Mul l&auml;ks sinu kiri meelest &uuml;ldse &auml;ra , t&auml;na alles meenus , vabandan . </s> <s> Surfivahaga on n&uuml;&uuml;d asi nii , et Eestis seda praktiliselt ei ole ning tuleb alternatiividele m&otilde;elda . </s> <s> Mina n&auml;iteks leidsin sobivate koostiosadega vaha Matkaspordi poest Tartu maanteelt . </s> <s> Tegelikult on ta riietele m&otilde;eldud , aga t&ouml;&ouml;tab surfivahana ka v&auml;ga h&auml;sti . </s> <s> Suurem pakk oli 125 krooni , v&auml;iksem 65 krooni . </s> </p>
+<p> <s> V&auml;ga h&auml;sti t&ouml;&ouml;tab , n&auml;dalavahetusel k&auml;isin V&otilde;sul ka natuke skimmimas ning hoiab laual kenasti . </s> <s> Kurat , samal p&otilde;lvel kukkusin korba maha . </s> </p>
+<p> <s> Olxxx , oled muidu juba s&otilde;itma ka j&otilde;udnud , kuidas on ? </s> </p>
+ </sp> <sp> <speaker>olxxx</speaker> 
+<p> <s> Miskurat ? ! </s> <s> Ettevaatlik ? </s> <s> Hullu tuleb panna . </s> <s> Esimest korda kui &uuml;ldse lauaga hakkasin vee poole jooksma , ei m&otilde;elnud ka , lihtsalt tunde j&auml;rgi ja hullu . </s> <s> L&otilde;ppes muidugi r&auml;nga kukkumisega , aga noh , v&auml;ga valus ka ei olnud . </s> </p>
+<p> <s> V&otilde;su haavad juba peaaegu paranenud , v&otilde;imaluse korral kohe skimmima j&auml;lle . </s> <s> Suutsin oma s&otilde;pru ka nakatada , &uuml;ks tahab minu lauaga s&otilde;ita , teine ehitab kodus endale oma lauda . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>teepakike</speaker> 
+<p> <s> Hoi , sinna see t&auml;nane p&auml;ev l&auml;ks nagu naksti . </s> <s> Tegime pildil oleva s&otilde;braga kolm lauda . </s> <s> Reedeni peab lakkima ja siis saab juba s&otilde;ita - uhuh , uurisin juba lainekamad rannad v&auml;lja - tuleb p&otilde;nev . </s> </p>
+<p> <s> Aga keegi k&otilde;vem vend v&otilde;iks muuta teema nimeks n&auml;iteks &quot;skimmimine&quot; ! </s> </p>
+ </sp> <sp> <speaker>kaos</speaker> 
+<p> <s> Jaaniplatsi juures pole skimmimas k&auml;inud , ainult seal vetelp&auml;&auml;stja maja ees . </s> <s> V&otilde;sul on teisi skimmijaid k&uuml;ll ja k&uuml;ll . </s> </p>
+ </sp> <sp> <speaker>T&scaron;ebunaator</speaker> 
+<p> <s> V&auml;&auml;na-j&otilde;esuus kohtab vahest head lainet ... </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Jalgpall foorumlastega - 8. leht - Planet Foorumid </head>
+<sp> <speaker>Hellion</speaker> 
+<p> <s> paljud siis tulema pidid ja paljud tegelikkuses kohal olid ? </s> </p>
+ </sp> <sp> <speaker>Scarface</speaker> 
+<p> <s> Homme ( t&auml;na p&otilde;mst ) l&auml;hme mina , Oden ja &uuml;ks mittefoorumlane Shnelli staadionile niisama peale l&ouml;&ouml;ma ja k&otilde;ksima n shit . </s> <s> Kes tahab , v&otilde;ib ka tulla . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Oih . kell 13 . 00 kuskil ^^ </s> </p>
+</sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Okei , see laup&auml;ev , 12 . juuli , kell 10 j&auml;lle seal samas , sobib ? </s> </p>
+ </sp> <sp> <speaker>iPwn</speaker> 
+<p> <s> Okei , aga siis teeme mingi teine p&auml;ev ja mingi teine aeg . </s> </p>
+ </sp> <sp> <speaker>Scarface</speaker> 
+<p> <s> jah . </s> </p>
+<p> <s> mina , sina , karl , t&otilde;nu oleks 4 foorumlast juba lol </s> </p>
+ </sp> <sp> <speaker>Changer</speaker> 
+<p> <s> Tartusse oleks mina k&uuml;ll n&otilde;us tulema , kunagi augustis . </s> </p>
+ </sp> <sp> <speaker>Scarface</speaker> 
+<p> <s> Teise kambaga sain kindla aja . </s> <s> &Otilde;llek&otilde;ht &uuml;tleb , et kaks korda n&auml;dalas oleks liig . </s> </p>
+ </sp> <sp> <speaker>Shocksteaddy</speaker> 
+<p> <s> Pole amu teemat j&auml;lginud , aga jah . nagu ma juba alguses arvasin ei miskit tule sellest . </s> </p>
+<p> <s> mingi 150plus posti , aga ainult m&otilde;ned m&auml;ngiad . <gap desc='image'> </s> </p>
+<p> <s> hea n&auml;ide , et arvuti taha on k&otilde;ik k&otilde;vad tuliad ja tegiad . tegusid real lifes ei tule . </s> </p>
+<p> <s> noliferid <gap desc='image'> L&otilde;puks hakkavad mingit jalka m&auml;ngu netis pelama koos <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Shocksteaddy</speaker> 
+<p> <s> Kes oleks k2pp tuleval pyhap2eval 13 : 00 Shnellis ? </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> P&uuml;hap . kell 12 : 00 liigam&auml;ng FC Flora Raplaga . </s> <s> Peale seda eriti ei viitsiks . . </s> </p>
+ </sp> <sp> <speaker>Shocksteaddy</speaker> 
+<p> <s> Millal siis jalkat teeme ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> langevarju h&uuml;pped ... - Planet Foorumid </head>
+<sp> <speaker>ropp5</speaker> 
+<p> <s> ei ole h&uuml;ppand ... aga tahax kyll . . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>flopper</speaker> 
+<p> <s> njaaa . . </s> </p>
+<p> <s> siis kui 20 saan siis h&uuml;ppan <gap desc='image'> </s> </p>
+<p> <s> kes kaasa tuleb ? <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>flopper</speaker> 
+<p> <s> v&otilde;ix ka tulla a ma liiga noor siis ma pakun </s> </p>
+ </sp> <sp> <speaker>flopper</speaker> 
+<p> <s> 5 aastat veel <gap desc='image'> head ootamist <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>plazas</speaker> 
+<p> <s> benji h&uuml;ppe olen &auml;ra teinud ... meeldis ... aga langevarju h&uuml;pet tahaks veel rohkem , see lihtsalt tundub p&otilde;nevam </s> </p>
+ </sp> <sp> <speaker>Velg</speaker> 
+<p> <s> Aikurat , kuis mulle meeldib igaltpoolt h&uuml;pata <gap desc='image'> </s> </p>
+<p> <s> Ja arvatavasti h&uuml;ppaks lennukist ka kui raha oleks nii palju <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>hullxx</speaker> 
+<p> <s> kui h&uuml;ppeisu v&auml;ga suur on ja 20 eluaastat ei j&otilde;ua &auml;ra kannatada , siis saab alati ka mustalt h&uuml;pata . Maksad lihtsalt n&auml;iteks lendurile vms ja instruktorile kuidagi ja siis lastakse h&uuml;pata . Kuigi jah , eks ta riskantsem ole , v&otilde;ibolla k&uuml;ll mitte sinu jaoks , aga kui sinuga peaks midagi juhtuma , siis tuleb korraldajatele sellest k&otilde;va jama kaela . ise ei ole h&uuml;panud ja eriti ei kisu ka . Reeglina proovin k&otilde;ik asjad &auml;ra , mis v&otilde;imalikud , kuid langevarjuh&uuml;petel on minu arvates selline kontrollimatuse tunne , kui juba maa ja taevavahel lendad ja avastad , et langevarju kotis langevarju asemel midagi muud on , siis ei ole enam midagi p&auml;&auml;sta . Ei aita ei kiire k&auml;tega vehkimine ega appi h&uuml;&uuml;dmine . Muudel spordialadel kuidagi suurem v&otilde;imalus midagi ise kontrollida . Kuigi jah , v&otilde;imalus et seal midagi viltu l&auml;heb , pole v&auml;ga suur , aga kui l&auml;heb , siis l&auml;heb ikka korralikult . </s> </p>
+ </sp> <sp> <speaker>aavu</speaker> 
+<p> <s> Tegelikult hirmsasti tahaksin , aga ei ole senini veel niipalju vaba raha ja aega leidnud , et sellega tegeleda ... </s> <s> Muidu p&auml;ris lahe oleks ma kujutan ette . </s> </p>
+ </sp> <sp> <speaker>Psychocandy</speaker> 
+<p> <s> Aikurat , kuis mulle meeldib igaltpoolt h&uuml;pata <gap desc='image'> </s> </p>
+<p> <s> Ja arvatavasti h&uuml;ppaks lennukist ka kui raha oleks nii palju <gap desc='image'> eelmine aasta olis baaskoolitus pluss 2 h&uuml;pet D6 dessantvarjuga 1500 krooni . </s> <s> Edasised maksavad umbes 300-400 krooni . </s> <s> See ei ole eriti palju . </s> <s> Saad isegi ise varju pakkida =P </s> </p>
+ </sp> <sp> <speaker>BlackBerry</speaker> 
+<p> <s> Elan ise Kuusiku l&auml;hedal ja p&auml;ris tihti n&auml;en langevarjureid taevast alla sadamas - kes lahtise , kes kinnise langevarjuga . . </s> </p>
+<p> <s> Endalgi plaanis h&uuml;ppama minna . . kuna aga pole veel nii vana ja ema ka n&otilde;uslekut ei anna , siis pean ootama ... </s> </p>
+<p> <s> Aga kuna lendamissoov nii suur on , siis plaanin j&auml;rgmine suvi <hi rend='bold'>parabaaniga </hi>s&otilde;itma minna <gap desc='image'> </s> </p>
+<p> <s> Kui aga vanust piisavalt , siis tahan h&uuml;pped ikka &auml;ra teha . </s> <s> &Uuml;ksi kui ka instruktoriga . . Instruktoriga h&uuml;ppamise pluss on see , et h&uuml;patakse k&otilde;rgemalt ja vabalangemist on kauem <gap desc='image'> Ma t&otilde;esti loodan , et sa teadlikult seda nii ei kirjutanud <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>igor</speaker> 
+<p> <s> Baraban : ) </s> </p>
+<p> <s> <hi rend='quote'> sry 'bout offtopic</hi> </s> </p>
+ </sp> <sp> <speaker>Psychocandy</speaker> 
+<p> <s> eelmine aasta olis baaskoolitus pluss 2 h&uuml;pet D6 dessantvarjuga 1500 krooni . </s> <s> Edasised maksavad umbes 300-400 krooni . </s> <s> See ei ole eriti palju . </s> <s> Saad isegi ise varju pakkida =P Mina laseks alguses siiski varjud proffidel pakkida , &auml;kki muidu ei avanegi ? <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>creep</speaker> 
+<p> <s> Kui rikkaks saan , siis l&auml;hen h&uuml;ppama ! </s> <s> Saan ehk kukkumisekartusest &uuml;le . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> langevarju h&uuml;pped ... - 2. leht - Planet Foorumid </head>
+<sp> <speaker>Kyioshi</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> Mina laseks alguses siiski varjud proffidel pakkida , &auml;kki muidu ei avanegi ? <gap desc='image'> nad kontrollivad &uuml;le . aga esimene h&uuml;pe enda pakitud varjuga on k&otilde;ige hullem . </hi> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&otilde;usaal - 35. leht - Planet Foorumid </head>
+<sp> <speaker>Hellion</speaker> 
+<p> <s> Jap , m&otilde;te hea kuid pole pesapalli kurikat , ega midagi sellist sarnast , mida t&otilde;sta . </s> <s> : ( </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> mitte &uuml;htegi . </s> <s> Suur k&ouml;&ouml;gitool vist isegi sobiks , aga p&auml;ris ebamugav tollega ju . </s> </p>
+ </sp> <sp> <speaker>Toomas189</speaker> 
+<p> <s> No &uuml;le pika-pika aja sain n&uuml;&uuml;d tagasi trenni . </s> <s> Esimene kord &uuml;le v&auml;sitava ja pidude rohke suve kuid v&otilde;iks &ouml;elda , et vormi ja toonuse &uuml;le olen rahul . </s> <s> Arvestades seda , millised alkoholi pruukimised ja peo panemised seljataga on . hea , trenn on hea ! </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 Ol&uuml;mpia - 6. leht - Planet Foorumid </head>
+<sp> <speaker>Hook</speaker> 
+<p> <s> Jee ! </s> <s> T&auml;na teeme &uuml;he laulu lauluv&auml;ljakul Gerdi auks ka ! </s> <s> Ei , mis kurat - teeme kohe mitu ! </s> </p>
+ </sp> <sp> <speaker>creep</speaker> 
+<p> <s> Kas see on see koht , kus ma tohin &ouml;elda , et Tammert n&auml;eb ikka v&auml;ga seks v&auml;lja ! ? </s> <s> Oo , ja kui sa veel teaksid , milline mehine kallistus tal on . <gap desc='image'> </s> </p>
+<p> <s> Kahju , et tal kehvasti l&auml;ks . </s> <s> Kanteri kulla &uuml;le on aga loomulikult hea meel . </s> </p>
+ </sp> <sp> <speaker>creep</speaker> 
+<p> <s> Kanter on tubli poiss . </s> <s> Eriti hea oli , kui ta hakkas sprinti tegema juubeldades <gap desc='image'> </s> </p>
+<p> <s> See mille j&auml;rgi ol&uuml;mpiale tuldi , on n&uuml;&uuml;d k&auml;es . </s> <s> V&otilde;ib rahul olla . </s> </p>
+ </sp> <sp> <speaker>Killer85</speaker> 
+<p> <s> Millal see autasustamine t&auml;pselt on ? </s> </p>
+ </sp> <sp> <speaker>donatello</speaker> 
+<p> <s> Ai kus on m&auml;ng ! ! </s> <s> ETV Hispaania - USA ! </s> </p>
+<p> <s> Kuradi vinge ikka . </s> <s> Go Hispaania ! ! </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Njaa . </s> <s> K&otilde;va m&auml;ng sellegipoolest . </s> </p>
+ </sp> <sp> <speaker>Nobizares</speaker> 
+<p> <s> Phelps'i seitsmendat medalit &uuml;mbritseb huvitav vanden&otilde;uteooria . </s> <s> Nimelt on korduses n&auml;ha , et seina puudutab esimesena hoopiski serblasest ujuja . </s> <s> Vaatamata sellele v&otilde;tab kulla Phelps . </s> <s> &Otilde;li lisab tulle fakt , et Omega ( mis &uuml;htlasi vastutab ujumise ajav&otilde;tu eest ) on 2004 . aastast Phelpsi sponsor ... </s> </p>
+<p> <s> <hi rend='quote'> Reeglid n&auml;evad ette , et seina tuleb puudutada M&Otilde;LEMA k&auml;ega . <gap desc='image'> <hi rend='italic'>Um ... bullshit ? </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> Did you not see the frame by frame shots ? </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> Phelps out touched him . </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> I don't know why anyone is even surprised that the worlds best swimmer won . </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> He took that extra powerful stroke and lunged at the wall . </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> Cavic merely glided . </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> Look at sports illustrated's frame . by frame of the finish . </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> I don't see how you can argue that . </hi> </hi> </s> <s> <hi rend='quote'> <hi rend='italic'> If i truly thought Cavic had won i was resign myself to that , but the only way I see anyone thinking phelps lost is due to personal bias . </hi></hi> </s> </p>
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'></hi> </s> </p>
+ </sp> <sp> <speaker>Mad Guy</speaker> 
+<p> <s> <hi rend='quote'> Zeppelist</hi> </s> </p>
+<p> <s> oi zepu , kui sa ainult 4 posti &uuml;lesse vaataksid <gap desc='image'> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> UEFA Meistrite Liiga 2008-09 - Planet Foorumid </head>
+<sp> <speaker>bright</speaker> 
+<p> <s> First ! </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> D ja F on suht nice grupid ... </s> </p>
+ </sp> <sp> <speaker>bright</speaker> 
+<p> <s> Manchester United got OWNED ! </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> haha </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Naelikud ! ? - Planet Foorumid </head>
+<sp> <speaker>Aetius . </speaker> 
+<p> <s> Kas su treener ei aitaks ? </s> </p>
+ </sp> <sp> <speaker>Aetius . </speaker> 
+<p> <s> ma sain treeneri k&auml;est kord ikka ehedad pastlad . </s> <s> : ) </s> </p>
+<p> <s> aga kurat , ma ei m&auml;letagi , kus mu naelikud &uuml;ldse on . veel enam , kust ma nad sain . </s> </p>
+<p> <s> hm . ja peale Sportlandi on veel spordipoode , muide . </s> </p>
+ </sp> <sp> <speaker>Aetius . </speaker> 
+<p> <s> Asi on selles , et ma ei k&auml;i kergej&otilde;ustiku trennis . </s> </p>
+<p> <s> Proovin rohkem ise treenida . </s> <s> Sest kergej&otilde;ustik pole mul p&otilde;hiala . </s> <s> &Auml;ra osta poest , &uuml;rita mingi treeneri kaudu ajada asja , sest neid &quot;diilereid&quot; on mitmeid , kes uusi naelikuid ( ka uusi mudeleid ) m&uuml;&uuml;vad 2x soodsamalt . </s> <s> Mul on k&otilde;rguse naelikud , mis 2 . 5k-d maksid poe ja ise sain 1 . 5k-ga . </s> </p>
+ </sp> <sp> <speaker>kanek</speaker> 
+<p> <s> Suhelda saab ikka . </s> <s> Mul kahjuks pole tema visiitkaarti , aga FIE nimega Jalaj&auml;lg , sealt peaks saama . </s> <s> Ma v&otilde;in veidi eksida , aga Jalaj&auml;lg peaks firma nimi olema v&otilde;i noh FIE . </s> </p>
+ </sp> <sp> <speaker>Aetius . </speaker> 
+<p> <s> Jah , uurisin ja ongi , aga neil ei ole soodsalt ? </s> <s> Aga k&uuml;si m&otilde;nelt treenerilt , kes lahkem tundub , kurda muret ja kindlasti annab abivalmis inimene kontaktandmeid . </s> <s> No ma , et siin sai neid h&otilde;bedasi Nike sprindinaelikuid , millel k&uuml;ljel on sellised augud ja mille poehind on &tilde;2000 ( Eestis ) vahendajalt 900-ga . </s> <s> Ma eeldan , et sul pole v&auml;ga profesionaalset kaupa vaja , siis saad oma 400-ga ikka . </s> </p>
+ </sp> <sp> <speaker>Aetius . </speaker> 
+<p> <s> Usun , et ei tapa jah , v&auml;ga v&otilde;imas naelik muidu . </s> <s> On &ouml;eldud k&uuml;ll , et see naelik on meeste oma , aga kas see muudab midagi , samasuguseid olen ka naistel n&auml;inud , kui numbrit on , siis vahet pole . </s> </p>
+<p> <s> Kui sul USA-s keegi hea tuttav on , siis saad v&otilde;ileiva hinnaga sealt , head naelikud v&auml;ga odavalt . <gap desc='hyperlink'> n&auml;iteks . </s> </p>
+ </sp> <sp> <speaker>Aetius . </speaker> 
+<p> <s> Reeglid on uued ju , rohkem on n&uuml;&uuml;d naelu , kas mitte 8 vist . </s> <s> Ja 8 naela on juba aastaid . </s> </p>
+ </sp> <sp> <speaker>cobra159</speaker> 
+<p> <s> Sportlandi kaudu saad ka asja ajada . </s> <s> L&auml;hed kohale , k&uuml;sid vajalikku mudelit , kui poes pole ( tavaliselt ei ole ) siis helistavad lattu ( jalaj&auml;lge siis ) ja sealt ikka midagi saad . </s> <s> A hind tuleb kirves k&uuml;ll . </s> <s> Tavainimesed Jalaj&auml;lest otse osta vist ei saa ( nu mulle on nii r&auml;&auml;gitud ) , k&auml;pp peab sees olema . </s> <s> Aga noh , kui sa niisama omal&otilde;buks teed ja kergej&otilde;ustik &uuml;ldse su p&otilde;hi ala pole , siis pole sulle spets sprindi naelikuid ja vaja , universaalid ajavad ka asja &auml;ra ( sest nagunii sul vahet pole , kumb nael on ja selle naela vahega sa midagi ei v&otilde;ida kah . ) </s> <s> No kui migni 600-900 eest saaks siis v&otilde;taks k&uuml;ll sprindi naelikud . </s> </p>
+ </sp> <sp> <speaker>Doc&tilde;C</speaker> 
+<p> <s> Kas adidase esinduspoes on ka naelikuid n&auml;ha olnud ? </s> </p>
+ </sp> <sp> <speaker>F.a.Q</speaker> 
+<p> <s> Huvitav kas Eesti noorte MV ajal kah spordi varustust odavamalt m&uuml;&uuml;akse ? </s> </p>
+<p> <s> ( homme Rakveres ) </s> </p>
+ </sp> <sp> <speaker>F.a.Q</speaker> 
+<p> <s> peaks olema 28-29 juuni ikka </s> </p>
+ </sp> <sp> <speaker>F.a.Q</speaker> 
+<p> <s> Homme algavad jah Eestikad . </s> <s> Ma ka v&otilde;istlen seal , A klassis nimelt , esimest aastat olen A-s <gap desc='image'> . </s> <s> Tavaliselt ei ole n&auml;inud , et seal m&uuml;&uuml;akse soodsamalt , aga alati liiguvad seal nn . &quot;naeladiilerid&quot; , keda m&auml;rgates v&otilde;iksid sa kohe juurde h&uuml;pata ja paar kiiremat k&uuml;simust p&auml;rima . </s> <s> Ehk saad visiitkaardi kah . </s> </p>
+ </sp> <sp> <speaker>justin</speaker> 
+<p> <s> Kuidas sa need diilerid &auml;ra tunned ? </s> <s> Panevad putka p&uuml;sti ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - 97. leht - Planet Foorumid </head>
+<sp> <speaker>sanwert</speaker> 
+<p> <s> hahah ... Brand laseb Clippersi &uuml;le ja l&auml;heb Sixersisse . . suurep&auml;rane uudis <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> peaks t&auml;hendama jah seda . Salary cap&Zcaron;i muudetakse vist iga aasta ? </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Marcus Camby is a Clipper ! </s> </p>
+<p> <s> Ehk siis mida veel ? </s> <s> Kui ma olin juba siiani veendunud , et AI ja Melo jaoks j&auml;&auml;b &uuml;hest pall v&auml;heseks ning et nad sellise koosseisuga ei saavuta midagi , siis n&uuml;&uuml;d antakse veel &uuml;he tuleviku 2 . raundi valiku eest &auml;ra hiilgav kaitsja ... ma ei oska muud arvata , kui et selle liigutusega loodi alust miskile uuele trade'ile . </s> <s> Sest ainult Nenele ja K-Martile Denver k&uuml;ll lootma j&auml;&auml;da ei saa . </s> <s> Ok , Hunter oli vist ka neil , aga temaga pole suurt miskit peale hakata . </s> <s> V&otilde;id mida arvab too keegi siinne Denveri p&ouml;idlahoidja ? </s> </p>
+<p> <s> LA poole pealt ei oska samuti hinnangut anda . </s> <s> Loomulikult saadi korralik m&auml;ngumees [ kui ( if ) terve ] , aga L&auml;&auml;nes laugele j&otilde;udmiseks j&auml;&auml;b sellest ikkagi v&auml;heks ... </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Wtf . </s> <s> T&auml;na sain teada , et sellest denveri vahetusest . </s> <s> Ma ka ei oska muud arvata , et tehti ruumi millegi suurema jaoks . </s> <s> Parem oleks , kuna ma soovin , et AI saaks ka tiitli , siis talle ei sobiks , kui meeskond hakkaks rebuildima . </s> <s> Aga eks n&auml;is . </s> <s> Ja hullar77 , t&auml;itsa usun , et l&auml;heb huvitavaks . </s> <s> Ilmselt v&otilde;ib mingi suurem pauk tulla mingi n&auml;dal enne seasoni algust vms . </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> Valesti arvatakse vist . </s> </p>
+<p> <s> Igatahes . </s> <s> Miami on &auml;ra tradenud J . Willy ja Ricky Davise , no kamooon mingi James Jones ja Diawara ei suuda iial neid asendada ... </s> <s> Samuti pole Chicago poolt mingit liikumist peale Dengi resingnimise m&auml;rgata . </s> </p>
+<p> <s> Muide . </s> <s> Teeme Fantasy ka ikka ? </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Fantasy - vabalt . </s> </p>
+<p> <s> Muuski osas eelk&otilde;nelejaga n&otilde;us . </s> <s> Valge &scaron;okolaad on omadega otsas ja Ricky teeb k&uuml;ll oma punktid &auml;ra , aga sisekliimale on ta mitte just k&otilde;ige positiivsemlt m&otilde;juv ja seega kaugeltki mitte asendamatu . </s> <s> Ja eks seda Marioni asja veel vaadatakse jah , aga nimetet 2 positsiooni vajaks t&auml;iustamist k&uuml;ll hooga , samas on omajagu backup-PG-sid olemas ... ehk on m&otilde;ni neist ka t&otilde;siseks m&auml;ngumeheks t&otilde;usmas . </s> </p>
+<p> <s> Aga t&auml;nase p&auml;eva lugu on ikkagi Memphise pakkumine Josh Smithi endale saamiseks ( 5 aastat 58 milli ) , eks n&auml;is , kuidas Hawks reageerib . </s> <s> Keerulist skeemi siinkohal lahti seletada ei viitsi ... </s> </p>
+ </sp> <sp> <speaker>ullukas</speaker> 
+<p> <s> Hawks just palju aega ei raisanud - J-Smoove <gap desc='hyperlink'> Atlantas </s> </p>
+<p> <s> kust n&auml;gi nba m&auml;ngijate palkasid ? <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Ok . </s> <s> Septembris algab regamine <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Lemmik meeskond on Boston , lemmik m&auml;ngijad on LeBron , Ford ja Cassell . </s> </p>
+<p> <s> k&otilde;ik keda NBA rohkem huvitab , v&otilde;iks end nendesse foorumitesse lisada . </s> </p>
+<p> <s> minu kasutajanimi on lebronjames ( basketnetis ) ja kaspar10 ( spordikaartides ) . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> wtf ? </s> </p>
+<p> <s> Kui keegi paneb uue vahetuse/uudise siia &uuml;les , hakkad sa kohe karjuma , et iga&uuml;ks sa uudiste vaatamisega ise hakkama ? </s> </p>
+<p> <s> Kui sa korvpalli j&auml;&auml;hokist ei erista , siis &auml;ra &uuml;ldse paugu . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> mis seis fantasyga on ? toimub ? </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Fantasy Basketball Starts Soon ! </s> </p>
+<p> <s> Join us in September when registration begins . veidi on veel aega . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 11. Tartu Rattamaraton - Planet Foorumid </head>
+<sp> <speaker>teepakike</speaker> 
+<p> <s> Me ! </s> <s> Me ! </s> </p>
+<p> <s> 40 . km </s> </p>
+<p> <s> 4847 </s> </p>
+<p> <s> See on juba kolmas kord vist . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - 98. leht - Planet Foorumid </head>
+<sp> <speaker>donatello</speaker> 
+<p> <s> No vaatame , milline on selle aasta Yahoo Fantasy , kui on jura , saab ESPNi omale &uuml;le minna . </s> </p>
+<p> <s> yahoo on muidu proovitud ja kindel asi , nii , et oleks veidi lihtsam . </s> </p>
+<p> <s> Mis uuendused seal ESPNi omas on ? </s> </p>
+ </sp> <sp> <speaker>donatello</speaker> 
+<p> <s> Lakers palkas C . J Gilesi . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> UEFA Champions League 2007/08 - Planet Foorumid </head>
+<sp> <speaker>cheers</speaker> 
+<p> <s> <hi rend='bold'>A-alagrupp : </hi> Liverpool , Porto , Marseille , Besiktas </s> </p>
+<p> <s> <hi rend='bold'>B-alagrupp : </hi> Chelsea , Valencia , Schalke 04 , Rosenborg </s> </p>
+<p> <s> <hi rend='bold'>C-alagrupp : </hi> Madridi Real , Bremeni Werder , Lazio , Olympiakos </s> </p>
+<p> <s> <hi rend='bold'>D-alagrupp : </hi> AC Milan , Benfica , Glasgow Celtic , Donetski &scaron;ahtar </s> </p>
+<p> <s> <hi rend='bold'>E-alagrupp : </hi> Barcelona , Lyon , Stuttgart , Glasgow Rangers </s> </p>
+<p> <s> <hi rend='bold'>F-alagrupp : </hi> Manchester United , AS Roma , Lissaboni Sporting , Kiievi D&uuml;namo </s> </p>
+<p> <s> <hi rend='bold'>G-alagrupp : </hi> Milano Inter , PSV Eindhoven , Moskva CSKA , Fenerbahce </s> </p>
+<p> <s> <hi rend='bold'>H-alagrupp : </hi> Arsenal , Sevilla v&otilde;i AEK , Bukaresti Steaua , Slavia </s> </p>
+<p> <s> Alagrupim&auml;ngudega alustatakse 18 . septembril . </s> <s> Liiga v&otilde;itja selgub j&auml;rgmise aasta 21 . <gap desc='hyperlink'> Moskvas . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Siin sellist erilist surmagruppi pole , kuid k&otilde;ige l&auml;hedamal on vist E-grupp . </s> <s> Miks see Kiievi reis raske peaks olema ? </s> </p>
+ </sp> <sp> <speaker>kuuseke</speaker> 
+<p> <s> Aaa ... sellele ma ei m&otilde;elnudki . </s> </p>
+ </sp> <sp> <speaker>cheers</speaker> 
+<p> <s> Moro astus tagasi ka . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> R&auml;&auml;gitakse , et Drogbad ja v&auml;rgid l&auml;hevad ka minekule sellet&otilde;ttu . </s> </p>
+<p> <s> Kui klubi alla k&auml;ib , siis vaevalt Abra enam oma papiga suudab seda ellu &auml;ratada . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> AS Roma v&otilde;iks midagi saavutada see aasta rsk </s> </p>
+ </sp> <sp> <speaker>cheers</speaker> 
+<p> <s> Celtic ! </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Real Madrid ! </s> </p>
+ </sp> <sp> <speaker>testarossa</speaker> 
+<p> <s> <hi rend='bold'>UEFA Meistrite Liiga 1/8-finaalid : </hi> </s> </p>
+<p> <s> Glasgow Celtic &mdash; Barcelona ( edasip&auml;&auml;sejaks pakun Barcelonat ) </s> </p>
+<p> <s> Lyon &mdash; Manchester United ( ManU ) </s> </p>
+<p> <s> Schalke 04 &mdash; FC Porto ( Porto ) </s> </p>
+<p> <s> Liverpool &mdash; Milano Inter ( tough call , aga siiski Inter ) </s> </p>
+<p> <s> AS Roma &mdash; Madridi Real ( samuti raske ennustada , aga loodan ja arvan siiski , et Roma ) </s> </p>
+<p> <s> Arsenal &mdash; AC Milan ( Milan ehk ) </s> </p>
+<p> <s> Olympiakos &mdash; Chelsea ( Chelsea ) </s> </p>
+<p> <s> Fenerbahce &mdash; Sevilla ( Sevilla ) </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> ( 0 : 2 ) First leg </s> </p>
+<p> <s> ( 0 : 1 ) First leg </s> </p>
+<p> <s> Fenerbah&quest;&para;e- <gap desc='hyperlink'> ( 2 : 1 ) First leg </s> </p>
+<p> <s> ( 1 : 1 ) First leg </s> </p>
+ </sp> <sp> <speaker>Curly</speaker> 
+<p> <s> Fenerbah&quest;&para;e- <gap desc='hyperlink'> ( 2 : 1 ) First leg </s> </p>
+<p> <s> OWNED ! <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Panustan , et Chelsea kodus ikka v&otilde;idab . </s> </p>
+<p> <s> Man . </s> <s> United edasi . </s> </p>
+<p> <s> Barca - Schalke , Barca k&uuml;ll 1 : 0 ees , aga imo pole midagi v&otilde;imatu . </s> <s> ( panustan Schalke peale ) </s> </p>
+<p> <s> Arsenal - Liverpool , arvatavasti Liverpool edasi . </s> </p>
+ </sp> <sp> <speaker>Mad Guy</speaker> 
+<p> <s> united vs roma - roma'l j&auml;&auml;b ka seekord v&auml;rav l&ouml;&ouml;mata ja united edasi </s> </p>
+<p> <s> barca vs schalke - katalaanide napp v&otilde;it , barca edasi . </s> </p>
+<p> <s> chelsea vs fener - grant on t&auml;htsates m&auml;ngudes absoluutselt clueless , arsenali vastu v&otilde;etud v&otilde;it oli ka puhta fluke - pakun v&auml;ravatega viiki ja fener edasi , kuna neil pole midagi kaotada . </s> </p>
+<p> <s> illustreeriv pilt kah : </s> </p>
+<p> <s> pool vs arsenal - arvestades asjaolu , et arsenal ei suuda viimasel ajal v&auml;ravat puutumata hoida tuleb v&auml;ravatega viik ( 1 : 1 ) ja pool pennudega edasi v&otilde;i 2 : 1 ja pool edasi . </s> </p>
+<p> <s> semi </s> </p>
+<p> <s> pool vs fener - siin v&otilde;tavad kogemused juba oma , pool edasi . </s> </p>
+<p> <s> united vs barca - barca kaitse on samasuguses paanikas nagu hiljuti betis'i vastu , isegi messi tagasitulek ei ole suureks abiks , kuna eeldatavasti on ka vida selleks ajaks tervenenud , united edasi . </s> </p>
+<p> <s> finaal </s> </p>
+<p> <s> united vs pool - olgugi , et omavahelistes m&auml;ngudes on rafa suutnud vaid &uuml;he viigi v&auml;lja pigistada peaks ju n&uuml;&uuml;d olema k&otilde;ige magusam aeg k&otilde;ik varasem kaotatu tasa teha . erand kinnitaks k&uuml;ll reeglit , kuid mitte seekord - united v&otilde;idab . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> omg , t&auml;na kuskilt live ei saa vaadata &uuml;lekandeid ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Rock v&otilde;i Kalev - Planet Foorumid </head>
+<sp> <speaker>launch</speaker> 
+<p> <s> Mulle meeldib Rock rohkem- seal on paremad m&auml;gijad </s> </p>
+ </sp> <sp> <speaker>RastaRon</speaker> 
+<p> <s> Hmm ... vahepeal olin isegi Rocki ( kunagise Delta ) poolt , kuid nttd v6iks Kalev j2lle 2ra panna <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Kamelot</speaker> 
+<p> <s> <hi rend='quote'> Kamelot &otilde;igesti panid ainult rock</hi> </s> </p>
+ </sp> <sp> <speaker>hiv</speaker> 
+<p> <s> TARTU ROCK ! v&otilde;iks ikkagi v&otilde;ita ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! aga Kriisat ma vihkan t&auml;iega ! </s> </p>
+ </sp> <sp> <speaker>Exedrin</speaker> 
+<p> <s> puhastasin teemat tiba ... </s> </p>
+<p> <s> mingi n00b tuli siia </s> </p>
+<p> <s> tatti loopima . </s> </p>
+<p> <s> <hi rend='bold'>m . </hi> </s> </p>
+ </sp> <sp> <speaker>slsl</speaker> 
+<p> <s> <hi rend='quote'> sama see kumb , parim on nybit aga tartu n&otilde;meda publiku p&auml;rast hoian p&ouml;ialt kalevile </hi> </s> </p>
+<p> <s> <hi rend='quote'> K&auml;i nahhui , oma n&otilde;medustega , igaljuhul parem kui Tallinna penson&auml;&auml;rid 3el pingil laiutamas . </hi> </s> <s> <hi rend='quote'> Ma ei pea seda pudejama silmas , need viskajad olid ju 10 aastased tatid , loe t&auml;nast SL &Otilde;htulehte ja vaata mida Kerde , oma Kalevi treener &uuml;tleb : </hi> </s> </p>
+<p> <s> &ldquo; Tartlased elavad kaasa , mitte ei m&auml;ngi taskupiljardit ! &rdquo; </s> </p>
+<p> <s> Kalevi peatreener &Uuml;llar Kerde v&otilde;ttis m&auml;nguj&auml;rgsel pressikonverentsil teab mitmendat korda viimaste aastate jooksul s&otilde;na Tartu publiku kiituseks . </s> <s> &ldquo; Olen seda juba kuus aastat r&auml;&auml;kinud , aga ei v&auml;si - Tartus elavad f&auml;nnid kaasa , mitte ei m&auml;ngi taskupiljardit ! &rdquo; teatas ta . </s> </p>
+<p> <s> Eilsel kolmandal finaalm&auml;ngul &auml;hvardas Tartu &uuml;likooli spordihoone l&otilde;hkeda , &otilde;hk saalis l&otilde;ppes juba esimese veerandaja keskpaiku . </s> <s> Korraldajate s&otilde;nul v&otilde;is eilne pealtvaatajaskond k&uuml;&uuml;ndida kuni 2800 inimeseni , mis on Eesti meeste korvpalliliiga hooaja rekord . </s> <s> Rohkem v&otilde;is Tartu saalis publikut olla vaid kaks aastat tagasi , kui tollal Tartu Delta nime kandnud meeskond koduhallis meistritiitli kindlustas . </s> </p>
+<p> <s> Ainsa t&otilde;rvatilga meepotti poetasid pealtvaatajad p&auml;rast l&otilde;puvilet plastikpudeleid v&auml;ljakule loopides , t&auml;pselt nagu poolfinaali kolmandas kohtumises Nybitiga . </s> <s> Sadu algas samal hetkel , kui Kalevi m&auml;ngijad v&otilde;idu m&auml;rgiks pidu alustasid . </s> <s> &ldquo; Tulge ometi m&otilde;istusele ! &rdquo; palus teadustaja . </s> <s> &ldquo; Viskajad on meil teada , k&otilde;ik k&uuml;mneaastased j&otilde;nglased , &rdquo; selgitas hiljem turvamees . <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>Acorp</speaker> 
+<p> <s> rock on hea , a ma panen muid kah , p&uuml;hap&auml;&auml;vaomikuti pilssi pidup&auml;eval originaali ja muid marke ka ikke . </s> </p>
+<p> <s> kalev on see p&auml;hklitega v&auml; ? </s> </p>
+ </sp> <sp> <speaker>shk</speaker> 
+<p> <s> Ma olen Kalevi poolt , alati olen olnud . V&otilde;idab KALEV </s> </p>
+ </sp> <sp> <speaker>reemus</speaker> 
+<p> <s> meeskonnana meeldib rock kuid puht inimlikust sarkasmist ei suuda ma tartu poolt kaasa elada ... </s> </p>
+ </sp> <sp> <speaker>Carlos</speaker> 
+<p> <s> Esiteks on Rock k&otilde;vasti Kalevist &uuml;le . lihtsalt Rockis vahetatakse tihti mehi , koguaeg uued nimed ja n&auml;od , mis on iseenesest &uuml;lihea , ja arvestades Kalevi m&auml;ngustaa&zcaron;i , siis ei saagi seal midagi muud olla ju . . kui kutid juba nii kaua koos m&auml;nginud on . . </s> </p>
+<p> <s> Siiski , Rock l&auml;heb Kalevist ette . . &uuml;sna pea kohe kindlasti ... mitte et mul midagi Kalevi vastu oleks , ikka seisan tartlaste selja taga <gap desc='image'> </s> </p>
+<p> <s> Rockis on ilusamad poisid kah , korvpall peaks punktide loendamise vahel silmailu ka pakkuma , Kalevil pole selle koha pealt midagi pakkuda , aga Rockil . . n&auml;mm ... <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Kiisu-Miisu</speaker> 
+<p> <s> Tartu ROCK peab t&auml;na v&otilde;itma . </s> <s> ROCK v&otilde;idab veel isegi finaali . </s> <s> Loodan , et viimane ja otsustav kohtumine tuleb Tartus siis saan ka minna ja kaasa elada . </s> <s> M&otilde;tetu oleks kui Finaali 5 m&auml;ng toimuks Tallnnas - seal nii &uuml;ksluine publik , keegi eriti ei h&otilde;iska ega ka rarju , trummidest ja n&auml;omaalingutest r&auml;&auml;kimata &uuml;hes&otilde;naga - JAMA ON SEE TLN PUBLIK . </s> </p>
+<p> <s> Tartu ruulib t&auml;iega ! ! ! ! ! ! <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>grihin</speaker> 
+<p> <s> tore oleks kui tuleks 5 . fnaal m&auml;ng tartu oleks veel 4 veerandi alguses mingi 15 punktiga ees ja l&otilde;puks kaotaks viimase sekundi kolmesega </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Rock v&otilde;i Kalev - 11. leht - Planet Foorumid </head>
+<sp> <speaker>Nabzter</speaker> 
+<p> <s> Suht p&otilde;nev kohtumine oli . </s> <s> Kuigi kodus oleks neid raske sellise m&auml;nguga v&otilde;ita . </s> <s> Aga k&uuml;&uuml;sa , et kuidas see edasip&auml;&auml;semise s&uuml;steem on ? </s> <s> Punktid liidetakse kokku ja siis parim edasi ? </s> </p>
+ </sp> <sp> <speaker>Kuks00</speaker> 
+<p> <s> Suht p&otilde;nev kohtumine oli . </s> <s> Kuigi kodus oleks neid raske sellise m&auml;nguga v&otilde;ita . </s> <s> Aga k&uuml;&uuml;sa , et kuidas see edasip&auml;&auml;semise s&uuml;steem on ? </s> <s> Punktid liidetakse kokku ja siis parim edasi ? punktivahega ikka jah . </s> </p>
+ </sp> <sp> <speaker>gudher</speaker> 
+<p> <s> Normaalne . </s> <s> Vaatasin viimastel sekunditel siis , et mida kurat ta isetseb . </s> <s> Et no n&uuml;&uuml;d ongi pee majas . </s> <s> Eelmisest m&auml;ngust j&auml;i kah silma ta tahtmine 3e punkti viskeid teha . </s> <s> Viset siis loomulikult &otilde;igustas sisseminek <gap desc='image'> </s> </p>
+<p> <s> V&auml;gahea . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> m&auml;ng oli normal , v&otilde;itis see , kes pidi </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> T&auml;itsa arusaamatu m&auml;ng oli Rocki poolt . </s> <s> No mida kurat , kolmeseid rohkem kui kaheseid ? ! ? </s> <s> Nad oleks l&otilde;dva randmega &auml;ra teinud kui oleks need kolmese-viske lollused vahele j&auml;tnud . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> Eriti p&otilde;nev l&otilde;pp oli . </s> <s> Ma n&auml;gin esimest <hi rend='italic'>buzzer beater</hi>it Eesti liigades . </s> <s> Igastahes suht super t&uuml;&uuml;p see Kullam&auml;e . </s> </p>
+ </sp> <sp> <speaker>retes</speaker> 
+<p> <s> n&auml;gin m&auml;ngust viimast 10-t sekundit . vist ei j&auml;&auml;nudki millestki ilma . </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> Ei . </s> <s> Kullam&auml;e pole terve tiim . </s> <s> Rock oleks ka Kullam&auml;eta tasemel . </s> <s> Kuigi see aasta on ta suht palju neid kitsingutest v&auml;lja aidanud . </s> <s> Rockil oleks t&otilde;esti vaja natuke ( v&otilde;i veidi rohkem ) meeskonnam&auml;ngu harjutada . </s> <s> Ja sellest Baileyst ma ei saa aru . </s> <s> Ma hetkel ei n&auml;e tema soetamise p&otilde;hjust , nagu ei hiilga veel . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> loomulikult pole kullam&auml;e terve tiim , aga tiimi pole ka kullam&auml;ega . ma lihtsalt v&auml;idan jultunult , et ilma kullam&auml;eta poleks rockil v&otilde;itlusvaimu ollagi ja t&auml;nane imeline p&auml;&auml;semine oli v&auml;ga suurel m&auml;&auml;ral kullam&auml;e teene . </s> <s> ( noh , selles viimases ei kahtle muidugi keegi . ) </s> </p>
+<p> <s> &auml;h , m&otilde;ttetu vaidlus , vabandan . </s> </p>
+ </sp> <sp> <speaker>XeoX</speaker> 
+<p> <s> kalev v&otilde;itis esimese ? uskugem saatust ja Rock v&otilde;idab 4-2 </s> </p>
+ </sp> <sp> <speaker>XeoX</speaker> 
+<p> <s> T&auml;nane Kullam&auml;e kolmene oli sick lihtsalt . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> Finaalile kohane m&auml;ng ! </s> <s> Telekast vahtimist ei anna absoluutselt v&otilde;rrelda koha peal olemisega . </s> <s> V&otilde;imalusel vaatan igat Kalevi m&auml;ngu . </s> <s> Kaotusest hoolimata , olen ma p&auml;ris rahul . </s> <s> Kui Kalev oleks suutnud need napid kaotused &auml;ra hoida oleks seeria k&otilde;igest 4-m&auml;nguliseks j&auml;&auml;nud ja sellest oleks mul kahju . </s> </p>
+<p> <s> Keegi &auml;kki n&auml;gi , p&auml;rast Kulla v&otilde;iduviset , kellele Georgi T . otsa h&uuml;ppas reklaami pealt ? </s> <s> Oli see Allingu ? </s> <s> K&uuml;llaltki j&otilde;hker mats tundus , aga ma olin ka v&auml;ga kaugel . </s> </p>
+<p> <s> Vaheajal toimunud k&ouml;ievedu oli hea idee , aga &uuml;ks idioot oskas selle &auml;ra rikkuda . </s> <s> P&auml;rast esialgset pusimist l&auml;ks mingi vanamees Kalevi n&ouml;&ouml;riotsa l&otilde;ppu ja hakkas ka tirima . </s> <s> Mulle vist isegi tundus , et tagumine kalevlane &uuml;tles talle , et ta &auml;ra kaoks . </s> <s> Esimesel otsal ei olnud asjast aimugi vist . </s> </p>
+<p> <s> Neljap&auml;eval tagasi saali omadele p&ouml;ialt hoidma ! </s> </p>
+ </sp> <sp> <speaker>braucieno</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> T&auml;nane Kullam&auml;e kolmene oli sick lihtsalt . p&otilde;him&otilde;tteliselt k&uuml;ll . mingil hetkel tabasime me &auml;ra , et oleme Kamikazes ehk siis vastase pubis . algul m&otilde;tlesime , miks seal Rocki f&auml;nnid on ... frigin dumb</hi> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Rock v&otilde;i Kalev - 12. leht - Planet Foorumid </head>
+<sp> <speaker>timo89</speaker> 
+<p> <s> Olen rocki poolt , kuigi jah . rocki ise eriti ei joo , kuna raibe on saku toodang . </s> </p>
+ </sp> <sp> <speaker>Nabzter</speaker> 
+<p> <s> see on juba vana stoori . . et hooaja m&otilde;ttetuim ost jne . . aga kurb jah et t&uuml;&uuml;p ei s&auml;ra . </s> <s> Seda ma ei v&auml;itnud , et hooaja m&otilde;ttetum ost . </s> <s> Pole minu asi klubi tehinguid kommenteerida , lihtsalt ma pole nende m&auml;ngudel p&otilde;hjal , mis mina olen n&auml;inud , seda n&auml;inud miks ta osteti . </s> <s> Ma arvasin , et &auml;kki mingi t&otilde;usev t&auml;ht , et j&auml;rgmine hooaeg on tasemel . </s> <s> On midagi sellist ? </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> Ei tea , ei k&auml;i Postimees . </s> <s> Aga keda nad veel see hooaeg , siis ostnud on ? </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> nonii . . hoopis teisest killast m&auml;ng rocki poolelt ja v&auml;ga h&auml;sti l&auml;ks <gap desc='image'> </s> </p>
+<p> <s> 1-3 </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> p&auml;ris kohutav m&auml;ng oli Kalevi pooldaja poolelt v&otilde;ttes : D </s> </p>
+ </sp> <sp> <speaker>timo89</speaker> 
+<p> <s> K&uuml;ll on kahju , et mul polnud v&otilde;imalust m&auml;ngu n&auml;ha . </s> <s> Ikka ilusti t&otilde;mbas Rock Kalvile koti p&auml;he . </s> <s> Hea m&auml;ng . </s> <s> Si**a sellest Tzindzadsest ( ei oska kirjutada nime ) , oskavad ilma veel paremini , Bailey suutis ka midagi ikkagi n&auml;idata . </s> </p>
+ </sp> <sp> <speaker>Kevinisgood</speaker> 
+<p> <s> Naaaah . . ei tulnudki tasav&auml;gist m&auml;ngu <gap desc='image'> </s> </p>
+<p> <s> Suhteliselt mage oli isegi v&otilde;rreldes eelmise m&auml;nguga . </s> </p>
+ </sp> <sp> <speaker>wiken hard koor</speaker> 
+<p> <s> karika v&otilde;itis kalev juba &auml;ra </s> </p>
+ </sp> <sp> <speaker>zxzalan</speaker> 
+<p> <s> Homme k&otilde;ik m&auml;ngu vaatama ! </s> <s> Ise ei saa vaadata , Kariibi piraadid selle ajal . </s> <s> Kuid k&otilde;ike paremat Rockile . </s> <s> Kas muidu playoffi piletid on kallimad ka kui tavaseasoni ajal ? </s> </p>
+ </sp> <sp> <speaker>timo89</speaker> 
+<p> <s> karika v&otilde;itis kalev juba &auml;ra lol </s> </p>
+<p> <s> zxazlan ( vms ) arbet v&otilde;ttis kulda . </s> </p>
+ </sp> <sp> <speaker>zxzalan</speaker> 
+<p> <s> no t&auml;nane m&auml;ng oli juba teine tera , Johnson ja Sokk olid p&auml;ris heal j&auml;rjel </s> </p>
+ </sp> <sp> <speaker>timo89</speaker> 
+<p> <s> Suurhallis on 100/150 </s> </p>
+ </sp> <sp> <speaker>zxzalan</speaker> 
+<p> <s> Teisip&auml;eval siis uuesti m&auml;ngule <gap desc='image'> V&auml;ga tahaks loota , et seeria l&auml;heb seitsmem&auml;nguliseks . </s> <s> Isegi mitte nii v&auml;ga lootuses Kalevi v&otilde;idule , vaid puht sportlikust huvist korvpalli vastu . </s> <s> Selliseid m&auml;nge n&auml;eb vaid kord aastas . </s> </p>
+<p> <s> Reed oli t&auml;na tasemel . </s> <s> Johnson avastas ka , et skoorimiseks ei pea vaid kolmese taga olema , sisse murdes tulevad korvid + vead . </s> <s> Kuld muidugi suutis l&otilde;pu p&otilde;nevaks ajada . </s> <s> Pisut oli isegi hirm sees korraks . </s> </p>
+<p> <s> Teades Kuusmaa ja Kullam&auml;e v&auml;ikest rivaalitsemist , v&otilde;iks sumo Kullam&auml;e m&ouml;&ouml;da l&auml;inud vabaka kohta midagi &ouml;elda <gap desc='image'> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Rock v&otilde;i Kalev - 13. leht - Planet Foorumid </head>
+<sp> <speaker>treudenbauer</speaker> 
+<p> <s> Kullam&auml;el ei olnud , Kikerpillil oli . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Reed vs M&uuml;rka on lihtsalt hale vaadata , kuidas m&uuml;rka oma NBA kogemuste ja eesti parima m&auml;ngija staatusega haigelt kotti saab reedilt , kes keerutab ennast m&uuml;rkast m&ouml;&ouml;da nagu oma vanaemast , aiikt </s> </p>
+<p> <s> kalev v&otilde;idab , kuigi kahju , et nad seda tartus peavad tegema </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Heh . </s> <s> Lugesin t&auml;na mingist vana &Otilde;htulehte , kus M&uuml;&uuml;rsepp Ural Greati v&auml;rvides omas Kaasani Unicsit , visates ka 24 . </s> <s> L&otilde;puks said vist finaali ka ... </s> </p>
+<p> <s> Oh . </s> <s> Vaatan netist , et p&auml;ras m&auml;ngis finaalis ka korralikult . </s> <s> N&auml;iteks 27 punkti CSKA vastu . </s> <s> Kust sellist M&uuml;rkat saada <gap desc='image'> </s> </p>
+<p> <s> Eriti n&otilde;me on see , et ta hakkaks hullult h&auml;sti m&auml;ngima , kui ta Kalevisse l&auml;heks . </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> rockis m&auml;ngib m&uuml;&uuml;rsepp k&uuml;ll t&auml;ielikku B-game ... </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> kalev v&otilde;idab , kuigi kahju , et nad seda tartus peavad tegema epic fail </s> </p>
+ </sp> <sp> <speaker>Geenius666</speaker> 
+<p> <s> L&otilde;puks ! </s> </p>
+ </sp> <sp> <speaker>Geenius666</speaker> 
+<p> <s> tuli &auml;ra . t&otilde;esti , rock hakkas finaali kolmanda m&auml;ngu l&otilde;pus m&auml;ngima . ma ei uskunud , et see v&otilde;iks juhtuda . </s> </p>
+<p> <s> tore . </s> </p>
+ </sp> <sp> <speaker>Knait</speaker> 
+<p> <s> homod : ( </s> </p>
+ </sp> <sp> <speaker>retes</speaker> 
+<p> <s> Olin eelmiste m&auml;ngude ajal t&auml;iega Rocki poolt . </s> <s> Finaali vaadates ja v&otilde;itu n&auml;hes eriti enam ei kottinudki . </s> <s> Aga noh , v&auml;ikese p&auml;ikese t&otilde;i ikkagi mu p&auml;eva . </s> </p>
+ </sp> <sp> <speaker>capiche</speaker> 
+<p> <s> Yey ! </s> ^^ <s> Rocki v&otilde;it ! </s> </p>
+ </sp> <sp> <speaker>dwarve</speaker> 
+<p> <s> vahepeal l&auml;ks p&auml;ris p&otilde;nevaks isegi . </s> <s> Kalev oleks v&otilde;inud v&auml;lja tulla </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> vahepeal l&auml;ks p&auml;ris p&otilde;nevaks isegi . </s> <s> Kalev oleks v&otilde;inud v&auml;lja tulla jah . omad lollid vead ja rockilt head korvid hoidsid kalevit tagasi . </s> </p>
+<p> <s> eriti hea oli see kui vaheoli vist 2 v&otilde;i 3 ja kiks pani kolme <gap desc='image'> </s> </p>
+<p> <s> siis oli nagu &uuml;lim&otilde;nus tunne </s> </p>
+ </sp> <sp> <speaker>braucieno</speaker> 
+<p> <s> hah , nojah . me olime Kamikazes ja kui Kalevile aplodeerisime heade m&auml;ngude ajal k&uuml;siti k&otilde;rvallauast , miks me plaksutame : D </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&otilde;usaal - Planet Foorumid </head>
+<sp> <speaker>dzihaad</speaker> 
+<p> <s> Peaks mainima , et p&auml;ris head tulemused sul . Palju sul muidu kaalu on ? </s> </p>
+<p> <s> Kui viitsid siis pane palun oma treeningukava siia . Mis j&otilde;usaalis &uuml;ldse k2id ? </s> </p>
+<p> <s> Mina isiklikult alles oktoobris hakkasin suuremat t&auml;helepanu j&otilde;usaalile p&ouml;&ouml;rama . K&auml;isin 3 korda n&auml;dalas . Varem surusin 60 kg , n&uuml;&uuml;d 85 . Kaal on kah suurenenud 85 -ni . Ise rahul ei ole , vaja rohkem t&ouml;&ouml;d teha aga traumad/haigused takistavad . </s> </p>
+ </sp> <sp> <speaker>dzihaad</speaker> 
+<p> <s> Ise kah umbes pool aastat k&auml;idud . </s> <s> Ja olen korralikult k&auml;inud , pause pole vahele tekkinud , ning k&auml;in 3-4 korda n&auml;dalas . </s> <s> Endal m&auml;rgatavat kaalut&otilde;usu pole olnud , sest toitumine j&auml;tab k&otilde;vasti soovida . </s> <s> Aga Dzihaad , sinu treeningkava tundub kuidagi imelik . </s> <s> Kas sa ise koostasid selle v&otilde;i k&uuml;sisid ka n&otilde;u kellegi k&auml;est ? </s> <s> Igastahes mina soovitaksin seda muuta . </s> <s> Endal on kava n&auml;dalaks selline : Esmasp&auml;ev - rind , biitseps , triitseps , lailihas . </s> <s> Teisip&auml;ev puhkan . </s> <s> Kolmap . </s> <s> &Otilde;lad , trapets , ranne , jalad . </s> <s> Neljap&auml;ev puhkus . </s> <s> Reedel teen j&auml;lle esmasp&auml;eva harjutusi . </s> <s> Varsti vist muudan kava ja hakkan igap&auml;ev k&auml;ima trennis , niiet tuleb vist kolmeks v&otilde;i neljaks kava jagada . </s> <s> Rinnale teed seerias kah kuidagi v&auml;he harjutusi , soovitaksin teha 6-12 harjutust &uuml;hes seerias . </s> <s> Aga noh , tegelikult on see k&otilde;ik v&auml;ga individuaalne ning kui tunned , et praegune treening sulle sobib , siis lase aga k&auml;ia . </s> </p>
+<p> <s> Ahjah , k&otilde;htu teen samuti iga kord . </s> </p>
+ </sp> <sp> <speaker>dzihaad</speaker> 
+<p> <s> <hi rend='quote'> piitsteps-raskus selline millega j&otilde;uad 3x10 . </hi> </s> </p>
+<p> <s> Mis raskusega biitsepsile teed . . ? </s> </p>
+ </sp> <sp> <speaker>dzihaad</speaker> 
+<p> <s> <hi rend='quote'> esmasp&auml;eval 30 kiloga , teisip ja reede 25 kiloga . </hi> </s> </p>
+<p> <s> <hi rend='quote'> &uuml;ldiselt biitsepsile ma eriti suur r&otilde;hku ei pane . </hi> </s> </p>
+<p> <s> <hi rend='quote'> Biitsepsi teen ma nii et v&otilde;tan rinnaltsurumise kangi mis kaalub 20kg ja panen raskused otsa ja l&auml;hen seina &auml;&auml;rde , toetan seljaga vastu seina ja siis hakkan pumpama . </hi> </s> </p>
+<p> <s> See annab p&auml;ris m&otilde;nusa koormuse k&otilde;hule , kui mainida v&otilde;ib <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> <hi rend='quote'> oot , mis moodi see v&auml;ljan&auml;eb ? </hi> </s> <s> <hi rend='quote'> Kuidagi arusaamatuks j2i . </hi> </s> </p>
+<p> <s> Biitseps on &otilde;lavarre pealmine lihas , mida saab treenida , kas hantliga k&auml;si k&otilde;verdades v&otilde;i sis sama kangiga tehes . </s> <s> Mis siin arusaamatuks saab j&auml;&auml;da . </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> j&otilde;usaal n&otilde;uab tohutult energiat , ma olen hakanud umbes 2 korda rohkem s&ouml;&ouml;ma sellest ajast peale kui ma hakkasin j&otilde;usaalis k&auml;ima . </s> </p>
+<p> <s> Peal l&auml;hevad p&otilde;hiliselt sellised valgu rikkad asjad n&auml;iteks piim , juust , loomaliha ja kalaliha . </s> </p>
+<p> <s> <hi rend='quote'> S&ouml;&ouml;n umbes 4 korda p&auml;evas korralikult , hommikul , enne j&otilde;usaali umbes 1 , 5 tundi ja natuke aega p&auml;rast j&otilde;usaali ja &otilde;htul . </hi> </s> </p>
+<p> <s> Tean , et peale j&otilde;usaali kohe ei soovitata s&uuml;&uuml;a , aga mul k&otilde;ht koguaeg siis nii t&uuml;hi et pean kohe s&ouml;&ouml;ma <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>'five'</speaker> 
+<p> <s> dzihaad loomaliha asemel s&ouml;&ouml; kanaliha see m&auml;rksa tervislikum . </s> </p>
+ </sp> <sp> <speaker>dzihaad</speaker> 
+<p> <s> <hi rend='quote'> aga selle eest on valku loomalihas rohkem , ja valk on p&otilde;hiline lihase ehitus materjal . </hi> </s> </p>
+<p> <s> Kusjuures olulist vahet seal ei ole . </s> <s> Valkude sisaldus kana- ja loomalihas on praktiliselt sama . </s> <s> ( v&auml;hemalt minu teadmiste kohaselt . ) </s> <s> Vat k&uuml;&uuml;likus on juba rohkem valku . </s> <s> Nii et k&otilde;ik k&uuml;&uuml;likut n&auml;ksima . </s> </p>
+ </sp> <sp> <speaker>deepxz</speaker> 
+<p> <s> Kanafilees on rasvasisaldus m&auml;rgatavalt v&auml;iksem ning valgukoguses suuri erinevusi ei tohiks olla . </s> </p>
+ </sp> <sp> <speaker>deepxz</speaker> 
+<p> <s> <hi rend='quote'> 8g j&auml;neselihas 60g valku 16g rasva </hi> </s> </p>
+<p> <s> tohoh ! </s> </p>
+ </sp> <sp> <speaker>JohnSmith</speaker> 
+<p> <s> <hi rend='quote'> tohoh ! </hi> </s> </p>
+<p> <s> <hi rend='quote'> Ta m&otilde;tles ikka nii : </hi> </s> </p>
+<p> <s> 200g </s> </p>
+<p> <s> -kanafilees on 52g valku rasva 8g </s> </p>
+<p> <s> <hi rend='quote'> -j&auml;neselihas 60g valku 16g rasva </hi> </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> <hi rend='quote'> esmasp&auml;eval tahtsin 100 kilo rinnalt proovida , krt ei l&auml;inud 95-gi . </hi> </s> </p>
+<p> <s> Selline v&auml;rk et ma t&otilde;mbasin laup&auml;eval selja &auml;ra , et kas see m&otilde;jutab ka rinnalt surumist ? </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> <hi rend='quote'> esmasp&auml;eval tahtsin 100 kilo rinnalt proovida , krt ei l&auml;inud 95-gi . </hi> </s> </p>
+<p> <s> <hi rend='quote'> Selline v&auml;rk et ma t&otilde;mbasin laup&auml;eval selja &auml;ra , et kas see m&otilde;jutab ka rinnalt surumist ? </hi> </s> </p>
+<p> <s> Usun , et k&uuml;ll . </s> </p>
+<p> <s> Kui mul selg t&uuml;litab siis kah surumise tulemus v&auml;iksem . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Jalgpall foorumlastega - Planet Foorumid </head>
+<sp> <speaker>Hellion</speaker> 
+<p> <s> Oh , ma oleks k&auml;pp . </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> 2006 . aasta EMi aegu m&auml;ngisime minu RL-s&otilde;prade ning F&auml;&auml;skiga Rannam&otilde;isas . </s> <s> Siin on &uuml;ks plats k&uuml;ll , mida saab kasutada - isek&uuml;simus on v&auml;ravate olemasolu . </s> <s> L&auml;hen vaatan m&otilde;ni p&auml;ev j&auml;rele . </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> Mis seal Shnellis orgunnida , k&otilde;igile kasutada v&auml;ljak ju . </s> </p>
+<p> <s> Lendame kohale ja peksame minema . </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> See mutt on jah mingi m&otilde;ttetu , mehed lubavad kenasti m&auml;ngida . </s> </p>
+ </sp> <sp> <speaker>|=X=|</speaker> 
+<p> <s> ma oleks kohe kindlasti k&auml;pp . </s> </p>
+ </sp> <sp> <speaker>Mattias</speaker> 
+<p> <s> Mattias , sa elad kusagil seal ligidal ? </s> <s> Ja kus kohas Rannam&otilde;isas saab teha ? kusagil seal lasteaia juures ? </s> </p>
+<p> <s> A . says : </s> </p>
+<p> <s> sa tahad ka jalkat m2ngida </s> </p>
+<p> <s> A . says : </s> </p>
+<p> <s> ytle nii ! </s> </p>
+<p> <s> ma &uuml;tlen nii . ma tahan ka jalkat m&auml;ngida . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> kiidan heaks </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> Keegi m&auml;ngida ka &uuml;ldse oskab ? </s> </p>
+ </sp> <sp> <speaker>Oden</speaker> 
+<p> <s> No reegleid teavad k&otilde;ik ju ja mingeid Ronaldo tasemel m&auml;ngijaid pole v&auml;ga m&otilde;tet oodata ka . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Loodetavasti tabate asukoha &auml;ra . </s> <s> L&auml;hen k&auml;in rattaga &auml;ra teen paar pilti ka praegu . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Noh siis telgid kaasa ja foorumi kokkutulek , easy </s> </p>
+ </sp> <sp> <speaker>Mattias</speaker> 
+<p> <s> Hmm ... ma &uuml;ritan l&auml;hip&auml;evil sinna Shnelli staadioni tegelastega r&auml;&auml;kima minna , sest kui on v&otilde;imalus m&auml;ngida kunstmuruv&auml;ljakul , kus on jooned maas ja v&otilde;rkudega v&auml;ravad , siis oleks see igal juhul parem . </s> </p>
+<p> <s> See rannam&otilde;isa plats tundub natuke ... noh liiga rott : D </s> </p>
+<p> <s> Aga rispekt , Mattias , et mingigi variandi v&auml;lja pakkusid . </s> </p>
+<p> <s> Kui ei saa head platsi , siis see Rannam&otilde;isa oma sobiks k&uuml;ll , aga esialgu otsime veel . </s> </p>
+ </sp> <sp> <speaker>kruvi</speaker> 
+<p> <s> okeika plats on k&uuml;ll . aga kas siis 90 minti ? ma ahelsuitsetaja ja ei jaksa . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 EM valikturniir - Planet Foorumid </head>
+<sp> <speaker>m&auml;ger</speaker> 
+<p> <s> suht okei grupp , Horvaatia asemel oleks v&otilde;inud Saksamaa olla , aga noh . </s> </p>
+<p> <s> Leedukatel vedas eriti . </s> </p>
+ </sp> <sp> <speaker>Jubin</speaker> 
+<p> <s> tuli &auml;ra l&otilde;puks , varsti varsti saab n&auml;ha eestimaa pinnal inglismaa vuti&auml;ssasid . </s> <s> Nonii , </s> </p>
+<p> <s> England &quot;check&quot; </s> </p>
+<p> <s> Kellega n&uuml;&uuml;d veel pole m&auml;ngitud ? ( ok , ega Inglismaaga ka veel m&auml;ng toimunud pole ) </s> </p>
+<p> <s> Prantsusmaaga ? </s> </p>
+<p> <s> Eriti huvitav on see , et Eesti on Venemaaga j&auml;lle samas grupis . <gap desc='image'> </s> </p>
+<p> <s> Leedul ja L&auml;til on t&otilde;esti p&auml;ris seksikad grupid . </s> </p>
+ </sp> <sp> <speaker>m&auml;ger</speaker> 
+<p> <s> Kodum&auml;ng Iisraeliga annab nii Kaitsepolitseile kui v&auml;lismaistele eriteenistustele suurep&auml;rased v&otilde;imalused mistahes eesm&auml;rgil k&otilde;ikv&otilde;imalikke provokatsioone l&auml;bi viia . </s> </p>
+<p> <s> Suureks saab Iisrael ja needsinatsed teised s&otilde;nad . </s> </p>
+ </sp> <sp> <speaker>Genka</speaker> 
+<p> <s> P&auml;ris h&auml;sti l&auml;ks Eestil selle alagrupiga iseenesest . Prantsusmaa oleks v&otilde;inud ka samasse alagruppi sattuda . Samas &uuml;sna raske on jagu saada Inglismaast ja Venemaast , kuid jalgpallis tuleb p&auml;ris tihti ette nn imem&auml;nge , nii et kes teab . V&auml;hemalt on alagruppide m&auml;nge p&otilde;nev j&auml;lgida . Tore oleks tegelikult , kui saaks ka EM finaali . Oleks saanud m&otilde;nda lahjemasse alagruppi , oleks see ehk isegi &otilde;nnestunud . Igal juhul loos on loos ja oleks v&otilde;inud veel hullemini minna . </s> </p>
+<p> <s> Aga andorra <gap desc='image'> , jah , tore , et saab h&auml;id tuttavaid j&auml;lle n&auml;ha . </s> </p>
+ </sp> <sp> <speaker>InMemoriam</speaker> 
+<p> <s> Nonii , </s> </p>
+<p> <s> England &quot;check&quot; </s> </p>
+<p> <s> Kellega n&uuml;&uuml;d veel pole m&auml;ngitud ? ( ok , ega Inglismaaga ka veel m&auml;ng toimunud pole ) </s> </p>
+<p> <s> Prantsusmaaga ? </s> </p>
+<p> <s> Eriti huvitav on see , et Eesti on Venemaaga j&auml;lle samas grupis . <gap desc='image'> </s> </p>
+<p> <s> Leedul ja L&auml;til on t&otilde;esti p&auml;ris seksikad grupid . prantsusmaaga peaks olema m&auml;ngitud . kui n&uuml;&uuml;d minna veidi teemast vasakule , siis Brasiiliaga ka me pole m&auml;nginud </s> </p>
+ </sp> <sp> <speaker>Genka</speaker> 
+<p> <s> u17 on ikkagi u17 </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> u17 on ikkagi u17 aga Brasiilia on ikkagi Brasiilia </s> </p>
+<p> <s> seal turniiril oli muidu ka Brasiilia A-koondis , aga nad pidasid ainult &uuml;he kohtumise </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> prantsusmaaga peaks olema m&auml;ngitud . kui n&uuml;&uuml;d minna veidi teemast vasakule , siis Brasiiliaga ka me pole m&auml;nginud OT : Vabandust , j&auml;tsin mainimata , et pidasin silmas muidugi Euroopa riike . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Yoshi</speaker> 
+<p> <s> V&auml;ga huvitav alagrupp Eestil . </s> </p>
+ </sp> <sp> <speaker>hansacandle</speaker> 
+<p> <s> &Auml;sja valitud maailmapeolinna tulevad britipoissmehed pidutsema <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>PsycoEvil</speaker> 
+<p> <s> OT : Vabandust , j&auml;tsin mainimata , et pidasin silmas muidugi Euroopa riike . <gap desc='image'> Algne postitaja oli joosep12 prantsusmaaga peaks olema m&auml;ngitud . <hi rend='bold'>kui n&uuml;&uuml;d minna veidi teemast vasakule</hi> , siis Brasiiliaga ka me pole m&auml;nginud 'bla bla kolm t&auml;hem&auml;rki </s> </p>
+ </sp> <sp> <speaker>midfield</speaker> 
+<p> <s> Inglismaa - viimane tiitliv&otilde;it 66 MM </s> </p>
+<p> <s> Prantsusmaa - viimane tiitliv&otilde;it 2000 EM , 98 MM </s> </p>
+<p> <s> m&otilde;ned m&auml;rkused veel : </s> </p>
+<p> <s> Campell on ligi aasta vaevelnud vigastuste k&uuml;&uuml;sis , viimaste m&auml;ngude p&otilde;hjal ei v&auml;&auml;ri ta kohta nende 23 nime hulgas , kes MM'ile s&otilde;idavad . </s> </p>
+<p> <s> Hetkel on SGE kaitseliin Cole - Terry - Ferdinand - Neville , n&otilde;ustun . </s> <s> Varus King , Carragher ja hetkel suurep&auml;rases vormis Brown . </s> <s> Kuid kuna SGE ei julge nimekaid mehi maha j&auml;tta , siis pakun et mahaj&auml;&auml;jaks j&auml;&auml;b just Brown . </s> <s> Mis on kummaline , kuna erinevalt Campellist suudab ta edukalt m&auml;ngida ka paremkaitsja kohal . </s> <s> King'i boonus on vajadusel ka kaitsva poolkaitsja rolli t&auml;itmine . </s> </p>
+<p> <s> Scholes l&otilde;petas inglismaa eest m&auml;ngimise juba eelmisel aastal , lisaks on ta hetkel mingi kummalise silmahaiguse t&otilde;ttu kuni hooaja l&otilde;puni palliplatsilt eemal . </s> <s> Butt v&otilde;ib aga kohast koondises unistada , tema kohta t&auml;idavad edukalt Carrick , Hargreaves ja Parker . </s> </p>
+<p> <s> arvatavasti on MM'il SGE arust tema parim keskv&auml;li selline </s> </p>
+<p> <s> Cole - Lampard - Gerrard - Beckham </s> </p>
+<p> <s> isiklikult m&auml;ngitaks Cole - Carrick - Gerrard - Beckham , varus Lampard , SWP , Parker , Hargreaves . </s> </p>
+<p> <s> r&uuml;ndes Rooney ja Owen , varus Defoe , Crouch ja Bent . </s> </p>
+<p> <s> v&auml;ravas Robinson , varus Kirkland ja Carson . </s> </p>
+<p> <s> Tugev ? kahtelmata , kuid inglismaa n&otilde;rgim l&uuml;li on nende peatreener . </s> </p>
+<p> <s> ja r&auml;&auml;kides veel sellest , et prantsusmaal puuduvad nimekad m&auml;ngijad siis HAW ! </s> </p>
+<p> <s> Henry , Zidane , Vieira , Thuram , Trezeguet , Makelele ei &uuml;tle vist jah midagi . </s> <s> Hetke Prantsuse koondise tugevust ei n&auml;ita see , mida nad 6-8 aastat tagasi &auml;ra tegid . </s> <s> Seda , et Inglismaa tiitliv&otilde;istlustel kunagi tippu v&auml;lja ei j&otilde;ua on kah mulle teada , aga j&auml;&auml;b nii nagu &uuml;tlesin Prantsusmaa on praeguse Inglise koondise k&otilde;rval n&otilde;rgem . </s> <s> Campbelli vigastustega polnud t&otilde;esti kursis , aga Terry suudab teda v&auml;&auml;riliselt asendada . </s> <s> Brown v&otilde;ib hetkel heas vormis olla , aga &uuml;ldiselt on suht ebastabiilne ja selles ei saa kindel olla , et ta suvel suudaks korralikult m&auml;ngida . </s> <s> Scholes on lihtsalt FA Inglise koondise lehel ikkagi nimekirjas ja sellest ka minu eksitus , sellest vigastusest olen teadlik , kuna ma Manchester Unitedi f&auml;nn ja noh Butt oli lihtsalt niisama mainitud , ta nigunii p&otilde;hikoosseisus ei m&auml;ngi ka s&otilde;prusm&auml;ngudes , kuigi ta suht alahinnatud m&auml;ngija . </s> </p>
+<p> <s> Carrickut ei saa Lampardile eelistada isegi mitte unes . </s> <s> Lampard on &uuml;ks parimaid keskv&auml;ljam&auml;ngijaid &uuml;ldse . </s> <s> Peale selle , et ta ka v&auml;ravaid l&ouml;&ouml;b on ta v&auml;ga hea m&auml;ngujuht . </s> <s> Erikssonist peab Inglismaa t&otilde;esti lahti saama ja ka &otilde;iget v&auml;ravavahti pole neil peaaegu kunagi olnud . </s> <s> Seaman oli kobak&auml;pp ja n&uuml;&uuml;dsed v&auml;ravavahid kah midagi erilist ei ole . </s> </p>
+<p> <s> Ja ma pole v&auml;itnud , et Prantsusmaal puuduvad nimekad m&auml;ngijad ! ! ! </s> <s> &Auml;ra tule r&auml;&auml;kima , kui aru ei saa . </s> <s> Ma &uuml;tlesin , et tavainimesele on Inglise koondise m&auml;ngijad rohkem tuttavad kui Prantsuse koondise m&auml;ngijad . </s> <s> Mis sa t&otilde;esti arvad , et ma ei tea Makelelet , Trezeguet , Thurami v&otilde;i Vieirat ? </s> <s> Lihtsalt Inglise koondises on igale positsioonile vastu panna parem m&auml;ngija , samas meeskondlikult ja taktikaliselt v&otilde;ivad nad vahel v&auml;ga n&otilde;rka m&auml;ngu n&auml;idata . </s> </p>
+<p> <s> Prantsusmaa v&otilde;ib alagrupiski h&auml;tta sattuda . </s> </p>
+ </sp> <sp> <speaker>mchund</speaker> 
+<p> <s> Armas . </s> </p>
+<p> <s> Neid inglismaa m&auml;nge tuleb kindlasti vaatama minna ! </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> F1 - Planet Foorumid </head>
+<sp> <speaker>muff</speaker> 
+<p> <s> noh , raffas . ennustusi uueks aastaks </s> </p>
+<p> <s> ise ennustan et Michael v&otilde;idab hooaja </s> </p>
+ </sp> <sp> <speaker>Changer</speaker> 
+<p> <s> F1 niigi madala populaarsuse seisukohalt loodan , et Jumala eest , et MS ei v&otilde;idaks . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>VeryApe</speaker> 
+<p> <s> Mh , R . Summi poolt n&uuml;&uuml;d <gap desc='image'> ja Trulli poolt , kuna nad Toyotas <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>SoulTiger</speaker> 
+<p> <s> R&auml;iksi poolt loomulikult . </s> </p>
+<p> <s> See on ju &uuml;liigav kui punased kogu aeg v&otilde;idavad . </s> </p>
+ </sp> <sp> <speaker>retes</speaker> 
+<p> <s> Ma ikka Alonso poolt . </s> <s> Ikkagi k&otilde;igi aegade noorim etapiv&otilde;itja ja Renault' t&otilde;usu peaosalisi . </s> </p>
+ </sp> <sp> <speaker>Red Devil</speaker> 
+<p> <s> Devil k&otilde;ige rohkem loodan ma seda , et n&otilde;rgemad tiimid t&otilde;usevad tippu . ja ka seda , et tuleks p&otilde;nev hooaeg . et enne viimast etappi oleks veel mitmel mehel tiitli v&otilde;imalus . ja l&otilde;puks siiski schumi paneks &auml;ra . </s> <s> : ] </s> </p>
+<p> <s> minardi v&otilde;iks kolme hulka saada . oleks tore . </s> <s> : ] See oleks jah p&otilde;nev , aga Alonso v&otilde;iks ikka l&otilde;puks &auml;ra v&otilde;ita . </s> </p>
+ </sp> <sp> <speaker>Karll</speaker> 
+<p> <s> Jah , kuna Trulli on ka endine meeskonna kaaslane , siis hoian talle ka p&ouml;ialt . </s> </p>
+ </sp> <sp> <speaker>wiseguy6</speaker> 
+<p> <s> Eelmine hooaeg tglt t&otilde;estas , et potensiaalseid tiitli n&auml;psajaid on peale Ferro ikkagi veel . </s> <s> Loodetavasti on BAR , Williams , McLaren sel hooajal tugevamad vastased . </s> </p>
+ </sp> <sp> <speaker>kolin</speaker> 
+<p> <s> Loodan ja noh tahaksin , et v&otilde;idaks McLaren ( R&auml;ikkonen ja Montoya ) ! </s> </p>
+<p> <s> Millalgi peab see ferarri ailistuma ja seda McLarenile , see oleks magus </s> </p>
+<p> <s> v&otilde;it . </s> </p>
+<p> <s> Tegelikult tahan , et nad F1 rahule j&auml;taksid pidevate ja idootsete reegli muudatustega ning k&uuml;lmutaksid reeglid v&auml;hemalt 3 aastaks ! </s> <s> See aasta </s> </p>
+<p> <s> tulevad huvitavad boksi peatused , kumme ju vahetada ei tohi terve </s> </p>
+<p> <s> s&otilde;idu ajal . </s> <s> &Uuml;sna varsti uute autode esitlused , eks siis n&auml;he ole kas see </s> </p>
+<p> <s> aasta ka disainis &uuml;llatusi on ( meenutaga eelmise aasta algset williamsit ) . </s> </p>
+ </sp> <sp> <speaker>ZaR</speaker> 
+<p> <s> Minu arust pole &uuml;ldse paha , kui n&auml;iteks bar v&otilde;idutseks j&auml;lle . </s> <s> Ja mind ei huvita v&auml;ga kes v&otilde;idab , vaid konkurents peaks tihe olema ! kahjuks pole mingi 2 v&otilde;i 3 aastat seda v&auml;ga olnud <gap desc='image'> Minumeelest oli 2003 t&auml;iesti k&otilde;va konkurents . </s> <s> &Uuml;he punktiline edu l&otilde;pus Schumil ainult . </s> </p>
+<p> <s> Kahju , et F1'est tehakse mingi m&otilde;ttetu sari . </s> <s> F1 on ikkagi v&otilde;idus&otilde;idu tipp aga FIA &uuml;ritab kiirusi v&auml;hendada k&otilde;vasti &ouml;eldes , et n&uuml;&uuml;d on v&auml;iksemad kulud . </s> <s> Jama asi . </s> </p>
+ </sp> <sp> <speaker>nimh</speaker> 
+<p> <s> see hooaeg v&otilde;iks tulla veidi p&otilde;nevam . . </s> </p>
+<p> <s> see on juba igav tegelikult kui ainult Schumacher v&otilde;idab . . </s> </p>
+<p> <s> mis siis , et ma just tema poolt olen . . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>kaivo</speaker> 
+<p> <s> Minu arust pole &uuml;ldse paha , kui n&auml;iteks bar v&otilde;idutseks j&auml;lle . </s> <s> Ja mind ei huvita v&auml;ga kes v&otilde;idab , vaid konkurents peaks tihe olema ! kahjuks pole mingi 2 v&otilde;i 3 aastat seda v&auml;ga olnud <gap desc='image'> J&auml;lle ? </s> <s> Minu teada pole BAR kordagi v&otilde;idutsenud . </s> </p>
+<p> <s> Apollo raamatumajas on huvitavaid raamatuid , t&auml;na vaatasin . </s> <s> 1000 lk . v&auml;ike Ferrari pildiraamat , terve raamat ainult pilte t&auml;is . </s> </p>
+<p> <s> Vormel1 ajalugu enne teist maailmas&otilde;da . </s> </p>
+<p> <s> Michael Schumacheri mingi elulugu vms . </s> </p>
+<p> <s> Ning autospordi leksikon vms . oli , p&auml;ris palju materjali . </s> </p>
+ </sp> <sp> <speaker>kingu</speaker> 
+<p> <s> ok , Suurem Schumi paneb asja kinni , teiseks tuleb Montoya , kolmandaks Button , neljandaks R&auml;ikk&ouml;nen , viiendaks Webber </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - 48. leht - Planet Foorumid </head>
+<sp> <speaker>hullar77</speaker> 
+<p> <s> ma vaatan sealt eest poolt , et te olete oma CF'idega p&auml;ris targad . minu teada eksisteerivad NBA's j&auml;rgmised positsioonid : PG ( point guard ) SG ( shooting guard ) SF ( small forward ) PF ( power forward ) ja C ( center ) . p&ouml;ialt hoian Houstonile . </s> </p>
+ </sp> <sp> <speaker>Red Devil</speaker> 
+<p> <s> ma ennustakse siis selliseid konverentside finaale : pistons-heat ja houston-san antonio . </s> <s> : D Kellele siis Suns kaotab ? </s> </p>
+ </sp> <sp> <speaker>jyrka15</speaker> 
+<p> <s> Kellele siis Suns kaotab ? n&auml;iteks Houstonile . </s> </p>
+ </sp> <sp> <speaker>jyrka15</speaker> 
+<p> <s> no jama kyll nets sai teisel lisajal ikka p&auml;he Heatilt . </s> <s> 105-108 . Ja Houston sai ka kodus p&auml;he , kahju . </s> <s> 102-106 . see oli p&auml;ris hull m&auml;ng , kaks lisaaega , carteri hull l&otilde;puvise . jeffersoni hullud dunkid jne . haslem 19 lauda . </s> </p>
+<p> <s> dallas tegi viimasel veerandajal 20 : 0 spurdi , muidu olid maas . noh , n&uuml;&uuml;d on dallasel ka v&auml;ike v&otilde;imalus . </s> </p>
+<p> <s> indiana esines kodus kindlalt . kardan , et j&auml;rgmine m&auml;ng l&auml;heb samasse kanti . nad peaksid siis sealt paarist edasi liikuma . </s> </p>
+ </sp> <sp> <speaker>F.a.Q</speaker> 
+<p> <s> sixers v&otilde;itis <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>jyrka15</speaker> 
+<p> <s> spurs n&otilde;me v&otilde;itis j&auml;lle . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> kui tahate kunagi etv'lt nbad n&auml;ha , siis pange sinna JAH ! : D </s> </p>
+ </sp> <sp> <speaker>jyrka15</speaker> 
+<p> <s> Sixers ka siis n&uuml;&uuml;d m&auml;ngust v&auml;ljas . kahju . v&auml;ga kahju </s> </p>
+ </sp> <sp> <speaker>jyrka15</speaker> 
+<p> <s> Devil <gap desc='hyperlink'> </s> </p>
+<p> <s> kui tahate kunagi etv'lt nbad n&auml;ha , siis pange sinna JAH ! : D hmm ... ja kuidas see v&otilde;imalik oleks ? ma olen pime ja ei leidnud kohta , kus saaks postitada . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Indiana ja Dallas viimastena teise ringi . </s> </p>
+ </sp> <sp> <speaker>jyrka15</speaker> 
+<p> <s> Mina olen n&uuml;&uuml;d Sunsi ja Miami poolt . </s> </p>
+ </sp> <sp> <speaker>braucieno</speaker> 
+<p> <s> nuuts . ainuke meeskond keda ma p&auml;rast Cavs'ide langemist toetasin . n&uuml;&uuml;d vist ... </s> <s> Suns ... v&otilde;i Mav's </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> <hi rend='quote'> Houston : </hi> </s> ' <s> <hi rend='quote'> ( ! </hi> </s> <s> <hi rend='quote'> Boston : </hi> </s> ' <s> <hi rend='quote'> ( ! </hi> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - 88. leht - Planet Foorumid </head>
+<sp> <speaker>braucieno</speaker> 
+<p> <s> t&auml;na k&uuml;ll peab Denver Houstonit v&otilde;itma . . 15 v&otilde;itu j&auml;rjest oleks juba liig <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Iverson viskab 23 punkti , kuidas sa ei tea . </s> <s> Anthony on see , kes viskab &uuml;le 27 <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>blacklabel</speaker> 
+<p> <s> tra , miks leaguepass enam ei toimi ? </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> NBA itimehed on asja natuke k&auml;sile v&otilde;tnud . </s> <s> Aga <gap desc='hyperlink'> n&auml;itab v&auml;ga hea kvaliteediga <gap desc='image'> t&auml;nks ! repin kohe , kui saan </s> </p>
+ </sp> <sp> <speaker>braucieno</speaker> 
+<p> <s> kolis &uuml;le ( v&otilde;inoh , tagasi ) --&gt; <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> on jah tagasi </s> ^^ <s> . hihi , 15 j&auml;rjest Houstonile , hihi </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> hea ^^ ma k&uuml;ll teadsin seda , a hea ikkagi ^^ </s> </p>
+</sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Houston v&otilde;i/ja Toronto v&otilde;is play-offides ilma teha </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> tra mis j&auml;lle kolis raptorsnation &auml;ra v&otilde;i ? </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> NBA lehele kuidagi ligi ei p&auml;&auml;se . </s> <s> Kas aprilli keskel on lootust Dallases mingit m&auml;ngu n&auml;ha ? </s> <s> 16 . 04 on vs . </s> <s> New Orleans Hornets ... grrr <gap desc='image'> </s> </p>
+<p> <s> Kaheksandal ja k&uuml;mnendal on ka , vastavalt Seattle ja Utah vastu , p&auml;rast 16'nendat on juba Play-offid . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Ma 13 . aprillist veidi aega Dallases , oleks tore midagi vaatama minna . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> 16 . l&auml;heks veidi kiireks , selles suhtes tundub 25 . k&uuml;ll etem . </s> <s> Kes m&auml;ngivad ? </s> </p>
+<p> <s> Mis m&auml;nge veel p&auml;rast tuleb ? </s> <s> Mai keskpaigani muidu Dallases . </s> </p>
+<p> <s> /mul siin hetkel nett liiiiiiga aeglane , et ise otsida/ </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> P&auml;rast 16 . algavad juba play-offid , nende ajakava ja meeskondi pole veel t&auml;pselt teada . </s> </p>
+<p> <s> Kui sa mai keskpaigani oled , siis ma usun , on valikut korralikult . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - 94. leht - Planet Foorumid </head>
+<sp> <speaker>sanwert</speaker> 
+<p> <s> Hmm , Boston kaotas j&auml;rjekordselt Atlantale ... loodetavasti v&otilde;tavad end 7 . m&auml;ngus ikka kokku , muidu oleks tegu suht katastroofiga ... </s> </p>
+<p> <s> Ahjaa , Kobe on siis selle hooaja MVP . </s> </p>
+<p> <s> E : ja Rick Carlisle on Mavsi uus peatreener </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Boston teeb ilmselt asja &auml;ra - 26 : 44 poolajal Bostonile . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> viimast cle-bos m&auml;ngu kuskilt n&auml;ha ? </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Loodab , et t&auml;na NO v&otilde;idab . </s> </p>
+<p> <s> <hi>Edit : niipalju siis sellest . </hi> </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> Nonii , Sixers kukkus ka v&auml;lja . </s> <s> N&uuml;&uuml;d nagu polegi kellegi poolt . </s> <s> Finaalideks ma pakun v&auml;lja , et LAL vs SAS ja DET vs BOS ja NBA finaal SAS vs DET , Detroit v&otilde;idab . </s> <s> Oooh , ma olen &uuml;ks oraakel ikka . </s> <s> Kuigi ma millegi p&auml;rast olin NOH poolt , kartsingi , et juhtub nii nagu juhtus . </s> </p>
+<p> <s> Muidu Nets r&auml;&auml;gib l&auml;bi Nuggetsi ja Anthonyga . </s> <s> &Uuml;ks v&otilde;imalik lahend oleks Anthony , Camby &gt;&lt; Jefferson , M . Williams ja see pick ( mille loosimine t&auml;na toimub muide ) . </s> <s> Picki kohast oleneb ka palju . </s> <s> Mulle endale see nagu ei meeldiks , Iverson j&auml;&auml;ks suht &uuml;ksikuks ja s&otilde;rmuse saamine muutuks j&auml;rjest ebat&otilde;en&auml;olisemaks . </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> Draft Lottery ainult 1 tunni p&auml;rast . </s> <s> 91 m&auml;ngijat on end &uuml;les andnud selleks <gap desc='hyperlink'> </s> </p>
+<p> <s> Ise teaksin v&auml;lja tuua : Derrick Rose G , Chris Douglas-Roberts SG , Robert Dozier ( mingi suur tont on ) , Darrel Arthur G , Kevin Love C , O . J Mayo G ( vb SF ) , Michael Beasley SF . </s> <s> Seda selle t&ouml;ttu , et juhtusin nende m&auml;nge n&auml;gema ( kus nad h&auml;sti ka m&auml;ngisid ) . </s> <s> V&auml;lismaalastest ei tea kedagi . </s> </p>
+<p> <s> Miami saaks siit &auml;kki Derrick Rose ja siis suurmeheks oleks hea Dozier v&otilde;i Love , kuigi arvan , et need teise ringi ei j&otilde;ua . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> V&auml;ga huvitav . </s> </p>
+<p> <s> 1 . Chicago ( numbrite j&auml;rgi oleks pidanud olema 9 . ) </s> </p>
+<p> <s> 2 . Miami </s> </p>
+<p> <s> 3 . Minnesota </s> </p>
+<p> <s> 4 . Seattle </s> </p>
+<p> <s> 5 . Memphis </s> </p>
+<p> <s> 6 . New York </s> </p>
+<p> <s> 7 . LA Clippers </s> </p>
+<p> <s> 8 . Milwaukee </s> </p>
+<p> <s> 9 . Charlotte </s> </p>
+<p> <s> 10 . New Jersey </s> </p>
+<p> <s> 11 . Indiana </s> </p>
+<p> <s> 12 . Sacramento </s> </p>
+<p> <s> 13 . Portland </s> </p>
+<p> <s> 14 . Golden State </s> </p>
+<p> <s> Kuna Chicagol on k&uuml;llaltki hea PG ja SG olemas , siis vast v&otilde;tavad Beasley . </s> <s> Siis Rose j&auml;&auml;ks Miamile . </s> <s> Aga jah , j&auml;llegi k&uuml;llaltki &uuml;llatuslik draft . </s> </p>
+<p> <s> Kas seda loosimise hetke kuidagi ei n&auml;e , seda kuidas pallid veerevad jne ? </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Ooh , ma pole ikkagi oraakel . </s> </p>
+<p> <s> Aga meil on siis NBA Finaal k&auml;es , see hakkab 5 juunil , neljap&auml;eval . </s> </p>
+<p> <s> VS <gap desc='image'> </s> </p>
+<p> <s> Boston on finaalis peale 21 aastast vaheaega . </s> <s> Pakkuge n&uuml;&uuml;d , kes v&otilde;idab , mitme m&auml;nguga , kes on finaalide MVP ? </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> Boston , 4-3 ja KG on MVP </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Lakers , igatahes . </s> </p>
+ </sp> <sp> <speaker>Disasterpiece</speaker> 
+<p> <s> nagu aru saan siis nba . com saab finaale lives vaadata ? </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='image'> 0 VS</hi> </s> </p>
+<p> <s> <hi rend='quote'> 1 <gap desc='image'></hi> </s> </p>
+<p> <s> <hi rend='quote'> ------------88 ----------------98</hi> </s> </p>
+<p> <s> <hi rend='quote'> Ise &uuml;ritasin vaadata , kuid kell 3 kustusin &auml;ra . </hi> </s> <s> <hi rend='quote'> Ma &uuml;ritan n&uuml;&uuml;d kuskilt m&auml;ngu ka saada . </hi> </s> <s> <hi rend='quote'> No Boston oli kodus ja see oli seeria esimene m&auml;ng , hullu vist pole . </hi> </s> <s> <hi rend='quote'> Kui teise saavad ka Celtics endale , siis Lakersil on juba oma kodus raske , seal kaotada ei tohi . </hi> </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Kas Pierce j&auml;i siis ikkagi 100% terveks ? </s> </p>
+<p> <s> Poleks uskunud . </s> <s> Hull vend ikka ... </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - 95. leht - Planet Foorumid </head>
+<sp> <speaker>sanwert</speaker> 
+<p> <s> ta &uuml;tles , et tal jalg on ikka valus . . pmt sai ta nii h&auml;sti m&auml;ngida , sest jalg oli soe . </s> </p>
+<p> <s> Ja seda m&auml;ngu saab tasuta vaadata <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> ta &uuml;tles , et tal jalg on ikka valus . . pmt sai ta nii h&auml;sti m&auml;ngida , sest jalg oli soe . </s> </p>
+<p> <s> Ja seda m&auml;ngu saab tasuta vaadata <gap desc='hyperlink'> Each game will be available as an online replay for 24 hours </s> </p>
+<p> <s> p&otilde;mst peaks n&auml;gema ju , ag amul see broadband tuleb ette aga pilti ei tule : </s> \ </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> p&otilde;mst peaks n&auml;gema ju , ag amul see broadband tuleb ette aga pilti ei tule : </s> \ <s> Kasuta mingit suvalist playerit ja lisa url . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Mis kell Eesti ajaj&auml;rgi t&auml;nane m&auml;ng hakkab ? </s> <s> 9 PM ehk siis meil hommikul kell 7 ? </s> </p>
+ </sp> <sp> <speaker>wiseman</speaker> 
+<p> <s> t&auml;itsa l&otilde;pp . . boston juhib juba 3-1 . </s> <s> Lakers on oma m&auml;ngu t&auml;ielikult kaotanud . Siuke tunne , et Bostonist saab kohe NBA meister . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> No kurjam . </s> <s> 24 punkti maha m&auml;ngida on jh p&auml;ris jama . </s> <s> Algus oli v&auml;ga hea . . aga jh . </s> <s> Kobe j&auml;i kuidagi lahjaks v&auml;heke . </s> <s> S&ouml;&ouml;tis h&auml;sti aga vise oleks v&otilde;inud paremini minna . </s> </p>
+ </sp> <sp> <speaker>wiseman</speaker> 
+<p> <s> Vaatasin m&auml;ngud &auml;ra - masendav . </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> Mida oligi arvata . </s> </p>
+<p> <s> Palju &otilde;nne Celticu f&auml;nnidele <gap desc='image'> </s> </p>
+<p> <s> Pierce t&auml;itsa v&auml;&auml;rib seda MVP'd ka muidugi ... </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Mis ajast delfi tulemust edastab ? </s> <s> Eelmine m&auml;ng l&auml;ks selle nahka . </s> <s> Viimase m&auml;ngu &uuml;tles Tammert ette . </s> </p>
+<p> <s> Ise hoidsin p&ouml;ialt LALile , aga t&otilde;epoolest , kui isegi +24 suudetakse niiviisi maha m&auml;ngida , siis ega nad v&otilde;itu v&auml;&auml;rigi . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> ma vist isegi vaatan , peale pikka aega . </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> minu teada peaks miami haslemi vist &auml;ra vahetama . Ja veel r&auml;&auml;giti , et Marion vahtetakse vb Odomi vastu . . aga need on kuulujutud hetkel </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Portland tege j&auml;lle &uuml;lej&auml;&auml;nud liigale t&uuml;nga . </s> <s> Saadi Bayless teise k&uuml;mne alguses . </s> </p>
+<p> <s> Pm . terve pre-drafti aja ei mainitud Baylessi nime . </s> <s> Testiti ja promoti teisi mehi , et klubide t&auml;helepanu hajutada . </s> <s> Siis tehti Pacersiga kokkulepe , et las nemad v&otilde;tavad Baylessi , keda Pacersil tegelikult vaja ei olnud - said nad Ford ; Portland ise valis aga Rushi - lisaks sellele andsid Pacersile paar mittevajalikku meest vastu , et nood olid valinud Baylessi . </s> </p>
+<p> <s> Sarnane nali toimus ka teises k&uuml;mnes , Portland oli endale enne drafti valmis ostnud picki Orleansilt ning j&auml;lle 'soppasid' teistele ja said oma tahtmise . </s> </p>
+<p> <s> Kolm aastat j&auml;rjest on Portland draft-dayl uskumatult tugev olnud . </s> </p>
+ </sp> <sp> <speaker>donatello</speaker> 
+<p> <s> Olen ka n&uuml;&uuml;d seda drafti ja sellele eelnenud/kaasnenud liigutusi siin m&otilde;ned p&auml;evad seedinud ja &uuml;ha enam ja enam j&otilde;uan j&auml;reldusele , et k&otilde;ik see on &uuml;ks suur mull . </s> <s> On offseason ja kuna midagi muud ei toimu , siis peab lihtsalt millestki kirjutama . </s> <s> Hapukapsahooaeg v&otilde;i kuidas seda aega ajakirjanduses nimetataksegi . </s> </p>
+<p> <s> NBA draft on k&uuml;ll v&auml;ga oluline asi , aga k&otilde;ik need jutud ja hinnangud selle suhtes , kes draftis h&auml;sti ja kes tegi kellele t&uuml;nga ja kellel kuidas l&auml;ks - see k&otilde;ik on puhas ja suur spekulatsioon . </s> <s> Jah , f&auml;nnidel on huvitav ja eks iga&uuml;hel meeldib vaadata tulevikku ja loota , aga ... agasid on palju . </s> </p>
+<p> <s> NBA klubide f&auml;nnid U S of A-s ei ole enamuses v&auml;ga h&auml;sti kursis kolled&zcaron;is toimuvaga , r&auml;&auml;kimata siis meist siin ( kasv&otilde;i enda n&auml;ite varal ) . </s> <s> Seega on meie arvamused nende noormeeste ja s&uuml;ndmuste osas v&auml;gagi kaugelseisjate arvamused ja seet&otilde;ttu &uuml;snagi ebaolulised ning m&otilde;jutatud ennek&otilde;ike foorumites levivast ja ajakirjandusest . </s> </p>
+<p> <s> Tegelikult v&otilde;iks ka siunata siin ajakirjanike teadmisi kolled&zcaron;inoortest - need ei pruugi olla sugugi mitte hiilgavad . </s> <s> Ajakirjanikud on ju peaaegu nagu poliitikud , kes suudavad oskuslikult teadja muljet j&auml;ttes jahuda teemadel , milles nad tegelikult suurt kursis ei olegi . </s> <s> Korvpalliajakirjanik olles on nad ennek&otilde;ike ikkagi NBA-st kirjutajad . </s> <s> Tuues paralleele jalgpalliga , siis kui paljud siinsed jalgpallihuvilised oskaksid midagi r&auml;&auml;kida Coca-Cola Championshipi , Bundesliga 2 , Serie B jms kohta ? </s> <s> Jep , aur l&auml;heb ikka tippudele ! </s> <s> R&auml;&auml;kimata siis tavap&auml;rasest faktist , et &uuml;hele meeldib ema ja teisele t&uuml;tar ehk siis isiklikest vaadetest ... s&otilde;naga - samast pallurist saab kirjutada t&auml;iesti erinevaid lugusid , oleneb ainult , kuidas kirjutaja suhtub . </s> </p>
+<p> <s> Minnes veel kaugemale ja j&otilde;udes selle pika jutu peamise m&otilde;tte esitamisele l&auml;hemale : kolled&zcaron;is ( v&otilde;i Euroopas ) m&auml;ngivate noorte korvpallurite v&otilde;imete hindamisel j&auml;&auml;vad h&auml;tta ka nende NBA klubide treenerid ja skaudid . </s> <s> Fakt ! </s> <s> 2007ndat ja isegi 2006ndat aastat on veel veidi vara hinnata ( jah , r&auml;&auml;kimata siis 2008 draftist ) , seega heitkem pilk veidi kaugemale : </s> </p>
+<p> <s> 2004 : Josh Smith 17-s ( tagapool nt Araujost ja Luke Jacksonist ) </s> </p>
+<p> <s> 2002 : Amare 9-s valik , Caron 10-s ( tagapool Tskitishvilist , Wagnerist ) ; T . Prince ja C . Boozer vastavalt 23 . ja 35 . ) </s> </p>
+<p> <s> 2001 : Tony Parker 28 . ja Gilbert Arenas 31 . </s> </p>
+<p> <s> &Uuml;hes&otilde;naga nende m&otilde;ne suvalise n&auml;itega tahtsin ma &ouml;elda , et ka valikud 10 . -30 v&otilde;ivad edu tuua , ja seda t&auml;navusegi drafti kontekstis . </s> <s> Muidugi oleks v&otilde;inud mainida ka Olowokandi ja Kwame Browni nimesid . </s> <s> Irve . </s> </p>
+<p> <s> L&otilde;ppkokkuv&otilde;ttes v&otilde;ib siis &ouml;elda , et praegu m&otilde;ne meeskonna valikute kiitmine ja teise laitmine v&otilde;ib osutuda v&auml;ga suureks m&ouml;&ouml;dapanekuks . </s> <s> Esimesi hinnanguid v&otilde;iks minu arvates andma hakata poole hooaja m&ouml;&ouml;dudes ja no kui 2-3 aastat on drafti hetkest m&ouml;&ouml;dunud , siis peaks juba selgeks saama hakkama , kes oli flop ja kellest sai/saab m&auml;ngumees . </s> </p>
+<p> <s> Eelnevast l&auml;htuvalt ei hakkaks ise miskit pikka anal&uuml;&uuml;si tegema , aga lihtsalt on pisut nagu h&auml;irinud see , et kiidetakse hirmsasti nt Portlandi valikuid ja laidetakse nt Sacramento omi . </s> <s> Portland sai , keda nad tahtsid , seda k&uuml;ll viisil , et ( v&auml;idetavalt Portlandi paremusj&auml;rjestuses neljas mees ) Bayless oli veel alles 11nda valiku tegemise ajal ; samas sai ka Sacramento , keda nad tahtsid - Thompsoni oleks eeldatavasti k&auml;tte saanud ka k&uuml;mmekond picki hiljem , aga kui Kingsi management oli veendunud , et just see mees on neile &otilde;ige , siis miks mitte ! </s> <s> ( Kevin Martin anybody ? ) </s> </p>
+<p> <s> Ei v&otilde;rdleks kuidagi Baylessi ja Thompsonit omavahel , positsioonidki ju erinevad , ent Portlandi v&otilde;ib hetkel kiita &uuml;ksnes valikute tegemise protsessi osas ( a la h&auml;mamised , kokkulepped ja pickide trade'imised ) , l&otilde;pptulemus on m&otilde;lema meeskonna osas ju sama : saadi , keda taheti . </s> </p>
+<p> <s> Ehk siis kogu drafti kohta : jury is still out ! </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - 96. leht - Planet Foorumid </head>
+<sp> <speaker>hullar77</speaker> 
+<p> <s> Siia lisaks Kevin Martin 2004 26-s valik . </s> </p>
+ </sp> <sp> <speaker>donatello</speaker> 
+<p> <s> Muidugi ei ole ma miskine ennustaja , ma lihtsalt v&auml;idan , et Rose m&auml;ngis teistest meestest , kelle vastu ta m&auml;ngis ( neis mida ise ka n&auml;gin ) , selgelt paremini . </s> </p>
+<p> <s> Aga &auml;rme vaidleme , tegelikult on asi ikka juhustes . </s> <s> Rolli m&auml;ngivad nii treener , kaasm&auml;ngijad , vigastused , isiklik elu jne . </s> </p>
+<p> <s> See hooaeg muide esimene veel &uuml;hele 'Rookiele' Oden'ile , kellele just toodi lisanduseks Rudy Fernandez , keda ma isiklikult v&auml;ga hindan . </s> </p>
+ </sp> <sp> <speaker>donatello</speaker> 
+<p> <s> Oklahoma Citys 2 aastat tagasi polnud &uuml;htegi klubi , n&uuml;&uuml;d on too ainuke , kus on 2 ! </s> </p>
+<p> <s> Hornets siis ka . </s> </p>
+<p> <s> Aga kuna mulle Supersonics niikuinii ei s&uuml;mpatiseeri , siis pole hullu <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> Hm , kust ma siis lugesin seda <gap desc='image'> </s> </p>
+<p> <s> Ise ma seda v&auml;lja ei m&otilde;elnud ( t&auml;psemalt- ei m&otilde;elnud &uuml;ldse <gap desc='image'> ) </s> </p>
+<p> <s> V&auml;hemalt see uudis teeb r&otilde;&otilde;mu : 'The Raptors will reportedly retain Jose Calderon' Loodetavasti ikka ei lisandu O' Neal , ma ei usu , et see Raptorisile kasu tooks . </s> </p>
+<p> <s> Arenas ja CP3 j&auml;&auml;vad ka sinna kus nad on . </s> </p>
+<p> <s> Metsikult suuri muutusi pole veel olnud ... </s> </p>
+ </sp> <sp> <speaker>donatello</speaker> 
+<p> <s> Njaa , Warriors pakub Brandile ligi 40 milli suuremat lepingut , aga t&otilde;en&auml;oliselt ta seda Clippersi plaani ei h&uuml;lga - nii tema kui Baron loobuvad pisut kallimast lepingust ja &uuml;ritavad meistritiitlit koos koju tuua . </s> </p>
+<p> <s> Ning jah , J . O'Neal on juba Raptor : <gap desc='hyperlink'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Ja kui ma ei eksi , siis Seattle j&auml;&auml;b ikka Seattleks , mitte ei tule mingi Oklahoma asi . nad kolisid ainutl aastaks &auml;ra . </s> <s> Division pidavat ka sama j&auml;&auml;ma . </s> <s> Kust sa seda veel lugesid ? <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Kuidas need divisionid n&uuml;&uuml;d jaotatakse ? </s> <s> Praeguse s&uuml;steemiga oli igas viis meeskonda . </s> <s> Hetkeseisuga ei ole midagi veel muudetud . </s> <s> V&auml;hemalt mina k&uuml;ll mingit uudist kuulnud/lugenud pole . </s> </p>
+<p> <s> on muidu v&auml;ga hea koht kust viimaseid NBA uudiseid lugeda <gap desc='image'> </s> </p>
+<p> <s> E : <gap desc='hyperlink'> on praeguste NBA linnade kaart siis kah , kui kedagi huvitab . </s> </p>
+ </sp> <sp> <speaker>Rollerboy</speaker> 
+<p> <s> Huvitav miks oli vaja viia v&otilde;istkond teise riigi otsa ? </s> <s> Et saaks rannal lesida peale m&auml;nge ? </s> <s> Seal l&auml;hedal on mitmeid kohti kus puudub v&otilde;istkond , nt Idaho v&otilde;i North Dakota . </s> </p>
+<p> <s> Oot , kas mingid jutud on , et Baron Davis liitub Brandiga Clippersisse ? </s> <s> Mida Maggette Bostonis teeks , seal piisavalt hea . </s> <s> Neile oleks pigem vaja C . Aga eks n&auml;is . </s> </p>
+<p> <s> Varsti on mingi offseason opener , Bulls vs Heat , Rose vs Beasley . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> Huvitav miks oli vaja viia v&otilde;istkond teise riigi otsa ? </s> <s> Et saaks rannal lesida peale m&auml;nge ? </s> <s> Seal l&auml;hedal on mitmeid kohti kus puudub v&otilde;istkond , nt Idaho v&otilde;i North Dakota . </s> </p>
+<p> <s> Oot , kas mingid jutud on , et Baron Davis liitub Brandiga Clippersisse ? </s> <s> Mida Maggette Bostonis teeks , seal piisavalt hea . </s> <s> Neile oleks pigem vaja C . Aga eks n&auml;is . </s> </p>
+<p> <s> Agaa JO'N'ist on ikka kahju : / </s> </p>
+<p> <s> Loodetavasti ta teeb tulemustega oma reputatsiooni minu silmis tasa . </s> </p>
+<p> <s> Muide , tuttav on Montrealis , tahtsin lasta tuua NBA s&auml;rke , aga fail- seal elavad inimesed ainult j&auml;&auml;hokki <gap desc='image'> </s> </p>
+<p> <s> Mingi Bosh #4 leidis , samas ei ole ta mu 1st choice . </s> </p>
+<p> * <s> Cavaliers' Zydrunas Ilgauskas , Lithuania : Back . </s> <s> Cavaliers General Manager Danny Ferry refused permission for his 7-3 center to play for Lithuania this summer . </s> <s> Ferry said : &quot;In light of the inability to insure Zydrunas adequately , we will not permit [ him ] to play in the 2008 Olympics . &quot; Ilgauskas , 33 , has suffered from foot and back problems during his career . </s> <s> Jube , kuidas vend on ikka tegelikult tahtnud alati m&auml;ngida oma riigi koondise eest , aga lihtsalt ei lubata , v&otilde;i kimbutavad vigastused ( v&otilde;i m&otilde;lemat ) </s> </p>
+<p> <s> On tal &uuml;ldse Leedu eest capse ? </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> No eks ma siis ootam , mis Brand teeb . </s> <s> Kui ta GSW l&auml;heb siis on toimunud lihtsalt staaride vahetus ja kumbki ei sekku tiitlijagamisse , arvan . </s> <s> Tegelt oleks neile Magette ka vaja ilmselt . </s> <s> Ma loodan , et Denver teeb ka mingi liigutuse , mis AI ja Melot &auml;ra ei vii , kuid tooks j&otilde;udu juurde , eriti kaitsesse . </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Tuleb v&auml;lja , et Richard Jefferson vahetati Yi Jianliani ja Bobby Simmonsi vastu . see ju draft-day-trade juba <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Beasley vist suht omas esimeses m&auml;ngus </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> Keegi siin ei maininud , kust mina pidin teadma . </hi> </s> </p>
+<p> <s> Muidu Miami alistas Chicago . </s> <s> Summer leagues muidugi . <gap desc='hyperlink'> Vaatasin ka seda m&auml;ngu . </s> <s> Beasleylt siis 28p/9lp . </s> <s> Mario &quot;Super Mario&quot; Chalmers m&auml;ngis ka suht h&auml;sti - 11p/6ast/4st + v&auml;ga hea kaitse Derrick Rose'i vastu ( 10p/4ast/5to ) </s> </p>
+<p> <s> T&auml;na kell 22 : 00 hakkab teise m&auml;ngup&auml;eva esimene m&auml;ng Heat vs NJN . </s> <s> Kui keegi vaadata tahab , siis link peaks olema selline : <gap desc='hyperlink'> </s> </p>
+<p> <s> Kui see ei t&ouml;&ouml;ta siis natuke enne m&auml;ngu algust peaks <gap desc='hyperlink'> alla vaskusse nurka kus on Watch live ! tekkima link . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&otilde;usaal - 25. leht - Planet Foorumid </head>
+<sp> <speaker>Che</speaker> 
+<p> <s> Olen n&auml;inud saalis , kes panevad kangile sellise kaalu mida ei jaksa kordagi t&otilde;sta . K&uuml;ll aga tahavad 5 korda &auml;ra teha . Niisiis punnitavad nad t&auml;iega s&otilde;bra abiga ( loe : s&otilde;ber t&otilde;stab kangi &uuml;les p&otilde;him&otilde;tteliselt ) . </s> </p>
+<p> <s> Kas selline asi on kasulik/kahjulik . R&auml;&auml;kige palun keegi asjatundja . </s> <s> Selline asi on &uuml;limalt kasulik . </s> <s> See ongi see , miks on vaja korralikku treeningpartnerit . </s> <s> OK , p&auml;ris nii , et &uuml;htegi korda ei j&otilde;ua t&otilde;sta on kah nats imelik , aga noh n&auml;iteks j&otilde;uad t&otilde;sta 1-3 korda ja siis 2-5 korda veel s&otilde;bra abiga juurde , siis see on k&otilde;ige parem asi , mis &uuml;ldse olla saab treeningu juures , see parandab tulemusi ikka v&auml;ga v&auml;ga h&auml;sti , kuna s&otilde;ber lihtsalt aitab nii minimaalselt , et raskest kohast &uuml;le tulla ja ka sinu enda pingutus on palju palju suurem , kui ilma treeningpartnerita , kui teed ainult niipalju kui tead , et j&otilde;uad , korralikku pingutust seega ei olegi . </s> <s> Kuna mul ei ole treeningpartnerit siis rinnalt surumisega on asjad suht halvaks muutunud , kuna ei suuda enam korralikult rinnalihaseid kurnata , seda varianti oleks vaja kasutada . </s> <s> Ja point ei ole selles , et s&otilde;ber t&otilde;stab kangi &uuml;les , vaid selles , et s&otilde;ber aitab nii minimaalselt kui v&otilde;imalik , et kang &uuml;les tuleks , kuna olen seda proovinud , siis tean , et see pingutus on nagu v&auml;ga karm , kuna selle raskuse surumiseks , mida tegelikult t&otilde;sta ei j&otilde;ua l&auml;heb vaja ikka suurt enese&uuml;letamist ka siis kui s&otilde;ber aitab . </s> <s> Nii t&otilde;stes harjuvad lihased kiiremini suuremate raskustega ja ka arenevad kiiremini . </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> S&otilde;ber otseses m&otilde;ttes t&otilde;stab &uuml;les . Suruja midagi pingutab ( 5 cm ehk ) aga siis t&otilde;stab s&otilde;ber &uuml;les . </s> </p>
+<p> <s> Vot sellist harjutamist ma m&otilde;tlesin . </s> <s> No siis on asi suht m&otilde;tetu , sest vaevalt , et see 5 cm-itki v&auml;ga suur pingutus on , paneb p&otilde;rkega selle 5 cm &auml;ra ja siis s&otilde;ber t&otilde;stab , siis on m&otilde;tetu . </s> <s> Aga nagu ma ennem r&auml;&auml;kisin , kui s&otilde;ber aitab minimaalselt , et asi &uuml;les saada , siis on asi v&auml;ga kasulik . </s> </p>
+ </sp> <sp> <speaker>FreakY</speaker> 
+<p> <s> Kuna mul ei ole treeningpartnerit siis rinnalt surumisega on asjad suht halvaks muutunud , kuna ei suuda enam korralikult rinnalihaseid kurnata , seda varianti oleks vaja kasutada . </s> <s> Aga selleks ei pea ju treeningpartnerit omama . </s> <s> Enamus inimesi j&otilde;usaalis ju piisavalt lahked ja inimlikud , et alati valmis abistama , kui paluda . </s> <s> Aga noh , kui kuskil &uuml;ksi tehes , siis on jah kehvasti . </s> </p>
+ </sp> <sp> <speaker>PsycoEvil</speaker> 
+<p> <s> Tegelikult on Egonil m&otilde;nev&otilde;rra &otilde;igus . </s> </p>
+<p> <s> Seal on k&uuml;ll palju inimesi , kes on n&otilde;us aitama ja nii , aga keegi sinuga koos trenni teha v&auml;ga ikka ei viitsi ka . </s> <s> Eks iga&uuml;hel ole ikka omad m&otilde;tted ja nii . </s> </p>
+ </sp> <sp> <speaker>Dude&commat;Home</speaker> 
+<p> <s> Kui ma kuskil pool aastat tagasi audenteses spordiarsti juures k&auml;isin , siis maksis mul 25 EEK </s> </p>
+ </sp> <sp> <speaker>Dude&commat;Home</speaker> 
+<p> <s> &quot;Patsient peab tasuma vaid 25 krooni visiiditasu&quot; </s> </p>
+ </sp> <sp> <speaker>Dude&commat;Home</speaker> 
+<p> <s> Ei hakanud uut teemat tegema aga k&uuml;simus selline : </s> </p>
+<p> <s> P&auml;rast trenni koju s&otilde;ites t&otilde;mban kurvides k&auml;sipiduri peale . Kas ja kuidas see autot rikub ? </s> </p>
+ </sp> <sp> <speaker>zuks</speaker> 
+<p> <s> Milliseid harjutusi keegi seljale teeb ? </s> <s> Ja millised on lemmikud ja k&otilde;ige effektiivsemad teie arvates ? </s> </p>
+ </sp> <sp> <speaker>kensey</speaker> 
+<p> <s> &uuml;lemisele osale . </s> </p>
+ </sp> <sp> <speaker>MoX</speaker> 
+<p> <s> v&otilde;ibolla siin teemas on juba kirjas kuskil , aga kuidas on normaalne kaalu alla v&otilde;tta v&otilde;istlusteks ? mul on aega neli p&auml;eva ja 8 liigset kilo ... </s> </p>
+<p> <s> kuna ma siiani ei ole pidanud kaalu v&otilde;tma siis olen t&auml;ielik ignorant . h&uuml;va n&otilde;u ( ja muidugi ka pilked ) on teretulnud . </s> </p>
+ </sp> <sp> <speaker>Sirius</speaker> 
+<p> <s> Vanasti soovitati k&otilde;vasti praetud kalamarja s&uuml;&uuml;a . </s> <s> Saad oma kalorid k&auml;tte v&auml;hemalt . </s> <s> Saun aitab ka k&otilde;vasti . </s> </p>
+<p> <s> Aga p&otilde;him&otilde;tteliselt eeldab kaalus allav&otilde;tmine energiadefitsiiti . </s> </p>
+<p> <s> M&otilde;tle n&uuml;&uuml;d sellele , et 1000 kcal puuduj&auml;&auml;ki t&auml;hendab k&otilde;igest 100g rasva . </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> Ise olen alustanud ka j&otilde;usaalis k&auml;imist ja oleks paar k&uuml;simust , millele te kindlasti oskate vastata . <gap desc='image'> </s> </p>
+<p> <s> Kui on n&auml;iteks 5x10 seeriad , kas siis tuleb teha neid nii , et teed seeria , v&otilde;tad 1-2 min pausi , teed j&auml;rgmise jne ? </s> <s> V&otilde;i teed &uuml;he seeria , siis teed jalale seeriaid , siis j&auml;lle selle &uuml;he seeria , siis j&auml;lle millegile muule jne ? </s> <s> V&otilde;i teed 2-3x , siis midagi muud jms , kuidas ise tahad ? </s> </p>
+<p> <s> Vaatasin sellelt fitness . ee'lt neid edasij&otilde;udnute kavasid ja oleks k&uuml;simus . </s> <s> Seal on n&auml;dalas 3 p&auml;eva ning igakord teed t&auml;iesti erinevaid asju - selg , siis k&auml;ed ja siis jalad . </s> <s> Minu k&uuml;simus oleks , et kas ei oleks m&otilde;tet teha parem nii , et esimesel korral teed tugevalt k&auml;si jms ning teisel ja kolmandal ka , kuid veidi n&otilde;rgemalt . </s> <s> See kehtib siis k&otilde;igi kehaosade kohta . </s> <s> V&otilde;i &uuml;ldse teha igap&auml;ev suht samamoodi k&otilde;iki osi . </s> <s> Minu point on , et kas on t&otilde;esti vaja anda oma lihastele 6 p&auml;eva puhkust ? </s> <s> Lihased ju peaksid puhkama kuskil 1-3 p&auml;evaga ning miks mitte kohe uuesti neid r&uuml;nnata , kui nad puhanud on ? </s> </p>
+<p> <s> Kas on m&otilde;tekam k&auml;ia n&auml;dalas 3 v&otilde;i 4 korda ? </s> <s> Aega on kasv&otilde;i 7'ks korraks , kuid k&uuml;simus seisneb selles , et kui k&auml;ia 4 korda , kas siis 3 p&auml;eva puhkust on piisav ? </s> </p>
+<p> <s> T&auml;nks . </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Kui teed , siis v&auml;sita &uuml;ks lihas l&otilde;puni &auml;ra , st &auml;ra tee vahepeal muid asju . </s> </p>
+<p> <s> Ja siiski , p&uuml;&uuml;a oma treening niiviisi &auml;ra jaotada , et &uuml;hel p&auml;eval tegeled &uuml;he grupiga ja j&auml;rgmisel j&auml;rgmisega . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&otilde;usaal - 31. leht - Planet Foorumid </head>
+<sp> <speaker>treudenbauer</speaker> 
+<p> <s> Lugesin just amazoni foorumist , et &uuml;ks 66kg kaaluv mehike surus 162kg , kuigi jah , tema ei ole kuni 60kg . . l&auml;hedal ikkagi </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> K&auml;isin t&auml;na &uuml;le v&auml;ga pika aja trennis . </s> <s> Paus oli ligi poolteist aastat . </s> <s> N&uuml;&uuml;d p&auml;ris hea olla . </s> <s> Peaks mingi treeningkava omale ka v&auml;lja m&otilde;tlema vist . </s> </p>
+ </sp> <sp> <speaker>Thomas</speaker> 
+<p> <s> On n&uuml;&uuml;d kuidagi nii v&auml;lja kujunenud , et t&ouml;&ouml;seeriaid teen 5 , korduste arv 8-12 ( m&otilde;ningate lihasgruppide puhul ei kehti ) . </s> </p>
+<p> <s> &Uuml;hel p&auml;eval teen koos rinda , triitsepsit ja k&auml;sivart , teisel &otilde;lg ja biitseps , kolmandal selg ja jalad , neljandal aeroobne . </s> </p>
+<p> <s> P&auml;rast 1 . 5 aastast pausi v&otilde;iks &ouml;elda , et vastupidavus on m&auml;rgatavalt v&auml;henenud , maksimaalj&otilde;ud enamv&auml;hem sama . </s> </p>
+ </sp> <sp> <speaker>madis73</speaker> 
+<p> <s> P&auml;ris puhas massikasvatus see vist ikka ei ole ka ... </s> </p>
+<p> <s> Kui teeksin v&auml;hem seeriaid ( 3-4 ) , siis korduste arv oluliselt ei suureneks ja seeriate l&otilde;puks ei suudaks lihast niiviisi &auml;ra v&auml;sitada . </s> <s> Kuna aga seeriate v&auml;ltel korduste arv &uuml;ldjuhul pigem t&otilde;useb kui langeb , siis on j&otilde;udu sooritada ka 5-6 seeriat . </s> <s> Kunagi sai Peep P&auml;lli juhendamise all isegi 6 seeriat tehtud . </s> </p>
+ </sp> <sp> <speaker>jeekim</speaker> 
+<p> <s> Njaa , ma kordasin p&auml;rast 1 . 5 aastast pausi ja 2 n&auml;dalast trenni oma isiklikku rekordit n&auml;iteks rinnalt surumises . </s> </p>
+<p> <s> Teisi asju suht raske v&otilde;rrelda , esiteks s&otilde;ltub suur osa tulemustest sellest kui puhtalt neid sooritada ja teiseks ei m&auml;leta enam ka selliseid asju nii pika aja m&ouml;&ouml;dudes . </s> </p>
+ </sp> <sp> <speaker>Dude&commat;Home</speaker> 
+<p> <s> kujuta endale ette , milline sa oled 10e , 20e v&otilde;i isegi 30e aasta p&auml;rast kui sa trenni ei tee ja siis hakka fitness . ee&Zcaron;st treenitud inimeste pilte vaatama <gap desc='image'> </s> </p>
+<p> <s> Minu puhul toimib <gap desc='image'> </s> </p>
+<p> <s> ja &uuml;ks moodus mida ma veel kasutan on see , et ma ostan hulgim j&otilde;usaali p&auml;&auml;smeid ette &auml;ra , niiet trenn j&auml;&auml;b mul vahele ainult t&otilde;sisema h&auml;da korral ! </s> </p>
+ </sp> <sp> <speaker>eripruul</speaker> 
+<p> <s> K&otilde;ige odavam peaks Tartus olema Arena , j&otilde;usaali kuukaart siis 450 . - </s> </p>
+ </sp> <sp> <speaker>s33maNN</speaker> 
+<p> <s> K&otilde;ige odavam peaks Tartus olema Arena , j&otilde;usaali kuukaart siis 450 . - Kust selline info ? </s> <s> K&otilde;ige odavam kuupilet on &otilde;pilastele , tudengitele ja pension&auml;ridele 625 , teistele 700 krooni . </s> </p>
+<p> <s> Soovitage Tartus m&otilde;nda <hi rend='bold'>soodsat</hi> j&otilde;usaalis , kus saab osta kuukaardi , mis tagab piiramatu sissep&auml;&auml;su . </s> <s> K&uuml;lastatavus v&otilde;iks j&auml;&auml;da normi piirsesse st seal ei tohiks olla r&auml;medaid j&auml;rjekordi iga masina taga . </s> <s> Arenas on p&auml;eval v&auml;ga vaikne , v&auml;hemalt j&otilde;usaalis . </s> <s> Masinaid v&auml;ga palju ei ole , ent k&otilde;ikidele lihasgruppidele leidub siiski midagi . </s> <s> Seitsmest kuni sulgemiseni on suhteliselt rahvastatud , korraga on vesiaeroobika ja teised trennid , seega v&otilde;ib olla raskusi kapi leidmisega . </s> <s> V&auml;ga oluline pluss on minu arust basseini kasutamise v&otilde;imalus ( eeldusel , et samal ajal pole seal trenni ) . </s> </p>
+<p> <s> K&otilde;ige odavam on kindlasti T&Uuml; spordihallis . </s> <s> Kuukaart &otilde;pilastele 450 , muidu 700 . </s> </p>
+ </sp> <sp> <speaker>gudher</speaker> 
+<p> <s> Tegin J&otilde;usaalist umbes n&auml;dala puhkust . T&auml;na l&auml;ksin taas j&otilde;usaali ning peale poole tunnist trenni l&otilde;i selline kerge valu rindu . Valu Pole rinnus siia maani kadunud ning &otilde;hku sisse hingates valu suureneb . Kahtlustan , et tegin koormusega s&uuml;damele liiga aga mine tea . Palun abi ! </s> <s> Vastust ootama j&auml;&auml;des </s> </p>
+ </sp> <sp> <speaker>Michieru Arata</speaker> 
+<p> <s> Valu on pigem &uuml;hel poolel , ei kiirgu , hingamisel suureneb ja samal k&uuml;ljel lamades v&auml;heneb ja siis ka hingamine kergem ? </s> </p>
+ </sp> <sp> <speaker>ParisDiamondEva</speaker> 
+<p> <s> Valu on pigem &uuml;hel poolel , ei kiirgu , hingamisel suureneb ja samal k&uuml;ljel lamades v&auml;heneb ja siis ka hingamine kergem ? </s> <s> Nii see on - &otilde;nneks asi laabub vaikselt , t&auml;na juba parem olla . </s> </p>
+ </sp> <sp> <speaker>Kami</speaker> 
+<p> <s> N&auml;dalase pausi kohta ei saaks k&uuml;ll &ouml;elda , et pole ammu teinud . </s> </p>
+<p> <s> Eelnevad s&uuml;mptomid viitavad roietevaheliste lihaste ( &auml;&auml;rmisel juhul n&auml;rvide ) probleemile . </s> <s> M&ouml;&ouml;dub m&otilde;ne p&auml;evaga . </s> </p>
+ </sp> <sp> <speaker>kensey</speaker> 
+<p> <s> Kus on Tartus k&otilde;ige parema kvaliteedi/hinnaklassi suhtega j&otilde;usaal n&auml;iteks ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&otilde;usaal - 32. leht - Planet Foorumid </head>
+<sp> <speaker>koolondee</speaker> 
+<p> <s> T&Uuml; uue spordihoone j&otilde;usaal . </s> <s> V&auml;ga pro , l&auml;bi kolme korruse . </s> <s> &Uuml;he korra pilet 50 . - </s> </p>
+<p> <s> Samas suhteliselt rahvarohke . </s> </p>
+<p> <s> Kui ise tahaks k&auml;ia , siis vist k&auml;iksin T&Uuml; Staadioni omas . </s> <s> K&uuml;llalti kompetentne koht , veidi aegunud , aga pole hullu . </s> <s> Rahvast suht v&auml;he . </s> </p>
+<p> <s> Aga ei ole ise eriline j&otilde;usaali mees <gap desc='image'> Kergej&otilde;ustikus k&auml;in , siis vahepeal treener saadab tegema midagi . </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Tervist kaasfoorumlased . </s> <s> K&uuml;sin siis natuke n&otilde;u , &auml;kki keegi oskab aidata . </s> <s> Olen 187cm pikk ja kaalun 75 kg , mida on ilmselgelt v&auml;ga v&auml;he . </s> <s> Tahaks kaalu juurde saada , ning ikka meelsasti lihast . </s> <s> Olen mingi aasta juba plaaninud j&otilde;usaali minna . </s> <s> Terve aja olen m&otilde;elnud , et s&ouml;&ouml;n ikka veits rasva ja pekki juurde et oleks millestki teha lihast . </s> <s> Probleem aga selles , et ei tule absoluutselt kaalu juurde . </s> <s> Ajan sisse igast asju endale nii kus j&otilde;uan . </s> <s> Mingit suurt trenni ei tee kuhu energia kaoks ... aga sellegi poolest ei tule kuskilt seda kaalu juurde . </s> <s> Oskab keegi mingit n&otilde;u anda mida tegema peaks ? </s> </p>
+ </sp> <sp> <speaker>Lupe</speaker> 
+<p> <s> Kehakaaluindeksi j&auml;rgi oled sa t&auml;iesti normaalkaalus . </s> <s> Samas sale lihaseline mees on nende kaaluindeksite j&auml;rgi ka juba &uuml;lekaalupiiril . </s> </p>
+<p> <s> Kui ma tahaks juurde kaalus saada , siis : ma s&ouml;&ouml;ks hommikuti rohkem ja korralikumalt kui praegu , s&ouml;&ouml;ks rohkem liha , s&ouml;&ouml;ks kindlamatel aegadel , teeks rohkem j&otilde;utrenni , magaks normaalse unevajaduse alati t&auml;is . </s> </p>
+<p> <s> Niisama lisaks : paar treudenbaueri postitust tagasi r&auml;&auml;kis ta rinnas oleva valu v&otilde;imalikest p&otilde;hjustest . </s> <s> Mul on varem olnud ja ka see n&auml;dal oli sama jama . </s> <s> Kusjuures valu ei teki j&otilde;usaalis vaid hoopis joostes . </s> <s> Neli p&auml;eva k&auml;isin j&otilde;usaalis , viiendal p&auml;eval peale 5km s&ouml;rki l&otilde;i valu sisse . </s> <s> Kahe p&auml;evaga l&auml;ks &uuml;le . </s> </p>
+ </sp> <sp> <speaker>Hellion</speaker> 
+<p> <s> Kust selline info ? </s> <s> K&otilde;ige odavam kuupilet on &otilde;pilastele , tudengitele ja pension&auml;ridele 625 , teistele 700 krooni . </s> </p>
+<p> <s> Arenas on p&auml;eval v&auml;ga vaikne , v&auml;hemalt j&otilde;usaalis . </s> <s> Masinaid v&auml;ga palju ei ole , ent k&otilde;ikidele lihasgruppidele leidub siiski midagi . </s> <s> Seitsmest kuni sulgemiseni on suhteliselt rahvastatud , korraga on vesiaeroobika ja teised trennid , seega v&otilde;ib olla raskusi kapi leidmisega . </s> <s> V&auml;ga oluline pluss on minu arust basseini kasutamise v&otilde;imalus ( eeldusel , et samal ajal pole seal trenni ) . </s> </p>
+<p> <s> K&otilde;ige odavam on kindlasti T&Uuml; spordihallis . </s> <s> Kuukaart &otilde;pilastele 450 , muidu 700 . </s> </p>
+<p> <s> Kui ainult j&otilde;usaali tahad siis on &otilde;pilastele 350 . - ja t&auml;iskasvanutele 450 . - ehk siis ilma ujumiseta ja teiste asjadeta </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Jooksin t&auml;na staadionil tuhandet meetrit . </s> <s> Umbes esimese kahesaja meetriga oli v&otilde;hm v&auml;ljas ja edasi toimus vaevaline kulgemine . </s> <s> L&otilde;ppaeg oli umbes minut kehvem , mis ma olen jooksnud . </s> <s> L&auml;hema 3 kuu eesm&auml;rgiks on umbes 5kg juurde v&otilde;tta , joosta see 1000 meetrit veidi &uuml;le minuti kiiremini ja j&otilde;usaali poole pealt t&otilde;sta rinnalt maksimumi 20kg v&otilde;rra . </s> </p>
+ </sp> <sp> <speaker>Mattias</speaker> 
+<p> <s> Tervist kaasfoorumlased . </s> <s> K&uuml;sin siis natuke n&otilde;u , &auml;kki keegi oskab aidata . </s> <s> Olen 187cm pikk ja kaalun 75 kg , mida on ilmselgelt v&auml;ga v&auml;he . </s> <s> Tahaks kaalu juurde saada , ning ikka meelsasti lihast . </s> <s> Olen mingi aasta juba plaaninud j&otilde;usaali minna . </s> <s> Terve aja olen m&otilde;elnud , et s&ouml;&ouml;n ikka veits rasva ja pekki juurde et oleks millestki teha lihast . </s> <s> Probleem aga selles , et ei tule absoluutselt kaalu juurde . </s> <s> Ajan sisse igast asju endale nii kus j&otilde;uan . </s> <s> Mingit suurt trenni ei tee kuhu energia kaoks ... aga sellegi poolest ei tule kuskilt seda kaalu juurde . </s> <s> Oskab keegi mingit n&otilde;u anda mida tegema peaks ? </s> </p>
+<p> <s> Esiteks , MINE TRENNI . </s> </p>
+<p> <s> Teiseks , rasvast ja pekist EI teki kuidagi lihas ka k&otilde;ige suurema tahtmise juures mitte , samuti ei saa lihas hiljem kuidagi rasvaks/pekiks muutuda . </s> </p>
+<p> <s> Kolmadaks , mine tegelt ka trenni ja v&otilde;ta kava ( nt . <gap desc='hyperlink'> ) . </s> <s> Kui eesm&auml;rgiks massikogumine , siis peaks kavas olema sellised harjutused , nagu k&uuml;kk , j&otilde;ut&otilde;mme , rinnalt surumine jm . baasharjutused . </s> <s> Esimesed kaks on &uuml;ldiselt k&otilde;ige efektiivsemad harjutused &uuml;ldse . </s> </p>
+<p> <s> Neljandaks , kui juba tegeled treeninguga , siis toitu korralikult . </s> <s> See t&auml;hendab kindlasti head hommikus&ouml;&ouml;ki , l&otilde;unat ja &otilde;htus&ouml;&ouml;ki . </s> <s> Ideaalne oleks s&uuml;&uuml;a iga 3-4h tagant , aga siis mitte ennast t&auml;is &otilde;gida , vaid normaalselt . </s> <s> Loomulikult peab iga toidukord sisaldama valgurikaid toiduaineid , sest valk on lihaskasvu alus . meeles tasuks pidada ka seda , et korraga suudab organism omastada ( v&otilde;in praegu eksida numbriga ) umbes 35g valku , niiet siit ka p&otilde;hjus , miks ei ole m&otilde;tet end kurguni t&auml;is s&uuml;&uuml;a . </s> <s> Normaalseks lihaskasvuks vajab organism treeningu korral minimaalselt 2g valku keha kg kohta . </s> <s> 75 kilo puhul oleks sinul vaja tarbida v&auml;hemlat 150g valku p&auml;evas . </s> </p>
+<p> <s> Ning loomulikult puhkus ehk uni , kuna lihas kasvab puhates , siis peab keha saama ka piisavad tunnid puhkust . </s> </p>
+<p> <s> P&otilde;hiline aga siiski - mine trenni ja s&ouml;&ouml; , sellest peaks esialgu piisama . </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> See fakt on viimasel ajal teaduslikult korduvalt &uuml;mber l&uuml;kkatud . </s> <s> Ei vaidle absoluutselt vastu , aga enda harimise eesm&auml;rgil , on sul &auml;kki meeles , mis on viimased andmed ? </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> J&otilde;usaalis vahelduva eduga vist aastakese k&auml;inud . </s> <s> &Uuml;ritasin kaks v&otilde;i kolm korda n&auml;dalas , kui puhkus l&auml;bi , tahaks viis korda n&auml;dalas . </s> <s> &Uuml;ldjuhul teen jooksulindil parajalt s&ouml;rki ning siis erinevaid hantliharjutusi . </s> <s> M&otilde;jub . </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> 20kg&curren;190 on p&auml;ris hea karistus tegelikult <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Krt , Reval Sport on nii fakin kalliks l&auml;inud , kevadel oli 300 krooni odavam . </s> <s> Samas polnud vanasti selle hinna sees basseini , squashi ega taipoksi . </s> <s> V&otilde;iks siis eraldi j&otilde;usaalipilet olla vms . </s> </p>
+ </sp> <sp> <speaker>koolondee</speaker> 
+<p> <s> Sai t&auml;na Tammertiga j&otilde;ut&otilde;mbes kihla veetud , et ta t&otilde;mbab &uuml;he k&auml;ega rohkem kui mina kahega . </s> <s> V&otilde;itiski , kurat . </s> </p>
+<p> <s> ( 130 vs . </s> <s> 135 kg ) Kuidas ta &uuml;he k&auml;ega j&otilde;ut&otilde;mmet tegi ? </s> <s> Pani hantlile 135kg peale ? </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Homme koormustestile , saab teada palju asjad aasta ja &uuml;he kuuga muutunud on . </s> <s> : D Tuli v&auml;lja , et ma olen arenenud . </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> Kuidas ta &uuml;he k&auml;ega j&otilde;ut&otilde;mmet tegi ? </hi> </s> <s> <hi rend='quote'> Pani hantlile 135kg peale ? </hi> </s> <s> <hi rend='quote'> Tavaline kang ikka , lihtsalt tuleb keskelt kinni v&otilde;tta ja m&otilde;lemad pooled tasakaalus hoida . </hi> </s> </p>
+<p> <s> Tuli v&auml;lja , et ma olen arenenud . </s> <s> Max vent . ja VO2max ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&otilde;usaal - 33. leht - Planet Foorumid </head>
+<sp> <speaker>Vilbiks</speaker> 
+<p> <s> Tavaline kang ikka , lihtsalt tuleb keskelt kinni v&otilde;tta ja m&otilde;lemad pooled tasakaalus hoida . </s> </p>
+<p> <s> Max vent . ja VO2max ? </s> <s> Mul on see leht soomekeelne ja ma ei tea , mis see vent on , sorri , aga Vo2 on 36 asemel 49 . </s> </p>
+<p> <s> saab veel areneda k&uuml;ll , enivei . </s> <s> : D </s> </p>
+ </sp> <sp> <speaker>Mansaft</speaker> 
+<p> <s> V&auml;idetakse , et k&otilde;rge proteiini tarbimine v&otilde;ib tugevasti kahjustada neerude tegevust . </s> <s> Lahustudes sisaldab proteiin ammoniaaki , mis on v&auml;ga m&uuml;rgine ja v&auml;idete kohaselt kahjustab neerude elutegevust . </s> <s> Sellest hoolimata ei ole olemas n&auml;iteid , et terved neerud oleksid kahjustunud suurest proteiini tarbimisest . </s> </p>
+<p> <s> Eriti laiaulatuslikust uurimusest proteiini tarbimise kohta selgus : &quot;On imetlusv&auml;&auml;rne , et proteiini tarbimine ei aeglusta neerude tegevust , pigem vastupidi . </s> <s> Tervel inimesel ei ole m&otilde;tet hakata piirama tarvitatavat proteiini kogust . &quot; </s> </p>
+<p> <s> Fitness . ee </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Mul enne oli 3 , 5 l/min , n&uuml;&uuml;d 4 , 2 ning pulsi aeroobne ala on 98-137 asemel 118-147 . </s> <s> Sesm&otilde;ttes , et aasta ajaga , millest umbes pool ma ka suht laisklesin , on minu arvates p&auml;ris hea . </s> <s> Eks n&auml;is , mis tulevikus on . </s> <s> : D </s> </p>
+ </sp> <sp> <speaker>koolondee</speaker> 
+<p> <s> Tere ! </s> <s> Sooviks teada , mida t&auml;pselt teha , et treenida reie lihaseid ja &uuml;ldse jala lihasgruppe . </s> <s> Eelk&otilde;ige ikka eesmiseid reielihaseid . </s> </p>
+ </sp> <sp> <speaker>TISKO</speaker> 
+<p> <s> Mis su VO2 Max on muidu ? </s> <s> Ja kuidas k&otilde;ige m&otilde;ttekam seda veidi veel parandada oleks ? </s> <s> Kaalust nagu ei tahaks alla v&otilde;tta , j&auml;relikult aeroobset ? </s> <s> Kunagi kui ma vastupidavustreeninguga tegelesin , siis ei osanud selle hapnikutarbimise kohta midagi k&uuml;sida ega aru saada . </s> <s> Kolm aastat tagasi kui tegelesin ainult j&otilde;utreeninguga , siis vastav n&auml;itaja oli umbes sama nagu sul praegu , ainult aeroobse tsooni &uuml;lemine piir oli 170 kanti . </s> </p>
+<p> <s> Praegu ma jooksen korra p&auml;evas ja istun 1600 meetri k&otilde;rgusel merepinnast , hapnikutarbimine peaks ilmselt n&uuml;&uuml;dseks suurem olema . </s> </p>
+<p> <s> Treenida soovitaksin kestvalt l&auml;ve &uuml;lemises osas , hakkab tasapisi tsoon t&otilde;usma . </s> </p>
+<p> <s> Paari n&auml;dala m&ouml;&ouml;dudes jooksen staadionil aja peale tuhandet meetrit . </s> <s> Siiani on max pulss olnud 176 , mis t&auml;hendab , et ma jooksen tugevalt alla v&otilde;imete piiri , kuna l&otilde;pujoonel peaks ideaalis pulss ulatuma 190+ . </s> <s> Viimane kord kasutasin j&auml;nest , kes tempot hoidis , kuid tookordse jooksu pulssi ei tea . </s> <s> See 176 &uuml;letab veidi aeroobset piiri , aga kui n&uuml;&uuml;d v&otilde;rrelda , siis m&otilde;tle , mis ajaga sa tuhandet jookseksid , kui hoiaksid oma maksimaalse pulsi &uuml;tleme 155 kandis . </s> </p>
+ </sp> <sp> <speaker>dzihaad</speaker> 
+<p> <s> Koduselt , kas hantlitega vms . saab rinnalihaseid natukenegi suuremaks ? </s> </p>
+ </sp> <sp> <speaker>dzihaad</speaker> 
+<p> <s> no kodus hantlitega saad teha n&auml;iteks mingi pingi peal , selili hantlitega surumist ja lendamist , aga ega see sulle eriti midagi ei anna ... tahad et lihas kasvaks ... siis v&otilde;ta kava ja mine j&otilde;usaali , sest paljalt nende kahe harjutusega ei j&otilde;ua kuskile ! </s> <s> Kava ? </s> </p>
+<p> <s> Olen v&auml;rske , selle ala peal , soz . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>TISKO</speaker> 
+<p> <s> Kava ? </s> </p>
+<p> <s> Olen v&auml;rske , selle ala peal , soz . <gap desc='image'> kui v&auml;rske oled ja tahad j&otilde;usaaliga tegelema hakata , siis uuri fitness . ee foorumeid . </s> </p>
+ </sp> <sp> <speaker>lecter</speaker> 
+<p> <s> Treudenbauer , kui sa kangi rinnale v&otilde;ttu sooritad , siis palju sa jalgadega t&ouml;&ouml;d teed ? </s> <s> Ning ega sa oska mingit head videot pakkuda , kus harjutust hea tehnikaga sooritatakse , nii jalgade t&ouml;&ouml;ga kui ka ilma ? </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Rinnalev&otilde;ttu v&auml;hese jalgade t&ouml;&ouml;ga - tehnikat ei oska , liiga uus harjutus ka minu jaoks . </s> </p>
+<p> <s> J&otilde;ut&otilde;mmet teen hetkel ainult selja jaoks , seega kasutan v&auml;ikseid raskusi ja p&uuml;&uuml;an jalgu mitte liiga palju k&otilde;verdada soorituse alguses . </s> </p>
+<p> <s> Aga kuna ma m&otilde;tlesin , et teeks mingi kuu v&otilde;i paar trenni just massi kasvatamiseks ja hakkaks numbreid taga ajama , siis peaks jalad ka m&otilde;lemasse harjutuses t&ouml;&ouml;le panema . </s> <s> J&otilde;ut&otilde;mbes ei tohiks see probleem olla , aga ma kardan , et rinnalev&otilde;tu juures l&auml;heb korraliku tehnikaga soorituse tegemine raskeks . </s> <s> Kardan valesti tegemist ja vigastusi . </s> </p>
+ </sp> <sp> <speaker>'five'</speaker> 
+<p> <s> Okei , kah uuest n&auml;dalast kusagil j&otilde;usaalis k&auml;ima , vaatan veel hindasid . </s> </p>
+ </sp> <sp> <speaker>eripruul</speaker> 
+<p> <s> Kui punnis biitsepsit taga ajada , siis k&otilde;ige paremini aitavad ikkagi biitsepsile m&otilde;eldud harjutused . </s> </p>
+<p> <s> Kui k&uuml;ki puhul kangi turjal hoida , siis k&auml;elihased mingit erilist arendavat koormust k&uuml;ll ei saa . </s> <s> Kui hoida rinnal , siis veidi teine lugu , aga isomeetriline kontraktsioon pole siiski p&auml;ris see . </s> </p>
+<p> <s> J&otilde;ut&otilde;mbe puhul biitseps samuti v&auml;ga oluliselt t&ouml;&ouml;d ei tee , kuna lihas teeb j&auml;llegi isomeetrilist t&ouml;&ouml;d . </s> <s> &Uuml;tleks , et isegi k&uuml;&uuml;narvarre lihastele langeb suurem koormus . </s> </p>
+<p> <s> Viimati mainitud lai-lihase harjutust kutsuti kunagi &quot;saagimiseks&quot; . </s> <s> T&otilde;si , biitseps t&ouml;&ouml;tab , aga kuskil 90 kraadini , v&otilde;rreldes biitsepsiharjutuse 130-140 kraadiga . </s> </p>
+<p> <s> Eelnevatele harjutustele soovitaks veel rinnalev&otilde;ttu , sest t&ouml;&ouml;tavad jalad , selg , &otilde;lad , k&auml;ed . </s> </p>
+ </sp> <sp> <speaker>'five'</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> Muide , biitsepsi treenimisele ei makse &uuml;leliia keskenduda . </hi> </s> <s> <hi rend='quote'> Tee parem tervet keha h&otilde;lmavaid harjutusi ja k&uuml;ll see biitseps kasvama hakkab . </hi> </s> </p>
+<p> <s> Harjutuste all m&otilde;tlen k&uuml;kke , j&otilde;ut&otilde;mmet , bent over rows ( ei oska eesti keeles &ouml;elda ) , l&otilde;uat&otilde;mbeid jne . </s> </p>
+<p> <s> Aga samas , &auml;kki oledki selline mees , kes treenib ainult rinna lihaseid , k&otilde;htu ja biitsepsit . </s> </p>
+<p> <s> Mis puutub j&otilde;u kaotamisse , siis see on &uuml;sna tavaline n&auml;htus , kui ei treeni j&auml;rjepidevalt . </s> <s> &Otilde;nneks on inimestel olemas n&ouml; &quot;musklim&auml;lu&quot; ja sinu vana j&otilde;ud peaks &uuml;sna pea tagasi tulema . </s> <s> Ahjaa , kui midagi treenid , siis kasuta esmalt vabasid raskuseid ja alles siis isoleerivaid . </s> <s> Kord n&auml;dalas igale lihasgrupile korralik trenn , see faas kui proovisin ainult kerge hantlivehkimise ja m&otilde;ne trossit&otilde;mbega suureks saada on ammu m&ouml;&ouml;das . </s> <s> Korralik trenn mis sisaldab baasharjutusi on need mis kasvatavad ! </s> <s> P&auml;rast k&uuml;kkimise ja j&otilde;ut&otilde;mbe v&otilde;tmist kavasse oli mass kiire tulema . </s> </p>
+<p> <s> Lihtsalt h&auml;mmastav on praegu biitseps , mille puhul ainult &Uuml;HE konkreetse harjutuse puhul on j&otilde;un&auml;itajad langenud , samas kui teiste harjutuste juures biitsepsile on raskused kasvanud ! </s> <s> See ongi nagu naljakas . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> J&otilde;usaal - 34. leht - Planet Foorumid </head>
+<sp> <speaker>nykifi</speaker> 
+<p> <s> Hoiatan , et Tallinna &Uuml;likooli j&otilde;usaalist tasub eemale hoida vaatamata k&uuml;mnekroonisele hinnale <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Kitsas , haisev , 10-20 jorssi korraga sees . </s> <s> Masinad vanad logud . </s> <s> K&auml;isin &uuml;he s&otilde;braga kohal korra ning &uuml;ks trena&zcaron;&ouml;&ouml;r l&auml;ks lihtsalt katki peale m&otilde;nda minutit . </s> <s> Sux . </s> </p>
+ </sp> <sp> <speaker>Flash</speaker> 
+<p> <s> Nii , septembrist alates olen ka siis regulaarselt 2x n&auml;dalas j&otilde;usaalis k&auml;inud . </s> <s> Enamasti teen selliste raskustega , et j&otilde;uan 3x8 korda teha . </s> <s> J&otilde;udu on m&auml;rgatavalt juurde tulnud , kuid millegip&auml;rast ei tule massi eriti . </s> <s> Selliste kordustega peaks samas m&otilde;lemat tulema ju ? </s> </p>
+<p> <s> Alguses ongi areng v&auml;ga kiire , hiljem see aeglustub ja tuleb k&otilde;vasti rohkem vaeva n&auml;ha , et edasi areneda . </s> <s> Mis kava muidu kasutad ? </s> <s> Siingi eespool r&auml;&auml;gitud massikasvatavad harjutustest . </s> <s> K&uuml;kk , j&otilde;ut&otilde;mme jne . </s> <s> K&otilde;ik nn . baasharjutused . </s> <s> Loomulikult ka korralik jalgade treening . </s> <s> V&auml;ga suur osa massist tuleb juurde jalgade treenimisega . </s> <s> Oluline on ka toitumine ja puhkus . </s> <s> Trenn , toitumine , puhkus ning j&auml;rjepidevus ja k&uuml;ll see mass kah tuleb . </s> <s> Samuti ei tasu unustada , et inimese kehat&uuml;&uuml;bid ning arenemiskiirused on erinevad , kui olen n . &ouml; <hi rend='italic'>hard gainer</hi> , nagu mina , siis pead ikka roppu moodi vaeva n&auml;gema v&otilde;rreldes m&otilde;ne t&uuml;&uuml;biga , kes peale 3 kuud trenni on juba sinu arengust mitmete kuude v&otilde;rra eest , aga sellest ei tohi lihtsalt meelt heita . </s> <s> L&otilde;uad pidada ja edasi t ( r ) eenida ! </s> </p>
+ </sp> <sp> <speaker>Flash</speaker> 
+<p> <s> Jooksmisega sa &uuml;ldiselt jalgadele massi juurde ei saa . </s> <s> Tegu aeroobse treeninguga , mida tuleb samuti kindlasti teha , kuid t&auml;helepanu siiski tuleks p&ouml;&ouml;rata j&otilde;uharjutustele . </s> <s> See , et harjutsi vahetada ja asendada on &uuml;ldsielt hea , varieerida tulekski . </s> <s> Aegajalt tulebki harjutusi asendada , vahetada j&auml;rjekorda jne . </s> <s> Muidugi n&auml;iteks &uuml;teb Otsus oma raamatus , et lihaskasvu seisukohalt pole vahet , kas varieerida harjutustega v&otilde;i mitte , et harjutustega varieerimine on vajalik vaid ps&uuml;hholoogiliselt , aga mina olen siiski vastupidisel seisukohal ( kuigi ma ei taha siin v&auml;ita , et ma oleksin Otsusest targem , kindlasti mitte . </s> <s> V&otilde;rreldes temaga olen loll kui lauajalg ) kuid lihtsalt tunnen , et minu keha vajab aegajalt harjutustega m&auml;ngimist . </s> <s> Kas teed neid harjutusi k&otilde;iki 2x n&auml;dalas ? </s> <s> &Uuml;ldiselt kui sa jubaseptembrist oled korralikult k&auml;inud trennis , soovitaks juba v&auml;he asjalikumat kava . <gap desc='hyperlink'> sealt t&ouml;&ouml;riistad ja treeningkavad . </s> <s> Saad valida endale sobiva . </s> <s> Ja loomulikult kui ajad massi taga , siis j&otilde;ut&otilde;mme , k&uuml;kk oleksid lausa kohustuslikud . </s> <s> Praegusele kavale lisaks kindlasti v&auml;hemalt j&otilde;ut&otilde;mbe , jalatrenni , &otilde;lale lisaks veel harjutusi , triitsepsile ning ka biitsepsile lisa , aga see t&auml;hendab ka seda , et kava tuleks jaotada . </s> <s> K&otilde;ike korraga ei j&otilde;ua . </s> <s> &Uuml;ldiselt peetakse k&otilde;ige m&otilde;istlikumaks kuni 45 min . pikkust treeningut . </s> <s> Mass tuleb p&otilde;him&otilde;tteliselt harjutustega , kus saab kasutada suuremaid raskuseid ning mis m&otilde;jutavad mitmeid lihaseid korraga . </s> <s> Isoleerivad harjutused on &uuml;ldiselt sel puhul teisej&auml;rgulised , kuid ka neid ei tohiks unustada , sest need annavad v&otilde;imaluse lihase 100% l&auml;bit&ouml;&ouml;tamiseks . </s> <s> J&otilde;ut&otilde;mme , k&uuml;kk , kangi t&otilde;mbed ettekummardatuna , kaldpinnal rinnalt surumine kangiga , horisontaal pingil kangi surumine , kitsa haardega surumine , prantsuse surumine , kangiga surumine &otilde;lgadele jne . </s> <s> Ja &uuml;ldiselt leotakse massikogumiseks sobivaks korduste arvuks kuni 6 kordust seerias . </s> </p>
+ </sp> <sp> <speaker>Flash</speaker> 
+<p> <s> 1-3min </s> </p>
+ </sp> <sp> <speaker>'five'</speaker> 
+<p> <s> Ma ei ole enam umbes poolteist kuud saanud t&otilde;siselt teha . </s> <s> Ja ei ole kohe seda moodigi , et &otilde;lg terveks saaks . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>nykifi</speaker> 
+<p> <s> Oskab keegi &ouml;elda kus kohast saada toitumiskava ? </s> <s> Fitness . ee-s on , aga pole niiv&otilde;rd rahaboss , et 500 eeku v&auml;lja k&auml;ia . </s> </p>
+ </sp> <sp> <speaker>Thomas</speaker> 
+<p> <s> mis see on normaalne , et kui enne treeningut kaalun 108 . 5 ja siis peale k&otilde;ike seda kaalun 109 . 5 , et kui mul on vaja rohkem kaalu maha siis ma peaksin tegema aeroobset rohkem kui j&otilde;utreeningut ? </s> </p>
+<p> <s> Ja kas see on normaalne kui mingi 1 , 5 kuuga v&otilde;tsin sama treening kavaga &uuml;le 10kg maha ja n&uuml;&uuml;d j&auml;i pidama 108-110-i peale ? </s> </p>
+ </sp> <sp> <speaker>lecter</speaker> 
+<p> <s> mis see on normaalne , et kui enne treeningut kaalun 108 . 5 ja siis peale k&otilde;ike seda kaalun 109 . 5 , et kui mul on vaja rohkem kaalu maha siis ma peaksin tegema aeroobset rohkem kui j&otilde;utreeningut ? </s> </p>
+<p> <s> Ja kas see on normaalne kui mingi 1 , 5 kuuga v&otilde;tsin sama treening kavaga &uuml;le 10kg maha ja n&uuml;&uuml;d j&auml;i pidama 108-110-i peale ? </s> </p>
+<p> <s> Ega jah , samas tempos ei j&auml;tku areng kunagi mis alguses , ei lihasmassi kasvus , et kaalu kaotuses . </s> <s> Kui just r&auml;medat keemiat ei kasuta , aga ka selle puhul on sama dendents . </s> </p>
+ </sp> <sp> <speaker>Heltrooper</speaker> 
+<p> <s> anaeroobne </s> </p>
+ </sp> <sp> <speaker>TISKO</speaker> 
+<p> <s> nii , mul on vaja kava ainult &uuml;lakehale . </s> </p>
+<p> <s> saalis k&auml;ia ei viitsi . olemas on kang ( kuni 50 kg ) ja paar sangpommi . seistes teha ei saa , ainult istudes . </s> </p>
+<p> <s> praegu on kava umbes selline - </s> </p>
+<p> <s> 1 . kang l&otilde;ua ( mitte rinna ) juurest sirgetele k&auml;tele . </s> </p>
+<p> <s> 2 . selilisurumised . </s> </p>
+<p> <s> 3 . biitseps </s> </p>
+<p> <s> 4 . &uuml;leveod ( st . selili pingil ja sangpommiga vehin &uuml;le pea - k&otilde;hule - &uuml;le pea jne . </s> </p>
+<p> <s> asja juurde k&auml;ivad ka sillad , l&otilde;uat&otilde;mbamised , k&otilde;hulihased , randmed . soojendus loomulikult jms . </s> </p>
+<p> <s> head ideed ( soovitused ; viited kust leida m&otilde;istlik kava jms ) on teretulnud . ait&auml;h . </s> </p>
+<p> <s> tervet internetti ma l&auml;bi lugeda ei viitsi , ise teoreetikuks saada ei taha . </s> </p>
+ </sp> <sp> <speaker>dzihaad</speaker> 
+<p> <s> Kui teed ainult &uuml;lakeha ja saalis k&auml;ia ei viitsi , et alakeha teha ( kus peitub tegelik j&otilde;ud , milleks on jalg ja alaselg ) , siis vehi kuidas tahad , sest m&auml;rgatavat kasu sellest nagunii ei ole </s> ... . <s> v&otilde;i siis kui viitsid loe Pavel Tsatsouline sangpommi treeningu teooriat ja tee parem nende sangpommidega mis sul on , tuleb j&otilde;ud ja lihas palju kiiremini kui selle kangiga m&otilde;tetult n&ouml; . rinda ja biitsa pumbates . mul on p&otilde;lv katki . ma ei saa seista nii nagu pavel soovitab , ma ei saa alakeha teha . &uuml;ldiselt ma teen k&uuml;ll . muidu sul on &otilde;igus . </s> </p>
+ </sp> <sp> <speaker>gudher</speaker> 
+<p> <s> Kellegil mingit &uuml;learu kangi ei vedele kodus , mida ei ole vaja ? </s> <s> Paremat k&auml;tt vaja tugevamaks teha , rattaga s&otilde;ites annab kohe tunda , et vasakuk&auml;eline oled ja parem k&auml;si v&auml;sib &auml;ra . fappimis k&auml;tt juba vahetasin . <gap desc='image'> </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Poks - Planet Foorumid </head>
+<sp> <speaker>Mini100</speaker> 
+<p> <s> Poks+kott ... Ei v&otilde;istle lihtsalt vormis hoidmiseks taon seda ... </s> </p>
+<p> <s> Mis su enda saavutused siis on ( mis grupp jne ) ? </s> </p>
+ </sp> <sp> <speaker>Zafa</speaker> 
+<p> <s> tegelen ... </s> </p>
+<p> <s> see piirdub sellega , et me s6pradega taome yxteisele luuki poxitreeneri n2pun2idete ja 6petuste j2rgi . </s> <s> Mudu on ylik6va . </s> </p>
+<p> <s> Kavaced ka boxima hakata we ? </s> </p>
+<p> <s> kui jah siis soovitan . </s> <s> Paljud muidugi soovitavad kick-boxi , kuid ma ei tea ... </s> <s> Box on imo parem . </s> </p>
+ </sp> <sp> <speaker>ats</speaker> 
+<p> <s> poksis oma 2 aastat k&auml;idud . </s> <s> Saavutand mingi imeliku &quot;kokkuvolditava&quot; nina . <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>ropp5</speaker> 
+<p> <s> tahaks minna ( 20a olen ) aga kardan et saan algul jubedalt peksa , kuda seal on , kas uued n&otilde;rgad j&auml;&auml;vad h&auml;tta jne , kuda seal &uuml;ldse trenn on , kui k&otilde;vad l&ouml;&ouml;gid jne ? ? tean et veic liialdan ka . </s> </p>
+ </sp> <sp> <speaker>tzink</speaker> 
+<p> <s> <hi rend='quote'> tahaks minna ( 20a olen ) aga kardan et saan algul jubedalt peksa , kuda seal on , kas uued n&otilde;rgad j&auml;&auml;vad h&auml;tta jne , kuda seal &uuml;ldse trenn on , kui k&otilde;vad l&ouml;&ouml;gid jne ? ? tean et veic liialdan ka . </hi> </s> </p>
+<p> <s> <hi rend='quote'> lapsik jutt tundub sul 20 aastase kohta . </hi> </s> </p>
+<p> <s> kui kardad , siis &auml;ra tule . </s> </p>
+<p> <s> kui oled juba otsustanud , et tahad , siis tule . </s> </p>
+<p> <s> alguses on alati raske . </s> </p>
+<p> <s> n&otilde;rga vaimuga j&auml;&auml;vad h&auml;tta . </s> </p>
+<p> <s> trennid on f&uuml;&uuml;siliselt rasked . </s> </p>
+<p> <s> l&ouml;&ouml;gid on nii nagu on , kui ikka mingi &uuml;le 60 kg vend sulle ilusti sisse s&otilde;idab siis j&auml;&auml;d ikka p&auml;ris kauaks m&otilde;ttesse . </s> </p>
+<p> <s> <hi rend='quote'> harjutamine teeb meistriks . </hi> </s> </p>
+<p> <s> edu . </s> </p>
+ </sp> <sp> <speaker>tzink</speaker> 
+<p> <s> <hi rend='quote'> Tahad sellega &ouml;elda , et ise k&auml;id we ? </hi> </s> </p>
+<p> <s> <hi rend='quote'> tahad sellega &ouml;elda , et sind see huvitab ve ? </hi> </s> </p>
+<p> <s> k&auml;in jah , so ? </s> </p>
+ </sp> <sp> <speaker>tzink</speaker> 
+<p> <s> <hi rend='quote'> ma millegi p&auml;rast kahtlen , et sa sinna tuled . </hi> </s> </p>
+<p> <s> maksab , palju . Aga odavam kui m&otilde;ni teine trenn . </s> </p>
+ </sp> <sp> <speaker>tzink</speaker> 
+<p> <s> Kui sulle venelaste seltskond ja kriminaalse taustaga sponsorid meeldivad siis mine ikka . </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> [ quote ] [ size=1 ] </s> </p>
+<p> <s> [ b ] kui sulle meeldib kodus istuda , arvutim&auml;nge m&auml;ngida ja niisama logeleda siis palun , ole sellisel arvamusel millisel tahad poksist . </s> </p>
+<p> <s> Kahjuks on see t&otilde;si . </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> Venelaseniru , see on fakt , et eesti poks on seotud allilmaga . </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> Oi fakk , kuidas mulle k&auml;ivad pinda sellised kes m&ouml;lisevad teise kallal rahvuse p&auml;rast . </s> <s> Kahju , et sellised &uuml;ldse olemas on . </s> </p>
+<p> <s> 13 aastaselt kulli m&auml;ngida ? </s> <s> T&auml;nan , ei . </s> </p>
+ </sp> <sp> <speaker>crash_343</speaker> 
+<p> <s> <hi rend='quote'> Mida see kabja peaks t&auml;hendama ? </hi> </s> <s> <hi rend='quote'> Sulle teadmiseks ma ei v&auml;ldi inimesi ja ma ei kola &otilde;ues nagu enamik noorukeid teeb . </hi> </s> <s> <hi rend='quote'> Ma ei leia sellises tegevuses mingit m&otilde;tet . </hi> </s> <s> <hi rend='quote'> Venelased on ja j&auml;&auml;vad r&otilde;vedateks inimesteks . </hi> </s> </p>
+<p> <s> Mida sa , eestlane arvad , et oled siin n&uuml;&uuml;d k&otilde;ige parem we ? </s> </p>
+ </sp> <sp><speaker>crash_343</speaker> 
+<p> <s> <hi rend='quote'> Mida sa , eestlane arvad , et oled siin n&uuml;&uuml;d k&otilde;ige parem we ? </hi> </s> </p>
+<p> <s> Jah , ma ei arva , et m&otilde;ni teine parem oleks . </s> <s> Teise rahvuse kummardamine on idiootsus . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Parim enesekaitseks - Planet Foorumid </head>
+<sp> <speaker>okinawa</speaker> 
+<p> <s> kiired jalad , proovi <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>somebody</speaker> 
+<p> <s> Ma k&uuml;sisin <hi rend='underline'>V&Otilde;ITLUSKUNSTI</hi> mitte midagi muud </s> ... . . <s> <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> <hi rend='quote'> Ma k&uuml;sisin <hi rend='underline'>V&Otilde;ITLUSKUNSTI</hi> mitte midagi muud </hi> </s> ... . . <s> <hi rend='quote'> <gap desc='image'> </hi> </s> </p>
+<p> <s> <hi rend='quote'> [ iroonia ] siis v&otilde;ta l&otilde;uend ette ning pintsel k&auml;tte [ /iroonia ] </hi> </s> </p>
+<p> <s> kui sa t&otilde;esti arvad , et saad siit adekvaatse vastuse PARIMA v&otilde;itluskunsti kohta , mis aitab igast olukorrast v&auml;lja tulla , siis lubage naerda . </s> </p>
+<p> <s> : confuzzled : </s> </p>
+ </sp> <sp> <speaker>okinawa</speaker> 
+<p> <s> kuigi ma olen samuti piisavalt kaua nn v&otilde;itluskunsti &otilde;ppinud , siis arvan sellegipoolest , et kiired jalad v&otilde;i terav ( pigem voice of reason ) keel on pikemas perspektiivis paremad variandid , kui kuskil urkas 2 kolli lampi l&uuml;&uuml;a ning 3nda k&auml;est nuga saada . </s> </p>
+<p> <s> go figure . </s> </p>
+ </sp> <sp> <speaker>okinawa</speaker> 
+<p> <s> shotokani karate </s> </p>
+ </sp> <sp> <speaker>kalmann007</speaker> 
+<p> <s> &gt;21 vanust ... kaine pea ... </s> <s> 9mm ... lol </s> </p>
+ </sp> <sp> <speaker>meits</speaker> 
+<p> <s> Ju-Jutsu vms . </s> </p>
+ </sp> <sp> <speaker>Sigudik</speaker> 
+<p> <s> <hi rend='quote'> Ju-Jutsu vms . </hi> </s> </p>
+<p> <s> <hi rend='quote'> tahtsin sama &ouml;elda - ise olen seda trenni saanud natuke </hi> </s> </p>
+<p> <s> <hi rend='quote'> ja ausalt &ouml;elda kui seda ala h&auml;sti tunda siis v&otilde;ib paari l&ouml;&ouml;giga</hi> </s> </p>
+<p> <s> vastase kahjutuks teha ... isegi tappa . </s> </p>
+ </sp> <sp> <speaker>ZorroZip</speaker> 
+<p> <s> <hi rend='quote'> kuigi ma olen samuti piisavalt kaua nn v&otilde;itluskunsti &otilde;ppinud , siis arvan sellegipoolest , et kiired jalad v&otilde;i terav ( pigem voice of reason ) keel on pikemas perspektiivis paremad variandid , kui kuskil urkas 2 kolli lampi l&uuml;&uuml;a ning 3nda k&auml;est nuga saada . </hi> </s> </p>
+<p> <s> <hi rend='quote'> go figure . </hi> </s> </p>
+<p> <s> sa oled nii lahe oma lausega &quot;go figure&quot; </s> </p>
+ </sp> <sp> <speaker>Levis</speaker> 
+<p> <s> <hi rend='quote'> tahtsin sama &ouml;elda - ise olen seda trenni saanud natuke </hi> </s> </p>
+<p> <s> <hi rend='quote'> ja ausalt &ouml;elda kui seda ala h&auml;sti tunda siis v&otilde;ib paari l&ouml;&ouml;giga</hi> </s> </p>
+<p> <s> <hi rend='quote'> vastase kahjutuks teha ... isegi tappa . </hi> </s> </p>
+<p> <s> see &quot;isegi&quot; seal on vast liiga &uuml;lepigutatud , inimest on v&auml;gagi kerge oma enese k&auml;tega tappa ka ilma nende v&otilde;itluskunstideta . </s> <s> &Uuml;ks v&otilde;imalus - tugevalt alt &uuml;les vastu nina l&uuml;&uuml;a , ninaluu l&auml;heb risti ajju ... teine v&otilde;imalus kinnise rusikaga vastu k&otilde;ris&otilde;lme . </s> </p>
+<p> <s> Ja &uuml;ldiselt pean &uuml;tlema , et enamus need v&otilde;itluskunstid kaotavad t&auml;navakakluses oma erip&auml;ra , nime ning m&otilde;tte . </s> <s> T&auml;naval v&otilde;idab see , kelle kiirus , tugevus , painduvus ja osavus on perfektses tasakaalus . </s> <s> Ning nagu te teate on jalal&ouml;&ouml;ke poole lihtsam t&otilde;rjuda kui k&auml;el&ouml;&ouml;ke seega idamaised v&otilde;itluskunstid , kus on enamus t&ouml;&ouml; jalgadel , j&auml;&auml;takse tihtipeale k&otilde;rvale ning kasutatakse vana head poksi . </s> </p>
+ </sp> <sp> <speaker>ozzy</speaker> 
+<p> <s> Ei tegele ega eriti ka huvitu v&otilde;itluskunstidest , a mulje on j&auml;&auml;nud , et sellises &quot;tavalises&quot; elus osutuks aikido vast k&otilde;ike t&otilde;husamaks . </s> </p>
+<p> <s> Nende ninjam&otilde;&otilde;kade koha pealt muide : keskmine p&auml;tt teeks sind enne kahjutuks kui sa asja tupest v&auml;lja j&otilde;uad t&otilde;mmata ... ja t&otilde;en&auml;oliselt saaksid kotti isegi siis kui m&otilde;&otilde;k k&auml;es ... kui vaid hakkaja kaak kel pea selge ja kes su terariista n&auml;hes n&auml;rveerima ei hakka . </s> <s> R&auml;&auml;kimata faktist , et s&auml;&auml;rase riistapuuga m&ouml;&ouml;da linna jalutamine peaks nagu ebaseaduslik olema <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Levis</speaker> 
+<p> <s> kickboxing <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>okinawa</speaker> 
+<p> <s> <hi rend='quote'> Kick boxiga on veic tegeletud ja kui treener vahest ette n&auml;itas , mida oskas siis ei suutnud k&uuml;ll talle vastast v&auml;lja pakkuda , kellest ta jagu ei saaks . </hi> </s> </p>
+<p> <s> Minu arvamus on selline , et pole &uuml;htegi v&otilde;itluskunsti , mis oleks teisest parem , on lihtsalt erinevad kogemused ja harjutatuse tase . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 EM valikturniir - 33. leht - Planet Foorumid </head>
+<sp> <speaker>pappalardo</speaker> 
+<p> <s> Jess ! : d : d </s> </p>
+ </sp> <sp> <speaker>skandium</speaker> 
+<p> <s> te olete nii kiired <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>iPwn</speaker> 
+<p> <s> Kurat ilus v2rav t6esti , langeks Holland v2lja siis j22ksid alles , peale Saksamaa kelle poolt ma niiv2ga ei ole aga Hollandi v2lja langemise korral oleks , sellised maad keda ei ole maailmakaardilegi m2rgitud , raisk . </s> </p>
+<p> <s> Kurat igasugust allahi paska on juba tekkind poolfinaali . </s> </p>
+<p> <s> Eelmine MM oli m6ttetute meeskondade ryselus , tahaks et EM midagi paremat oleks . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Holland , raisk , ei oska ju penalteid l&uuml;&uuml;a . </s> </p>
+<p> <s> See t&auml;hendab , et on veel pikad 15 minutit Venemaale &uuml;ks kiire , ilus , tugev l&ouml;&ouml;k ristnurka saata . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Fakk : s </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Mida kuradit , mida kuradit ? ! ? ! </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Ei suuda seda jama uskuda . </s> </p>
+ </sp> <sp> <speaker>pappalardo</speaker> 
+<p> <s> Driver <gap desc='hyperlink'> Pange end p&otilde;lema . </s> <s> Poolfinaalis on maailma lambimad meeskonnad . </s> </p>
+<p> <s> Mingid Allahihullud , vene metsalised , saksa robotid . </s> <s> No tere tulemast . just </s> </p>
+ </sp> <sp> <speaker>futurist</speaker> 
+<p> <s> hiddink on imet teinud ! </s> </p>
+ </sp> <sp> <speaker>importneeger</speaker> 
+<p> <s> See EM on t&auml;ielik anekdoot . </s> <s> J&auml;rgmisel EMil nelja aasta p&auml;rast tuleb meistriks raudselt Albaania . </s> <s> Ei , ei . </s> <s> Eesti koondis v&otilde;idab . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> Pekkis ... </s> </p>
+ </sp> <sp> <speaker>Oden</speaker> 
+<p> <s> nonii . . </s> </p>
+<p> <s> mina seda EM'i edasi ei vaata enam . . </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> <hi rend='quote'> <gap desc='hyperlink'> Ei , ei . </hi> </s> <s> <hi rend='quote'> Eesti koondis v&otilde;idab . </hi> </s> <s> <hi rend='quote'> No Eesti koondis ei v&otilde;idaks siis ka , kui ainuke mees ? kond oleks . </hi> </s> </p>
+<p> <s> Aga jah , pole midagi teha . </s> <s> Eks see paras loterii ole . </s> <s> &Uuml;ks sitt p&auml;ev ja v&otilde;ibki mingi lamp sisse saada . </s> </p>
+<p> <s> Samahea , et &uuml;hel p&auml;eval v&otilde;ib glau seksi saada . </s> <s> K&otilde;ik on v&otilde;imalik . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 EM valikturniir - 39. leht - Planet Foorumid </head>
+<sp> <speaker>koolondee</speaker> 
+<p> <s> V&auml;hemalt vaesed saavad ikka s&uuml;&uuml;a . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> T&otilde;siselt , v&auml;rava alt teise v&auml;rava alla , midagi v&auml;ga ekstreemset pole olnud . </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Just panin teleka k&auml;ima ja selline hea &uuml;llatus . </s> <s> Ilus v&auml;rav . </s> </p>
+ </sp> <sp> <speaker>Red Devil</speaker> 
+<p> <s> aii . . hispaania omab <gap desc='image'> </s> </p>
+<p> <s> edit : 3-0 </s> </p>
+ </sp> <sp> <speaker>Garfu</speaker> 
+<p> <s> rassija rassija . </s> </p>
+<p> <s> kas Tallinna Hispaania restoranid on veel terved ? </s> </p>
+ </sp> <sp> <speaker>skandium</speaker> 
+<p> <s> Driver <gap desc='hyperlink'> Hispaanlastel see blond pikkade juustega t&uuml;&uuml;p &uuml;ritab koguaeg mingeid imetrikke selle palliga teha , wtf , ja siis pall v&otilde;etakse &auml;ra lihtsalt . </s> </p>
+<p> <s> A see t&uuml;&uuml;p , kes n&auml;eb v&auml;lja , nagu keskajast tulnu , v&otilde;iks k&uuml;ll veel paar vasakuga pommi anda ja tabab m&auml;rki k&uuml;ll . </s> <s> Torrest sa m&otilde;tled vast ? </s> </p>
+ </sp> <sp> <speaker>koolondee</speaker> 
+<p> <s> T&auml;nk gaad , tuli nii ilus seis . </s> <s> Ja &otilde;nneks oli imekombel poolpaljaid venelasi v&auml;ga v&auml;he . </s> </p>
+<p> <s> Ootan finaali , ootan ja ei oska lemmikut valida . </s> </p>
+ </sp> <sp> <speaker>Cab Driver</speaker> 
+<p> <s> Saksamaa poolt olen finaalis . </s> </p>
+ </sp> <sp> <speaker>Mad Guy</speaker> 
+<p> <s> kehvasti sellega . midagi huvitavamat oleks tahtnud n&auml;ha . </s> </p>
+ </sp> <sp> <speaker>mik009</speaker> 
+<p> <s> fishki . net-s oli p&auml;ris huvitav pilt juba varem valmis tehtud . </s> <s> HAHAHAHA ! </s> </p>
+ </sp> <sp> <speaker>Q Ball</speaker> 
+<p> <s> Ball <gap desc='hyperlink'> Jube igav ja &uuml;hepoolne m&auml;ng oli ... venelased oleks nagu suuremat sorti prjasniku eile maha pidanud . </s> </p>
+<p> <s> T&auml;iesti emotsioonitu peale m&auml;ngu ja ilmselt ka peale finaali kui just v&auml;ga p&otilde;nev m&auml;ng ei tule . </s> <s> +1 </s> </p>
+<p> <s> Oleks siis v&auml;hemalt venelased korralikku kaitsem&auml;ngu teinud ... </s> <s> Pohmelliga m&auml;ngitud k&uuml;ll , m&otilde;tlemist ju tegelt ei sega , lihtsalt liduda ei viitsi . </s> <s> Masendav . </s> <s> Seda k&otilde;ike arvestades l&otilde;id hispaanlased isegi d&zcaron;entelmenlikult v&auml;he v&auml;ravaid . </s> </p>
+ </sp> <sp> <speaker>Vilbiks</speaker> 
+<p> <s> saksamaa m&auml;ng on minu arvates kordades parem olnud kui venemaal eile , s&ouml;&ouml;dud l&auml;ksid igakord t&auml;iesti m&ouml;&ouml;da , kaitse oli laiali ja &uuml;ldse olid nad kuidagi hajevil . hispaania jaoks oli see v&auml;ga lihtne v&otilde;it . n&auml;gin ka ainult teist poolaega , aga siit lugedes tundub , et esimest poolaega polnudki p&otilde;hjust n&auml;ha . </s> </p>
+ </sp> <sp> <speaker>Garfu</speaker> 
+<p> <s> ma olen Saksamaa poolt . . aga samas selle aastaseid m&auml;nge vaadates , siis ta nii hea ei ole . . </s> </p>
+<p> <s> kui Skm EMi v&otilde;idab , siis ta on 4x meister , p&auml;ris f&auml;&auml;nsi . . </s> <s> ^^ </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 EM valikturniir - 40. leht - Planet Foorumid </head>
+<sp> <speaker>Cab Driver</speaker> 
+<p> <s> Driver <gap desc='hyperlink'> Hispaania m&auml;ngu on ausalt &ouml;eldes nauditav vaadata . </s> <s> Seda just keskv&auml;ljal , kus s&ouml;&ouml;dud on ikka jube ilusad . </s> </p>
+<p> <s> Selle EM-ga varem ebas&uuml;mpaatsena tundunud meeskonnad on vastupidiselt s&uuml;mpaatseks muutunud . </s> <s> Pean silmas Hispaaniat ja m&otilde;ningal m&auml;&auml;ral ka Itaaliat . </s> <s> Kuigi Horvaatia ja Hollandi vastu ei saa miski . </s> </p>
+<p> <s> Saksamaa muutub aina ebameeldivamaks . </s> <s> Ei m&auml;ngi nad ilusat palli . </s> <s> Mida Itaalia sellist on teinud , et nad s&uuml;mpaatsemaks on muutunud ? </s> <s> Riik ise mulle meeldib , aga jalgpall , mida nad m&auml;ngivad , on k&uuml;ll kohutav . </s> <s> : ( </s> </p>
+ </sp> <sp> <speaker>Level</speaker> 
+<p> <s> aww </s> </p>
+ </sp> <sp> <speaker>davey</speaker> 
+<p> <s> fishki . net-s oli p&auml;ris huvitav pilt juba varem valmis tehtud . </s> <s> HAHAHAHA ! </s> </p>
+<p> <s> Ei m&otilde;ista <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Sass</speaker> 
+<p> <s> Mida Itaalia sellist on teinud , et nad s&uuml;mpaatsemaks on muutunud ? </s> <s> Riik ise mulle meeldib , aga jalgpall , mida nad m&auml;ngivad , on k&uuml;ll kohutav . </s> <s> : ( Just , loodetavasti hispaanlased ei tee venelasi finaalis ! </s> </p>
+<p> <s> selles m&otilde;ttes , et ei vaju t&auml;ielikult &auml;ra nagu eilses m&auml;ngus venkud , kuidas venelastel &otilde;nnestus nii n&otilde;medalt m&auml;ngida vot see on k&uuml;simus ? </s> </p>
+<p> <s> ilmselt metsikud ootused rahvuskaaslaste poolt jne . +press tegid oma t&ouml;&ouml; , venkud polnud seda n&auml;gugi , et v&otilde;itma l&auml;ksid aga mis olnud see olnud , loodetavasti saab p&otilde;nev finaal olema ( kuigi arvan , et saksa ei suuda ennast kuidagi kokku v&otilde;tta nende endiste jubedate &otilde;nnem&auml;ngude puhul ) . </s> <s> Hispaanlased ainsad kellel pole &uuml;sna pikalt lihtsalt vedanud see t&otilde;ttu p&ouml;jal neile ! </s> </p>
+ </sp> <sp> <speaker>bright</speaker> 
+<p> <s> Hispaania poolt , n&auml;rvid juba praegu pingul <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>monstrum</speaker> 
+<p> <s> olen saksamaa poolt <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>Q Ball</speaker> 
+<p> <s> loodan hispaaniat , sakslaste jalgpall ei meeldi </s> </p>
+ </sp> <sp> <speaker>Kyioshi</speaker> 
+<p> <s> Hispaania v&otilde;iks l&otilde;puks v&otilde;ita . </s> </p>
+ </sp> <sp> <speaker>Kill inc. </speaker> 
+<p> <s> Hispaania . . , sakslastest lihtsalt k&otilde;rini ( no offense ) . </s> </p>
+<p> <s> no kui juba finaal t&auml;na on , siis tahaks t&auml;ispikka m&auml;ngu . . penaltid ? ! ; D </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Venemaa ja T&uuml;rgi m&auml;ngu pole olnudki ju . </s> </p>
+<p> <s> Saksamaa - T&uuml;rgi m&otilde;tlesid ikka , Kill inc . Ei Venemaa ja T&uuml;rgi . </s> </p>
+<p> <s> Selles m&otilde;ttes , et oleks v&otilde;inud olla ja kahju , et ei olnud . </s> </p>
+ </sp> <sp> <speaker>iPwn</speaker> 
+<p> <s> Oi , vabandan , sain t&otilde;esti valesti aru . &gt; : ( </s> </p>
+<p> <s> Seda tahaks muidugi n&auml;ha . </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Kurat , nii ilus finaal oleks olnud Saksamaa venemaa vastu . </s> <s> Aga eks siis peavad sakslased hispaanlastele kolakat andma . </s> </p>
+ </sp> <sp> <speaker>Level</speaker> 
+<p> <s> see . . on . . alanud . . </s> </p>
+<p> <s> ps ! rahvas &uuml;mises white stripesi seven nation armyt enne h&uuml;mne ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 EM valikturniir - 41. leht - Planet Foorumid </head>
+<sp> <speaker>Nobizares</speaker> 
+<p> <s> hispaanlased nagu &uuml;ldse ei oska </s> </p>
+ </sp> <sp> <speaker>skandium</speaker> 
+<p> <s> Assa kurat , napikas . &gt; : ( </s> </p>
+ </sp> <sp> <speaker>Disasterpiece</speaker> 
+<p> <s> Deutschland , Deutschland &uuml;ber alles ! </s> </p>
+<p> <s> . . me tuleme sellest veel v&auml;lja </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> wuhuu , fiesta </s> </p>
+ </sp> <sp> <speaker>ParisDiamondEva</speaker> 
+<p> <s> ilus ! </s> </p>
+<p> <s> kuigi kohtunik on k&uuml;ll paras tropp . </s> </p>
+<p> <s> hispaania poolt ise <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>skandium</speaker> 
+<p> <s> K&otilde;ik l&auml;heb plaanip&auml;raselt . </s> <s> Ballack sai m&otilde;nusalt vatti rsk . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> argh ! </s> </p>
+<p> <s> Go Lahm ! </s> <s> Go Ballack ! </s> </p>
+<p> <s> Kohtunik on indeed tropp . </s> </p>
+<p> <s> Hea m&auml;ng siiani . </s> </p>
+ </sp> <sp> <speaker>kaos</speaker> 
+<p> <s> Ei ole nii . <gap desc='image'> Samas &otilde;ige m&auml;ng on alles ees , seega tagasi ekraani ette ja Deutschland-Deutschland ! ! ! ! </s> </p>
+ </sp> <sp> <speaker>Garfu</speaker> 
+<p> <s> miks Jansen m&auml;ngu pandi , MIKS ? ? ? </s> </p>
+ </sp> <sp> <speaker>Geenius666</speaker> 
+<p> <s> Miks nad Silva &auml;ra v&otilde;tsid ? : ( ( ( ( ( ( ( ( </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Spain is ruulzzzz </s> </p>
+ </sp> <sp> <speaker>Disasterpiece</speaker> 
+<p> <s> : ( </s> </p>
+ </sp> <sp> <speaker>inedible</speaker> 
+<p> <s> wuhuuu , done , l&auml;bi </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> 2008 Ol&uuml;mpia - Planet Foorumid </head>
+<sp> <speaker>Zeppelist</speaker> 
+<p> <s> Mul liiga sitt pilt praegu , et midagi discussida . </s> <s> Ainult heli on olrait . </s> </p>
+ </sp> <sp> <speaker>monstrum</speaker> 
+<p> <s> Fireworks oli k&uuml;ll t&scaron;ikitimm ! </s> </p>
+<p> <s> E : see joonistamise v&auml;rkl on ilusalt kihvta ! </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Eurospordi pealt on kommentaarid k&uuml;ll m&otilde;istlikumad , kui ETV omad <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>creep</speaker> 
+<p> <s> See nais kommentaator mulle ei istu , jube ninatark ikka . </s> <s> Tegemist ikkagi ol&uuml;mpia m&auml;ngudega , mitte mingi poliitilise showga , oleks siis veel arukas jutt . </s> </p>
+<p> <s> Aga show on v&auml;gev , hirmus t&ouml;&ouml;j&otilde;ud ja raha on ikka taga . </s> </p>
+ </sp> <sp> <speaker>Zeppelist</speaker> 
+<p> <s> Imo nad v&otilde;iks lihtsalt vait olla . </s> </p>
+ </sp> <sp> <speaker>Drools</speaker> 
+<p> <s> Ikka neid . </s> </p>
+ </sp> <sp> <speaker>saku0007</speaker> 
+<p> <s> good luck hiina t&auml;hestiku leidmisega , hehe . </s> </p>
+<p> <s> eniveis , kommentaator on ikka t&auml;ielik uba - v&auml;itis et maailma suurima pindalaga riik on kanada ja hiina on teisel kohal . </s> <s> Pluss veel see et ta v&auml;rvi ei tunne . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> etv striim funkab normaalselt </s> </p>
+<p> <s> t&ouml;&ouml;l ei striimi see : ( </s> </p>
+ </sp> <sp> <speaker>Jihad</speaker> 
+<p> <s> No kurat . </s> <s> Eesti oli ainus riik millel ei n&auml;idanud all ekraani servas nime , ega midagi . </s> <s> AINUS ! kuradi kommud , rsk </s> </p>
+ </sp> <sp> <speaker>nykifi</speaker> 
+<p> <s> ETV kommentaatorid panid p&auml;ris palju pange ikka . . </s> </p>
+<p> <s> Kanada on maailma suurim riik pindalalt , Hiina ees n&uuml;&uuml;d ! </s> </p>
+ </sp> <sp> <speaker>Level</speaker> 
+<p> <s> Mida Eurospordi vennad Eestist r&auml;&auml;kisid ? </s> <s> Ma vaatasin ETV pealt . </s> <s> Et Eesti on v&otilde;itnud palju medaleid , enamus neist raskej&otilde;ustiku aladel ... t&otilde;stmises ja maadluses . </s> <s> Ja et ka sel korral on meil lootust medalit saada , nimetati &auml;ra J&uuml;ri Jaanson ja s&otilde;udmine . </s> </p>
+<p> <s> Rohkem selle 10-15 sekundiga nagu r&auml;&auml;kida ei j&otilde;udnudki . </s> <s> Kanter olnuks k&uuml;ll v&auml;he loogilisem nimi nimetamiseks olnud , aga missealsikka ... </s> </p>
+<p> <s> Muidu tundus k&uuml;ll p&auml;ris uhke show olevat , niipalju kui vaadatud sai ! </s> </p>
+ </sp> <sp> <speaker>Level</speaker> 
+<p> <s> Ta ei p&auml;&auml;senud OM-le ju , mis tast ikka r&auml;&auml;kida . </s> </p>
+ </sp> <sp><speaker>monstrum</speaker> 
+<p> <s> p&auml;ris asjalik &uuml;levaade . kahjuks ( v&otilde;i &otilde;nneks ) kommentaarideta . </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> NBA - Planet Foorumid </head>
+<sp> <speaker>wiseguy6</speaker> 
+<p> <s> N B A on lahe ! </s> </p>
+<p> <s> ma vaatan m&auml;nge nii tihti kui v&otilde;imalik . </s> </p>
+<p> <s> ma hoian p&ouml;ialt san antonio spursile ! ! see on k&otilde;ige lahedam v&otilde;istkond ! </s> </p>
+<p> <s> samas on lakers ja eminem kah lahedad . </s> </p>
+ </sp> <sp> <speaker>wiseguy6</speaker> 
+<p> <s> vene kanal 7TV n&auml;itab nba-d . </s> </p>
+ </sp> <sp> <speaker>kaaren</speaker> 
+<p> <s> <hi rend='quote'> jaa , vene keelest ei saa suurt aru ... ingliskeelselt oleks hea vaadata , tuleb kunagi see t&uuml;kk &auml;ra teha , et endale ka need taevakanalid tellida , kas keegi teab peast , palju see kuumaks tuleb ? </hi> </s> </p>
+<p> <s> P&otilde;hiliselt oleks seda mulle just spordi p&auml;rast vaja , ma paras fanatt ... </s> </p>
+ </sp> <sp> <speaker>Che</speaker> 
+<p> <s> Vaatan kord n&auml;dalas Nbad , nimeslt siis 7TV pealt . </s> </p>
+<p> <s> P&ouml;ialt hoian Lakersile , muide Kobe tegi &auml;sja l&otilde;ppenud v&otilde;idum&auml;ngus Wizardsi vastu Triple-Double <gap desc='image'> </s> </p>
+<p> <s> <hi rend='quote'> Lemmikud meeskonnad : Lakers , Mavericks ja Memphis . </hi> </s> </p>
+<p> <s> Lemmikud m&auml;ngijad : Kobe , Dirk ja Pau . </s> </p>
+ </sp> <sp> <speaker>kaaren</speaker> 
+<p> <s> <hi rend='quote'> Enam mind ei koti &uuml;ltse see mis seal toimub . </hi> </s> </p>
+<p> <s> muidu kunagi f&auml;nnasin Bullsi </s> </p>
+ </sp> <sp> <speaker>Red Devil</speaker> 
+<p> <s> <hi rend='quote'> Vihkan Spursi , seal m&auml;ngib Tim Duncan <gap desc='image'> </hi> </s> </p>
+<p> <s> t&otilde;si v&auml; ? mis sul Tim Duncani vastu on ? ta on lahe ju ! </s> </p>
+ </sp> <sp> <speaker>Red Devil</speaker> 
+<p> <s> Minu lemmik m&auml;ngija on Iverson . </s> </p>
+<p> <s> Kahju , et Phi on viimased m&auml;ngud kaotanud <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>wiseguy6</speaker> 
+<p> <s> ta on muide preagu vigastatud </s> </p>
+ </sp> <sp> <speaker>wiseguy6</speaker> 
+<p> <s> l&auml;&auml;nes </s> </p>
+<p> <s> Lakers </s> </p>
+<p> <s> Spurs </s> </p>
+<p> <s> Timberwolws </s> </p>
+<p> <s> Dallas </s> </p>
+<p> <s> Sacromento </s> </p>
+<p> <s> Portland </s> </p>
+<p> <s> Memphis </s> </p>
+<p> <s> Houston </s> </p>
+<p> <s> Ida </s> </p>
+<p> <s> New Jersey </s> </p>
+<p> <s> New York </s> </p>
+<p> <s> Philadelphia </s> </p>
+<p> <s> Indiana </s> </p>
+<p> <s> Detroit </s> </p>
+<p> <s> New Orleans </s> </p>
+<p> <s> Milwaukee </s> </p>
+<p> <s> Cleveland </s> </p>
+ </sp> <sp> <speaker>Red Devil</speaker> 
+<p> <s> golden state k&uuml;ll play-offi ei j&otilde;ua <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>wiseguy6</speaker> 
+<p> <s> Lakers Lakers . . ma hoina ka p&ouml;ialt ikke neile ... vahepal oli ju k&otilde;ik neli p&otilde;him&auml;ngijat Lakersi koosseisust v&auml;ljas ... sellep&auml;rast ka v&otilde;iduprotsendi langus . koosseis ei olnud t&auml;iuslik ... </s> </p>
+<p> <s> Viimasel ajal on ka UTAH JAZZ v&otilde;itma hakanud ; </s> = <s> ) imelik ... r&auml;&auml;gitakse sellest ja puha ... </s> </p>
+ </sp> <sp> <speaker>k&auml;nksta kass</speaker> 
+<p> <s> tore , et siin ka peale minu m&otilde;ningaid lakersi f&auml;nne leidub ... muidugi tuline kahju , et ise m&auml;nge vaadata ei saa , elan siukses kolkas , aga eks ma pea ennast ka kursis neti vahendusel </s> </p>
+ </sp> <sp> <speaker>wiseguy6</speaker> 
+<p> <s> kuulge , mul tuli hea m&otilde;te ... kuna mul endal pole neid taevakanaleid , peale selle , et vahel l&auml;ti kanaleid n&auml;itab , &auml;kki on keegi n&otilde;us &auml;ri tegema ... kui kellelgi videomakk olemas on ja m&auml;nge lindistada viitsib , ma ostaks &auml;ra ja maksaks postikulu ka kinni ? olgu siis enam-v&auml;hem normaalse hinnaga no kasseti hind + mingi paark&uuml;mmned krooni otsa ... v&auml;hemalt finaalseeriat tahan kindlasti . </s> <s> Andke teada , kes huvitatud on </s> </p>
+<p> <s> PS : hea oleks , kui asud tallinnas , saan sugulaste kaudu k&auml;tte , aga kui ei ela , pole ka midagi . </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>

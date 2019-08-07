@@ -1,6 +1,8 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import str
 
 import sys
 from traceback import print_exc, format_exception_only
@@ -102,8 +104,8 @@ class RunCmd(PimlicoCLISubcommand):
                              if module.module_executable and not module.is_locked()
                              and module.status != "COMPLETE" and module.all_inputs_ready()]
             if len(ready_modules) == 0:
-                print >>sys.stderr, "No modules not already completed have all their inputs ready: no module name to " \
-                                    "default to"
+                print("No modules not already completed have all their inputs ready: no module name to " \
+                                    "default to", file=sys.stderr)
                 sys.exit(1)
             else:
                 module_specs = [ready_modules[0]]
@@ -120,16 +122,16 @@ class RunCmd(PimlicoCLISubcommand):
                     # Just output stage names and exit
                     module = pipeline[module_name]
                     if not isinstance(module, MultistageModuleInfo):
-                        print "%s is not a multi-stage module" % module_name
+                        print("%s is not a multi-stage module" % module_name)
                         sys.exit(1)
-                    print "Module stages: %s" % ", ".join(stage.name for stage in module.stages)
+                    print("Module stages: %s" % ", ".join(stage.name for stage in module.stages))
                     sys.exit(0)
                 elif module_name and stage_name in ["*", "all"]:
                     # Execute all stages at once, by expanding the list of modules to include all this one's stages
                     module = pipeline[module_name]
                     # Only makes sense with a multistage module
                     if not isinstance(module, MultistageModuleInfo):
-                        print "%s is not a multi-stage module: tried to execute all stages (%s)" % (module_name, module_spec)
+                        print("%s is not a multi-stage module: tried to execute all stages (%s)" % (module_name, module_spec))
                         sys.exit(1)
                     module_specs.extend(["%s:%s" % (module_name, stage.name) for stage in module.stages])
                 else:
@@ -146,10 +148,10 @@ class RunCmd(PimlicoCLISubcommand):
         # If email report has been requested, check now before we begin that email sending is configured
         try:
             EmailConfig.from_local_config(pipeline.local_config)
-        except EmailError, e:
-            print >>sys.stderr, "Email sending requested, but local email config is not ready:"
-            print >>sys.stderr, str(e)
-            print >>sys.stderr, "Please fix in local config file to use email reports"
+        except EmailError as e:
+            print("Email sending requested, but local email config is not ready:", file=sys.stderr)
+            print(str(e), file=sys.stderr)
+            print("Please fix in local config file to use email reports", file=sys.stderr)
             sys.exit(1)
 
         exit_status = 0
@@ -160,36 +162,36 @@ class RunCmd(PimlicoCLISubcommand):
                 all_deps=opts.all_deps, check_only=dry_run, exit_on_error=opts.exit_on_error,
                 preliminary=preliminary, email=opts.email
             )
-        except (ModuleInfoLoadError, ModuleNotReadyError), e:
+        except (ModuleInfoLoadError, ModuleNotReadyError) as e:
             exit_status = 1
             if debug:
                 print_exc()
                 if hasattr(e, "cause") and e.cause is not None:
-                    print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
+                    print("Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)), end=' ', file=sys.stderr)
             # See whether the problem came from a specific module
             module_name = getattr(e, "module_name", None)
             if module_name is not None:
                 error_type = ("Error loading module info for %s" % module_name) if type(e) is ModuleInfoLoadError else \
                     ("Error: module '%s' not ready to run" % module_name)
-                print >>sys.stderr, "%s: %s" % (error_type, e)
+                print("%s: %s" % (error_type, e), file=sys.stderr)
             else:
                 error_type = "Error loading module info" if type(e) is ModuleInfoLoadError else \
                     "Error: module not ready to run"
-                print >>sys.stderr, "%s: %s" % (error_type, e)
-        except ModuleExecutionError, e:
+                print("%s: %s" % (error_type, e), file=sys.stderr)
+        except ModuleExecutionError as e:
             exit_status = 1
             if debug:
                 print_exc()
                 if hasattr(e, "cause") and e.cause is not None:
-                    print >>sys.stderr, "Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)),
+                    print("Caused by: %s" % "".join(format_exception_only(type(e.cause), e.cause)), end=' ', file=sys.stderr)
             # See whether the problem came from a specific module
             module_name = getattr(e, "module_name", None)
             if module_name is not None:
-                print >>sys.stderr, "Error running module '%s': %s" % (module_name, e)
+                print("Error running module '%s': %s" % (module_name, e), file=sys.stderr)
             else:
-                print >>sys.stderr, "Error running modules: %s" % e
+                print("Error running modules: %s" % e, file=sys.stderr)
         except KeyboardInterrupt:
-            print >>sys.stderr, "Exiting before execution completed due to user interrupt"
+            print("Exiting before execution completed due to user interrupt", file=sys.stderr)
             # Raise the exception so we see the full stack trace
             if debug:
                 raise

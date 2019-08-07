@@ -12,7 +12,7 @@ def worker_setup(worker):
 @skip_invalid
 def process_document(worker, archive_name, doc_name, doc):
     # First split into lines, since much works on the line level
-    lines = doc.splitlines()
+    lines = doc.text.splitlines()
 
     if worker.case == "upper":
         lines = [line.upper() for line in lines]
@@ -25,7 +25,7 @@ def process_document(worker, archive_name, doc_name, doc):
     if worker.blank_lines:
         lines = [l for l in lines if len(l) > 0]
 
-    return u"\n".join(lines)
+    return worker.info.document(text=u"\n".join(lines))
 
 
 ModuleExecutor = multiprocessing_executor_factory(process_document, worker_set_up_fn=worker_setup)

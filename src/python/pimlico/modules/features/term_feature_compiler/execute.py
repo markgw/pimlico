@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from builtins import next
 
 from collections import Counter
 
@@ -14,7 +15,7 @@ def process_document(worker, archive, filename, doc):
     for data_point in doc:
         # Look for the special keys we use as terms
         try:
-            term = (val for (key, val) in data_point if key in term_keys).next()
+            term = next((val for (key, val) in data_point if key in term_keys))
         except StopIteration:
             # No term keys found in the data point: skip it
             continue

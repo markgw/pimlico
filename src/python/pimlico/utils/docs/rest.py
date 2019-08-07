@@ -3,6 +3,8 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 
+from builtins import zip
+from builtins import range
 def make_table(grid, header=None):
     all_rows = [header] + grid if header is not None else grid
     col_widths = [max(len(row[i]) for row in all_rows) for i in range(len(all_rows[0]))]

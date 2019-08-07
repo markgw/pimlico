@@ -50,7 +50,7 @@ class FloatListsDocumentType(RawDocumentType):
                     raise IOError("file ended mid-row")
                 try:
                     num = self.unpacker.unpack(num_string)[0]
-                except struct.error, e:
+                except struct.error as e:
                     raise IOError("error interpreting float data: %s" % e)
                 row.append(num)
             yield row
@@ -100,7 +100,7 @@ class FloatListsDocumentCorpusWriter(TarredCorpusWriter):
                 raw_data.write(self.length_struct.pack(len(row)))
                 for num in row:
                     raw_data.write(self.packer.pack(num))
-            except struct.error, e:
+            except struct.error as e:
                 raise ValueError("error encoding float row %s using struct format %s: %s" %
                                  (row, self.packer.format, e))
         return raw_data.getvalue()
@@ -129,7 +129,7 @@ class FloatListDocumentType(RawDocumentType):
                 return
             try:
                 num = self.unpacker.unpack(num_string)[0]
-            except struct.error, e:
+            except struct.error as e:
                 raise IOError("error interpreting float data: %s" % e)
             yield num
 
@@ -161,7 +161,7 @@ class FloatListDocumentCorpusWriter(TarredCorpusWriter):
         for num in doc:
             try:
                 raw_data.write(self.packer.pack(num))
-            except struct.error, e:
+            except struct.error as e:
                 raise ValueError("error encoding float data %s using struct format %s: %s" %
                                  (num, self.packer.format, e))
         return raw_data.getvalue()
@@ -186,7 +186,7 @@ class VectorDocumentType(RawDocumentType):
     def process_document(self, data):
         try:
             return self.unpacker.unpack(data)
-        except struct.error, e:
+        except struct.error as e:
             raise IOError("error interpreting float vector data: %s" % e)
 
 
@@ -223,6 +223,6 @@ class VectorDocumentCorpusWriter(TarredCorpusWriter):
     def document_to_raw_data(self, doc):
         try:
             return self.packer.pack(*doc)
-        except struct.error, e:
+        except struct.error as e:
             raise ValueError("error encoding float data %s using struct format %s: %s" %
                              (doc, self.packer.format, e))

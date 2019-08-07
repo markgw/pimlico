@@ -1,6 +1,8 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import print_function
+from builtins import input
 
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.utils.core import remove_duplicates
@@ -20,7 +22,7 @@ class ResetCmd(PimlicoCLISubcommand):
     def run_command(self, pipeline, opts):
         if "all" in opts.modules:
             # Reset every module, one by one
-            print "Resetting execution state of all modules"
+            print("Resetting execution state of all modules")
             pipeline.reset_all_modules()
         else:
             module_names = opts.modules
@@ -37,15 +39,15 @@ class ResetCmd(PimlicoCLISubcommand):
                 if len(dependent_modules) > 0:
                     # There are additional modules that we should reset along with these,
                     # but check with the user in case they didn't intend that
-                    print "The following modules depend on %s. Their execution state will be reset too if you continue." % \
-                          ", ".join(module_names)
-                    print "  %s" % ", ".join(dependent_modules)
-                    answer = raw_input("Do you want to continue? [y/N] ")
+                    print("The following modules depend on %s. Their execution state will be reset too if you continue." % \
+                          ", ".join(module_names))
+                    print("  %s" % ", ".join(dependent_modules))
+                    answer = input("Do you want to continue? [y/N] ")
                     if answer.lower() != "y":
-                        print "Cancelled"
+                        print("Cancelled")
                         return
 
             for module_name in module_names + dependent_modules:
-                print "Resetting execution state of module %s" % module_name
+                print("Resetting execution state of module %s" % module_name)
                 module = pipeline[module_name]
                 module.reset_execution()

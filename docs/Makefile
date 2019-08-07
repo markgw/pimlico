@@ -62,18 +62,22 @@ clean:
 all: test commands modules api html
 
 api:
+	@echo "Building API docs"
 	rm -rf $(APIDIR)
 	$(SPHINXAPI) -eT -d 2 -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH) $(EXCLUDE_API)
 
 modules:
+	@echo "Building module docs"
 	@rm -rf $(MODULEDIR)
 	@$(PYTHON) -m pimlico.utils.docs.modulegen $(MODULEDIR) --test-refs $(TESTCONFIGDIR)/module_list.tsv
 
 test:
+	@echo "Building test pipeline pages"
 	@rm -rf $(TESTCONFIGDIR)
 	@$(PYTHON) -m pimlico.utils.docs.testgen $(TESTCONFIGDIR)
 
 commands:
+	@echo "Building command docs"
 	@rm -rf $(COMMANDDIR)
 	@$(PYTHON) -m pimlico.utils.docs.commandgen $(COMMANDDIR)
 

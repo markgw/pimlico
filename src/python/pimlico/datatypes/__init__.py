@@ -11,13 +11,14 @@ from .embeddings import Embeddings, TSVVecFiles
 from .gensim import GensimLdaModel
 from .corpora.base import IterableCorpus
 from .corpora.grouped import GroupedCorpus
+from .arrays import NumpyArray, ScipySparseMatrix
 
 # All builtin datatypes that may be easily loaded using their
 # class names of datatype names from config files
 BUILTIN_DATATYPES = [
     PimlicoDatatype, IterableCorpus, GroupedCorpus,
     StringList, Dict, NamedFileCollection, NamedFile, TextFile, Dictionary,
-    Embeddings, TSVVecFiles, GensimLdaModel,
+    Embeddings, TSVVecFiles, GensimLdaModel, NumpyArray, ScipySparseMatrix,
 ]
 BUILTIN_DATATYPES_BY_DATATYPE_NAME = dict(
     # Go through them in reverse, so that, if we make a mistake and have a duplicate name, the
@@ -46,7 +47,7 @@ def load_datatype(path, options={}):
     else:
         try:
             cls = import_member(path)
-        except ImportError, e:
+        except ImportError as e:
             raise DatatypeLoadError("could not load datatype class %s: %s" % (path, e))
 
     # The type of the class will generally not be "type", since we use meta classes

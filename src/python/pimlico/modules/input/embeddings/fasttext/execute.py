@@ -1,5 +1,7 @@
+from builtins import next
 from itertools import islice
 
+import io
 import numpy
 
 from pimlico.core.modules.base import BaseModuleExecutor
@@ -17,7 +19,7 @@ class ModuleExecutor(BaseModuleExecutor):
             raise IOError("FastText reader can currently only handle Facebook's text vector format (.vec)")
 
         # The first line of the file gives the number of vectors and dimensionality
-        with open(path, "r") as vec_file:
+        with io.open(path, "r", encoding="utf-8") as vec_file:
             lines = iter(vec_file)
             num_lines, __, embedding_size = next(lines).partition(" ")
             num_lines, embedding_size = int(num_lines), int(embedding_size)
@@ -36,7 +38,6 @@ class ModuleExecutor(BaseModuleExecutor):
 
             pbar = get_progress_bar(read_lines, title="Reading")
             for i, line in enumerate(pbar(islice(lines, read_lines))):
-                line = line.decode("utf8")
                 word, __, vector = line.partition(u" ")
                 vector = [float(x) for x in vector.split()]
 

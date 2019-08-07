@@ -2,6 +2,7 @@
 Called if a virtual environment has not yet been set up for this Pimlico environment.
 
 """
+from __future__ import print_function
 import os
 
 import sys
@@ -9,8 +10,10 @@ import sys
 try:
     import virtualenv
 except ImportError:
-    print "Virtualenv must be installed to start using a Pimlico project"
-    print "See https://virtualenv.pypa.io/en/latest/ for details"
+    print("ERROR: Virtualenv must be installed to start using a Pimlico project.")
+    print("  Configuration script could not import virtualenv Python package.")
+    print("  Current Python interpreter: {}".format(sys.executable))
+    print("  See https://virtualenv.pypa.io/en/latest/ for details of Virtualenv installation")
     sys.exit(1)
 from virtualenv import create_environment
 
@@ -26,5 +29,5 @@ if not os.path.exists(virtualenv_dir):
     os.makedirs(virtualenv_dir)
 
 # Make a new virtualenv that will be used by Pimlico to install software
-print "Creating new virtualenv in %s for installing Python software" % virtualenv_dir
+print("Creating new virtualenv in %s for installing Python software" % virtualenv_dir)
 create_environment(virtualenv_dir, site_packages=True)

@@ -5,14 +5,27 @@
 """
 Tool to generate Pimlico module docs. Based on Sphinx's apidoc tool.
 
+It is assumed that this script will be run using Python 3. Although it has
+a basic Python 2 compatibility, it's not really intended for Python 2 use.
+Modules that are marked as still awaiting update to the new datatypes system
+will now not be imported at all, since they are typically not Python 3
+compatible (due to their use of ``old_datatypes``, which has not been
+updated to Python 3).
+
 """
+from __future__ import print_function
+
 import argparse
 import codecs
 import os
 import sys
 import warnings
+from builtins import str
+from collections import OrderedDict
 from importlib import import_module
 from pkgutil import iter_modules
+
+from past.builtins import basestring
 from sphinx import __version__
 from sphinx.ext.apidoc import format_heading
 
@@ -79,17 +92,27 @@ def generate_docs_for_pymod(module, output_dir, test_refs={}):
 
 
 def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_refs={}):
-    print "Building docs for %s" % module_path
+    print("Building docs for %s" % module_path)
     filename = os.path.join(output_dir, "%s.rst" % module_path)
     # First import the python module
     pymod = import_module(module_path)
     # Check whether we've been instructed to skip this module
     if hasattr(pymod, "SKIP_MODULE_DOCS") and pymod.SKIP_MODULE_DOCS:
         return
-    # While datatype update is going on, mark the modules that haven't yet been updated
-    awaiting_datatype_update = hasattr(pymod, "AWAITING_UPDATE") and pymod.AWAITING_UPDATE
-    if awaiting_datatype_update:
+    # If a module is marked as awaiting update to the new datatypes, don't
+    # even try importing it, as this usually won't work in Python 3
+    if hasattr(pymod, "AWAITING_UPDATE") and pymod.AWAITING_UPDATE:
         warnings.warn("Module {} is still waiting to be updated to the new datatypes system".format(module_path))
+        with codecs.open(filename, "w", "utf8") as output_file:
+            module_title = module_path.rpartition(".")[2]
+            module_title = "!! {}".format(module_title)
+            # Make a page heading
+            output_file.write(format_heading(0, module_title))
+            # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
+            output_file.write(".. py:module:: %s\n\n" % module_path)
+            output_file.write(".. note::\n\n   This module has not yet been updated to the new "
+                              "datatype system, so cannot be used yet. Soon it will be updated.\n\n")
+        return
 
     # Import the info pymodule so we can get the ModuleInfo class
     info = import_module("%s.info" % module_path)  # We know this exists
@@ -114,15 +137,15 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         module_title = module_title[0].capitalize() + module_title[1:]
         module_title = module_title.replace("_", " ")
     input_table = [
-        [input_name, input_datatype_list(input_types, context=module_path, no_warn=awaiting_datatype_update)]
+        [input_name, input_datatype_list(input_types, context=module_path)]
         for input_name, input_types in ModuleInfo.module_inputs
     ]
     output_table = [
-        [output_name, output_datatype_text(output_types, context=module_path, no_warn=awaiting_datatype_update)]
+        [output_name, output_datatype_text(output_types, context=module_path)]
         for output_name, output_types in ModuleInfo.module_outputs
     ]
     optional_output_table = [
-        [output_name, output_datatype_text(output_types, context=module_path, no_warn=awaiting_datatype_update)]
+        [output_name, output_datatype_text(output_types, context=module_path)]
         for output_name, output_types in ModuleInfo.module_optional_outputs
     ]
     info_doc = info.__doc__
@@ -144,32 +167,26 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
             ("(required) " if d.get("required", False) else "") + d.get("help", ""),
             format_option_type(d.get("type", str)),
         ]
-        for (option_name, d) in ModuleInfo.module_options.items()
+        for (option_name, d) in _sort_options(ModuleInfo.module_options)
     ]
 
     # Try generating some example config for how this module can be used
     try:
         example_config_short = generate_example_config(ModuleInfo, input_table, module_path, minimal=True)
-    except Exception, e:
+    except Exception as e:
         warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
         example_config_short = None
     try:
         example_config_long = generate_example_config(ModuleInfo, input_table, module_path, minimal=False)
-    except Exception, e:
+    except Exception as e:
         warnings.warn("Error generating example config for {}: {}. Not including example".format(module_path, e))
         example_config_long = None
-
-    if awaiting_datatype_update:
-        module_title = "!! {}".format(module_title)
 
     with codecs.open(filename, "w", "utf8") as output_file:
         # Make a page heading
         output_file.write(format_heading(0, module_title))
         # Add a directive to mark this as the documentation for the py module that defines the Pimlico module
         output_file.write(".. py:module:: %s\n\n" % module_path)
-        if awaiting_datatype_update:
-            output_file.write(".. note::\n\n   This module has not yet been updated to the new datatype system, so cannot be used "
-                              "in the `datatypes` branch. Soon it will be updated.\n\n")
         # Output a summary table of key information
         output_file.write("%s\n" % make_table(key_info))
         # Insert text from docstrings
@@ -350,7 +367,7 @@ def generate_example_config(info, input_types, module_path, minimal=False):
 
     # Generate example values for all the options
     options = []
-    for opt_name, opt_dict in info.module_options.iteritems():
+    for opt_name, opt_dict in _sort_options(info.module_options):
         # If producing minimal version, only include required options
         if not minimal or opt_dict.get("required", False):
             opt_val = None
@@ -442,6 +459,19 @@ def _opt_type_to_config(otype):
         return None
 
 
+def _sort_options(options_dict):
+    """
+    Ensure consistent ordering of options in table and examples.
+    """
+    # Ensure a consistent ordering of the options in the table
+    if isinstance(options_dict, OrderedDict):
+        # Ordering is consistent, because options have been specified with an OrderedDict
+        return options_dict.items()
+    else:
+        # Sort alphabetically, so we have a consistent ordering. Otherwise it's random
+        return sorted(options_dict.items())
+
+
 def indent(spaces, text):
     return "\n".join("{}{}".format(" "*spaces, line) for line in text.splitlines())
 
@@ -464,18 +494,18 @@ if __name__ == "__main__":
     # Install basic Pimlico requirements
     install_core_dependencies()
 
-    print "Sphinx %s" % __version__
-    print "Pimlico module doc generator"
+    print("Sphinx %s" % __version__)
+    print("Pimlico module doc generator")
     try:
         base_mod = import_module(opts.path)
-    except ImportError, e:
-        print "Could not import base module %s: %s" % (opts.path, e)
-        print "Did you add your own modules to the pythonpath? (Current paths: %s)" % \
-              u", ".join(sys.path).encode("ascii", "ignore")
-        print "Cannot generate docs"
+    except ImportError as e:
+        print("Could not import base module %s: %s" % (opts.path, e))
+        print("Did you add your own modules to the pythonpath? (Current paths: %s)" % \
+              u", ".join(sys.path).encode("ascii", "ignore"))
+        print("Cannot generate docs")
         sys.exit(1)
-    print "Generating docs for %s (including all submodules)" % opts.path
-    print "Outputting module docs to %s" % output_dir
+    print("Generating docs for %s (including all submodules)" % opts.path)
+    print("Outputting module docs to %s" % output_dir)
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)

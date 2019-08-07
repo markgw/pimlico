@@ -1,6 +1,9 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from __future__ import unicode_literals
+from builtins import str, bytes
+from builtins import object
 
 from contextlib import contextmanager
 from threading import Timer
@@ -60,10 +63,9 @@ def terminate_process(proc, kill_time=None):
     return True
 
 
-
 class StreamCommunicationPacket(object):
     def __init__(self, data):
-        self.data = unicode(data)
+        self.data = str(data)
 
     @property
     def length(self):
@@ -74,7 +76,7 @@ class StreamCommunicationPacket(object):
         if len(length) > 6:
             raise ValueError("StreamCommunicationPacket can't handle data packets longer than 1M chars")
 
-        return "PACKET(%s): %s" % (length, self.data.encode("utf-8"))
+        return bytes("PACKET({}): {}".format(length, self.data).encode("utf-8"))
 
     @staticmethod
     def read(stream):

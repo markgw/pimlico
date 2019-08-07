@@ -2,7 +2,12 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-from cStringIO import StringIO
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from io import StringIO
+
 import sys
 from traceback import format_exception_only
 
@@ -98,20 +103,22 @@ def format_execution_error(error):
     :return: formatted output
     """
     output = StringIO()
-    print >>output, "\nDetails of error"
-    print >>output,   "----------------"
-    print >>output, "".join(format_exception_only(type(error), error)).strip("\n")
+    print("\nDetails of error", file=output)
+    print("----------------", file=output)
+    print("".join(format_exception_only(type(error), error)).strip("\n"), file=output)
     if hasattr(error, "debugging_info") and error.debugging_info is not None:
         # Extra debugging information was provided by the exception
-        print >>output, "\n## Further debugging info ##"
-        print >>output, error.debugging_info.strip("\n")
-    output_str = output.getvalue()
+        print("\n## Further debugging info ##", file=output)
+        print(error.debugging_info.strip("\n"), file=output)
 
     if hasattr(error, "cause") and error.cause is not None:
         # Recursively print any debugging info on the cause exception
-        output_str = "%s\n%s" % (output_str, format_execution_error(error.cause))
+        print("\nShowing cause of error below\n", file=output)
+        print(format_execution_error(error.cause), file=output)
+
+    output_str = output.getvalue()
     return output_str
 
 
 def print_execution_error(error):
-    print >>sys.stderr, format_execution_error(error)
+    print(format_execution_error(error), file=sys.stderr)

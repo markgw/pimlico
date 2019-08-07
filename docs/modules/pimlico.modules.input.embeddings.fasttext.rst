@@ -45,9 +45,9 @@ Options
 +-------+---------------------------------------------------------------------------------------------------------------------------------------+--------+
 | Name  | Description                                                                                                                           | Type   |
 +=======+=======================================================================================================================================+========+
-| path  | (required) Path to the FastText embedding file                                                                                        | string |
-+-------+---------------------------------------------------------------------------------------------------------------------------------------+--------+
 | limit | Limit to the first N words. Since the files are typically ordered from most to least frequent, this limits to the N most common words | int    |
++-------+---------------------------------------------------------------------------------------------------------------------------------------+--------+
+| path  | (required) Path to the FastText embedding file                                                                                        | string |
 +-------+---------------------------------------------------------------------------------------------------------------------------------------+--------+
 
 Example config
@@ -67,8 +67,8 @@ This example usage includes more options.
    
    [my_fasttext_embedding_reader_module]
    type=pimlico.modules.input.embeddings.fasttext
-   path=value
    limit=0
+   path=value
 
 Test pipelines
 ==============

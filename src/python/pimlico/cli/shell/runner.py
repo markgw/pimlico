@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -19,15 +20,15 @@ class ShellCLICmd(PimlicoCLISubcommand):
     def run_command(self, pipeline, opts):
         module_name = opts.module_name
         output_name = opts.output_name
-        print "Loading %s of module '%s'" % \
-              ("default output" if output_name is None else "output '%s'" % output_name, module_name)
+        print("Loading %s of module '%s'" % \
+              ("default output" if output_name is None else "output '%s'" % output_name, module_name))
         setup = pipeline[module_name].get_output_reader_setup(output_name)
         if not setup.ready_to_read():
             raise ShellError("Output '{}' from module '{}' is not yet ready to read".format(
                 module_name, output_name or "default"))
         reader = setup(pipeline, module_name)
-        print "Datatype: %s\n" % reader.datatype.datatype_name
-        print """
+        print("Datatype: %s\n" % reader.datatype.datatype_name)
+        print("""
 Pimlico dataset shell
 =====================
 The dataset shell provides you with a variety of ways to query the contents
@@ -46,7 +47,7 @@ For more a comprehensive Python interpreter, with the dataset and environment
 available, use the 'py' command.
 
 Type Ctrl+D to exit.
-"""
+""")
         launch_shell(reader)
 
 
@@ -57,7 +58,7 @@ def launch_shell(data):
     """
     commands = BASIC_SHELL_COMMANDS + data.datatype.shell_commands
     shell = DataShell(data, commands)
-    print "Available commands for this datatype: %s" % ", ".join(
+    print("Available commands for this datatype: %s" % ", ".join(
         "%s%s" % (c.commands[0],
-                  " (%s)" % ", ".join(c.commands[1:]) if len(c.commands) > 1 else "") for c in commands)
+                  " (%s)" % ", ".join(c.commands[1:]) if len(c.commands) > 1 else "") for c in commands))
     shell.cmdloop()

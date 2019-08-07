@@ -12,6 +12,8 @@ If you want to do proper tokenization, consider either the CoreNLP or OpenNLP co
 modules.
 
 """
+from builtins import str
+
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.datatypes.corpora import GroupedCorpus
 from pimlico.datatypes.corpora.data_points import TextDocumentType
@@ -27,6 +29,6 @@ class ModuleInfo(DocumentMapModuleInfo):
         "splitter": {
             "help": "Character or string to split on. Default: space",
             "default": u" ",
-            "type": unicode,
+            "type": str,
         },
     }

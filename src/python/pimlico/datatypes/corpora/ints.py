@@ -9,9 +9,14 @@ They are designed to be fast to read.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+from builtins import bytes
+
 import struct
-from StringIO import StringIO
-from cStringIO import StringIO
+from io import StringIO, BytesIO
 
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.utils.core import cached_property
@@ -74,11 +79,11 @@ class IntegerListsDocumentType(RawDocumentType):
             del state["length_struct"]
         return state
 
-    class Document:
+    class Document(object):
         keys = ["lists"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             lists = list(self.read_rows(reader))
             return {
                 "lists": lists,
@@ -97,17 +102,17 @@ class IntegerListsDocumentType(RawDocumentType):
             def _read_row(length):
                 for i in range(length):
                     num_string = reader.read(int_size)
-                    if num_string == "":
+                    if num_string == b"":
                         raise IOError("file ended mid-row")
                     try:
                         yield unpacker.unpack(num_string)[0]
-                    except struct.error, e:
+                    except struct.error as e:
                         raise IOError("error interpreting int data: %s" % e)
 
             while True:
                 # First read an int that tells us how long the row is
                 row_length_string = reader.read(length_size)
-                if row_length_string == "":
+                if row_length_string == b"":
                     # Reached end of file
                     break
                 row_length = length_unpacker.unpack(row_length_string)[0]
@@ -115,14 +120,14 @@ class IntegerListsDocumentType(RawDocumentType):
                 yield list(_read_row(row_length))
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             for row in internal_data["lists"]:
                 # Should be rows of ints
                 try:
-                    raw_data.write(self.data_point_type.length_struct.pack(len(row)))
+                    raw_data.write(bytes(self.data_point_type.length_struct.pack(len(row))))
                     for num in row:
-                        raw_data.write(self.data_point_type.struct.pack(num))
-                except struct.error, e:
+                        raw_data.write(bytes(self.data_point_type.struct.pack(num)))
+                except struct.error as e:
                     raise ValueError("error encoding int row %s using struct format %s: %s" %
                                      (row, self.data_point_type.struct.format, e))
             return raw_data.getvalue()
@@ -174,11 +179,11 @@ class IntegerListDocumentType(RawDocumentType):
             del state["struct"]
         return state
 
-    class Document:
+    class Document(object):
         keys = ["list"]
 
         def raw_to_internal(self, raw_data):
-            reader = StringIO(raw_data)
+            reader = BytesIO(raw_data)
             lst = list(self.read_rows(reader))
             return {
                 "list": lst,
@@ -192,21 +197,21 @@ class IntegerListDocumentType(RawDocumentType):
             while True:
                 # Read the whole document, one int at a time
                 num_string = reader.read(self.data_point_type.int_size)
-                if num_string == "":
+                if len(num_string) == 0:
                     return
                 try:
                     num = self.data_point_type.struct.unpack(num_string)[0]
-                except struct.error, e:
+                except struct.error as e:
                     raise IOError("error interpreting int data: %s" % e)
                 yield num
 
         def internal_to_raw(self, internal_data):
-            raw_data = StringIO()
+            raw_data = BytesIO()
             # Doc should be a list of ints
             for num in internal_data["list"]:
                 try:
                     raw_data.write(self.data_point_type.struct.pack(num))
-                except struct.error, e:
+                except struct.error as e:
                     raise ValueError("error encoding int data %s using struct format %s: %s" %
                                      (num, self.data_point_type.struct.format, e))
             return raw_data.getvalue()

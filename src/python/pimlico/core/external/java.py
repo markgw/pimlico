@@ -1,10 +1,18 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import object
+
 import sys
 import time
-from Queue import Empty
-from cStringIO import StringIO
+from queue import Empty
+from io import StringIO
 from collections import deque
 from subprocess import Popen, PIPE
 from threading import Thread
@@ -74,6 +82,8 @@ class Py4JInterface(object):
         system_properties adds Java system property settings to the Java command.
 
         """
+        from py4j.compat import Queue
+
         self.prefix_classpath = prefix_classpath
         self.java_opts = java_opts
         self.system_properties = system_properties
@@ -86,7 +96,6 @@ class Py4JInterface(object):
         self.port = port
         self.timeout = timeout
 
-        from py4j.compat import Queue
         self.stderr_queue = Queue()
         self.stdout_queue = Queue()
 
@@ -165,7 +174,7 @@ class Py4JInterface(object):
         # Stop the server process
         try:
             self.process.terminate()
-        except OSError, e:
+        except OSError as e:
             if e.errno == 3:
                 # No such process: process is already dead
                 pass
@@ -300,7 +309,7 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
             # Already terminated
             pass
         raise JavaProcessError("timed out starting gateway server (for details see %s)" % err_path)
-    except Exception, e:
+    except Exception as e:
         # Try reading stderr to see if there's any info there
         error_output = get_stderr()
         err_path = output_p4j_error_info(command, "?", "could not read", error_output)
@@ -397,13 +406,13 @@ class OutputConsumer(Thread):
 def output_p4j_error_info(command, returncode, stdout, stderr):
     file_path = get_log_file("py4j")
     with open(file_path, "w") as f:
-        print >>f, "Command:"
-        print >>f, " ".join(command)
-        print >>f, "Return code: %s" % returncode
-        print >>f, "Read from stdout:"
-        print >>f, stdout
-        print >>f, "Read from stderr:"
-        print >>f, stderr
+        print("Command:", file=f)
+        print(" ".join(command), file=f)
+        print("Return code: %s" % returncode, file=f)
+        print("Read from stdout:", file=f)
+        print(stdout, file=f)
+        print("Read from stderr:", file=f)
+        print(stderr, file=f)
     return file_path
 
 
@@ -421,7 +430,7 @@ def make_py4j_errors_safe(fn):
     def _wrapped_fn(*args, **kwargs):
         try:
             return fn(*args, **kwargs)
-        except Py4JJavaError, e:
+        except Py4JJavaError as e:
             # Try getting the java exception and string repr, but don't throw everything in the air if we can't
             try:
                 java_exception = str(e.java_exception)

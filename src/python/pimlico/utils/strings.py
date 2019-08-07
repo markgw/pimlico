@@ -1,6 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from builtins import zip
 
 
 def truncate(s, length, ellipsis=u"..."):

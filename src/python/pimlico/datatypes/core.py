@@ -6,6 +6,12 @@ Some basic core datatypes that are commonly used for passing simple data, like
 strings and dicts, through pipelines.
 
 """
+from future import standard_library
+
+standard_library.install_aliases()
+from builtins import object
+
+import io
 import os
 
 from pimlico.datatypes.base import PimlicoDatatype
@@ -21,23 +27,23 @@ class Dict(PimlicoDatatype):
     """
     datatype_name = "dict"
 
-    class Reader:
-        class Setup:
+    class Reader(object):
+        class Setup(object):
             def get_required_paths(self):
                 return ["data"]
 
         def get_dict(self):
-            import cPickle as pickle
-            with open(os.path.join(self.data_dir, "data"), "r") as f:
+            import pickle as pickle
+            with open(os.path.join(self.data_dir, "data"), "rb") as f:
                 return pickle.load(f)
 
-    class Writer:
+    class Writer(object):
         required_tasks = ["dict"]
 
         def write_dict(self, d):
-            import cPickle as pickle
+            import pickle as pickle
             # Write out the data file
-            with open(os.path.join(self.data_dir, "data"), "w") as f:
+            with open(os.path.join(self.data_dir, "data"), "wb") as f:
                 pickle.dump(d, f, -1)
             self.task_complete("dict")
 
@@ -50,20 +56,20 @@ class StringList(PimlicoDatatype):
     """
     datatype_name = "string_list"
 
-    class Reader:
-        class Setup:
+    class Reader(object):
+        class Setup(object):
             def get_required_paths(self):
                 return ["data"]
 
         def get_list(self):
-            with open(os.path.join(self.data_dir, "data"), "r") as f:
-                return f.read().decode("utf-8").splitlines()
+            with io.open(os.path.join(self.data_dir, "data"), "r", encoding="utf-8") as f:
+                return f.read().splitlines()
 
-    class Writer:
+    class Writer(object):
         required_tasks = ["list"]
 
         def write_list(self, l):
             # Write out the data file
-            with open(os.path.join(self.data_dir, "data"), "w") as f:
-                f.write((u"\n".join(l)).encode("utf-8"))
+            with io.open(os.path.join(self.data_dir, "data"), "w", encoding="utf-8") as f:
+                f.write(u"\n".join(l))
             self.task_complete("list")

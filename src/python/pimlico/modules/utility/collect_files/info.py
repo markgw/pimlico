@@ -15,6 +15,8 @@ clashes.
    Update to new datatypes system and add test pipeline
 
 """
+from builtins import zip
+from builtins import range
 import os
 import warnings
 
@@ -60,7 +62,7 @@ class CollectedFiles(DynamicOutputDatatype):
                     (filename, "{}_{}".format(collection_name, filename)) for filename in input_collection.filenames
                 )
             filename_mappings.append(filename_mapping)
-            new_filenames.extend(filename_mapping.values())
+            new_filenames.extend(list(filename_mapping.values()))
 
         class CollectedFileCollection(NamedFileCollection):
             filenames = new_filenames

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
@@ -24,7 +25,7 @@ doubt apologizes for their mistake.
         # Send a dummy email to see if email sending works
         data = send_pimlico_email("Test email from Pimlico", content, pipeline.local_config, pipeline.log)
         if data["success"]:
-            print "Email sending worked: check your email (%s) to see if the test message has arrived" % \
-                  ", ".join(data["recipients"])
+            print("Email sending worked: check your email (%s) to see if the test message has arrived" % \
+                  ", ".join(data["recipients"]))
         else:
-            print "Email sending failed"
+            print("Email sending failed")

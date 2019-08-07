@@ -96,7 +96,7 @@ class Embeddings(PimlicoDatatype):
         """
         try:
             word_ids = [self.vocab[w].index for w in words]
-        except KeyError, e:
+        except KeyError as e:
             raise KeyError("word not in vocabulary: {}".format(e))
         return self.vectors[word_ids]
 

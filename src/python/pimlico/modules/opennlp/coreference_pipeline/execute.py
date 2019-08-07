@@ -2,6 +2,8 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
+from builtins import str
+from builtins import zip
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
@@ -44,7 +46,7 @@ def process_document(worker, archive, filename, doc):
         elif output_name == "pos":
             tokens = [sentence.split() for sentence in get_field(coref_result, "tokenizedSentences")]
             pos_tags = [sentence.split() for sentence in get_field(coref_result, "posTags")]
-            outputs.append(zip(tokens, pos_tags))
+            outputs.append(list(zip(tokens, pos_tags)))
         elif output_name == "parse":
             outputs.append(list(coref_result.getParseTrees()))
     return tuple(outputs)
@@ -72,7 +74,7 @@ def start_interface(info):
     )
     try:
         interface.start()
-    except JavaProcessError, e:
+    except JavaProcessError as e:
         raise ModuleExecutionError("error starting coref process: %s" % e)
     return interface
 

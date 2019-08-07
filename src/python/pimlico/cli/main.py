@@ -7,6 +7,10 @@ Main command-line script for running Pimlico, typically called from `pimlico.sh`
 Provides access to many subcommands, acting as the primary interface to Pimlico's functionality.
 
 """
+<<<<<<< HEAD
+=======
+from __future__ import print_function
+>>>>>>> python3
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
@@ -55,8 +59,8 @@ class VariantsCmd(PimlicoCLISubcommand):
     def run_command(self, pipeline, opts):
         # Main is the default pipeline config and is always available (but not included in this list)
         variants = ["main"] + pipeline.available_variants
-        print "Available pipeline variants: %s" % ", ".join(variants)
-        print "Select one using the --variant option"
+        print("Available pipeline variants: %s" % ", ".join(variants))
+        print("Select one using the --variant option")
 
 
 class UnlockCmd(PimlicoCLISubcommand):
@@ -85,10 +89,10 @@ class UnlockCmd(PimlicoCLISubcommand):
     def run_command(self, pipeline, opts):
         module = pipeline[opts.module_name]
         if not module.is_locked():
-            print "Module '%s' is not locked" % opts.module_name
+            print("Module '%s' is not locked" % opts.module_name)
         else:
             module.unlock()
-            print "Module unlocked"
+            print("Module unlocked")
 
 
 class BrowseCmd(PimlicoCLISubcommand):
@@ -202,11 +206,11 @@ if __name__ == "__main__":
         pipeline = PipelineConfig.load(opts.pipeline_config, variant=opts.variant,
                                        override_local_config=override_local,
                                        local_config=opts.local_config)
-    except (PipelineConfigParseError, PipelineStructureError), e:
-        print >>sys.stderr, "Error reading pipeline config: %s" % e
+    except (PipelineConfigParseError, PipelineStructureError) as e:
+        print("Error reading pipeline config: %s" % e, file=sys.stderr)
         sys.exit(1)
-    except ModuleOptionParseError, e:
-        print >>sys.stderr, "Error in module options specified in config file: %s" % e
+    except ModuleOptionParseError as e:
+        print("Error in module options specified in config file: %s" % e, file=sys.stderr)
         sys.exit(1)
 
     # Allow numbers to be used instead of module name arguments
@@ -217,8 +221,8 @@ if __name__ == "__main__":
             opts.modules = module_numbers_to_names(pipeline, opts.modules)
         if hasattr(opts, "module") and opts.module is not None:
             opts.module = module_number_to_name(pipeline, opts.module)
-    except ValueError, e:
-        print >>sys.stderr, "Error in module specification: %s" % e
+    except ValueError as e:
+        print("Error in module specification: %s" % e, file=sys.stderr)
         sys.exit(1)
 
     # Run the function corresponding to the subcommand

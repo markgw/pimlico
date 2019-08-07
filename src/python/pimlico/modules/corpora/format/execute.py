@@ -15,7 +15,7 @@ def worker_setup(worker):
     input_datatype = worker.info.get_input_datatype("corpus")
     try:
         worker.formatter = load_formatter(input_datatype, worker.info.options["formatter"])
-    except (TypeError, TypeCheckError), e:
+    except (TypeError, TypeCheckError) as e:
         raise ModuleExecutionError("error loading formatter: %s" % e)
 
 

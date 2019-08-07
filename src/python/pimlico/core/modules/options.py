@@ -6,6 +6,9 @@
 Utilities and type processors for module options.
 
 """
+from builtins import str
+from past.builtins import basestring
+
 import json
 
 from pimlico.utils.strings import sorted_by_similarity
@@ -116,7 +119,7 @@ comma_separated_strings = comma_separated_list()
 def json_string(string):
     try:
         return json.loads(string)
-    except ValueError, e:
+    except ValueError as e:
         raise ValueError("error parsing JSON string: {}".format(e))
 
 
@@ -130,7 +133,7 @@ def json_dict(string):
 
     try:
         return json.loads(string)
-    except ValueError, e:
+    except ValueError as e:
         raise ValueError("error parsing JSON string: {}".format(e))
 
 
@@ -179,7 +182,7 @@ def process_module_options(opt_def, opt_dict, module_type_name):
                 type_conv = _enhanced_int
             try:
                 value = type_conv(value)
-            except Exception, e:
+            except Exception as e:
                 raise ModuleOptionParseError("error processing option value '%s' for %s option in %s module: %s" %
                                              (value, name, module_type_name, e))
             options[name] = value

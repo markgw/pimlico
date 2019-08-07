@@ -9,8 +9,13 @@ multiprocessing.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+
 import threading
-from Queue import Empty, Queue
+from queue import Empty, Queue
 from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
@@ -59,7 +64,7 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
                         input_buffer = []
             finally:
                 self.tear_down()
-        except Exception, e:
+        except Exception as e:
             # If there's any uncaught exception, make it available to the main process
             # Include the formatted stack trace, since we can't get this later from the exception outside this process
             e.traceback = format_exc()
@@ -68,6 +73,9 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
             self.ended.set()
+
+    def terminate(self):
+        self.shutdown()
 
     def shutdown(self, timeout=3.):
         # This may have been done by the pool, but it doesn't hurt to set it again

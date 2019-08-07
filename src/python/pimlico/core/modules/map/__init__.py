@@ -1,6 +1,14 @@
+from future import standard_library
+from future.utils import raise_from
+
+standard_library.install_aliases()
+from builtins import zip
+from builtins import object
+
 import threading
 import warnings
-from Queue import Queue, Empty, Full
+
+from queue import Queue, Empty, Full
 from threading import Thread
 from time import sleep
 from traceback import format_exc
@@ -222,7 +230,7 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
 
                     pbar.finish()
             complete = True
-        except ModuleExecutionError, e:
+        except ModuleExecutionError as e:
             if self.info.status == "PARTIALLY_PROCESSED":
                 self.log.info("Processed documents recorded: restart processing where you left off by calling run "
                               "again once you've fixed the problem (%d docs processed in this run, %d processed in "
@@ -266,7 +274,7 @@ class DocumentMapper(object):
         # Start up a pool
         try:
             executor.pool = executor.create_pool(self.processes)
-        except WorkerStartupError, e:
+        except WorkerStartupError as e:
             raise ModuleExecutionError(e.message, cause=e.cause, debugging_info=e.debugging_info)
 
         complete = False
@@ -401,7 +409,7 @@ def invalid_doc_on_error(fn):
             # Processing was cancelled, killed or otherwise called to a halt
             # Don't report this as an error processing a doc, but raise it
             raise
-        except Exception, e:
+        except Exception as e:
             # Error while processing the document: output an invalid document, with some error information
             # This covers the case of wrapping a process_document() function for a map factory,
             # since the first argument is always the worker process
@@ -422,7 +430,7 @@ def invalid_docs_on_error(fn):
             # Processing was cancelled, killed or otherwise called to a halt
             # Don't report this as an error processing a doc, but raise it
             raise
-        except Exception, e:
+        except Exception as e:
             # Error while processing the document: output invalid documents, with some error information
             return [invalid_document(self.info.module_name,  "%s\n%s" % (e, format_exc()))] * len(input_tuples)
     return _fn
@@ -506,11 +514,13 @@ class InputQueueFeeder(Thread):
                         self.exception_queue.get(timeout=0.1)
                     # Sometimes, a traceback from within the process is included
                     if hasattr(error, "traceback"):
-                        debugging = "Traceback from worker process:\n%s" % error.traceback
+                        debugging = "Traceback from input feeder process:\n%s" % error.traceback
                     else:
                         debugging = None
-                    raise ModuleExecutionError("error in worker process: %s" % error,
-                                               cause=error, debugging_info=debugging)
+                    raise_from(
+                        ModuleExecutionError("error in input feeder process: %s" % error,
+                                             cause=error, debugging_info=debugging),
+                        error)
 
     def check_invalid(self, archive, filename):
         """
@@ -563,7 +573,7 @@ class InputQueueFeeder(Thread):
             self.feeding_complete.set()
             if self.complete_callback is not None:
                 self.complete_callback()
-        except Exception, e:
+        except Exception as e:
             # Error in iterating over the input data -- actually quite common, since it could involve filter modules
             # Make it available to the main thread
             e.traceback = format_exc()
@@ -620,6 +630,10 @@ class InputQueueFeeder(Thread):
                     try:
                         q.get_nowait()
                     except Empty:
+                        break
+                    except OSError:
+                        # Sometime get "handle is closed" on python 3
+                        # but probably fine to ignore this, since there's nothing more left presumably
                         break
                 if hasattr(q, "task_done"):
                     while True:
@@ -683,6 +697,11 @@ class DocumentProcessorPool(object):
                 try:
                     q.get_nowait()
                 except Empty:
+                    break
+                except OSError:
+                    # This happens sometimes when emptying the queue
+                    # I think it's a bug (https://bugs.python.org/issue36281), but we needn't
+                    # worry about it: if the queue is closed, there's presumably nothing more to come
                     break
 
 

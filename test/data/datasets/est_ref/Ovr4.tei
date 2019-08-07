@@ -1,0 +1,183 @@
+<!DOCTYPE TEI.2 SYSTEM 'tei2.dtd'[
+<!ENTITY % TEI.general 'INCLUDE'>
+<!ENTITY % TEI.analysis 'INCLUDE'>
+<!ENTITY % TEI.figures 'INCLUDE'>
+<!ENTITY % ISOLat1
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN">
+%ISOLat1;
+<!ENTITY % ISOLat2
+	PUBLIC "ISO 8879-1986//ENTITIES Added Latin 2//EN">
+%ISOLat2;
+<!ENTITY % ISOnum
+	PUBLIC "ISO 8879-1986//ENTITIES Numeric and Special Graphic//EN">
+%ISOnum;
+<!ENTITY % ISOpub
+	PUBLIC "ISO 8879-1986//ENTITIES Publishing//EN">
+%ISOpub;
+<!ENTITY % ISOtech
+	PUBLIC "ISO 8879-1986//ENTITIES General Technical//EN">
+%ISOtech;
+<!ENTITY % ISOgrk1
+	PUBLIC "ISO 8879-1986//ENTITIES Greek Letters//EN">
+%ISOgrk1;
+<!ENTITY % ISOgrk2 
+	PUBLIC "ISO 8879-1986//ENTITIES Monotoniko Greek//EN">
+%ISOgrk2;
+<!ENTITY % ISOcyr1 
+	PUBLIC "ISO 8879-1986//ENTITIES Russian Cyrillic//EN">
+%ISOcyr1;
+<!ENTITY % ISOcyr2 
+	PUBLIC "ISO 8879-1986//ENTITIES Non-Russian Cyrillic//EN">
+%ISOcyr2;
+<!ENTITY % WINlat1 
+	PUBLIC "ISO 8879-1986//ENTITIES WIN Latin1 extra//EN">
+     %WINlat1;
+]>
+<tei.2>
+<teiheader>
+   <filedesc>
+      <titleStmt>
+         <title>Zone foorum 2008</title>
+         <principal>Heiki-Jaan Kaalep</principal>
+         <respStmt> <name>Kaarel Veskis</name>
+	    <resp>salvestas internetist, m&auml;rgendas, teisendas 
+TEI-kujule</resp>
+            <name>Kaarel Veskis</name>
+         </respStmt>
+      </titleStmt>
+         <extent> baite: 11886; s&otilde;nu kokku: 1196</extent>
+      <publicationStmt>
+	 <authority>T&Uuml; arvutuslingvistika uurimisgrupp</authority>
+    	 <pubPlace>Tartu, Liivi 2-307</pubPlace>
+	 <date>november 2008</date>
+	 <availability>
+	    <p>vaba kasutamiseks mittekommertsiaalsetel eesm&auml;rkidel</p>
+	 </availability>
+      </publicationStmt>
+      <sourcedesc>
+         <bibl>
+            <title level='j'>Zone foorum 2008</title>
+         </bibl>
+           <p>http://forum.planet.ee/</p>
+      </sourcedesc>
+   </filedesc>
+   <encodingdesc>
+	<projectdesc>
+<p>eesti keele Koondkorpuse projekt, finatseeritud riiklikust programmist 'Eesti keele keeletehnoloogiline tugi'</p>
+	</projectdesc>
+	<samplingdecl>
+		<p>&uuml;hes failis on &uuml;hest veebikataloogist p&auml;rinevad vestlused</p>
+	</samplingdecl>
+	<editorialdecl>
+		<hyphenation><p>s&otilde;nu ei poolitata</p></hyphenation>
+		<interpretation>
+                    <p>speaker t&auml;histab postituse autorit</p>
+		    <p>sp t&auml;histab postitust</p> 
+		    <p>div1 t&auml;histab &uuml;hel lehel olnud j&aauml;rjestikuseid postitusi</p>
+		    <p>olem quest t&auml;histab m&auml;rke, mille kujust ei ole informatsiooni</p>
+                </interpretation>
+                <quotation>
+                   <p>alustav jutum&auml;rk on &ldquo;</p>
+                   <p>l&otilde;petav jutum&auml;rk on &rdquo;</p>
+                   <p>&uuml;hekordne jutum&auml;rk on ' </p>
+                </quotation>
+                <segmentation>
+                   <p>lausestatud, l&otilde;igud on nagu nad algses failis olid</p>
+                </segmentation>
+      </editorialdecl>
+      <tagsdecl>
+         <tagusage gi=gap occurs=3></tagusage>
+         <tagusage gi=p occurs=49></tagusage>
+         <tagusage gi=sp occurs=31></tagusage>
+         <tagusage gi=speaker occurs=31></tagusage>
+      </tagsdecl>
+   </encodingdesc>
+</teiheader>
+<text> <body> <div0 type=kataloog> <head> Ovr4 </head>
+<div1 type='thread'> <head> Soovitage s&uuml;learvutit - 6. leht - Planet Foorumid </head>
+<sp> <speaker>Z1rra</speaker> 
+<p> <s> Ok j&auml;tan need m&auml;ngud hetkel vahele . </s> <s> Milline on parim arvuti nendest , mis ma postitasin ? </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> No mis ma teha saan , kui mulle sellised kriteeriumid on ette antud ja arvutit on vaja . </s> <s> Praegune on &uuml;sna nutune ja viimasel ajal ei t&ouml;&ouml;ta ka h&auml;sti . </s> <s> Ma ise arvan et see pavilion 6635 . </s> <s> Aga jah , kui keegi oskab midagi kasulikku soovitada , r&auml;&auml;kida siis palun . </s> </p>
+<p> <s> T&auml;nud abi eest ! </s> </p>
+ </sp> <sp> <speaker>Z1rra</speaker> 
+<p> <s> Siinkohal t&otilde;esti &uuml;ks kuldne soovitus : osta lauakas ja kui tahad olla mobiilne , siis Asus Eee ka lisaks . muide , see on t&otilde;esti kuldne soovitus . mina olin nii saabas , et tulin sellele m&otilde;ttele kolm n&auml;dalat p&auml;rast l&auml;pakajuustu soetamist ning nii m&ouml;ku , et ei jooksnud sellega poodi tagasi - et vahetage lauaarvuti vastu ... </s> </p>
+<p> <s> kuulake troskalit , tegelt ka . </s> </p>
+ </sp> <sp> <speaker>eripruul</speaker> 
+<p> <s> Samsung r60 plus mikromaailmast . </s> <s> Aku on v&otilde;ib-olla miinuseks aga muu on super . </s> </p>
+ </sp> <sp> <speaker>Timmy</speaker> 
+<p> <s> varsti saab minust dell xps m1530 omanik . ma usun , et ei pea kahetsema . endal m1330 ja kiidan t&auml;iega - t&ouml;&ouml;kaaslasel m1530 ja ta ka suht rahul ( mis siis et ta tna just toidet k&auml;is vahetamas/ma ka korra pidand vahetama ) . </s> <s> Loodan t&ouml;&ouml;arvutiks ka xps-i saada aga vaatab - kardan et &uuml;lemus on suht cheap selle koha pealt : / </s> </p>
+ </sp> <sp> <speaker>miu</speaker> 
+<p> <s> di&lt;or-i ei soovita ... lenovo peaks = ibm niiet peaks p&auml;ris pandav olema </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> e : kuidas need lenovod ja ordid on ? </s> <s> Mul on aasta aega vana Ordi Enduro ... </s> <s> T&ouml;&ouml;tab , h&auml;sti ning kurta ei saa . </s> </p>
+ </sp> <sp> <speaker>FredL</speaker> 
+<p> <s> S&uuml;learvutid , mis alla 10 kilo maksavad , pole suurem asi s&uuml;learvutid . </s> <s> Vaatame kasv&otilde;i neid odavaid HP Pavilione . </s> <s> Korraliku s&uuml;learvuti hind hakkab 14-15 kilost . </s> <s> &Auml;rge siis h&auml;daldage , et ei t&ouml;&ouml;ta v&otilde;i mingi jama . </s> </p>
+ </sp> <sp> <speaker>Tehnolehm</speaker> 
+<p> <s> Mul on aasta aega vana Ordi Enduro ... </s> <s> T&ouml;&ouml;tab , h&auml;sti ning kurta ei saa . peale need korrad kui oled pidanud parandusse saatma ? </s> </p>
+ </sp> <sp> <speaker>hullar77</speaker> 
+<p> <s> Tere ! </s> </p>
+<p> <s> Olen soetamas uut l&auml;pparit ja sooviks ideid ja soovitusi , otsin l&auml;pakat mis lubab m&auml;ngida uuemaid m&auml;nge alates Half Life kahest ja l&otilde;petades . . ? </s> </p>
+<p> <s> Siiamaani on j&auml;&auml;nud silm peale -- </s> </p>
+<p> <s> dell xps m1330 , kuid lugesin netist et videokaart ei ole p&auml;ris m&auml;ngimiseks m&otilde;eldud . </s> </p>
+<p> <s> ja dell xps m150 , see tundub k&otilde;vasti asjalikum olevat vististi , kuid ei tahaks palju &uuml;le 20 tudande v&auml;lja k&auml;ia , igasugused web'i kaamerad ja n&auml;puj&auml;lje lugejad ei paku &uuml;ltse huvi . </s> </p>
+<p> <s> v&auml;ga huvitav on ka selline masin : The Area-51&reg; m15x , sellist kahjuks eesti pinnal m&uuml;&uuml;gil pole . </s> <s> &Auml;kki oskab keegi miskit h&auml;id lahendusi pakkuda . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> 15000ga saab ka korraliku l&auml;paka m&auml;ngimiseks , dell xps m1530 n&auml;iteks . grid'i ja devil may cry 4'ja saan vabalt m&auml;ngida . midagi rohkemat nagu ei otsigi </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Torrent - 4. leht - Planet Foorumid </head>
+<sp> <speaker>SP22</speaker> 
+<p> <s> imelik , mul oli keel . eesti . kui muutsin selle tagasi english , siis tulid need aadressid ja favourited ka tagasi . </s> </p>
+ </sp> <sp> <speaker>koolondee</speaker> 
+<p> <s> Sai kah uTorrenti peale &uuml;le mindud . </s> <s> Mitte otseselt seet&otilde;ttu et n&otilde;nda ropult meeldiks ( leian ikka veel , et BitCometi kasutajaliides on loogilisem ning j&auml;tab igatpidi meeldivama mulje ning maakeelsus on &uuml;ks igatpidi kiitmist v&auml;&auml;riv k&uuml;lg ) vaid pigem vajadusest : &uuml;ks sait mida kasutan b&auml;nnis BC &auml;ra . </s> <s> Selle elaks &uuml;le , aga kuna avastasin , et uT'sse ka minimalistlik <hi rend='italic'>tracker</hi> sisse ehitatud ( funktsionaalsus mis koheselt kasutust leidis &quot;ametliku&quot; FreeDOSi <hi rend='italic'>tracker</hi>i tagavarakoopiana ) siis polnud erilist valikut . </s> </p>
+<p> <s> Alternatiive k&uuml;ll leiduks ( n&auml;iteks jooksutada kahte klienti korraga v&otilde;i pannes p&uuml;sti eraldiseisva <hi rend='italic'>tracker</hi>i , n&auml;iteks tolle mille BitCometi loojad valmis meisterdasid ) , aga igal juhul kulutaks see rohkem m&auml;lu ning t&otilde;en&auml;oliselt ei saaks ka ribalaiust n&otilde;nda efektiivselt rakendada . </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Mul on bitcometiga t&otilde;mmatud fail 96 , 7% Ta t&otilde;mbab seda praegu nulliga , et mulle piisab sellest 96%-st ka , et kas poolikut faili saab avada p&auml;rast ? </s> <s> N&auml;iteks zip , kui failis on film . </s> </p>
+ </sp> <sp><speaker>sepu</speaker> 
+<p> <s> <hi rend='quote'> Mind Trick <gap desc='hyperlink'> Mul on bitcometiga t&otilde;mmatud fail 96 , 7% Ta t&otilde;mbab seda praegu nulliga , et mulle piisab sellest 96%-st ka , et kas poolikut faili saab avada p&auml;rast ? </hi> </s> <s> <hi rend='quote'> N&auml;iteks zip , kui failis on film . </hi> </s> <s> <hi rend='quote'> Ei saa . </hi> </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Mind Trick <gap desc='hyperlink'> Mul on bitcometiga t&otilde;mmatud fail 96 , 7% Ta t&otilde;mbab seda praegu nulliga , et mulle piisab sellest 96%-st ka , et kas poolikut faili saab avada p&auml;rast ? </s> <s> N&auml;iteks zip , kui failis on film . </s> <s> Bitcomet/Download seal on failid olemas , poolikud failid on * . bc ! laiendiga , oma laiendiga asjad on t&otilde;mmatud , &uuml;ksikuid poolikuid faile saad kah avada nt . VLC playeriga poolikuid video faile v&otilde;i notepadiga poolikuid text faile . zipi kohta ei oska &ouml;elda ... </s> </p>
+<p> <s> EDIT : v&otilde;imalik et fail ongi poolikult &uuml;lesse laetud , mul nt . j&auml;i 99% peale jokutama &uuml;ks film , uurisin torrenti kohta feedi ja tuli v&auml;lja et oligi poolikult laetud . </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Ise kasutan kah uTorrentit . </s> <s> Tundub ok ja on ju samuti eesti keelne . </s> </p>
+ </sp> <sp> <speaker>Scorp</speaker> 
+<p> <s> ma ei t&otilde;mbagi torrenteid . </s> </p>
+ </sp> <sp> <speaker>gudher</speaker> 
+<p> <s> EDIT : v&otilde;imalik et fail ongi poolikult &uuml;lesse laetud , mul nt . j&auml;i 99% peale jokutama &uuml;ks film , uurisin torrenti kohta feedi ja tuli v&auml;lja et oligi poolikult laetud . </s> <s> No neid juhtumeid on siiski haruharva . </s> </p>
+<p> <s> &Uuml;ldiselt mida paljud ei m&otilde;ista on see , et &quot;99% complete &quot; *ei t&auml;henda* et l&otilde;pust on 1% puudu . </s> <s> See t&auml;hendab et *kogu* faili mahust on 1% puudu , see 1% aga v&otilde;ib n&auml;iteks 512 baidiste juppidena &uuml;le terve faili jaguneda ning on t&auml;iesti reaalne v&otilde;imalus et &uuml;kski proge ei tee sellist faili &uuml;ldse lahtigi kui &uuml;ks puuduv jupike juhtub n&auml;iteks t&auml;iesti alguses olema kus peaks faili formaati kirjeldav p&auml;is asuma . </s> <s> ZIP on parandamise seisukohast ka t&auml;iesti m&otilde;tetu formaat ( kuna tema loomisel ei peetud &uuml;le&uuml;ldse vajalikukski parandamist kaaluda ) seega midagi praktilisemat kui kannatuse varumine pole soovitada ( /v&otilde;id loomulikult DHT ja PEXi sisse l&uuml;kata kui sul klient seda v&otilde;imaldab , v&otilde;ib juhtuda et nende vahendusel &otilde;nnestub puuduv osa k&auml;tte saada ) . </s> </p>
+ </sp> <sp> <speaker>sanwert</speaker> 
+<p> <s> Mul on kah &uuml;ks asi 98 . 1% - Borat </s> </p>
+<p> <s> <hi rend='quote'> Ja n&uuml;&uuml;d ei v&otilde;ta isegi download &uuml;hendust , aga upload t&ouml;&ouml;tab . </hi> </s> </p>
+<p> <s> w0rd . </s> <s> Mul on t&auml;pselt sama . </s> <s> : / </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Khmm ... miks mul on tunne et sul puudub igasugune ettekujutus mismoodi BT &uuml;ldse toimib ? </s> <s> Sa oled &uuml;ldse suvatsenud teiste <hi rend='italic'>peer</hi>ide n&auml;ite vaadata ? </s> <s> Olen surmkindel et 98% &uuml;lej&auml;&auml;nutest on max . sama kaugel kui sina ning nood vaesed 2% eavad *k&otilde;ik* tahtjad &auml;ra toitma . </s> </p>
+<p> <s> Ning kui sul see puuduv 3% k&auml;es siis l&ouml;&ouml;d torrenti niikuinii kiiremas korras kinni ega aita jagada ... </s> </p>
+ </sp> <sp> <speaker>Jedi Mind Trick</speaker> 
+<p> <s> Azureusiga siuke probleem , et kui on mitu faili ja panen &uuml;hele neist Priority High . . siis tea peaks ju ainult seda tirima . </s> <s> Aga hetkel on nii , et isegi high on 40% ja teised juba 60% vms . . </s> </p>
+<p> <s> Kuidagi seda parandada ei saa v&otilde;i mingi muu client kus ikka saab nii 1 fail korraga ? </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> Skip file ? </s> <s> V&otilde;i don't download . </s> <s> Dno , tegelt . </s> <s> Seedin oma Linuxi ISOsid uTorrentiga . ei viitsi eriti k&otilde;igile panna do not download et siis 1 t&otilde;mbaks . . pigem et paned &uuml;hele ja see t&otilde;mbab . </s> </p>
+<p> <s> a noh , eks ma proovin seda utorrentit hiljem . </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> Select all , ctrl+click sellele mida tahad ja siis neile , mis aktiivseks j&auml;id , don't download ? </s> </p>
+<p> <s> Mina saan v&auml;ga kenasti nii . </s> <s> Samas , Azureus aka Vuze sux ka . </s> ++ <s> agreed , t&otilde;mba bittorrent , suht m&otilde;nus tundub ja kiire kah ( rammi suhtes ) <gap desc='image'> </s> </p>
+ </sp> <sp> <speaker>troskal</speaker> 
+<p> <s> Kas mitte BitTorrent Inc ei omandanud uTorrentit ? </s> <s> Ehk , uTorrent </s> == <s> uus BitTorrent ametlik klient ? </s> </p>
+ </sp> </div1> 
+<div1 type='thread'> <head> Torrent - 5. leht - Planet Foorumid </head>
+<sp> <speaker>Fireforce</speaker> 
+<p> <s> Kas mitte BitTorrent Inc ei omandanud uTorrentit ? </s> <s> Ehk , uTorrent </s> == <s> uus BitTorrent ametlik klient ? jah . lisaks kuuldavasti on bittorrentil &quot;torrant call hoem&quot; &quot;featuur&quot; k&uuml;ljes . </s> </p>
+ </sp> <sp> <speaker>CD7</speaker> 
+<p> <s> igast asju kasutand aga &quest;torrent-it saab k&otilde;ige paremini seadistada ja meeletult v&auml;he resursse kasutab t&otilde;esti . </s> </p>
+ </sp> <sp> <speaker>MegaK&auml;kk</speaker> 
+<p> <s> Azureus oli t&auml;pselt niikaua parim , kuni see mingiks kuradi Vuze'iks muutus . </s> <s> N&uuml;&uuml;d on uTorrent or nothing . </s> </p>
+ </sp> <sp> <speaker>treudenbauer</speaker> 
+<p> <s> Ilmselt on k&uuml;simus ka selles , mis suurusega failid sul on . </s> <s> Kui &quot;high&quot; on gigades ja &uuml;lej&auml;&auml;nud kordades v&auml;iksemad , siis ilmselge , et nad ikkagi j&otilde;uavad varem kohale . </s> </p>
+<p> <s> UTorrent muidu k&uuml;ll j&auml;lgib prioriteete . </s> <s> Samasuured k&otilde;ik . &tilde;700mb </s> </p>
+ </sp> <sp> <speaker>Geenius666</speaker> 
+<p> <s> s/l ratiost oleneb ka . </s> </p>
+ </sp> <sp> <speaker>CyberRax</speaker> 
+<p> <s> Azureus oli t&auml;pselt niikaua parim , kuni see mingiks kuradi Vuze'iks muutus . </s> <s> N&uuml;&uuml;d on uTorrent or nothing . </s> </p>
+<p> <s> kasutasin kah azureust kuni vuzeks muutus ... peale seda ainult kirusin ( kui vuze oli ) </s> </p>
+ </sp> </div1> 
+</div0> </body> </text> </tei.2>

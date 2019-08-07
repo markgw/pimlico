@@ -92,7 +92,7 @@ class TermFeatureListDocumentType(KeyValueListDocumentType):
         for data_point in raw_data_points:
             # Pull out the special "term" feature (usually at the beginning)
             try:
-                term = (value for (feature, value) in data_point if feature == "term").next()
+                term = next((value for (feature, value) in data_point if feature == "term"))
             except StopIteration:
                 # No "term" feature found -- uh-oh! Catch as invalid doc
                 raise ValueError("data point has no 'term' feature: %s" % data_point)
@@ -408,7 +408,7 @@ def _read_binary_int(f, unpacker):
     try:
         # Try decoding this as a single int
         integer = unpacker.unpack(string)[0]
-    except struct.error, e:
+    except struct.error as e:
         raise DatatypeLoadError("could not unpack integer data in file: corrupt data? %s" % e)
     return integer
 

@@ -12,8 +12,13 @@ In particular, use :fun:.multiprocessing_executor_factory wherever possible.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+
 import multiprocessing
-from Queue import Empty
+from queue import Empty
 from traceback import format_exc
 
 import signal
@@ -76,9 +81,9 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
             finally:
                 try:
                     self.tear_down()
-                except Exception, e:
+                except Exception as e:
                     self.exception_queue.put(WorkerShutdownError("error in tear_down() call", cause=e), block=True)
-        except Exception, e:
+        except Exception as e:
             # If there's any uncaught exception, make it available to the main process
             # Include the formatted stack trace, since we can't get this later from the exception outside this process
             e.traceback = format_exc()
@@ -126,7 +131,7 @@ class MultiprocessingMapPool(DocumentProcessorPool):
             return self.PROCESS_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
 
     @staticmethod
-    def create_queue(maxsize=None):
+    def create_queue(maxsize=0):
         q = multiprocessing.Queue(maxsize)
         q.cancel_join_thread()
         return q

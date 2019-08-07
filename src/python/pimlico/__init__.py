@@ -4,8 +4,25 @@ made up of linguistic processing tasks to run on large datasets (corpora). It pr
 existing, widely used NLP (Natural Language Processing) tools.
 
 """
+from __future__ import print_function
 import os
 import sys
+import subprocess
+
+# Core dependencies will be checked when Pimlico is run and installed if necessary.
+# However, future is needed right away, before we can even start importing
+# the code to install the core deps, since that code needs to be Py2-3 compatible
+try:
+    import future
+except ImportError:
+    print("Future library is not installed: installing now")
+    # Call pip to install future
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'future'])
+    # Reload the environment, so we see the newly install package(s)
+    import site
+    from imp import reload
+    reload(site)
+
 from pimlico.core.dependencies.base import check_and_install
 from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
 
@@ -39,9 +56,9 @@ def install_core_dependencies():
     # We just pass in an empty dictionary
     unavailable = [dep for dep in CORE_PIMLICO_DEPENDENCIES if not dep.available({})]
     if len(unavailable):
-        print >>sys.stderr, "Some core Pimlico dependencies are not available: %s\n" % \
-                            ", ".join(dep.name for dep in unavailable)
+        print("Some core Pimlico dependencies are not available: %s\n" % \
+                            ", ".join(dep.name for dep in unavailable), file=sys.stderr)
         uninstalled = check_and_install(CORE_PIMLICO_DEPENDENCIES, {})
         if len(uninstalled):
-            print >>sys.stderr, "Unable to install all core dependencies: exiting"
+            print("Unable to install all core dependencies: exiting", file=sys.stderr)
             sys.exit(1)

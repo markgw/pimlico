@@ -2,6 +2,8 @@
 Utilities for using Gensim in Pimlico used across different modules.
 
 """
+from __future__ import division
+from builtins import object
 from collections import Counter
 
 from pimlico.datatypes.corpora import is_invalid_doc
@@ -37,7 +39,7 @@ class GensimCorpus(object):
                 word_counter = Counter(
                     word_id for sentence in doc.lists for word_id in sentence if word_id not in self.ignore_ids
                 )
-                yield list(word_counter.iteritems())
+                yield list(word_counter.items())
 
 
 def word_relevance_for_topic(topic_word_probs, word_probs, l=0.6):

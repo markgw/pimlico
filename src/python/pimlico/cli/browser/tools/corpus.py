@@ -2,6 +2,12 @@
 Browser tool for iterable corpora.
 
 """
+from __future__ import print_function
+from builtins import next
+from builtins import str
+from builtins import range
+from builtins import object
+
 import os
 from traceback import format_exc
 
@@ -10,7 +16,7 @@ from pimlico.datatypes.corpora import is_invalid_doc
 try:
     import urwid
 except ImportError:
-    print "Urwid is not installed: installing now"
+    print("Urwid is not installed: installing now")
     from pimlico.core.dependencies.python import PythonPackageOnPip
     urwid_dep = PythonPackageOnPip("urwid")
     urwid_dep.install({})
@@ -18,7 +24,7 @@ except ImportError:
     try:
         import urwid
     except ImportError:
-        print "Tried to install Urwid, but still not available"
+        print("Tried to install Urwid, but still not available")
         raise
 
 urwid.set_encoding("UTF-8")
@@ -84,7 +90,7 @@ def browse_data(reader, formatter, skip_invalid=False):
         try:
             with open(filename, "w") as f:
                 f.write(formatter.format_document(corpus_state.current_doc_data).encode("utf8"))
-        except IOError, e:
+        except IOError as e:
             message("Could not save file:\n%s" % e)
         else:
             message("Output formatted document to %s" % filename)
@@ -124,7 +130,7 @@ def browse_data(reader, formatter, skip_invalid=False):
                 doc = formatter.format_document(doc_data)
             except:
                 doc = "Error formatting datatype %s for display:\n%s" % (type(doc_data).__name__, format_exc())
-            body_text.set_text(unicode(doc).replace(u"\t", u"    "))
+            body_text.set_text(str(doc).replace(u"\t", u"    "))
 
     def _keypress(key):
         if key == "esc" or key == "q":
@@ -157,7 +163,7 @@ class CorpusState(object):
         self.doc_iter = iter(corpus)
 
     def next_document(self):
-        self.current_doc_name, self.current_doc_data = self.doc_iter.next()
+        self.current_doc_name, self.current_doc_data = next(self.doc_iter)
         self.doc_num += 1
         return self.current_doc_name, self.current_doc_data
 

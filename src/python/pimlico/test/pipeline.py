@@ -15,6 +15,7 @@ This way of providing tests also has the advantage that modules at the same time
 several) of how to use them -- how pipeline config should look and what sort of input data to use.
 
 """
+from builtins import object
 import traceback
 
 from pimlico.utils.core import remove_duplicates
@@ -40,10 +41,11 @@ from pimlico.utils.logging import get_console_logger
 
 
 class TestPipeline(object):
-    def __init__(self, pipeline, run_modules, log):
+    def __init__(self, pipeline, run_modules, log, debug=False):
         self.log = log
         self.requested_modules = run_modules
         self.pipeline = pipeline
+        self.debug = debug
 
         # Expand the list of requested modules to include any that they depend on
         modules = [self.pipeline[mod] for mod in self.requested_modules]
@@ -76,6 +78,13 @@ class TestPipeline(object):
             self.log.info("Processing module '{}'".format(module_name))
             module = self.pipeline[module_name]
             if isinstance(module, InputModuleInfo):
+                # If an input module has execute_count=True, it's actually an executable
+                # module, since it needs to be executed before its data is ready to read
+                if module.module_executable:
+                    self.log.info("Input module '{}' needs to be executed before data is ready: "
+                                  "running".format(module_name))
+                    self.test_module_execution(module_name)
+                    self.log.info("Data preparation executed. Testing input module")
                 self.test_input_module(module_name)
             else:
                 self.test_module_execution(module_name)
@@ -95,14 +104,14 @@ class TestPipeline(object):
                 try:
                     for doc_name, doc in dataset:
                         pass
-                except Exception, e:
+                except Exception as e:
                     raise TestPipelineRunError("test of input dataset {}.{} failed: error while iterating over "
                                                "iterable corpus: {}".format(module.module_name, output_name, e))
 
     def test_module_execution(self, module_name):
         try:
-            exit_status = check_and_execute_modules(self.pipeline, [module_name], log=self.log)
-        except Exception, e:
+            exit_status = check_and_execute_modules(self.pipeline, [module_name], log=self.log, debug=self.debug)
+        except Exception as e:
             traceback.print_exc()
             raise TestPipelineRunError("error while running module '{}': {}".format(module_name, e))
         if exit_status != 0:
@@ -110,7 +119,7 @@ class TestPipeline(object):
             raise TestPipelineRunError("module '{}' failed".format(module_name))
 
 
-def run_test_pipeline(path, module_names, log, no_clean=False):
+def run_test_pipeline(path, module_names, log, no_clean=False, debug=False, no_clean_after=False):
     """
     Run a test pipeline, loading the pipeline config from a given path (which may be relative to the
     Pimlico test data directory) and running each of the named modules, including any of those
@@ -134,8 +143,8 @@ def run_test_pipeline(path, module_names, log, no_clean=False):
         # Load the pipeline config
         try:
             pipeline = TestPipeline.load_pipeline(path, TEST_STORAGE_DIR)
-            test_pipeline = TestPipeline(pipeline, module_names, log)
-        except Exception, e:
+            test_pipeline = TestPipeline(pipeline, module_names, log, debug=debug)
+        except Exception as e:
             traceback.print_exc()
             raise TestPipelineRunError("could not load test pipeline {}: {}".format(path, e))
 
@@ -149,7 +158,7 @@ def run_test_pipeline(path, module_names, log, no_clean=False):
                 log.info("Installing {}".format(dep.name))
                 try:
                     dep.install(pipeline.local_config)
-                except InstallationError, e:
+                except InstallationError as e:
                     dep_problems.append("Could not install dependency '{}': {}".format(dep.name, e))
             else:
                 instructions = dep.installation_instructions()
@@ -169,11 +178,11 @@ def run_test_pipeline(path, module_names, log, no_clean=False):
         test_pipeline.test_all_modules()
 
     finally:
-        if not no_clean:
+        if not no_clean and not no_clean_after:
             clear_storage_dir()
 
 
-def run_test_suite(pipelines_and_modules, log, no_clean=False):
+def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False, stop_on_error=False, no_clean_after=False):
     """
     :param pipeline_and_modules: list of (pipeline, modules) pairs, where pipeline is a path to a config file and
         modules a list of module names to test
@@ -182,10 +191,13 @@ def run_test_suite(pipelines_and_modules, log, no_clean=False):
     for path, module_names in pipelines_and_modules:
         log.info("Running test pipeline {}, modules {}".format(path, ", ".join(module_names)))
         try:
-            run_test_pipeline(path, module_names, log, no_clean=no_clean)
-        except TestPipelineRunError, e:
+            run_test_pipeline(path, module_names, log, no_clean=no_clean, debug=debug, no_clean_after=no_clean_after)
+        except TestPipelineRunError as e:
             log.error("Test failed: {}".format(e))
             failed.append((path, module_names))
+            if stop_on_error:
+                log.error("Aborting test suite after error on {} [{}]".format(path, ",".join(module_names)))
+                break
         else:
             log.info("Test succeeded")
     return failed
@@ -211,6 +223,8 @@ if __name__ == "__main__":
                                      epilog="See also suite.py for running whole test suites")
     parser.add_argument("pipeline_config", help="Pipeline config file to load")
     parser.add_argument("modules", nargs="+", help="Module(s) to test running")
+    parser.add_argument("--debug", "-d", help="Execute modules in debug mode, potentially giving more verbose output",
+                        action="store_true")
     parser.add_argument("--no-clean", help="Do not clean up the storage directory after running tests. By default, "
                                            "all output from the test pipelines is deleted at the end",
                         action="store_true")
@@ -218,5 +232,8 @@ if __name__ == "__main__":
 
     log = get_console_logger("Test")
 
-    failed = run_test_suite([(os.path.abspath(opts.pipeline_config), opts.modules)], log, no_clean=opts.no_clean)
+    failed = run_test_suite(
+        [(os.path.abspath(opts.pipeline_config), opts.modules)],
+        log, no_clean=opts.no_clean, debug=opts.debug
+    )
     sys.exit(1 if failed else 0)

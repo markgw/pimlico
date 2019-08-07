@@ -10,25 +10,29 @@ read in using Pimlico's generic word embedding storage type.
 
 Uses scikit-learn to perform the MDS/TSNE reduction.
 
-.. todo::
+The module outputs a Python file for doing the plotting (``plot.py``)
+and a CSV file containing the vector data (``data.csv``) that is used as
+input to the plotting. The Python file is then run to produce (if it
+succeeds) an output PDF (``plot.pdf``).
 
-   Update to new datatypes system and add test pipeline
+The idea is that you can use these source files (``plot.py`` and ``data.csv``)
+as a template and adjust the plotting code to produce a perfect plot for
+inclusion in your paper, website, desktop wallpaper, etc.
 
 """
 from pimlico.core.dependencies.python import sklearn_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import json_string, choose_from_list, comma_separated_strings
-from pimlico.old_datatypes.base import MultipleInputs
-from pimlico.old_datatypes.embeddings import Embeddings
-from pimlico.old_datatypes.plotting import PlotOutput
+from pimlico.datatypes import Embeddings, MultipleInputs
+from pimlico.datatypes.plotting import PlotOutput
 from pimlico.modules.visualization import matplotlib_dependency
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "embeddings_plot"
     module_readable_name = "Embedding space plotter"
-    module_inputs = [("vectors", MultipleInputs(Embeddings))]
-    module_outputs = [("plot", PlotOutput)]
+    module_inputs = [("vectors", MultipleInputs(Embeddings()))]
+    module_outputs = [("plot", PlotOutput())]
     module_options = {
         "words": {
             "help": "Number of most frequent words to plot. Default: 50",

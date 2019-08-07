@@ -6,9 +6,10 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
-import copy
+from traceback import format_exc
 
-from pimlico.utils.core import remove_duplicates
+from builtins import object
+from future.utils import with_metaclass
 
 __all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
            "InvalidDocument"]
@@ -45,14 +46,21 @@ class DataPointTypeMeta(type):
                     # Nothing overridden
                     new_dict = {}
                 else:
-                    new_dict = my_doc_cls.__dict__
+                    new_dict = dict(my_doc_cls.__dict__)
+
+                # Don't inherit the __dict__ and __weakref__ attributes
+                # These will be created on the new type as necessary
+                if "__dict__" in new_dict:
+                    del new_dict["__dict__"]
+                if "__weakref__" in new_dict:
+                    del new_dict["__weakref__"]
 
                 # Perform subclassing so that a new Document is created that is a subclass of the parent's document
                 cls.__document_type = type("Document", (parent_doc_cls,), new_dict)
         return cls.__document_type
 
 
-class DataPointType(object):
+class DataPointType(with_metaclass(DataPointTypeMeta, object)):
     """
     Base data-point type for iterable corpora. All iterable corpora should have data-point types that are
     subclasses of this.
@@ -71,7 +79,6 @@ class DataPointType(object):
        data point type options for when a datatype is being loaded using a config file.
 
     """
-    __metaclass__ = DataPointTypeMeta
     #: List of (name, cls_path) pairs specifying a standard set of formatters that the user might want to choose from to
     #: view a dataset of this type. The user is not restricted to this set, but can easily choose these by name,
     #: instead of specifying a class path themselves.
@@ -193,7 +200,8 @@ class DataPointType(object):
 
         A data point type's constructed document class is available as `MyDataPointType.Document`.
 
-        Each document type should provide a method to convert from raw data (a unicode string) to the
+        Each document type should provide a method to convert from raw data (a bytes object in Py3,
+        or ``future``'s backport of ``bytes`` in Py2) to the
         internal representation (an arbitrary dictionary) called `raw_to_internal()`, and another to convert
         the other way called `internal_to_raw()`. Both forms of the data are available using the
         properties `raw_data` and `internal_data`, and these methods are called as necessary to
@@ -287,13 +295,13 @@ class DataPointType(object):
                     # Raw data not available yet: convert from internal data
                     self._raw_data = self.internal_to_raw(self._internal_data)
                     self.raw_available()
-                except Exception, e:
+                except Exception as e:
                     # Catch any exceptions and wrap them
                     # In particular, it's important to catch attribute errors, as these otherwise lead
                     # to __getatttr__ being called and give mystifying errors
                     raise DataConversionError(
-                        "{} error converting internal to raw data for document type {}: {}".format(
-                            type(e).__name__, self.data_point_type, e
+                        "{} error converting internal to raw data for document type {}: {}. [{}]".format(
+                            type(e).__name__, self.data_point_type, e, format_exc(),
                         ))
             return self._raw_data
 
@@ -304,11 +312,11 @@ class DataPointType(object):
                     # Internal data not available yet: convert from raw
                     self._internal_data = self.raw_to_internal(self._raw_data)
                     self.internal_available()
-                except Exception, e:
+                except Exception as e:
                     # Catch any exceptions and wrap them
                     raise DataConversionError(
-                        "{} error converting raw to internal data for document type {}: {}".format(
-                            type(e).__name__, self.data_point_type, e
+                        "{} error converting raw to internal data for document type {}: {}. [{}]".format(
+                            type(e).__name__, self.data_point_type, e, format_exc(),
                         ))
             return self._internal_data
 
@@ -354,7 +362,7 @@ class InvalidDocument(DataPointType):
     possible to work out, where one of these pops up, where the error occurred.
 
     """
-    class Document:
+    class Document(object):
         keys = ["module_name", "error_info"]
 
         def raw_to_internal(self, raw_data):
@@ -371,9 +379,11 @@ class InvalidDocument(DataPointType):
 
         def internal_to_raw(self, internal_data):
             # Encode back to utf-8 for the raw data
-            return (u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\n"
-                    u"Full error details:\n%s" %
-                    (internal_data["module_name"], internal_data["error_info"])).encode("utf-8")
+            return bytes(
+                (u"***** EMPTY DOCUMENT *****\nEmpty due to processing error in module: %s\n\n"
+                 u"Full error details:\n%s" %
+                 (internal_data["module_name"], internal_data["error_info"])).encode("utf-8")
+            )
 
         @property
         def module_name(self):
@@ -398,18 +408,35 @@ def invalid_document(module_name, error_info):
     return InvalidDocument()(module_name=module_name, error_info=error_info)
 
 
-def invalid_document_or_text(module_name, text):
+def invalid_document_or_raw(data):
     """
-    If the text represents an invalid document, parse it and return an InvalidDocument object.
-    Otherwise, return the text as is.
+    Takes the given raw data, given as a bytes object, and returns it as an
+    InvalidDocument object, if it represents an invalid document, or returns
+    the data as is otherwise.
 
     """
-    if is_invalid_doc(text):
-        return text
-    elif text.startswith("***** EMPTY DOCUMENT *****"):
-        return InvalidDocument()(module_name=module_name, error_info=text)
+    is_invalid = False
+    try:
+        if data.startswith(b"***** EMPTY DOCUMENT *****"):
+            # This is the raw data for an invalid doc
+            is_invalid = True
+    except TypeError:
+        if not isinstance(data, bytes):
+            raise DataConversionError("invalid_document_or_raw() should be given a bytes object, "
+                                      "not {}".format(type(data).__name__))
+        else:
+            raise
+
+    if is_invalid:
+        return InvalidDocument()(raw_data=data)
     else:
-        return text
+        return data
+
+
+# Alias for backwards compatibility
+# Doesn't any longer correctly describe the function
+def invalid_document_or_text(module_name, data):
+    return invalid_document_or_raw(data)
 
 
 def is_invalid_doc(doc):
@@ -428,15 +455,15 @@ class RawDocumentType(DataPointType):
     datatype.
 
     """
-    class Document:
+    class Document(object):
         keys = ["raw_data"]
 
         def raw_to_internal(self, raw_data):
             # Just include the raw data itself, so it's possible to convert back to raw data later
-            return {"raw_data": raw_data}
+            return {"raw_data": raw_data.decode("utf-8")}
 
         def internal_to_raw(self, internal_data):
-            return internal_data["raw_data"]
+            return bytes(internal_data["raw_data"].encode("utf-8"))
 
 
 class TextDocumentType(RawDocumentType):
@@ -453,7 +480,7 @@ class TextDocumentType(RawDocumentType):
     contain information other than the raw text.
 
     """
-    class Document:
+    class Document(object):
         keys = ["text"]
 
         @property
@@ -461,7 +488,7 @@ class TextDocumentType(RawDocumentType):
             return self.internal_data["text"]
 
         def internal_to_raw(self, internal_data):
-            return internal_data["text"].encode("utf-8")
+            return bytes(internal_data["text"].encode("utf-8"))
 
         def raw_to_internal(self, raw_data):
             return {"text": raw_data.decode("utf-8")}

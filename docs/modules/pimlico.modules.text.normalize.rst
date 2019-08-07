@@ -46,9 +46,9 @@ Options
 +===================+=========================================================================================================================+========================+
 | case              | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
 +-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
-| remove_only_punct | Skip over any sentences that are empty if punctuation is ignored                                                        | bool                   |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 | remove_empty      | Skip over any empty sentences (i.e. blank lines)                                                                        | bool                   |
++-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
+| remove_only_punct | Skip over any sentences that are empty if punctuation is ignored                                                        | bool                   |
 +-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
 
 Example config
@@ -71,8 +71,8 @@ This example usage includes more options.
    type=pimlico.modules.text.normalize
    input_corpus=module_a.some_output
    case=
-   remove_only_punct=F
    remove_empty=F
+   remove_only_punct=F
 
 Test pipelines
 ==============

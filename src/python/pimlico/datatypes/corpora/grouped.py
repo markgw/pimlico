@@ -1,17 +1,31 @@
-from __future__ import absolute_import
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-import cPickle as pickle
+from __future__ import print_function
+from __future__ import absolute_import
+
+import warnings
+
+from future import standard_library
+from future.utils import PY2
+
+standard_library.install_aliases()
+from builtins import zip
+from builtins import next
+from builtins import object
+from builtins import str
+from builtins import bytes
+
+import pickle
 import gzip
 import json
 import os
 import shutil
 import tarfile
 import zlib
-from cStringIO import StringIO
-from itertools import izip
+from io import StringIO, BytesIO, open
+
 from tempfile import mkdtemp
 
 from pimlico.datatypes.base import DynamicOutputDatatype
@@ -31,8 +45,8 @@ class GroupedCorpus(IterableCorpus):
     # This may be overridden by subclasses to provide filters for documents applied before main doc processing
     document_preprocessors = []
 
-    class Reader:
-        class Setup:
+    class Reader(object):
+        class Setup(object):
             def data_ready(self, base_dir):
                 # Run the superclass check -- that the data dir exists
                 if not super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir):
@@ -134,12 +148,15 @@ class GroupedCorpus(IterableCorpus):
                             continue
 
                     # Extract the tarball to the temp dir
-                    with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                    with retry_open(archive_filename, mode="rb") as tar_f:
+                        tarball = tarfile.open(archive_filename, fileobj=tar_f, mode="r|")
                         for tarinfo in tarball:
-                            filename = tarinfo.name
+                            if PY2:
+                                filename = tarinfo.name.decode("utf-8")
+                            else:
+                                filename = tarinfo.name
                             # By default, doc name is just the same as filename
-                            # Filenames could be unicode and we should preserve that in the doc name
-                            doc_name = filename.decode("utf8")
+                            doc_name = filename
 
                             if gzipped and doc_name.endswith(".gz"):
                                 # If we used the .gz extension while writing the file, remove it to get the doc name
@@ -173,17 +190,22 @@ class GroupedCorpus(IterableCorpus):
 
                             tarball.extract(tarinfo, tmp_dir)
                             # Read in the data
-                            with open(os.path.join(tmp_dir, filename), "r") as f:
+                            with open(os.path.join(tmp_dir, filename), "rb") as f:
                                 raw_data = f.read()
                             if gzipped:
                                 if doc_name.endswith(".gz"):
                                     # Gzipped document
-                                    with gzip.GzipFile(fileobj=StringIO(raw_data), mode="rb") as gzip_file:
+                                    with gzip.GzipFile(fileobj=BytesIO(raw_data), mode="rb") as gzip_file:
                                         raw_data = gzip_file.read()
                                 else:
                                     # For backwards-compatibility, where gzip=True, but the gz extension wasn't used, we
                                     #  just decompress with zlib, without trying to parse the gzip headers
                                     raw_data = zlib.decompress(raw_data)
+
+                            # Wrap in bytes
+                            # In Py2, this converts the string to a bytes backport
+                            # In Py3, this is a no-op
+                            raw_data = bytes(raw_data)
 
                             # Apply subclass-specific post-processing and produce a document instance
                             document = self.data_to_document(raw_data)
@@ -207,17 +229,17 @@ class GroupedCorpus(IterableCorpus):
         def list_archive_iter(self):
             gzipped = self.metadata.get("gzip", False)
             for archive_name, archive_filename in zip(self.archives, self.archive_filenames):
-                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
+                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="rb")) as tarball:
                     for tarinfo in tarball:
-                        filename = tarinfo.name
+                        filename = tarinfo.name.decode("utf-8")
                         # Do the same name preprocessing that archive_iter does
-                        doc_name = filename.decode("utf8")
+                        doc_name = filename
                         if gzipped and doc_name.endswith(".gz"):
                             # If we used the .gz extension while writing the file, remove it to get the doc name
                             doc_name = doc_name[:-3]
                         yield archive_name, doc_name
 
-    class Writer:
+    class Writer(object):
         """
         Writes a large corpus of documents out to disk, grouping them together in tar archives.
 
@@ -288,7 +310,7 @@ class GroupedCorpus(IterableCorpus):
             self.doc_count = self.metadata["length"]
 
         def add_document(self, archive_name, doc_name, doc):
-            # A document instance provides access to the raw data for a document as a unicode string
+            # A document instance provides access to the raw data for a document as a bytes (Py3) or string (Py2)
             # If it's not directly available, it will be converted when we try to retrieve the raw data
             try:
                 data = doc.raw_data
@@ -307,7 +329,26 @@ class GroupedCorpus(IterableCorpus):
 
             if data is None:
                 # For an empty result, signified by None, output an empty file
-                data = u""
+                data = bytes()
+
+            # TODO In the future, remove this explicit type check
+            if not isinstance(data, bytes):
+                warnings.warn("document raw data should be provided as a bytes() object. Document type {} got "
+                              "a {} instead. This is probably a result of the Python 2-3 conversion".format(
+                    self.datatype.data_point_type.name, type(data).__name__,
+                ))
+            try:
+                # This should already be a bytes object, but we do this here
+                # to make it more likely that old code works, while the above message is showing and
+                data = bytes(data)
+            except Exception as e:
+                # It's here now to ease the transition to Python 3, as this is going to be a tricky point to get right
+                # Check that the data is a unicode string, as expected
+                raise TypeError("tried to add a document of type {}, but its raw_data was of type {}, not "
+                                "something compatible with bytes(). "
+                                "This is probably a result of the Python 2-3 conversion. (Error: {})".format(
+                    self.datatype.data_point_type.name, type(data).__name__, e
+                ))
 
             if archive_name != self.current_archive_name:
                 # Starting a new archive
@@ -318,10 +359,10 @@ class GroupedCorpus(IterableCorpus):
                 tar_filename = os.path.join(self.data_dir, "%s.tar" % archive_name)
                 # If we're appending a corpus and the archive already exists, append to it
                 try:
-                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w")
+                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w", encoding="utf8")
                 except tarfile.ReadError:
                     # Couldn't open the existing file to append to, write instead
-                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w")
+                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w", encoding="utf8")
 
             # Add a new document to archive
             if self.gzip:
@@ -331,7 +372,7 @@ class GroupedCorpus(IterableCorpus):
                 with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=gzip_io) as gzip_file:
                     gzip_file.write(data)
                 data = gzip_io.getvalue()
-            data_file = StringIO(data)
+            data_file = BytesIO(data)
             # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
             info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
             info.size = len(data)
@@ -408,7 +449,7 @@ class AlignedGroupedCorpora(object):
 
     def archive_iter(self, start_after=None, skip=None, name_filter=None):
         # Iterate over all grouped corpora at once
-        for corpus_items in izip(
+        for corpus_items in zip(
                 *[corpus.archive_iter(start_after=start_after, skip=skip)
                   for corpus in self.readers]):
             # Check we've got the same archive and doc name combination from every corpus
@@ -500,7 +541,7 @@ class CorpusWithTypeFromInput(DynamicOutputDatatype):
             else:
                 # No type to serve as the common type
                 raise TypeError(
-                    "incompatible data point types for concatenation: %s" % ", ".join(t.__name__ for t in types))
+                    "incompatible data point types for concatenation: %s" % ", ".join(t.__name__ for t in dp_types))
 
         # Check whether the inputs are all grouped corpora
         if all(isinstance(datatype, GroupedCorpus) for datatype in datatypes):
