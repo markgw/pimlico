@@ -1,5 +1,5 @@
-pimlico\.utils\.communicate module
-==================================
+communicate
+===========
 
 .. automodule:: pimlico.utils.communicate
     :members:

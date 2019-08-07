@@ -1,5 +1,5 @@
-pimlico\.datatypes package
-==========================
+datatypes
+=========
 
 Subpackages
 -----------

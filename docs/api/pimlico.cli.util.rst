@@ -1,5 +1,5 @@
-pimlico\.cli\.util module
-=========================
+util
+====
 
 .. automodule:: pimlico.cli.util
     :members:

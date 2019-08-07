@@ -1,5 +1,5 @@
-pimlico\.cli\.check module
-==========================
+check
+=====
 
 .. automodule:: pimlico.cli.check
     :members:

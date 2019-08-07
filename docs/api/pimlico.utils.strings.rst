@@ -1,5 +1,5 @@
-pimlico\.utils\.strings module
-==============================
+strings
+=======
 
 .. automodule:: pimlico.utils.strings
     :members:

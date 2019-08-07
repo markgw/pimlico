@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.base module
-========================================
+base
+====
 
 .. automodule:: pimlico.datatypes.corpora.base
     :members:

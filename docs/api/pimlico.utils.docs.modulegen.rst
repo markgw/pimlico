@@ -1,5 +1,5 @@
-pimlico\.utils\.docs\.modulegen module
-======================================
+modulegen
+=========
 
 .. automodule:: pimlico.utils.docs.modulegen
     :members:

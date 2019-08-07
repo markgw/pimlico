@@ -1,5 +1,5 @@
-pimlico\.test package
-=====================
+test
+====
 
 Submodules
 ----------

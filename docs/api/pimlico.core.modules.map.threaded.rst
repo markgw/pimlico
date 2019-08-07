@@ -1,5 +1,5 @@
-pimlico\.core\.modules\.map\.threaded module
-============================================
+threaded
+========
 
 .. automodule:: pimlico.core.modules.map.threaded
     :members:

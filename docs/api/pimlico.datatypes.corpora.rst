@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora package
-===================================
+corpora
+=======
 
 Submodules
 ----------

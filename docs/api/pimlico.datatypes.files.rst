@@ -1,5 +1,5 @@
-pimlico\.datatypes\.files module
-================================
+files
+=====
 
 .. automodule:: pimlico.datatypes.files
     :members:

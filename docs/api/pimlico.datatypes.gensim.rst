@@ -1,5 +1,5 @@
-pimlico\.datatypes\.gensim module
-=================================
+gensim
+======
 
 .. automodule:: pimlico.datatypes.gensim
     :members:

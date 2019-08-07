@@ -1,5 +1,5 @@
-pimlico\.utils\.urwid module
-============================
+urwid
+=====
 
 .. automodule:: pimlico.utils.urwid
     :members:

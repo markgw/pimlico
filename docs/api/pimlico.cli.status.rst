@@ -1,5 +1,5 @@
-pimlico\.cli\.status module
-===========================
+status
+======
 
 .. automodule:: pimlico.cli.status
     :members:

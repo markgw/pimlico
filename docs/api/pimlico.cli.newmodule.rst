@@ -1,5 +1,5 @@
-pimlico\.cli\.newmodule module
-==============================
+newmodule
+=========
 
 .. automodule:: pimlico.cli.newmodule
     :members:

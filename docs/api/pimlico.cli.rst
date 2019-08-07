@@ -1,5 +1,5 @@
-pimlico\.cli package
-====================
+cli
+===
 
 Subpackages
 -----------

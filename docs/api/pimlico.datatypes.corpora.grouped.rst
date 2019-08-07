@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.grouped module
-===========================================
+grouped
+=======
 
 .. automodule:: pimlico.datatypes.corpora.grouped
     :members:

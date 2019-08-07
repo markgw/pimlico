@@ -1,5 +1,5 @@
-pimlico\.cli\.recover module
-============================
+recover
+=======
 
 .. automodule:: pimlico.cli.recover
     :members:

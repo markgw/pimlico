@@ -1,5 +1,5 @@
-pimlico\.cli\.browser\.tools\.corpus module
-===========================================
+corpus
+======
 
 .. automodule:: pimlico.cli.browser.tools.corpus
     :members:

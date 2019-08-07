@@ -1,5 +1,5 @@
-pimlico\.cli\.debug\.stepper module
-===================================
+stepper
+=======
 
 .. automodule:: pimlico.cli.debug.stepper
     :members:

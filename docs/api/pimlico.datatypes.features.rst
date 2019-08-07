@@ -1,5 +1,5 @@
-pimlico\.datatypes\.features module
-===================================
+features
+========
 
 .. automodule:: pimlico.datatypes.features
     :members:

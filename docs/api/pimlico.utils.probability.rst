@@ -1,5 +1,5 @@
-pimlico\.utils\.probability module
-==================================
+probability
+===========
 
 .. automodule:: pimlico.utils.probability
     :members:

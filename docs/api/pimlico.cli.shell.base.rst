@@ -1,5 +1,5 @@
-pimlico\.cli\.shell\.base module
-================================
+base
+====
 
 .. automodule:: pimlico.cli.shell.base
     :members:

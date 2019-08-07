@@ -1,5 +1,5 @@
-pimlico\.core\.dependencies\.java module
-========================================
+java
+====
 
 .. automodule:: pimlico.core.dependencies.java
     :members:

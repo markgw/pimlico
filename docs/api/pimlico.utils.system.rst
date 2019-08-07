@@ -1,5 +1,5 @@
-pimlico\.utils\.system module
-=============================
+system
+======
 
 .. automodule:: pimlico.utils.system
     :members:

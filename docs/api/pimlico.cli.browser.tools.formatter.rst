@@ -1,5 +1,5 @@
-pimlico\.cli\.browser\.tools\.formatter module
-==============================================
+formatter
+=========
 
 .. automodule:: pimlico.cli.browser.tools.formatter
     :members:

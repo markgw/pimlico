@@ -1,5 +1,5 @@
-pimlico\.cli\.run module
-========================
+run
+===
 
 .. automodule:: pimlico.cli.run
     :members:

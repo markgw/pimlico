@@ -65,6 +65,8 @@ api:
 	@echo "Building API docs"
 	rm -rf $(APIDIR)
 	$(SPHINXAPI) -eT -d 2 -o $(APIDIR) ../src/python/ ../src/python/$(MODULE_PATH) $(EXCLUDE_API)
+	# Change the titles of the docs so they don't include the full Python path
+	@$(PYTHON) ../src/python/pimlico/utils/docs/apiheaders.py $(APIDIR)
 
 modules:
 	@echo "Building module docs"

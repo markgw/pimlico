@@ -1,5 +1,5 @@
-pimlico\.cli\.pyshell module
-============================
+pyshell
+=======
 
 .. automodule:: pimlico.cli.pyshell
     :members:

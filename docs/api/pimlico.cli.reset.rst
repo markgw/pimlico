@@ -1,5 +1,5 @@
-pimlico\.cli\.reset module
-==========================
+reset
+=====
 
 .. automodule:: pimlico.cli.reset
     :members:

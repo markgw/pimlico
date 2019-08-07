@@ -1,5 +1,5 @@
-pimlico\.datatypes\.embeddings module
-=====================================
+embeddings
+==========
 
 .. automodule:: pimlico.datatypes.embeddings
     :members:

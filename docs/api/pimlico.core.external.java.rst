@@ -1,5 +1,5 @@
-pimlico\.core\.external\.java module
-====================================
+java
+====
 
 .. automodule:: pimlico.core.external.java
     :members:

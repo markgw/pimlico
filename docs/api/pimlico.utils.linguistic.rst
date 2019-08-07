@@ -1,5 +1,5 @@
-pimlico\.utils\.linguistic module
-=================================
+linguistic
+==========
 
 .. automodule:: pimlico.utils.linguistic
     :members:

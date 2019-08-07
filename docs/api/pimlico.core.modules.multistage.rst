@@ -1,5 +1,5 @@
-pimlico\.core\.modules\.multistage module
-=========================================
+multistage
+==========
 
 .. automodule:: pimlico.core.modules.multistage
     :members:

@@ -1,11 +1,12 @@
-pimlico\.utils\.docs package
-============================
+docs
+====
 
 Submodules
 ----------
 
 .. toctree::
 
+   pimlico.utils.docs.apiheaders
    pimlico.utils.docs.commandgen
    pimlico.utils.docs.modulegen
    pimlico.utils.docs.rest

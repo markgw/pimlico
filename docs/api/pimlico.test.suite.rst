@@ -1,5 +1,5 @@
-pimlico\.test\.suite module
-===========================
+suite
+=====
 
 .. automodule:: pimlico.test.suite
     :members:

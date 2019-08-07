@@ -1,5 +1,5 @@
-pimlico\.utils\.filesystem module
-=================================
+filesystem
+==========
 
 .. automodule:: pimlico.utils.filesystem
     :members:

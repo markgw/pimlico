@@ -1,5 +1,5 @@
-pimlico\.core\.modules package
-==============================
+modules
+=======
 
 Subpackages
 -----------

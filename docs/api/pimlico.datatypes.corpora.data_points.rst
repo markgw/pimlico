@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.data\_points module
-================================================
+data\_points
+============
 
 .. automodule:: pimlico.datatypes.corpora.data_points
     :members:

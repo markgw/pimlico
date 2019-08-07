@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.json module
-========================================
+json
+====
 
 .. automodule:: pimlico.datatypes.corpora.json
     :members:

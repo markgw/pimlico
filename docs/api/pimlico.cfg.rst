@@ -1,5 +1,5 @@
-pimlico\.cfg module
-===================
+cfg
+===
 
 .. automodule:: pimlico.cfg
     :members:

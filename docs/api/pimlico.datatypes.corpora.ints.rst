@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.ints module
-========================================
+ints
+====
 
 .. automodule:: pimlico.datatypes.corpora.ints
     :members:

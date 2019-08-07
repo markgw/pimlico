@@ -1,5 +1,5 @@
-pimlico\.cli\.browser\.tool module
-==================================
+tool
+====
 
 .. automodule:: pimlico.cli.browser.tool
     :members:

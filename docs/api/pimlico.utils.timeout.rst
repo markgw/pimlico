@@ -1,5 +1,5 @@
-pimlico\.utils\.timeout module
-==============================
+timeout
+=======
 
 .. automodule:: pimlico.utils.timeout
     :members:

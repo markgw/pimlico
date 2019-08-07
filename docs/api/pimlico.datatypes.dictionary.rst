@@ -1,5 +1,5 @@
-pimlico\.datatypes\.dictionary module
-=====================================
+dictionary
+==========
 
 .. automodule:: pimlico.datatypes.dictionary
     :members:

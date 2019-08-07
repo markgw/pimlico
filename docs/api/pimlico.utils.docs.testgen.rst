@@ -1,5 +1,5 @@
-pimlico\.utils\.docs\.testgen module
-====================================
+testgen
+=======
 
 .. automodule:: pimlico.utils.docs.testgen
     :members:

@@ -1,5 +1,5 @@
-pimlico\.utils\.progress module
-===============================
+progress
+========
 
 .. automodule:: pimlico.utils.progress
     :members:

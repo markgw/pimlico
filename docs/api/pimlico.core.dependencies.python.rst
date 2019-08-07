@@ -1,5 +1,5 @@
-pimlico\.core\.dependencies\.python module
-==========================================
+python
+======
 
 .. automodule:: pimlico.core.dependencies.python
     :members:

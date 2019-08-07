@@ -1,5 +1,5 @@
-pimlico\.utils\.docs\.rest module
-=================================
+rest
+====
 
 .. automodule:: pimlico.utils.docs.rest
     :members:

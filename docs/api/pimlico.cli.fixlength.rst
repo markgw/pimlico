@@ -1,5 +1,5 @@
-pimlico\.cli\.fixlength module
-==============================
+fixlength
+=========
 
 .. automodule:: pimlico.cli.fixlength
     :members:

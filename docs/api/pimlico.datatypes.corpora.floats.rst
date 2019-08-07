@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.floats module
-==========================================
+floats
+======
 
 .. automodule:: pimlico.datatypes.corpora.floats
     :members:

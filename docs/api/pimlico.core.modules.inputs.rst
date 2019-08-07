@@ -1,5 +1,5 @@
-pimlico\.core\.modules\.inputs module
-=====================================
+inputs
+======
 
 .. automodule:: pimlico.core.modules.inputs
     :members:

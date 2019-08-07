@@ -1,5 +1,5 @@
-pimlico\.test\.pipeline module
-==============================
+pipeline
+========
 
 .. automodule:: pimlico.test.pipeline
     :members:

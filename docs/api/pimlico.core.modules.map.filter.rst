@@ -1,5 +1,5 @@
-pimlico\.core\.modules\.map\.filter module
-==========================================
+filter
+======
 
 .. automodule:: pimlico.core.modules.map.filter
     :members:

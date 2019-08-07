@@ -1,5 +1,5 @@
-pimlico\.cli\.shell\.commands module
-====================================
+commands
+========
 
 .. automodule:: pimlico.cli.shell.commands
     :members:

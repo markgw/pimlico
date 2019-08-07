@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.table module
-=========================================
+table
+=====
 
 .. automodule:: pimlico.datatypes.corpora.table
     :members:

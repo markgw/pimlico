@@ -1,5 +1,5 @@
-pimlico\.datatypes\.corpora\.tokenized module
-=============================================
+tokenized
+=========
 
 .. automodule:: pimlico.datatypes.corpora.tokenized
     :members:

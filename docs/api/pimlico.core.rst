@@ -1,5 +1,5 @@
-pimlico\.core package
-=====================
+core
+====
 
 Subpackages
 -----------

@@ -1,5 +1,5 @@
-pimlico\.cli\.locations module
-==============================
+locations
+=========
 
 .. automodule:: pimlico.cli.locations
     :members:
