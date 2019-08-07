@@ -7,10 +7,7 @@ Main command-line script for running Pimlico, typically called from `pimlico.sh`
 Provides access to many subcommands, acting as the primary interface to Pimlico's functionality.
 
 """
-<<<<<<< HEAD
-=======
 from __future__ import print_function
->>>>>>> python3
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
