@@ -18,7 +18,7 @@ you can write your own processing modules using either Python 2 or 3.
 
 .. note::
 
-   These are the docs for the **release candidate for v1.0**.
+   **New datatypes system**
 
    This brings with it a big project
    to change how datatypes work internally (previously in branch ``datatypes``)
