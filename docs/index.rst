@@ -13,14 +13,8 @@ It is especially focussed on processing linguistic corpora and
 provides wrappers around many
 existing, widely used **NLP** (Natural Language Processing) tools.
 
-.. note::
-
-   This is the ``python3`` branch of Pimlico, which adds Python 2-3 compatibility.
-   This is a lengthy ongoing process. It's now reasonably functional and I welcome
-   people using this branch and reporting bugs (in Python 2 or 3).
-
-   If you want a more stable version of Pimlico, use the ``master`` branch or a
-   tagged release.
+Pimlico is written in Python and can be run using Python >=2.7 or >=3.6. This means
+you can write your own processing modules using either Python 2 or 3.
 
 .. note::
 
@@ -52,11 +46,6 @@ pipeline and checking that everything's executed in the right order.
 The core toolkit is written in Python. Pimlico is open source, released under the GPLv3 license. It is
 available from `its Github repository <https://github.com/markgw/pimlico>`_.
 To get started with a Pimlico project, follow the :doc:`getting-started guide <guides/setup>`.
-
-Currently, Pimlico only supports **Python 2**.
-`Work is underway <https://github.com/markgw/pimlico/issues/8>`_
-to make it **Python 3 compatible**, but it's a large and complex
-codebase, so this will take some time.
 
 Pimlico is short for *PIpelined Modular LInguistic COrpus processing*.
 
