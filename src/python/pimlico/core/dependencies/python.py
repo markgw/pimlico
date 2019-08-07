@@ -310,12 +310,8 @@ class PythonPackageOnPip(PythonPackageDependency):
 # Some commonly used dependencies #
 ###################################
 
-numpy_dependency = PythonPackageSystemwideInstall("numpy", "Numpy",
-                                                  pip_package="numpy", yum_package="numpy", apt_package="python-numpy",
-                                                  url="http://www.numpy.org/")
-scipy_dependency = PythonPackageSystemwideInstall("scipy", "Scipy",
-                                                  pip_package="scipy", yum_package="scipy", apt_package="python-scipy",
-                                                  url="https://www.scipy.org/scipylib/")
+numpy_dependency = PythonPackageOnPip("numpy", "Numpy")
+scipy_dependency = PythonPackageOnPip("scipy", "Scipy")
 theano_dependency = PythonPackageOnPip("theano", pip_package="Theano")
 tensorflow_dependency = PythonPackageOnPip("tensorflow")
 # We usually need h5py for reading/storing models
