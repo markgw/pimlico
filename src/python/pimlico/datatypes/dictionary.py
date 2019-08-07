@@ -13,12 +13,6 @@ because it's unnecessary to depend on the whole of Gensim just for one data stru
 However, it is possible to retrieve a Gensim dictionary directly from the Pimlico
 data structure if you need to use it with Gensim.
 
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to ``Reader``
-   and ``Writer`` classes.
-   Check that these still work as they used to.
-
 """
 from __future__ import absolute_import
 

@@ -5,12 +5,6 @@
 Some basic core datatypes that are commonly used for passing simple data, like
 strings and dicts, through pipelines.
 
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to ``Reader``
-   and ``Writer`` classes.
-   Check that these still work as they used to.
-
 """
 from future import standard_library
 

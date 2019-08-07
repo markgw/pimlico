@@ -15,12 +15,6 @@ See :doc:`/core/datatypes` for a guide to how Pimlico datatypes work.
 
 This module defines the base classes for all datatypes.
 
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to ``PimlicoDatatype.Reader``,
-   ``PimlicoDatatype.Reader.Setup`` and ``PimlicoDatatype.Writer``.
-   Check that these still work as they used to.
-
 """
 from builtins import next
 from builtins import zip

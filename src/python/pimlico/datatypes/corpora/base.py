@@ -1,11 +1,6 @@
-"""
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to ``Reader``
-   and ``Writer`` classes.
-   Check that these still work as they used to.
-
-"""
+# This file is part of Pimlico
+# Copyright (C) 2016 Mark Granroth-Wilding
+# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from __future__ import print_function
 from builtins import object
