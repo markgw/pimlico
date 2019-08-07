@@ -3,7 +3,9 @@
 #
 # These things also get installed in a local environment when you run Pimlico for the first time.
 # The main reason for also having this requirements file is to allow ReadTheDocs to set up its environment.
+future
 progressbar
 tabulate
 termcolor
 colorama
+backports.csv
