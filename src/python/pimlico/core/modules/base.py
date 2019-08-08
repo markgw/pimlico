@@ -1341,19 +1341,9 @@ def load_module_executor(path_or_info):
             try:
                 mod = import_module(executor_path)
             except ImportError as e:
-                # Executors used to be defined in a module called "exec", until I realised this was stupid, as it's
-                #  as reserved word!
-                # Check whether one such exists and use it if it does
-                try:
-                    mod = import_module("%s.exec" % path_or_info)
-                except ImportError:
-                    # If not, raise an error relating to the new "execute" convention, not the old, deprecated name
-                    raise ModuleInfoLoadError("module %s could not be loaded, could not import path %s" %
-                                              (path_or_info, executor_path), cause=e)
-                else:
-                    # Output a deprecation warning so we know to fix this naming
-                    warnings.warn("module '%s' uses an 'exec' python module to define its executor. Should be renamed "
-                                  "to 'execute'" % path_or_info)
+                # If not, raise an error relating to the new "execute" convention, not the old, deprecated name
+                raise ModuleInfoLoadError("module %s could not be loaded, could not import path %s" %
+                                          (path_or_info, executor_path), cause=e)
         else:
             # We were given a module info instance: work out where it lives and get the executor relatively
             try:
