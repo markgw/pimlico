@@ -162,7 +162,7 @@ class LoadCmd(PimlicoCLISubcommand):
             with tarfile.open(dump_path, mode="r:gz") as tarball:
                 # Tarball should include a metadata file if it's come from a dump
                 metadata_file = tarball.extractfile("dump_metadata.json")
-                dump_meta = json.loads(metadata_file.read())
+                dump_meta = json.loads(metadata_file.read().decode("utf-8"))
                 metadata_file.close()
 
                 module_name = dump_meta["module_name"]
