@@ -949,7 +949,7 @@ class PipelineConfig(object):
             # Run all type-checking straight away so we know this is a valid pipeline
             check_pipeline(pipeline)
         except PipelineCheckError as e:
-            raise PipelineConfigParseError("pipeline loaded, but failed checks: %s" % e, cause=e)
+            raise PipelineConfigParseError("failed checks: %s" % e, cause=e, explanation=e.explanation)
 
         return pipeline
 
@@ -1558,17 +1558,21 @@ class PipelineConfigParseError(Exception):
     """ General problems interpreting pipeline config """
     def __init__(self, *args, **kwargs):
         self.cause = kwargs.pop("cause", None)
+        self.explanation = kwargs.pop("explanation", None)
         super(PipelineConfigParseError, self).__init__(*args, **kwargs)
 
 
 class PipelineStructureError(Exception):
     """ Fundamental structural problems in a pipeline. """
-    pass
+    def __init__(self, *args, **kwargs):
+        self.explanation = kwargs.pop("explanation", None)
+        super(PipelineStructureError, self).__init__(*args, **kwargs)
 
 
 class PipelineCheckError(Exception):
     """ Error in the process of explicitly checking a pipeline for problems. """
     def __init__(self, cause, *args, **kwargs):
+        self.explanation = kwargs.pop("explanation", None)
         super(PipelineCheckError, self).__init__(*args, **kwargs)
         self.cause = cause
 
@@ -1912,7 +1916,8 @@ def check_pipeline(pipeline):
         try:
             mod.typecheck_inputs()
         except PipelineStructureError as e:
-            raise PipelineCheckError(e, "Input typechecking for module '%s' failed: %s" % (module, e))
+            raise PipelineCheckError(e, "Input typechecking for module '%s' failed: %s" % (module, e),
+                                     explanation=e.explanation)
 
 
 def get_dependencies(pipeline, modules, recursive=False, sources=False):

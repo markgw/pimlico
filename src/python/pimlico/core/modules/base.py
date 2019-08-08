@@ -33,6 +33,8 @@ import warnings
 from datetime import datetime
 from importlib import import_module
 
+from tabulate import tabulate
+
 from pimlico.core.config import PipelineStructureError
 from pimlico.core.modules.options import process_module_options
 from pimlico.datatypes.base import PimlicoDatatype, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
@@ -872,15 +874,23 @@ class BaseModuleInfo(object):
                     "invalid output datatype from output '{}' of module '{}'. Must be instance of PimlicoDatatype "
                     "subclass or a DynamicOutputDatatype subclass, got {}".format(
                         dep_module_output_name, dep_module_name, type(dep_module_output).__name__
-                    ))
+                    ),
+                    explanation="type({}.{}): {}".format(
+                        dep_module_name, dep_module_output_name, type(dep_module_output)
+                    )
+                )
             try:
                 first_satisfied.append(check_type(dep_module_output, input_type_requirements))
             except TypeCheckError as e:
+                e.input = "{}.{}".format(self.module_name, input_name)
+                e.source = "{}.{}".format(dep_module_name, output_name or "[default]")
                 raise PipelineStructureError(
                     "type-checking error matching input '{}' to module '{}' with output '{}' from "
                     "module '{}': {}".format(
                         input_name, self.module_name, output_name or "default", dep_module_name, e
-                ))
+                    ),
+                    explanation=e.format(),
+                )
         return first_satisfied
 
     def get_software_dependencies(self):
@@ -1185,7 +1195,11 @@ def check_type(provided_type, type_requirements):
     # Try to use type_checking_name() to identify types
     provided_type_name = type_checking_name(provided_type)
     req_types = "/".join(type_checking_name(t) for t in type_requirements)
-    raise TypeCheckError("required type is {} (or a descendent), but provided type is {}".format(req_types, provided_type_name))
+    raise TypeCheckError(
+        "required type is {} (or a descendent), but provided type is {}".format(req_types, provided_type_name),
+        required_type=req_types,
+        provided_type=provided_type_name,
+    )
 
 
 def type_checking_name(typ):
@@ -1248,7 +1262,36 @@ class ModuleTypeError(Exception):
 
 
 class TypeCheckError(Exception):
-    pass
+    """
+    Pipeline type-check mismatch.
+
+    Full description of problem provided in error message.
+    May optionally provide more detailed information about the input and output (source)
+    that failed to match, the expected type and the received type, all as strings.
+    Specify using kwargs ``input``, ``source``, ``required_type`` and
+    ``provided_type``.
+
+    """
+    def __init__(self, *args, **kwargs):
+        self.input = kwargs.pop("input_desc", None)
+        self.source = kwargs.pop("output_desc", None)
+        self.provided_type = kwargs.pop("provided_type", None)
+        self.required_type = kwargs.pop("required_type", None)
+        super(TypeCheckError, self).__init__(*args, **kwargs)
+
+    def format(self):
+        """
+        Provide a nice visual format of the mismatch to help the user.
+
+        """
+        if any(x is None for x in [self.input, self.source, self.provided_type, self.required_type]):
+            return None
+        return "Type mismatch:\n{}".format(
+            tabulate([
+                [" ", "Connection:", self.source, "->", self.input],
+                [" ", "Types:", "!> {} <!".format(self.provided_type), "->", self.required_type]
+            ], tablefmt="plain", colalign=[None, "left", "right", "center", "left"])
+        )
 
 
 class DependencyError(Exception):

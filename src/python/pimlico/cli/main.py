@@ -205,6 +205,9 @@ if __name__ == "__main__":
                                        local_config=opts.local_config)
     except (PipelineConfigParseError, PipelineStructureError) as e:
         print("Error reading pipeline config: %s" % e, file=sys.stderr)
+        if hasattr(e, "explanation") and e.explanation is not None:
+            # Show more detailed explanation of problem
+            print("\n" + e.explanation, file=sys.stderr)
         sys.exit(1)
     except ModuleOptionParseError as e:
         print("Error in module options specified in config file: %s" % e, file=sys.stderr)

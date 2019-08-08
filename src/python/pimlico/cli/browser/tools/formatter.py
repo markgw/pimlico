@@ -106,7 +106,11 @@ def typecheck_formatter(formatted_doc_type, formatter_cls):
     if not isinstance(formatted_doc_type, type(document_type)):
         raise TypeCheckError(
             "formatter {} is not designed for this data-point type ({})".format(
-                formatter_cls.__name__, formatted_doc_type.name)
+                formatter_cls.__name__, formatted_doc_type.name),
+            input="formatter {}".format(formatter_cls.__name__),
+            source="formatter input",
+            required_type=str(document_type),
+            provided_type=formatted_doc_type.name,
         )
 
 
