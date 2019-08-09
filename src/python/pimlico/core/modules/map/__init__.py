@@ -315,8 +315,8 @@ class DocumentMapper(object):
                                 qget(executor.pool.exception_queue, timeout=0.1)
                             # Sometimes, a traceback from within the process is included
                             debugging = error.traceback if hasattr(error, "traceback") else None
-                            raise ModuleExecutionError("error in worker process: %s" % error,
-                                                       cause=error, debugging_info=debugging)
+                            raise_from(ModuleExecutionError("error in worker process: %s" % error,
+                                                            cause=error, debugging_info=debugging), error)
                     except:
                         raise
                     else:
