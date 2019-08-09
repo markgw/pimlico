@@ -399,6 +399,9 @@ class InvalidDocument(DataPointType):
         def __str__(self):
             return self.raw_data
 
+        def __repr__(self):
+            return "InvalidDocument()"
+
 
 def invalid_document(module_name, error_info):
     """
@@ -482,10 +485,6 @@ class TextDocumentType(RawDocumentType):
     """
     class Document(object):
         keys = ["text"]
-
-        @property
-        def text(self):
-            return self.internal_data["text"]
 
         def internal_to_raw(self, internal_data):
             return bytes(internal_data["text"].encode("utf-8"))
