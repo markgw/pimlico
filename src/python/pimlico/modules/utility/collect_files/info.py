@@ -10,10 +10,6 @@ in one place.
 Files are either collected into subdirectories or renamed to avoid
 clashes.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
-
 """
 import os
 import warnings
