@@ -31,6 +31,7 @@ Available pipelines
    embeddings.store_tsv.conf.rst
    embeddings.word2vec.conf.rst
    embeddings.store_word2vec.conf.rst
+   utility.collect_files.conf.rst
    opennlp.tokenize.conf.rst
    corpora.store.conf.rst
    corpora.shuffle.conf.rst

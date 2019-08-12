@@ -12,6 +12,7 @@ test-config-glove.conf	pimlico.modules.input.embeddings.glove
 test-config-store_tsv.conf	pimlico.modules.embeddings.store_tsv
 test-config-word2vec.conf	pimlico.modules.embeddings.word2vec
 test-config-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec
+test-config-collect_files.conf	pimlico.modules.utility.collect_files
 test-config-tokenize.conf	pimlico.modules.opennlp.tokenize
 test-config-store.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.store
 test-config-shuffle.conf	pimlico.modules.corpora.shuffle

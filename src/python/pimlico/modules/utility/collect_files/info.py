@@ -15,16 +15,26 @@ clashes.
    Update to new datatypes system and add test pipeline
 
 """
-from builtins import zip
-from builtins import range
 import os
 import warnings
+from builtins import zip, range, super
 
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool, comma_separated_strings
 from pimlico.datatypes import DynamicOutputDatatype
 from pimlico.datatypes.base import MultipleInputs
 from pimlico.datatypes.files import NamedFileCollection
+
+
+class MappedNamedFileCollection(NamedFileCollection):
+    """
+    Same as NamedFileCollection, but provides access to a filename mapping
+    that was applied to produce the collected filenames.
+
+    """
+    def __init__(self, *args, **kwargs):
+        self.collection_mappings = kwargs.pop("collection_mappings", {})
+        super().__init__(*args, **kwargs)
 
 
 class CollectedFiles(DynamicOutputDatatype):
@@ -64,21 +74,16 @@ class CollectedFiles(DynamicOutputDatatype):
             filename_mappings.append(filename_mapping)
             new_filenames.extend(list(filename_mapping.values()))
 
-        class CollectedFileCollection(NamedFileCollection):
-            filenames = new_filenames
-            # Make this mapping available in the output datatype so we don't need to compute it again
-            collection_mappings = filename_mappings
+        return MappedNamedFileCollection(filenames=new_filenames, collection_mappings=filename_mappings)
 
-        return CollectedFileCollection
-
-    def get_base_datatype_class(self):
-        return NamedFileCollection
+    def get_base_datatype(self):
+        return MappedNamedFileCollection()
 
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "collect_files"
     module_readable_name = "Collect files"
-    module_inputs = [("files", MultipleInputs(NamedFileCollection))]
+    module_inputs = [("files", MultipleInputs(NamedFileCollection()))]
     module_outputs = [("files", CollectedFiles())]
     module_options = {
         "subdirs": {
