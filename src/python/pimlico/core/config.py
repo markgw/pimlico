@@ -533,6 +533,11 @@ class PipelineConfig(object):
                 # At this stage, any expanded modules specified with the *name notation (input to a MultipleInputs)
                 # will not be picked up, as they've still got the * on them
                 for input_opt in [key for key in module_config.keys() if key == "input" or key.startswith("input_")]:
+                    # Check for a list of alt names within []s
+                    # This should be expanded into a list of modules names, each with a different alt name
+                    # E.g. mymod[alt1,alt2,alt3] -> mymod[alt1],mymod[alt2],mymod[alt3]
+                    module_config[input_opt] = _expand_alt_names_list(module_config[input_opt])
+
                     new_alternatives = []
                     # It's possible for the value to already have alternatives, in which case we include them all
                     for original_val in module_config[input_opt].split("|"):
@@ -1797,6 +1802,44 @@ def _check_valid_alt_name(name):
                 disallowed = "newline"
             raise ValueError("module alternative name '{}' is invalid: alt names may not "
                              "include '{}'".format(name, disallowed))
+
+
+_non_mod_name_char = re.compile(r"[\],*|]")
+
+
+def _expand_alt_names_list(val):
+    """
+    Checks through a string for a list of alt names within []s after a module name.
+    These get expanded into a list of repeats of the module name, covering each of
+    the alt names in a list.
+
+    E.g. "mymod[alt1,alt2,alt3],mymod2" -> "mymod[alt1],mymod[alt2],mymod[alt3],mymod2"
+
+    """
+    index = 0
+    while "[" in val[index:]:
+        open_bracket = val.index("[", index)
+        close_bracket = val.find("]", open_bracket)
+        if close_bracket == -1:
+            # No matching closing bracket
+            # Don't complain here: an error will arise somewhere else
+            return val
+        if "," in val[open_bracket+1:close_bracket]:
+            # Get the main module name by seaching backwards from the [ for non-module name strings
+            non_mod_chars = _non_mod_name_char.findall(val[:open_bracket])
+            if len(non_mod_chars) == 0:
+                mod_start = 0
+            else:
+                mod_start = non_mod_chars[-1].end() + 1
+            mod_name = val[mod_start:open_bracket]
+            # Get the list of alt names
+            alt_names = val[open_bracket+1:close_bracket].split(",")
+            # Expand the list and reconstruct the string around it
+            val = val[:mod_start] + \
+                  ",".join("{}[{}]".format(mod_name, alt_name) for alt_name in alt_names) + \
+                  val[close_bracket+1:]
+        index = close_bracket+1
+    return val
 
 
 def check_for_cycles(pipeline):
