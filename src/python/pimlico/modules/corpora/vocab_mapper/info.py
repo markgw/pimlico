@@ -33,4 +33,17 @@ class ModuleInfo(DocumentMapModuleInfo):
             "help": "If given, special token to map all OOV tokens to. Otherwise, use vocab_size+1 as index. "
                     "Special value 'skip' simply skips over OOV tokens",
         },
+        "row_length_bytes": {
+            "help": "The length of each row is stored, by default, using a 2-byte value. "
+                    "If your dataset contains very long lines, you can increase this to allow "
+                    "larger row lengths to be stored",
+            "type": int,
+            "default": 2,
+        }
     }
+
+    def get_output_writer(self, output_name=None, **kwargs):
+        if output_name == "ids":
+            print("Setting bytes to {}".format(self.options["row_length_bytes"]))
+            kwargs["row_length_bytes"] = self.options["row_length_bytes"]
+        return super(ModuleInfo, self).get_output_writer(output_name, **kwargs)

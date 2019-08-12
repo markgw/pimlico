@@ -44,12 +44,18 @@ class IntegerListsDocumentType(RawDocumentType):
             False,
             "Stored signed integers. Default: False",
         ),
+        "row_length_bytes": (
+            2,
+            "Number of bytes to use to encode the length of each row. Default: 2. Increase if you "
+            "need to store very long lists"
+        ),
     })
 
     def reader_init(self, reader):
         super(IntegerListsDocumentType, self).reader_init(reader)
         self.bytes = self.metadata["bytes"]
         self.signed = self.metadata["signed"]
+        self.row_length_bytes = self.metadata["row_length_bytes"]
         self.int_size = self.struct.size
         self.length_size = self.length_struct.size
 
@@ -58,7 +64,7 @@ class IntegerListsDocumentType(RawDocumentType):
         # Metadata should have been set by this point, using kwargs to override the defaults
         self.bytes = writer.metadata["bytes"]
         self.signed = writer.metadata["signed"]
-        self.length_size = self.length_struct.size
+        self.row_length_bytes = writer.metadata["row_length_bytes"]
 
     @cached_property
     def struct(self):
@@ -67,7 +73,7 @@ class IntegerListsDocumentType(RawDocumentType):
     @cached_property
     def length_struct(self):
         # We use a separate struct for the row lengths
-        return get_struct(2, False, 1)
+        return get_struct(self.row_length_bytes, False, 1)
 
     def __getstate__(self):
         # Don't pickle the prepared structs, as they don't pickle nicely
@@ -97,7 +103,7 @@ class IntegerListsDocumentType(RawDocumentType):
             unpacker = self.data_point_type.struct
             int_size = self.data_point_type.int_size
             length_unpacker = self.data_point_type.length_struct
-            length_size = self.data_point_type.length_size
+            length_size = self.data_point_type.length_struct.size
 
             def _read_row(length):
                 for i in range(length):
