@@ -893,10 +893,10 @@ class DynamicOutputDatatype(object):
     def get_datatype(self, module_info):
         raise NotImplementedError
 
-    def get_base_datatype_class(self):
+    def get_base_datatype(self):
         """
         If it's possible to say before the instance of a ModuleInfo is available what base datatype will be
-        produced, implement this to return the class. By default, it returns None.
+        produced, implement this to return a datatype instance. By default, it returns None.
 
         If this information is available, it will be used in documentation.
 

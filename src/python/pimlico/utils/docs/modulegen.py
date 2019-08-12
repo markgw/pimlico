@@ -284,9 +284,9 @@ def input_datatype_text(datatype, context=None, no_warn=False):
 def output_datatype_text(datatype, context=None, no_warn=False):
     if isinstance(datatype, DynamicOutputDatatype):
         # Use the datatype name given by the dynamic datatype and link to the class
-        datatype_class = datatype.get_base_datatype_class()
-        if datatype_class is not None:
-            datatype_class_name = datatype_class.datatype_full_class_name()
+        base_datatype = datatype.get_base_datatype()
+        if base_datatype is not None:
+            datatype_class_name = base_datatype.datatype_full_class_name()
         else:
             # Just link to the dynamic datatype class
             datatype_class_name = "%s.%s" % (type(datatype).__module__, type(datatype).__name__)

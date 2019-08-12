@@ -487,7 +487,7 @@ class GroupedCorpusWithTypeFromInput(DynamicOutputDatatype):
     def __init__(self, input_name=None):
         self.input_name = input_name
 
-    def get_base_datatype_class(self):
+    def get_base_datatype(self):
         return GroupedCorpus()
 
     def get_datatype(self, module_info):
