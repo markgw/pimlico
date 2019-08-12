@@ -1510,7 +1510,10 @@ def substitute_modvars_in_value(key, val, modvars, expanded_params, variables_fr
         # The next thing should be the closing bracket after the substitution expression
         # i.e. the closer of $(...)
         rest = rest.lstrip()
-        if rest[0] != ")":
+        if len(rest) == 0:
+            raise PipelineConfigParseError("reached end of parameter before finding closing bracket "
+                                           "of modvar substitution $(...): {}".format(val))
+        elif rest[0] != ")":
             raise PipelineConfigParseError("expected closing bracket after modvar substitution $(...), but "
                                            "got '%s' in parameter: %s" % (rest[0], val))
         # Modvar expressions can evaluate to lists, but we can't use them in substitutions
