@@ -1294,6 +1294,17 @@ def modvar_params_to_modvars(params, vars, expanded_params, variables_from_input
         else:
             try:
                 vars[key], rest = _parse_modvar_param(val, vars, expanded_params, variables_from_inputs)
+                rest = rest.strip()
+                while rest.startswith(","):
+                    new_val, rest = _parse_modvar_param(rest[1:], vars, expanded_params, variables_from_inputs)
+                    if not isinstance(new_val, list):
+                        new_val = [new_val]
+                    if isinstance(vars[key], list):
+                        vars[key].extend(new_val)
+                    else:
+                        vars[key] = [vars[key]] + new_val
+                    rest = rest.strip()
+
                 # After we've parsed everything we can, nothing else is allowed
                 if len(rest.strip()):
                     raise ValueError("unexpected string: %s" % rest.strip())
