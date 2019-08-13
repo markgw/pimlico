@@ -287,7 +287,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
                         # We don't currently allow additional output specifiers within multistage modules, but
                         # there's no reason why we couldn't
                         sub_inputs[input_name] = \
-                            [("%s:%s" % (self.module_name, previous_stage_name), connection.output_name, [])]
+                            [("%s:%s" % (self.module_name, previous_stage_name), connection.output_name)]
                     elif type(connection) is ModuleInputConnection:
                         # Connection to multi-stage module input
                         stage_input_name = connection.stage_input_name or stage.module_info_cls.inputs[0][0]
