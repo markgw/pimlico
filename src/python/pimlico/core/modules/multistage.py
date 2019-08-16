@@ -8,6 +8,8 @@ from builtins import object
 from collections import Counter, OrderedDict
 from itertools import takewhile, dropwhile
 
+from past.types import basestring
+
 from pimlico.cli.status import status_colored
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.utils.core import remove_duplicates
@@ -113,7 +115,8 @@ class MultistageModuleInfo(BaseModuleInfo):
             return module.is_locked()
 
 
-def multistage_module(multistage_module_type_name, module_stages, use_stage_option_names=False, module_readable_name=None):
+def multistage_module(multistage_module_type_name, module_stages, use_stage_option_names=False,
+                      module_readable_name=None):
     """
     Factory to build a multi-stage module type out of a series of stages, each of which specifies a module type
     for the stage. The stages should be a list of :class:`ModuleStage` objects.
@@ -129,6 +132,7 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
     option_mapping = OrderedDict()
     option_mapping_by_stage = {}
     multistage_module_readable_name = module_readable_name
+    required_outputs = {}
 
     for stage_num, stage in enumerate(module_stages):
         # Make sure we can identify all of the module connections that provide this stage's inputs
@@ -146,26 +150,40 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
                 ]
 
         for connection in stage.connections:
-            if type(connection) is InternalModuleConnection:
+            if type(connection) in [InternalModuleConnection, InternalModuleMultipleConnection]:
                 if stage_num == 0:
                     raise MultistageModulePreparationError("cannot make an internal connection to the first stage")
-                # Look for the previous module we're connecting to
-                if connection.previous_module is None:
-                    # Default to the previous one in the sequence
-                    previous_stage = module_stages[stage_num - 1]
-                elif connection.previous_module not in named_stages:
-                    raise MultistageModulePreparationError(
-                        "stage %s connects to a previous module that does not precede it in the stage sequence: %s" %
-                        (stage.name, connection.previous_module))
+                if type(connection) is InternalModuleConnection:
+                    cnncts = [(connection.previous_module, connection.output_name)]
                 else:
-                    previous_stage = named_stages[connection.previous_module]
-                # Check that the named output of the previous stage exists
-                if connection.output_name is not None and \
-                        connection.output_name not in dict(previous_stage.module_info_cls.module_outputs +
-                                                           previous_stage.module_info_cls.module_optional_outputs):
-                    raise MultistageModulePreparationError(
-                        "stage %s connects to an non-existent output of stage %s: %s" %
-                        (stage.name, previous_stage.name, connection.output_name))
+                    cnncts = [
+                        (
+                            None if isinstance(output, basestring) else output[0],
+                            output if isinstance(output, basestring) else output[1]
+                        ) for output in connection.outputs
+                    ]
+                for previous_module, output_name in cnncts:
+                    # Look for the previous module we're connecting to
+                    if previous_module is None:
+                        # Default to the previous one in the sequence
+                        previous_stage = module_stages[stage_num - 1]
+                    elif previous_module not in named_stages:
+                        raise MultistageModulePreparationError(
+                            "stage %s connects to a previous module that does not precede it in the stage sequence: %s" %
+                            (stage.name, previous_module))
+                    else:
+                        previous_stage = named_stages[previous_module]
+                    # Check that the named output of the previous stage exists
+                    if output_name is not None and \
+                            output_name not in dict(previous_stage.module_info_cls.module_outputs +
+                                                    previous_stage.module_info_cls.module_optional_outputs):
+                        raise MultistageModulePreparationError(
+                            "stage %s connects to an non-existent output of stage %s: %s" %
+                            (stage.name, previous_stage.name, output_name))
+
+                    # Make sure that the required output is produced if it's optional
+                    if output_name is not None:
+                        required_outputs.setdefault(previous_stage.name, []).append(output_name)
             elif type(connection) is ModuleInputConnection:
                 # Connection to multi-stage module input
                 # Get the input type for the stage input
@@ -194,6 +212,9 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
                 main_output_name = connection.main_output_name or stage_output_name
                 main_outputs.append((main_output_name, output_type))
                 output_stage_names[main_output_name] = (stage.name, stage_output_name)
+                if stage_output_name is not None:
+                    # Any outputs that are marked as main outputs should be required (if they're optional)
+                    required_outputs.setdefault(stage.name, []).append(stage_output_name)
 
         stage_mapped_options = []
         # Store a separate mapping for each stage, to make processing easier later
@@ -260,6 +281,14 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
             Overridden to also instantiate all of the internal module infos.
 
             """
+            # Instantiate each internal module in turn
+            for stage_num, stage in enumerate(self.stages):
+                # Get any addition connections for this stage on the basis of the options
+                if stage.extra_connections_from_options is not None:
+                    _extra_cntns, _extra_output_cntns = stage.extra_connections_from_options(kwargs.get("options", {}))
+                    stage.connections.extend(_extra_cntns)
+                    stage.output_connections.extend(_extra_output_cntns)
+
             super(ModuleInfo, self).__init__(module_name, pipeline, **kwargs)
 
             # Instantiate each internal module in turn
@@ -288,14 +317,35 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
                         # there's no reason why we couldn't
                         sub_inputs[input_name] = \
                             [("%s:%s" % (self.module_name, previous_stage_name), connection.output_name)]
+                    elif type(connection) is InternalModuleMultipleConnection:
+                        connect_to = []
+                        for output_def in connection.outputs:
+                            if isinstance(output_def, basestring):
+                                previous_module, output_name = None, output_def
+                            else:
+                                previous_module, output_name = output_def
+
+                            # Get the module we're connecting to
+                            if previous_module is None:
+                                # Default to the previous one in the sequence
+                                previous_stage_name = self.stages[stage_num - 1].name
+                            else:
+                                previous_stage_name = previous_module
+                            connect_to.append(("%s:%s" % (self.module_name, previous_stage_name), output_name))
+                        # This will be referred to in the pipeline using a prefixed name
+                        input_name = connection.input_name or stage.module_info_cls.module_inputs[0][0]
+                        sub_inputs[input_name] = connect_to
                     elif type(connection) is ModuleInputConnection:
                         # Connection to multi-stage module input
                         stage_input_name = connection.stage_input_name or stage.module_info_cls.inputs[0][0]
                         main_input_name = connection.main_input_name or stage_input_name
                         sub_inputs[stage_input_name] = self.inputs[main_input_name]
+
                 # Instantiate the module info for the sub-module
                 module_info = stage.module_info_cls(
-                    "%s:%s" % (self.module_name, stage.name), self.pipeline, inputs=sub_inputs, options=sub_options
+                    "%s:%s" % (self.module_name, stage.name), self.pipeline, inputs=sub_inputs, options=sub_options,
+                    # Ensure that we produce all required outputs
+                    optional_outputs=required_outputs.get(stage.name, []),
                 )
                 # Give the stage a pointer to the main module
                 module_info.main_module = self
@@ -304,6 +354,26 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
                 # along with the other stages (in order) instead of the main module
                 self.internal_modules.append(module_info)
                 self.named_internal_modules[stage.name] = module_info
+
+                # Check for any new outputs from each stage that are defined as main module outputs
+                if stage.output_connections is not None:
+                    for connection in stage.output_connections:
+                        stage_output_name = connection.stage_output_name or \
+                                            (stage.module_info_cls.module_outputs + stage.module_info_cls.module_optional_outputs)[0][0]
+                        main_output_name = connection.main_output_name or stage_output_name
+                        if main_output_name not in dict(self.module_outputs):
+                            try:
+                                output_type = dict(module_info.available_outputs)[stage_output_name]
+                            except KeyError:
+                                raise MultistageModulePreparationError(
+                                    "stage %s tried to connect a non-existent output '%s' to the multistage module output" %
+                                    (stage.name, stage_output_name))
+                            self.module_outputs.append((main_output_name, output_type))
+                            output_stage_names[main_output_name] = (stage.name, stage_output_name)
+                            if stage_output_name is not None:
+                                # Any outputs that are marked as main outputs should be required (if they're optional)
+                                required_outputs.setdefault(stage.name, []).append(stage_output_name)
+                            self.available_outputs.append((main_output_name, output_type))
 
         def instantiate_output_reader_setup(self, output_name, datatype):
             # Hand over to the appropriate module that the output came from to do the instantiation
@@ -342,15 +412,21 @@ class ModuleStage(object):
     with this behaviour, so only do it if you know the stages have distinct option names (or should share their
     values where the names overlap).
 
+    Further connections may be produced once processed options are available (when the
+    main module's module info is instantiated), by specifying a one-argument function
+    as ``extra_connections_from_options``. The argument is the processed option dictionary,
+    which will contain the full set of options given the to the main module.
+
     """
     def __init__(self, name, module_info_cls, connections=None, output_connections=None, option_connections=None,
-                 use_stage_option_names=False):
+                 use_stage_option_names=False, extra_connections_from_options=None):
         self.use_stage_option_names = use_stage_option_names
         self.option_connections = option_connections
-        self.output_connections = output_connections
-        self.connections = connections
+        self.output_connections = output_connections or []
+        self.connections = connections or []
         self.name = name
         self.module_info_cls = module_info_cls
+        self.extra_connections_from_options = extra_connections_from_options
 
 
 class ModuleConnection(object):
@@ -371,6 +447,20 @@ class InternalModuleConnection(ModuleConnection):
         self.output_name = output_name
         self.input_name = input_name
         self.previous_module = previous_module
+
+
+class InternalModuleMultipleConnection(ModuleConnection):
+    """
+    Connection between the outputs of multiple modules and the input to another
+    (which must be a multiple input).
+
+    ``outputs`` should be a list of (``module_name``, ``output_name``) pairs,
+    or just strings giving the output name, assumed to be from the previous module.
+
+    """
+    def __init__(self, input_name, outputs):
+        self.outputs = outputs
+        self.input_name = input_name
 
 
 class ModuleInputConnection(ModuleConnection):
