@@ -10,9 +10,47 @@ parameters of the form ``key=value``.
 Each section, except for ``vars`` and ``pipeline``, defines a module instance in the pipeline. Some of these can
 be executed, others act as filters on the outputs of other modules, or input readers.
 
+Module instances
+----------------
+
+The main components of a pipeline config file are sections defining module instances.
+They load a module of a particular type, giving a set of options controlling what it
+does and specifying inputs, connecting it up to the outputs from previous modules.
+
 Each section that defines a module has a ``type`` parameter. Usually, this is a fully-qualified Python package
-name that leads to the module type's Python code (that package containing the ``info`` Python module). A special
-type is ``alias``. This simply defines a module alias -- an alternative name for an already defined module. It
+name that leads to the module type's Python code (that package containing the ``info`` Python module).
+
+A typical module instance section looks like this:
+
+.. code-block:: ini
+
+   [mymodule]
+   type=pimlico.modules.corpora.subset
+   input_corpus=corpus_module.some_output
+   size=100
+
+Here the :mod:`~pimlico.modules.corpora.subset` module is instantiated, with the option
+``size=100``, specifying how big a subset to create. This module takes a single input,
+called ``corpus``, which is here connected to the output of a previous module instance.
+Inputs are connected using parameters of the form ``input_<input-name>``. They give
+the name of a previous module instance and, optionally, the name of the output of that
+module that we will get input from. (If not specified, the module's default output
+will be used.)
+
+The documentation for each module gives details of:
+ * what options it can take, including their types and default values
+ * what inputs it takes and their datatypes
+ * what outputs it produces and their datatypes.
+
+A large set of :mod:`module types <pimlico.modules>` for different tasks, ranging from simple dataset manipulation to
+advanced natual language processing or machine learning tasks, comes built into Pimlico and
+each is :mod:`fully documented <pimlico.modules>`.
+
+Many of the core modules are associated with test pipelines, which serve both as unit
+tests for the module and examples of how it can be used.
+
+A special type of module is ``alias``.
+This simply defines a module alias -- an alternative name for an already defined module. It
 should have exactly one other parameter, ``input``, specifying the name of the module we're aliasing.
 
 Special sections
