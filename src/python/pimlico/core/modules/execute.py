@@ -92,6 +92,7 @@ def check_and_execute_modules(pipeline, module_names, force_rerun=False, debug=F
     if all_deps:
         # For each module requested, also include any unexecuted dependencies recursively as far back as necessary
         requested_modules = [m.module_name for m in modules]
+        log.info("Checking for unexecuted dependencies of {}".format(", ".join(requested_modules)))
         modules = collect_unexecuted_dependencies(modules)
         if len(modules) > len(requested_modules):
             # Report which modules we added
