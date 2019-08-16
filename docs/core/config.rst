@@ -38,6 +38,7 @@ module that we will get input from. (If not specified, the module's default outp
 will be used.)
 
 The documentation for each module gives details of:
+
  * what options it can take, including their types and default values
  * what inputs it takes and their datatypes
  * what outputs it produces and their datatypes.
