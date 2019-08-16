@@ -669,9 +669,10 @@ class BaseModuleInfo(object):
         module executor, since data availability has already been checked by
         this point.
 
-        If the input type was specified with MultipleInputs, meaning that we're expecting an unbounded number
+        If the input type was specified with :class:`~pimlico.datatypes.base.MultipleInputs`,
+        meaning that we're expecting an unbounded number
         of inputs, this is a list. Otherwise, it's a single datatype instance.
-        If always_list=True, in this latter case we return a single-item list.
+        If ``always_list=True``, in this latter case we return a single-item list.
 
         If the requested input name is an optional input and it has not been supplied,
         returns None.

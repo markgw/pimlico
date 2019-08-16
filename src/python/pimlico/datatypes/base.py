@@ -943,7 +943,8 @@ class MultipleInputs(object):
     Each item in the list must point to a dataset (module output) that satisfies the
     type-checking for the wrapped datatype.
 
-    Example::
+    .. code-block:: ini
+
        [module3]
        type=pimlico.modules.some_module
        input_datasets=module1.the_output,module2.the_output
@@ -958,7 +959,8 @@ class MultipleInputs(object):
     all of the expanded module names as inputs. These are treated as if you'd
     written out all of the expanded module names separated by commas.
 
-    Example::
+    .. code-block:: ini
+
        [module1]
        type=pimlico.modules.any_module
        param={case1}first value for param|{case2}second value
@@ -977,7 +979,8 @@ class MultipleInputs(object):
     to feed into the same (multiple-input) input, you can specify a list of
     **all of the module's outputs** using the notation ``module_name.*``.
 
-    Example::
+    .. code-block:: ini
+
        # This module provides two outputs, output1 and output2
        [module2]
        type=pimlico.modules.multi_output_module
@@ -986,7 +989,10 @@ class MultipleInputs(object):
        type=pimlico.modules.some_module
        input_datasets=module2.*
 
-    is equivalent to::
+    is equivalent to:
+
+    .. code-block:: ini
+
        [module3]
        type=pimlico.modules.some_module
        input_datasets=module2.output1,module2.output2
@@ -997,17 +1003,22 @@ class MultipleInputs(object):
     ``N`` is the result of expanding module variables, allowing the number of times
     an input is repeated to depend on some modvar expression.
 
-    Example::
+    .. code-block:: ini
+
        [module3]
        type=pimlico.modules.some_module
        input_datasets=module1.the_output*3
 
-    is equivalent to::
+    is equivalent to:
+
+    .. code-block:: ini
+
        [module3]
        type=pimlico.modules.some_module
        input_datasets=module1.the_output,module1.the_output,module1.the_output
 
-    When ``get_input(input_name)`` is called on the module info, if multiple inputs have been provided,
+    When :meth:`~pimlico.core.modules.base.BaseModuleInfo.get_input`
+    is called on the module info, if multiple inputs have been provided,
     instead of returning a single dataset reader, a list of readers is returned.
     You can use ``get_input(input_name, always_list=True)`` to always return a list
     of readers, even if only a single dataset was given as input. This is usually
