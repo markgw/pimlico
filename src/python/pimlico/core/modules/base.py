@@ -297,11 +297,12 @@ class BaseModuleInfo(object):
             inputs[input_name] = []
             input_specs_initial = input_spec.split(",")
             # Check for a * somewhere in the spec other than at the beginning
+            # We ignore the case of module_name.*, which denotes all of the module's outputs
             input_specs = []
             input_multipliers = []
             for spec in input_specs_initial:
                 # This indicates that one of the inputs should be repeated
-                if "*" in spec[1:]:
+                if "*" in spec[1:] and not ".*" in spec:
                     mult_star_idx = spec[1:].index("*") + 1
                     spec, multiplier = spec[:mult_star_idx], spec[mult_star_idx+1:]
                     spec = spec.strip()
@@ -358,7 +359,7 @@ class BaseModuleInfo(object):
         return inputs
 
     @staticmethod
-    def get_extra_outputs_from_options(options):
+    def get_extra_outputs_from_options(options, inputs):
         """
         Normally, which optional outputs get produced by a module depend on the 'output' option given in the
         config file, plus any outputs that get used by subsequent modules. By overriding this method, module
@@ -369,6 +370,9 @@ class BaseModuleInfo(object):
 
         E.g. the corenlp module include the 'annotations' output if annotators are specified, so that the
         user doesn't need to give both options.
+
+        Note that this does not provide additional output definitions, just a list of the optional
+        outputs (already defined) that should be included among the outputs produced.
 
         """
         return []
@@ -467,7 +471,7 @@ class BaseModuleInfo(object):
         outputs = dict(self.available_outputs)
         if output_name not in outputs:
             raise PipelineStructureError("%s module does not have an output named '%s'. Available outputs: %s" %
-                                         (self.module_type_name, output_name, ", ".join(self.output_names)))
+                                         (self.module_type_name, output_name, ", ".join(outputs.keys())))
         datatype = outputs[output_name]
 
         # The datatype might be a dynamic type -- with a function that we call to get the type

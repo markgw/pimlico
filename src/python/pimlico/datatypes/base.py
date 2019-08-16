@@ -934,23 +934,84 @@ class DynamicInputDatatypeRequirement(object):
 
 class MultipleInputs(object):
     """
-    An input datatype that can be used as an item in a module's inputs, which lets the module accept an unbounded
-    number of inputs, all satisfying the same datatype requirements. When writing the inputs in a config file,
-    they can be specified as a comma-separated list of the usual type of specification (module name, with optional
-    output name). Each item in the list must point to a datatype that satisfies the type-checking.
+    A wrapper around an input datatype that can be used as an item in a module's inputs,
+    which lets the module accept an unbounded number of inputs, all satisfying the same
+    datatype requirements.
 
-    The list may also include (or entirely consist of) a base module name from the pipeline that has been expanded
-    into multiple modules according to alternative parameters (the type separated by vertical bars,
-    see :ref:`parameter-alternatives`). Use the notation `*name`, where `name` is the base module name, to denote
-    all of the expanded module names as inputs. These are treated as if you'd written out all of the expanded module
-    names separated by commas.
+    When writing the inputs in a config file, they can be specified as a comma-separated
+    list of the usual type of specification (module name, with optional output name).
+    Each item in the list must point to a dataset (module output) that satisfies the
+    type-checking for the wrapped datatype.
+
+    Example::
+       [module3]
+       type=pimlico.modules.some_module
+       input_datasets=module1.the_output,module2.the_output
+
+    Here ``module1``'s output ``the_output`` and ``module2``'s output ``the_output``
+    must both be of valid types for the multiple-input ``datasets`` to this module.
+
+    The list may also include (or entirely consist of) a base module name from the pipeline
+    that has been **expanded** into multiple modules according to **alternative parameters**
+    (the type separated by vertical bars, see :ref:`parameter-alternatives`).
+    You can use the notation ``*name``, where ``name`` is the base module name, to denote
+    all of the expanded module names as inputs. These are treated as if you'd
+    written out all of the expanded module names separated by commas.
+
+    Example::
+       [module1]
+       type=pimlico.modules.any_module
+       param={case1}first value for param|{case2}second value
+
+       [module3]
+       type=pimlico.modules.some_module
+       input_datasets=*module1.the_output
+
+    Here ``module1`` will be expanded into ``module1[case1]`` and ``module1[case2]``,
+    each having a different value for option ``param``. The ``*``-notation is a shorthand
+    to say that the input ``datasets`` should get the output ``the_output`` from
+    **both** of these alternatives, as if you had written
+    ``module1[case1].the_output,module1[case2].the_output``.
+
+    If a module provides multiple outputs, all of a suitable type, that you want
+    to feed into the same (multiple-input) input, you can specify a list of
+    **all of the module's outputs** using the notation ``module_name.*``.
+
+    Example::
+       # This module provides two outputs, output1 and output2
+       [module2]
+       type=pimlico.modules.multi_output_module
+
+       [module3]
+       type=pimlico.modules.some_module
+       input_datasets=module2.*
+
+    is equivalent to::
+       [module3]
+       type=pimlico.modules.some_module
+       input_datasets=module2.output1,module2.output2
     
-    In a config file, if you need the same input specification to be repeated multiple times in a list,
-    instead of writing it out explicitly you can use a multiplier to repeat it N times by putting
-    ``*N`` after it. This is particularly useful when ``N`` is the result of expanding module variables,
-    allowing the number of times an input is repeated to depend on some modvar expression.
+    If you need the **same input specification to be repeated** multiple
+    times in a list, instead of writing it out explicitly you can use a multiplier to
+    repeat it N times by putting ``*N`` after it. This is particularly useful when
+    ``N`` is the result of expanding module variables, allowing the number of times
+    an input is repeated to depend on some modvar expression.
 
-    When get_input() is called on the module, instead of returning a single datatype, a list of datatypes is returned.
+    Example::
+       [module3]
+       type=pimlico.modules.some_module
+       input_datasets=module1.the_output*3
+
+    is equivalent to::
+       [module3]
+       type=pimlico.modules.some_module
+       input_datasets=module1.the_output,module1.the_output,module1.the_output
+
+    When ``get_input(input_name)`` is called on the module info, if multiple inputs have been provided,
+    instead of returning a single dataset reader, a list of readers is returned.
+    You can use ``get_input(input_name, always_list=True)`` to always return a list
+    of readers, even if only a single dataset was given as input. This is usually
+    the best way to handle multiple inputs in module code.
 
     """
     def __init__(self, datatype_requirements):

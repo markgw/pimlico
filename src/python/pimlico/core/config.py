@@ -909,6 +909,19 @@ class PipelineConfig(object):
                             new_input_specs.extend([(_mod, _output)] * _mlt)
                         inputs[input_name] = new_input_specs
 
+                    # Replace input specs of form module_name.* with all the (non-optional) outputs from module_name
+                    inputs = dict(
+                        (input_name, sum([
+                            # Replace * outputs with a list of the same module with each of the outputs
+                            [(_mod, output_name) for (output_name,__) in pipeline[_mod].available_outputs]
+                                if _output == "*"
+                            # Other module/output pairs are left
+                            else [(_mod, _output)]
+                            for _mod, _output in input_specs
+                        ], []))
+                        for input_name, input_specs in inputs.items()
+                    )
+
                     inputs = dict(
                         (input_name, [spec[:2] for spec in input_spec]) for (input_name, input_spec) in inputs.items()
                     )
@@ -918,7 +931,8 @@ class PipelineConfig(object):
 
                     # Get additional outputs to be included on the basis of the options, according to module
                     # type's own logic
-                    optional_outputs = set(outputs) | set(module_info_class.get_extra_outputs_from_options(options_dict))
+                    optional_outputs = set(outputs) | \
+                                       set(module_info_class.get_extra_outputs_from_options(options_dict, inputs))
 
                     # Instantiate the module info
                     module_info = module_info_class(
