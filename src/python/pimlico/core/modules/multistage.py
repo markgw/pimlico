@@ -1,7 +1,7 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
-
+import copy
 from builtins import next
 from builtins import zip
 from builtins import object
@@ -281,6 +281,8 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
             Overridden to also instantiate all of the internal module infos.
 
             """
+            # Copy all the stage instances so we can modify them for this instance without affecting others
+            self.stages = copy.deepcopy(self.stages)
             # Instantiate each internal module in turn
             for stage_num, stage in enumerate(self.stages):
                 # Get any addition connections for this stage on the basis of the options
@@ -448,6 +450,13 @@ class InternalModuleConnection(ModuleConnection):
         self.input_name = input_name
         self.previous_module = previous_module
 
+    def __repr__(self):
+        return "Cnct({}.{} -> {})".format(
+            self.previous_module or "previous",
+            self.output_name or "default",
+            self.input_name
+        )
+
 
 class InternalModuleMultipleConnection(ModuleConnection):
     """
@@ -461,6 +470,13 @@ class InternalModuleMultipleConnection(ModuleConnection):
     def __init__(self, input_name, outputs):
         self.outputs = outputs
         self.input_name = input_name
+
+    def __repr__(self):
+        return "Cnct({} -> {})".format(
+            ",".join("previous.{}".format(output) if isinstance(output, basestring)
+                      else "{}.{}".format(output[0], output[1]) for output in self.outputs),
+            self.input_name
+        )
 
 
 class ModuleInputConnection(ModuleConnection):
@@ -482,6 +498,9 @@ class ModuleInputConnection(ModuleConnection):
         self.stage_input_name = stage_input_name
         self.main_input_name = main_input_name
 
+    def __repr__(self):
+        return "Input(main:{} -> stage:{})".format(self.main_input_name or self.stage_input_name, self.stage_input_name)
+
 
 class ModuleOutputConnection(object):
     """
@@ -492,6 +511,9 @@ class ModuleOutputConnection(object):
     def __init__(self, stage_output_name=None, main_output_name=None):
         self.stage_output_name = stage_output_name
         self.main_output_name = main_output_name
+
+    def __repr__(self):
+        return "Output(stage:{} -> main:{})".format(self.stage_output_name, self.main_output_name or self.stage_output_name)
 
 
 class MultistageModulePreparationError(Exception):
