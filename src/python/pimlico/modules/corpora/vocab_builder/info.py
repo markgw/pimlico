@@ -45,9 +45,9 @@ class ModuleInfo(BaseModuleInfo):
             "example": "word1,word2,... "
         },
         "oov": {
-            "help": "Use the final index the represent chars that will be out of vocabulary after applying "
-                    "threshold/limit filters. Applied even if the count is 0. "
-                    "Represent OOVs using the given string in the vocabulary",
+            "help": "Represent OOVs using the given string in the vocabulary. Used to represent chars that "
+                    "will be out of vocabulary after applying threshold/limit filters. "
+                    "Included in the vocabulary even if the count is 0",
             "type": str,
         },
         "prune_at": {
