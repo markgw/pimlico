@@ -73,8 +73,8 @@ class Dictionary(PimlicoDatatype):
 
             return super(Dictionary.Reader, self).get_detailed_status() + [
                 # Add a wee sample of the items in the dictionary
-                "Terms: %s" % term_list.encode("utf8"),
-                "Vocab size: %d" % len(data)
+                u"Terms: {}".format(term_list),
+                u"Vocab size: %d" % len(data)
             ]
 
     class Writer(object):
