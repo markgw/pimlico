@@ -8,7 +8,7 @@ For a basic guide to writing your own modules, see :doc:`/guides/module`.
 
 .. todo::
 
-   Write documentation for this
+   Finish the missing parts of this doc below
 
 
 For many generic or common tasks, you can use one of Pimlico's
@@ -104,7 +104,7 @@ that the input is expected to have. Here, and most commonly, this is an instance
 dataset supplied for this input is of a compatible datatype.
 
 Here we take just a single input. It is a corpus of the standard type that Pimlico
-uses for sequential document corpora: class:`~pimlico.datatypes.corpora.GroupedCorpus`.
+uses for sequential document corpora :class:`~pimlico.datatypes.corpora.GroupedCorpus`.
 More specifically, it is a corpus with a document type of
 :class:`~pimlico.datatypes.corpora.tokenized.TokenizedDocumentType`, or some sub-type.
 
@@ -242,14 +242,14 @@ Pimlico can:
    Further document specification of software dependencies
 
 More extensive documentation of the Pimlico dependency system is provided
-in :doc:`core/dependencies`.
+in :doc:`/core/dependencies`.
 
 Execution: execute.py
 =====================
 
 .. todo::
 
-   This section is copied from :doc:`/guides/module_structure`.
+   This section is copied from :doc:`/core/module_structure`.
    It needs to be re-written to provide more technical and comprehensive documentation
    of module execution.
 
@@ -313,7 +313,7 @@ for all the details of how modules can be used in pipelines.
 
 .. todo::
 
-   This section is copied from :doc:`/guides/module_structure`.
+   This section is copied from :doc:`/core/module_structure`.
    It needs to be re-written to provide more technical and comprehensive documentation
    of pipeline config.
    NB: config files are fully documented in :doc:`/core/config`, so this just covers how
