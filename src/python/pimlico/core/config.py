@@ -538,6 +538,45 @@ class PipelineConfig(object):
                     # E.g. mymod[alt1,alt2,alt3] -> mymod[alt1],mymod[alt2],mymod[alt3]
                     module_config[input_opt] = _expand_alt_names_list(module_config[input_opt])
 
+                    # Output groups: check for the altgroup(output_group) notation that expands an output
+                    # group into alternative inputs
+                    # TODO I think there's a problem with the use of altgroup in a sequence of expanded alternative
+                    # modules, since the expansion happens after the altgroup expansion
+                    # It might be OK to just disallow this, since it would make for an extremely confusing config
+                    # file anyway, but we should probably at least have some clearer error output for this case
+                    while "altgroup(" in module_config[input_opt]:
+                        input_val = module_config[input_opt]
+                        altgroup_start = input_val.index("altgroup(")
+                        # Find closing bracket
+                        altgroup_end = input_val.index(")", altgroup_start)
+                        if (altgroup_start > 0 and input_val[altgroup_start-1] != "|") or \
+                                (altgroup_end < len(input_val)-1 and input_val[altgroup_end+1] != "|"):
+                            # Altgroup can't be combined with lists or other things
+                            # It's unclear to me now what the expected behaviour of that would be, so we
+                            # disallow it for now
+                            raise PipelineConfigParseError("not sure how to interpret input option with altgroup() "
+                                                           "in context: {}".format(input_val))
+                        # Look up the output group to expand to a list of alternative outputs
+                        output_group_spec = input_val[altgroup_start+9:altgroup_end]
+                        if "." not in output_group_spec:
+                            raise PipelineConfigParseError("argument to altgroup() must be module_name.output_group")
+                        previous_module_name, __, output_group_name = output_group_spec.partition(".")
+                        try:
+                            previous_module = module_infos[previous_module_name]
+                        except KeyError:
+                            raise PipelineConfigParseError("unknown module '{}' in altgroup() argument".format(previous_module_name))
+                        try:
+                            output_group = previous_module.get_output_group(output_group_name)
+                        except KeyError:
+                            raise PipelineConfigParseError("module '{}' has no output group named '{}' "
+                                                           "(used in input '{}' to module '{}')".format(
+                                previous_module_name, output_group_name, input_opt, module_name))
+                        # Expand the output group into alternatives
+                        module_config[input_opt] = input_val[:altgroup_start] + \
+                                                   "|".join("{}.{}".format(previous_module_name, output_name)
+                                                            for output_name in output_group) + \
+                                                   input_val[altgroup_end+1:]
+
                     new_alternatives = []
                     # It's possible for the value to already have alternatives, in which case we include them all
                     for original_val in module_config[input_opt].split("|"):
@@ -916,6 +955,17 @@ class PipelineConfig(object):
                             [(_mod, output_name) for (output_name,__) in pipeline[_mod].available_outputs]
                                 if _output == "*"
                             # Other module/output pairs are left
+                            else [(_mod, _output)]
+                            for _mod, _output in input_specs
+                        ], []))
+                        for input_name, input_specs in inputs.items()
+                    )
+
+                    # Replace input specs of form module_name.output_group_name with a list of the outputs in the group
+                    inputs = dict(
+                        (input_name, sum([
+                            [(_mod, output_name) for output_name in pipeline[_mod].get_output_group(_output)]
+                            if pipeline[_mod].is_output_group_name(_output)
                             else [(_mod, _output)]
                             for _mod, _output in input_specs
                         ], []))

@@ -125,12 +125,6 @@ datasets produced by the module.
 Output groups
 ~~~~~~~~~~~~~
 
-.. todo::
-
-   This documentation is being written in advance of the addition of this
-   feature. It explains how output groups will be used, but the feature
-   is not fully implemented yet!
-
 A module's outputs have no structure: each module just has a list of outputs
 identified by their names. The don't typically even have any particular order.
 
@@ -149,11 +143,6 @@ single module group, called ``"all"``.
 
 Once a module info has been instantiated, it has an attribute ``output_groups``
 listing the groups. Each group is specified as ``(group_name, [output_name1, ...])``.
-
-.. todo::
-
-   The actual use of these groups hasn't been implemented yet. This
-   is how it will work...
 
 In a config file, an output group name can be used in the same way as a
 single output name to specify where inputs to a module will come from:

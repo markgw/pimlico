@@ -409,6 +409,20 @@ class BaseModuleInfo(object):
         """
         return []
 
+    def is_output_group_name(self, group_name):
+        return group_name == "all" or group_name in dict(self.output_groups)
+
+    def get_output_group(self, group_name):
+        """
+        Get the list of output names corresponding to the given output group name.
+
+        Raises a KeyError if the output group does not exist.
+
+        """
+        if group_name == "all":
+            return [name for (name, outtype) in self.available_outputs]
+        return dict(self.output_groups)[group_name]
+
     def get_module_output_dir(self, absolute=False, short_term_store=None):
         """
         Gets the path to the base output dir to be used by this module, relative to the storage base dir.
