@@ -55,6 +55,16 @@ Optional
 | doc_list2 | :class:`string_list <pimlico.datatypes.core.StringList>` |
 +-----------+----------------------------------------------------------+
 
+Output groups
+=============
+
+The module defines some named output groups, which can be used to refer to collections of outputs at once, as multiple inputs to another module or alternative inputs.
++------------+------------+
+| Group name | Outputs    |
++============+============+
+| corpora    | set1, set2 |
++------------+------------+
+
 Options
 =======
 

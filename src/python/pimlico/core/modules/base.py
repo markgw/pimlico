@@ -23,6 +23,8 @@ is loaded.
 
 """
 from builtins import zip
+import copy
+
 from past.builtins import basestring
 from builtins import object
 
@@ -64,6 +66,11 @@ class BaseModuleInfo(object):
     in the "output" option or used by another module
     """
     module_optional_outputs = []
+    """
+    List of output groups: (group_name, [output_name1, ...]).
+    Further groups may be added by build_output_groups().
+    """
+    module_output_groups = []
     """
     Whether the module should be executed
     Typically True for almost all modules, except input modules (though some of them may also require execution) and
@@ -114,7 +121,7 @@ class BaseModuleInfo(object):
                                       if name in set(optional_outputs) | include_outputs)
 
         # Define output groups, now that the final list of available outputs is available
-        self.output_groups = self.built_output_groups()
+        self.output_groups = copy.deepcopy(self.module_output_groups) + self.build_output_groups()
 
         self._metadata = None
         self._history = None
@@ -394,9 +401,12 @@ class BaseModuleInfo(object):
         """
         return []
 
-    def built_output_groups(self):
+    def build_output_groups(self):
         """
-        Called during instantiation to produce the list of named groups of outputs.
+        Called during instantiation to produce a list of named groups of outputs. The list
+        extends the statically define output groups in ``module_output_groups``.
+        You should use the static list unless you need to override this for conditionally
+        added outputs.
 
         Called after all input, options and output processing has been done, so the
         outputs in the attribute ``available_outputs`` are the final list of outputs that
@@ -408,6 +418,10 @@ class BaseModuleInfo(object):
         outputs and outputs may feature in multiple groups.
 
         Should not include group "all", which is always included by default.
+
+        If you override this, use the docstring to specify what output groups will get
+        added and how they are named. The text will be used in the generated module
+        docs.
 
         """
         return []

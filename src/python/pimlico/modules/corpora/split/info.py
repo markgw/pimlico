@@ -33,6 +33,7 @@ class ModuleInfo(BaseModuleInfo):
         ("doc_list1", StringList()),
     ]
     module_optional_outputs = [("doc_list2", StringList())]
+    module_output_groups = [("corpora", ["set1", "set2"])]
     module_options = {
         "set1_size": {
             "help": "Proportion of the corpus to put in the first set, float between 0.0 and 1.0. "

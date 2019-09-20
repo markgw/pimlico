@@ -41,6 +41,7 @@ from pimlico.utils.docs.rest import make_table
 
 
 provide_further_outputs_base_doc = BaseModuleInfo.provide_further_outputs.__doc__
+build_output_groups_base_doc = BaseModuleInfo.build_output_groups.__doc__
 
 
 def generate_docs_for_pymod(module, output_dir, test_refs={}):
@@ -156,6 +157,14 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
     if further_outputs_doc is None or further_outputs_doc == provide_further_outputs_base_doc:
         # Docstring hasn't been overridden: don't use this
         further_outputs_doc = ""
+    # Output groups are simply defined as string
+    output_groups_table = [
+        [group_name, ", ".join(output_names)]
+        for (group_name, output_names) in ModuleInfo.module_output_groups
+    ]
+    build_output_groups_doc = ModuleInfo.build_output_groups.__doc__
+    if build_output_groups_doc is None or build_output_groups_doc == build_output_groups_base_doc:
+        build_output_groups_doc = ""
     info_doc = info.__doc__
     module_info_doc = ModuleInfo.__doc__
 
@@ -226,6 +235,16 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         if further_outputs_doc:
             output_file.write("\n" + format_heading(2, "Further conditional outputs"))
             output_file.write("\n{}\n".format(further_outputs_doc))
+
+        # Show output groups if there are any
+        if len(output_groups_table) or len(build_output_groups_doc):
+            output_file.write(format_heading(1, "Output groups"))
+            output_file.write("The module defines some named output groups, which can be used to refer to collections "
+                              "of outputs at once, as multiple inputs to another module or alternative inputs.\n")
+            if len(output_groups_table):
+                output_file.write("%s\n" % make_table(output_groups_table, header=["Group name", "Outputs"]))
+            if len(build_output_groups_doc):
+                output_file.write("\n{}\n".format(build_output_groups_doc))
 
         # Table of options
         if options_table:

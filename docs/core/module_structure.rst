@@ -159,6 +159,11 @@ it will be expanded to ``module_name.output_name1|module_name.output_name2|:...`
 to provide each output in the group as an alternative input.
 (See :doc:`/core/config` for more on alternative inputs and parameters.)
 
+Output groups are defined by the class attribute ``module_output_groups``
+on the module info class and may be extended by overriding ``build_output_groups()``
+to add more output groups containing further outputs added dependent on
+options and inputs.
+
 Optional outputs
 ~~~~~~~~~~~~~~~~
 
