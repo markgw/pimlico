@@ -113,6 +113,9 @@ class BaseModuleInfo(object):
         self.available_outputs.extend((name, dt) for (name, dt) in self.module_optional_outputs
                                       if name in set(optional_outputs) | include_outputs)
 
+        # Define output groups, now that the final list of available outputs is available
+        self.output_groups = self.built_output_groups()
+
         self._metadata = None
         self._history = None
 
@@ -359,7 +362,7 @@ class BaseModuleInfo(object):
         return inputs
 
     @staticmethod
-    def get_extra_outputs_from_options(options, inputs):
+    def choose_optional_outputs_from_options(options, inputs):
         """
         Normally, which optional outputs get produced by a module depend on the 'output' option given in the
         config file, plus any outputs that get used by subsequent modules. By overriding this method, module
@@ -377,10 +380,31 @@ class BaseModuleInfo(object):
         """
         return []
 
+    # For backwards compatibility: name now changed to clearer version
+    get_extra_outputs_from_options = choose_optional_outputs_from_options
+
     def provide_further_outputs(self):
         """
         Called during instantiation, once inputs and options are available, to add a further list of module
         outputs that are dependent on inputs or options.
+
+        """
+        return []
+
+    def built_output_groups(self):
+        """
+        Called during instantiation to produce the list of named groups of outputs.
+
+        Called after all input, options and output processing has been done, so the
+        outputs in the attribute ``available_outputs`` are the final list of outputs that
+        this module instance has.
+
+        Returns a list of groups, each specified as: ``(group_name, [output_name1, ...])``.
+
+        May contain as many groups as necessary. They are not required to cover all the
+        outputs and outputs may feature in multiple groups.
+
+        Should not include group "all", which is always included by default.
 
         """
         return []

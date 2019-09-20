@@ -157,7 +157,7 @@ class ModuleInfo(DocumentMapModuleInfo):
         return super(ModuleInfo, self).check_ready_to_run()
 
     @staticmethod
-    def get_extra_outputs_from_options(options, inputs):
+    def choose_optional_outputs_from_options(options, inputs):
         # If the 'annotators' option is given, produce annotations output
         if options["annotators"].strip():
             return ["annotations"]

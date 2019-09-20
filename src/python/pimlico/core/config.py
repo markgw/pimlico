@@ -932,7 +932,7 @@ class PipelineConfig(object):
                     # Get additional outputs to be included on the basis of the options, according to module
                     # type's own logic
                     optional_outputs = set(outputs) | \
-                                       set(module_info_class.get_extra_outputs_from_options(options_dict, inputs))
+                                       set(module_info_class.choose_optional_outputs_from_options(options_dict, inputs))
 
                     # Instantiate the module info
                     module_info = module_info_class(
