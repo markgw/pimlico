@@ -182,6 +182,11 @@ pairs of ``(output_name, datatype_instance)``. Once the module info has been
 instantiated for a particular module in a pipeline, these outputs will be available
 in the ``available_outputs`` attribute, just like any that were defined statically.
 
+If you override ``provide_further_outputs()``, you should also give it a docstring
+describing the further outputs that may be added, how they are named and under what
+conditions they are added. This string will be included in the generated documentation
+for the module, underneath the table of outputs.
+
 Options
 -------
 Most modules define some **options** that provided control over exactly

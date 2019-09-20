@@ -30,6 +30,7 @@ from sphinx import __version__
 from sphinx.ext.apidoc import format_heading
 
 from pimlico import install_core_dependencies
+from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import format_option_type, str_to_bool, \
     json_string, json_dict
 from pimlico.datatypes import PimlicoDatatype, MultipleInputs, DynamicOutputDatatype, DynamicInputDatatypeRequirement, \
@@ -37,6 +38,9 @@ from pimlico.datatypes import PimlicoDatatype, MultipleInputs, DynamicOutputData
 from pimlico.datatypes.corpora import DataPointType
 from pimlico.utils.docs import trim_docstring
 from pimlico.utils.docs.rest import make_table
+
+
+provide_further_outputs_base_doc = BaseModuleInfo.provide_further_outputs.__doc__
 
 
 def generate_docs_for_pymod(module, output_dir, test_refs={}):
@@ -148,6 +152,10 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         [output_name, output_datatype_text(output_types, context=module_path)]
         for output_name, output_types in ModuleInfo.module_optional_outputs
     ]
+    further_outputs_doc = ModuleInfo.provide_further_outputs.__doc__
+    if further_outputs_doc is None or further_outputs_doc == provide_further_outputs_base_doc:
+        # Docstring hasn't been overridden: don't use this
+        further_outputs_doc = ""
     info_doc = info.__doc__
     module_info_doc = ModuleInfo.__doc__
 
@@ -215,6 +223,9 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         if optional_output_table:
             output_file.write("\n" + format_heading(2, "Optional"))
             output_file.write("%s\n" % make_table(optional_output_table, header=["Name", "Type(s)"]))
+        if further_outputs_doc:
+            output_file.write("\n" + format_heading(2, "Further conditional outputs"))
+            output_file.write("\n{}\n".format(further_outputs_doc))
 
         # Table of options
         if options_table:

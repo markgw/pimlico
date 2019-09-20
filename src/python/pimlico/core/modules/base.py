@@ -388,6 +388,9 @@ class BaseModuleInfo(object):
         Called during instantiation, once inputs and options are available, to add a further list of module
         outputs that are dependent on inputs or options.
 
+        When overriding this, you can provide a new docstring, which will be used in the
+        module docs to describe the extra conditional outputs that are added.
+
         """
         return []
 
