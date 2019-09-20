@@ -2,7 +2,6 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 from __future__ import division
-from past.utils import old_div
 from builtins import object
 
 import warnings
@@ -29,10 +28,12 @@ def get_progress_bar(maxval, counter=False, title=None, start=True):
     widgets = []
     if title is not None:
         widgets.append("%s: " % title)
-    widgets.extend([Percentage(), ' ', Bar(marker=RotatingMarker())])
+    if maxval is not UnknownLength:
+        widgets.extend([Percentage(), ' ', Bar(marker=RotatingMarker())])
     if counter:
         widgets.extend([' (', Counter(), ')'])
-    widgets.extend([' ', ETA()])
+    if maxval is not UnknownLength:
+        widgets.extend([' ', ETA()])
     pbar = SafeProgressBar(widgets=widgets, maxval=maxval)
     return pbar
 
