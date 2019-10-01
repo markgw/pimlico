@@ -276,11 +276,11 @@ class ModuleInfo(BaseModuleInfo):
     module_readable_name = "{module_readable_name}"
     module_inputs = [
         # TODO Define module inputs here as:
-        # ("input_name", InputTypeClass),
+        # ("input_name", InputTypeClass()),
     ]
     module_outputs = [
         # TODO Define module outputs here as:
-        # ("output_name", OutputTypeClass),
+        # ("output_name", OutputTypeClass()),
     ]
     module_options = {{
 {module_options}
@@ -304,12 +304,12 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_readable_name = "{module_readable_name}"
     module_inputs = [
         # TODO Define module inputs here as:
-        # ("input_name", InputTypeClass),
+        # ("input_name", InputTypeClass()),
         # At least one should be a sub-type of IterableCorpus
     ]
     module_outputs = [
         # TODO Define module outputs here as:
-        # ("output_name", OutputTypeClass),
+        # ("output_name", OutputTypeClass()),
         # At least one should be a sub-type of IterableCorpus
     ]
     module_options = {{
