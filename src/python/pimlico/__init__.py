@@ -62,3 +62,12 @@ def install_core_dependencies():
         if len(uninstalled):
             print("Unable to install all core dependencies: exiting", file=sys.stderr)
             sys.exit(1)
+
+
+def get_jupyter_pipeline():
+    """
+    Special function to get access to a currently loaded pipeline from a Jupyter notebook.
+
+    """
+    from pimlico.utils.jupyter import get_pipeline
+    return get_pipeline()
