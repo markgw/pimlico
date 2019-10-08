@@ -34,6 +34,7 @@ Outputs
 | vocab | :class:`dictionary <pimlico.datatypes.dictionary.Dictionary>` |
 +-------+---------------------------------------------------------------+
 
+
 Options
 =======
 

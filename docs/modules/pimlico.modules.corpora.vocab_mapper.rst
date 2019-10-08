@@ -44,6 +44,7 @@ Outputs
 | ids  | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`IntegerListsDocumentType <pimlico.datatypes.corpora.ints.IntegerListsDocumentType>`> |
 +------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+
 Options
 =======
 

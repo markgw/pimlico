@@ -40,6 +40,7 @@ Outputs
 | documents | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`TokenizedDocumentType <pimlico.datatypes.corpora.tokenized.TokenizedDocumentType>`> |
 +-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+
 Options
 =======
 

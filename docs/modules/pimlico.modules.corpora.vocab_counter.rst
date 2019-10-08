@@ -44,6 +44,7 @@ Outputs
 | distribution | :class:`numpy_array <pimlico.datatypes.arrays.NumpyArray>` |
 +--------------+------------------------------------------------------------+
 
+
 Options
 =======
 

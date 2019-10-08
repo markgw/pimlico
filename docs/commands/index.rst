@@ -38,6 +38,8 @@ command line.
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`install`    | Install missing module library dependencies                                                  |
 +-------------------+----------------------------------------------------------------------------------------------+
+| :doc:`jupyter`    | Create and start a new Jupyter notebook for the pipeline                                     |
++-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`load`       | Load a module's output data from a tarball previously created by the dump command            |
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`movestores` | Move data between stores                                                                     |
@@ -95,3 +97,4 @@ command line.
    newmodule
    visualize
    email
+   jupyter

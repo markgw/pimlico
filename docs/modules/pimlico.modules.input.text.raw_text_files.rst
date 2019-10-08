@@ -39,6 +39,7 @@ Outputs
 | corpus | :class:`grouped_corpus <pimlico.datatypes.corpora.grouped.GroupedCorpus>` <:class:`RawTextDocumentType <pimlico.datatypes.corpora.data_points.RawTextDocumentType>`> |
 +--------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+
 Options
 =======
 

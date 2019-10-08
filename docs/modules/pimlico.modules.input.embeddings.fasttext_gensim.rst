@@ -44,6 +44,7 @@ Outputs
 | embeddings | :class:`embeddings <pimlico.datatypes.embeddings.Embeddings>` |
 +------------+---------------------------------------------------------------+
 
+
 Options
 =======
 

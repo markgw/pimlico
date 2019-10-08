@@ -36,6 +36,7 @@ Outputs
 | files | :class:`collected_named_file_collection <pimlico.modules.utility.collect_files.info.MappedNamedFileCollection>` |
 +-------+-----------------------------------------------------------------------------------------------------------------+
 
+
 Options
 =======
 

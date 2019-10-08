@@ -55,6 +55,7 @@ Optional
 | doc_list2 | :class:`string_list <pimlico.datatypes.core.StringList>` |
 +-----------+----------------------------------------------------------+
 
+
 Output groups
 =============
 
@@ -64,6 +65,7 @@ The module defines some named output groups, which can be used to refer to colle
 +============+============+
 | corpora    | set1, set2 |
 +------------+------------+
+
 
 Options
 =======

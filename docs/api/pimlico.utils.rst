@@ -18,6 +18,7 @@ Submodules
    pimlico.utils.email
    pimlico.utils.filesystem
    pimlico.utils.format
+   pimlico.utils.jupyter
    pimlico.utils.linguistic
    pimlico.utils.logging
    pimlico.utils.network

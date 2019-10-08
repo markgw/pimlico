@@ -50,6 +50,7 @@ Outputs
 | documents | :class:`grouped corpus with input doc type <pimlico.datatypes.corpora.grouped.GroupedCorpus>` |
 +-----------+-----------------------------------------------------------------------------------------------+
 
+
 Options
 =======
 

@@ -45,6 +45,7 @@ Outputs
 | plot | :class:`named_file_collection <pimlico.datatypes.plotting.PlotOutput>` |
 +------+------------------------------------------------------------------------+
 
+
 Options
 =======
 

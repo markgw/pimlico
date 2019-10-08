@@ -41,6 +41,7 @@ Outputs
 | model | :class:`sklearn_model <pimlico.datatypes.sklearn.SklearnModel>` |
 +-------+-----------------------------------------------------------------+
 
+
 Options
 =======
 

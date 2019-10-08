@@ -37,6 +37,7 @@ Outputs
 | model | :class:`lda_model <pimlico.datatypes.gensim.GensimLdaModel>` |
 +-------+--------------------------------------------------------------+
 
+
 Options
 =======
 

@@ -41,6 +41,7 @@ Outputs
 | corpus | :class:`corpus with data-point from input <pimlico.datatypes.corpora.grouped.CorpusWithTypeFromInput>` |
 +--------+--------------------------------------------------------------------------------------------------------+
 
+
 Options
 =======
 
