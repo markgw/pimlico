@@ -811,6 +811,8 @@ class BaseModuleInfo(object):
         behaviour is to require all of them to be ready, but in a preliminary run this requirement is relaxed.
 
         """
+        from pimlico.core.modules.multistage import MultistageModuleInfo
+
         missing = []
         if input_names is None:
             # Default to checking all inputs
@@ -825,6 +827,30 @@ class BaseModuleInfo(object):
             for input_name in input_names:
                 input_connections = self.get_input_module_connection(input_name, always_list=True)
                 missing_for_input = []
+
+                # If an input connection comes from a multistage module, we need to replace it with its relevant stage
+                for previous_module, output_name in input_connections:
+                    # If the previous module is to be assumed executed, skip checking anything
+                    if previous_module.module_name in assume_executed:
+                        continue
+
+                _input_connections = copy.copy(input_connections)
+                input_connections = []
+                for (previous_module, output_name) in _input_connections:
+                    if isinstance(previous_module, MultistageModuleInfo):
+                        if output_name is None:
+                            # Get the default output name
+                            # TODO Is this the correct way to do this??
+                            output_name = previous_module.available_outputs[0][0]
+                        ms_stage, ms_stage_output = previous_module.module_output_stage_names[output_name]
+                        input_connections.append((
+                            # The pipeline module for the substage
+                            previous_module.named_internal_modules[ms_stage],
+                            # The output from that module that we need
+                            ms_stage_output
+                        ))
+                    else:
+                        input_connections.append((previous_module, output_name))
 
                 for previous_module, output_name in input_connections:
                     # If the previous module is to be assumed executed, skip checking whether its output data is
@@ -1160,6 +1186,8 @@ def collect_unexecuted_dependencies(modules):
     :param modules: list of ModuleInfo instances
     :return: list of ModuleInfo instances that need to be executed
     """
+    from pimlico.core.modules.multistage import MultistageModuleInfo
+
     if len(modules) == 0:
         return []
     else:
@@ -1173,7 +1201,14 @@ def collect_unexecuted_dependencies(modules):
                 # Add all of this module's unexecuted deps to the list first
                 for dep_name in mod.dependencies:
                     dep = pipeline[dep_name]
-                    unex_mods.extend(_get_deps(dep))
+                    # If we get a multistage module, then we add dependencies on all its stages (instead)
+                    # We could also check more specifically for the stages that we actually need, but
+                    # this becomes a bit more difficult, so for now we take this simpler approach
+                    if isinstance(dep, MultistageModuleInfo):
+                        for internal_mod in dep.internal_modules:
+                            unex_mods.extend(_get_deps(internal_mod))
+                    else:
+                        unex_mods.extend(_get_deps(dep))
                 if mod.module_executable:
                     # Now add the module itself
                     unex_mods.append(mod)

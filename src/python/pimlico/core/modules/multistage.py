@@ -275,6 +275,8 @@ def multistage_module(multistage_module_type_name, module_stages, use_stage_opti
         # Module options for the MS module includes all of the internal modules' options, with prefixes
         module_options = main_module_options
         stages = module_stages
+        # Stores the mapping from main module outputs to the internal stages' outputs
+        module_output_stage_names = output_stage_names
 
         def __init__(self, module_name, pipeline, **kwargs):
             """
