@@ -5,12 +5,6 @@
 """
 Base classes and utilities for input modules in a pipeline.
 
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to ``InputReader.Setup``
-   and ``FactoryInputReader.Setup``, since this is required/implicit in Python 3.
-   Check that these still work as they used to.
-
 """
 from builtins import next
 from builtins import object
@@ -223,7 +217,7 @@ class DocumentCounterModuleExecutor(BaseModuleExecutor):
             else:
                 num_docs, num_valid_docs = num_docs
 
-        self.log.info("Corpus contains {} docs. Storing count".format(num_docs))
+        self.log.info("Corpus contains {:,} docs. Storing count".format(num_docs))
         output_datatype = output_setup.datatype
         # Don't use get_output_writer here, as we're not actually writing out a corpus
         # GroupedCorpus has a writer than writes documents and handles the corpus length in its own way
