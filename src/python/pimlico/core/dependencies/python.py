@@ -322,6 +322,8 @@ keras_tensorflow_dependency = PythonPackageOnPip("keras", dependencies=[tensorfl
 # This version does not depend on any of the backend packages
 # This allows you to be ambivalent about which one is used, but means the package is not checked
 keras_dependency = PythonPackageOnPip("keras", dependencies=[h5py_dependency])
+pytorch_dependency = PythonPackageOnPip("torch", "PyTorch")
+pyro_dependency = PythonPackageOnPip("pyro", "Pyro", pip_package="pyro-ppl", dependencies=[pytorch_dependency])
 
 sklearn_dependency = PythonPackageOnPip(
     "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
