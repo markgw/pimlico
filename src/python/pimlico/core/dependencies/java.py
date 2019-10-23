@@ -110,6 +110,9 @@ class JavaDependency(SoftwareDependency):
             sum((dep._get_classpath_components_non_recursive() for dep in java_deps), [])
         )
 
+    def __hash__(self):
+        return 0
+
     def __eq__(self, other):
         return isinstance(other, JavaDependency) and \
                set(self.classes) == set(other.classes) and \
