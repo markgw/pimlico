@@ -30,6 +30,8 @@ def call_java(class_name, args=[], classpath=None):
     # May in future want to allow the path to the java executable to be specified in local config
     process = Popen(java_call_command(class_name, classpath=classpath) + args, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=False)
     stdout_data, stderr_data = process.communicate()
+    stdout_data = stdout_data.decode("utf-8")
+    stderr_data = stderr_data.decode("utf-8")
     return stdout_data, stderr_data, process.returncode
 
 
