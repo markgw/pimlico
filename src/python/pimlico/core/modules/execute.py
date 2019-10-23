@@ -164,7 +164,7 @@ def check_modules_ready(pipeline, modules, log, preliminary=False):
             if len(problems):
                 for problem_name, problem_desc in problems:
                     print("Module '%s' cannot run: %s\n  %s" % \
-                          (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100).splitlines())))
+                          (module_name, problem_name, "\n  ".join(wrap(problem_desc, 100))))
                     raise ModuleExecutionError("runtime checks failed for module '%s'" % module_name)
 
             # Check that previous modules have been completed and input data is ready for us to use
