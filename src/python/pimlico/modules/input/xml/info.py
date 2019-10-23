@@ -222,8 +222,8 @@ ModuleInfo = iterable_input_reader(
     },
     RawTextDocumentType(),
     data_ready, corpus_len, corpus_iter,
-    module_type_name="raw_text_files_reader",
-    module_readable_name="Raw text files",
+    module_type_name="xml_files_reader",
+    module_readable_name="XML files",
     software_dependencies=[beautiful_soup_dependency],
     execute_count=True,
 )
