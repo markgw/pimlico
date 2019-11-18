@@ -118,7 +118,12 @@ class PythonPackageOnPip(PythonPackageDependency):
     it will be upgraded.
 
     """
-    def __init__(self, package, name=None, pip_package=None, upgrade_only_if_needed=False, min_version=None, **kwargs):
+    def __init__(self, package, name=None, pip_package=None, upgrade_only_if_needed=False, min_version=None, editable=False, **kwargs):
+        """
+        :type editable: boolean
+        :param editable: Pass the --editable option to pip when installing. Use with e.g. Git urls as packages.
+        """
+        self.editable = editable
         self.min_version = min_version
         self.upgrade_only_if_needed = upgrade_only_if_needed
         # Package names tend to be identical to the software name, so there's no need to specify both
@@ -137,6 +142,11 @@ class PythonPackageOnPip(PythonPackageDependency):
         options = []
         if self.upgrade_only_if_needed:
             options.extend(["--upgrade-strategy", "only-if-needed"])
+        elif self.min_version is not None:
+            options.append("--upgrade")
+
+        if self.editable:
+            options.append("--editable")
 
         if self.min_version is not None:
             package = "{}>={}".format(self.pip_package, self.min_version)
