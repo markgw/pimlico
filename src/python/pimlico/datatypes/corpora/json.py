@@ -24,10 +24,10 @@ class JsonDocumentType(RawDocumentType):
         keys = ["data"]
 
         def raw_to_internal(self, raw_data):
-            return {"data": json.loads(raw_data)}
+            return {"data": json.loads(raw_data.decode("utf-8"))}
 
         def internal_to_raw(self, internal_data):
-            return json.dumps(internal_data["data"])
+            return json.dumps(internal_data["data"]).encode("utf-8")
 
 
 class JsonFormatter(DocumentBrowserFormatter):
