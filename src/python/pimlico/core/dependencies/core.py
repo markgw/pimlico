@@ -12,10 +12,8 @@ from pimlico.core.dependencies.python import PythonPackageOnPip, PythonPackageSy
 #: use, and installed automatically if they're not found.
 CORE_PIMLICO_DEPENDENCIES = [
     # We use the future library to provide Python 2-3 compatibility, but this has to be installed before we get this far
-    # Without Pip, we can't install anything else, so we need that to be installed first
-    PythonPackageSystemwideInstall("pip", "Pip"),
-    # From Pip, you can make sure that Pip itself has a sufficiently high version
-    PythonPackageOnPip("pip", "Pip", min_version="19"),
+    # Since we're always running in a virtualenv, we can assume that Pip is availble.
+    # We've actually already checked its version and potentially upgraded by this point.
     # Virtualenv must be installed so that we can install other packages in the local Pimlico environment
     # Note that, even within a running virtualenv, the virtualenv Python package might not be installed
     # In this case, it can be installed using Pip
