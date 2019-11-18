@@ -275,7 +275,7 @@ class DocumentMapper(object):
         try:
             executor.pool = executor.create_pool(self.processes)
         except WorkerStartupError as e:
-            raise ModuleExecutionError(e.message, cause=e.cause, debugging_info=e.debugging_info)
+            raise_from(ModuleExecutionError(str(e), cause=e.cause, debugging_info=e.debugging_info), e)
 
         complete = False
         result_buffer = {}

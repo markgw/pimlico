@@ -10,6 +10,8 @@ multiprocessing.
 from __future__ import absolute_import
 
 from future import standard_library
+from future.utils import raise_from
+
 standard_library.install_aliases()
 from builtins import zip
 from builtins import range
@@ -107,13 +109,15 @@ class ThreadingMapPool(DocumentProcessorPool):
                 # No error
                 pass
             else:
-                raise WorkerStartupError("error in worker process: %s" % e, cause=e)
+                raise_from(WorkerStartupError("error in worker process: %s" % e, cause=e), e)
 
     def start_worker(self):
         return self.THREAD_TYPE(self.input_queue, self.output_queue, self.exception_queue, self.executor)
 
     @staticmethod
     def create_queue(maxsize=None):
+        if maxsize is None:
+            maxsize = 0
         return Queue(maxsize)
 
     def shutdown(self):
