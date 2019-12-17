@@ -78,7 +78,7 @@ class ModuleExecutor(BaseModuleExecutor):
 
         self.log.info("Training complete. Some of the learned topics:")
         for topic, topic_repr in lda.show_topics(10, 6):
-            self.log.info(u"#{}: {}".format(topic, topic_repr).encode("utf-8"))
+            self.log.info(u"#{}: {}".format(topic, topic_repr))
 
         self.log.info("Storing model")
         with self.info.get_output_writer("model") as w:
