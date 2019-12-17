@@ -1843,7 +1843,8 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
         vars.update(sub_var)
 
     config_sections = [
-        (section, OrderedDict(config_parser.items(section))) for section in config_parser.sections() if section != u"vars"
+        (section, OrderedDict(config_parser.items(section))) for section in config_parser.sections()
+        if section != "vars"
     ]
     # Add in sections from the included configs
     for subconfig_filename, subconfig, include_after in sub_configs:
@@ -1853,8 +1854,12 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
             raise PipelineStructureError("section '%s' defined in %s has already be defined in an including "
                                          "config file" % (" + ".join(overlap_sections), subconfig_filename))
         # Find the index where we'll include this
-        after_index = next((i for (i, (sec, conf)) in enumerate(config_sections) if sec == include_after))
-        config_sections = config_sections[:after_index+1] + subconfig + config_sections[after_index+1:]
+        if include_after == "vars":
+            # If include directive was straight after vars section, put at beginning of pipeline
+            include_at = 0
+        else:
+            include_at = next((i for (i, (sec, conf)) in enumerate(config_sections) if sec == include_after)) + 1
+        config_sections = config_sections[:include_at] + subconfig + config_sections[include_at:]
 
     # Config parser permits values that span multiple lines and removes indent of subsequent lines
     # This is good, but we don't want the newlines to be included in the values
