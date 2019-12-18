@@ -109,6 +109,11 @@ class PipelineConfig(object):
             # Paths should all be specified relative to the config file's directory
             additional_paths = [self.path_relative_to_config(path) for path in
                                 self.pipeline_config["python_path"].split(":") if path]
+            # Check that the paths exist and warn the user if any don't
+            for path in additional_paths:
+                if not os.path.exists(path):
+                    warnings.warn("python_path specified in config file ({}) does not exist: adding to system path "
+                                  "anyway, but no code will be found there".format(path))
             # Add these paths for the python path, so later code will be able to import things from them
             sys.path.extend(additional_paths)
 
@@ -266,9 +271,13 @@ class PipelineConfig(object):
         Get an absolute path to a file/directory that's been specified relative to a config
         file (usually within the config file).
 
+        If the path is already an absolute path, doesn't do anything.
+
         :param path: relative path
         :return: absolute path
         """
+        if os.path.isabs(path):
+            return path
         config_dir = os.path.dirname(os.path.abspath(self.filename))
         return os.path.abspath(os.path.join(config_dir, path))
 
