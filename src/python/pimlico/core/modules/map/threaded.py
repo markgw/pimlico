@@ -93,15 +93,34 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
 
 
 class ThreadingMapPool(DocumentProcessorPool):
+    """
+    If sequential_start=True, each worker is started in turn and we don't start launching
+    one until the previous one has completed its initialization. This can be useful in
+    cases where there can be synchronization problems with starting multiple workers
+    simultaneously, or where there's a danger of overloading the system by starting lots
+    at once.
+
+    Default behaviour is to set all workers running, then wait until they've all initialized.
+
+    """
     THREAD_TYPE = None
 
     def __init__(self, executor, processes):
         super(ThreadingMapPool, self).__init__(processes)
         self.executor = executor
-        self.workers = [self.start_worker() for i in range(processes)]
-        # Wait until all of the workers have completed their initialization
+        if executor.SEQUENTIAL_START:
+            self.workers = []
+            for i in range(processes):
+                worker = self.start_worker()
+                self.workers.append(worker)
+                worker.initialized.wait()
+        else:
+            self.workers = [self.start_worker() for i in range(processes)]
+            # Wait until all of the workers have completed their initialization
+            for worker in self.workers:
+                worker.initialized.wait()
+
         for worker in self.workers:
-            worker.initialized.wait()
             # Check whether the worker had an error during initialization
             try:
                 e = worker.exception_queue.get_nowait()
@@ -139,6 +158,7 @@ class ThreadingMapPool(DocumentProcessorPool):
 
 class ThreadingMapModuleExecutor(DocumentMapModuleExecutor):
     POOL_TYPE = None
+    SEQUENTIAL_START = False
 
     def create_pool(self, processes):
         return self.POOL_TYPE(self, processes)
@@ -148,7 +168,8 @@ class ThreadingMapModuleExecutor(DocumentMapModuleExecutor):
 
 
 def threading_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,
-                               worker_set_up_fn=None, worker_tear_down_fn=None, allow_skip_output=False):
+                               worker_set_up_fn=None, worker_tear_down_fn=None, allow_skip_output=False,
+                               sequential_start=False):
     """
     Factory function for creating an executor that uses the threading-based implementations of document-map
     pools and worker processes.
@@ -175,6 +196,13 @@ def threading_executor_factory(process_document_fn, preprocess_fn=None, postproc
 
     If ``allow_skip_output==True`` and the process document function returns None as one of
     its outputs, that document will simply not be written to that output.
+
+    If sequential_start=True, each worker is started in turn and we don't start launching
+    one until the previous one has completed its initialization. This can be useful in
+    cases where there can be synchronization problems with starting multiple workers
+    simultaneously, or where there's a danger of overloading the system by starting lots
+    at once.
+    Default behaviour is to set all workers running, then wait until they've all initialized.
 
     """
     if isinstance(process_document_fn, type):
@@ -205,6 +233,7 @@ def threading_executor_factory(process_document_fn, preprocess_fn=None, postproc
     class ModuleExecutor(ThreadingMapModuleExecutor):
         POOL_TYPE = FactoryMadeMapPool
         ALLOW_SKIP_OUTPUT = allow_skip_output
+        SEQUENTIAL_START = sequential_start
 
         def preprocess(self):
             super(ModuleExecutor, self).preprocess()
