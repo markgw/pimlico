@@ -25,6 +25,7 @@ is loaded.
 from builtins import zip
 import copy
 
+from future.utils import raise_from
 from past.builtins import basestring
 from builtins import object
 
@@ -1471,7 +1472,10 @@ def load_module_info(path):
     try:
         mod = import_module(info_path)
     except ImportError as e:
-        raise ModuleInfoLoadError("module type '%s' could not be found (could not import %s: %s)" % (path, info_path, e))
+        raise_from(
+            ModuleInfoLoadError("module type '%s' could not be found (could not import %s: %s)" % (path, info_path, e)),
+            e
+        )
 
     if not hasattr(mod, "ModuleInfo"):
         raise ModuleInfoLoadError("invalid module type code: could not load class %s.ModuleInfo" % info_path)

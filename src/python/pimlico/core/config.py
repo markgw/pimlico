@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from future import standard_library
+from future.utils import raise_from
 
 standard_library.install_aliases()
 from builtins import map
@@ -471,8 +472,12 @@ class PipelineConfig(object):
                     try:
                         module_info_class = load_module_info(module_type_name)
                     except ModuleInfoLoadError as e:
-                        raise PipelineConfigParseError("could not load a module type for the name '{}': "
-                                                       "no datatype or module type could be loaded".format(module_type_name))
+                        raise_from(
+                            PipelineConfigParseError(
+                                "could not load a module type for the name '{}': no datatype or module type "
+                                "could be loaded".format(module_type_name)),
+                            e
+                        )
                 else:
                     # Get an input module info class for this datatype
                     module_info_class = input_module_factory(datatype_class)

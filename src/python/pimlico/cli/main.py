@@ -9,6 +9,8 @@ Provides access to many subcommands, acting as the primary interface to Pimlico'
 """
 from __future__ import print_function
 
+from traceback import print_exc
+
 from pimlico.cli.jupyter import JupyterCmd
 
 if __name__ == "__main__":
@@ -207,6 +209,8 @@ if __name__ == "__main__":
                                        override_local_config=override_local,
                                        local_config=opts.local_config)
     except (PipelineConfigParseError, PipelineStructureError) as e:
+        if opts.debug:
+            print_exc()
         print("Error reading pipeline config: %s" % e, file=sys.stderr)
         if hasattr(e, "explanation") and e.explanation is not None:
             # Show more detailed explanation of problem
