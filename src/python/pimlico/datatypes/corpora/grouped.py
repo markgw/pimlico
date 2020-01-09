@@ -86,6 +86,7 @@ class GroupedCorpus(IterableCorpus):
             self.archive_filenames = self.setup._get_archive_filenames(self.data_dir)
             self.archive_filenames.sort()
             self.archives = [os.path.splitext(os.path.basename(f))[0] for f in self.archive_filenames]
+            self.archive_to_archive_filename = dict(zip(self.archives, self.archive_filenames))
 
         def extract_file(self, archive_name, filename):
             """
@@ -94,7 +95,7 @@ class GroupedCorpus(IterableCorpus):
             iterate over its files, which is much faster.
 
             """
-            with tarfile.open(os.path.join(self.data_dir, archive_name)) as archive:
+            with tarfile.open(os.path.join(self.data_dir, self.archive_to_archive_filename[archive_name])) as archive:
                 return archive.extractfile(filename).read()
 
         def __iter__(self):
