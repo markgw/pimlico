@@ -195,14 +195,14 @@ class VectorDocumentType(RawDocumentType):
     def reader_init(self, reader):
         super(VectorDocumentType, self).reader_init(reader)
         # Prepare struct for reading in the whole vector
-        dim = reader.datatype.metadata["dimensions"]
+        dim = reader.metadata["dimensions"]
         self.struct = struct.Struct("<" + "d"*dim)
         self.value_size = self.struct.size
 
     def writer_init(self, writer):
         super(VectorDocumentType, self).writer_init(writer)
         # Prepare struct for writing out the whole vector
-        dim = writer.datatype.metadata["dimensions"]
+        dim = writer.metadata["dimensions"]
         self.struct = struct.Struct("<" + "d"*dim)
         self.value_size = self.struct.size
 
