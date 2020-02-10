@@ -190,6 +190,7 @@ class VectorDocumentType(RawDocumentType):
 
     """
     formatters = [("vector", "pimlico.datatypes.floats.VectorFormatter")]
+    metadata_defaults = {"dimensions": 10}
 
     def reader_init(self, reader):
         super(VectorDocumentType, self).reader_init(reader)
