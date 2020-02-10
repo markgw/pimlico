@@ -304,7 +304,7 @@ class DocumentMapper(object):
 
         # Get the expected output datatypes, ready for any possible output type conversion when we get results
         output_datatypes = [
-            executor.info.get_output_datatype(name) for name in executor.info.get_grouped_corpus_output_names()
+            executor.info.get_output_datatype(name)[1] for name in executor.info.get_grouped_corpus_output_names()
         ]
         num_outputs = len(output_datatypes)
 
