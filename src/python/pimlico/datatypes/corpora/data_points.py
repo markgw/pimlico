@@ -98,7 +98,7 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
         Produce a document of this type. Data is specified using kwargs, which should
         be keys listed in the document type's `keys` list.
 
-        If `raw_data` is given it should be a string.
+        If `raw_data` is given it should be a bytes object.
         Other kwargs are ignored and the document is instantiated
         from the raw data alone. Otherwise, it is instantiated from an internal data
         dictionary containing all of the specified keys.
@@ -246,7 +246,7 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
 
         def raw_to_internal(self, raw_data):
             """
-            Take a unicode string containing the raw data for a document, read in from disk,
+            Take a bytes object containing the raw data for a document, read in from disk,
             and produce a dictionary containing all the processed data in the document's
             internal format.
 
@@ -262,7 +262,7 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
         def internal_to_raw(self, internal_data):
             """
             Take a dictionary containing all the document's data in its internal format
-            and produce a unicode string containing all that data, which can be written
+            and produce a bytes object containing all that data, which can be written
             out to disk.
 
             """
