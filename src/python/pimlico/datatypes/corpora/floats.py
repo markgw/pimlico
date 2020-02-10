@@ -211,13 +211,13 @@ class VectorDocumentType(RawDocumentType):
 
         def raw_to_internal(self, raw_data):
             try:
-                return {"vector": self.data_point_type.struct.unpack(raw_data),}
+                return {"vector": self.data_point_type.struct.unpack(raw_data)}
             except struct.error as e:
                 raise IOError("error interpreting float vector data: %s" % e)
 
         def internal_to_raw(self, internal_data):
             try:
-                return self.data_point_type.struct.pack(internal_data["vector"])
+                return self.data_point_type.struct.pack(*internal_data["vector"])
             except struct.error as e:
                 raise ValueError("error encoding float data using struct format %s: %s" %
                                  (self.data_point_type.struct.format, e))
