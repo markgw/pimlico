@@ -106,6 +106,17 @@ class Dictionary(PimlicoDatatype):
                 no_above = 1.
             return self.data.filter_extremes(no_below=threshold, no_above=no_above, keep_n=limit)
 
+    def run_browser(self, reader, opts):
+        """
+        Browse the vocab simply by printing out all the words
+
+        """
+        d = reader.get_data()
+        print("Showing all words in vocabulary")
+        max_freq = max(d.dfs.values()) + 1
+        for word, id in sorted(d.token2id.items(), key=lambda wi: -d.dfs.get(wi[1], max_freq)):
+            print(u"{}: {}".format(word, d.dfs.get(id, "--")))
+
 
 class DictionaryData(object):
     """

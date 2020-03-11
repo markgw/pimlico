@@ -25,7 +25,7 @@ class ModuleExecutor(BaseModuleExecutor):
             # Input is given for every document in a corpus
             # Update the term vocab with all terms in each doc
             vocab_writer.add_documents(
-                (line for doc_name, doc in pbar(input_docs) if not is_invalid_doc(doc) for line in doc.sentences),
+                (sum(doc.sentences, []) for doc_name, doc in pbar(input_docs) if not is_invalid_doc(doc)),
                 prune_at=prune_at
             )
 
@@ -56,9 +56,18 @@ class ModuleExecutor(BaseModuleExecutor):
             if oov_token:
                 # Add the OOV token to the vocabulary
                 oov_id = vocab_writer.data.add_term(oov_token)
-                # Set the count to the total count of everything that was filtered out
-                # If we didn't apply filters, or they didn't have an effect, this will be 0, but we include it anyway
-                oov_count = sum([count for (t, i, count) in removed], 0)
+                # To get a correct document count for the OOV token, we need to go over the
+                # data again and check where the filtered-out terms appear
+                self.log.info("Counting OOVs in the input corpus")
+                pbar = get_progress_bar(len(input_docs), title="Counting OOVs")
+                vocab_terms = set(vocab_writer.data.token2id.keys())
+                oov_count = sum(
+                    (1 if any(
+                        word not in vocab_terms
+                        for line in doc.sentences
+                        for word in line)
+                     else 0 for dn, doc in pbar(input_docs)), 0
+                )
                 vocab_writer.data.dfs[oov_id] = oov_count
                 self.log.info("Added OOV token '%s' with count of %d" % (oov_token, oov_count))
 
