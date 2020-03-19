@@ -12,6 +12,7 @@ import types
 
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.core.modules.execute import ModuleExecutionError
+from pimlico.core.modules.map import output_to_document
 from pimlico.datatypes import PimlicoDatatype, GroupedCorpus
 from pimlico.datatypes.base import PimlicoDatatypeReaderMeta
 from pimlico.datatypes.corpora import IterableCorpus
@@ -76,6 +77,9 @@ class InputReader(with_metaclass(PimlicoDatatypeReaderMeta, PimlicoDatatype.Read
         # of the factory function has made a mistake in building the iter_fn
         it = iter(self.iterate())
         doc_name, doc = next(it)
+        dp_type = self.datatype.data_point_type
+        # Like process_document() on doc map modules, we allow raw data or dicts to be returned
+        doc = output_to_document(doc, dp_type)
         if not self.datatype.data_point_type.is_type_for_doc(doc):
             raise TypeError("data iterator for input reader yielded the wrong type of document. Expected "
                             "a document of data point type {}, but got {}".format(
@@ -85,6 +89,7 @@ class InputReader(with_metaclass(PimlicoDatatypeReaderMeta, PimlicoDatatype.Read
         yield doc_name, doc
         # Just iterate over the rest
         for doc_name, doc in it:
+            doc = output_to_document(doc, dp_type)
             yield doc_name, doc
 
     def process_setup(self):

@@ -139,7 +139,15 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
         """
         Check whether the given document is of this type, or a subclass of this one.
 
+        If the object is not a document instance (or, more precisely, doesn't have a
+        data_point_type attr), this will always return False.
+
         """
+        if not hasattr(doc, "data_point_type"):
+            # Sometimes things other than document instances will turn up here, e.g. when
+            # a doc map module's process_document() produces a dict or raw data output
+            # That's fine: we return false simply
+            return False
         return isinstance(doc.data_point_type, type(self))
 
     def reader_init(self, reader):
