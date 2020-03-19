@@ -1152,6 +1152,67 @@ class PipelineConfig(object):
         return local_config_data, used_config_sources
 
     @staticmethod
+    def trace_load_local_config(filename=None, override={}, only_override=False):
+        """
+        Trace the process of loading local config file(s). Follows exactly the same logic
+        as load_local_config(), but documents what it finds/doesn't find.
+
+        """
+        # Keep a record of where we got config from, for debugging purposes
+        config_sources = []
+
+        if only_override:
+            config_sources.append("Using only the overriden LC settings")
+        else:
+            if filename is None:
+                home_dir = os.path.expanduser("~")
+                # Use the default locations for local config file
+                # First, look for the basic config
+                # If other config files are found below, we don't complain about this not existing,
+                # but usually it must exist: we will complain below if nothing else is found
+                basic_config_filename = os.path.join(home_dir, ".pimlico")
+                if os.path.exists(basic_config_filename):
+                    config_sources.append("Basic config in home dir: {}".format(basic_config_filename))
+
+                # Allow other files to override the settings in this basic one
+                # Look for any files matching the pattern .pimlico_*
+
+                # You may specify config files for specific hosts
+                hostname = gethostname()
+                if hostname is not None and len(hostname) > 0:
+                    alt_config_files = [f for f in os.listdir(home_dir) if f.startswith(".pimlico_")]
+                    found_already = False
+                    for alt_config_filename in alt_config_files:
+                        suffix = alt_config_filename[9:]
+                        if hostname == suffix:
+                            # Our hostname matches a hostname-specific config file .pimlico_<hostname>
+                            if found_already:
+                                config_sources.append("Host-specific config file {} matches, but won't be used, as "
+                                                      "another match has already been found".format(alt_config_filename))
+                            else:
+                                config_sources.append("Hostname ({}) matches host-specific config file: {}".format(
+                                    hostname, alt_config_filename
+                                ))
+                                # Only allow one host-specific config file
+                                found_already = True
+                        elif suffix.endswith("-") and hostname.startswith(suffix[:-1]):
+                            # Hostname match hostname-prefix-specific config file .pimlico_<hostname_prefix>-
+                            if found_already:
+                                config_sources.append("Host-specific config file {} matches, but won't be used, as "
+                                                      "another match has already been found".format(alt_config_filename))
+                            else:
+                                config_sources.append("Hostname ({}) matches host-prefix-specific config file: {}".format(
+                                    hostname, alt_config_filename
+                                ))
+                                found_already = True
+                        else:
+                            config_sources.append("Config file {} does not match the hostname ({})".format(
+                                alt_config_filename, hostname))
+            else:
+                config_sources.append("Using giving local config filename: {}".format(filename))
+        return config_sources
+
+    @staticmethod
     def empty(local_config=None, override_local_config={}, override_pipeline_config={}, only_override_config=False):
         """
         Used to programmatically create an empty pipeline. It will contain no modules, but provides a gateway to

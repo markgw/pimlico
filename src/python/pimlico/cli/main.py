@@ -154,6 +154,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main command line interface to PiMLiCo")
     parser.add_argument("pipeline_config", help="Config file to load a pipeline from")
     parser.add_argument("--debug", "-d", help="Output verbose debugging info", action="store_true")
+    parser.add_argument("--trace-config",
+                        help="Trace the process of resolving which local config file(s) to use. Useful for debugging "
+                             "the resolution on a given server or with a given set of config files",
+                        action="store_true")
     parser.add_argument("--non-interactive",
                         help="Don't output things like progress bars that rely on being in a terminal or similar. "
                              "Equivalent to setting environment variable PIM_NON_INT=1",
@@ -192,6 +196,21 @@ if __name__ == "__main__":
         )
     else:
         override_local = {}
+
+    if opts.trace_config:
+        # Trace the loading of local config files
+        if opts.override_local_config is not None:
+            print("Using some local config overrides from command line: {}".format(
+                ", ".join(opts.override_local_config)))
+        if opts.local_config:
+            print("Using local config source given on command line: {}".format(opts.local_config))
+
+        # Run the usual LC loading routine that the pipeline config loader uses
+        for l, line in enumerate(
+                PipelineConfig.trace_load_local_config(filename=opts.local_config, override=override_local)):
+            print("{}: {}".format(l, line))
+        sys.exit(0)
+
     if opts.processes is not None:
         # Override the processes local config setting
         override_local["processes"] = opts.processes
