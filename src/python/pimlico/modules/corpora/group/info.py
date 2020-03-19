@@ -30,6 +30,7 @@ from builtins import object
 import math
 
 from pimlico.core.modules.base import BaseModuleInfo
+from pimlico.datatypes import PimlicoDatatype
 from pimlico.datatypes.corpora import IterableCorpus
 from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
 
@@ -87,7 +88,7 @@ class IterableCorpusGrouper(object):
             yield self.next_document()
 
 
-class CorpusGroupReader(IterableCorpus.Reader):
+class CorpusGroupReader(PimlicoDatatype.Reader):
     """
     Special reader for grouping documents in an iterable corpus on the fly and
     producing a corresponding grouped corpus.
@@ -103,8 +104,8 @@ class CorpusGroupReader(IterableCorpus.Reader):
             # We're ready when the input's ready
             return self.input_reader_setup.ready_to_read()
 
-    def init_before_data_point(self):
-        # Override this instead of __init__(), so that the data-point's reader_init has all this available
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # Prepare the input reader
         self.input_reader = self.setup.input_reader_setup.get_reader(self.pipeline, module=self.module)
         # Create an initial grouper utility to get the list of archive names

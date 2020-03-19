@@ -151,22 +151,9 @@ class IterableCorpus(PimlicoDatatype):
     class Reader(object):
         def __init__(self, *args, **kwargs):
             super(IterableCorpus.Reader, self).__init__(*args, **kwargs)
-            self.init_before_data_point()
             # Call the data point type's reader_init() method to allow it to do anything
             # that should be done when the reader is prepared
             self.datatype.data_point_type.reader_init(self)
-
-        def init_before_data_point(self):
-            """
-            Called after base init operations have been performed (setting all
-            the basic attributes, etc), but before the data-point type's
-            ``reader_init()`` is called. This must be used instead of overriding
-            the ``__init__()`` in cases where the data-point type's init might
-            rely on the subclass' init operations (e.g. if you prepare
-            metadata that might be used by the data-point type).
-
-            """
-            return
 
         def __len__(self):
             try:
