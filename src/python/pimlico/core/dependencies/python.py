@@ -175,9 +175,9 @@ class PythonPackageOnPip(PythonPackageDependency):
         return "PythonPackageOnPip<%s%s>" % (self.name, (" (%s)" % self.package) if self.package != self.name else "")
 
     def get_installed_version(self, local_config):
-        reqs = list(parse_requirements(self.pip_package))
+        reqs = list(parse_requirements(self.package))
         if len(reqs) != 1:
-            raise ValueError("pip_package='{}', which could not be parsed as a requirement".format(self.pip_package))
+            raise ValueError("pip_package='{}', which could not be parsed as a requirement".format(self.package))
         # Reload the working set in case something's been installed since loaded
         reload(pkg_resources)
         # Look up the package
