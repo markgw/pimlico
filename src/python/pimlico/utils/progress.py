@@ -140,9 +140,10 @@ class LittleOutputtingProgressBar(SafeProgressBar):
 
     def _format_line(self):
         # Ignore widgets and output a simple message
-        text = "Completed {}%".format(self._current_percentage())
+        text = "Completed {}%\n".format(self._current_percentage())
         # Ignore justification: always L-justify
-        return text.ljust(self.term_width)
+        # Don't need to fill the whole width, as we're just outputting a whole line
+        return text
 
     def _need_update(self):
         if self.output_start_end_only:
@@ -153,7 +154,7 @@ class LittleOutputtingProgressBar(SafeProgressBar):
     def start(self):
         super(LittleOutputtingProgressBar, self).start()
         if self.output_start_end_only:
-            self.fd.write("Started".ljust(self.term_width) + "\r")
+            self.fd.write("Started\n")
 
         # This gets computed automatically on the basis of the terminal width, but we want it
         # set to a small value
