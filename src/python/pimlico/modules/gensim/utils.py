@@ -3,8 +3,11 @@ Utilities for using Gensim in Pimlico used across different modules.
 
 """
 from __future__ import division
+
+import logging
 from builtins import object
 from collections import Counter
+from logging import getLogger
 
 from pimlico.datatypes.corpora import is_invalid_doc
 
@@ -60,3 +63,14 @@ def word_relevance_for_topic(topic_word_probs, word_probs, l=0.6):
     """
     import numpy as np
     return l * np.log(topic_word_probs) + (1-l) * np.log(topic_word_probs / word_probs)
+
+
+def init_gensim_train_logging():
+    # Set up logging, so that we see Gensim's progress as it trains
+    lda_logger = getLogger('gensim.models.ldamodel')
+    hnd = logging.StreamHandler()
+    hnd.setLevel(logging.INFO)
+    fmt = logging.Formatter('%(asctime)s - Gensim - %(levelname)s - %(message)s')
+    hnd.setFormatter(fmt)
+    lda_logger.addHandler(hnd)
+    lda_logger.setLevel(logging.INFO)

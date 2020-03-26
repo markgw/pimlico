@@ -4,7 +4,7 @@ from logging import getLogger
 from gensim.models import LdaModel, TfidfModel
 
 from pimlico.core.modules.base import BaseModuleExecutor
-from pimlico.modules.gensim.utils import GensimCorpus
+from pimlico.modules.gensim.utils import GensimCorpus, init_gensim_train_logging
 from pimlico.utils.progress import get_progress_bar
 
 
@@ -26,14 +26,7 @@ class ModuleExecutor(BaseModuleExecutor):
             ).encode("utf-8"))
         ignore_ids = [vocab.token2id[term] for term in ignore_terms]
 
-        # Set up logging, so that we see Gensim's progress as it trains
-        lda_logger = getLogger('gensim.models.ldamodel')
-        hnd = logging.StreamHandler()
-        hnd.setLevel(logging.INFO)
-        fmt = logging.Formatter('%(asctime)s - Gensim - %(levelname)s - %(message)s')
-        hnd.setFormatter(fmt)
-        lda_logger.addHandler(hnd)
-        lda_logger.setLevel(logging.INFO)
+        init_gensim_train_logging()
 
         # Wrap the corpus to present it as bags of words to Gensim
         gensim_corpus = GensimCorpus(corpus, ignore_ids=ignore_ids)
