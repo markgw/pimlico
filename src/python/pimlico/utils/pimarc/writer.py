@@ -32,7 +32,8 @@ class PimarcWriter(object):
 
     def open(self):
         """
-        Open the archive file.
+        Open the archive file. Called by the context manager's enter method, so
+        you don't usually need to call this.
 
         """
         return open(self.archive_filename, mode="ab" if self.append else "wb")
@@ -45,24 +46,38 @@ class PimarcWriter(object):
         else:
             # Create an empty index
             self.index = PimarcIndex()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.archive_file.close()
         # We need to store the updated index, which is only updated in memory while writing
         self.index.save(self.index_filename)
 
-    def write_file(self, metadata, data):
+    def write_file(self, data, name=None, metadata=None):
         """
         Append a write to the end of the archive. The metadata should be a dictionary
         that can be encoded as JSON (which is how it will be stored). The data should
         be a bytes object.
 
+        If you want to write text files, you should encode the text as UTF-8 to get a
+        bytes object and write that.
+
+        Setting `name=X` is simply a shorthand for setting `metadata["name"]=X`.
+        Either `name` or a metadata dict including the `name` key is required.
+
         """
-        # The file's name should always be in the metadata as "name"
-        try:
-            filename = metadata["name"]
-        except KeyError:
-            raise MetadataError("metadata should include 'name' key")
+        if metadata is None:
+            metadata = {}
+
+        if name is not None:
+            filename = name
+            metadata["name"] = name
+        else:
+            # The file's name should always be in the metadata as "name"
+            try:
+                filename = metadata["name"]
+            except KeyError:
+                raise MetadataError("metadata should include 'name' key")
         # Check where we're up to in the file
         # This tells us where the metadata starts, which will be stored in the index
         metadata_start = self.archive_file.tell()

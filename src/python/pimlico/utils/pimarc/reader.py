@@ -25,6 +25,7 @@ class PimarcReader(object):
     def __enter__(self):
         self.archive_file = self.open()
         self.index = PimarcIndex.load(self.index_filename)
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.archive_file.close()
@@ -99,6 +100,9 @@ class PimarcReader(object):
 
     def __iter__(self):
         return self.iter_files()
+
+    def __len__(self):
+        return len(self.index)
 
 
 def _read_var_length_data(reader):

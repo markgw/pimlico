@@ -27,6 +27,13 @@ class PimarcIndex(object):
     def __getitem__(self, item):
         return self.get_metadata_start_byte(item), self.get_data_start_byte(item)
 
+    def __iter__(self):
+        """ Simply iterate over the filenames. You can access the data using these as args to other methods. """
+        return iter(self.filenames)
+
+    def __len__(self):
+        return len(self.filenames)
+
     def append(self, filename, metadata_start, data_start):
         if filename in self.filenames:
             raise DuplicateFilename(filename)

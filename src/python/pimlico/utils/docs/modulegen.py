@@ -26,7 +26,6 @@ from collections import OrderedDict
 from importlib import import_module
 from pkgutil import iter_modules
 
-from past.builtins import basestring
 from sphinx import __version__
 from sphinx.ext.apidoc import format_heading
 
@@ -449,7 +448,7 @@ type={}
 
 
 def _val_to_config(val):
-    if isinstance(val, basestring):
+    if isinstance(val, str):
         # This is easy: we can just use it
         return val
     # Some types can simply be converted to strings to get a good example
@@ -470,7 +469,7 @@ def _opt_type_to_config(otype):
     if hasattr(otype, "_opt_type_example"):
         return otype._opt_type_example
     if type(otype) is type:
-        if issubclass(otype, basestring):
+        if issubclass(otype, str):
             # Just a string, anything can go here
             return "text"
         elif issubclass(otype, int):

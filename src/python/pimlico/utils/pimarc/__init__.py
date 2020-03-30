@@ -34,6 +34,10 @@ using a writer.
 Restrictions on filenames:
 Filenames may use any unicode characters, excluding EOF, newline and tab.
 
+The standard filename for a Pimarc file is `.prc`. This file contains the archive's
+data. A second file is always stored in the same location, with an identical filename,
+except the extension `.prci`.
+
 """
 from .reader import PimarcReader
 from .writer import PimarcWriter
