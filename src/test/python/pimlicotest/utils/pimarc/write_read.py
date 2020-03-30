@@ -62,7 +62,7 @@ class WriteRandomDocumentsTest(PimarcWriteReadTest):
 
         with PimarcReader(self.archive_path) as arc:
             self.assertEqual(len(arc), len(files_data))
-            
+
             # Read each file back in and check it has the same content
             for (metadata, file_data), expected_data in zip(arc, files_data):
                 self.assertEqual(file_data.decode("utf-8"), expected_data,
