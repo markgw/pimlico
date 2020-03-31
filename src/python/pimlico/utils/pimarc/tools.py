@@ -4,8 +4,9 @@ Command-line tools for manipulating Pimarcs.
 """
 import argparse
 import os
+from tarfile import TarFile
 
-from pimlico.utils.pimarc import PimarcReader
+from pimlico.utils.pimarc import PimarcReader, PimarcWriter
 
 
 def list_files(opts):
@@ -32,6 +33,33 @@ def extract_file(opts):
             f.write(data)
 
 
+def from_tar(opts):
+    in_tar_paths = opts.tars
+    out_dir_path = opts.out_path
+
+    for tar_path in in_tar_paths:
+        tar_path = os.path.abspath(tar_path)
+
+        # Work out where to put the converted file
+        out_filename = "{}.prc".format(os.path.splitext(os.path.basename(tar_path))[0])
+        if out_dir_path is None:
+            out_path = os.path.join(os.path.dirname(tar_path), out_filename)
+        else:
+            out_path = os.path.join(out_dir_path, out_filename)
+        print("Creating {} from {}".format(out_path, tar_path))
+
+        # Create a writer to add files to
+        with PimarcWriter(out_path) as arc:
+            # Read in the tar file
+            tarfile = TarFile.open(tar_path, "r:")
+            for tarinfo in tarfile:
+                name = tarinfo.name
+                with tarfile.extractfile(tarinfo) as tar_member:
+                    data = tar_member.read()
+                print("  Writing {}".format(name))
+                arc.write_file(data, name)
+
+
 def no_subcommand(opts):
     print("Specify a subcommand: list, ...")
 
@@ -50,6 +78,13 @@ def run():
     subparser.add_argument("path", help="Path to the Pimarc")
     subparser.add_argument("filenames", nargs="+", help="Filename(s) to extract")
     subparser.add_argument("--out", "-o", help="Output dir (default CWD)")
+
+    subparser = subparsers.add_parser("fromtar",
+                                      help="Create a Pimarc containing all the same files as a given tar. "
+                                           "Outputs to the same filename as input, with '.tar' replaced by '.prc'")
+    subparser.set_defaults(func=from_tar)
+    subparser.add_argument("tars", nargs="+", help="Path to the tar archive(s)")
+    subparser.add_argument("--out-path", "-o", help="Directory to output files to. Defaults to same as input")
 
     opts = parser.parse_args()
     opts.func(opts)
