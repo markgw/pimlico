@@ -2,36 +2,33 @@
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
-from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import print_function
 
 import warnings
 
 from future import standard_library
-from future.utils import PY2
+
+from pimlico.utils.pimarc import PimarcReader, PimarcWriter
+from pimlico.utils.pimarc.reader import StartAfterFilenameNotFound
+from pimlico.utils.pimarc.tar import PimarcTarBackend
 
 standard_library.install_aliases()
 from builtins import zip
 from builtins import next
 from builtins import object
-from builtins import str
 from builtins import bytes
 
 import pickle
 import gzip
 import json
 import os
-import shutil
-import tarfile
 import zlib
 from io import StringIO, BytesIO, open
-
-from tempfile import mkdtemp
 
 from pimlico.datatypes.base import DynamicOutputDatatype
 from pimlico.datatypes.corpora import IterableCorpus, DataPointType
 from pimlico.datatypes.corpora.data_points import is_invalid_doc
-from pimlico.utils.filesystem import retry_open
 
 __all__ = [
     "GroupedCorpus", "AlignedGroupedCorpora",
@@ -68,7 +65,7 @@ class GroupedCorpus(IterableCorpus):
                     for root, dirs, files in os.walk(data_dir):
                         for filename in files:
                             f = os.path.join(root, filename)
-                            if f.endswith(".tar.gz") or f.endswith(".tar"):
+                            if f.endswith(".prc") or f.endswith(".tar"):
                                 yield f
 
             def _has_archives(self, data_dir):
@@ -88,15 +85,54 @@ class GroupedCorpus(IterableCorpus):
             self.archives = [os.path.splitext(os.path.basename(f))[0] for f in self.archive_filenames]
             self.archive_to_archive_filename = dict(zip(self.archives, self.archive_filenames))
 
+            # Cache the last-used archive
+            self._last_used_archive = None
+            self._last_used_archive_name = None
+
+        def get_archive(self, archive_name):
+            """
+            Return a `PimarcReader` for the named archive, or, if using the tar backend, a
+            PimarcTarBackend.
+
+            """
+            if self._last_used_archive_name is None or self._last_used_archive_name != archive_name:
+                archive_filename = self.archive_to_archive_filename[archive_name]
+                archive_path = os.path.join(self.data_dir, archive_filename)
+                if archive_filename.endswith(".tar"):
+                    # Use the tar backend for backwards compatibility
+                    arc = PimarcTarBackend(archive_path)
+                else:
+                    arc = PimarcReader(archive_path)
+
+                # Close the cached archive
+                if self._last_used_archive is not None:
+                    self._last_used_archive.close()
+                # Replace it with the new one
+                self._last_used_archive_name = archive_name
+                self._last_used_archive = arc
+
+            # Used the cached archive
+            return self._last_used_archive
+
         def extract_file(self, archive_name, filename):
             """
-            Extract an individual file by archive name and filename. This is not an efficient
+            Extract an individual file by archive name and filename.
+
+            With the old use of tar to store file, this was not an efficient
             way of extracting a lot of files. The typical use case of a grouped corpus is to
             iterate over its files, which is much faster.
 
+            Now we're using Pimarc, this is faster. However, jumping a lot between different
+            archives is still slow, as you have to load the index for each archive. A
+            better approach is to load an archive and extract all the files from it you
+            need before loading another.
+
+            The reader will cache the most recently used archive, so if you use this method
+            multiple times with the same archive name, it won't reload the index in between.
+
             """
-            with tarfile.open(os.path.join(self.data_dir, self.archive_to_archive_filename[archive_name])) as archive:
-                return archive.extractfile(filename).read()
+            __, file_data = self.get_archive(archive_name)[filename]
+            return file_data
 
         def __iter__(self):
             return self.doc_iter()
@@ -124,75 +160,62 @@ class GroupedCorpus(IterableCorpus):
             if skip is not None and skip < 1:
                 skip = None
 
-            # Prepare a temporary directory to extract everything to
-            tmp_dir = mkdtemp()
+            # -1 means don't skip anything, otherwise we accumulate how many we've skipped
+            skipped = -1 if skip is None else 0
+            # Start after we've hit this (archive, doc name)
+            started = start_after is not None
 
-            skipped = 0
-            if start_after is None and skip is None:
-                # Don't wait to start
-                started = True
-            else:
-                # Start after we've hit this (archive, doc name), or after we've passed a certain number of docs
-                started = False
+            for archive_name in self.archives:
+                if not started and start_after is not None:
+                    if start_after[0] == archive_name and start_after[1] is None:
+                        # Asked to start after an archive, but not given specific filename
+                        # Skip the whole archive and start at the beginning of the next one
+                        # Cancel the start_after requirement, but don't start yet, as we might still skip
+                        start_after = None
+                        continue
+                    elif start_after[0] != archive_name:
+                        # If we're waiting for a particular archive/file, skip archives until we're in the right one
+                        continue
 
-            try:
-                for archive_name, archive_filename in zip(self.archives, self.archive_filenames):
-                    if not started and start_after is not None:
-                        if start_after[0] == archive_name and start_after[1] is None:
-                            # Asked to start after an archive, but not given specific filename
-                            # Skip the whole archive and start at the beginning of the next one
-                            # Cancel the start_after requirement, but don't start yet, as we might still skip
-                            start_after = None
+                # Now we're either reading the whole of this archive, or starting after a filename in it
+                with self.get_archive(archive_name) as archive:
+                    skip_in_archive = None
+                    start_after_in_archive = None
+                    # Allow the first portion of the corpus to be skipped
+                    if start_after is not None:
+                        # If we've got this far, we're in the right archive, but need to skip past the filename
+                        start_after_in_archive = start_after[1]
+                    elif skipped != -1:
+                        # If we're skipping a certain number of docs, check how long the archive is to know
+                        # whether to skip it all
+                        # This is slow for tar, but relatively fast for Pimarc
+                        archive_length = len(archive)
+                        if skipped + archive_length <= skip:
+                            # We can skip the whole of this archive
+                            skipped += archive_length
                             continue
-                        elif start_after[0] != archive_name:
-                            # If we're waiting for a particular archive/file, skip archives until we're in the right one
-                            continue
+                        else:
+                            # Skip over the remaining number within this archive
+                            skip_in_archive = skip - skipped
+                            # Don't skip at all in future archives
+                            skipped = -1
 
-                    # Extract the tarball to the temp dir
-                    with retry_open(archive_filename, mode="rb") as tar_f:
-                        tarball = tarfile.open(archive_filename, fileobj=tar_f, mode="r|")
-                        for tarinfo in tarball:
-                            if PY2:
-                                filename = tarinfo.name.decode("utf-8")
-                            else:
-                                filename = tarinfo.name
+                    try:
+                        # Iterate over the files in the archive
+                        for metadata, raw_data in archive.iter_files(
+                                skip=skip_in_archive, start_after=start_after_in_archive):
+                            filename = metadata["name"]
                             # By default, doc name is just the same as filename
                             doc_name = filename
-
                             if gzipped and doc_name.endswith(".gz"):
                                 # If we used the .gz extension while writing the file, remove it to get the doc name
                                 doc_name = doc_name[:-3]
-
-                            # Allow the first portion of the corpus to be skipped
-                            if not started:
-                                if start_after is not None:
-                                    # We know we're in the right archive now, skip until we get to the requested file
-                                    if start_after[1] == filename:
-                                        # We've hit the condition for starting
-                                        # Skip this doc and start on the next (or after we've satisfied "skip")
-                                        start_after = None
-                                    continue
-                                elif skip is not None:
-                                    if skipped >= skip:
-                                        # Skipped enough now: stop skipping
-                                        started = True
-                                    else:
-                                        # Keep skipping docs
-                                        skipped += 1
-                                        continue
-                                else:
-                                    # No more skipping requirements left
-                                    started = True
 
                             # If subsampling or filtering, decide whether to extract this file
                             if name_filter is not None and not name_filter(archive_name, doc_name):
                                 # Reject this file
                                 continue
 
-                            tarball.extract(tarinfo, tmp_dir)
-                            # Read in the data
-                            with open(os.path.join(tmp_dir, filename), "rb") as f:
-                                raw_data = f.read()
                             if gzipped:
                                 if doc_name.endswith(".gz"):
                                     # Gzipped document
@@ -203,36 +226,25 @@ class GroupedCorpus(IterableCorpus):
                                     #  just decompress with zlib, without trying to parse the gzip headers
                                     raw_data = zlib.decompress(raw_data)
 
-                            # Wrap in bytes
-                            # In Py2, this converts the string to a bytes backport
-                            # In Py3, this is a no-op
-                            raw_data = bytes(raw_data)
-
                             # Apply subclass-specific post-processing and produce a document instance
                             document = self.data_to_document(raw_data)
 
                             yield archive_name, doc_name, document
-                            # Remove the file once we're done with it (when we request another)
-                            os.remove(os.path.join(tmp_dir, filename))
 
+                    except StartAfterFilenameNotFound:
                         # Catch the case where the archive/filename requested as a starting point wasn't found
-                        # We only get here with started=False when we're in the right archive and have got through the
-                        #  the whole thing without finding the requested filename
-                        if not started and start_after is not None:
-                            raise GroupedCorpusIterationError(
-                                "tried to start iteration over grouped corpus at document (%s, %s), but filename %s "
-                                "wasn't found in archive %s" % (start_after[0], start_after[1], start_after[1], archive_name)
-                            )
-            finally:
-                # Remove the temp dir
-                shutil.rmtree(tmp_dir)
+                        # With Pimarc, the error is raised immediately
+                        # With tar, it's only raised when we get to the end of the file without finding the filename
+                        raise GroupedCorpusIterationError(
+                            "tried to start iteration over grouped corpus at document (%s, %s), but filename %s "
+                            "wasn't found in archive %s" % (start_after[0], start_after[1], start_after[1], archive_name)
+                        )
 
         def list_archive_iter(self):
             gzipped = self.metadata.get("gzip", False)
-            for archive_name, archive_filename in zip(self.archives, self.archive_filenames):
-                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="rb")) as tarball:
-                    for tarinfo in tarball:
-                        filename = tarinfo.name.decode("utf-8")
+            for archive_name in self.archives:
+                with self.get_archive(archive_name) as archive:
+                    for filename in archive.iter_filenames():
                         # Do the same name preprocessing that archive_iter does
                         doc_name = filename
                         if gzipped and doc_name.endswith(".gz"):
@@ -242,13 +254,18 @@ class GroupedCorpus(IterableCorpus):
 
     class Writer(object):
         """
-        Writes a large corpus of documents out to disk, grouping them together in tar archives.
+        Writes a large corpus of documents out to disk, grouping them together in Pimarc archives.
 
         A subtlety is that, as soon as the writer has been initialized,
         it must be legitimate to initialize a datatype to read the corpus. Naturally, at this point there will
         be no documents in the corpus, but it allows us to do document processing on the fly by initializing
         writers and readers to be sure the pre/post-processing is identical to if we were writing the docs to disk
         and reading them in again.
+
+        The reader above allows reading from tar archives for backwards compatibility. However,
+        it is no longer possible to write corpora to tar archives. This has been completely replaced
+        by the new Pimarc archives, which are more efficient to use and allow random access when
+        necessary without huge speed penalties.
 
         """
         metadata_defaults = {
@@ -285,7 +302,7 @@ class GroupedCorpus(IterableCorpus):
             self.trust_length = self.params["trust_length"]
 
             self.current_archive_name = None
-            self.current_archive_tar = None
+            self.current_archive = None
 
             self.metadata["length"] = 0
 
@@ -311,6 +328,22 @@ class GroupedCorpus(IterableCorpus):
             self.doc_count = self.metadata["length"]
 
         def add_document(self, archive_name, doc_name, doc):
+            """
+            Add a document to the named archive. All docs should be added to a single archive
+            before moving onto the next. If the archive name is the same as the previous
+            doc added, the doc's data will be appended. Otherwise, the archive is finalized
+            and we move onto the new archive.
+
+            .. todo::
+
+               Pimarc archives also provide the ability to add further metadata for each
+               document, encoded as JSON. At the moment, we don't expose this during corpus
+               writing, but in future this could be provided via a kwarg here.
+
+            :param archive_name: archive name
+            :param doc_name: name of document
+            :param doc: document instance
+            """
             # A document instance provides access to the raw data for a document as a bytes (Py3) or string (Py2)
             # If it's not directly available, it will be converted when we try to retrieve the raw data
             try:
@@ -353,17 +386,14 @@ class GroupedCorpus(IterableCorpus):
 
             if archive_name != self.current_archive_name:
                 # Starting a new archive
-                if self.current_archive_tar is not None:
+                if self.current_archive is not None:
                     # Close the old one
-                    self.current_archive_tar.close()
+                    self.current_archive.close()
                 self.current_archive_name = archive_name
-                tar_filename = os.path.join(self.data_dir, "%s.tar" % archive_name)
+                arc_filename = os.path.join(self.data_dir, "{}.prc".format(archive_name))
                 # If we're appending a corpus and the archive already exists, append to it
-                try:
-                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="a" if self.append else "w", encoding="utf8")
-                except tarfile.ReadError:
-                    # Couldn't open the existing file to append to, write instead
-                    self.current_archive_tar = tarfile.TarFile(tar_filename, mode="w", encoding="utf8")
+                self.current_archive = PimarcWriter(arc_filename,
+                                                    mode="a" if self.append and os.path.exists(arc_filename) else "w")
 
             # Add a new document to archive
             if self.gzip:
@@ -373,29 +403,25 @@ class GroupedCorpus(IterableCorpus):
                 with gzip.GzipFile(mode="wb", compresslevel=9, fileobj=gzip_io) as gzip_file:
                     gzip_file.write(data)
                 data = gzip_io.getvalue()
-            data_file = BytesIO(data)
-            # If we're zipping, add the .gz extension, so it's easier to inspect the output manually
-            info = tarfile.TarInfo(name="%s.gz" % doc_name if self.gzip else doc_name)
-            info.size = len(data)
-            self.current_archive_tar.addfile(info, data_file)
-            # Flush to disk to ensure the latest file always gets written
+                filename = "{}.gz".format(doc_name)
+            else:
+                filename = doc_name
+
+            # Append this document's data to the Pimarc
+            self.current_archive.write_file(data, name=filename)
             self.flush()
 
             # Keep a count of how many we've added so we can write metadata
             self.doc_count += 1
 
         def flush(self):
-            """ Flush disk write of the tarfile currently being written. Called after adding a new file """
-            if self.current_archive_tar is not None:
-                # First call flush(), which does a basic flush to RAM cache
-                f = self.current_archive_tar.fileobj
-                f.flush()
-                # Then we also need to force the system to write it to disk
-                os.fsync(f.fileno())
+            """ Flush disk write of the archive currently being written. Called after adding a new file """
+            if self.current_archive is not None:
+                self.current_archive.flush()
 
         def __exit__(self, exc_type, exc_val, exc_tb):
-            if self.current_archive_tar is not None:
-                self.current_archive_tar.close()
+            if self.current_archive is not None:
+                self.current_archive.close()
             self.metadata["length"] = self.doc_count
             super(GroupedCorpus.Writer, self).__exit__(exc_type, exc_val, exc_tb)
 
@@ -409,13 +435,12 @@ class GroupedCorpus(IterableCorpus):
             # Look for already written archives
             archive_filenames = GroupedCorpus.Reader.Setup._get_archive_filenames(self.data_dir)
             archive_filenames.sort()
-            archives = [os.path.splitext(os.path.basename(f))[0] for f in archive_filenames]
 
             total_docs = 0
-            for archive_name, archive_filename in zip(archives, archive_filenames):
+            for archive_filename in archive_filenames:
                 # Count the docs in each archive
-                with tarfile.open(archive_filename, fileobj=retry_open(archive_filename, mode="r")) as tarball:
-                    total_docs += sum(1 for __ in tarball)
+                with PimarcReader(archive_filename) as arc:
+                    total_docs += len(arc)
             return total_docs
 
 

@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from builtins import *
 
@@ -25,7 +26,8 @@ class PimarcIndex(object):
             raise FilenameNotInArchive(filename)
 
     def __getitem__(self, item):
-        return self.get_metadata_start_byte(item), self.get_data_start_byte(item)
+        """ Returns a pair containing the metadata start byte and the data start byte. """
+        return self.filenames[item]
 
     def __iter__(self):
         """ Simply iterate over the filenames. You can access the data using these as args to other methods. """
@@ -33,6 +35,12 @@ class PimarcIndex(object):
 
     def __len__(self):
         return len(self.filenames)
+
+    def __contains__(self, item):
+        return item in self.filenames
+
+    def keys(self):
+        return self.filenames.keys()
 
     def append(self, filename, metadata_start, data_start):
         if filename in self.filenames:
@@ -58,6 +66,63 @@ class PimarcIndex(object):
                 f.write("{}\t{}\t{}\n".format(doc_filename, metadata_start, data_start))
 
 
+class PimarcIndexAppender(object):
+    """
+    Class for writing out a Pimarc index as each file is added to the archive.
+    This is used by the Pimarc writer, instead of creating a PimarcIndex and
+    calling `save()`, so that the index is always kept up to date with what's
+    in the archive.
+
+    Mode may be `"w"` to write a new index or `"a"` to append to an existing
+    one.
+
+    """
+    def __init__(self, store_path, mode="w"):
+        self.store_path = store_path
+        self.filenames = OrderedDict()
+        self.mode = mode
+
+        if self.mode == "a":
+            # Load the existing index so we can append
+            self._load()
+            self.fileobj = open(self.store_path, "a")
+        else:
+            # Start a new index
+            self.fileobj = open(self.store_path, "w")
+
+    def __len__(self):
+        return len(self.filenames)
+
+    def __contains__(self, item):
+        return item in self.filenames
+
+    def append(self, filename, metadata_start, data_start):
+        if filename in self.filenames:
+            raise DuplicateFilename(filename)
+        self.filenames[filename] = (metadata_start, data_start)
+        # Add a line to the end of the index
+        self.fileobj.write("{}\t{}\t{}\n".format(filename, metadata_start, data_start))
+
+    def close(self):
+        self.fileobj.close()
+
+    def _load(self):
+        with open(self.store_path, "r") as f:
+            for line in f:
+                # Remove the newline char
+                line = line[:-1]
+                # There should be three tab-separated values: filename, metadata start and data start
+                doc_filename, metadata_start, data_start = line.split("\t")
+                metadata_start, data_start = int(metadata_start), int(data_start)
+                self.filenames[doc_filename] = (metadata_start, data_start)
+
+    def flush(self):
+        # First call flush(), which does a basic flush to RAM cache
+        self.fileobj.flush()
+        # Then we also need to force the system to write it to disk
+        os.fsync(self.fileobj.fileno())
+
+
 class FilenameNotInArchive(Exception):
     def __init__(self, filename):
         super().__init__(u"filename '{}' not found in archive".format(filename))
@@ -68,3 +133,7 @@ class DuplicateFilename(Exception):
     def __init__(self, filename):
         super().__init__(u"filename '{}' already in archive: cannot add it again".format(filename))
         self.filename = filename
+
+
+class IndexWriteError(Exception):
+    pass

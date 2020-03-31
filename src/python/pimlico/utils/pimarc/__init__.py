@@ -38,6 +38,9 @@ The standard filename for a Pimarc file is `.prc`. This file contains the archiv
 data. A second file is always stored in the same location, with an identical filename,
 except the extension `.prci`.
 
+Some basic command-line utilities for working with Pimarc archives are provided.
+Run `pimlico.utils.pimarc` with one of the various sub-commands.
+
 """
 from .reader import PimarcReader
 from .writer import PimarcWriter

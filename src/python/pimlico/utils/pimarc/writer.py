@@ -3,6 +3,7 @@ import os
 
 from future.utils import raise_from
 
+from pimlico.utils.pimarc.index import PimarcIndexAppender
 from pimlico.utils.varint import encode
 from .index import PimarcIndex
 
@@ -30,28 +31,18 @@ class PimarcWriter(object):
             if os.path.exists(self.index_filename):
                 os.remove(self.index_filename)
 
-    def open(self):
-        """
-        Open the archive file. Called by the context manager's enter method, so
-        you don't usually need to call this.
+        self.archive_file = open(self.archive_filename, mode="ab" if self.append else "wb")
+        self.index = PimarcIndexAppender(self.index_filename, mode="a" if self.append else "w")
 
-        """
-        return open(self.archive_filename, mode="ab" if self.append else "wb")
+    def close(self):
+        self.archive_file.close()
+        self.index.close()
 
     def __enter__(self):
-        self.archive_file = self.open()
-        if self.append:
-            # Load the index so far
-            self.index = PimarcIndex.load(self.index_filename)
-        else:
-            # Create an empty index
-            self.index = PimarcIndex()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.archive_file.close()
-        # We need to store the updated index, which is only updated in memory while writing
-        self.index.save(self.index_filename)
+        self.close()
 
     def write_file(self, data, name=None, metadata=None):
         """
@@ -98,6 +89,18 @@ class PimarcWriter(object):
 
         # Add the file to the index
         self.index.append(filename, metadata_start, data_start)
+
+    def flush(self):
+        """
+        Flush the archive's data out to disk, archive and index.
+
+        """
+        # First call flush(), which does a basic flush to RAM cache
+        self.archive_file.flush()
+        # Then we also need to force the system to write it to disk
+        os.fsync(self.archive_file.fileno())
+        # The index flush does the same with its file
+        self.index.flush()
 
 
 def _write_var_length_data(writer, data):
