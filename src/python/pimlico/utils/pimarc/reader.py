@@ -13,6 +13,8 @@ class PimarcReader(object):
     """
     def __init__(self, archive_filename):
         self.archive_filename = archive_filename
+        if not archive_filename.endswith(".prc"):
+            raise IOError("pimarc files should have the extension '.prc'")
         self.index_filename = "{}i".format(archive_filename)
 
         self.archive_file = open(self.archive_filename, mode="rb")

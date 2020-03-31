@@ -59,6 +59,10 @@ def from_tar(opts):
                 print("  Writing {}".format(name))
                 arc.write_file(data, name)
 
+        if opts.delete:
+            print("Deleting tar: {}".format(tar_path))
+            os.remove(tar_path)
+
 
 def no_subcommand(opts):
     print("Specify a subcommand: list, ...")
@@ -85,6 +89,7 @@ def run():
     subparser.set_defaults(func=from_tar)
     subparser.add_argument("tars", nargs="+", help="Path to the tar archive(s)")
     subparser.add_argument("--out-path", "-o", help="Directory to output files to. Defaults to same as input")
+    subparser.add_argument("--delete", "-d", action="store_true", help="Delete the tar files after creating pimarcs")
 
     opts = parser.parse_args()
     opts.func(opts)
