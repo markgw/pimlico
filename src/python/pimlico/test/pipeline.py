@@ -47,6 +47,13 @@ class TestPipeline(object):
         self.pipeline = pipeline
         self.debug = debug
 
+        if len(self.requested_modules) == 0:
+            # No modules requested: test all modules
+            self.requested_modules = [
+                module_name for module_name in self.pipeline.module_order
+                if self.pipeline[module_name].module_executable
+            ]
+
         # Expand the list of requested modules to include any that they depend on
         modules = [self.pipeline[mod] for mod in self.requested_modules]
         self.to_run = remove_duplicates(self.requested_modules + [m.module_name for m in collect_unexecuted_dependencies(modules)])
@@ -125,6 +132,8 @@ def run_test_pipeline(path, module_names, log, no_clean=False, debug=False, no_c
     Pimlico test data directory) and running each of the named modules, including any of those
     modules' dependencies.
 
+    If no module names are given, all modules are run.
+
     Any software dependencies not already available that can be installed automatically will be
     installed in the current environment. If there are unsatisfied dependencies that can't be
     automatically installed, an error will be raised.
@@ -185,7 +194,7 @@ def run_test_pipeline(path, module_names, log, no_clean=False, debug=False, no_c
 def run_test_suite(pipelines_and_modules, log, no_clean=False, debug=False, stop_on_error=False, no_clean_after=False):
     """
     :param pipeline_and_modules: list of (pipeline, modules) pairs, where pipeline is a path to a config file and
-        modules a list of module names to test
+        modules a list of module names to test. If the module list is empty, all runable modules are run.
     """
     failed = []
     for path, module_names in pipelines_and_modules:
@@ -222,7 +231,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Single pipeline test runner. ",
                                      epilog="See also suite.py for running whole test suites")
     parser.add_argument("pipeline_config", help="Pipeline config file to load")
-    parser.add_argument("modules", nargs="+", help="Module(s) to test running")
+    parser.add_argument("modules", nargs="*", help="Module(s) to test running")
     parser.add_argument("--debug", "-d", help="Execute modules in debug mode, potentially giving more verbose output",
                         action="store_true")
     parser.add_argument("--no-clean", help="Do not clean up the storage directory after running tests. By default, "
