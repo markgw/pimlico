@@ -12,6 +12,7 @@ from __future__ import print_function
 from traceback import print_exc
 
 from pimlico.cli.jupyter import JupyterCmd
+from pimlico.cli.pimarc import Tar2PimarcCmd
 
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
@@ -138,7 +139,7 @@ SUBCOMMANDS = [
     StatusCmd, VariantsCmd, RunCmd, RecoverCmd, FixLengthCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd,
     ListStoresCmd, MoveStoresCmd, UnlockCmd,
     DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, NewModuleCmd, VisualizeCmd, EmailCmd,
-    JupyterCmd,
+    JupyterCmd, Tar2PimarcCmd,
 ]
 
 

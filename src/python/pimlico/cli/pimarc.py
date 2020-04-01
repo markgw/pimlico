@@ -31,13 +31,15 @@ class Tar2PimarcCmd(PimlicoCLISubcommand):
                                  "be given as 'module_name.output_name'. All grouped corpus outputs "
                                  "of a module can be converted by just giving 'module_name'. Or, if "
                                  "nothing's given, all outputs of all modules are converted")
-        parser.add_argument("--dry", "--check", action="store_true",
-                            help="Just check what format the corpora use, don't run conversion")
+        parser.add_argument("--run", action="store_true",
+                            help="Run conversion. Without this option, just checks "
+                                 "what format the corpora use")
 
     def run_command(self, pipeline, opts):
-        dry = opts.dry
-        if dry:
+        run = opts.run
+        if not run:
             print("DRY: Not running any conversions, just checking formats")
+
         output_specs = opts.outputs
         if output_specs is None or len(output_specs) == 0:
             # Nothing given: convert all modules
@@ -49,7 +51,12 @@ class Tar2PimarcCmd(PimlicoCLISubcommand):
                     name for name in module.output_names
                     if satisfies_typecheck(module.get_output_datatype(name)[1], GroupedCorpus())
                 ]
-                outputs.extend([(module_name, output) for output in grouped_outputs])
+                module_outputs = [(module_name, output) for output in grouped_outputs]
+                if len(module_outputs):
+                    print("Including: {}".format(", ".join("{}.{}".format(mn, on) for (mn, on) in module_outputs)))
+                    outputs.extend(module_outputs)
+                else:
+                    print("No grouped corpus outputs from {}".format(module_name))
         else:
             outputs = []
             for output_spec in output_specs:
@@ -61,6 +68,7 @@ class Tar2PimarcCmd(PimlicoCLISubcommand):
                         print("Skipping {}: not a grouped corpus".format(output_spec))
                     else:
                         outputs.append((module_name, output_name))
+                        print("Including: {}.{}".format(module_name, output_name))
                 else:
                     # Just module name: add all outputs that are grouped corpora
                     module_name = output_spec
@@ -69,7 +77,12 @@ class Tar2PimarcCmd(PimlicoCLISubcommand):
                         name for name in module.output_names
                         if satisfies_typecheck(module.get_output_datatype(name)[1], GroupedCorpus())
                     ]
-                    outputs.extend([(module_name, output) for output in grouped_outputs])
+                    module_outputs = [(module_name, output) for output in grouped_outputs]
+                    if len(module_outputs):
+                        print("Including: {}".format(", ".join("{}.{}".format(mn, on) for (mn, on) in module_outputs)))
+                        outputs.extend(module_outputs)
+                    else:
+                        print("No grouped corpus outputs from {}".format(module_name))
 
         if len(outputs) == 0:
             print("No corpora to convert")
@@ -81,23 +94,28 @@ class Tar2PimarcCmd(PimlicoCLISubcommand):
             except DataNotReadyError:
                 print("Skipping {}.{} as data is not ready to read".format(module_name, output_name))
             else:
-                # Check the format of the stored data
-                if corpus.uses_tar:
+                if not isinstance(corpus, GroupedCorpus.Reader):
+                    # This corpus uses a reader other than the standard grouped corpus reader
+                    # This probably means it's produced on the fly, or stored some other way
+                    # We therefore can't do any kind of conversion
+                    print("Skipping {}.{} which reads its data using {}".format(module_name, output_name, type(corpus)))
+                elif corpus.uses_tar:
+                    # Check the format of the stored data
                     # This is an old tar-based corpus
                     # Look for all the tar files
                     tar_paths = [
                         os.path.join(corpus.data_dir, fn) for fn in corpus.archive_filenames
                     ]
-                    if dry:
-                        print("Would convert {}.{} from tar to prc".format(module_name, output_name))
-                        for tp in tar_paths:
-                            print("  {}".format(tp))
-                    else:
+                    if run:
                         print("Converting tar files in {}".format(corpus.data_dir))
                         tar_to_pimarc(tar_paths)
                         # Remove the tar files
                         for tp in tar_paths:
                             os.remove(tp)
+                    else:
+                        print("Would convert {}.{} from tar to prc".format(module_name, output_name))
+                        for tp in tar_paths:
+                            print("  {}".format(tp))
                 else:
                     print("Already stored using prc: {}.{}".format(module_name, output_name))
 
