@@ -3,9 +3,9 @@ import os
 
 from future.utils import raise_from
 
-from pimlico.utils.pimarc.index import PimarcIndexAppender
-from pimlico.utils.varint import encode
-from .index import PimarcIndex
+from pimlico.utils.pimarc.index import DuplicateFilename
+from .utils import _write_var_length_data
+from .index import PimarcIndexAppender
 
 
 class PimarcWriter(object):
@@ -69,6 +69,11 @@ class PimarcWriter(object):
                 filename = metadata["name"]
             except KeyError:
                 raise MetadataError("metadata should include 'name' key")
+
+        # Check before we write anything that the filename isn't already used
+        if filename in self.index:
+            raise DuplicateFilename("cannot add {} to pimarc: filename already exists".format(filename))
+
         # Check where we're up to in the file
         # This tells us where the metadata starts, which will be stored in the index
         metadata_start = self.archive_file.tell()
@@ -101,19 +106,6 @@ class PimarcWriter(object):
         os.fsync(self.archive_file.fileno())
         # The index flush does the same with its file
         self.index.flush()
-
-
-def _write_var_length_data(writer, data):
-    """
-    Write some data to a file-like object by first writing a varint that says how many
-    bytes are in the data and then writing the data immediately following.
-
-    """
-    # Store the length of the data in bytes
-    data_length = len(data)
-    writer.write(encode(data_length))
-    # Write the data as a bytes array
-    return writer.write(data)
 
 
 class MetadataError(Exception):

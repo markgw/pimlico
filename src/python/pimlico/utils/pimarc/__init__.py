@@ -19,6 +19,10 @@ need these things for documents in a Pimlico corpus. It does, however, have a ge
 JSON metadata dictionary for each file, so metadata like this can be stored as
 necessary.
 
+Pimarcs do not store any directory structures, just a flat collection of files.
+This is all that is needed for storing Pimlico datasets, so it's best for this purpose
+to keep the format as simple as possible.
+
 Iterating over files in order is still likely to be substantially faster than random
 access (depending on the underlying storage), so it is recommended to add files to
 the archive in the sequential order that they are used in. This is the typical use

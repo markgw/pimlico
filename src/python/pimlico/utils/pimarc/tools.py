@@ -6,7 +6,10 @@ import argparse
 import os
 from tarfile import TarFile
 
+import sys
+
 from pimlico.utils.pimarc import PimarcReader, PimarcWriter
+from .index import reindex
 
 
 def list_files(opts):
@@ -25,12 +28,48 @@ def extract_file(opts):
     path = opts.path
     filenames = opts.filenames
 
-    reader = PimarcReader(path)
-    for filename in filenames:
-        print("Extracting {}".format(filename))
-        metadata, data = reader[filename]
-        with open(os.path.join(out_path, filename), "wb") as f:
-            f.write(data)
+    with PimarcReader(path) as reader:
+        for filename in filenames:
+            print("Extracting {}".format(filename))
+            metadata, data = reader[filename]
+            with open(os.path.join(out_path, filename), "wb") as f:
+                f.write(data)
+
+
+def append_file(opts):
+    path = os.path.abspath(opts.path)
+    if not path.endswith(".prc"):
+        print("Pimarc data file must use extension '.prc'")
+    paths_to_add = opts.files
+    # Append if the file already exists, otherwise create a new archive
+    append = os.path.exists(path)
+    if append:
+        print("Appending files to existing pimarc {}".format(path))
+    else:
+        print("Creating new pimarc {}".format(path))
+
+    with PimarcWriter(path, mode="a" if append else "w") as writer:
+        # First check that all files can be added
+        for path_to_add in paths_to_add:
+            path_to_add = os.path.abspath(path_to_add)
+            if not os.path.exists(path_to_add):
+                print("Cannot add {}: file does not exist".format(path_to_add))
+                sys.exit(1)
+            filename = os.path.basename(path_to_add)
+            if filename in writer.index:
+                print("Cannot add {}: filename '{}' already exists in archive".format(path_to_add, filename))
+                sys.exit(1)
+
+        # Now add the files
+        for path_to_add in paths_to_add:
+            path_to_add = os.path.abspath(path_to_add)
+            # Just use the basename when adding the file: no paths are stored in pimarcs
+            filename = os.path.basename(path_to_add)
+            print("  Adding {} as {}".format(path_to_add, filename))
+            # Read in the file's data
+            with open(path_to_add, "rb") as f:
+                data = f.read()
+            writer.write_file(data, filename)
 
 
 def from_tar(opts):
@@ -64,6 +103,17 @@ def from_tar(opts):
             os.remove(tar_path)
 
 
+def reindex_pimarcs(opts):
+    if not all(path.endswith(".prc") for path in opts.paths):
+        print("Pimarc files must have correct extension: .prc")
+        sys.exit(1)
+
+    for pimarc_path in opts.paths:
+        print("Rebuilding index for {}".format(pimarc_path))
+        reindex(pimarc_path)
+        print("  Success")
+
+
 def no_subcommand(opts):
     print("Specify a subcommand: list, ...")
 
@@ -83,6 +133,12 @@ def run():
     subparser.add_argument("filenames", nargs="+", help="Filename(s) to extract")
     subparser.add_argument("--out", "-o", help="Output dir (default CWD)")
 
+    subparser = subparsers.add_parser("append", help="Append a file to a pimarc. "
+                                                     "If the pimarc doesn't exist, it is created")
+    subparser.set_defaults(func=append_file)
+    subparser.add_argument("path", help="Path to the pimarc (.prc file)")
+    subparser.add_argument("files", nargs="+", help="Path(s) to add")
+
     subparser = subparsers.add_parser("fromtar",
                                       help="Create a Pimarc containing all the same files as a given tar. "
                                            "Outputs to the same filename as input, with '.tar' replaced by '.prc'")
@@ -90,6 +146,13 @@ def run():
     subparser.add_argument("tars", nargs="+", help="Path to the tar archive(s)")
     subparser.add_argument("--out-path", "-o", help="Directory to output files to. Defaults to same as input")
     subparser.add_argument("--delete", "-d", action="store_true", help="Delete the tar files after creating pimarcs")
+
+    subparser = subparsers.add_parser("reindex",
+                                      help="Rebuild a pimarc's index (the .prci file) from its data (the .prc file). "
+                                           "This can be necessary if the index has become corrupted or something when "
+                                           "wrong during writing of the archive")
+    subparser.set_defaults(func=reindex_pimarcs)
+    subparser.add_argument("paths", nargs="+", help="Path to the pimarc(s) - .prc files")
 
     opts = parser.parse_args()
     opts.func(opts)

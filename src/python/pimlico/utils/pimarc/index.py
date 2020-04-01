@@ -1,6 +1,9 @@
+import json
 import os
 from collections import OrderedDict
 from builtins import *
+
+from .utils import _read_var_length_data, _skip_var_length_data
 
 
 class PimarcIndex(object):
@@ -121,6 +124,45 @@ class PimarcIndexAppender(object):
         self.fileobj.flush()
         # Then we also need to force the system to write it to disk
         os.fsync(self.fileobj.fileno())
+
+
+def reindex(pimarc_path):
+    """
+    Rebuild the index of a Pimarc archive from its data file (.prc).
+
+    Stores the new index in the correct location (.prci), overwriting any existing index.
+
+    :param pimarc_path: path to the .prc file
+    :return: the PimarcIndex
+    """
+    if not pimarc_path.endswith(".prc"):
+        raise IndexWriteError("input pimarc path does not have the correct extension (.prc)")
+    index_path = "{}i".format(pimarc_path)
+
+    # Create an empty index
+    index = PimarcIndex()
+    # Read in each file in turn, reading the metadata to get the name and skipping the file content
+    with open(pimarc_path, "rb") as data_file:
+        try:
+            while True:
+                # Check where the metadata starts
+                metadata_start_byte = data_file.tell()
+                # First read the file's metadata block
+                metadata = json.loads(_read_var_length_data(data_file).decode("utf-8"))
+                # From that we can get the name
+                filename = metadata["name"]
+                # Now we're at the start of the file data
+                data_start_byte = data_file.tell()
+                # Skip over the data: we don't need to read that
+                _skip_var_length_data(data_file)
+                # Now add the entry to the index, with pointers to the start bytes
+                index.append(filename, metadata_start_byte, data_start_byte)
+        except EOFError:
+            # Reached the end of the file
+            pass
+
+    index.save(index_path)
+    return index
 
 
 class FilenameNotInArchive(Exception):
