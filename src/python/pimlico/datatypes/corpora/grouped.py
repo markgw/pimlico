@@ -114,7 +114,8 @@ class GroupedCorpus(IterableCorpus):
             PimarcTarBackend.
 
             """
-            if self._last_used_archive_name is None or self._last_used_archive_name != archive_name:
+            if self._last_used_archive_name is None or self._last_used_archive_name != archive_name or \
+                    self._last_used_archive.closed:
                 archive_filename = self.archive_to_archive_filename[archive_name]
                 archive_path = os.path.join(self.data_dir, archive_filename)
                 if archive_filename.endswith(".tar"):

@@ -22,6 +22,7 @@ class PimarcTarBackend(object):
     def __init__(self, archive_filename):
         self.archive_filename = archive_filename
         self.archive_file = None
+        self.closed = False
 
     def open(self):
         self.archive_file = tarfile.open(self.archive_filename, mode="r:")
@@ -29,6 +30,7 @@ class PimarcTarBackend(object):
 
     def close(self):
         self.archive_file.close()
+        self.closed = True
 
     def __enter__(self):
         self.archive_file = self.open()

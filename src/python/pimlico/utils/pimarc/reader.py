@@ -19,17 +19,19 @@ class PimarcReader(object):
 
         self.archive_file = open(self.archive_filename, mode="rb")
         self.index = PimarcIndex.load(self.index_filename)
+        self.closed = False
 
     def close(self):
         self.archive_file.close()
+        # Allow garbage collection of the index
+        self.index = None
+        self.closed = True
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.archive_file.close()
-        # Allow garbage collection of the index
-        self.index = None
+        self.close()
 
     def __getitem__(self, item):
         """
