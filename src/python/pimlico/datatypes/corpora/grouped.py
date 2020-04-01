@@ -62,11 +62,28 @@ class GroupedCorpus(IterableCorpus):
                 if data_dir is None:
                     return
                 else:
+                    # Check for any .prc files: if even one is found, we look only at .prc files
+                    ext = ".prc" if cls._uses_prc(data_dir) else ".tar"
                     for root, dirs, files in os.walk(data_dir):
                         for filename in files:
-                            f = os.path.join(root, filename)
-                            if f.endswith(".prc") or f.endswith(".tar"):
-                                yield f
+                            if filename.endswith(ext):
+                                yield os.path.join(root, filename)
+
+            @classmethod
+            def _uses_prc(cls, data_dir):
+                found_tar = False
+                for root, dirs, files in os.walk(data_dir):
+                    for filename in files:
+                        if filename.endswith(".prc"):
+                            # Found one prc file, so use prc
+                            return True
+                        elif filename.endswith(".tar"):
+                            # Found one tar file: if no prc files found, we're clearly using tar
+                            found_tar = True
+                # No archives found:
+                # If tars found, use them
+                # Otherwise, assume we're using prc but don't have any files yet
+                return not found_tar
 
             def _has_archives(self, data_dir):
                 # Return True if there's at least 1 archive in the dir
@@ -84,6 +101,8 @@ class GroupedCorpus(IterableCorpus):
             self.archive_filenames.sort()
             self.archives = [os.path.splitext(os.path.basename(f))[0] for f in self.archive_filenames]
             self.archive_to_archive_filename = dict(zip(self.archives, self.archive_filenames))
+            # Whether this corpus uses Pimarc (prc) files or tar
+            self.uses_tar = not self.setup._uses_prc(self.data_dir)
 
             # Cache the last-used archive
             self._last_used_archive = None
