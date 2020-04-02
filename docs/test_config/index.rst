@@ -34,6 +34,7 @@ Available pipelines
    utility.collect_files.conf.rst
    opennlp.tokenize.conf.rst
    corpora.store.conf.rst
+   corpora.vocab_mapper_longer.conf.rst
    corpora.shuffle.conf.rst
    corpora.filter_tokenize.conf.rst
    corpora.vocab_mapper.conf.rst
@@ -42,6 +43,7 @@ Available pipelines
    corpora.vocab_builder.conf.rst
    corpora.subset.conf.rst
    corpora.interleave.conf.rst
+   corpora.subsample.conf.rst
    corpora.vocab_counter.conf.rst
    corpora.stats.conf.rst
    corpora.list_filter.conf.rst

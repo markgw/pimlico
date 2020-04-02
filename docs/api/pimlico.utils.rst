@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     pimlico.utils.docs
+    pimlico.utils.pimarc
 
 Submodules
 ----------
@@ -30,6 +31,7 @@ Submodules
    pimlico.utils.system
    pimlico.utils.timeout
    pimlico.utils.urwid
+   pimlico.utils.varint
    pimlico.utils.web
 
 Module contents

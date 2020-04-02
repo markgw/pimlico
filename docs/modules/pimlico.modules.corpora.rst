@@ -22,6 +22,7 @@ Core modules for generic manipulation of mainly iterable corpora.
    pimlico.modules.corpora.shuffle
    pimlico.modules.corpora.split
    pimlico.modules.corpora.store
+   pimlico.modules.corpora.subsample
    pimlico.modules.corpora.subset
    pimlico.modules.corpora.vocab_builder
    pimlico.modules.corpora.vocab_counter

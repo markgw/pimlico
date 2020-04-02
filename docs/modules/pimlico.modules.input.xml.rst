@@ -1,5 +1,5 @@
-Raw text files
-~~~~~~~~~~~~~~
+XML files
+~~~~~~~~~
 
 .. py:module:: pimlico.modules.input.xml
 
@@ -66,7 +66,7 @@ This is an example of how this module can be used in a pipeline config file.
 
 .. code-block:: ini
    
-   [my_raw_text_files_reader_module]
+   [my_xml_files_reader_module]
    type=pimlico.modules.input.xml
    files=path1,path2,...
 
@@ -74,7 +74,7 @@ This example usage includes more options.
 
 .. code-block:: ini
    
-   [my_raw_text_files_reader_module]
+   [my_xml_files_reader_module]
    type=pimlico.modules.input.xml
    archive_basename=archive
    archive_size=1000

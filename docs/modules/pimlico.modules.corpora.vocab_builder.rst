@@ -75,7 +75,7 @@ This example usage includes more options.
    input_text=module_a.some_output
    include=word1,word2,... 
    limit=10k
-   oov=value
+   oov=text
    prune_at=2000000
    threshold=100
 

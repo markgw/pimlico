@@ -23,6 +23,7 @@ Submodules
    pimlico.cli.locations
    pimlico.cli.main
    pimlico.cli.newmodule
+   pimlico.cli.pimarc
    pimlico.cli.pyshell
    pimlico.cli.recover
    pimlico.cli.reset

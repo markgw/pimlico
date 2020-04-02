@@ -62,6 +62,8 @@ command line.
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`stores`     | List named Pimlico stores                                                                    |
 +-------------------+----------------------------------------------------------------------------------------------+
+| :doc:`tar2pimarc` | Convert grouped corpora from the old tar-based storage format to pimarc                      |
++-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`unlock`     | Forcibly remove an execution lock from a module                                              |
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`variants`   | List the available variants of a pipeline config                                             |
@@ -98,3 +100,4 @@ command line.
    visualize
    email
    jupyter
+   tar2pimarc
