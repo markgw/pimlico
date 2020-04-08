@@ -9,19 +9,14 @@ Provides access to many subcommands, acting as the primary interface to Pimlico'
 """
 from __future__ import print_function
 
-from traceback import print_exc
-
-from pimlico.cli.jupyter import JupyterCmd
-from pimlico.cli.pimarc import Tar2PimarcCmd
-
 if __name__ == "__main__":
     from pimlico import install_core_dependencies
-
     install_core_dependencies()
 
 import argparse
 import sys
 from operator import itemgetter
+from traceback import print_exc
 
 from pimlico import cfg
 
@@ -43,6 +38,8 @@ from pimlico.cli.util import module_number_to_name, module_numbers_to_names
 from pimlico.core.config import PipelineConfig, PipelineConfigParseError, PipelineStructureError
 from pimlico.core.modules.options import ModuleOptionParseError
 from pimlico.utils.system import set_proc_title
+from pimlico.cli.jupyter import JupyterCmd
+from pimlico.cli.pimarc import Tar2PimarcCmd
 
 
 class VariantsCmd(PimlicoCLISubcommand):
