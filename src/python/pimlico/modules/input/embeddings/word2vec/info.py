@@ -29,6 +29,10 @@ class ModuleInfo(BaseModuleInfo):
             "help": "Path to the word2vec embedding file (.bin)",
             "required": True,
         },
+        "limit": {
+            "help": "Limit to the first N vectors in the file. Default: no limit",
+            "type": int,
+        },
     }
 
     def get_software_dependencies(self):

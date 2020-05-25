@@ -9,6 +9,7 @@ class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         path = self.info.options["path"]
         binary = self.info.options["binary"]
+        limit = self.info.options["limit"]
 
         # See whether a vocab file was provided: typically it has the same basename and a "vocab" extension
         vocab_path = "{}.vocab".format(path.rpartition(".")[0])
@@ -21,7 +22,9 @@ class ModuleExecutor(BaseModuleExecutor):
 
         # Use Gensim's tool to load the data
         self.log.info("Loading word2vec vectors from {}".format(path))
-        vectors = KeyedVectors.load_word2vec_format(path, binary=binary, fvocab=vocab_path)
+        if limit:
+            self.log.info("Limiting to the first {:,} vectors".format(limit))
+        vectors = KeyedVectors.load_word2vec_format(path, binary=binary, fvocab=vocab_path, limit=limit)
 
         # If there were spaces in any of the words, this is a problem for the w2v format, since the vocab
         # is stored in a space-separated file! When Pimlico writes out w2v vectors, it replaces spaces,
