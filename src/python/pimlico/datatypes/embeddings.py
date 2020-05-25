@@ -223,6 +223,33 @@ class Embeddings(PimlicoDatatype):
             self.write_vectors(vecs)
             self.write_word_counts([(w, kv.vocab[w].count) for kv in kvecs for w in kv.index2word])
 
+    def run_browser(self, reader, opts):
+        """
+        Just output some info about the embeddings.
+
+        We could also iterate through some of the words or provide other inspection tools,
+        but for now we don't do that.
+
+        """
+        import numpy as np
+        from sklearn.metrics import euclidean_distances
+
+        print("Reading embeddings...")
+        num_vectors = len(reader)
+        vector_size = reader.vector_size
+        print("Embeddings for {:,} words, of {:,} dimensions".format(num_vectors, vector_size))
+        # Select a few embeddings at random
+        rand_ids = np.random.choice(num_vectors, 10)
+        rand_vecs = reader.vectors[rand_ids]
+        print("\nNearest neighbours for some random embeddings, using Euclidean distance")
+        for rand_id, rand_vec in zip(rand_ids, rand_vecs):
+            nns = np.argsort(euclidean_distances(rand_vec.reshape(1, -1), reader.vectors))[0]
+            word, count = reader.word_counts[rand_id]
+            print("  {} ({:,}): {}".format(
+                word, count,
+                ", ".join(reader.word_counts[i][0] for i in nns[:10])
+            ))
+
 
 class TSVVecFiles(NamedFileCollection):
     """
