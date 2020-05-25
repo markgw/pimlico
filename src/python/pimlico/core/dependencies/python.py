@@ -213,6 +213,7 @@ pyro_dependency = PythonPackageOnPip("pyro", "Pyro", pip_package="pyro-ppl", dep
 sklearn_dependency = PythonPackageOnPip(
     "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
 )
+pandas_dependency = PythonPackageOnPip("pandas")
 
 # Gensim relies on Requests, which needs urllib3>=1.23 to work,
 # but this isn't enforced in the dependencies
