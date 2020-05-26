@@ -353,13 +353,10 @@ class GroupedCorpus(IterableCorpus):
             before moving onto the next. If the archive name is the same as the previous
             doc added, the doc's data will be appended. Otherwise, the archive is finalized
             and we move onto the new archive.
-
-            .. todo::
-
-               Pimarc archives also provide the ability to add further metadata for each
-               document, encoded as JSON. At the moment, we don't expose this during corpus
-               writing, but in future this could be provided via a kwarg here.
-
+            
+            :param metadata: dict of metadata values to write with the document. If doc is a document
+                instance, the metadata is taken from there first, but these values will override anything
+                in the doc object's metadata. If doc is a bytes object, the metadata kwarg is used
             :param archive_name: archive name
             :param doc_name: name of document
             :param doc: document instance or bytes object containing document's raw data
@@ -383,6 +380,14 @@ class GroupedCorpus(IterableCorpus):
                 else:
                     # Some other problem caused this
                     raise
+            else:
+                # If we got the raw data from a document object, we should also retrieve the metadata from there
+                # This can be None
+                doc_metadata = doc.metadata or {}
+                # If metadata is also given as a kwarg, override with those values
+                if metadata is not None:
+                    doc_metadata.update(metadata)
+                metadata = doc_metadata
 
             if data is None:
                 # For an empty result, signified by None, output an empty file
