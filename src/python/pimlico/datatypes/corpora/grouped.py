@@ -347,7 +347,7 @@ class GroupedCorpus(IterableCorpus):
                     self.metadata["length"] = self._count_written_docs()
             self.doc_count = self.metadata["length"]
 
-        def add_document(self, archive_name, doc_name, doc):
+        def add_document(self, archive_name, doc_name, doc, metadata=None):
             """
             Add a document to the named archive. All docs should be added to a single archive
             before moving onto the next. If the archive name is the same as the previous
@@ -362,7 +362,7 @@ class GroupedCorpus(IterableCorpus):
 
             :param archive_name: archive name
             :param doc_name: name of document
-            :param doc: document instance
+            :param doc: document instance or bytes object containing document's raw data
             """
             # A document instance provides access to the raw data for a document as a bytes (Py3) or string (Py2)
             # If it's not directly available, it will be converted when we try to retrieve the raw data
@@ -371,8 +371,11 @@ class GroupedCorpus(IterableCorpus):
             except AttributeError:
                 # Instead of type-checking every document, we assume that if it has a raw_data attr, this
                 # is the right thing to use
-                # If not, we kick up a fuss, as we've presumably been given something that's not a valid document
-                if not isinstance(doc, DataPointType.Document):
+                # If a bytes object is given, we assume that's the doc's raw data
+                if isinstance(doc, bytes):
+                    data = doc
+                elif not isinstance(doc, DataPointType.Document):
+                    # If not, we kick up a fuss, as we've presumably been given something that's not a valid document
                     raise TypeError("documents added to a grouped corpus should be instances of the data point type's "
                                     "document class. Data point type is {}. Got {}".format(
                         self.datatype.data_point_type.name, type(doc).__name__
@@ -428,7 +431,7 @@ class GroupedCorpus(IterableCorpus):
                 filename = doc_name
 
             # Append this document's data to the Pimarc
-            self.current_archive.write_file(data, name=filename)
+            self.current_archive.write_file(data, name=filename, metadata=metadata)
             self.flush()
 
             # Keep a count of how many we've added so we can write metadata

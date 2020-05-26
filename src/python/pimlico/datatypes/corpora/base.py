@@ -179,11 +179,12 @@ class IterableCorpus(PimlicoDatatype):
             """
             raise NotImplementedError
 
-        def data_to_document(self, data):
+        def data_to_document(self, data, metadata=None):
             """
             Applies the corpus' datatype's processing to the raw data, given as a
             bytes object, and produces a document instance.
 
+            :param metadata: dict containing doc metadata (optional)
             :param data: bytes raw data
             :return: document instance
             """
@@ -194,7 +195,7 @@ class IterableCorpus(PimlicoDatatype):
             # Apply subclass-specific post-processing if we've not been asked to yield just the raw data
             try:
                 # Produce a document instance of the appropriate type
-                document = self.datatype.data_point_type(raw_data=data)
+                document = self.datatype.data_point_type(raw_data=data, metadata=metadata)
             except BaseException as e:
                 # If there's any problem reading in the document, yield an invalid doc with the error
                 document = invalid_document(

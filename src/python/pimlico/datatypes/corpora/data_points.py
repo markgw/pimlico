@@ -235,7 +235,7 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
         #: The internal data fields corresponding to these can be accessed as attributes of the document
         keys = []
 
-        def __init__(self, data_point_type, raw_data=None, internal_data=None):
+        def __init__(self, data_point_type, raw_data=None, internal_data=None, metadata=None):
             self.data_point_type = data_point_type
 
             if raw_data is None and internal_data is None:
@@ -243,6 +243,8 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
             if raw_data is not None and internal_data is not None:
                 raise DataPointError("only one of raw_data and internal_data may be given when "
                                      "instantiating a document")
+
+            self.metadata = metadata
 
             self._raw_data = raw_data
             self._internal_data = internal_data

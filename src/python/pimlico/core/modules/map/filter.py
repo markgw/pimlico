@@ -11,12 +11,6 @@ output to a corpus, this mode performs the document-level processing
 on the fly and yields the results in order, providing a new
 iterable (grouped) corpus for the next module, without storing anything.
 
-.. todo::
-
-   During Python 2-3 conversion, an ``object`` base class was added to
-   ``FilterModuleOutputReader.Setup``, since this is required/implicit in Python 3.
-   Check that this stills work as it used to.
-
 """
 from builtins import object
 
