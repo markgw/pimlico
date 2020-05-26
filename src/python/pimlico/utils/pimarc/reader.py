@@ -40,14 +40,10 @@ class PimarcReader(object):
         """
         # Look up the filename in the index and get pointers to its metadata and data
         metadata_start, data_start = self.index[item]
-        # Jump to the start of the metadata
-        self.archive_file.seek(metadata_start)
-        # Read the metadata
-        metadata = self._read_metadata()
         # There's some redundancy in this case: we're now presumably at the start
-        # of the data, so don't need data_start
+        # of the data after reading the metadata, so don't need data_start
         # Assume that this is the case and continue reading from where we stopped
-        data = _read_var_length_data(self.archive_file)
+        metadata, data = read_doc_from_pimarc_file(self.archive_file, metadata_start)
         return metadata, data
 
     def read_file(self, filename):
@@ -163,6 +159,40 @@ class PimarcReader(object):
 
     def __len__(self):
         return len(self.index)
+
+
+def read_doc_from_pimarc(archive_filename, metadata_start_byte):
+    """
+    Read a single file's metadata and file data from a given start point in the
+    archive. This can be useful if you know the start point and don't want to
+    read in the whole index for an archive.
+
+    :param archive_filename: path to archive file
+    :param metadata_start_byte: byte from which metadata starts
+    :return: tuple (metadata, raw file data)
+    """
+    with open(archive_filename, mode="rb") as archive_file:
+        return read_doc_from_pimarc_file(archive_file, metadata_start_byte)
+
+
+def read_doc_from_pimarc_file(archive_file, metadata_start_byte):
+    """
+    Same as `read_doc_from_pimarc`, but operates on an already-opened
+    archive file.
+
+    :param archive_file: file-like object
+    :param metadata_start_byte: byte from which metadata starts
+    :return: tuple (metadata, raw file data)
+    """
+
+    # Jump to the start of the metadata
+    archive_file.seek(metadata_start_byte)
+    # Read the metadata
+    metadata = PimarcFileMetadata(_read_var_length_data(archive_file))
+    # We're now presumably at the start of the data
+    # Assume that this is the case and continue reading from where we stopped
+    data = _read_var_length_data(archive_file)
+    return metadata, data
 
 
 def metadata_decode_decorator(fn):

@@ -12,6 +12,8 @@ class PimarcIndex(object):
     `.prci` file. Provides a list of the filenames in the archive, along with
     the starting byte of the file's metadata and data.
 
+    filenames is an OrderedDict mapping filename -> (metadata start byte, data start byte).
+
     """
     def __init__(self):
         self.filenames = OrderedDict()
