@@ -227,6 +227,8 @@ gensim_dependency = PythonPackageOnPip(
     min_version="3.3.0",
 )
 
+spacy_dependency = PythonPackageOnPip("spacy")
+
 
 ### Special behaviour for bs4
 
