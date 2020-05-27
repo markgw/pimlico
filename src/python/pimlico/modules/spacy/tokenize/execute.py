@@ -1,5 +1,6 @@
 from importlib import reload
 
+import pkg_resources
 import spacy
 from spacy import about
 from spacy.cli.download import get_json, get_compatibility, get_version, download_model
@@ -11,13 +12,21 @@ from pimlico.core.modules.map.singleproc import single_process_executor_factory
 
 def preprocess(executor):
     model = executor.info.options["model"]
-    if not executor.info.options["on_disk"]:
-        # If not loading from disk, we need to run the spacy download command
-        executor.log.info("Checking the model '{}' is downloaded".format(model))
-        if not download(model):
-            raise ModuleExecutionError("Model could not be downloaded")
 
-    nlp = spacy.load(model)
+    try:
+        nlp = spacy.load(model)
+    except IOError:
+        # Couldn't load spacy model
+        if not executor.info.options["on_disk"]:
+            # If not loading from disk, we need to run the spacy download command
+            executor.log.info("Downloading the model '{}'".format(model))
+            if not download(model):
+                raise ModuleExecutionError("Model could not be downloaded")
+        else:
+            raise
+        # Now the model should be available
+        nlp = spacy.load(model)
+
     executor.tokenizer = nlp.Defaults.create_tokenizer(nlp)
     executor.sentencizer = nlp.create_pipe("sentencizer")
 
@@ -54,4 +63,5 @@ def download(model):
     # Refresh sys.path so we can import the installed package
     import site
     reload(site)
+    reload(pkg_resources)
     return True
