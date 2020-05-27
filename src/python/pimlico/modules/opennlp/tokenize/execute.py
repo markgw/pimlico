@@ -18,7 +18,7 @@ def process_document(worker, archive, filename, doc):
     # Run tokenization
     tokenized_sents = list(worker.tokenizer.tokenize_text(doc.text))
     # Output one sentence per line
-    return TokenizedDocumentType()(sentences=tokenized_sents)
+    return dict(sentences=tokenized_sents)
 
 
 def executor_set_up(executor):
