@@ -108,7 +108,7 @@ class PimarcReader(object):
             if start_after not in self.index:
                 raise StartAfterFilenameNotFound("filename '{}' not found in the Pimarc archive".format(start_after))
             # Get the start byte of the file's data
-            start_after_start_byte = self.index.get_data_start_byte()
+            start_after_start_byte = self.index.get_data_start_byte(start_after)
             # Seek to this byte, then skip over the data, so we're at the start of the next file's metadata
             self.archive_file.seek(start_after_start_byte)
             self._skip_block()

@@ -83,17 +83,26 @@ class PimarcWriter(object):
         except Exception as e:
             raise_from(MetadataError("problem encoding metadata as JSON"), e)
 
-        # Write it to the file, including its length
-        _write_var_length_data(self.archive_file, metadata_data)
+        try:
+            # Write it to the file, including its length
+            _write_var_length_data(self.archive_file, metadata_data)
 
-        # Check where we're up to in the file
-        # This tells us where the file data starts, which will be stored in the index
-        data_start = self.archive_file.tell()
-        # Write out the data, including its length
-        _write_var_length_data(self.archive_file, data)
+            # Check where we're up to in the file
+            # This tells us where the file data starts, which will be stored in the index
+            data_start = self.archive_file.tell()
+            # Write out the data, including its length
+            _write_var_length_data(self.archive_file, data)
 
-        # Add the file to the index
-        self.index.append(filename, metadata_start, data_start)
+            # Add the file to the index
+            self.index.append(filename, metadata_start, data_start)
+        except:
+            # If anything goes wrong during writing or it's cancelled by an interrupt,
+            # truncate the partial data that we've just written, so we don't leave the file
+            # in a messed up state
+            self.archive_file.truncate(metadata_start)
+            self.archive_file.seek(metadata_start)
+            # Re-raise the exception for handling further up
+            raise
 
     def flush(self):
         """

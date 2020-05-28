@@ -1,6 +1,8 @@
 from future import standard_library
 from future.utils import raise_from
 
+from pimlico.utils.pimarc.index import DuplicateFilename
+
 standard_library.install_aliases()
 from builtins import zip
 from builtins import object
@@ -198,6 +200,9 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         docs_completed_before, start_after = self.retrieve_processing_status()
         total_to_process = len(self.input_iterator) - docs_completed_before
 
+        # Note whether we're processing the first output, or have already output something
+        first_output = True
+
         try:
             # Prepare a corpus writer for the output
             with multiwith(*self.info.get_writers(append=start_after is not None)) as writers:
@@ -223,10 +228,21 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                         for result, writer in zip(next_output, writers):
                             # If allowing skipping outputs, we don't try to write the output if None is returned
                             if result is not None or not self.ALLOW_SKIP_OUTPUT:
-                                writer.add_document(archive, doc_name, result)
+                                try:
+                                    writer.add_document(archive, doc_name, result)
+                                except DuplicateFilename:
+                                    # If the first doc we try writing is already in the archive, don't worry,
+                                    #  just skip it. This can happen if we dropped out of processing after writing,
+                                    #  but before storing the name of the last processed file.
+                                    # However, if it happens after the first one, it's more worrying: maybe a
+                                    #  problem with the input data
+                                    if not first_output:
+                                        raise
 
                         # Update the module's metadata to say that we've completed this document
                         self.update_processing_status(docs_completed_before+docs_completed_now, archive, doc_name)
+                        if first_output:
+                            first_output = False
 
                     pbar.finish()
             complete = True

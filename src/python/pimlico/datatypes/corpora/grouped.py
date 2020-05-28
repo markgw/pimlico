@@ -183,7 +183,8 @@ class GroupedCorpus(IterableCorpus):
             # -1 means don't skip anything, otherwise we accumulate how many we've skipped
             skipped = -1 if skip is None else 0
             # Start after we've hit this (archive, doc name)
-            started = start_after is not None
+            started = start_after is None
+            start_after_req = start_after
 
             for archive_name in self.archives:
                 if not started and start_after is not None:
@@ -205,6 +206,8 @@ class GroupedCorpus(IterableCorpus):
                     if start_after is not None:
                         # If we've got this far, we're in the right archive, but need to skip past the filename
                         start_after_in_archive = start_after[1]
+                        start_after = None
+                        started = True
                     elif skipped != -1:
                         # If we're skipping a certain number of docs, check how long the archive is to know
                         # whether to skip it all
@@ -257,7 +260,8 @@ class GroupedCorpus(IterableCorpus):
                         # With tar, it's only raised when we get to the end of the file without finding the filename
                         raise GroupedCorpusIterationError(
                             "tried to start iteration over grouped corpus at document (%s, %s), but filename %s "
-                            "wasn't found in archive %s" % (start_after[0], start_after[1], start_after[1], archive_name)
+                            "wasn't found in archive %s" %
+                            (start_after_req[0], start_after_req[1], start_after_req[1], archive_name)
                         )
 
         def list_archive_iter(self):
