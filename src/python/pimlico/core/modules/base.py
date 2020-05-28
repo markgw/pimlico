@@ -126,6 +126,7 @@ class BaseModuleInfo(object):
 
         self._metadata = None
         self._history = None
+        self.__module_output_dir = None
 
     def __repr__(self):
         return "%s(%s)" % (self.module_type_name, self.module_name)
@@ -165,21 +166,28 @@ class BaseModuleInfo(object):
                         self._metadata = json.loads(data)
         return self._metadata
 
+    def _get_and_prepare_module_output_dir(self):
+        # If we've done this before, don't do all the check again, just return a cached value
+        if self.__module_output_dir is None:
+            self.__module_output_dir = self.get_module_output_dir(absolute=True)
+            # Make sure we've got an output directory to output the metadata to
+            # Always write to output store, don't search others
+            if not os.path.exists(self.__module_output_dir):
+                os.makedirs(self.__module_output_dir)
+        return self.__module_output_dir
+
     def set_metadata_value(self, attr, val):
         self.set_metadata_values({attr: val})
 
     def set_metadata_values(self, val_dict):
-        # Make sure we've got an output directory to output the metadata to
-        # Always write to output store, don't search others
-        if not os.path.exists(self.get_module_output_dir(absolute=True)):
-            os.makedirs(self.get_module_output_dir(absolute=True))
+        output_dir = self._get_and_prepare_module_output_dir()
         # Load the existing metadata
         metadata = self.get_metadata()
         # Add our new values to it
         metadata.update(val_dict)
         # Write the whole thing out to the file
-        with open(os.path.join(self.get_module_output_dir(absolute=True), "metadata"), "w") as f:
-            json.dump(metadata, f, indent=4)
+        with open(os.path.join(output_dir, "metadata"), "w") as f:
+            json.dump(metadata, f)
             # Flush to ensure it gets updated immediately
             f.flush()
             os.fsync(f.fileno())
