@@ -26,7 +26,7 @@ def process_document(worker, archive_name, doc_name, doc):
     if worker.remove_only_punct:
         sentences = [sentence for sentence in sentences if not all(only_punct_re.match(w) for w in sentence)]
 
-    return worker.info.document(sentences=sentences)
+    return dict(sentences=sentences)
 
 
 ModuleExecutor = multiprocessing_executor_factory(process_document, worker_set_up_fn=worker_setup)
