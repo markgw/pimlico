@@ -70,7 +70,7 @@ class DefaultFormatter(DocumentBrowserFormatter):
 
     def format_document(self, doc):
         try:
-            return doc.raw_data.decode("utf8")
+            return str(doc.internal_data)
         except:
             return doc.raw_data
 
