@@ -91,7 +91,7 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
 
     def __init__(self):
         # This is set when the reader is initialized
-        self.metadata = None
+        self.metadata = {}
 
     def __call__(self, **kwargs):
         """

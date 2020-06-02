@@ -51,20 +51,32 @@ class IntegerListsDocumentType(RawDocumentType):
         ),
     })
 
-    def reader_init(self, reader):
-        super(IntegerListsDocumentType, self).reader_init(reader)
-        self.bytes = self.metadata["bytes"]
-        self.signed = self.metadata["signed"]
-        self.row_length_bytes = self.metadata["row_length_bytes"]
-        self.int_size = self.struct.size
-        self.length_size = self.length_struct.size
+    @property
+    def bytes(self):
+        return self.metadata.get("bytes", self.metadata_defaults["bytes"][0])
+
+    @property
+    def signed(self):
+        return self.metadata.get("signed", self.metadata_defaults["signed"][0])
+
+    @property
+    def row_length_bytes(self):
+        return self.metadata.get("row_length_bytes", self.metadata_defaults["row_length_bytes"][0])
+
+    @property
+    def int_size(self):
+        return self.struct.size
+
+    @property
+    def length_size(self):
+        return self.length_struct.size
 
     def writer_init(self, writer):
         super(IntegerListsDocumentType, self).writer_init(writer)
         # Metadata should have been set by this point, using kwargs to override the defaults
-        self.bytes = writer.metadata["bytes"]
-        self.signed = writer.metadata["signed"]
-        self.row_length_bytes = writer.metadata["row_length_bytes"]
+        self.metadata["bytes"] = writer.metadata["bytes"]
+        self.metadata["signed"] = writer.metadata["signed"]
+        self.metadata["row_length_bytes"] = writer.metadata["row_length_bytes"]
 
     @cached_property
     def struct(self):
