@@ -60,10 +60,10 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
         result = WordEmbeddingsKeyedVectors(vector_size)
         result.syn0 = zeros((vocab_size, vector_size), dtype=float32)
 
-        def add_word(word, weights):
+        def add_word(word, weights, from_line):
             word_id = len(result.vocab)
             if word in result.vocab:
-                warnings.warn("duplicate word '%s' in %s, ignoring all but first", word, fname)
+                warnings.warn("duplicate word '{}' in {}:{:d}, ignoring all but first".format(word, fname, from_line))
                 return
             if counts is None:
                 # most common scenario: no vocab file given. just make up some bogus counts, in descending order
@@ -73,7 +73,7 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
                 result.vocab[word] = Vocab(index=word_id, count=counts[word])
             else:
                 # vocab file given, but word is missing -- set count to None (TODO: or raise?)
-                warnings.warn("vocabulary file is incomplete: '%s' is missing", word)
+                warnings.warn("vocabulary file is incomplete: '{}' is missing (line {:d}".format(word, from_line))
                 result.vocab[word] = Vocab(index=word_id, count=None)
             result.syn0[word_id] = weights
             result.index2word.append(word)
@@ -92,7 +92,7 @@ def load_glove_format(fname, fvocab=None, encoding='utf8', unicode_errors='stric
             if len(parts) != vector_size + 1:
                 raise ValueError("invalid vector on line %s (is this really the text format?)" % line_no)
             word, weights = parts[0], [float32(x) for x in parts[1:]]
-            add_word(word, weights)
+            add_word(word, weights, line_no)
     if result.syn0.shape[0] != len(result.vocab):
         result.syn0 = ascontiguousarray(result.syn0[: len(result.vocab)])
     assert (len(result.vocab), vector_size) == result.syn0.shape
