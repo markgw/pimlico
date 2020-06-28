@@ -10,6 +10,9 @@ from builtins import object
 import threading
 import warnings
 
+import tblib.pickling_support
+tblib.pickling_support.install()
+
 from queue import Queue, Empty, Full
 from threading import Thread
 from time import sleep
@@ -356,9 +359,12 @@ class DocumentMapper(object):
                             sleep(0.05)
                             while not executor.pool.exception_queue.empty():
                                 qget(executor.pool.exception_queue, timeout=0.1)
+                            if isinstance(error, ExceptionWithTraceback):
+                                # Attach the original traceback to the original error
+                                error = error.exception_with_traceback()
                             # Sometimes, a traceback from within the process is included
                             debugging = error.traceback if hasattr(error, "traceback") else None
-                            raise_from(ModuleExecutionError("error in worker process: %s" % error,
+                            raise_from(ModuleExecutionError("error in worker process: %s" % str(error),
                                                             cause=error, debugging_info=debugging), error)
                     except:
                         raise
@@ -812,3 +818,21 @@ class WorkerShutdownError(Exception):
     def __init__(self, *args, **kwargs):
         self.cause = kwargs.pop("cause", None)
         super(WorkerShutdownError, self).__init__(*args, **kwargs)
+
+
+class ExceptionWithTraceback(object):
+    """
+    Simple wrapper to pass an exception along with its original traceback between
+    processes and reconstruct the exception in the receiving (usually master) process.
+
+    The traceback can be retrieved by sys.exc_info()[2].
+
+    Relies on tblib having already installed its traceback pickling support.
+
+    """
+    def __init__(self, exception, traceback):
+        self.exception = exception
+        self.traceback = traceback
+
+    def exception_with_traceback(self):
+        return self.exception.with_traceback(self.traceback)

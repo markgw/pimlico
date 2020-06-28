@@ -12,19 +12,21 @@ In particular, use :fun:.multiprocessing_executor_factory wherever possible.
 """
 from __future__ import absolute_import
 
+import sys
+
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import zip
 from builtins import range
 
 import multiprocessing
 from queue import Empty
-from traceback import format_exc
 
 import signal
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
-    DocumentMapModuleExecutor, WorkerStartupError, WorkerShutdownError
+    DocumentMapModuleExecutor, WorkerStartupError, WorkerShutdownError, ExceptionWithTraceback
 from pimlico.core.modules.map.threaded import ThreadingMapThread
 from pimlico.utils.pipes import qget
 
@@ -85,9 +87,9 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                     self.exception_queue.put(WorkerShutdownError("error in tear_down() call", cause=e), block=True)
         except Exception as e:
             # If there's any uncaught exception, make it available to the main process
-            # Include the formatted stack trace, since we can't get this later from the exception outside this process
-            e.traceback = format_exc()
-            self.exception_queue.put(e, block=True)
+            # Store the exception together with the original traceback, so we can reconstruct it later
+            error = ExceptionWithTraceback(e, sys.exc_info()[2])
+            self.exception_queue.put(error, block=True)
         finally:
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()

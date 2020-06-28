@@ -25,6 +25,7 @@ CORE_PIMLICO_DEPENDENCIES = [
     PythonPackageOnPip("progressbar", "Progressbar"),
     # Backport of CSV reading, so we can handle unicode in the same way on Py 2 and 3
     PythonPackageOnPip("backports.csv"),
+    PythonPackageOnPip("tblib"),
 ]
 
 # Python 2-only dependencies
