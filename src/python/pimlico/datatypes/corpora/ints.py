@@ -233,3 +233,80 @@ class IntegerListDocumentType(RawDocumentType):
                     raise ValueError("error encoding int data %s using struct format %s: %s" %
                                      (num, self.data_point_type.struct.format, e))
             return raw_data.getvalue()
+
+
+class IntegerDocumentType(RawDocumentType):
+    """
+    Corpus of integer data: each doc contains a single int.
+
+    This may be useful, for example, for storing predicted or gold standard class labels
+    for documents.
+
+    By default, the ints are stored as C longs, which use 4 bytes. If you know you don't need ints this
+    big, you can choose 1 or 2 bytes, or even 8 (long long). By default, the ints are unsigned, but they
+    may be signed.
+
+    """
+    metadata_defaults = dict(RawDocumentType.metadata_defaults, **{
+        "bytes": (
+            8,
+            "Number of bytes to use to represent each int. Default: 8",
+        ),
+        "signed": (
+            False,
+            "Stored signed integers. Default: False",
+        ),
+    })
+
+    def reader_init(self, reader):
+        super(IntegerDocumentType, self).reader_init(reader)
+        self.bytes = self.metadata["bytes"]
+        self.signed = self.metadata["signed"]
+        self.int_size = self.struct.size
+
+    def writer_init(self, writer):
+        super(IntegerDocumentType, self).writer_init(writer)
+        # Metadata should have been set by this point, using kwargs to override the defaults
+        self.bytes = writer.metadata["bytes"]
+        self.signed = writer.metadata["signed"]
+
+    @cached_property
+    def struct(self):
+        return get_struct(self.bytes, self.signed, 1)
+
+    def __getstate__(self):
+        # Don't pickle the prepared struct, as it doesn't pickle nicely
+        # It gets recreated on demand anyway
+        state = dict(self.__dict__)
+        if "struct" in state:
+            del state["struct"]
+        return state
+
+    class Document(object):
+        keys = ["val"]
+
+        def raw_to_internal(self, raw_data):
+            # Read the whole document, which should be a single int
+            if len(raw_data) == self.data_point_type.int_size:
+                raise IOError("expected {} bytes in single-int doc, got {}".format(
+                    self.data_point_type.int_size, len(raw_data)))
+            try:
+                val = self.data_point_type.struct.unpack(raw_data)[0]
+            except struct.error as e:
+                raise IOError("error interpreting int data: %s" % e)
+            return {
+                "val": val,
+            }
+
+        @property
+        def list(self):
+            return self.internal_data["val"]
+
+        def internal_to_raw(self, internal_data):
+            # Doc should be a single int
+            val = internal_data["val"]
+            try:
+                return self.data_point_type.struct.pack(val)
+            except struct.error as e:
+                raise ValueError("error encoding int data %s using struct format %s: %s" %
+                                 (val, self.data_point_type.struct.format, e))
