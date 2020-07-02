@@ -21,11 +21,11 @@ class SklearnModel(NamedFile):
 
     class Reader(object):
         def load_model(self):
-            from sklearn.externals import joblib
+            import joblib
             return joblib.load(self.get_absolute_path("model.pkl"))
 
     class Writer(object):
         def save_model(self, model):
-            from sklearn.externals import joblib
+            import joblib
             joblib.dump(model, self.get_absolute_path("model.pkl"))
             self.task_complete("write_model.pkl")
