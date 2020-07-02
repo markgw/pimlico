@@ -189,7 +189,7 @@ class VectorDocumentType(RawDocumentType):
     The floats are stored as C doubles, using 8 bytes each.
 
     """
-    formatters = [("vector", "pimlico.datatypes.floats.VectorFormatter")]
+    formatters = [("vector", "pimlico.datatypes.corpora.floats.VectorFormatter")]
     metadata_defaults = {"dimensions": (10, "Number of dimensions in each vector (default: 10)")}
 
     def reader_init(self, reader):
@@ -224,7 +224,7 @@ class VectorDocumentType(RawDocumentType):
 
 
 class VectorFormatter(DocumentBrowserFormatter):
-    DATATYPE = VectorDocumentType
+    DATATYPE = VectorDocumentType()
 
     def format_document(self, doc):
-        return "\n".join("{:.3f}".format(f) for f in doc.vector)
+        return "\n".join("{}: {:.3f}".format(i, f) for i, f in enumerate(doc.vector))
