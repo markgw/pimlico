@@ -4,11 +4,15 @@
 """
 Perform text normalization on tokenized documents.
 
-Currently, this includes only the following:
+Currently, this includes the following:
 
  - case normalization (to upper or lower case)
  - blank line removal
  - empty sentence removal
+ - punctuation removal
+ - removal of words that contain only punctuation
+ - numerical character removal
+ - minimum word length filter
 
 In the future, more normalization operations may be added.
 
@@ -33,7 +37,8 @@ class ModuleInfo(DocumentMapModuleInfo):
             "type": choose_from_list(["upper", "lower", ""]),
         },
         "remove_empty": {
-            "help": "Skip over any empty sentences (i.e. blank lines)",
+            "help": "Skip over any empty sentences (i.e. blank lines). Applied after other processing, so this "
+                    "will remove sentences that are left empty by other filters",
             "default": False,
             "type": str_to_bool,
         },
@@ -41,6 +46,21 @@ class ModuleInfo(DocumentMapModuleInfo):
             "help": "Skip over any sentences that are empty if punctuation is ignored",
             "default": False,
             "type": str_to_bool,
+        },
+        "remove_punct": {
+            "help": "Remove punctuation from all tokens and then remove the whole token if nothing's left",
+            "default": False,
+            "type": str_to_bool,
+        },
+        "remove_nums": {
+            "help": "Remove numeric characters",
+            "default": False,
+            "type": str_to_bool,
+        },
+        "min_word_length": {
+            "help": "Remove any words shorter than this. Default: 0 (don't do anything)",
+            "default": 0,
+            "type": int,
         },
     }
 
