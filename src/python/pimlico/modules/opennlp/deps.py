@@ -7,7 +7,7 @@ from pimlico import JAVA_BUILD_JAR_DIR
 
 from pimlico.core.dependencies.java import JavaDependency, py4j_dependency, JavaJarsDependency, argparse4j_dependency
 
-OPENNLP_VERSION = "1.9.1"
+OPENNLP_VERSION = "1.9.2"
 OPENNLP_URL = "http://mirror.netinch.com/pub/apache/opennlp/opennlp-{v}/apache-opennlp-{v}-bin.tar.gz".format(v=OPENNLP_VERSION)
 
 
