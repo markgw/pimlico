@@ -66,7 +66,7 @@ class ModuleExecutor(BaseModuleExecutor):
                         word not in vocab_terms
                         for line in doc.sentences
                         for word in line)
-                     else 0 for dn, doc in pbar(input_docs)), 0
+                     else 0 for dn, doc in pbar(input_docs) if not is_invalid_doc(doc)), 0
                 )
                 vocab_writer.data.dfs[oov_id] = oov_count
                 self.log.info("Added OOV token '%s' with count of %d" % (oov_token, oov_count))
