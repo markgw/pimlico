@@ -76,7 +76,9 @@ if [ -n "$PROFILE" ]; then
     # Allows you to profile any script by just putting:
     #  PROFILE=1
     # in front of the command
-    profile_out=$(readlink -m $DIR/../log/profile)
+    profile_out_dir=$(readlink -m $DIR/../log)
+    mkdir -p $profile_out_dir
+    profile_out=$profile_out_dir/profile
     echo "Profiling, output to $profile_out" >&2
     if [ "$1" == "-m" ]; then
         shift
