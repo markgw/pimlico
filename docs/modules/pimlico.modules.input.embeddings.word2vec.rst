@@ -35,13 +35,15 @@ Outputs
 Options
 =======
 
-+--------+----------------------------------------------------------+--------+
-| Name   | Description                                              | Type   |
-+========+==========================================================+========+
-| binary | Assume input is in word2vec binary format. Default: True | bool   |
-+--------+----------------------------------------------------------+--------+
-| path   | (required) Path to the word2vec embedding file (.bin)    | string |
-+--------+----------------------------------------------------------+--------+
++--------+-------------------------------------------------------------+--------+
+| Name   | Description                                                 | Type   |
++========+=============================================================+========+
+| binary | Assume input is in word2vec binary format. Default: True    | bool   |
++--------+-------------------------------------------------------------+--------+
+| limit  | Limit to the first N vectors in the file. Default: no limit | int    |
++--------+-------------------------------------------------------------+--------+
+| path   | (required) Path to the word2vec embedding file (.bin)       | string |
++--------+-------------------------------------------------------------+--------+
 
 Example config
 ==============
@@ -61,5 +63,6 @@ This example usage includes more options.
    [my_word2vec_embedding_reader_module]
    type=pimlico.modules.input.embeddings.word2vec
    binary=T
+   limit=0
    path=value
 

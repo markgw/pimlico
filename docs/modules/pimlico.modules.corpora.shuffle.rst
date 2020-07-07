@@ -12,20 +12,28 @@ Random shuffle
 Randomly shuffles all the documents in a grouped corpus, outputting
 them to a new set of archives with the same sizes as the input archives.
 
-It is difficult to do this efficiently for a large corpus.
-We use a strategy where the input documents are read in linear order
-and placed into a temporary set of small archives ("bins"). Then these are
+This was difficult to do this efficiently for a large corpus using the
+old tar storage format. There therefore used to be a strategy implemented
+here where the input documents were read in linear order
+and placed into a temporary set of small archives ("bins") and these were
 concatenated into the larger archives, shuffling the documents in memory
 in each during the process.
 
-The expected average size of the temporary bins can be set using the
-``bin_size`` parameter. Alternatively, the exact total number of
-bins to use can be set using the ``num_bins`` parameter.
+It is no longer necessary to do this, since the standard pipeline-internal
+storage format permits efficient random access. However, it may sometimes
+be necessary to use the linear-reading strategy: for example, if the input
+comes from a filter module, its documents cannot be randomly accessed.
 
-It may be necessary to lower the bin size if, for example, your
-individual documents are very large files. You might also find the
-process is noticeably faster with a higher bin size if your files
-are small.
+.. todo::
+
+   Currently, this accepts any GroupedCorpus as input, but checks at runtime
+   that the input is stored used the pipeline-internal format. It would be
+   much better if this check could be enforced at the level of datatypes, so
+   that the input datatype requirement explicitly rules out grouped corpora
+   coming from input readers, filters or other dynamic sources.
+
+   Since this requires some tricky changes to the datatype system, I'm not
+   implementing it now, but it should be done in future.
 
 
 Inputs
@@ -50,17 +58,13 @@ Outputs
 Options
 =======
 
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
-| Name               | Description                                                                                                                                                                                                                                                                                                                | Type   |
-+====================+============================================================================================================================================================================================================================================================================================================================+========+
-| archive_basename   | Basename to use for archives in the output corpus. Default: 'archive'                                                                                                                                                                                                                                                      | string |
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
-| bin_size           | Target expected size of temporary bins into which documents are shuffled. The actual size may vary, but they will on average have this size. Default: 100                                                                                                                                                                  | int    |
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
-| keep_archive_names | By default, it is assumed that all doc names are unique to the whole corpus, so the same doc names are used once the documents are put into their new archives. If doc names are only unique within the input archives, use this and the input archive names will be included in the output document names. Default: False | bool   |
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
-| num_bins           | Directly set the number of temporary bins to put document into. If set, bin_size is ignored                                                                                                                                                                                                                                | int    |
-+--------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------+
++------------------+---------------------------------------------------------------------------------------------------+--------+
+| Name             | Description                                                                                       | Type   |
++==================+===================================================================================================+========+
+| archive_basename | Basename to use for archives in the output corpus. Default: 'archive'                             | string |
++------------------+---------------------------------------------------------------------------------------------------+--------+
+| seed             | Seed for the random number generator. The RNG is always seeded, for reproducibility. Default: 999 | int    |
++------------------+---------------------------------------------------------------------------------------------------+--------+
 
 Example config
 ==============
@@ -82,9 +86,7 @@ This example usage includes more options.
    type=pimlico.modules.corpora.shuffle
    input_corpus=module_a.some_output
    archive_basename=archive
-   bin_size=100
-   keep_archive_names=F
-   num_bins=0
+   seed=999
 
 Test pipelines
 ==============

@@ -11,11 +11,15 @@ Normalize tokenized text
 
 Perform text normalization on tokenized documents.
 
-Currently, this includes only the following:
+Currently, this includes the following:
 
  - case normalization (to upper or lower case)
  - blank line removal
  - empty sentence removal
+ - punctuation removal
+ - removal of words that contain only punctuation
+ - numerical character removal
+ - minimum word length filter
 
 In the future, more normalization operations may be added.
 
@@ -42,15 +46,21 @@ Outputs
 Options
 =======
 
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
-| Name              | Description                                                                                                             | Type                   |
-+===================+=========================================================================================================================+========================+
-| case              | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation | 'upper', 'lower' or '' |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
-| remove_empty      | Skip over any empty sentences (i.e. blank lines)                                                                        | bool                   |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
-| remove_only_punct | Skip over any sentences that are empty if punctuation is ignored                                                        | bool                   |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------+------------------------+
++-------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------+
+| Name              | Description                                                                                                                                          | Type                   |
++===================+======================================================================================================================================================+========================+
+| case              | Transform all text to upper or lower case. Choose from 'upper' or 'lower', or leave blank to not perform transformation                              | 'upper', 'lower' or '' |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------+
+| min_word_length   | Remove any words shorter than this. Default: 0 (don't do anything)                                                                                   | int                    |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------+
+| remove_empty      | Skip over any empty sentences (i.e. blank lines). Applied after other processing, so this will remove sentences that are left empty by other filters | bool                   |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------+
+| remove_nums       | Remove numeric characters                                                                                                                            | bool                   |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------+
+| remove_only_punct | Skip over any sentences that are empty if punctuation is ignored                                                                                     | bool                   |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------+
+| remove_punct      | Remove punctuation from all tokens and then remove the whole token if nothing's left                                                                 | bool                   |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------+
 
 Example config
 ==============
@@ -72,8 +82,11 @@ This example usage includes more options.
    type=pimlico.modules.text.normalize
    input_corpus=module_a.some_output
    case=
+   min_word_length=0
    remove_empty=F
+   remove_nums=F
    remove_only_punct=F
+   remove_punct=F
 
 Test pipelines
 ==============

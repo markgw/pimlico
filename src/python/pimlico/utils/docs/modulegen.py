@@ -27,7 +27,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 
 from sphinx import __version__
-from sphinx.ext.apidoc import format_heading
+from .rest import format_heading
 
 from pimlico import install_core_dependencies
 from pimlico.core.modules.base import BaseModuleInfo

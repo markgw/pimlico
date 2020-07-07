@@ -31,6 +31,7 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  all        build all Pimlico docs"
 	@echo "  api        automatically generate API docs in api/"
 	@echo "  modules    automatically generate special API docs for Pimlico modules (in $(MODULEDIR)/)"
 	@echo "  commands   automatically generate special API docs for Pimlico command-line commands (in $(COMMANDDIR)/)"

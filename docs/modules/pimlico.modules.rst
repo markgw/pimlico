@@ -28,6 +28,7 @@ many applications.
    pimlico.modules.r
    pimlico.modules.regex
    pimlico.modules.sklearn
+   pimlico.modules.spacy
    pimlico.modules.text
    pimlico.modules.utility
    pimlico.modules.visualization

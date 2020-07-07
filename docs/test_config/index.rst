@@ -17,38 +17,43 @@ Available pipelines
    :maxdepth: 2
    :titlesonly:
 
-   nltk.nist_tokenize.conf.rst
-   text.char_tokenize.conf.rst
-   text.text_normalize.conf.rst
-   text.normalize.conf.rst
-   text.simple_tokenize.conf.rst
-   visualization.embeddings_plot.conf.rst
-   core.filter_map.conf.rst
-   input.xml.conf.rst
-   input.raw_text_files.conf.rst
-   input.fasttext.conf.rst
-   input.glove.conf.rst
-   embeddings.store_tsv.conf.rst
+   opennlp.tokenize.conf.rst
+   embeddings.normalize.conf.rst
    embeddings.word2vec.conf.rst
    embeddings.store_word2vec.conf.rst
-   utility.collect_files.conf.rst
-   opennlp.tokenize.conf.rst
-   corpora.store.conf.rst
-   corpora.vocab_mapper_longer.conf.rst
-   corpora.shuffle.conf.rst
-   corpora.filter_tokenize.conf.rst
-   corpora.vocab_mapper.conf.rst
-   corpora.concat.conf.rst
-   corpora.group.conf.rst
-   corpora.vocab_builder.conf.rst
-   corpora.subset.conf.rst
+   embeddings.store_tsv.conf.rst
    corpora.interleave.conf.rst
-   corpora.subsample.conf.rst
-   corpora.vocab_counter.conf.rst
-   corpora.stats.conf.rst
    corpora.list_filter.conf.rst
+   corpora.vocab_unmapper.conf.rst
+   corpora.shuffle_linear.conf.rst
+   corpora.subset.conf.rst
+   corpora.concat.conf.rst
+   corpora.subsample.conf.rst
+   corpora.vocab_builder.conf.rst
+   corpora.group.conf.rst
    corpora.split.conf.rst
+   corpora.vocab_mapper.conf.rst
+   corpora.store.conf.rst
+   corpora.stats.conf.rst
+   corpora.filter_tokenize.conf.rst
+   corpora.vocab_mapper_longer.conf.rst
+   corpora.vocab_counter.conf.rst
+   corpora.shuffle.conf.rst
    corpora.formatters.tokenized.conf.rst
+   text.simple_tokenize.conf.rst
+   text.normalize.conf.rst
+   text.text_normalize.conf.rst
+   text.char_tokenize.conf.rst
+   input.europarl.conf.rst
+   input.raw_text_files.conf.rst
+   input.xml.conf.rst
+   input.glove.conf.rst
+   input.fasttext.conf.rst
+   spacy.tokenize.conf.rst
+   utility.collect_files.conf.rst
+   nltk.nist_tokenize.conf.rst
+   visualization.embeddings_plot.conf.rst
+   core.filter_map.conf.rst
 
 
 Input data
