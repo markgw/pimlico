@@ -37,13 +37,13 @@ Pimlico is short for *PIpelined Modular LInguistic COrpus processing*.
 
    **New datatypes system**
 
-   This brings with it a big project
-   to change how datatypes work internally (previously in branch ``datatypes``)
-   and requires all datatypes and modules
-   to be updated to the new system.
+   Some time ago, we changed how datatypes work internally 
+   (previously in branch ``datatypes``), which required 
+   all datatypes and modules to be updated to the new system.
    `More info... <https://github.com/markgw/pimlico/projects/1>`_
 
-   Modules marked with ``!!`` in the docs are waiting to be updated and
+   This has been done for many of the core modules, but modules marked 
+   with ``!!`` in the docs are waiting to be updated and
    don't work. Other known outstanding tasks are marked with todos:
    :doc:`full todo list </plans/wishlist>`.
 

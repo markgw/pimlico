@@ -19,6 +19,12 @@ setup steps is also available.
 
 System-wide configuration
 =========================
+
+.. note::
+
+   If you've used Pimlico before, you can skip this step.
+
+
 Pimlico needs you to specify certain parameters regarding your local system.
 Typically this is just
 a file in your home directory called ``.pimlico``. :ref:`More details <local-config>`.
@@ -31,7 +37,7 @@ with each other's output (provided you give them different names).
 
 Most of the time, you only need to specify one storage location,
 using the ``store`` parameter in your local
-config file. (You can specify multiple: :ref:`more details <data-storage>`).
+config file. (You can specify multiple: :ref:`more details <data-storage>`.)
 
 Create a file ``~/.pimlico`` that looks like this:
 
@@ -48,6 +54,10 @@ The procedure for starting a new Pimlico project, using the latest release, is v
 Create a new, empty directory to put your project in. Download
 `newproject.py <https://raw.githubusercontent.com/markgw/pimlico/master/admin/newproject.py>`_
 into the project directory.
+
+Make sure you've got Python installed. Pimlico currently supports Python 2 and 3,
+but we strongly recommend using Python 3 unless you have old Python 2 code you
+need to run.
 
 Choose a name for your project (e.g. ``myproject``) and run:
 
