@@ -92,8 +92,10 @@ it's what distinguishes the storage locations.
 set to the latest one, which has been downloaded.
 
 If you later try running the same pipeline with an updated version of Pimlico,
-it will work fine as long as it's the same major version (the first digit).
-Otherwise, there may be backwards incompatible changes, so you'd
+it will work fine as long as it's the same minor version (the second part).
+The minor-minor third part can be updated and may bring some improvements.
+If you use a higher minor version (e.g. 0.10.x when you started with 0.9.24),
+there may be backwards incompatible changes, so you'd
 need to update your config file, ensuring it plays nicely with the later
 Pimlico version.
 
@@ -113,28 +115,28 @@ the home directory.
 
 .. code-block:: ini
 
-    [input-text]
+    [input_text]
     type=pimlico.modules.input.text.raw_text_files
     files=%(home)s/data/europarl_demo/*
-
-.. todo::
-
-   Continue writing from here
 
 Doing something: tokenization
 -----------------------------
 Now, some actual linguistic processing, albeit somewhat uninteresting. Many NLP tools assume that
-their input has been divided into sentences and tokenized. The OpenNLP-based tokenization module does both of these 
-things at once, calling OpenNLP tools.
+their input has been divided into sentences and tokenized. To keep things simple, we use a very
+basic, regular expression-based tokenizer.
 
-Notice that the output from the previous module feeds into the input for this one, which we specify simply by naming 
-the module.
+Notice that the output from the previous module feeds into the
+input for this one, which we specify simply by naming the module.
 
 .. code-block:: ini
 
     [tokenize]
-    type=pimlico.modules.opennlp.tokenize
-    input=tar-grouper
+    type=pimlico.modules.text.simple_tokenize
+    input=input_text
+
+.. todo::
+
+   Continue writing from here
 
 Doing something more interesting: POS tagging
 ---------------------------------------------

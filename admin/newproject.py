@@ -188,6 +188,8 @@ def main():
 
 
 TEMPLATE_CONF = """\
+#!./pimlico.sh
+
 [pipeline]
 name={pipeline_name}
 release={latest_release}
