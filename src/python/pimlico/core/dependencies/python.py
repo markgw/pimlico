@@ -273,14 +273,19 @@ class NLTKResource(SoftwareDependency):
     def problems(self, local_config):
         problems = super(NLTKResource, self).problems(local_config)
         # Check whether the resource is available
-        from nltk.downloader import _downloader
         try:
-            resource_installed = _downloader.is_installed(self.name)
-        except Exception as e:
-            problems.append("Error checking NLTK resource status for {}: {}".format(self.name, e))
+            from nltk.downloader import _downloader
+        except:
+            # If NLTK isn't even installed, we can't check whether the resource is there
+            problems.append("NLTK not installed: cannot check for resource '{}'".format(self.name))
         else:
-            if not resource_installed:
-                problems.append("NLTK resource '{}' not installed".format(self.name))
+            try:
+                resource_installed = _downloader.is_installed(self.name)
+            except Exception as e:
+                problems.append("Error checking NLTK resource status for {}: {}".format(self.name, e))
+            else:
+                if not resource_installed:
+                    problems.append("NLTK resource '{}' not installed".format(self.name))
         return problems
 
     def installable(self):
