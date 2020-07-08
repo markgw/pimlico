@@ -11,7 +11,7 @@ def process_document(worker, archive, filename, doc):
     # Run tokenization
     # This tokenizer doesn't split sentences, so linebreaks will be the same as in the input
     # These linebreaks will subsequently be treated as sentence breaks
-    tokenized_text = worker.tokenizer.tokenize(doc, lowercase=worker.info.options["lowercase"], return_str=True)
+    tokenized_text = worker.tokenizer.tokenize(doc.text, lowercase=worker.info.options["lowercase"], return_str=True)
     sentences = [sent.split(" ") for sent in tokenized_text.splitlines()]
     return worker.info.document(sentences=sentences)
 
