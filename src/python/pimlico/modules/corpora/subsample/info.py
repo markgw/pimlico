@@ -20,7 +20,9 @@ class ModuleInfo(BaseModuleInfo):
     module_options = {
         "p": {
             "help": "Probability of including any given document. The resulting corpus will be roughly "
-                    "this proportion of the size of the input",
+                    "this proportion of the size of the input. Alternatively, you can specify an integer, "
+                    "which will be interpreted as the target size of the output. A p value will be calculated "
+                    "based on the size of the input corpus",
             "type": float,
             "required": True,
             "example": "0.1",

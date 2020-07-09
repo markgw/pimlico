@@ -10,6 +10,14 @@ class ModuleExecutor(BaseModuleExecutor):
         input_corpus = self.info.get_input("corpus")
         skip_invalid = self.info.options["skip_invalid"]
         prob = self.info.options["p"]
+        if prob > 1.:
+            # Treat as a target output size
+            target_size = int(prob)
+            prob = target_size / len(input_corpus)
+            if prob > 1.:
+                self.log.warn("Target size of {:,} resulted in a sampling probability of {}: input size is {:,}. "
+                              "All documents will be included"
+                              .format(target_size, prob, len(input_corpus)))
 
         rng = random.Random(self.info.options["seed"])
         selected = 0
