@@ -1043,11 +1043,7 @@ class TypeFromInput(DynamicOutputDatatype):
         self.input_name = input_name
 
     def get_datatype(self, module_info):
-        datatype = module_info.get_input_datatype(self.input_name)
-        # If the input datatype emulates another, it is that other that we will produce as output
-        if datatype.emulated_datatype is not None:
-            datatype = datatype.emulated_datatype
-        return datatype
+        return module_info.get_input_datatype(self.input_name)
 
 
 class DatatypeLoadError(Exception):
