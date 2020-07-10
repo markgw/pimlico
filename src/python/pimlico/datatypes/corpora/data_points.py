@@ -459,6 +459,17 @@ def is_invalid_doc(doc):
     return isinstance(doc, DataPointType.Document) and InvalidDocument().is_type_for_doc(doc)
 
 
+def is_invalid_doc_raw_data(data):
+    try:
+        return data.startswith(b"***** EMPTY DOCUMENT *****")
+    except:
+        if not isinstance(data, bytes):
+            raise TypeError("is_invalid_doc_raw_data() should be called on a document's raw data, which should be a "
+                            "bytes instance: got {}".format(type(data).__name__))
+        else:
+            raise
+
+
 class RawDocumentType(DataPointType):
     """
     Base document type. All document types for grouped corpora should be subclasses of this.
