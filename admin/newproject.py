@@ -15,6 +15,7 @@ from __future__ import print_function
 
 import os
 import sys
+import shutil
 import subprocess
 from io import open
 
@@ -104,7 +105,7 @@ def main():
                 ])
             ])
         ]),
-        ("output", [])
+        #("output", [])
         # `pimlico` dir will be created by bootstrap.py
     ]
     create_directory_structure(structure, base_dir)
@@ -174,14 +175,21 @@ def main():
 
     # Get rid of the scripts themselves used to set up the project
     def _rem(filename):
-        if os.path.exists(os.path.join(base_dir, filename)):
-            os.remove(os.path.join(base_dir, filename))
+        path = os.path.join(base_dir, filename)
+        if os.path.exists(path):
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
     _rem("bootstrap.py")
     _rem("bootstrap.pyc")
     _rem("newproject.py")
+    _rem("__pycache__")
 
 
 TEMPLATE_CONF = """\
+#!./pimlico.sh
+
 [pipeline]
 name={pipeline_name}
 release={latest_release}

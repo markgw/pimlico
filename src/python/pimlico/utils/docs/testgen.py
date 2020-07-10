@@ -14,7 +14,7 @@ import argparse
 import os
 import warnings
 from sphinx import __version__
-from sphinx.ext.apidoc import format_heading
+from .rest import format_heading
 
 from pimlico import install_core_dependencies, TEST_DATA_DIR, TEST_STORAGE_DIR
 from pimlico.test.pipeline import TestPipeline

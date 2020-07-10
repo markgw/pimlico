@@ -1,5 +1,6 @@
 import re
 
+from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 
 
@@ -17,6 +18,7 @@ punct_re = re.compile(r"[\W_]")
 num_re = re.compile(r"[0-9]")
 
 
+@skip_invalid
 def process_document(worker, archive_name, doc_name, doc):
     sentences = doc.sentences
 

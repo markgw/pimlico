@@ -19,6 +19,12 @@ setup steps is also available.
 
 System-wide configuration
 =========================
+
+.. note::
+
+   If you've used Pimlico before, you can skip this step.
+
+
 Pimlico needs you to specify certain parameters regarding your local system.
 Typically this is just
 a file in your home directory called ``.pimlico``. :ref:`More details <local-config>`.
@@ -31,7 +37,7 @@ with each other's output (provided you give them different names).
 
 Most of the time, you only need to specify one storage location,
 using the ``store`` parameter in your local
-config file. (You can specify multiple: :ref:`more details <data-storage>`).
+config file. (You can specify multiple: :ref:`more details <data-storage>`.)
 
 Create a file ``~/.pimlico`` that looks like this:
 
@@ -48,6 +54,10 @@ The procedure for starting a new Pimlico project, using the latest release, is v
 Create a new, empty directory to put your project in. Download
 `newproject.py <https://raw.githubusercontent.com/markgw/pimlico/master/admin/newproject.py>`_
 into the project directory.
+
+Make sure you've got Python installed. Pimlico currently supports Python 2 and 3,
+but we strongly recommend using Python 3 unless you have old Python 2 code you
+need to run.
 
 Choose a name for your project (e.g. ``myproject``) and run:
 
@@ -82,8 +92,10 @@ it's what distinguishes the storage locations.
 set to the latest one, which has been downloaded.
 
 If you later try running the same pipeline with an updated version of Pimlico,
-it will work fine as long as it's the same major version (the first digit).
-Otherwise, there may be backwards incompatible changes, so you'd
+it will work fine as long as it's the same minor version (the second part).
+The minor-minor third part can be updated and may bring some improvements.
+If you use a higher minor version (e.g. 0.10.x when you started with 0.9.24),
+there may be backwards incompatible changes, so you'd
 need to update your config file, ensuring it plays nicely with the later
 Pimlico version.
 
@@ -103,28 +115,28 @@ the home directory.
 
 .. code-block:: ini
 
-    [input-text]
+    [input_text]
     type=pimlico.modules.input.text.raw_text_files
     files=%(home)s/data/europarl_demo/*
-
-.. todo::
-
-   Continue writing from here
 
 Doing something: tokenization
 -----------------------------
 Now, some actual linguistic processing, albeit somewhat uninteresting. Many NLP tools assume that
-their input has been divided into sentences and tokenized. The OpenNLP-based tokenization module does both of these 
-things at once, calling OpenNLP tools.
+their input has been divided into sentences and tokenized. To keep things simple, we use a very
+basic, regular expression-based tokenizer.
 
-Notice that the output from the previous module feeds into the input for this one, which we specify simply by naming 
-the module.
+Notice that the output from the previous module feeds into the
+input for this one, which we specify simply by naming the module.
 
 .. code-block:: ini
 
     [tokenize]
-    type=pimlico.modules.opennlp.tokenize
-    input=tar-grouper
+    type=pimlico.modules.text.simple_tokenize
+    input=input_text
+
+.. todo::
+
+   Continue writing from here
 
 Doing something more interesting: POS tagging
 ---------------------------------------------

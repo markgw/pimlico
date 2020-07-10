@@ -19,6 +19,7 @@ provided by sklearn.
    :titlesonly:
 
    pimlico.modules.embeddings.dependencies
+   pimlico.modules.embeddings.normalize
    pimlico.modules.embeddings.store_embeddings
    pimlico.modules.embeddings.store_tsv
    pimlico.modules.embeddings.store_word2vec

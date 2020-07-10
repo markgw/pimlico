@@ -1,7 +1,7 @@
-.. _test-config-raw_text_files.conf:
+.. _test-config-europarl.conf:
 
-raw\_text\_files\_test
-~~~~~~~~~~~~~~~~~~~~~~
+europarl
+~~~~~~~~
 
 
 
@@ -17,12 +17,12 @@ The complete config file for this test pipeline:
 .. code-block:: ini
    
    [pipeline]
-   name=raw_text_files_test
+   name=europarl
    release=latest
    
-   # Read in some Europarl raw files
+   # Read in some Europarl raw files, using the special Europarl reader
    [europarl]
-   type=pimlico.modules.input.text.raw_text_files
+   type=pimlico.modules.input.text.europarl
    files=%(test_data_dir)s/datasets/europarl_en_raw/*
    
    [store]
