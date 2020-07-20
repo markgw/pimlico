@@ -269,4 +269,4 @@ todo_include_todos = True
 def setup(app):
     # This should be including an additional stylesheet in the html
     # Unfortunately, it only seems to be working in the root dir
-    app.add_stylesheet("theme_overrides.css")
+    app.add_css_file("theme_overrides.css")

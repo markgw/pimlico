@@ -9,3 +9,4 @@ added, e.g. CoNLL dependency parses.
 Datatypes exist for some of these, which should be converted to input readers in due course.
 
 """
+AWAITING_UPDATE = True

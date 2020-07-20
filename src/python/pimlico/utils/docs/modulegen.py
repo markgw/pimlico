@@ -248,9 +248,9 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
         if len(output_groups_table) or len(build_output_groups_doc):
             output_file.write("\n" + format_heading(1, "Output groups"))
             output_file.write("The module defines some named output groups, which can be used to refer to collections "
-                              "of outputs at once, as multiple inputs to another module or alternative inputs.\n")
+                              "of outputs at once, as multiple inputs to another module or alternative inputs.\n\n")
             if len(output_groups_table):
-                output_file.write("%s\n" % make_table(output_groups_table, header=["Group name", "Outputs"]))
+                output_file.write("{}\n".format(make_table(output_groups_table, header=["Group name", "Outputs"])))
             if len(build_output_groups_doc):
                 output_file.write("\n{}\n".format(build_output_groups_doc))
 
