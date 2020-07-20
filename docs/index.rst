@@ -42,9 +42,11 @@ Pimlico is short for *PIpelined Modular LInguistic COrpus processing*.
    all datatypes and modules to be updated to the new system.
    `More info... <https://github.com/markgw/pimlico/projects/1>`_
 
-   This has been done for many of the core modules, but modules marked 
-   with ``!!`` in the docs are waiting to be updated and
-   don't work. Other known outstanding tasks are marked with todos:
+   This has been done for many of the core modules some are waiting
+   to be updated and
+   don't work. They do not appear in the documentation and can
+   be found in ``pimlico.old_datatypes.modules``.
+   Other known outstanding tasks are marked with todos:
    :doc:`full todo list </plans/wishlist>`.
 
    These issues will be resolved before v1.0 is released.

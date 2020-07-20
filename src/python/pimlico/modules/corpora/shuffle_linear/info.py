@@ -38,7 +38,7 @@ from pimlico.datatypes.corpora.grouped import GroupedCorpusWithTypeFromInput
 
 class ModuleInfo(BaseModuleInfo):
     module_type_name = "shuffle"
-    module_readable_name = "Random shuffle"
+    module_readable_name = "Random shuffle (linear)"
     module_inputs = [("corpus", GroupedCorpus())]
     module_outputs = [("corpus", GroupedCorpusWithTypeFromInput())]
     module_options = {

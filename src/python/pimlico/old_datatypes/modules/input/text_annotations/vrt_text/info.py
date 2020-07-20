@@ -31,7 +31,7 @@ from pimlico.core.modules.inputs import iterable_input_reader
 from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 from pimlico.modules.input.text.raw_text_files.info import ModuleInfo as RawTextModuleInfo, \
     data_ready as rt_data_ready, get_paths_from_options
-from pimlico.modules.input.text_annotations.vrt.read import VRTText
+from pimlico.old_datatypes.modules.input.text_annotations.vrt import VRTText
 
 
 def count_documents(options):

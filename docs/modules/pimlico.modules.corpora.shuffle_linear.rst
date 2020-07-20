@@ -1,5 +1,5 @@
-Random shuffle
-~~~~~~~~~~~~~~
+Random shuffle \(linear\)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. py:module:: pimlico.modules.corpora.shuffle_linear
 
