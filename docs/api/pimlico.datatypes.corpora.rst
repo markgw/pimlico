@@ -14,6 +14,7 @@ Submodules
    pimlico.datatypes.corpora.json
    pimlico.datatypes.corpora.table
    pimlico.datatypes.corpora.tokenized
+   pimlico.datatypes.corpora.word_annotations
 
 Module contents
 ---------------

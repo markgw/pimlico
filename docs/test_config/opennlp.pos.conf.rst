@@ -1,7 +1,7 @@
-.. _test-config-opennlp-tokenize.conf:
+.. _test-config-opennlp-pos.conf:
 
-opennlp\_tokenize
-~~~~~~~~~~~~~~~~~
+opennlp\_pos
+~~~~~~~~~~~~
 
 
 
@@ -17,23 +17,22 @@ The complete config file for this test pipeline:
 .. code-block:: ini
    
    [pipeline]
-   name=opennlp_tokenize
+   name=opennlp_pos
    release=latest
    
    # Prepared tarred corpus
-   [europarl]
+   [tokens]
    type=pimlico.datatypes.corpora.GroupedCorpus
-   data_point_type=RawTextDocumentType
-   dir=%(test_data_dir)s/datasets/text_corpora/europarl
+   data_point_type=TokenizedDocumentType
+   dir=%(test_data_dir)s/datasets/corpora/tokenized
    
    # There's a problem with the tests here
    # Pimlico still has a clunky old Makefile-based system for installing model data for modules
    # The tests don't know that this needs to be done before the pipeline can be run
    # This is why this test is not in the main suite, but a special OpenNLP one
-   [tokenize]
-   type=pimlico.modules.opennlp.tokenize
-   token_model=en-token.bin
-   sentence_model=en-sent.bin
+   [pos]
+   type=pimlico.modules.opennlp.pos
+   model=en-pos-maxent.bin
 
 
 Modules
@@ -42,6 +41,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.opennlp.tokenize`
+ * :mod:`~pimlico.modules.opennlp.pos`
     
 

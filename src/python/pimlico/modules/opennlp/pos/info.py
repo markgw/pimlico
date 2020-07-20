@@ -9,27 +9,22 @@ By default, uses the pre-trained English model distributed with OpenNLP. If you 
 for other languages), download them from the OpenNLP website to the models dir (`models/opennlp`) and specify
 the model name as an option.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline
-
 """
 import os
 
 from pimlico.core.modules.map import DocumentMapModuleInfo
 from pimlico.core.paths import abs_path_or_model_dir_path
-from pimlico.old_datatypes.tar import TarredCorpusType
-from pimlico.old_datatypes.tokenized import TokenizedDocumentType
-from pimlico.old_datatypes.word_annotations import AddAnnotationField, \
-    SimpleWordAnnotationCorpusWriter, WordAnnotationsDocumentType
+from pimlico.datatypes import GroupedCorpus
+from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
+from pimlico.datatypes.corpora.word_annotations import WordAnnotationsDocumentType
 from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_pos_tagger"
     module_readable_name = "OpenNLP POS-tagger"
-    module_inputs = [("text", TarredCorpusType(TokenizedDocumentType, WordAnnotationsDocumentType))]
-    module_outputs = [("documents", AddAnnotationField("text", "pos"))]
+    module_inputs = [("text", GroupedCorpus(TokenizedDocumentType()))]
+    module_outputs = [("pos", GroupedCorpus(WordAnnotationsDocumentType()))]
     module_options = {
         "model": {
             "help": "POS tagger model, full path or filename. If a filename is given, it is expected to be in the "
@@ -44,13 +39,6 @@ class ModuleInfo(DocumentMapModuleInfo):
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + dependencies
-
-    def get_writer(self, output_name, output_dir, append=False):
-        return SimpleWordAnnotationCorpusWriter(
-            output_dir,
-            self.get_output("documents").annotation_fields,
-            append=append
-        )
 
     def check_ready_to_run(self):
         problems = super(ModuleInfo, self).check_ready_to_run()

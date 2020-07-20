@@ -17,7 +17,7 @@ Available pipelines
    :maxdepth: 2
    :titlesonly:
 
-   opennlp.tokenize.conf.rst
+   opennlp.pos.conf.rst
    embeddings.normalize.conf.rst
    embeddings.word2vec.conf.rst
    embeddings.store_word2vec.conf.rst

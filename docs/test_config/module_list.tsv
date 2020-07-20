@@ -1,4 +1,4 @@
-test-config-opennlp-tokenize.conf	pimlico.modules.opennlp.tokenize
+test-config-opennlp-pos.conf	pimlico.modules.opennlp.pos
 test-config-embeddings-normalize.conf	pimlico.modules.embeddings.normalize
 test-config-embeddings-word2vec.conf	pimlico.modules.embeddings.word2vec
 test-config-embeddings-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec

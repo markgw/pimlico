@@ -1,1 +1,0 @@
-AWAITING_UPDATE = True
