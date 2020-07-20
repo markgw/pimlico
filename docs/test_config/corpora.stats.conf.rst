@@ -1,4 +1,4 @@
-.. _test-config-stats.conf:
+.. _test-config-corpora-stats.conf:
 
 stats
 ~~~~~

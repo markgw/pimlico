@@ -51,4 +51,4 @@ Test pipelines
 
 This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
 
- * :ref:`test-config-concat.conf`
+ * :ref:`test-config-corpora-concat.conf`

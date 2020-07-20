@@ -109,9 +109,11 @@ of test pipelines for Pimlico's core modules, run:
 """
 
 
-def build_test_config_doc(conf_file):
+def build_test_config_doc(base_path, rel_path):
+    conf_file = os.path.join(base_path, rel_path)
+    config_full_name = "-".join(rel_path.split(os.path.sep))
     config_name = os.path.basename(conf_file)
-    ref_name = "test-config-{}".format(config_name)
+    ref_name = "test-config-{}".format(config_full_name)
 
     # Load the raw data
     with open(conf_file, "r") as f:
@@ -172,7 +174,7 @@ def build_test_config_docs(test_config_dir, output_dir):
                 rel_path = os.path.relpath(base_dir, test_config_dir)
                 print("Building {}/{}".format(rel_path, filename))
                 # Build the doc's text
-                doc = build_test_config_doc(os.path.join(base_dir, filename))
+                doc = build_test_config_doc(test_config_dir, os.path.join(rel_path, filename))
                 if doc is not None:
                     doc_text, ref_name, modules = doc
                     # Work out what to call the file

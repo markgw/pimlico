@@ -1,4 +1,4 @@
-.. _test-config-group.conf:
+.. _test-config-corpora-group.conf:
 
 group
 ~~~~~

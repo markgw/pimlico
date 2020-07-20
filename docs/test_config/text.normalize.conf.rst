@@ -1,4 +1,4 @@
-.. _test-config-normalize.conf:
+.. _test-config-text-normalize.conf:
 
 normalize
 ~~~~~~~~~

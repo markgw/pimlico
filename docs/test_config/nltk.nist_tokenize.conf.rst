@@ -1,4 +1,4 @@
-.. _test-config-nist_tokenize.conf:
+.. _test-config-nltk-nist_tokenize.conf:
 
 nltk\_nist\_tokenize
 ~~~~~~~~~~~~~~~~~~~~

@@ -1,37 +1,37 @@
-test-config-tokenize.conf	pimlico.modules.opennlp.tokenize
-test-config-normalize.conf	pimlico.modules.embeddings.normalize
-test-config-word2vec.conf	pimlico.modules.embeddings.word2vec
-test-config-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec
-test-config-store_tsv.conf	pimlico.modules.embeddings.store_tsv
-test-config-interleave.conf	pimlico.modules.corpora.interleave, pimlico.modules.corpora.format
-test-config-list_filter.conf	pimlico.modules.corpora.list_filter
-test-config-vocab_unmapper.conf	pimlico.modules.corpora.vocab_unmapper
-test-config-shuffle_linear.conf	pimlico.modules.corpora.shuffle_linear
-test-config-subset.conf	pimlico.modules.corpora.subset, pimlico.modules.corpora.format
-test-config-concat.conf	pimlico.modules.corpora.concat, pimlico.modules.corpora.format
-test-config-subsample.conf	pimlico.modules.corpora.subsample
-test-config-vocab_builder.conf	pimlico.modules.corpora.vocab_builder
-test-config-group.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.format
-test-config-split.conf	pimlico.modules.corpora.split
-test-config-vocab_mapper.conf	pimlico.modules.corpora.vocab_mapper
-test-config-store.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.store
-test-config-stats.conf	pimlico.modules.corpora.corpus_stats
-test-config-filter_tokenize.conf	pimlico.modules.corpora.store
-test-config-vocab_mapper_longer.conf	pimlico.modules.corpora.vocab_mapper
-test-config-vocab_counter.conf	pimlico.modules.corpora.vocab_counter
-test-config-shuffle.conf	pimlico.modules.corpora.shuffle
-test-config-tokenized.conf	pimlico.modules.corpora.format
-test-config-simple_tokenize.conf	pimlico.modules.text.simple_tokenize
-test-config-normalize.conf	pimlico.modules.text.normalize
-test-config-text_normalize.conf	pimlico.modules.text.text_normalize
-test-config-char_tokenize.conf	pimlico.modules.text.char_tokenize
-test-config-europarl.conf	pimlico.modules.corpora.store
-test-config-raw_text_files.conf	pimlico.modules.corpora.store
-test-config-xml.conf	
-test-config-glove.conf	pimlico.modules.input.embeddings.glove
-test-config-fasttext.conf	pimlico.modules.input.embeddings.fasttext
-test-config-tokenize.conf	pimlico.modules.spacy.tokenize
-test-config-collect_files.conf	pimlico.modules.utility.collect_files
-test-config-nist_tokenize.conf	pimlico.modules.nltk.nist_tokenize, pimlico.modules.nltk.nist_tokenize
-test-config-embeddings_plot.conf	pimlico.modules.visualization.embeddings_plot
-test-config-filter_map.conf	pimlico.modules.corpora.store
+test-config-opennlp-tokenize.conf	pimlico.modules.opennlp.tokenize
+test-config-embeddings-normalize.conf	pimlico.modules.embeddings.normalize
+test-config-embeddings-word2vec.conf	pimlico.modules.embeddings.word2vec
+test-config-embeddings-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec
+test-config-embeddings-store_tsv.conf	pimlico.modules.embeddings.store_tsv
+test-config-corpora-interleave.conf	pimlico.modules.corpora.interleave, pimlico.modules.corpora.format
+test-config-corpora-list_filter.conf	pimlico.modules.corpora.list_filter
+test-config-corpora-vocab_unmapper.conf	pimlico.modules.corpora.vocab_unmapper
+test-config-corpora-shuffle_linear.conf	pimlico.modules.corpora.shuffle_linear
+test-config-corpora-subset.conf	pimlico.modules.corpora.subset, pimlico.modules.corpora.format
+test-config-corpora-concat.conf	pimlico.modules.corpora.concat, pimlico.modules.corpora.format
+test-config-corpora-subsample.conf	pimlico.modules.corpora.subsample
+test-config-corpora-vocab_builder.conf	pimlico.modules.corpora.vocab_builder
+test-config-corpora-group.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.format
+test-config-corpora-split.conf	pimlico.modules.corpora.split
+test-config-corpora-vocab_mapper.conf	pimlico.modules.corpora.vocab_mapper
+test-config-corpora-store.conf	pimlico.modules.corpora.group, pimlico.modules.corpora.store
+test-config-corpora-stats.conf	pimlico.modules.corpora.corpus_stats
+test-config-corpora-filter_tokenize.conf	pimlico.modules.corpora.store
+test-config-corpora-vocab_mapper_longer.conf	pimlico.modules.corpora.vocab_mapper
+test-config-corpora-vocab_counter.conf	pimlico.modules.corpora.vocab_counter
+test-config-corpora-shuffle.conf	pimlico.modules.corpora.shuffle
+test-config-corpora-formatters-tokenized.conf	pimlico.modules.corpora.format
+test-config-text-simple_tokenize.conf	pimlico.modules.text.simple_tokenize
+test-config-text-normalize.conf	pimlico.modules.text.normalize
+test-config-text-text_normalize.conf	pimlico.modules.text.text_normalize
+test-config-text-char_tokenize.conf	pimlico.modules.text.char_tokenize
+test-config-input-europarl.conf	pimlico.modules.corpora.store
+test-config-input-raw_text_files.conf	pimlico.modules.corpora.store
+test-config-input-xml.conf	
+test-config-input-glove.conf	pimlico.modules.input.embeddings.glove
+test-config-input-fasttext.conf	pimlico.modules.input.embeddings.fasttext
+test-config-spacy-tokenize.conf	pimlico.modules.spacy.tokenize
+test-config-utility-collect_files.conf	pimlico.modules.utility.collect_files
+test-config-nltk-nist_tokenize.conf	pimlico.modules.nltk.nist_tokenize, pimlico.modules.nltk.nist_tokenize
+test-config-visualization-embeddings_plot.conf	pimlico.modules.visualization.embeddings_plot
+test-config-core-filter_map.conf	pimlico.modules.corpora.store

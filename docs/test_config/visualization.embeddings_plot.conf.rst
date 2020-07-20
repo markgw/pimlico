@@ -1,4 +1,4 @@
-.. _test-config-embeddings_plot.conf:
+.. _test-config-visualization-embeddings_plot.conf:
 
 embeddings\_plot
 ~~~~~~~~~~~~~~~~

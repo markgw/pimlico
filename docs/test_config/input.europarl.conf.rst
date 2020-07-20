@@ -1,4 +1,4 @@
-.. _test-config-europarl.conf:
+.. _test-config-input-europarl.conf:
 
 europarl
 ~~~~~~~~

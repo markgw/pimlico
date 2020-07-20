@@ -1,4 +1,4 @@
-.. _test-config-char_tokenize.conf:
+.. _test-config-text-char_tokenize.conf:
 
 simple\_tokenize
 ~~~~~~~~~~~~~~~~

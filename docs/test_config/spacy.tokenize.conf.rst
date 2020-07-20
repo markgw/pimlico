@@ -1,4 +1,4 @@
-.. _test-config-tokenize.conf:
+.. _test-config-spacy-tokenize.conf:
 
 spacy\_tokenize
 ~~~~~~~~~~~~~~~

@@ -1,4 +1,4 @@
-.. _test-config-vocab_mapper.conf:
+.. _test-config-corpora-vocab_mapper.conf:
 
 vocab\_mapper
 ~~~~~~~~~~~~~

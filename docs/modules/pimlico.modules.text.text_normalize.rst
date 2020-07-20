@@ -75,4 +75,4 @@ Test pipelines
 
 This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
 
- * :ref:`test-config-text_normalize.conf`
+ * :ref:`test-config-text-text_normalize.conf`

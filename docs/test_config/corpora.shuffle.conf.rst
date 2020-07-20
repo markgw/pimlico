@@ -1,4 +1,4 @@
-.. _test-config-shuffle.conf:
+.. _test-config-corpora-shuffle.conf:
 
 shuffle
 ~~~~~~~

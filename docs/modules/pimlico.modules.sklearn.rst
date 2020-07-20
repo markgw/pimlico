@@ -19,4 +19,3 @@ and then use them as input to Scikit-learn's tools using the modules in this pac
    :titlesonly:
 
    pimlico.modules.sklearn.logistic_regression
-   pimlico.modules.sklearn.matrix_factorization

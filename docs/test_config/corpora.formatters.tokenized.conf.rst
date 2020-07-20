@@ -1,4 +1,4 @@
-.. _test-config-tokenized.conf:
+.. _test-config-corpora-formatters-tokenized.conf:
 
 tokenized\_formatter
 ~~~~~~~~~~~~~~~~~~~~

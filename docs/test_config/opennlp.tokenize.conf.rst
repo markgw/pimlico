@@ -1,4 +1,4 @@
-.. _test-config-tokenize.conf:
+.. _test-config-opennlp-tokenize.conf:
 
 opennlp\_tokenize
 ~~~~~~~~~~~~~~~~~

@@ -1,4 +1,4 @@
-.. _test-config-interleave.conf:
+.. _test-config-corpora-interleave.conf:
 
 interleave
 ~~~~~~~~~~

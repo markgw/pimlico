@@ -1,4 +1,4 @@
-.. _test-config-filter_tokenize.conf:
+.. _test-config-corpora-filter_tokenize.conf:
 
 filter\_tokenize
 ~~~~~~~~~~~~~~~~

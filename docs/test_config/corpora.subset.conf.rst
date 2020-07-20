@@ -1,4 +1,4 @@
-.. _test-config-subset.conf:
+.. _test-config-corpora-subset.conf:
 
 subset
 ~~~~~~

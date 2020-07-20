@@ -1,4 +1,4 @@
-.. _test-config-concat.conf:
+.. _test-config-corpora-concat.conf:
 
 concat
 ~~~~~~

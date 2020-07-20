@@ -1,4 +1,4 @@
-.. _test-config-vocab_unmapper.conf:
+.. _test-config-corpora-vocab_unmapper.conf:
 
 vocab\_unmapper
 ~~~~~~~~~~~~~~~

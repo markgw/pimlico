@@ -1,4 +1,4 @@
-.. _test-config-glove.conf:
+.. _test-config-input-glove.conf:
 
 glove\_input\_test
 ~~~~~~~~~~~~~~~~~~

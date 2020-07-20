@@ -3,16 +3,13 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from builtins import str
-from builtins import zip
 from pimlico.core.external.java import Py4JInterface, JavaProcessError
 from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.multiproc import multiprocessing_executor_factory
 from pimlico.old_datatypes.base import InvalidDocument
 from pimlico.old_datatypes.coref.opennlp import Entity
-from pimlico.modules.opennlp.coreference.info import WORDNET_DIR
-
-from py4j.java_gateway import get_field
+from pimlico.old_datatypes.modules.opennlp.coreference import WORDNET_DIR
 
 
 def _get_full_queue(q):
@@ -24,32 +21,25 @@ def _get_full_queue(q):
 
 @skip_invalid
 def process_document(worker, archive, filename, doc):
+    """
+    Common document processing routine used by parallel and non-parallel versions.
+
+    """
     interface = worker.interface
     # Resolve coreference, passing in PTB parse trees as strings
-    coref_result = interface.gateway.entry_point.resolveCoreference(doc)
-    if coref_result is None:
+    coref_output = interface.gateway.entry_point.resolveCoreferenceFromTreesStrings(doc)
+    if coref_output is None:
         # Coref failed, return an invalid doc
         # Fetch all output from stdout and stderr
         stdout = _get_full_queue(interface.stdout_queue)
         stderr = _get_full_queue(interface.stderr_queue)
+
         return InvalidDocument(
             u"opennlp_coref", u"Error running coref\nJava stdout:\n%s\nJava stderr:\n%s" % (stdout, stderr)
         )
-
-    outputs = []
-    for output_name in worker.info.output_names:
-        if output_name == "coref":
-            # Pull all of the information out of the java objects to get ready to store as JSON
-            outputs.append([Entity.from_java_object(e) for e in get_field(coref_result, "entities")])
-        elif output_name == "tokenized":
-            outputs.append([sentence.split() for sentence in get_field(coref_result, "tokenizedSentences")])
-        elif output_name == "pos":
-            tokens = [sentence.split() for sentence in get_field(coref_result, "tokenizedSentences")]
-            pos_tags = [sentence.split() for sentence in get_field(coref_result, "posTags")]
-            outputs.append(list(zip(tokens, pos_tags)))
-        elif output_name == "parse":
-            outputs.append(list(coref_result.getParseTrees()))
-    return tuple(outputs)
+    # Pull all of the information out of the java objects to get ready to store as JSON
+    entities = [Entity.from_java_object(e) for e in list(coref_output)]
+    return entities
 
 
 def start_interface(info):
@@ -58,16 +48,13 @@ def start_interface(info):
 
     """
     # Start a parser process running in the background via Py4J
-    gateway_args=[
-        info.sentence_model_path, info.token_model_path, info.pos_model_path, info.parse_model_path,
-        info.coref_model_path
-    ]
+    gateway_args=[info.model_path]
     if info.options["timeout"] is not None:
         # Set a timeout for coref tasks
         gateway_args.extend(["--timeout", str(info.options["timeout"])])
 
     interface = Py4JInterface(
-        "pimlico.opennlp.CoreferenceResolverRawTextGateway", gateway_args=gateway_args,
+        "pimlico.opennlp.CoreferenceResolverGateway", gateway_args=gateway_args,
         pipeline=info.pipeline, system_properties={"WNSEARCHDIR": WORDNET_DIR},
         java_opts=["-Xmx%s" % info.get_heap_memory_limit(), "-Xms%s" % info.get_heap_memory_limit()],
         print_stderr=False, print_stdout=False

@@ -1,4 +1,4 @@
-.. _test-config-store_word2vec.conf:
+.. _test-config-embeddings-store_word2vec.conf:
 
 word2vec\_store
 ~~~~~~~~~~~~~~~

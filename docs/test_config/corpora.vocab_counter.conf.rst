@@ -1,4 +1,4 @@
-.. _test-config-vocab_counter.conf:
+.. _test-config-corpora-vocab_counter.conf:
 
 vocab\_counter
 ~~~~~~~~~~~~~~

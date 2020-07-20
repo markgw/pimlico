@@ -1,4 +1,4 @@
-.. _test-config-vocab_builder.conf:
+.. _test-config-corpora-vocab_builder.conf:
 
 vocab\_builder
 ~~~~~~~~~~~~~~

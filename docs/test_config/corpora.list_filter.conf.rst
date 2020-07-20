@@ -1,4 +1,4 @@
-.. _test-config-list_filter.conf:
+.. _test-config-corpora-list_filter.conf:
 
 list\_filter
 ~~~~~~~~~~~~

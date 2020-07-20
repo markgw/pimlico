@@ -73,4 +73,4 @@ Test pipelines
 
 This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
 
- * :ref:`test-config-simple_tokenize.conf`
+ * :ref:`test-config-text-simple_tokenize.conf`

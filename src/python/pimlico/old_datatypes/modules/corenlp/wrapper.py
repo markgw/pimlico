@@ -25,7 +25,7 @@ import time
 from pimlico.core.external.java import start_java_process
 from pimlico.core.logs import get_log_file
 from pimlico.core.modules.execute import StopProcessing
-from pimlico.modules.corenlp import CoreNLPClientError, CoreNLPProcessingError
+from pimlico.old_datatypes.modules.corenlp import CoreNLPClientError, CoreNLPProcessingError
 from pimlico.utils.communicate import timeout_process
 from pimlico.utils.pipes import OutputQueue
 

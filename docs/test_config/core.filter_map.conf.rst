@@ -1,4 +1,4 @@
-.. _test-config-filter_map.conf:
+.. _test-config-core-filter_map.conf:
 
 filter\_map
 ~~~~~~~~~~~

@@ -12,7 +12,6 @@ pos tagging, parsing and coreference resolution. The results of all the stages a
 
 """
 from __future__ import division
-from past.utils import old_div
 import os
 
 from pimlico.core.modules.map import DocumentMapModuleInfo
@@ -24,7 +23,7 @@ from pimlico.old_datatypes.parse import ConstituencyParseTreeCorpus, Constituenc
 from pimlico.old_datatypes.tar import TarredCorpusType
 from pimlico.old_datatypes.tokenized import TokenizedCorpus, TokenizedCorpusWriter
 from pimlico.old_datatypes.word_annotations import WordAnnotationCorpusWithFields, SimpleWordAnnotationCorpusWriter
-from pimlico.modules.opennlp.coreference.info import WORDNET_DIR
+from pimlico.old_datatypes.modules.opennlp.coreference import WORDNET_DIR
 from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 

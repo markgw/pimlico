@@ -1,4 +1,4 @@
-.. _test-config-xml.conf:
+.. _test-config-input-xml.conf:
 
 xml\_test
 ~~~~~~~~~

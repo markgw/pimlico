@@ -1,4 +1,4 @@
-.. _test-config-collect_files.conf:
+.. _test-config-utility-collect_files.conf:
 
 collect\_files
 ~~~~~~~~~~~~~~

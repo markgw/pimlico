@@ -1,9 +1,11 @@
-Run spaCy tools and pipelines on your datasets.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spaCy
+~~~~~
 
 
 .. py:module:: pimlico.modules.spacy
 
+
+Run spaCy tools and pipelines on your datasets.
 
 Currently only includes tokenization, but this could be expanded to include
 many more of spaCy's tools.

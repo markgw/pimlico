@@ -1,4 +1,4 @@
-.. _test-config-store_tsv.conf:
+.. _test-config-embeddings-store_tsv.conf:
 
 tsvvec\_store
 ~~~~~~~~~~~~~

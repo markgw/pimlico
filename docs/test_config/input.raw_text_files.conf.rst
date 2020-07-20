@@ -1,4 +1,4 @@
-.. _test-config-raw_text_files.conf:
+.. _test-config-input-raw_text_files.conf:
 
 raw\_text\_files\_test
 ~~~~~~~~~~~~~~~~~~~~~~

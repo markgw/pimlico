@@ -1,4 +1,4 @@
-.. _test-config-normalize.conf:
+.. _test-config-embeddings-normalize.conf:
 
 embedding\_norm
 ~~~~~~~~~~~~~~~

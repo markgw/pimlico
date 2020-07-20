@@ -54,7 +54,7 @@ Test pipelines
 
 This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
 
- * :ref:`test-config-filter_tokenize.conf`
- * :ref:`test-config-europarl.conf`
- * :ref:`test-config-raw_text_files.conf`
- * :ref:`test-config-filter_map.conf`
+ * :ref:`test-config-corpora-filter_tokenize.conf`
+ * :ref:`test-config-input-europarl.conf`
+ * :ref:`test-config-input-raw_text_files.conf`
+ * :ref:`test-config-core-filter_map.conf`

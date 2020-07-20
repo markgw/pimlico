@@ -1,4 +1,4 @@
-.. _test-config-shuffle_linear.conf:
+.. _test-config-corpora-shuffle_linear.conf:
 
 shuffle
 ~~~~~~~

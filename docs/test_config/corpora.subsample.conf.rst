@@ -1,4 +1,4 @@
-.. _test-config-subsample.conf:
+.. _test-config-corpora-subsample.conf:
 
 subsample
 ~~~~~~~~~

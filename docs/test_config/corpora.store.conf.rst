@@ -1,4 +1,4 @@
-.. _test-config-store.conf:
+.. _test-config-corpora-store.conf:
 
 store
 ~~~~~

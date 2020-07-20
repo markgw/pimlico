@@ -1,4 +1,4 @@
-.. _test-config-fasttext.conf:
+.. _test-config-input-fasttext.conf:
 
 fasttext\_input\_test
 ~~~~~~~~~~~~~~~~~~~~~

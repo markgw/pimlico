@@ -18,8 +18,8 @@ from pimlico.old_datatypes.base import InvalidDocument
 from pimlico.old_datatypes.parse.dependency import StanfordDependencyParse
 from pimlico.old_datatypes.tokenized import TokenizedCorpus, TokenizedDocumentType
 from pimlico.old_datatypes.word_annotations import WordAnnotationCorpus, WordAnnotationsDocumentType
-from pimlico.modules.corenlp import CoreNLPProcessingError
-from pimlico.modules.corenlp.wrapper import CoreNLP
+from pimlico.old_datatypes.modules.corenlp import CoreNLPProcessingError
+from pimlico.old_datatypes.modules.corenlp import CoreNLP
 
 
 def preprocess(executor):

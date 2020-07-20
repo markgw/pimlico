@@ -1,4 +1,4 @@
-.. _test-config-word2vec.conf:
+.. _test-config-embeddings-word2vec.conf:
 
 word2vec\_train
 ~~~~~~~~~~~~~~~

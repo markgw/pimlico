@@ -1,4 +1,5 @@
-"""
+"""spaCy
+
 Run spaCy tools and pipelines on your datasets.
 
 Currently only includes tokenization, but this could be expanded to include

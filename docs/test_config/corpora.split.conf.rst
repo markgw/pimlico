@@ -1,4 +1,4 @@
-.. _test-config-split.conf:
+.. _test-config-corpora-split.conf:
 
 split
 ~~~~~

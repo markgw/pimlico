@@ -6,7 +6,7 @@ from builtins import str
 from pimlico.core.config import PipelineConfigParseError
 from pimlico.core.modules.base import BaseModuleExecutor
 from pimlico.old_datatypes.arrays import NumpyArrayWriter
-from pimlico.modules.sklearn.matrix_factorization.info import SKLEARN_CLASSES
+from pimlico.old_datatypes.modules.sklearn.matrix_factorization import SKLEARN_CLASSES
 
 
 class ModuleExecutor(BaseModuleExecutor):
