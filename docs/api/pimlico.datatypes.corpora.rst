@@ -1,6 +1,13 @@
 corpora
 =======
 
+Subpackages
+-----------
+
+.. toctree::
+
+    pimlico.datatypes.corpora.parse
+
 Submodules
 ----------
 

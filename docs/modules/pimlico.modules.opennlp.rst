@@ -17,5 +17,6 @@ See :mod:`pimlico.old_datatypes.modules.opennlp`.
    :maxdepth: 2
    :titlesonly:
 
+   pimlico.modules.opennlp.parse
    pimlico.modules.opennlp.pos
    pimlico.modules.opennlp.tokenize

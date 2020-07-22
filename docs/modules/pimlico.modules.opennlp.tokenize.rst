@@ -1,5 +1,5 @@
-OpenNLP tokenizer
-~~~~~~~~~~~~~~~~~
+Tokenizer
+~~~~~~~~~
 
 .. py:module:: pimlico.modules.opennlp.tokenize
 
@@ -77,3 +77,9 @@ This example usage includes more options.
    token_model=en-token.bin
    tokenize_only=F
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-opennlp-tokenize.conf`

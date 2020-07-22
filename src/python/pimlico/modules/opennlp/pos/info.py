@@ -22,7 +22,7 @@ from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_pos_tagger"
-    module_readable_name = "OpenNLP POS-tagger"
+    module_readable_name = "POS-tagger"
     module_inputs = [("text", GroupedCorpus(TokenizedDocumentType()))]
     module_outputs = [("pos", GroupedCorpus(WordAnnotationsDocumentType()))]
     module_options = {

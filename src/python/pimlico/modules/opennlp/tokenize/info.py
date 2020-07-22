@@ -29,7 +29,7 @@ from pimlico.modules.opennlp.deps import py4j_wrapper_dependency
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_tokenizer"
-    module_readable_name = "OpenNLP tokenizer"
+    module_readable_name = "Tokenizer"
     module_inputs = [("text", GroupedCorpus(TextDocumentType()))]
     module_outputs = [("documents", GroupedCorpus(TokenizedDocumentType()))]
     module_options = {
