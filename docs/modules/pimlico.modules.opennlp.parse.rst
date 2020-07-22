@@ -11,9 +11,15 @@ Constituency parser
 
 Constituency parsing using OpenNLP's tools.
 
-.. todo::
+We run OpenNLP in the background using a Py4J wrapper, just as with the other
+OpenNLP wrappers.
 
-   Update to new datatypes system and add test pipeline
+The output format is not yet ideal: currently we produce documents consisting of a
+list of strings, each giving the OpenNLP tree output for a sentence. It would be
+better to use a standard constituency tree datatype that can be used generically
+as input to any modules required tree input. For now, if you write a module taking
+input from the parser, it will itself need to process the strings from the OpenNLP
+parser output.
 
 
 Inputs
