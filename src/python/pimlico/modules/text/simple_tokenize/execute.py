@@ -12,7 +12,7 @@ def process_document(worker, archive_name, doc_name, doc):
         [t for t in line.strip().split(worker.info.options["splitter"]) if len(t)]
         for line in doc.text.splitlines()
     ]
-    return worker.info.document(sentences=sentences)
+    return dict(sentences=sentences)
 
 
 ModuleExecutor = multiprocessing_executor_factory(process_document)
