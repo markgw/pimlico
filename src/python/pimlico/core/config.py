@@ -1105,6 +1105,17 @@ class PipelineConfig(object):
             for local_config_filename in local_config:
                 local_config_file_data = _load_config_file(local_config_filename)
                 if local_config_file_data:
+                    # Allow storage locations to be specified relative to the local config file
+                    # This is probably never useful in practice, but is permitted for the sake of
+                    #  running example pipelines
+                    for key, val in local_config_file_data.items():
+                        if key in ["short_term_store", "long_term_store", "store"] or key.startswith("store_"):
+                            # This is a storage location
+                            if not os.path.isabs(val):
+                                # It's a relative path: make it relative to the location of the file
+                                local_config_file_data[key] = os.path.abspath(
+                                    os.path.join(os.path.dirname(local_config_filename), val)
+                                )
                     # Override previous local config data
                     local_config_data.update(local_config_file_data)
                     # Mark this source as used (for debugging)
