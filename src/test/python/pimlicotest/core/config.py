@@ -6,7 +6,7 @@ from pimlicotest import example_path
 class PipelineConfigTest(unittest.TestCase):
     def setUp(self):
         # Get a basic local config file so Pimlico doesn't go looking for one on the system
-        self.local_conf_path = example_path("tests_local_config")
+        self.local_conf_path = example_path("examples_local_config")
         # Create a temporary directory to use as our storage location
         self.storage_dir = tempfile.mkdtemp()
         # Override the local config values that should point to this path
