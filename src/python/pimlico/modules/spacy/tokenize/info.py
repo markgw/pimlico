@@ -16,7 +16,7 @@ from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 
 class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "spacy_tokenizer"
-    module_readable_name = "spaCy tokenizer"
+    module_readable_name = "Tokenizer"
     module_inputs = [("text", GroupedCorpus(TextDocumentType()))]
     module_outputs = [("documents", GroupedCorpus(TokenizedDocumentType()))]
     module_options = {
