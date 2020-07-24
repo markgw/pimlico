@@ -239,9 +239,11 @@ class IterableCorpus(PimlicoDatatype):
         Override type checking to require that the supplied type have a document type that is compatible with
         (i.e. a subclass of) the document type of this class.
 
+        The data point types can also introduce their own checks, other than simple isinstance checks.
+
         """
         main_type_check = super(IterableCorpus, self).check_type(supplied_type)
-        return main_type_check and isinstance(supplied_type.data_point_type, type(self.data_point_type))
+        return main_type_check and self.data_point_type.check_type(supplied_type.data_point_type)
 
     def type_checking_name(self):
         return "%s<%s>" % (super(IterableCorpus, self).type_checking_name(), self.data_point_type.name)

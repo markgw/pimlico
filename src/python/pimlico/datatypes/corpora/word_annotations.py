@@ -2,6 +2,11 @@
 Textual corpus type where each word is accompanied by some annotations.
 
 """
+from builtins import str
+from collections import OrderedDict
+
+from pimlico.core.modules.options import comma_separated_strings
+from pimlico.datatypes import DynamicOutputDatatype, DatatypeLoadError
 from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 from pimlico.utils.core import cached_property
 
@@ -24,13 +29,56 @@ class WordAnnotationsDocumentType(TokenizedDocumentType):
     List of sentences, each consisting of a list of word, each consisting of a
     tuple of the token and its annotations.
 
-    Using this type directly gives documents with annotations per word, but doesn't
-    know what the annotations are. Currently there's no way to perform type checking
-    to ensure that a given set of annotations are included.
+    The document type needs to know what fields will be provided, so that it's
+    possible for a module to require a particular set of fields. The field list
+    also tells the reader in which position to find each field.
 
-    This is not very satisfactory, but will do for now.
+    E.g. the field list "word,lemma,pos" will store values like "walks|walk|VB"
+    for each token. You could also provide "word,pos,lemma" with "walks|VB|walk"
+    and the reader would know where to find the fields it needs.
+
+    When a WordAnnotationsDocumentType is used as an input type requirement, it
+    will accept any input corpus that also has a WordAnnotationsDocumentType as
+    its data-point type and includes at least all of the fields specified for
+    the requirement.
+
+    So, a requirement of
+    ``GroupedCorpus(WordAnnotationsDocumentType(["word", "pos"]))`` will match
+    a supplied type of ``GroupedCorpus(WordAnnotationsDocumentType(["word", "pos"]))``,
+    or ``GroupedCorpus(WordAnnotationsDocumentType(["word", "pos", "lemma]))``,
+    but not ``GroupedCorpus(WordAnnotationsDocumentType(["word", "lemma"]))``.
 
     """
+    data_point_type_options = OrderedDict([
+        ("fields", {
+            "type": comma_separated_strings,
+            "required": True,
+            "help": "Names of the annotation fields. These include the word itself. Typically the first "
+                    "field is therefore called 'word', but this is not required. However, there must be "
+                    "a field called 'word', since this datatype overrides tokenized documents, so need "
+                    "to be able to provide the original text. "
+                    "Specified as a comma-separated list. Required",
+        }),
+    ])
+
+    def __init__(self, *args, **kwargs):
+        super(WordAnnotationsDocumentType, self).__init__(*args, **kwargs)
+        self.fields = self.options["fields"]
+        self.field_pos = dict([(field, pos) for (pos, field) in enumerate(self.fields)])
+
+    def check_type(self, supplied_type):
+        if not isinstance(supplied_type, WordAnnotationsDocumentType):
+            return False
+        # Make sure the supplied type has all of the required fields
+        # It may have more, but must have at least these
+        for req_field in self.fields:
+            if req_field not in supplied_type.fields:
+                return False
+        return True
+
+    def __repr__(self):
+        return "{}({})".format(self.name, ", ".join(self.fields))
+
     class Document(object):
         keys = ["word_annotations"]
 
@@ -40,7 +88,17 @@ class WordAnnotationsDocumentType(TokenizedDocumentType):
 
         @cached_property
         def sentences(self):
-            return [[word[0] for word in sentence] for sentence in self.internal_data["word_annotations"]]
+            return self.get_field("word")
+
+        def get_field(self, field):
+            """
+            Get the given field for every word in every sentence.
+
+            Must be one of the fields available in this datatype.
+
+            """
+            field_pos = self.data_point_type.field_pos[field]
+            return [[word[field_pos] for word in sentence] for sentence in self.internal_data["word_annotations"]]
 
         def raw_to_internal(self, raw_data):
             # Decode UTF8
@@ -62,3 +120,55 @@ class WordAnnotationsDocumentType(TokenizedDocumentType):
                     for word in sentence
                 ) for sentence in internal_data["word_annotations"]
             ).encode("utf-8")
+
+
+class AddAnnotationField(DynamicOutputDatatype):
+    def __init__(self, input_name, add_fields):
+        """
+        Dynamic type constructor that can be used in place of a module's output type. When called
+        (when the output type is needed), dynamically creates a new type that is a corpus with
+        WordAnnotationsDocumentType with the same fields as the named input to the module,
+        with the addition of one or more new ones.
+
+        :param input_name: input to the module whose fields we extend
+        :param add_fields: field or fields to add, string names
+        """
+        super(AddAnnotationField, self).__init__()
+        # Make it easy to add just a single field, the most common case
+        self.input_name = input_name
+
+        if isinstance(add_fields, str):
+            add_fields = [add_fields]
+        self.add_fields = add_fields
+        self.datatype_doc_info = ":class:WordAnnotationCorpus with %s" % ", ".join(add_fields)
+
+    def get_datatype(self, module_info):
+        from pimlico.core.modules.base import ModuleInfoLoadError
+        from pimlico.datatypes import GroupedCorpus
+
+        input_datatype = module_info.get_input_datatype(self.input_name)
+        # Allow the special case where the input datatype is a tokenized corpus
+        # Pretend it's an annotated corpus with no annotations, just words
+        if not isinstance(input_datatype, GroupedCorpus):
+            raise DatatypeLoadError("tried to add word annotations fields to input '{}', but that input is "
+                                    "not a corpus type".format(self.input_name))
+        elif isinstance(input_datatype.data_point_type, TokenizedDocumentType):
+            # Special case where the input is tokenized documents: we can handle that, since it's
+            # just like an annotated corpus with only the 'word' field
+            base_fields = ["word"]
+        elif not isinstance(input_datatype.data_point_type, WordAnnotationsDocumentType):
+            raise DatatypeLoadError("input corpus '{}' has document type '{}'. Need TokenizedDocumentType or "
+                                    "WordAnnotationsDocumentType to be able to extend the annotation fields"
+                                    .format(self.input_name, input_datatype.data_point_type))
+        else:
+            base_fields = input_datatype.fields
+
+        for field in self.add_fields:
+            if field in base_fields:
+                raise ModuleInfoLoadError("trying to add a field '{}' to data that already has a field with "
+                                          "that name".format(field))
+        return WordAnnotationsDocumentType(base_fields + self.add_fields)
+
+    def get_base_datatype(self):
+        from pimlico.datatypes import GroupedCorpus
+        return GroupedCorpus(WordAnnotationsDocumentType(["fields..."]))

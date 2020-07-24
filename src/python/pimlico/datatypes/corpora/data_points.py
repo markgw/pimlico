@@ -6,6 +6,8 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
+import traceback
+from collections import OrderedDict
 from traceback import format_exc
 
 from builtins import object
@@ -71,11 +73,16 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
     functionality or add new methods, etc. This will be used to automatically create
     the `Document` class for the data point type.
 
+    Some data-point types may specify some options, using the ``data_point_type_options``
+    field. This works in the same way as PimlicoDatatype's ``datatype_options``.
+    Values for the options can be specified on initialization as args or kwargs of the
+    data-point type.
+
     .. note::
 
-       For now, data point types don't have a way of specifying options (like main datatypes do).
-       I'm not sure whether this is needed, so I'm leaving it out for now. If it is needed, an
-       additional datatype option can be added to iterable corpora that allows you to specify
+       I have now implemented the data-point type options, just like datatype options.
+       However, you cannot yet specify these in a config file when loading a stored corpus.
+       An additional datatype option should be added to iterable corpora that allows you to specify
        data point type options for when a datatype is being loaded using a config file.
 
     """
@@ -88,10 +95,47 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
     #: strings documenting the meaning of the parameter. Used for writers for this data point
     #: type. See :class:`~pimlico.datatypes.PimlicoDatatype.Writer`.
     metadata_defaults = {}
+    data_point_type_options = OrderedDict()
+    """
+    Options specified in the same way as module options that control the nature of the 
+    document type. These are not things to do with reading of specific datasets, for which 
+    the dataset's metadata should be used. These are things that have an impact on 
+    typechecking, such that options on the two checked datatypes are required to match 
+    for the datatypes to be considered compatible.
+    
+    This corresponds exactly to a PimlicoDatatype's datatype_options and is processed 
+    in the same way.
+    
+    They should always be an ordered dict, so that they can be specified using 
+    positional arguments as well as kwargs and config parameters.
+    
+    """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         # This is set when the reader is initialized
         self.metadata = {}
+
+        # Kwargs specify (processed) values for named datatype options
+        # Check they're all valid options
+        for key in kwargs:
+            if key not in self.data_point_type_options:
+                raise DataPointError("unknown data-point type option '{}' for {}".format(key, self))
+        self.options = dict(kwargs)
+        # Positional args can also be used to specify options, using the order in which the options are defined
+        for key, arg in zip(self.data_point_type_options.keys(), args):
+            if key in kwargs:
+                raise DataPointError("data-point type option '{}' given by positional arg was also specified "
+                                     "by a kwarg".format(key))
+            self.options[key] = arg
+
+        # Check any required options have been given
+        for opt_name, opt_dict in self.data_point_type_options.items():
+            if opt_dict.get("required", False) and opt_name not in self.options:
+                raise DataPointError("{} datatype requires option '{}' to be specified".format(self, opt_name))
+        # Finally, set default options from the datatype options
+        for opt_name, opt_dict in self.data_point_type_options.items():
+            if opt_name not in self.options:
+                self.options[opt_name] = opt_dict.get("default", None)
 
     def __call__(self, **kwargs):
         """
@@ -135,6 +179,18 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
     def name(self):
         return self.__class__.__name__
 
+    def check_type(self, supplied_type):
+        """
+        Type checking for an iterable corpus calls this to check that the supplied
+        data point type matches the required one (i.e. this instance). By default,
+        the supplied type is simply required to be an instance of the required
+        type (or one of its subclasses).
+
+        This may be overridden to introduce other type checks.
+
+        """
+        return isinstance(supplied_type, type(self))
+
     def is_type_for_doc(self, doc):
         """
         Check whether the given document is of this type, or a subclass of this one.
@@ -148,7 +204,7 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
             # a doc map module's process_document() produces a dict or raw data output
             # That's fine: we return false simply
             return False
-        return isinstance(doc.data_point_type, type(self))
+        return self.check_type(doc.data_point_type)
 
     def reader_init(self, reader):
         """
