@@ -146,13 +146,14 @@ class RunCmd(PimlicoCLISubcommand):
             log.info("Loaded local config from: %s" % ", ".join(pipeline.local_config_sources))
 
         # If email report has been requested, check now before we begin that email sending is configured
-        try:
-            EmailConfig.from_local_config(pipeline.local_config)
-        except EmailError as e:
-            print("Email sending requested, but local email config is not ready:", file=sys.stderr)
-            print(str(e), file=sys.stderr)
-            print("Please fix in local config file to use email reports", file=sys.stderr)
-            sys.exit(1)
+        if opts.email is not None:
+            try:
+                EmailConfig.from_local_config(pipeline.local_config)
+            except EmailError as e:
+                print("Email sending requested, but local email config is not ready:", file=sys.stderr)
+                print(str(e), file=sys.stderr)
+                print("Please fix in local config file to use email reports", file=sys.stderr)
+                sys.exit(1)
 
         exit_status = 0
         try:
