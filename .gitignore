@@ -25,4 +25,4 @@ log/
 lib/test_env/
 lib/test_env2/
 test/storage/
-
+examples/data/store/*
