@@ -37,9 +37,11 @@ def process_document(worker, archive, filename, doc):
     doc = worker.executor.tokenizer(doc.text)
     # Apply sentence segmentation to the doc
     doc = worker.executor.sentencizer(doc)
-
     # Now doc.sents contains the separated sentences
-    return {"sentences": [[token.text for token in sent] for sent in doc.sents]}
+    # Filter out any empty sentences or tokens
+    sentences = [[token.text for token in sent if len(token.text.strip())] for sent in doc.sents]
+
+    return {"sentences": sentences}
 
 
 ModuleExecutor = single_process_executor_factory(process_document, preprocess_fn=preprocess)
