@@ -11,16 +11,21 @@ from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
 from pimlico.utils.core import cached_property
 
 SENTENCE_DIVIDER = "\n<SENT>\n"
+NULL_ANNOTATION = "<NONE>"
 
 
 def _encode_token(tok):
     """
     Replace any linebreaks and tabs
     """
+    if tok is None:
+        return NULL_ANNOTATION
     return tok.replace("\n", "<LINEBREAK>").replace("\t", "<TAB>")
 
 
 def _decode_token(tok):
+    if tok == NULL_ANNOTATION:
+        return None
     return tok.replace("<LINEBREAK>", "\n").replace("<TAB>", "\t")
 
 
@@ -48,6 +53,13 @@ class WordAnnotationsDocumentType(TokenizedDocumentType):
     or ``GroupedCorpus(WordAnnotationsDocumentType(["word", "pos", "lemma]))``,
     but not ``GroupedCorpus(WordAnnotationsDocumentType(["word", "lemma"]))``.
 
+    Annotations are given as strings, not other types (like ints). If you want
+    to store e.g. int or float annotations, you need to do the conversion
+    separately, as the encoding and decoding assumes only strings are used.
+
+    Annotations may, however, be ``None``. This, as well as any linebreaks and
+    tabs in the strings, will be encoded/decoded by the writer/reader.
+
     """
     data_point_type_options = OrderedDict([
         ("fields", {
@@ -57,11 +69,15 @@ class WordAnnotationsDocumentType(TokenizedDocumentType):
                     "field is therefore called 'word', but this is not required. However, there must be "
                     "a field called 'word', since this datatype overrides tokenized documents, so need "
                     "to be able to provide the original text. "
+                    "When used as a module type requirement, the field list gives all the fields that "
+                    "must (at least) be provided by the supplied type. "
                     "Specified as a comma-separated list. Required",
         }),
     ])
 
     def __init__(self, *args, **kwargs):
+        self.fields = []
+        self.field_pos = {}
         super(WordAnnotationsDocumentType, self).__init__(*args, **kwargs)
         self.fields = self.options["fields"]
         self.field_pos = dict([(field, pos) for (pos, field) in enumerate(self.fields)])
@@ -167,8 +183,11 @@ class AddAnnotationField(DynamicOutputDatatype):
             if field in base_fields:
                 raise ModuleInfoLoadError("trying to add a field '{}' to data that already has a field with "
                                           "that name".format(field))
-        return WordAnnotationsDocumentType(base_fields + self.add_fields)
+        return GroupedCorpus(WordAnnotationsDocumentType(base_fields + self.add_fields))
 
     def get_base_datatype(self):
         from pimlico.datatypes import GroupedCorpus
         return GroupedCorpus(WordAnnotationsDocumentType(["fields..."]))
+
+
+AddAnnotationFields = AddAnnotationField
