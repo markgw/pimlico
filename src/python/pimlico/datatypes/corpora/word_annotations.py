@@ -139,16 +139,16 @@ class WordAnnotationsDocumentType(TokenizedDocumentType):
 
 
 class AddAnnotationField(DynamicOutputDatatype):
-    def __init__(self, input_name, add_fields):
-        """
-        Dynamic type constructor that can be used in place of a module's output type. When called
-        (when the output type is needed), dynamically creates a new type that is a corpus with
-        WordAnnotationsDocumentType with the same fields as the named input to the module,
-        with the addition of one or more new ones.
+    """
+    Dynamic type constructor that can be used in place of a module's output type. When called
+    (when the output type is needed), dynamically creates a new type that is a corpus with
+    WordAnnotationsDocumentType with the same fields as the named input to the module,
+    with the addition of one or more new ones.
 
-        :param input_name: input to the module whose fields we extend
-        :param add_fields: field or fields to add, string names
-        """
+    :param input_name: input to the module whose fields we extend
+    :param add_fields: field or fields to add, string names
+    """
+    def __init__(self, input_name, add_fields):
         super(AddAnnotationField, self).__init__()
         # Make it easy to add just a single field, the most common case
         self.input_name = input_name

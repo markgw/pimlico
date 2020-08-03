@@ -259,9 +259,13 @@ texinfo_documents = [
 # -- Autosummary ----------------------
 import glob
 autosummary_generate = glob.glob("reference/*.rst")
+
 autodoc_member_order = 'bysource'
 # pygraphviz: optional import used by visualization
 autodoc_mock_imports = ["pygraphviz"]
+
+# If a class' __init__ has a docstring, include that in the class doc
+autoclass_content = "both"
 
 todo_include_todos = True
 
