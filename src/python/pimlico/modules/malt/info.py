@@ -17,15 +17,6 @@ parser's output. Some may be ``None`` if they are empty in the parser output.
 All the fields in the input (which always include ``word`` and ``pos`` at least)
 are also output.
 
-.. todo::
-
-   Update to new datatypes system and add test pipeline.
-
-   Now finished coding, but haven't tested yet.
-   - Write a test pipeline
-   - Run the OpenNLP POS tagger test pipeline and save the output data (word annotations format)
-   - Use this as input to the Malt test pipeline and debug
-
 """
 import os
 
