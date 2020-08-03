@@ -8,6 +8,7 @@ Submodules
 
    pimlico.utils.docs.apiheaders
    pimlico.utils.docs.commandgen
+   pimlico.utils.docs.examplegen
    pimlico.utils.docs.modulegen
    pimlico.utils.docs.rest
    pimlico.utils.docs.testgen

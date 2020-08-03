@@ -44,6 +44,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.corpora.list_filter`
+ * :mod:`pimlico.modules.corpora.list_filter`
     
 

@@ -141,7 +141,7 @@ The following Pimlico module types are used in this pipeline:
 {}
     """.format(
             format_heading(1, "Modules"),
-            "\n".join(" * :mod:`~{}`".format(mod) for mod in module_types)
+            "\n".join(" * :mod:`{}`".format(mod) for mod in module_types)
         )
     else:
         module_list = ""

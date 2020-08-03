@@ -42,6 +42,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.opennlp.tokenize`
+ * :mod:`pimlico.modules.opennlp.tokenize`
     
 

@@ -39,6 +39,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.text.text_normalize`
+ * :mod:`pimlico.modules.text.text_normalize`
     
 

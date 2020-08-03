@@ -37,6 +37,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.spacy.tokenize`
+ * :mod:`pimlico.modules.spacy.tokenize`
     
 

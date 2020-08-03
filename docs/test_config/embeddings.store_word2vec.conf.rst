@@ -36,6 +36,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.embeddings.store_word2vec`
+ * :mod:`pimlico.modules.embeddings.store_word2vec`
     
 

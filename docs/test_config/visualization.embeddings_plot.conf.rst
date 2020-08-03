@@ -36,6 +36,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.visualization.embeddings_plot`
+ * :mod:`pimlico.modules.visualization.embeddings_plot`
     
 

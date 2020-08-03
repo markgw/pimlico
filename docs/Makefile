@@ -12,6 +12,7 @@ SPHINXAPI     = sphinx-apidoc
 APIDIR        = api
 MODULEDIR     = modules
 TESTCONFIGDIR = test_config
+EXAMPLECONFIGDIR = example_config
 # Exclude Pimlico modules from the API doc, since they need to be built in a special way
 MODULE_PATH   = pimlico/modules/
 COMMANDDIR    = commands
@@ -27,7 +28,7 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext api modules commands test
+.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext api modules commands test examples
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -36,6 +37,7 @@ help:
 	@echo "  modules    automatically generate special API docs for Pimlico modules (in $(MODULEDIR)/)"
 	@echo "  commands   automatically generate special API docs for Pimlico command-line commands (in $(COMMANDDIR)/)"
 	@echo "  test       automatically generate docs for the test pipeline config files (in $(TESTCONFIGDIR)/)"
+	@echo "  examples   automatically generate docs for the example pipeline config files (in $(EXAMPLECONFIGDIR)/)"
 	@echo "  html       to make standalone HTML files"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
@@ -60,7 +62,7 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 	-rm -rf $(APIDIR)/*
 
-all: test commands modules api html
+all: test examples commands modules api html
 
 api:
 	@echo "Building API docs"
@@ -72,12 +74,17 @@ api:
 modules:
 	@echo "Building module docs"
 	@rm -rf $(MODULEDIR)
-	@$(PYTHON) -m pimlico.utils.docs.modulegen $(MODULEDIR) --test-refs $(TESTCONFIGDIR)/module_list.tsv
+	@$(PYTHON) -m pimlico.utils.docs.modulegen $(MODULEDIR) --test-refs $(TESTCONFIGDIR)/module_list.tsv --example-refs $(EXAMPLECONFIGDIR)/module_list.tsv
 
 test:
 	@echo "Building test pipeline pages"
 	@rm -rf $(TESTCONFIGDIR)
 	@$(PYTHON) -m pimlico.utils.docs.testgen $(TESTCONFIGDIR)
+
+examples:
+	@echo "Building example pipeline pages"
+	@rm -rf $(EXAMPLECONFIGDIR)
+	@$(PYTHON) -m pimlico.utils.docs.examplegen $(EXAMPLECONFIGDIR)
 
 commands:
 	@echo "Building command docs"

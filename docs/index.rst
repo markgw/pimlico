@@ -64,6 +64,7 @@ Contents
    commands/index
    api
    test_config/index
+   example_config/index
    plans/index
 
 

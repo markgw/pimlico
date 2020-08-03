@@ -48,6 +48,8 @@ OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
 EXAMPLES_DIR = os.path.join(PIMLICO_ROOT, "examples")
 TEST_DATA_DIR = os.path.join(PIMLICO_ROOT, "test", "data")
 TEST_STORAGE_DIR = os.path.join(PIMLICO_ROOT, "test", "storage")
+# Root URL for generating links to Pimlico source code in the docs
+REPO_SOURCE_HTML_ROOT = "https://github.com/markgw/pimlico/blob/master/"
 
 
 def install_core_dependencies():

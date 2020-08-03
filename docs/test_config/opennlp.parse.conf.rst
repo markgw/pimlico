@@ -43,6 +43,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.opennlp.parse`
+ * :mod:`pimlico.modules.opennlp.parse`
     
 

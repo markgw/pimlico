@@ -45,7 +45,7 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.corpora.group`
- * :mod:`~pimlico.modules.corpora.store`
+ * :mod:`pimlico.modules.corpora.group`
+ * :mod:`pimlico.modules.corpora.store`
     
 

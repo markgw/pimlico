@@ -45,6 +45,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.corpora.vocab_mapper`
+ * :mod:`pimlico.modules.corpora.vocab_mapper`
     
 

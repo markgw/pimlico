@@ -1,0 +1,3 @@
+example-pipeline-empty-test	
+example-pipeline-custom-module-example	pimlico.modules.spacy.tokenize, pimlico.modules.corpora.vocab_builder
+example-pipeline-tokenize-example	pimlico.modules.text.simple_tokenize

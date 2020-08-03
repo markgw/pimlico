@@ -68,9 +68,17 @@ This example usage includes more options.
    input_corpus=module_a.some_output
    splitter= 
 
+Example pipelines
+=================
+
+This module is used by the following :ref:`example pipelines <example-pipelines>`. They are examples of how the module can be used together with other modules in a larger pipeline.
+
+ * :ref:`example-pipeline-tokenize-example`
+
 Test pipelines
 ==============
 
 This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
 
  * :ref:`test-config-text-simple_tokenize.conf`
+

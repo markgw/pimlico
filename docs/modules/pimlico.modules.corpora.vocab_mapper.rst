@@ -87,3 +87,4 @@ This module is used by the following :ref:`test pipelines <test-pipelines>`. The
 
  * :ref:`test-config-corpora-vocab_mapper.conf`
  * :ref:`test-config-corpora-vocab_mapper_longer.conf`
+

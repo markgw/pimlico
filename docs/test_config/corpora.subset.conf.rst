@@ -41,7 +41,7 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.corpora.subset`
- * :mod:`~pimlico.modules.corpora.format`
+ * :mod:`pimlico.modules.corpora.subset`
+ * :mod:`pimlico.modules.corpora.format`
     
 

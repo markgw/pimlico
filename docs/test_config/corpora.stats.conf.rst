@@ -36,6 +36,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.corpora.corpus_stats`
+ * :mod:`pimlico.modules.corpora.corpus_stats`
     
 

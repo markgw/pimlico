@@ -36,6 +36,6 @@ Modules
 
 The following Pimlico module types are used in this pipeline:
 
- * :mod:`~pimlico.modules.embeddings.store_tsv`
+ * :mod:`pimlico.modules.embeddings.store_tsv`
     
 
