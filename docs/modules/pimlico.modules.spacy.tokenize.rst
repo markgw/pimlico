@@ -1,5 +1,5 @@
-spaCy tokenizer
-~~~~~~~~~~~~~~~
+Tokenizer
+~~~~~~~~~
 
 .. py:module:: pimlico.modules.spacy.tokenize
 

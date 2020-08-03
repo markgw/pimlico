@@ -23,6 +23,7 @@ currently functional, until I get round to updating them.
    pimlico.modules.embeddings
    pimlico.modules.gensim
    pimlico.modules.input
+   pimlico.modules.malt
    pimlico.modules.nltk
    pimlico.modules.opennlp
    pimlico.modules.output

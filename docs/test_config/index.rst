@@ -54,6 +54,7 @@ Available pipelines
    spacy.tokenize.conf.rst
    utility.collect_files.conf.rst
    nltk.nist_tokenize.conf.rst
+   malt.parse.conf.rst
    visualization.embeddings_plot.conf.rst
    core.filter_map.conf.rst
 
