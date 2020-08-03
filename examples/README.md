@@ -8,8 +8,11 @@ does is to run the Pimlico command-line interface with the local config
 in `examples_local_config`, so that a special local storage directory is 
 used for pipeline data.
 
-There's not a lot here at the moment, so consult the [docs](http://pimlico.readthedocs.io/en/latest/) instead. 
-What is here is really just to support the examples in the docs.
+These example pipelines are 
+[included in the Pimlico documentation](https://pimlico.readthedocs.io/en/latest/example_config/index.html), 
+where they are cross-referenced with the core module types they use.
+
+More full example pipelines will be added in the future.
 
 A wider array of example pipelines can be found in the form of **test pipelines**.
 
