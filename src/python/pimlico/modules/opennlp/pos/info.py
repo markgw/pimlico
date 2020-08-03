@@ -24,7 +24,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_type_name = "opennlp_pos_tagger"
     module_readable_name = "POS-tagger"
     module_inputs = [("text", GroupedCorpus(TokenizedDocumentType()))]
-    module_outputs = [("pos", GroupedCorpus(WordAnnotationsDocumentType("pos")))]
+    module_outputs = [("pos", GroupedCorpus(WordAnnotationsDocumentType("word", "pos")))]
     module_options = {
         "model": {
             "help": "POS tagger model, full path or filename. If a filename is given, it is expected to be in the "
