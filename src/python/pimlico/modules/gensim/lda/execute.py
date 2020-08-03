@@ -1,6 +1,3 @@
-import logging
-from logging import getLogger
-
 from gensim.models import LdaModel, TfidfModel
 
 from pimlico.core.modules.base import BaseModuleExecutor

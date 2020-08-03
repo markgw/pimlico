@@ -11,6 +11,7 @@ or `the multicore version <https://radimrehurek.com/gensim/models/ldamulticore.h
    Add test pipeline and test
 
 """
+from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool, comma_separated_strings, opt_type_help
 from pimlico.datatypes import GensimLdaModel, GroupedCorpus, Dictionary
@@ -132,3 +133,6 @@ class ModuleInfo(BaseModuleInfo):
             "default": 0.01,
         },
     }
+
+    def get_software_dependencies(self):
+        return super(ModuleInfo, self).get_software_dependencies() + [gensim_dependency]
