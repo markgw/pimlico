@@ -11,7 +11,7 @@ from traceback import format_exc
 import sys
 
 from pimlico.cli.shell.base import ShellCommand
-from pimlico.core.modules.options import opt_type_help
+from pimlico.core.modules.options import opt_type_help, process_module_options
 from pimlico.datatypes.base import PimlicoDatatype, DatatypeLoadError, DatatypeWriteError
 from pimlico.datatypes.corpora.data_points import DataPointType, is_invalid_doc, \
     invalid_document_or_raw, invalid_document
@@ -40,6 +40,20 @@ class CountInvalidCmd(ShellCommand):
 def data_point_type_opt(text):
     from . import DATA_POINT_TYPES
     text = text.strip("\n ")
+    # The string can specify options to the data-point type, given in brackets
+    # Remove these before trying to find the class
+    dp_type_opts = {}
+    if "(" in text:
+        opts_start = text.index("(")
+        opts_str = text[opts_start+1:].rstrip(")")
+        text = text[:opts_start]
+
+        # Split up the options ready for processing once we've got the class
+        dp_type_opts = dict(
+            (opt.partition("=")[0].strip(), opt.partition("=")[2].strip())
+            for opt in opts_str.split(";")
+        )
+
     # Check whether this refers to one of the core types
     for cls in DATA_POINT_TYPES:
         if cls.__name__ == text:
@@ -47,8 +61,15 @@ def data_point_type_opt(text):
     else:
         # Try to load the class from a fully qualified path
         cls = import_member(text)
+
+    # Process the options for the data-point type
+    if dp_type_opts:
+        kwargs = process_module_options(cls.data_point_type_options, dp_type_opts,
+                                        "data-point type {}".format(cls.__name__))
+    else:
+        kwargs = {}
     # Instantiate the datatype
-    return cls()
+    return cls(**kwargs)
 
 
 class IterableCorpus(PimlicoDatatype):
@@ -90,7 +111,11 @@ class IterableCorpus(PimlicoDatatype):
             "help": "Data point type for the iterable corpus. This is used to process each "
                     "document in the corpus in an appropriate way. Should be a subclass of DataPointType. "
                     "This should almost always be given, typically as the first positional arg when instantiating "
-                    "the datatype. Defaults to the generic data point type at the top of the hierarchy"
+                    "the datatype. Defaults to the generic data point type at the top of the hierarchy. "
+                    "When specifying as a string (e.g. loading from a config file), you can specify data-point "
+                    "type options in brackets after the class name, separated by semicolons (;). These "
+                    "are processed in the same way as other options. "
+                    "E.g. WordAnnotationsDocumentType(fields=xyz,abc; some_key=52)"
         })
     ] + list(PimlicoDatatype.datatype_options.items()))
 

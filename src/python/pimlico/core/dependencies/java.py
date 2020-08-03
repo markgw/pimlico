@@ -131,6 +131,8 @@ class JavaJarsDependency(JavaDependency):
     have ".zip" or ".tar.gz" in it), specify the intended extension in the form "[ext]url->member", where ext is
     "tar.gz" or "zip".
 
+    If multiple jars come from the same URL (i.e. the same archive), it will only be downloaded once.
+
     """
     def __init__(self, name, jar_urls, **kwargs):
         self.jar_urls = jar_urls

@@ -10,6 +10,7 @@ from . import floats
 from . import ints
 from . import json
 from . import table
+from . import word_annotations
 
 """
 This list collects together all the built-in data point types. These can be specified 
@@ -24,4 +25,5 @@ DATA_POINT_TYPES = [
     ints.IntegerListsDocumentType, ints.IntegerListDocumentType,
     json.JsonDocumentType,
     table.IntegerTableDocumentType,
+    word_annotations.WordAnnotationsDocumentType, word_annotations.AddAnnotationField, word_annotations.AddAnnotationFields,
 ]
