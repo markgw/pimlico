@@ -126,6 +126,9 @@ class CorpusGroupReader(PimlicoDatatype.Reader):
     def __len__(self):
         return len(self.input_reader)
 
+    def get_detailed_status(self):
+        return super(CorpusGroupReader, self).get_detailed_status() + ["Length: {:,}".format(len(self))]
+
     def extract_file(self, archive_name, filename):
         raise TypeError("cannot extract files from filter: it's not an actual corpus")
 
