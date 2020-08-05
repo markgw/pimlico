@@ -14,12 +14,11 @@ provides wrappers around many
 existing, widely used **NLP** (Natural Language Processing) tools.
 
 It makes it easy to write large, potentially complex pipelines 
-with the following key goals:
-
-* to provide **clear documentation** of what has been done;
-* to make it easy to **incorporate standard NLP tasks**,
-* and to extend the code with **non-standard tasks, specific to a pipeline**;
-* to support simple **distribution of code** for reproduction, for example, on other datasets.
+with the key goals of making is easy to:
+* provide **clear documentation** of what has been done;
+* **incorporate standard NLP tasks** and data-processing tasks with minimal effort;
+* **integrate non-standard code**, specific to the task at hand, into the same pipeline; and
+* **distribute code** for later reproduction or application to other datasets or experiments.
 
 The toolkit takes care of managing data between the steps of a 
 pipeline and checking that everything's executed in the right order.
@@ -32,24 +31,6 @@ Pimlico is written in Python and can be run using Python >=2.7 or >=3.6. This me
 you can write your own processing modules using either Python 2 or 3.
 
 Pimlico is short for *PIpelined Modular LInguistic COrpus processing*.
-
-.. note::
-
-   **New datatypes system**
-
-   Some time ago, we changed how datatypes work internally 
-   (previously in branch ``datatypes``), which required 
-   all datatypes and modules to be updated to the new system.
-   `More info... <https://github.com/markgw/pimlico/projects/1>`_
-
-   This has been done for many of the core modules some are waiting
-   to be updated and
-   don't work. They do not appear in the documentation and can
-   be found in ``pimlico.old_datatypes.modules``.
-   Other known outstanding tasks are marked with todos:
-   :doc:`full todo list </plans/wishlist>`.
-
-   These issues will be resolved before v1.0 is released.
 
 Contents
 ========
@@ -66,6 +47,22 @@ Contents
    test_config/index
    example_config/index
    plans/index
+
+
+.. note::
+
+   **New datatypes system**
+
+   Some time ago, we changed how datatypes work internally, requiring
+   all datatypes and modules to be updated.
+   `More info... <https://github.com/markgw/pimlico/projects/1>`_
+
+   This has been done for many of the core modules, but some are waiting
+   to be updated and
+   don't work. They do not appear in the documentation and can
+   be found in ``pimlico.old_datatypes.modules``.
+
+   These issues will be resolved before v1.0 is released.
 
 
 * :ref:`genindex`
