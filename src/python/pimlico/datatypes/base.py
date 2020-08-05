@@ -840,8 +840,9 @@ class PimlicoDatatype(with_metaclass(PimlicoDatatypeMeta, object)):
             return self
 
         def __exit__(self, exc_type, exc_val, exc_tb):
+            # Write out the latest metadata, even if there was an error
+            self.write_metadata()
             if exc_type is None:
-                self.write_metadata()
                 # Check all required output tasks were completed
                 if len(self._to_output):
                     raise DatatypeWriteError("some outputs were not written for datatype %s: %s" %
