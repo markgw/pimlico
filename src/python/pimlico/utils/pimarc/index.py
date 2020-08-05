@@ -167,6 +167,67 @@ def reindex(pimarc_path):
     return index
 
 
+def check_index(pimarc_path):
+    """
+    Check through a Pimarc file together with its index to identify any places
+    where the index does not match the archive contents.
+
+    Useful for debugging writing/reading code.
+
+    """
+    if not pimarc_path.endswith(".prc"):
+        raise IOError("input pimarc path does not have the correct extension (.prc)")
+    index_path = "{}i".format(pimarc_path)
+
+    if not os.path.exists(index_path):
+        raise IOError("pimarc does not have an index: cannot check it")
+    index = PimarcIndex.load(index_path)
+    index_it = iter(index)
+    file_num = 0
+
+    # Read in each file in turn, reading the metadata to get the name and skipping the file content
+    with open(pimarc_path, "rb") as data_file:
+        try:
+            while True:
+                # Check where the metadata starts
+                metadata_start_byte = data_file.tell()
+                # First read the file's metadata block
+                metadata = json.loads(_read_var_length_data(data_file).decode("utf-8"))
+                # From that we can get the name
+                filename = metadata["name"]
+                # Now we're at the start of the file data
+                data_start_byte = data_file.tell()
+                # Skip over the data: we don't need to read that
+                _skip_var_length_data(data_file)
+
+                # Get the expected values from the index
+                exp_filename = next(index_it)
+                exp_metadata_start_byte = index.get_metadata_start_byte(exp_filename)
+                exp_data_start_byte = index.get_data_start_byte(exp_filename)
+
+                if metadata_start_byte != exp_metadata_start_byte:
+                    raise IndexCheckFailed("file {} expected to start its metadata at {}, got {}"
+                                           .format(file_num, exp_metadata_start_byte, metadata_start_byte))
+
+                if filename != exp_filename:
+                    raise IndexCheckFailed("file {} expected to be called {}, got {}"
+                                           .format(file_num, exp_filename, filename))
+
+                if data_start_byte != exp_data_start_byte:
+                    raise IndexCheckFailed("file {} expected to start its data at {}, got {}"
+                                           .format(file_num, data_start_byte, exp_data_start_byte))
+
+                file_num += 1
+        except EOFError:
+            # Reached the end of the file
+            pass
+    return file_num
+
+
+class IndexCheckFailed(Exception):
+    pass
+
+
 class FilenameNotInArchive(Exception):
     def __init__(self, filename):
         super().__init__(u"filename '{}' not found in archive".format(filename))

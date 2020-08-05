@@ -9,6 +9,7 @@ from tarfile import TarFile
 import sys
 
 from pimlico.utils.pimarc import PimarcReader, PimarcWriter
+from pimlico.utils.pimarc.index import check_index, IndexCheckFailed
 from .index import reindex
 
 
@@ -114,6 +115,24 @@ def reindex_pimarcs(opts):
         print("  Success")
 
 
+def check_pimarcs(opts):
+    if not all(path.endswith(".prc") for path in opts.paths):
+        print("Pimarc files must have correct extension: .prc")
+        sys.exit(1)
+
+    total_length = 0
+    for pimarc_path in opts.paths:
+        print("Checking index for {}".format(pimarc_path))
+        try:
+            length = check_index(pimarc_path)
+            print("  Success ({:,d} members)".format(length))
+            total_length += length
+        except IndexCheckFailed as e:
+            print("  {}".format(e))
+
+    print("Total members in all archives: {:,d}".format(total_length))
+
+
 def no_subcommand(opts):
     print("Specify a subcommand: list, ...")
 
@@ -152,6 +171,13 @@ def run():
                                            "This can be necessary if the index has become corrupted or something when "
                                            "wrong during writing of the archive")
     subparser.set_defaults(func=reindex_pimarcs)
+    subparser.add_argument("paths", nargs="+", help="Path to the pimarc(s) - .prc files")
+
+    subparser = subparsers.add_parser("check",
+                                      help="Check a pimarc's index (the .prci file) against its data (the .prc file). "
+                                           "This can be useful for debugging writing code, or checking whether the "
+                                           "index should be rebuilt")
+    subparser.set_defaults(func=check_pimarcs)
     subparser.add_argument("paths", nargs="+", help="Path to the pimarc(s) - .prc files")
 
     opts = parser.parse_args()
