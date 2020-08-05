@@ -307,14 +307,6 @@ class GroupedCorpus(IterableCorpus):
                 "just added to the end. This is useful where we want to restart processing that was "
                 "broken off in the middle"
             ),
-            "trust_length": (
-                False,
-                "If True, when appending, the initial length of the corpus is read from the metadata " 
-                "already written. Otherwise (default), the number of docs already written is actually "
-                "counted during initialization. This is sensible when the previous writing process "
-                "may have ended abruptly, so that the metadata is not reliable. If you know you can "
-                "trust the metadata, however, setting this will speed things up"
-            )
         }
 
         def __init__(self, *args, **kwargs):
@@ -323,7 +315,6 @@ class GroupedCorpus(IterableCorpus):
             # Set "gzip" in the metadata, so we know to unzip when reading
             self.gzip = self.metadata["gzip"]
             self.append = self.params["append"]
-            self.trust_length = self.params["trust_length"]
 
             self.current_archive_name = None
             self.current_archive = None
@@ -331,24 +322,9 @@ class GroupedCorpus(IterableCorpus):
             self.metadata["length"] = 0
 
             if self.append:
-                if self.trust_length:
-                    # Try reading length so far if we're appending and some docs have already been written
-                    # If no metadata has been written, we start from 0
-                    if os.path.exists(self._metadata_path):
-                        with open(self._metadata_path, "r") as f:
-                            raw_data = f.read()
-                            if len(raw_data) != 0:
-                                try:
-                                    # In later versions of Pimlico, we store metadata as JSON
-                                    data = json.loads(raw_data)
-                                except ValueError:
-                                    # If written by an earlier Pimlico version, it's a pickled dictionary
-                                    data = pickle.loads(raw_data)
-                                self.metadata["length"] = data.get("length", 0)
-                else:
-                    # Can't rely on the metadata: count up docs in archive to get initial length
-                    # This can take a long time on a large corpus
-                    self.metadata["length"] = self._count_written_docs()
+                # Shouldn't rely on the metadata: count up docs in archive to get initial length
+                # This can take a long time on a large corpus
+                self.metadata["length"] = self._count_written_docs()
             self.doc_count = self.metadata["length"]
 
         def add_document(self, archive_name, doc_name, doc, metadata=None):
