@@ -25,6 +25,9 @@ comes from a filter module, its documents cannot be randomly accessed.
    Since this requires some tricky changes to the datatype system, I'm not
    implementing it now, but it should be done in future.
 
+   It will be implemented as part of the replacement of ``GroupedCorpus``
+   by ``StoredIterableCorpus``: `https://github.com/markgw/pimlico/issues/24`_
+
 """
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool
