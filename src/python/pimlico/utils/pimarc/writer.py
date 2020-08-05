@@ -72,7 +72,7 @@ class PimarcWriter(object):
 
         # Check before we write anything that the filename isn't already used
         if filename in self.index:
-            raise DuplicateFilename("cannot add {} to pimarc: filename already exists".format(filename))
+            raise DuplicateFilename(filename)
 
         # Check where we're up to in the file
         # This tells us where the metadata starts, which will be stored in the index
