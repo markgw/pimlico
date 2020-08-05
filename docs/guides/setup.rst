@@ -2,11 +2,6 @@
   Setting up a new project using Pimlico
 ==========================================
 
-.. todo::
-
-   Setup guide has a lot that needs to be updated for the new datatypes system.
-   I've updated up to **Getting input**.
-
 You've decided to use Pimlico to implement a data processing pipeline. So, where do you start?
 
 This guide steps
@@ -134,10 +129,6 @@ input for this one, which we specify simply by naming the module.
     type=pimlico.modules.text.simple_tokenize
     input=input_text
 
-.. todo::
-
-   Continue writing from here
-
 Doing something more interesting: POS tagging
 ---------------------------------------------
 Many NLP tools rely on part-of-speech (POS) tagging. Again, we use OpenNLP, and a standard Pimlico module
@@ -155,9 +146,10 @@ Now we've got our basic config file ready to go. It's a simple linear pipeline t
 
     read input docs -> group into batches -> tokenize -> POS tag
 
-Before we can run it, there's one thing missing: three of these modules have their own dependencies, so we need
-to get hold of the libraries they use. The input reader uses the Beautiful Soup python library and the tokenization 
-and POS tagging modules use OpenNLP.
+It's now ready to load and inspect using Pimlico's command-line interface.
+
+Before we can run it, there's one thing missing: the OpenNLP tokenizer module needs access
+to the OpenNLP tool. We'll see below how Pimlico sorts that out for you.
 
 Checking everything's dandy
 ---------------------------
@@ -174,32 +166,33 @@ To check that specific modules are ready to run, with all software dependencies 
 
     ./pimlico.sh myproject.conf run tokenize --dry
 
-With any luck, all the checks will be successful. There might be some missing software dependencies.
 
 Fetching dependencies
 ---------------------
 All the standard modules provide easy ways to get hold of their dependencies automatically, or as close as possible.
 Most of the time, all you need to do is tell Pimlico to install them.
 
-Use the ``run`` command, with a module name and ``--dry-run``, to check whether a module is ready to run.
+You use the ``run`` command, with a module name and ``--dry-run``, to check whether a module is ready to run.
 
 .. code-block:: bash
 
     ./pimlico.sh myproject.conf run tokenize --dry
 
-In this case, it will tell you that some libraries are missing, but they can be installed automatically. Simply issue
-the ``install`` command for the module.
+This will find that things aren't quite ready yet, as the OpenNLP Java
+packages are not available. These are not distributed with Pimlico, since they're
+only needed if you use an OpenNLP module.
 
-.. code-block:: bash
+When you run the ``run`` command, Pimlico will offer to install the necessary
+software for you. In this case, this involves downloading OpenNLP's jar files
+from its web repository to somewhere where the OpenNLP tokenizer module can find it.
 
-    ./pimlico.sh myproject.conf install tokenize
-
-Simple as that.
+Say yes and Pimlico will get everything ready. Simple as that!
 
 There's one more thing to do: the tools we're using
 require statistical models. We can simply download the pre-trained English models from the OpenNLP website.
 
-At present, Pimlico doesn't yet provide a built-in way for the modules to do this, as it does with software libraries,
+At present, Pimlico doesn't yet provide a built-in way for the modules to
+do this, as it does with software libraries,
 but it does include a GNU Makefile to make it easy to do:
 
 .. code-block:: bash
@@ -214,6 +207,7 @@ extra options in the module definition in your config file.
 If there are any other library problems shown up by the dry run, you'll need to address them
 before going any further.
 
+
 Running the pipeline
 ====================
 What modules to run?
@@ -227,11 +221,7 @@ pipeline is entirely linear -- it's clear which ones need to be run before other
 
 The output also tells you the current status of each module. At the moment, all the modules are ``UNEXECUTED``.
 
-You'll notice that the ``tar-grouper`` module doesn't feature in the list. This is because it's a filter --
-it's run on the fly while reading output from the previous module (i.e. the input), so doesn't have anything to 
-run itself.
-
-You might be surprised to see that ``input-text`` *does* feature in the list. This is because, although it just
+You might be surprised to see that ``input-text`` features in the list. This is because, although it just
 reads the data out of a corpus on disk, there's not quite enough information in the corpus, so we need to run the 
 module to collect a little bit of metadata from an initial pass over the corpus. Some input types need this, others
 not. In this case, all we're lacking is a count of the total number of documents in the corpus.
