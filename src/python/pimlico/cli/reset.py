@@ -18,6 +18,10 @@ class ResetCmd(PimlicoCLISubcommand):
         parser.add_argument("-n", "--no-deps", action="store_true",
                             help="Only reset the state of this module, even if it has dependent modules in an executed "
                                  "state, which could be invalidated by resetting and re-running this one")
+        parser.add_argument("-f", "--force-deps", action="store_true",
+                            help="Reset the state of this module and any dependent modules in an executed "
+                                 "state, which could be invalidated by resetting and re-running this one. Do "
+                                 "not ask for confirmation to do this")
 
     def run_command(self, pipeline, opts):
         if "all" in opts.modules:
@@ -42,10 +46,13 @@ class ResetCmd(PimlicoCLISubcommand):
                     print("The following modules depend on %s. Their execution state will be reset too if you continue." % \
                           ", ".join(module_names))
                     print("  %s" % ", ".join(dependent_modules))
-                    answer = input("Do you want to continue? [y/N] ")
-                    if answer.lower() != "y":
-                        print("Cancelled")
-                        return
+                    if opts.force_deps:
+                        print("Resetting all")
+                    else:
+                        answer = input("Do you want to continue? [y/N] ")
+                        if answer.lower() != "y":
+                            print("Cancelled")
+                            return
 
             for module_name in module_names + dependent_modules:
                 print("Resetting execution state of module %s" % module_name)
