@@ -75,11 +75,11 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                     else:
                         # Buffer input documents, so that we can process multiple at once if requested
                         input_buffer.append(tuple([archive, filename] + docs))
-                    if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
-                        results = self.process_documents(input_buffer)
-                        for input_tuple, result in zip(input_buffer, results):
-                            self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
-                        input_buffer = []
+                        if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
+                            results = self.process_documents(input_buffer)
+                            for input_tuple, result in zip(input_buffer, results):
+                                self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
+                            input_buffer = []
             finally:
                 try:
                     self.tear_down()
@@ -150,6 +150,8 @@ class MultiprocessingMapPool(DocumentProcessorPool):
         # Although the worker's shutdown does this too, do it to all now so they can be finishing up in the background
         for worker in self.workers:
             worker.stopped.set()
+        # Empty the pool's queues, so they don't cause threads not to shut down
+        self.empty_all_queues()
         # Wait until all workers have got to the end of their execution
         for worker in self.workers:
             # Ideally, wait now until the process ends of its own accord
@@ -157,8 +159,6 @@ class MultiprocessingMapPool(DocumentProcessorPool):
             worker.ended.wait(3.)
             if not worker.ended.is_set():
                 self.executor.log.warn("Worker process did not end when asked to: it might have got stuck")
-        # Empty the pool's queues, so they don't cause threads not to shut down
-        self.empty_all_queues()
         # They've all reached the end of execution (unless a warning was output above), but sometimes they
         #  don't exit straight away. I'm not sure why that is, since they queues have been emptied, but they
         #  tend to respond to termination, so we do that now
