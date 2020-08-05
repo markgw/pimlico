@@ -15,6 +15,7 @@ existing, widely used **NLP** (Natural Language Processing) tools.
 
 It makes it easy to write large, potentially complex pipelines 
 with the key goals of making is easy to:
+
 * provide **clear documentation** of what has been done;
 * **incorporate standard NLP tasks** and data-processing tasks with minimal effort;
 * **integrate non-standard code**, specific to the task at hand, into the same pipeline; and
