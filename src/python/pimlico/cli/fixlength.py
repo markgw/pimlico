@@ -10,6 +10,8 @@ from pimlico.core.modules.base import satisfies_typecheck
 from pimlico.datatypes import GroupedCorpus, PimlicoDatatype
 from pimlico.datatypes.base import DataNotReadyError, _metadata_path
 from pimlico.datatypes.corpora.data_points import RawDocumentType
+from pimlico.utils.pimarc import PimarcReader
+from pimlico.utils.progress import get_open_progress_bar
 
 
 class FixLengthCmd(PimlicoCLISubcommand):
@@ -59,6 +61,13 @@ class FixLengthCmd(PimlicoCLISubcommand):
                 print("Could not read output '{}': cannot check written documents".format(output_name))
                 raise DataNotReadyError("could not read output '{}': {}".format(output_name, e))
             print("Reported length: {:,d}".format(len(output)))
+            print("Counting using pimarc indices...")
+            num_docs_in_indices = count_pimarcs(output)
+            if num_docs_in_indices == len(output):
+                print("Reported length matches Pimarc indices")
+            else:
+                print("Stored length does not match count from Pimarc indices")
+                print("Length of indices: {:,d}".format(num_docs_in_indices))
             print("Counting actual length. This could take some time...")
             # Use the function from the recover command to count the docs
             num_docs = count_docs(output, last_buffer_size=0)[1]
@@ -76,3 +85,16 @@ class FixLengthCmd(PimlicoCLISubcommand):
                     metadata["length"] = num_docs
                     # Use standard method to write out the corrected metadata
                     PimlicoDatatype.Writer._write_metadata(metadata_path, metadata)
+
+
+def count_pimarcs(output):
+    # Show counting progress so we know something's happening
+    pbar = get_open_progress_bar("Counting")
+    total = 0
+    for archive_filename in output.archive_filenames:
+        reader = PimarcReader(archive_filename)
+        # Read the length from the pimarc's index
+        # This could be wrong, if something went wrong with writing the archives
+        total += len(reader)
+        pbar.update(total)
+    return total
