@@ -58,6 +58,12 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
                     except Empty:
                         # Don't worry if the queue is empty: just keep waiting for more until we're shut down
                         pass
+                    except IOError as e:
+                        if e.args[0] == "handle is closed":
+                            # The queue was closed while we were waiting
+                            # Stopped should have been set by now: we continue and check that
+                            continue
+                        raise
                     else:
                         input_buffer.append(tuple([archive, filename] + docs))
                     if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
