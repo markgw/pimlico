@@ -49,3 +49,4 @@ class ModuleInfo(BaseModuleInfo):
             "type": int,
         },
     }
+    module_supports_python2 = True

@@ -20,6 +20,7 @@ class ScoredRealFeatureSets(NamedFileCollection):
 
     """
     datatype_name = "scored_real_feature_sets"
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(ScoredRealFeatureSets, self).__init__(["feature_types.list", "data.csv"], *args, **kwargs)

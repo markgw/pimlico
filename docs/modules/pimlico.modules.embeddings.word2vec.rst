@@ -16,6 +16,10 @@ Find out more about `word2vec <https://code.google.com/archive/p/word2vec/>`_.
 This module is simply a wrapper to call `Gensim Python (+C) <https://radimrehurek.com/gensim/models/word2vec.html>`_'s
 implementation of word2vec on a Pimlico corpus.
 
+Does not support Python 2 since Gensim has dropped Python 2 support.
+
+
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
 
 Inputs
 ======

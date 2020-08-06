@@ -17,6 +17,8 @@ class ModuleInfo(BaseModuleInfo):
 
     Reads only the binary format (``.bin``), not the text format (``.vec``).
 
+    Does not support Python 2, since Gensim has dropped Python 2 support.
+
     .. seealso::
 
        :mod:`pimlico.modules.input.embeddings.fasttext`:
@@ -37,6 +39,7 @@ class ModuleInfo(BaseModuleInfo):
             "required": True,
         },
     }
+    module_supports_python2 = False
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [gensim_dependency]

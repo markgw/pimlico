@@ -75,6 +75,7 @@ class ModuleInfo(BaseModuleInfo):
                     "(potentially without the {}s). E.g.: 'n_components=200, solver=\"cd\", tol=0.0001, max_iter=200'",
         },
     }
+    module_supports_python2 = True
 
     def __init__(self, module_name, pipeline, **kwargs):
         super(ModuleInfo, self).__init__(module_name, pipeline, **kwargs)

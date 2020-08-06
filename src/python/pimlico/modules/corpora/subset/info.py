@@ -51,6 +51,7 @@ class ModuleInfo(BaseModuleInfo):
             "type": str_to_bool,
         },
     }
+    module_supports_python2 = True
 
     def instantiate_output_reader_setup(self, output_name, datatype):
         if isinstance(datatype, GroupedCorpus):

@@ -118,6 +118,7 @@ class IterableCorpus(PimlicoDatatype):
                     "E.g. WordAnnotationsDocumentType(fields=xyz,abc; some_key=52)"
         })
     ] + list(PimlicoDatatype.datatype_options.items()))
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(IterableCorpus, self).__init__(*args, **kwargs)
@@ -139,6 +140,14 @@ class IterableCorpus(PimlicoDatatype):
             raise TypeError("tried to create a reader from iterable corpus type: use a subtype, like "
                             "GroupedCorpus, instead")
         return super(IterableCorpus, self).__call__(*args, **kwargs)
+
+    def supports_python2(self):
+        """
+        Whether a corpus type supports Python 2, depends on its document type. The corpus
+        datatype introduces no reason not to, but specific document types might.
+
+        """
+        return self.data_point_type.supports_python2()
 
     def run_browser(self, reader, opts):
         from pimlico.cli.browser.tools.formatter import load_formatter

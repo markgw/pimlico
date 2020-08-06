@@ -16,3 +16,4 @@ class ModuleInfo(BaseModuleInfo):
     module_readable_name = "Store embeddings (internal)"
     module_inputs = [("embeddings", Embeddings())]
     module_outputs = [("embeddings", Embeddings())]
+    module_supports_python2 = True

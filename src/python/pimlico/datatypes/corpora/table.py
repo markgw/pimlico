@@ -67,6 +67,7 @@ class IntegerTableDocumentType(RawDocumentType):
             "Row length - number of integers in each row. Default: 1",
         ),
     })
+    data_point_type_supports_python2 = True
 
     def reader_init(self, reader):
         super(IntegerTableDocumentType, self).reader_init(reader)

@@ -74,6 +74,7 @@ class WordAnnotationsDocumentType(TokenizedDocumentType):
                     "Specified as a comma-separated list. Required",
         }),
     ])
+    data_point_type_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         self.fields = []

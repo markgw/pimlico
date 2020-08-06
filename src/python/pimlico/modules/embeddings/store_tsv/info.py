@@ -21,3 +21,4 @@ class ModuleInfo(BaseModuleInfo):
     module_readable_name = "Store in TSV format"
     module_inputs = [("embeddings", Embeddings())]
     module_outputs = [("embeddings", TSVVecFiles())]
+    module_supports_python2 = True

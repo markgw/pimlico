@@ -257,6 +257,19 @@ class PimlicoDatatype(with_metaclass(PimlicoDatatypeMeta, object)):
     """
     Override to provide shell commands specific to this datatype. Should include the superclass' list.
     """
+    datatype_supports_python2 = True
+    """
+    Most core Pimlico datatypes support use in Python 2 and 3. Datatypes that do should set 
+    this to True. If it is False, the datatype is assumed to work only in Python 3.
+    
+    Python 2 compatibility requires extra work from the programmer. Datatypes should 
+    generally declare whether or not they provide this support by overriding this
+    explicitly.
+    
+    Use ``supports_python2()`` to check whether a datatype instance supports Python 2. 
+    (There may be reasons for a datatype's instance to override this class-level setting.)
+    
+    """
 
     def __init__(self, *args, **kwargs):
         # Kwargs specify (processed) values for named datatype options
@@ -286,6 +299,13 @@ class PimlicoDatatype(with_metaclass(PimlicoDatatypeMeta, object)):
         if self.datatype_name == "base_datatype" and type(self) is not PimlicoDatatype:
             # Build a better name out of the class name
             self.datatype_name = _class_name_word_boundary.sub(r"\1_\2", type(self).__name__).lower()
+
+    def supports_python2(self):
+        """
+        By default, just returns cls.datatype_supports_python2. Subclasses might override this.
+
+        """
+        return self.datatype_supports_python2
 
     def get_software_dependencies(self):
         """
@@ -883,6 +903,14 @@ class DynamicOutputDatatype(object):
 
     The dynamic type must provide certain pieces of information needed for typechecking.
 
+    If a base datatype is available (i.e. indication of the datatype before the module is
+    instantiated), we take the information regarding whether the datatype supports
+    Python 2 from there. If not, we assume it does. This may seems the opposite to other
+    places: for example, the base datatype says it does **not** support Python 2 and subclasses
+    must declare if they do. However, dynamic output datatypes are often used with modules
+    that work with a broad range of input datatypes. It is therefore wrong to say that they
+    do not support Python 2, since they will provided the input module does.
+
     """
     """
     Must be provided by subclasses: can be a noncommittal string giving some idea of what types may be provided.
@@ -903,6 +931,14 @@ class DynamicOutputDatatype(object):
 
         """
         return None
+
+    def supports_python2(self):
+        base_dt = self.get_base_datatype()
+        if base_dt is None:
+            # Can't say whether this supports Py2 or not, so we say it does
+            return True
+        else:
+            return base_dt.supports_python2()
 
 
 class DynamicInputDatatypeRequirement(object):
@@ -1028,6 +1064,9 @@ class MultipleInputs(object):
     """
     def __init__(self, datatype_requirements):
         self.datatype_requirements = datatype_requirements
+
+    def supports_python2(self):
+        return self.datatype_requirements.supports_python2()
 
 
 class TypeFromInput(DynamicOutputDatatype):

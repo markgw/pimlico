@@ -32,3 +32,4 @@ class ModuleInfo(DocumentMapModuleInfo):
             "example": "path.to.formatter.FormatterClass"
         },
     }
+    module_supports_python2 = True

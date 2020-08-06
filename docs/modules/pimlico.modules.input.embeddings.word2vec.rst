@@ -17,6 +17,8 @@ Can be used, for example, to read the pre-trained embeddings
 `offered by Google <https://code.google.com/archive/p/word2vec/>`_.
 
 
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
+
 Inputs
 ======
 

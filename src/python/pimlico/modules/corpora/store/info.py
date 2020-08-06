@@ -23,6 +23,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_readable_name = "Store a corpus"
     module_inputs = [("corpus", GroupedCorpus())]
     module_outputs = [("corpus", GroupedCorpusWithTypeFromInput())]
+    module_supports_python2 = True
 
     def get_output_writer(self, output_name=None, **kwargs):
         # Include metadata from the input in the writer kwargs

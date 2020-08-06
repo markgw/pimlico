@@ -25,6 +25,8 @@ class OpenNLPTreeStringsDocumentType(RawDocumentType):
        For now, you need to load and process the tree strings yourself.
 
     """
+    data_point_type_supports_python2 = True
+
     class Document(object):
         keys = ["trees"]
 

@@ -17,3 +17,4 @@ class ModuleInfo(BaseModuleInfo):
     module_readable_name = "Corpus statistics"
     module_inputs = [("corpus", GroupedCorpus(TokenizedDocumentType()))]
     module_outputs = [("stats", NamedFile("stats.json"))]
+    module_supports_python2 = True

@@ -34,6 +34,7 @@ class ModuleInfo(BaseModuleInfo):
             "type": int,
         },
     }
+    module_supports_python2 = False
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [gensim_dependency]

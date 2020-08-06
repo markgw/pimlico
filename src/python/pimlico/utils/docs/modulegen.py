@@ -187,6 +187,12 @@ def generate_docs_for_pimlico_mod(module_path, output_dir, submodules=[], test_r
             "be run. It produces its output for the next module on the fly when the next module needs it."
         )
 
+    # Check whether this module works in Python 2
+    if not ModuleInfo.supports_python2():
+        # It doesn't: include a warning in the docs
+        additional_paras.append("*This module does not support Python 2, so can only be used when Pimlico "
+                                "is being run under Python 3*")
+
     # Put together the options table
     options_table = [
         [

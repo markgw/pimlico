@@ -41,6 +41,7 @@ class ModuleInfo(DocumentMapModuleInfo):
             "default": False,
         },
     }
+    module_supports_python2 = True
 
     def get_writer(self, output_name, output_dir, append=False):
         return TermFeatureListCorpusWriter(output_dir, append=append)

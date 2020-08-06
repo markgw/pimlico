@@ -76,4 +76,5 @@ ModuleInfo = iterable_input_reader(
     raw_data_ready, raw_corpus_len, corpus_iter,
     module_type_name="europarl_reader",
     module_readable_name="Europarl corpus reader",
+    python2=True,
 )

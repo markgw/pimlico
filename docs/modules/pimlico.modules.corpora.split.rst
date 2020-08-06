@@ -23,6 +23,8 @@ e.g. in a training-test split, store only the test document list, as the trainin
 a case, just put the smaller set first and don't request the optional output `doc_list2`.
 
 
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
+
 Inputs
 ======
 

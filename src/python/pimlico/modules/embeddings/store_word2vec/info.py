@@ -20,11 +20,14 @@ class ModuleInfo(BaseModuleInfo):
 
     Uses the Gensim implementation of the storage, so depends on Gensim.
 
+    Does not support Python 2, since we depend on Gensim.
+
     """
     module_type_name = "store_word2vec"
     module_readable_name = "Store in word2vec format"
     module_inputs = [("embeddings", Embeddings())]
     module_outputs = [("embeddings", Word2VecFiles())]
+    module_supports_python2 = False
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [gensim_dependency]

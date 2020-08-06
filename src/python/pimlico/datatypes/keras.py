@@ -27,6 +27,7 @@ class KerasModel(PimlicoDatatype):
     # Override to pass in extra values in Keras' custom objects arg to model_from_json
     # May be given as string fully-qualified Python names
     custom_objects = {}
+    datatype_supports_python2 = True
 
     def get_software_dependencies(self):
         return super(KerasModel, self).get_software_dependencies() + [keras_dependency]
@@ -94,6 +95,7 @@ class KerasModelBuilderClass(PimlicoDatatype):
 
     """
     datatype_name = "keras_model_builder_class"
+    datatype_supports_python2 = True
 
     class Reader(object):
         @property

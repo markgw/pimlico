@@ -54,6 +54,7 @@ class ModuleInfo(BaseModuleInfo):
     module_executable = False
     module_inputs = [("input", PimlicoDatatype())]
     module_outputs = [("output", TypeFromInput())]
+    module_supports_python2 = True
 
     def instantiate_output_reader_setup(self, output_name, datatype):
         return self.get_input_reader_setup("input")

@@ -20,3 +20,4 @@ class ModuleInfo(DocumentMapModuleInfo):
     module_inputs = [("corpus", GroupedCorpus(TextDocumentType()))]
     module_outputs = [("corpus", GroupedCorpus(CharacterTokenizedDocumentType()))]
     module_options = {}
+    module_supports_python2 = True

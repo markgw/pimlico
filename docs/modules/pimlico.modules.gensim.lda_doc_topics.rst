@@ -16,10 +16,14 @@ in each sentence of each document. It is assumed that the corpus uses the same v
 to map to integer IDs as the LDA model's training corpus, so no further mapping needs to
 be done.
 
+Does not support Python 2 since Gensim has dropped Python 2 support.
+
 .. todo::
 
    Add test pipeline and test
 
+
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
 
 Inputs
 ======

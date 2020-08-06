@@ -35,6 +35,11 @@ comes from a filter module, its documents cannot be randomly accessed.
    Since this requires some tricky changes to the datatype system, I'm not
    implementing it now, but it should be done in future.
 
+   It will be implemented as part of the replacement of ``GroupedCorpus``
+   by ``StoredIterableCorpus``: `https://github.com/markgw/pimlico/issues/24`_
+
+
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
 
 Inputs
 ======

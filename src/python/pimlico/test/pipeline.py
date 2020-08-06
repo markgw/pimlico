@@ -18,6 +18,8 @@ several) of how to use them -- how pipeline config should look and what sort of 
 from builtins import object
 import traceback
 
+from past.utils import PY2
+
 from pimlico.utils.core import remove_duplicates
 
 if __name__ == "__main__":
@@ -84,17 +86,22 @@ class TestPipeline(object):
         for module_name in self.to_run:
             self.log.info("Processing module '{}'".format(module_name))
             module = self.pipeline[module_name]
-            if isinstance(module, InputModuleInfo):
-                # If an input module has execute_count=True, it's actually an executable
-                # module, since it needs to be executed before its data is ready to read
-                if module.module_executable:
-                    self.log.info("Input module '{}' needs to be executed before data is ready: "
-                                  "running".format(module_name))
-                    self.test_module_execution(module_name)
-                    self.log.info("Data preparation executed. Testing input module")
-                self.test_input_module(module_name)
+
+            if PY2 and not module.supports_python2():
+                self.log.warn("module type '{}' is not designed to run on Python 2: skipping test"
+                               .format(module.module_name))
             else:
-                self.test_module_execution(module_name)
+                if isinstance(module, InputModuleInfo):
+                    # If an input module has execute_count=True, it's actually an executable
+                    # module, since it needs to be executed before its data is ready to read
+                    if module.module_executable:
+                        self.log.info("Input module '{}' needs to be executed before data is ready: "
+                                      "running".format(module_name))
+                        self.test_module_execution(module_name)
+                        self.log.info("Data preparation executed. Testing input module")
+                    self.test_input_module(module_name)
+                else:
+                    self.test_module_execution(module_name)
 
     def test_input_module(self, module_name):
         module = self.pipeline[module_name]
@@ -224,6 +231,10 @@ def clear_storage_dir():
 
 
 class TestPipelineRunError(Exception):
+    pass
+
+
+class SkipTest(Exception):
     pass
 
 

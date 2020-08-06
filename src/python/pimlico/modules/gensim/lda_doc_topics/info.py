@@ -10,6 +10,8 @@ in each sentence of each document. It is assumed that the corpus uses the same v
 to map to integer IDs as the LDA model's training corpus, so no further mapping needs to
 be done.
 
+Does not support Python 2 since Gensim has dropped Python 2 support.
+
 .. todo::
 
    Add test pipeline and test
@@ -30,6 +32,7 @@ class ModuleInfo(DocumentMapModuleInfo):
     ]
     module_outputs = [("vectors", GroupedCorpus(VectorDocumentType()))]
     module_options = {}
+    module_supports_python2 = False
 
     def get_output_writer(self, output_name=None, **kwargs):
         if output_name == "vectors":

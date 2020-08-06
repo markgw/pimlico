@@ -10,7 +10,15 @@ __all__ = ["GensimLdaModel"]
 
 
 class GensimLdaModel(PimlicoDatatype):
+    """
+    Storage of trained Gensim LDA models.
+
+    Depends on Gensim (and thereby also in Python 3), since we use Gensim to store and load
+    the models.
+
+    """
     datatype_name = "lda_model"
+    datatype_supports_python2 = False
 
     def get_software_dependencies(self):
         return super(GensimLdaModel, self).get_software_dependencies() + [gensim_dependency]

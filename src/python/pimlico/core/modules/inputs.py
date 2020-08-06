@@ -269,6 +269,9 @@ def input_module_factory(datatype):
                 "required": True,
             },
         }
+        # Set module to support Python 2, since it doesn't do anything
+        # If the datatype doesn't support Python 2, this will get checked anyway
+        module_supports_python2 = True
 
         def instantiate_output_reader_setup(self, output_name, datatype):
             # Create a reader setup that just has the given directory as a possible location for the data
@@ -280,7 +283,7 @@ def input_module_factory(datatype):
 def iterable_input_reader(input_module_options, data_point_type,
                           data_ready_fn, len_fn=None, iter_fn=None,
                           module_type_name=None, module_readable_name=None,
-                          software_dependencies=None, execute_count=False, no_group=False):
+                          software_dependencies=None, execute_count=False, no_group=False, python2=False):
     """
     Factory for creating an input reader module info.
     This is a (typically) non-executable module that has no
@@ -402,6 +405,7 @@ def iterable_input_reader(input_module_options, data_point_type,
         module_readable_name = mr_name
         module_outputs = [("corpus", output_datatype)]
         module_options = input_module_options
+        module_supports_python2 = python2
 
         # Special behaviour if we're making this an executable module in order to count the data
         module_executable = execute_count

@@ -6,6 +6,8 @@
 Trains LDA using Gensim's `basic LDA implementation <https://radimrehurek.com/gensim/models/ldamodel.html>`_,
 or `the multicore version <https://radimrehurek.com/gensim/models/ldamulticore.html>`_.
 
+Does not support Python 2, since Gensim has dropped Python 2 support.
+
 .. todo::
 
    Add test pipeline and test
@@ -133,6 +135,7 @@ class ModuleInfo(BaseModuleInfo):
             "default": 0.01,
         },
     }
+    module_supports_python2 = False
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [gensim_dependency]

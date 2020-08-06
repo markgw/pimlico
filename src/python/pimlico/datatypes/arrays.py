@@ -25,6 +25,7 @@ class NumpyArray(NamedFileCollection):
 
     """
     datatype_name = "numpy_array"
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(NumpyArray, self).__init__(["array.npy"], *args, **kwargs)
@@ -57,6 +58,7 @@ class ScipySparseMatrix(NamedFileCollection):
 
     """
     datatype_name = "scipy_sparse_array"
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(ScipySparseMatrix, self).__init__(["array.mtx"], *args, **kwargs)

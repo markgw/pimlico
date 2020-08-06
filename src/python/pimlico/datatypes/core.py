@@ -26,6 +26,7 @@ class Dict(PimlicoDatatype):
 
     """
     datatype_name = "dict"
+    datatype_supports_python2 = True
 
     class Reader(object):
         class Setup(object):
@@ -55,6 +56,7 @@ class StringList(PimlicoDatatype):
 
     """
     datatype_name = "string_list"
+    datatype_supports_python2 = True
 
     class Reader(object):
         class Setup(object):

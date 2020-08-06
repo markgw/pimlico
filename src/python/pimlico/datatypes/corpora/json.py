@@ -19,6 +19,7 @@ class JsonDocumentType(RawDocumentType):
 
     """
     formatters = [("json", "pimlico.datatypes.corpora.json.JsonFormatter")]
+    data_point_type_supports_python2 = True
 
     class Document(object):
         keys = ["data"]

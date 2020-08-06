@@ -217,4 +217,5 @@ ModuleInfo = iterable_input_reader(
     # Make the module executable to count the docs, since this can take a while
     # with large tar archives
     execute_count=True,
+    python2=True,
 )

@@ -110,6 +110,19 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
     positional arguments as well as kwargs and config parameters.
     
     """
+    data_point_type_supports_python2 = True
+    """
+    Most core Pimlico datatypes support use in Python 2 and 3. Datatypes that do should set 
+    this to True. If it is False, the datatype is assumed to work only in Python 3.
+    
+    Python 2 compatibility requires extra work from the programmer. Datatypes should 
+    generally declare whether or not they provide this support by overriding this
+    explicitly.
+    
+    Use ``supports_python2()`` to check whether a data-point type instance supports Python 2. 
+    (There may be reasons for a datatype's instance to override this class-level setting.)
+    
+    """
 
     def __init__(self, *args, **kwargs):
         # This is set when the reader is initialized
@@ -171,6 +184,10 @@ class DataPointType(with_metaclass(DataPointTypeMeta, object)):
             internal_data = dict(kwargs)
 
         return self.Document(self, raw_data=raw_data, internal_data=internal_data)
+
+    def supports_python2(self):
+        """ Just returns data_point_type_supports_python2. """
+        return self.data_point_type_supports_python2
 
     def __repr__(self):
         return "{}()".format(self.name)
@@ -428,6 +445,8 @@ class InvalidDocument(DataPointType):
     possible to work out, where one of these pops up, where the error occurred.
 
     """
+    data_point_type_supports_python2 = True
+
     class Document(object):
         keys = ["module_name", "error_info"]
 
@@ -535,6 +554,8 @@ class RawDocumentType(DataPointType):
     datatype.
 
     """
+    data_point_type_supports_python2 = True
+
     class Document(object):
         keys = ["raw_data"]
 
@@ -560,6 +581,8 @@ class TextDocumentType(RawDocumentType):
     contain information other than the raw text.
 
     """
+    data_point_type_supports_python2 = True
+
     class Document(object):
         keys = ["text"]
 
@@ -578,6 +601,7 @@ class RawTextDocumentType(TextDocumentType):
     is used as a requirement.
 
     """
+    data_point_type_supports_python2 = True
 
 
 class DataPointError(Exception):

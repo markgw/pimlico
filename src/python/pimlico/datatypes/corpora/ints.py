@@ -50,6 +50,7 @@ class IntegerListsDocumentType(RawDocumentType):
             "need to store very long lists"
         ),
     })
+    data_point_type_supports_python2 = True
 
     @property
     def bytes(self):
@@ -172,6 +173,7 @@ class IntegerListDocumentType(RawDocumentType):
             "Stored signed integers. Default: False",
         ),
     })
+    data_point_type_supports_python2 = True
 
     def reader_init(self, reader):
         super(IntegerListDocumentType, self).reader_init(reader)
@@ -257,6 +259,7 @@ class IntegerDocumentType(RawDocumentType):
             "Stored signed integers. Default: False",
         ),
     })
+    data_point_type_supports_python2 = True
 
     def reader_init(self, reader):
         super(IntegerDocumentType, self).reader_init(reader)

@@ -114,4 +114,5 @@ ModuleInfo = iterable_input_reader(
     module_type_name="vrt_files_reader",
     module_readable_name="VRT annotated text files",
     execute_count=True,
+    python2=True,
 )

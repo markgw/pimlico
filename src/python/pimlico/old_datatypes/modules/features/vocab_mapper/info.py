@@ -27,3 +27,4 @@ class ModuleInfo(BaseModuleInfo):
     ]
     module_outputs = [("data", IndexedTermFeatureListCorpus)]
     module_options = {}
+    module_supports_python2 = True

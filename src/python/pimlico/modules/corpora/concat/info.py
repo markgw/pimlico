@@ -27,6 +27,7 @@ class ModuleInfo(BaseModuleInfo):
     module_inputs = [("corpora", MultipleInputs(IterableCorpus()))]
     module_outputs = [("corpus", CorpusWithTypeFromInput())]
     module_executable = False
+    module_supports_python2 = True
 
     def instantiate_output_reader_setup(self, output_name, datatype):
         if isinstance(datatype, GroupedCorpus):

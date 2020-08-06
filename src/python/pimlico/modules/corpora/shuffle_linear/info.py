@@ -68,3 +68,4 @@ class ModuleInfo(BaseModuleInfo):
             "default": "archive",
         },
     }
+    module_supports_python2 = True

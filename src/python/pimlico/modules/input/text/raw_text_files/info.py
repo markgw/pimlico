@@ -254,4 +254,5 @@ ModuleInfo = iterable_input_reader(
     data_ready, corpus_len, corpus_iter,
     module_type_name="raw_text_files_reader",
     module_readable_name="Raw text files",
+    python2=True,
 )

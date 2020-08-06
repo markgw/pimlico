@@ -63,4 +63,5 @@ class ModuleInfo(DocumentMapModuleInfo):
             "type": int,
         },
     }
+    module_supports_python2 = True
 

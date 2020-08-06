@@ -19,3 +19,4 @@ class ModuleInfo(BaseModuleInfo):
     module_inputs = [("corpus", GroupedCorpus()), ("list", StringList())]
     module_outputs = [("set1", GroupedCorpusWithTypeFromInput()), ("set2", GroupedCorpusWithTypeFromInput())]
     module_options = {}
+    module_supports_python2 = True

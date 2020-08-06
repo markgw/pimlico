@@ -28,6 +28,8 @@ class MappedNamedFileCollection(NamedFileCollection):
     that was applied to produce the collected filenames.
 
     """
+    datatype_supports_python2 = True
+
     def __init__(self, *args, **kwargs):
         self.collection_mappings = kwargs.pop("collection_mappings", {})
         super().__init__(*args, **kwargs)
@@ -94,3 +96,4 @@ class ModuleInfo(BaseModuleInfo):
             "type": comma_separated_strings,
         }
     }
+    module_supports_python2 = True

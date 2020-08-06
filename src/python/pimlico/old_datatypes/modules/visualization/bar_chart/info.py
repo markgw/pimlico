@@ -21,6 +21,7 @@ class ModuleInfo(BaseModuleInfo):
     module_readable_name = "Bar chart plotter"
     module_inputs = [("values", MultipleInputs(NumericResult))]
     module_outputs = [("plot", PlotOutput)]
+    module_supports_python2 = True
 
     def get_software_dependencies(self):
         return [matplotlib_dependency]

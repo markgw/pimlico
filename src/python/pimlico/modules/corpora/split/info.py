@@ -43,3 +43,4 @@ class ModuleInfo(BaseModuleInfo):
             "default": 0.2,
         },
     }
+    module_supports_python2 = True

@@ -23,6 +23,8 @@ over the data to count them up.
 
 This is a filter module. It is not executable, so won't appear in a pipeline's list of modules that can be run. It produces its output for the next module on the fly when the next module needs it.
 
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
+
 Inputs
 ======
 

@@ -53,38 +53,50 @@ class BaseModuleInfo(object):
     module_type_name = None
     module_readable_name = None
     module_options = {}
-    """ Specifies a list of (name, datatype class) pairs for inputs that are always required """
     module_inputs = []
+    """ Specifies a list of (name, datatype instance) pairs for inputs that are always required """
+    module_optional_inputs = []
     """ 
-    Specifies a list of (name, datatype class) pairs for optional inputs. The module's execution may 
+    Specifies a list of (name, datatype instance) pairs for optional inputs. The module's execution may 
     vary depending on what is provided. If these are not given, None is returned from get_input() 
     """
-    module_optional_inputs = []
-    """ Specifies a list of (name, datatype class) pairs for outputs that are always written """
     module_outputs = []
+    """ Specifies a list of (name, datatype instance) pairs for outputs that are always written """
+    module_optional_outputs = []
     """
-    Specifies a list of (name, datatype class) pairs for outputs that are written only if they're specified
+    Specifies a list of (name, datatype instance) pairs for outputs that are written only if they're specified
     in the "output" option or used by another module
     """
-    module_optional_outputs = []
+    module_output_groups = []
     """
     List of output groups: (group_name, [output_name1, ...]).
     Further groups may be added by build_output_groups().
     """
-    module_output_groups = []
+    module_executable = True
     """
     Whether the module should be executed
     Typically True for almost all modules, except input modules (though some of them may also require execution) and
     filters
     """
-    module_executable = True
-    """ If specified, this ModuleExecutor class will be used instead of looking one up in the exec Python module """
     module_executor_override = None
+    """ If specified, this ModuleExecutor class will be used instead of looking one up in the exec Python module """
+    main_module = None
     """
     Usually None. In the case of stages of a multi-stage module, stores a pointer to the main module.
 
     """
-    main_module = None
+    module_supports_python2 = False
+    """
+    Most core Pimlico modules support use in Python 2 and 3. Modules that do should set 
+    this to True. If it is False, the module is assumed to work only in Python 3.
+    
+    Since Python 2 compatibility requires extra work from the programmer, this is 
+    False by default.
+    
+    To check whether a module can be used in Python 2, call ``supports_python2()``, 
+    which will check this and also input and output datatypes.
+    
+    """
 
     def __init__(self, module_name, pipeline, inputs={}, options={}, optional_outputs=[],
                  docstring="", include_outputs=[], alt_expanded_from=None, alt_param_settings=[], module_variables={}):
@@ -130,6 +142,24 @@ class BaseModuleInfo(object):
 
     def __repr__(self):
         return "%s(%s)" % (self.module_type_name, self.module_name)
+
+    @classmethod
+    def supports_python2(cls):
+        """
+        :return: True if the module can be run in Python 2 and 3, False if it
+           only supports Python 3.
+
+        """
+        if not cls.module_supports_python2:
+            # The module itself does not support Python 2
+            return False
+        # Also check all the input and output datatypes
+        for inout_list in [cls.module_inputs, cls.module_optional_inputs, cls.module_outputs, cls.module_optional_outputs]:
+            for inout_name, datatype in inout_list:
+                if not datatype.supports_python2():
+                    return False
+        # Everything supports Python 2 and 3
+        return True
 
     def load_executor(self):
         """

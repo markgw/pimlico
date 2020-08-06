@@ -226,4 +226,5 @@ ModuleInfo = iterable_input_reader(
     module_readable_name="XML files",
     software_dependencies=[beautiful_soup_dependency],
     execute_count=True,
+    python2=True,
 )

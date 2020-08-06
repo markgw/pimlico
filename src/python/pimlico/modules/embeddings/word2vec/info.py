@@ -10,6 +10,8 @@ Find out more about `word2vec <https://code.google.com/archive/p/word2vec/>`_.
 This module is simply a wrapper to call `Gensim Python (+C) <https://radimrehurek.com/gensim/models/word2vec.html>`_'s
 implementation of word2vec on a Pimlico corpus.
 
+Does not support Python 2 since Gensim has dropped Python 2 support.
+
 """
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
@@ -45,6 +47,7 @@ class ModuleInfo(BaseModuleInfo):
             "default": 5,
         },
     }
+    module_supports_python2 = False
 
     def __init__(self, module_name, pipeline, **kwargs):
         super(ModuleInfo, self).__init__(module_name, pipeline, **kwargs)

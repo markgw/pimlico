@@ -172,6 +172,7 @@ def wrap_module_info_as_filter(module_info_instance):
         module_outputs = module_info_instance.module_outputs
         module_optional_outputs = []
         module_executable = False
+        module_supports_python2 = module_info_instance.module_supports_python2
 
         def instantiate_output_reader_setup(self, output_name, datatype):
             return FilterModuleOutputReader.Setup(datatype, module_info_instance, output_name)

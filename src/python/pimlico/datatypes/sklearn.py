@@ -12,6 +12,7 @@ class SklearnModel(NamedFile):
 
     """
     datatype_name = "sklearn_model"
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(SklearnModel, self).__init__("model.pkl", *args, **kwargs)

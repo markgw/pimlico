@@ -31,3 +31,4 @@ class ModuleInfo(BaseModuleInfo):
                     "Ignored if there's more than one input file",
         }
     }
+    module_supports_python2 = True

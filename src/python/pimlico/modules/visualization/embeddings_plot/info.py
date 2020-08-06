@@ -67,6 +67,7 @@ class ModuleInfo(BaseModuleInfo):
             "default": "mds",
         },
     }
+    module_supports_python2 = True
 
     def get_software_dependencies(self):
         return [matplotlib_dependency, sklearn_dependency]

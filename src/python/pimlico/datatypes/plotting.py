@@ -17,6 +17,8 @@ class PlotOutput(NamedFileCollection):
     Also supplies additional datatypes to point to the individual files.
 
     """
+    datatype_supports_python2 = True
+
     def __init__(self, *args, **kwargs):
         super(PlotOutput, self).__init__(["plot.py", "data.csv", "plot.pdf"], *args, **kwargs)
 

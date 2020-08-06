@@ -33,6 +33,7 @@ class ModuleInfo(BaseModuleInfo):
             "required": True,
         }
     }
+    module_supports_python2 = True
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [r_dependency]

@@ -212,6 +212,7 @@ class ModuleInfo(BaseModuleInfo):
         },
     }
     module_executable = False
+    module_supports_python2 = True
 
     def instantiate_output_reader_setup(self, output_name, datatype):
         # We use a special reader to pass documents through from the input

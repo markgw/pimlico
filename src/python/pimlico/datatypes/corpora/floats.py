@@ -44,6 +44,7 @@ class FloatListsDocumentType(RawDocumentType):
             "Stored signed integers. Default: False",
         ),
     })
+    data_point_type_supports_python2 = True
 
     def reader_init(self, reader):
         super(FloatListsDocumentType, self).reader_init(reader)
@@ -120,6 +121,8 @@ class FloatListDocumentType(RawDocumentType):
     The floats are stored as C doubles, using 8 bytes each.
 
     """
+    data_point_type_supports_python2 = True
+
     def reader_init(self, reader):
         super(FloatListDocumentType, self).reader_init(reader)
         # Struct for reading in individual floats (actually doubles)
@@ -191,6 +194,7 @@ class VectorDocumentType(RawDocumentType):
     """
     formatters = [("vector", "pimlico.datatypes.corpora.floats.VectorFormatter")]
     metadata_defaults = {"dimensions": (10, "Number of dimensions in each vector (default: 10)")}
+    data_point_type_supports_python2 = True
 
     def reader_init(self, reader):
         super(VectorDocumentType, self).reader_init(reader)

@@ -21,6 +21,7 @@ class TokenizedDocumentType(TextDocumentType):
 
     """
     formatters = [("tokenized_doc", "pimlico.datatypes.corpora.tokenized.TokenizedDocumentFormatter")]
+    data_point_type_supports_python2 = True
 
     class Document(object):
         keys = ["sentences"]
@@ -60,6 +61,7 @@ class LemmatizedTokensDocumentType(TokenizedDocumentType):
     modules to require that their input has been lemmatized (and tokenized).
 
     """
+    data_point_type_supports_python2 = True
 
 
 class CharacterTokenizedDocumentType(TokenizedDocumentType):
@@ -71,6 +73,8 @@ class CharacterTokenizedDocumentType(TokenizedDocumentType):
     sequence, see `SegmentedLinesDocumentType`.
 
     """
+    data_point_type_supports_python2 = True
+
     class Document(object):
         @property
         def sentences(self):
@@ -101,6 +105,8 @@ class SegmentedLinesDocumentType(TokenizedDocumentType):
     so this string is assumed not to be used in any element (which seems reasonable enough, generally).
 
     """
+    data_point_type_supports_python2 = True
+
     class Document(object):
         @property
         def text(self):

@@ -85,6 +85,7 @@ class ModuleInfo(DocumentMapModuleInfo):
             "type": int,
         }
     }
+    module_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(ModuleInfo, self).__init__(*args, **kwargs)

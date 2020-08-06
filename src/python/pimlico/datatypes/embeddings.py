@@ -60,8 +60,13 @@ class Embeddings(PimlicoDatatype):
     of vectors and other functionality, like similarity computations, can be provided by utilities or by
     direct use of Gensim.
 
+    Since we don't depend on Gensim, this datatype supports Python 2. However, if you
+    try to use the mapping to Gensim's type, this will only work with Gensim installed
+    and therefore also depends on Python 3.
+
     """
     datatype_name = "embeddings"
+    datatype_supports_python2 = True
 
     def get_software_dependencies(self):
         return super(Embeddings, self).get_software_dependencies() + [numpy_dependency]
@@ -262,6 +267,7 @@ class TSVVecFiles(NamedFileCollection):
 
     """
     datatype_name = "tsv_vec_files"
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(TSVVecFiles, self).__init__(["embeddings.tsv", "metadata.tsv"], *args, **kwargs)
@@ -301,6 +307,7 @@ class TSVVecFiles(NamedFileCollection):
 
 class Word2VecFiles(NamedFileCollection):
     datatype_name = "word2vec_files"
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(Word2VecFiles, self).__init__(["embeddings.bin", "embeddings.vocab"], *args, **kwargs)

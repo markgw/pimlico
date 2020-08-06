@@ -23,6 +23,8 @@ data structure. This is not enforced by the dependency check, since we're not ab
 to require a specific version yet.
 
 
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
+
 Inputs
 ======
 

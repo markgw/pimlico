@@ -45,6 +45,7 @@ class ModuleInfo(DocumentMapModuleInfo):
             "default": [],
         },
     }
+    module_supports_python2 = True
 
     def __init__(self, module_name, pipeline, **kwargs):
         super(ModuleInfo, self).__init__(module_name, pipeline, **kwargs)

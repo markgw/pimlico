@@ -19,6 +19,8 @@ produced corpus for further use, rather than always running the filters/readers
 each time the corpus' documents are needed.
 
 
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
+
 Inputs
 ======
 

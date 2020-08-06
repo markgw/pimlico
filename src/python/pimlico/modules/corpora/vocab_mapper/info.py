@@ -41,6 +41,7 @@ class ModuleInfo(DocumentMapModuleInfo):
             "default": 2,
         }
     }
+    module_supports_python2 = True
 
     def get_output_writer(self, output_name=None, **kwargs):
         if output_name == "ids":

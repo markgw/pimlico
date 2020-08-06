@@ -28,3 +28,4 @@ class ModuleInfo(DocumentMapModuleInfo):
                     "Special value 'skip' simply skips over vocab_size+1 indices",
         },
     }
+    module_supports_python2 = True

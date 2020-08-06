@@ -19,6 +19,8 @@ offered by Facebook AI.
 
 Reads only the binary format (``.bin``), not the text format (``.vec``).
 
+Does not support Python 2, since Gensim has dropped Python 2 support.
+
 .. seealso::
 
    :mod:`pimlico.modules.input.embeddings.fasttext`:
@@ -29,6 +31,8 @@ Reads only the binary format (``.bin``), not the text format (``.vec``).
    Add test pipeline. This is slightly difficult, as we need a small FastText binary
    file, which is harder to produce, since you can't easily just truncate a big file.
 
+
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
 
 Inputs
 ======

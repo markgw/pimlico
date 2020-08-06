@@ -47,6 +47,7 @@ class NamedFileCollection(PimlicoDatatype):
             "default": [],
         })
     ])
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(NamedFileCollection, self).__init__(*args, **kwargs)
@@ -228,6 +229,7 @@ class NamedFile(NamedFileCollection):
             "help": "The file's name",
         })
     ] + list(NamedFileCollection.datatype_options.items()))
+    datatype_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(NamedFile, self).__init__(*args, filenames=[], **kwargs)
@@ -296,6 +298,7 @@ class TextFile(NamedFile):
             "default": "data.txt",
         })
     ] + list(NamedFileCollection.datatype_options.items()))
+    datatype_supports_python2 = True
 
     class Reader(object):
         def read_file(self, filename=None, mode="r", text=False):

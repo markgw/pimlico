@@ -142,6 +142,7 @@ class ModuleInfo(DocumentMapModuleInfo):
         },
         # TODO Add an option to specify model path, for non-standard (e.g. non-English) models
     }
+    module_supports_python2 = True
 
     def __init__(self, *args, **kwargs):
         super(ModuleInfo, self).__init__(*args, **kwargs)

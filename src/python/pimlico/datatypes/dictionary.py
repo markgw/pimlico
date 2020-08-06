@@ -47,6 +47,7 @@ class Dictionary(PimlicoDatatype):
 
     """
     datatype_name = "dictionary"
+    datatype_supports_python2 = True
 
     class Reader(object):
         def get_data(self):
