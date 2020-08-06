@@ -33,7 +33,7 @@ except ImportError:
     reload(site)
 
 from pimlico.core.dependencies.base import check_and_install
-from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
+from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES, coloredlogs_dependency
 
 PIMLICO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 
@@ -73,6 +73,18 @@ def install_core_dependencies():
         if len(uninstalled):
             print("Unable to install all core dependencies: exiting", file=sys.stderr)
             sys.exit(1)
+
+    # Special procedure for coloredlogs
+    # This is nice to have, but if we can't install it or load it, it's not a problem
+    try:
+        if not coloredlogs_dependency.available({}):
+            print("Installing coloredlogs")
+            coloredlogs_dependency.install({})
+        # Load coloredlogs and start using it for all logging formatters
+        import coloredlogs
+        coloredlogs.install()
+    except Exception as e:
+        print("Error installing and loading colorlogs. Logs will not be coloured. {}".format(e))
 
 
 def get_jupyter_pipeline():

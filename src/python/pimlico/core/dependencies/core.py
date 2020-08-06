@@ -5,7 +5,7 @@
 
 from future.utils import PY2
 
-from pimlico.core.dependencies.python import PythonPackageOnPip, PythonPackageSystemwideInstall
+from pimlico.core.dependencies.python import PythonPackageOnPip
 
 #: Core dependencies required by the basic Pimlico installation, regardless of what pipeline is being processed.
 #: These will be checked when Pimlico is run, using the same dependency-checking mechanism that Pimlico modules
@@ -34,3 +34,6 @@ if PY2:
         # Provides a backport of Py3's updated and renamed configparser package
         PythonPackageOnPip("configparser"),
     ])
+
+
+coloredlogs_dependency = PythonPackageOnPip("coloredlogs")

@@ -5,6 +5,11 @@ from pimlico.test.pipeline import run_test_suite
 from pimlico.utils.logging import get_console_logger
 
 if __name__ == "__main__":
+    from pimlico import install_core_dependencies
+    install_core_dependencies()
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pipeline test suite runner")
     parser.add_argument("suite_file", help="CSV file in which each line contains a path to a pipeline config file "
                                            "(potentially relative to test data dir), then a list of modules to test")
