@@ -15,6 +15,9 @@ if __name__ == "__main__":
                         help="Do not clean up the storage directory after running tests, but do empty it before "
                              "tests start. By default, all output from the test pipelines is deleted at the end",
                         action="store_true")
+    parser.add_argument("--debug", "-d",
+                        help="Execute modules in debug mode, potentially giving more verbose output",
+                        action="store_true")
     parser.add_argument("--exit-error", "-x", help="Stop after the first error encountered. By default, the error "
                                                    "will be reporting and the next test will continue. This will "
                                                    "cause the whole suite to be aborted if a test fails",
@@ -29,7 +32,7 @@ if __name__ == "__main__":
     log.info("Running {} test pipelines".format(len(pipelines_and_modules)))
 
     failed = run_test_suite(pipelines_and_modules, log, no_clean=opts.no_clean, stop_on_error=opts.exit_error,
-                            no_clean_after=opts.no_clean_after)
+                            no_clean_after=opts.no_clean_after, debug=opts.debug)
     if failed:
         log.error("Some tests did not complete successfully: {}. See above for details".format(
             ", ".join("{}[{}]".format(pipeline, ",".join(modules)) for (pipeline, modules) in failed)
