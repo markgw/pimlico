@@ -105,7 +105,7 @@ class CorpusGroupReader(PimlicoDatatype.Reader):
             return self.input_reader_setup.ready_to_read()
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(CorpusGroupReader, self).__init__(*args, **kwargs)
         # Prepare the input reader
         self.input_reader = self.setup.input_reader_setup.get_reader(self.pipeline, module=self.module)
         # Create an initial grouper utility to get the list of archive names

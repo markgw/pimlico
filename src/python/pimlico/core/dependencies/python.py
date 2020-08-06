@@ -10,7 +10,7 @@ Provides superclasses for Python library dependencies and a selection of commonl
 """
 from builtins import str
 import sys
-from importlib import reload
+from past.builtins import reload
 from pkgutil import find_loader
 
 import pkg_resources

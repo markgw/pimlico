@@ -10,6 +10,7 @@ multiprocessing.
 from __future__ import absolute_import
 
 import sys
+
 from future import standard_library
 from future.utils import raise_from
 
@@ -19,7 +20,6 @@ from builtins import range
 
 import threading
 from queue import Empty, Queue
-from traceback import format_exc
 
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor, WorkerStartupError, ExceptionWithTraceback
@@ -59,7 +59,8 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
                         # Don't worry if the queue is empty: just keep waiting for more until we're shut down
                         pass
                     except IOError as e:
-                        if e.args[0] == "handle is closed":
+                        # This gives different messages on Py2 and 3
+                        if e.args[0] == "handle is closed" or e.args[0] == "poll() gave POLLNVAL or POLLERR":
                             # The queue was closed while we were waiting
                             # Stopped should have been set by now: we continue and check that
                             continue

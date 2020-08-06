@@ -20,7 +20,16 @@ except ImportError:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'future'])
     # Reload the environment, so we see the newly install package(s)
     import site
-    from importlib import reload
+    try:
+        # importlib is preferred over imp
+        from importlib import reload
+    except ImportError:
+        try:
+            # In early Python3 versions, use imp
+            from imp import reload
+        except ImportError:
+            # In Python2 it's a builtin, so try just skipping
+            pass
     reload(site)
 
 from pimlico.core.dependencies.base import check_and_install

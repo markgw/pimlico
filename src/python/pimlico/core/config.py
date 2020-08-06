@@ -36,7 +36,6 @@ from operator import itemgetter
 from socket import gethostname
 
 from pimlico import PIMLICO_ROOT, PROJECT_ROOT, OUTPUT_DIR, TEST_DATA_DIR
-from pimlico.cli.debug.stepper import enable_step_for_pipeline
 from pimlico.core.dependencies.base import check_and_install
 from pimlico.datatypes.base import DatatypeLoadError
 from pimlico.datatypes import load_datatype
@@ -1346,6 +1345,7 @@ class PipelineConfig(object):
               The debug module defines the behaviour of step mode.
 
         """
+        from pimlico.cli.debug.stepper import enable_step_for_pipeline
         enable_step_for_pipeline(self)
 
 

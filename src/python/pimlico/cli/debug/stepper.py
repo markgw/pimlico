@@ -10,7 +10,6 @@ import inspect
 import threading
 
 from pimlico.cli.debug import fmt_frame_info, output_stack_trace
-from pimlico.datatypes.corpora.grouped import GroupedCorpus
 
 
 class Stepper(object):
@@ -36,6 +35,8 @@ def enable_step_for_pipeline(pipeline):
 
     :param pipeline: instance of PipelineConfig
     """
+    from pimlico.datatypes.corpora.grouped import GroupedCorpus
+
     # Once the stepper has been assigned, that in itself acts as an indication that we're running in step mode
     # It also stores parameters and state as required
     pipeline._stepper = Stepper()

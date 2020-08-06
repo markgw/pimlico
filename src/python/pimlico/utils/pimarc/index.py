@@ -68,7 +68,7 @@ class PimarcIndex(object):
     def save(self, path):
         with open(path, "w") as f:
             for doc_filename, (metadata_start, data_start) in self.filenames.items():
-                f.write("{}\t{}\t{}\n".format(doc_filename, metadata_start, data_start))
+                f.write(u"{}\t{}\t{}\n".format(doc_filename, metadata_start, data_start))
 
 
 class PimarcIndexAppender(object):
@@ -106,7 +106,7 @@ class PimarcIndexAppender(object):
             raise DuplicateFilename(filename)
         self.filenames[filename] = (metadata_start, data_start)
         # Add a line to the end of the index
-        self.fileobj.write("{}\t{}\t{}\n".format(filename, metadata_start, data_start))
+        self.fileobj.write(u"{}\t{}\t{}\n".format(filename, metadata_start, data_start))
 
     def close(self):
         self.fileobj.close()
