@@ -10,6 +10,12 @@ recover
 When a document map module gets killed forcibly, sometimes it doesn't have time to
 save its execution state, meaning that it can't pick up from where it left off.
 
+.. todo::
+
+   This has not been updated for the Pimarc internal storage format,
+   so still assumes that tar files are used. It will be updated in
+   future, if there is a need for it.
+
 This command tries to fix the state so that execution can be resumed. It counts
 the documents in the output corpora and checks what the last written document was.
 It then updates the state to mark the module as partially executed, so that it

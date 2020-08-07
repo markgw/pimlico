@@ -40,8 +40,6 @@ are small.
       module type.
 
 
-*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
-
 Inputs
 ======
 

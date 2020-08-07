@@ -23,6 +23,10 @@ format, and a ``vocab`` file, containing the vocabulary and word counts.
 
 Uses the Gensim implementation of the storage, so depends on Gensim.
 
+Does not support Python 2, since we depend on Gensim.
+
+
+*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
 
 Inputs
 ======

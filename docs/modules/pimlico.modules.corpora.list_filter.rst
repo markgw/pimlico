@@ -13,8 +13,6 @@ Similar to :mod:`~pimlico.modules.corpora.split`, but instead of taking a random
 according to a given list of documents, putting those in the list in one set and the rest in another.
 
 
-*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
-
 Inputs
 ======
 

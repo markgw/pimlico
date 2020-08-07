@@ -56,6 +56,14 @@ class DataPointTypeMeta(type):
                     del new_dict["__dict__"]
                 if "__weakref__" in new_dict:
                     del new_dict["__weakref__"]
+                # Set the reader setup's __qualname__ so it's properly treated as a nested class of the datatype's reader
+                new_dict["__qualname__"] = "{}.Document".format(cls.__qualname__)
+                new_dict["__module__"] = cls.__module__
+
+                # If no new documentation is provided, then we don't want to inherit the
+                # superclass' docstring, but instead let the reader follow the link to see that
+                if "__doc__" not in new_dict or new_dict["__doc__"] is None:
+                    new_dict["__doc__"] = "Document class for {}".format(cls.__name__)
 
                 # Perform subclassing so that a new Document is created that is a subclass of the parent's document
                 cls.__document_type = type("Document", (parent_doc_cls,), new_dict)

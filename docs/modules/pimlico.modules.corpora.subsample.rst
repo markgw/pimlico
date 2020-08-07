@@ -12,8 +12,6 @@ Random subsample
 Randomly subsample documents of a corpus at a given rate to create a smaller corpus.
 
 
-*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
-
 Inputs
 ======
 

@@ -39,8 +39,6 @@ comes from a filter module, its documents cannot be randomly accessed.
    by ``StoredIterableCorpus``: `https://github.com/markgw/pimlico/issues/24`_
 
 
-*This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
-
 Inputs
 ======
 

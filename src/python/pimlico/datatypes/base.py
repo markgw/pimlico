@@ -100,6 +100,14 @@ class PimlicoDatatypeMeta(type):
                     del my_dict["__dict__"]
                 if "__weakref__" in my_dict:
                     del my_dict["__weakref__"]
+                # Set the reader's __qualname__ so it's properly treated as a nested class of the datatype
+                my_dict["__qualname__"] = "{}.Reader".format(cls.__qualname__)
+                my_dict["__module__"] = cls.__module__
+
+                # No new documentation is provided, then we don't want to inherit the
+                # superclass' docstring, but instead let the reader follow the link to see that
+                if my_dict["__doc__"] is None:
+                    my_dict["__doc__"] = "Reader class for {}".format(cls.__qualname__)
 
                 reader_cls = PimlicoDatatypeReaderMeta("Reader", (parent_reader,), my_dict)
             setattr(cls, _cache_name, reader_cls)
@@ -157,6 +165,14 @@ class PimlicoDatatypeMeta(type):
                         del new_cls_dict["__dict__"]
                     if "__weakref__" in new_cls_dict:
                         del new_cls_dict["__weakref__"]
+                    # Set the writer's __qualname__ so it's properly treated as a nested class of the datatype
+                    new_cls_dict["__qualname__"] = "{}.Writer".format(cls.__qualname__)
+                    new_cls_dict["__module__"] = cls.__module__
+
+                    # No new documentation is provided, then we don't want to inherit the
+                    # superclass' docstring, but instead let the reader follow the link to see that
+                    if new_cls_dict["__doc__"] is None:
+                        new_cls_dict["__doc__"] = "Writer class for {}".format(cls.__qualname__)
 
                 # Perform subclassing so that a new Writer is created that is a subclass of the parent's writer
                 writer_cls = type("Writer", (parent_writer,), new_cls_dict)
@@ -216,6 +232,15 @@ class PimlicoDatatypeReaderMeta(type):
                 del my_dict["__dict__"]
             if "__weakref__" in my_dict:
                 del my_dict["__weakref__"]
+            # Set the reader setup's __qualname__ so it's properly treated as a nested class of the datatype's reader
+            my_dict["__qualname__"] = "{}.Setup".format(cls.__qualname__)
+            my_dict["__module__"] = cls.__module__
+
+            if my_setup is parent_setup or my_dict["__doc__"] is None:
+                # If setup was not overridden: don't use the base class' doc
+                # If no new documentation is provided, then we don't want to inherit the
+                #  superclass' docstring, but instead let the reader follow the link to see that
+                my_dict["__doc__"] = "Setup class for {}".format(cls.__qualname__)
 
             setup_cls = type("Setup", (parent_setup,), my_dict)
             setattr(cls, _cache_name, setup_cls)
