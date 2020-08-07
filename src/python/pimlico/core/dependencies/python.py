@@ -154,7 +154,7 @@ class PythonPackageOnPip(PythonPackageDependency):
             package = self.pip_package
 
         # Use subprocess to call Pip: the recommended way to use it programmatically
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install'] + options + [package])
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-warn-script-location'] + options + [package])
 
         # Refresh sys.path so we can import the installed package
         import site
