@@ -43,7 +43,6 @@ features). These do not take long to update and include in the main library.
 .. toctree::
    :maxdepth: 2
 
-   wishlist
    berkeley
    cherry_picker
    drawing

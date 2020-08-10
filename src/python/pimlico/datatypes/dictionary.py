@@ -34,7 +34,7 @@ from operator import itemgetter
 from pimlico.datatypes.base import PimlicoDatatype
 
 
-__all__ = ["Dictionary"]
+__all__ = ["Dictionary", "DictionaryData"]
 
 
 class Dictionary(PimlicoDatatype):
@@ -51,11 +51,16 @@ class Dictionary(PimlicoDatatype):
 
     class Reader(object):
         def get_data(self):
+            """
+            Load the dictionary and return a :class:`DictionaryData` object.
+
+            """
             with open(os.path.join(self.data_dir, "dictionary"), "rb") as f:
                 return pickle.load(f)
 
         class Setup(object):
             def get_required_paths(self):
+                """Require the dictionary file to be written"""
                 return ["dictionary"]
 
         def get_detailed_status(self):

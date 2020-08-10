@@ -1,5 +1,5 @@
-Running a pipeline
-==================
+Running someone else's pipeline
+===============================
 
 This guide takes you through what to do if you have received someone else's
 code for a Pimlico project and would like to run it.

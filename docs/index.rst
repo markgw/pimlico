@@ -26,7 +26,9 @@ pipeline and checking that everything's executed in the right order.
 
 The core toolkit is written in Python. Pimlico is open source, released under the GPLv3 license. It is
 available from `its Github repository <https://github.com/markgw/pimlico>`_.
-To get started with a Pimlico project, follow the :doc:`getting-started guide <guides/setup>`.
+
+* For a broad introduction to Pimlico's key concepts, read :doc:`guides/intro`.
+* To get started with a Pimlico project, follow the :doc:`getting-started guide <guides/setup>`.
 
 Pimlico is written in Python and can be run using Python >=2.7 or >=3.6. This means
 you can write your own processing modules using either Python 2 or 3.

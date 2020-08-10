@@ -1,5 +1,5 @@
 ==========================================
-Running one pipeline on multiple computers
+      Running on multiple computers
 ==========================================
 
 Multiple servers

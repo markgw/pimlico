@@ -1,6 +1,6 @@
-===========================
-  Writing Pimlico modules
-===========================
+=================================
+  Writing Pimlico module types
+=================================
 
 Pimlico comes with a fairly large number of :mod:`module types <pimlico.modules>`
 that you can use to run many standard NLP, data processing
