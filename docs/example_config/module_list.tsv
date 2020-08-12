@@ -1,3 +1,4 @@
 example-pipeline-empty-test	
+example-pipeline-train-tms-example	pimlico.modules.corpora.store, pimlico.modules.spacy.tokenize, pimlico.modules.text.normalize, pimlico.modules.corpora.vocab_builder, pimlico.modules.corpora.vocab_mapper, pimlico.modules.gensim.lda, pimlico.modules.gensim.ldaseq, pimlico.modules.gensim.ldaseq_doc_topics
 example-pipeline-custom-module-example	pimlico.modules.spacy.tokenize, pimlico.modules.corpora.vocab_builder
 example-pipeline-tokenize-example	pimlico.modules.text.simple_tokenize

@@ -88,6 +88,13 @@ This example usage includes more options.
    remove_only_punct=F
    remove_punct=F
 
+Example pipelines
+=================
+
+This module is used by the following :ref:`example pipelines <example-pipelines>`. They are examples of how the module can be used together with other modules in a larger pipeline.
+
+ * :ref:`example-pipeline-train-tms-example`
+
 Test pipelines
 ==============
 

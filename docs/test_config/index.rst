@@ -17,6 +17,8 @@ Available pipelines
    :maxdepth: 2
    :titlesonly:
 
+   gensim.dtm_train.conf.rst
+   gensim.dtm_infer.conf.rst
    opennlp.tokenize.conf.rst
    opennlp.parse.conf.rst
    opennlp.pos.conf.rst

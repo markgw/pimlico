@@ -18,6 +18,7 @@ Available pipelines
    :titlesonly:
 
    empty.rst
+   topic_modelling.train_tms.rst
    simple.custom_module.rst
    simple.tokenize.rst
 

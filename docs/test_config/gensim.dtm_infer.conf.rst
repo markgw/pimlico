@@ -1,0 +1,63 @@
+.. _test-config-gensim-dtm_infer.conf:
+
+dtm\_infer
+~~~~~~~~~~
+
+
+
+This is one of the test pipelines included in Pimlico's repository.
+See :ref:`test-pipelines` for more details.
+
+Config file
+===========
+
+The complete config file for this test pipeline:
+
+
+.. code-block:: ini
+   
+   # Take a trained DTM model and perform inference on other docs
+   #
+   # For a fuller example (on which this test is based), see
+   # :doc:`the topic model training example </example_config/topic_modelling.train_tms>`.
+   
+   [pipeline]
+   name=dtm_infer
+   release=latest
+   
+   # Load word IDs
+   [ids]
+   type=pimlico.datatypes.corpora.GroupedCorpus
+   data_point_type=IntegerListsDocumentType
+   dir=%(test_data_dir)s/datasets/corpora/ids_ubuntu
+   
+   # Load slice labels
+   [labels]
+   type=pimlico.datatypes.corpora.GroupedCorpus
+   data_point_type=LabelDocumentType
+   dir=%(test_data_dir)s/datasets/corpora/labels_ubuntu
+   
+   # Load a trained DTM model
+   [dtm]
+   type=pimlico.datatypes.gensim.GensimLdaSeqModel
+   dir=%(test_data_dir)s/datasets/dtm_model
+   
+   # Apply stationary DTM inference to all of the documents
+   # This doesn't need to be run on the same document set we trained on:
+   #  we do that here just as an example
+   [dtm_infer]
+   type=pimlico.modules.gensim.ldaseq_doc_topics
+   input_corpus=ids
+   input_labels=labels
+   input_model=dtm
+
+
+Modules
+=======
+
+
+The following Pimlico module types are used in this pipeline:
+
+ * :mod:`pimlico.modules.gensim.ldaseq_doc_topics`
+    
+

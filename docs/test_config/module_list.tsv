@@ -1,3 +1,5 @@
+test-config-gensim-dtm_train.conf	pimlico.modules.gensim.ldaseq
+test-config-gensim-dtm_infer.conf	pimlico.modules.gensim.ldaseq_doc_topics
 test-config-opennlp-tokenize.conf	pimlico.modules.opennlp.tokenize
 test-config-opennlp-parse.conf	pimlico.modules.opennlp.parse
 test-config-opennlp-pos.conf	pimlico.modules.opennlp.pos

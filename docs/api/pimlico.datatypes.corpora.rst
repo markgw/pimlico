@@ -19,6 +19,7 @@ Submodules
    pimlico.datatypes.corpora.grouped
    pimlico.datatypes.corpora.ints
    pimlico.datatypes.corpora.json
+   pimlico.datatypes.corpora.strings
    pimlico.datatypes.corpora.table
    pimlico.datatypes.corpora.tokenized
    pimlico.datatypes.corpora.word_annotations
