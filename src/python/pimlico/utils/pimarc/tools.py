@@ -4,6 +4,7 @@ Command-line tools for manipulating Pimarcs.
 """
 import argparse
 import os
+import shutil
 from tarfile import TarFile
 
 import sys
@@ -133,6 +134,58 @@ def check_pimarcs(opts):
     print("Total members in all archives: {:,d}".format(total_length))
 
 
+def remove(opts):
+    path = os.path.abspath(opts.path)
+    if not path.endswith(".prc"):
+        print("Pimarc data file must use extension '.prc'")
+
+    files_to_remove = opts.files
+    remove_all_after = opts.after
+    remove_after_found = False
+
+    if len(files_to_remove) == 0 and remove_all_after is None:
+        print("No files to remove")
+        sys.exit(0)
+
+    # Write to a temporary new archive
+    tmp_arc = "{}.tmp".format(path)
+    try:
+        with PimarcWriter(tmp_arc, mode="w") as writer:
+            with PimarcReader(path) as reader:
+                for metadata, data in reader:
+                    name = metadata["name"]
+                    if name in files_to_remove:
+                        files_to_remove.remove(name)
+                        print("Removing {}".format(name))
+                    else:
+                        # Pass the file straight through
+                        writer.write_file(data, metadata=metadata)
+
+                    if remove_all_after == name:
+                        # Written this file, now stop
+                        print("Stopping after {}".format(name))
+                        remove_after_found = True
+                        break
+
+        if remove_all_after is not None and not remove_after_found:
+            print("ERROR: filename {} not found in archive".format(remove_all_after))
+            return
+        if len(files_to_remove) > 0:
+            print("ERROR: some files not found in archive: {}".format(", ".join(files_to_remove)))
+            return
+
+        # Replace the old archive with the new one
+        print("Writing new archive to {}".format(path))
+        os.replace(tmp_arc, path)
+        os.replace("{}i".format(tmp_arc), "{}i".format(path))
+    finally:
+        # Remove the temporary archive
+        if os.path.exists(tmp_arc):
+            os.remove(tmp_arc)
+        if os.path.exists("{}i".format(tmp_arc)):
+            os.remove("{}i".format(tmp_arc))
+
+
 def no_subcommand(opts):
     print("Specify a subcommand: list, ...")
 
@@ -179,6 +232,13 @@ def run():
                                            "index should be rebuilt")
     subparser.set_defaults(func=check_pimarcs)
     subparser.add_argument("paths", nargs="+", help="Path to the pimarc(s) - .prc files")
+
+    subparser = subparsers.add_parser("remove",
+                                      help="Remove files from a Pimarc archive")
+    subparser.set_defaults(func=remove)
+    subparser.add_argument("path", help="Path to the pimarc - .prc file")
+    subparser.add_argument("files", nargs="*", help="Names of files to remove")
+    subparser.add_argument("--after", action="store", help="Remove all files after the given name")
 
     opts = parser.parse_args()
     opts.func(opts)
