@@ -6,6 +6,7 @@ import os
 from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.datatypes import PimlicoDatatype
 
+
 __all__ = ["GensimLdaModel"]
 
 
@@ -44,3 +45,52 @@ class GensimLdaModel(PimlicoDatatype):
         def write_model(self, model):
             model.save(os.path.join(self.data_dir, "model"))
             self.task_complete("model")
+
+
+class GensimLdaSeqModel(PimlicoDatatype):
+    """
+    A trained LDA-seq model – i.e. Dynamic Topic Model (DTM).
+
+    As well as the Gensim model, it also stores the list of slice labels, so that
+    we can easily look up the appropriate time slice for a document paired with
+    its slice name. These could be, for example, years or months.
+
+    """
+    datatype_name = "ldaseq_model"
+
+    def get_software_dependencies(self):
+        return super(GensimLdaSeqModel, self).get_software_dependencies() + [gensim_dependency]
+
+    def run_browser(self, reader, opts):
+        """
+        Browse the DTM model simply by printing out all its topics.
+
+        """
+        model = reader.load_model()
+        print("Showing all {} trained DTM topics:".format(model.num_topics))
+        for time, label in zip(range(len(model.time_slice)), reader.load_labels()):
+            print("Time slice {}".format(time))
+            for topic, topic_repr in enumerate(model.print_topics(time=time, top_terms=6)):
+                print(u"#{}: {}".format(topic,
+                                        ", ".join("{} ({:.3f})".format(word, prob) for (word, prob) in topic_repr)))
+
+    class Reader(object):
+        def load_model(self):
+            from gensim.models.ldaseqmodel import LdaSeqModel
+            return LdaSeqModel.load(os.path.join(self.data_dir, "model"))
+
+        def load_labels(self):
+            with open(os.path.join(self.data_dir, "slice_labels.txt"), "r") as f:
+                return f.read().splitlines()
+
+    class Writer(object):
+        required_tasks = ["model", "slice_labels"]
+
+        def write_model(self, model):
+            model.save(os.path.join(self.data_dir, "model"))
+            self.task_complete("model")
+
+        def write_labels(self, labels):
+            with open(os.path.join(self.data_dir, "slice_labels.txt"), "w") as f:
+                f.write("\n".join(labels))
+            self.task_complete("slice_labels")
