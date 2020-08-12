@@ -16,4 +16,5 @@ from `Gensim <https://radimrehurek.com/gensim/>`_.
 
    pimlico.modules.gensim.lda
    pimlico.modules.gensim.lda_doc_topics
+   pimlico.modules.gensim.ldaseq
    pimlico.modules.gensim.ldaseq_doc_topics
