@@ -15,6 +15,7 @@ from __future__ import absolute_import
 import sys
 
 from future import standard_library
+from future.utils import raise_from
 
 standard_library.install_aliases()
 from builtins import zip
@@ -130,8 +131,15 @@ class MultiprocessingMapPool(DocumentProcessorPool):
                 debugging_info = e.traceback
             else:
                 debugging_info = None
-            raise WorkerStartupError("error starting up worker process: %s" % e, cause=e,
-                                     debugging_info=debugging_info)
+
+            if isinstance(e, ExceptionWithTraceback):
+                # Retrieve the original exception with its traceback
+                e = e.exception_with_traceback()
+
+            raise_from(
+                WorkerStartupError("error starting up worker process: %s" % e, cause=e, debugging_info=debugging_info),
+                e
+            )
 
     def start_worker(self):
         if self.processes == 1 and self.SINGLE_PROCESS_TYPE is not None:

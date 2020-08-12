@@ -836,3 +836,6 @@ class ExceptionWithTraceback(object):
 
     def exception_with_traceback(self):
         return self.exception.with_traceback(self.traceback)
+
+    def __str__(self):
+        return str(self.exception)
