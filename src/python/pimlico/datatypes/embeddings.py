@@ -21,7 +21,7 @@ import os
 
 from backports import csv
 
-from pimlico.core.dependencies.python import numpy_dependency
+from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip
 from pimlico.datatypes import PimlicoDatatype, NamedFileCollection
 from pimlico.datatypes.files import NamedFileCollection
 from pimlico.utils.core import cached_property
@@ -311,3 +311,33 @@ class Word2VecFiles(NamedFileCollection):
 
     def __init__(self, *args, **kwargs):
         super(Word2VecFiles, self).__init__(["embeddings.bin", "embeddings.vocab"], *args, **kwargs)
+
+
+class FastTextEmbeddings(PimlicoDatatype):
+    """
+    Simple wrapper for fastText embeddings, stored and written using the
+    `fastText Python package <https://fasttext.cc/docs/en/python-module.html>`.
+
+    Depends on the fastText package, installed via Pip.
+
+    """
+    datatype_name = "fasttext_embeddings"
+    datatype_supports_python2 = True
+
+    def get_software_dependencies(self):
+        return super(FastTextEmbeddings, self).get_software_dependencies() + [PythonPackageOnPip("fasttext")]
+
+    class Reader:
+        def load_model(self):
+            import fasttext
+
+            model_path = os.path.join(self.data_dir, "model.bin")
+            return fasttext.load_model(model_path)
+
+    class Writer:
+        required_tasks = ["model"]
+
+        def save_model(self, model):
+            model_path = os.path.join(self.data_dir, "model.bin")
+            model.save_model(model_path)
+            self.task_complete("model")
