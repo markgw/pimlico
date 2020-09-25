@@ -7,6 +7,7 @@ test-config-embeddings-normalize.conf	pimlico.modules.embeddings.normalize
 test-config-embeddings-word2vec.conf	pimlico.modules.embeddings.word2vec
 test-config-embeddings-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec
 test-config-embeddings-store_tsv.conf	pimlico.modules.embeddings.store_tsv
+test-config-embeddings-fasttext.conf	pimlico.modules.embeddings.fasttext
 test-config-corpora-interleave.conf	pimlico.modules.corpora.interleave, pimlico.modules.corpora.format
 test-config-corpora-list_filter.conf	pimlico.modules.corpora.list_filter
 test-config-corpora-vocab_unmapper.conf	pimlico.modules.corpora.vocab_unmapper

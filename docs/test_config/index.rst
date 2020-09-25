@@ -26,6 +26,7 @@ Available pipelines
    embeddings.word2vec.conf.rst
    embeddings.store_word2vec.conf.rst
    embeddings.store_tsv.conf.rst
+   embeddings.fasttext.conf.rst
    corpora.interleave.conf.rst
    corpora.list_filter.conf.rst
    corpora.vocab_unmapper.conf.rst
