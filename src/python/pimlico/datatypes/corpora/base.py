@@ -213,6 +213,18 @@ class IterableCorpus(PimlicoDatatype):
             """
             raise NotImplementedError
 
+        def list_iter(self):
+            """
+            Iterate over the list of document names, without yielding the doc contents.
+
+            Whilst this could be considerably faster than iterating over all the docs,
+            the default implementation, if not overridden by subclasses of IterableCorpus,
+            simply calls the doc iter and throws away the docs.
+
+            """
+            for doc_name, doc in self:
+                yield doc_name
+
         def data_to_document(self, data, metadata=None):
             """
             Applies the corpus' datatype's processing to the raw data, given as a

@@ -276,6 +276,16 @@ class GroupedCorpus(IterableCorpus):
                             doc_name = doc_name[:-3]
                         yield archive_name, doc_name
 
+        def list_iter(self):
+            """
+            Iterate over the list of document names, without processing the doc contents.
+
+            In some cases, this could be considerably faster than iterating over all the docs.
+
+            """
+            for archive_name, doc_name in self.list_archive_iter():
+                yield doc_name
+
     class Writer(object):
         """
         Writes a large corpus of documents out to disk, grouping them together in Pimarc archives.
