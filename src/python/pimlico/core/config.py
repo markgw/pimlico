@@ -590,7 +590,7 @@ class PipelineConfig(object):
                                                             for output_name in output_group) + \
                                                    input_val[altgroup_end+1:]
 
-                    new_alternatives = []
+                    processed_alternatives = []
                     # It's possible for the value to already have alternatives, in which case we include them all
                     for original_val in module_config[input_opt].split("|"):
                         # If there's a list of values here, we need to handle it carefully
@@ -627,7 +627,7 @@ class PipelineConfig(object):
                                 new_item_alt_names.append([None])
                         if len(new_items) == 1:
                             # Simplest case: no comma-separated list at all
-                            new_alternatives.extend(new_items[0])
+                            new_alternatives = new_items[0]
                         elif any(len(i) == 1 for i in new_items) and not all(len(i) == 1 for i in new_items):
                             # Some items have only one alternative, but others have more
                             num_alts = next((len(i) for i in new_items if len(i) > 1))
@@ -667,8 +667,8 @@ class PipelineConfig(object):
                                     new_alts_with_names.append(new_alt)
                                 else:
                                     new_alts_with_names.append("{%s}%s" % (new_name, new_alt))
-                        new_alternatives = new_alts_with_names
-                    module_config[input_opt] = "|".join(new_alternatives)
+                        processed_alternatives.extend(new_alts_with_names)
+                    module_config[input_opt] = "|".join(processed_alternatives)
 
                 # Now look for any options with alternative values and expand them out into multiple module configs
                 expanded_module_configs = []
