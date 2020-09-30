@@ -11,7 +11,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from future import standard_library
-from future.utils import raise_from
+
+from pimlico.utils.core import raise_from
 
 standard_library.install_aliases()
 from builtins import str
@@ -23,7 +24,7 @@ import sys
 from io import StringIO
 from tarfile import TarFile
 from textwrap import wrap
-from traceback import format_exc, format_tb
+from traceback import format_exc, format_tb, format_exception
 
 from datetime import datetime
 
