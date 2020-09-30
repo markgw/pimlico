@@ -423,13 +423,29 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
 
 
 def format_execution_dependency_tree(tree):
+    """
+    Takes a tree structure of modules and their inputs, tracing where
+    inputs to a module come from, and formats it recursively for output
+    to the logs.
+
+    :param tree: pair (module name, inputs list), where each input is a tuple
+        (input name, previous module output name, previous module subtree)
+    :return: list of lines of formatted string
+    """
+    # module is the current module represented by this node
     module, inputs = tree
-    lines = ["%s" % module]
+    # Build up list of output lines
+    # First line is this module itself (ignored for subtrees)
+    lines = ["{} ({})".format(module.module_name, module.module_type_name)]
+
     for (input_name, output_name, input_tree) in inputs:
         if output_name is None:
             output_name = "default_output"
+        # Recursively format subtree
         input_lines = format_execution_dependency_tree(input_tree)
-        input_lines = ["|- %s.%s" % (input_lines[0], output_name)] + ["|  %s" % line for line in input_lines[1:]]
+        prev_mod = input_tree[0]
+        input_lines = ["|- {}.{} ({})".format(prev_mod.module_name, output_name, prev_mod.module_type_name)] \
+                      + ["|  {}".format(line) for line in input_lines[1:]]
         lines.extend(input_lines)
     return lines
 
