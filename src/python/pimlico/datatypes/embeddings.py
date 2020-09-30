@@ -19,6 +19,8 @@ from builtins import object
 import io
 import os
 
+from sklearn.metrics.pairwise import cosine_distances
+
 from backports import csv
 
 from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip
@@ -249,6 +251,14 @@ class Embeddings(PimlicoDatatype):
         print("\nNearest neighbours for some random embeddings, using Euclidean distance")
         for rand_id, rand_vec in zip(rand_ids, rand_vecs):
             nns = np.argsort(euclidean_distances(rand_vec.reshape(1, -1), reader.vectors))[0]
+            word, count = reader.word_counts[rand_id]
+            print("  {} ({:,}): {}".format(
+                word, count,
+                ", ".join(reader.word_counts[i][0] for i in nns[:10])
+            ))
+        print("\nNearest neighbours for some random embeddings, using cosine distance")
+        for rand_id, rand_vec in zip(rand_ids, rand_vecs):
+            nns = np.argsort(cosine_distances(rand_vec.reshape(1, -1), reader.vectors))[0]
             word, count = reader.word_counts[rand_id]
             print("  {} ({:,}): {}".format(
                 word, count,
