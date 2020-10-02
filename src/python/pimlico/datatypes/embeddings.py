@@ -26,7 +26,8 @@ from pimlico.datatypes import PimlicoDatatype
 from pimlico.datatypes.files import NamedFileCollection
 from pimlico.utils.core import cached_property
 
-__all__ = ["Embeddings", "TSVVecFiles", "Word2VecFiles"]
+__all__ = ["Vocab", "Embeddings", "TSVVecFiles", "Word2VecFiles",
+           "DocEmbeddingsMapper", "FixedEmbeddingsDocMapper", "FastTextDocMapper"]
 
 
 class Vocab(object):
