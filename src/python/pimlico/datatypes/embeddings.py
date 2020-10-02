@@ -12,7 +12,7 @@ easy to convert from other formats.
 """
 from __future__ import absolute_import
 
-from builtins import str
+from builtins import str, input
 from past.builtins import basestring
 from builtins import object
 
@@ -350,3 +350,186 @@ class FastTextEmbeddings(PimlicoDatatype):
             model_path = os.path.join(self.data_dir, "model.bin")
             model.save_model(model_path)
             self.task_complete("model")
+
+
+class DocEmbeddingsMapper(PimlicoDatatype):
+    """
+    Abstract datatype.
+
+    An embedding loader provides a method to take a list of tokens (e.g. a tokenized document)
+    and produce an embedding for each token.
+    It will not necessarily be able to produce an embedding for *any* given term, so
+    might return None for some tokens.
+
+    This is more general than the :class:`~.Embeddings` datatype, as it allows this
+    method to potentially produce embeddings for an infinite set of terms. Conversely,
+    it is not able to say which set of terms it can produce embeddings for.
+
+    It provides a unified interface to composed embeddings, like fastText, which can
+    use sub-word information to produce embeddings of OOVs; context-sensitive
+    embeddings, like BERT, which taken into account the context of a token; and fixed
+    embeddings, which just return a fixed embedding for in-vocab terms.
+
+    Some subtypes are just wrappers for fixed sets of embeddings.
+
+    """
+    datatype_name = "doc_embeddings_mapper"
+
+    def get_software_dependencies(self):
+        return super(DocEmbeddingsMapper, self).get_software_dependencies() + [numpy_dependency]
+
+    def run_browser(self, reader, opts):
+        """
+        Simple tool to display embeddings for the words of user-entered sentences.
+        """
+        print("Enter a sentence to see its word vectors. Ctrl+D to exit")
+        try:
+            while True:
+                input_text = input("> ")
+                sentence = input_text.split()
+                embeddings = reader.get_embeddings(sentence)
+                for w, (word, embedding) in enumerate(zip(sentence, embeddings)):
+                    print("{} {}: {}".format(w, word, embedding))
+        except EOFError:
+            print("Exiting")
+
+    class Reader:
+        def get_embeddings(self, tokens):
+            """
+            Subclasses should produce a list, with an item for each token. The
+            item may be None, or a numpy array containing a vector for the token.
+
+            :param tokens: list of strings
+            :return: list of embeddings
+            """
+            raise NotImplementedError("abstract datatype does not implement get_embeddings")
+
+
+class FastTextDocMapper(DocEmbeddingsMapper):
+    datatype_name = "fasttext_doc_embeddings_mapper"
+
+    def get_software_dependencies(self):
+        return super(FastTextEmbeddings, self).get_software_dependencies() + [PythonPackageOnPip("fasttext")]
+
+    class Reader:
+        @cached_property
+        def model(self):
+            import fasttext
+
+            model_path = os.path.join(self.data_dir, "model.bin")
+            return fasttext.load_model(model_path)
+
+        def get_embeddings(self, tokens):
+            return [self.model.get_word_vector(token) for token in tokens]
+
+    class Writer:
+        required_tasks = ["model"]
+
+        def save_model(self, model):
+            model_path = os.path.join(self.data_dir, "model.bin")
+            model.save_model(model_path)
+            self.task_complete("model")
+
+
+class FixedEmbeddingsDocMapper(DocEmbeddingsMapper):
+    datatype_name = "fixed_embeddings_doc_embeddings_mapper"
+
+    class Reader(object):
+        class Setup(object):
+            def get_required_paths(self):
+                return ["vectors.npy", "vocab.csv"]
+
+        @cached_property
+        def vectors(self):
+            import numpy
+            with io.open(os.path.join(self.data_dir, "vectors.npy"), "rb") as f:
+                return numpy.load(f, allow_pickle=False)
+
+        @cached_property
+        def vector_size(self):
+            return self.vectors.shape[1]
+
+        @cached_property
+        def word_counts(self):
+            with io.open(os.path.join(self.data_dir, "vocab.csv"), "r", encoding="utf-8", newline="") as f:
+                reader = csv.reader(f)
+                return [(row[0], int(row[1])) for row in reader]
+
+        @cached_property
+        def index2vocab(self):
+            return [Vocab(word, i, count=count) for i, (word, count) in enumerate(self.word_counts)]
+
+        @cached_property
+        def index2word(self):
+            return [v.word for v in self.index2vocab]
+
+        @cached_property
+        def vocab(self):
+            # Build the vocab by indexing the vocab items (in index2word) by word
+            return dict((v.word, v) for v in self.index2vocab)
+
+        def __len__(self):
+            return len(self.index2vocab)
+
+        def word_vec(self, word):
+            """
+            Accept a single word as input.
+            Returns the word's representation in vector space, as a 1D numpy array.
+
+            """
+            try:
+                word_id = self.vocab[word].index
+            except KeyError as e:
+                raise KeyError("word not in vocabulary: {}".format(e))
+            return self.vectors[word_id]
+
+        def __contains__(self, word):
+            return word in self.vocab
+
+        def get_embeddings(self, tokens):
+            return [self.word_vec(token) if token in self else None for token in tokens]
+
+    class Writer(object):
+        required_tasks = ["vocab", "vectors"]
+
+        def write_vectors(self, arr):
+            """Write out vectors from a Numpy array """
+            import numpy
+            with open(os.path.join(self.data_dir, "vectors.npy"), "wb") as f:
+                numpy.save(f, arr, allow_pickle=False)
+            self.task_complete("vectors")
+
+        def write_word_counts(self, word_counts):
+            """
+            Write out vocab from a list of words with counts.
+
+            :param word_counts: list of (unicode, int) pairs giving each word and its count. Vocab indices are
+                determined by the order of words
+            """
+            with io.open(os.path.join(self.data_dir, "vocab.csv"), "w", encoding="utf-8", newline="") as f:
+                writer = csv.writer(f)
+                for word, count in word_counts:
+                    writer.writerow([str(word), str(count)])
+            self.task_complete("vocab")
+
+        def write_vocab_list(self, vocab_items):
+            """
+            Write out vocab from a list of vocab items (see ``Vocab``).
+
+            :param vocab_items: list of ``Vocab`` s
+            """
+            self.write_word_counts([(v.word, v.count) for v in vocab_items])
+
+        def write_keyed_vectors(self, *kvecs):
+            """
+            Write both vectors and vocabulary straight from Gensim's ``KeyedVectors`` data structure.
+            Can accept multiple objects, which will then be concatenated in the output.
+
+            """
+            import numpy
+            if len(kvecs) > 1:
+                vecs = numpy.vstack(tuple(kv.syn0 for kv in kvecs))
+            else:
+                vecs = kvecs[0].syn0
+            self.write_vectors(vecs)
+            self.write_word_counts([(w, kv.vocab[w].count) for kv in kvecs for w in kv.index2word])

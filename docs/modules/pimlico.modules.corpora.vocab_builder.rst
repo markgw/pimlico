@@ -15,6 +15,10 @@ ID to every distinct word seen in the corpus, optionally applying thresholds so 
 Similar to :mod:`pimlico.modules.features.vocab_builder`, which builds two vocabs, one for terms and one for
 features.
 
+May specify a list of stopwords, which will be ignored, even if they're found in the corpus.
+The filter to remove frequent words (controlled  by `max_prop`) will potentially add further
+stopwords, so the resulting list is output as `stopwords`.
+
 
 Inputs
 ======
@@ -28,11 +32,13 @@ Inputs
 Outputs
 =======
 
-+-------+---------------------------------------------------------------+
-| Name  | Type(s)                                                       |
-+=======+===============================================================+
-| vocab | :class:`dictionary <pimlico.datatypes.dictionary.Dictionary>` |
-+-------+---------------------------------------------------------------+
++-----------+---------------------------------------------------------------+
+| Name      | Type(s)                                                       |
++===========+===============================================================+
+| vocab     | :class:`dictionary <pimlico.datatypes.dictionary.Dictionary>` |
++-----------+---------------------------------------------------------------+
+| stopwords | :class:`string_list <pimlico.datatypes.core.StringList>`      |
++-----------+---------------------------------------------------------------+
 
 
 Options
