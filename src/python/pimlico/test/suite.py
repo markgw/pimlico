@@ -1,12 +1,13 @@
+
+if __name__ == "__main__":
+    from pimlico import install_core_dependencies
+    install_core_dependencies()
+
 import argparse
 import sys
 
 from pimlico.test.pipeline import run_test_suite
 from pimlico.utils.logging import get_console_logger
-
-if __name__ == "__main__":
-    from pimlico import install_core_dependencies
-    install_core_dependencies()
 
 
 if __name__ == "__main__":

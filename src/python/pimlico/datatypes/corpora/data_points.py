@@ -11,7 +11,7 @@ from collections import OrderedDict
 from traceback import format_exc
 
 from builtins import object
-from future.utils import with_metaclass
+from future.utils import with_metaclass, PY3
 
 __all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
            "InvalidDocument"]
@@ -57,7 +57,8 @@ class DataPointTypeMeta(type):
                 if "__weakref__" in new_dict:
                     del new_dict["__weakref__"]
                 # Set the reader setup's __qualname__ so it's properly treated as a nested class of the datatype's reader
-                new_dict["__qualname__"] = "{}.Document".format(cls.__qualname__)
+                if PY3:
+                    new_dict["__qualname__"] = "{}.Document".format(cls.__qualname__)
                 new_dict["__module__"] = cls.__module__
 
                 # If no new documentation is provided, then we don't want to inherit the

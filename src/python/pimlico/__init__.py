@@ -32,9 +32,6 @@ except ImportError:
             pass
     reload(site)
 
-from pimlico.core.dependencies.base import check_and_install
-from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES, coloredlogs_dependency
-
 PIMLICO_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 
 # Fetch current version number from PIMLICO_ROOT/admin/release.txt
@@ -62,6 +59,8 @@ REPO_SOURCE_HTML_ROOT = "https://github.com/markgw/pimlico/blob/master/"
 
 
 def install_core_dependencies():
+    from pimlico.core.dependencies.base import check_and_install
+    from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES, coloredlogs_dependency
     # Always check that core dependencies are satisfied before running anything
     # Core dependencies are not allowed to depend on the local config, as we can't get to it at this point
     # We just pass in an empty dictionary

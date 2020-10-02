@@ -15,16 +15,16 @@ This way of providing tests also has the advantage that modules at the same time
 several) of how to use them -- how pipeline config should look and what sort of input data to use.
 
 """
+if __name__ == "__main__":
+    from pimlico import install_core_dependencies
+    install_core_dependencies()
+
 from builtins import object
 import traceback
 
 from past.utils import PY2
 
 from pimlico.utils.core import remove_duplicates
-
-if __name__ == "__main__":
-    from pimlico import install_core_dependencies
-    install_core_dependencies()
 
 import argparse
 import os

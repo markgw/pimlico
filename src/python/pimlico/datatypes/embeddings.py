@@ -19,12 +19,10 @@ from builtins import object
 import io
 import os
 
-from sklearn.metrics.pairwise import cosine_distances
-
 from backports import csv
 
 from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip
-from pimlico.datatypes import PimlicoDatatype, NamedFileCollection
+from pimlico.datatypes import PimlicoDatatype
 from pimlico.datatypes.files import NamedFileCollection
 from pimlico.utils.core import cached_property
 
@@ -240,6 +238,7 @@ class Embeddings(PimlicoDatatype):
         """
         import numpy as np
         from sklearn.metrics import euclidean_distances
+        from sklearn.metrics.pairwise import cosine_distances
 
         print("Reading embeddings...")
         num_vectors = len(reader)

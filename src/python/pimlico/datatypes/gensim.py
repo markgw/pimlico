@@ -49,7 +49,7 @@ class GensimLdaModel(PimlicoDatatype):
 
 class GensimLdaSeqModel(PimlicoDatatype):
     """
-    A trained LDA-seq model – i.e. Dynamic Topic Model (DTM).
+    A trained LDA-seq model - i.e. Dynamic Topic Model (DTM).
 
     As well as the Gensim model, it also stores the list of slice labels, so that
     we can easily look up the appropriate time slice for a document paired with
