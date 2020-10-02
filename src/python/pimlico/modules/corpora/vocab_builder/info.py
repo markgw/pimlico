@@ -9,7 +9,13 @@ ID to every distinct word seen in the corpus, optionally applying thresholds so 
 Similar to :mod:`pimlico.modules.features.vocab_builder`, which builds two vocabs, one for terms and one for
 features.
 
+May specify a list of stopwords, which will be ignored, even if they're found in the corpus.
+The filter to remove frequent words (controlled  by `max_prop`) will potentially add further
+stopwords, so the resulting list is output as `stopwords`.
+
 """
+from pimlico.datatypes import StringList
+
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import comma_separated_strings
 from pimlico.datatypes.corpora import GroupedCorpus
@@ -21,7 +27,11 @@ class ModuleInfo(BaseModuleInfo):
     module_type_name = "vocab_builder"
     module_readable_name = "Corpus vocab builder"
     module_inputs = [("text", GroupedCorpus(TokenizedDocumentType()))]
-    module_outputs = [("vocab", Dictionary())]
+    module_optional_inputs = [("stopwords", StringList())]
+    module_outputs = [
+        ("vocab", Dictionary()),
+        ("stopwords", StringList()),
+    ]
     module_options = {
         "threshold": {
             "help": "Minimum number of occurrences required of a term to be included",

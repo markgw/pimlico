@@ -13,6 +13,12 @@ class ModuleExecutor(BaseModuleExecutor):
         input_docs = self.info.get_input("text")
         oov_token = self.info.options["oov"]
 
+        # Read an optional list of stopwords
+        stopwords = self.info.get_input("stopwords")
+        if stopwords is not None:
+            stopwords = stopwords.get_list()
+            self.log.info("Initial list of {:,} stopwords".format(len(stopwords)))
+
         prune_at = self.info.options["prune_at"] or None
         if prune_at is not None:
             self.log.info("Pruning if dictionary size reaches {}".format(prune_at))
@@ -21,7 +27,9 @@ class ModuleExecutor(BaseModuleExecutor):
         pbar = get_progress_bar(len(input_docs), title="Counting")
 
         # Prepare dictionary writers for the term and feature vocabs
-        with self.info.get_output_writer("vocab") as vocab_writer:
+        # Set the list of stopwords initially, so that these terms will be
+        #  ignored while building the vocab
+        with self.info.get_output_writer("vocab", stopwords=stopwords) as vocab_writer:
             # Input is given for every document in a corpus
             # Update the term vocab with all terms in each doc
             vocab_writer.add_documents(
@@ -30,21 +38,25 @@ class ModuleExecutor(BaseModuleExecutor):
             )
 
             # Filter the vocab according to the options set
-            self.log.info("Built dictionary of %d terms, applying filters" % len(vocab_writer.data))
+            self.log.info("Built dictionary of {:,} terms, applying filters".format(len(vocab_writer.data)))
 
-            self.log.info("Feature vocab filters: %s" % ", ".join("%s=%s" % (k, v) for (k, v) in [
+            self.log.info("Feature vocab filters: {}".format(", ".join("{}={}".format(k, v) for (k, v) in [
                 ("threshold", self.info.options["threshold"]),
                 ("max proportion", self.info.options["max_prop"]),
                 ("limit", self.info.options["limit"]),
-            ] if v is not None))
-            removed = vocab_writer.filter(
+            ] if v is not None)))
+            removed_freq, removed_rare = vocab_writer.filter_high_low(
                 self.info.options["threshold"],
                 self.info.options["max_prop"],
                 self.info.options["limit"]
             )
-            show_removed = removed[:30] + [("...", None, None)] if len(removed) > 30 else removed
-            self.log.info("Filters removed %d items from vocabulary: %s" % (
-                len(removed), ", ".join(char for (char, __, __) in show_removed)
+            show_removed_freq = removed_freq[:30] + [("...", None, None)] if len(removed_freq) > 30 else removed_freq
+            show_removed_rare = removed_rare[:30] + [("...", None, None)] if len(removed_rare) > 30 else removed_rare
+            self.log.info("Filters removed {:,} frequent items from vocabulary: {}".format(
+                len(removed_freq), ", ".join(char for (char, __, __) in show_removed_freq)
+            ))
+            self.log.info("Filters removed {:,} rare items from vocabulary: {}".format(
+                len(removed_rare), ", ".join(char for (char, __, __) in show_removed_rare)
             ))
 
             if self.info.options["include"] is not None:
@@ -69,6 +81,12 @@ class ModuleExecutor(BaseModuleExecutor):
                      else 0 for dn, doc in pbar(input_docs) if not is_invalid_doc(doc)), 0
                 )
                 vocab_writer.data.dfs[oov_id] = oov_count
-                self.log.info("Added OOV token '%s' with count of %d" % (oov_token, oov_count))
+                self.log.info("Added OOV token '{}' with count of {:,}".format(oov_token, oov_count))
 
-            self.log.info("Outputting vocab (%d terms)" % len(vocab_writer.data))
+            self.log.info("Outputting vocab ({} terms)".format(len(vocab_writer.data)))
+
+            stopwords = list(vocab_writer.data.stopwords)
+
+        self.log.info("Final list of {:,} stopwords".format(len(stopwords)))
+        with self.info.get_output_writer("stopwords") as stopwords_writer:
+            stopwords_writer.write_list(stopwords)
