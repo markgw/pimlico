@@ -3,6 +3,9 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 from __future__ import print_function
+
+import logging
+
 from future import standard_library
 standard_library.install_aliases()
 from builtins import zip
@@ -240,6 +243,11 @@ def launch_gateway(gateway_class="py4j.GatewayServer", args=[],
     """
     from py4j.java_gateway import ProcessConsumer
     from py4j.compat import Queue
+
+    # Make sure that java_gateway logger isn't set to debug, as it outputs tonnes
+    from py4j.java_gateway import logger as java_gateway_logger
+    if java_gateway_logger.level <= logging.DEBUG:
+        java_gateway_logger.setLevel(logging.INFO)
 
     if startup_timeout is None:
         startup_timeout = 10.
