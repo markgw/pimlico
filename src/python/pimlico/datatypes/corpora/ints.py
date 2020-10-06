@@ -290,7 +290,7 @@ class IntegerDocumentType(RawDocumentType):
 
         def raw_to_internal(self, raw_data):
             # Read the whole document, which should be a single int
-            if len(raw_data) == self.data_point_type.int_size:
+            if len(raw_data) != self.data_point_type.int_size:
                 raise IOError("expected {} bytes in single-int doc, got {}".format(
                     self.data_point_type.int_size, len(raw_data)))
             try:
