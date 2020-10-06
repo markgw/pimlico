@@ -1,5 +1,4 @@
 from future import standard_library
-from future.utils import raise_from
 
 from pimlico.utils.pimarc.index import DuplicateFilename
 
@@ -24,7 +23,7 @@ from pimlico.core.modules.execute import ModuleExecutionError, StopProcessing
 from pimlico.datatypes.corpora import is_invalid_doc, invalid_document
 from pimlico.datatypes.corpora.data_points import RawDocumentType
 from pimlico.datatypes.corpora.grouped import GroupedCorpus, AlignedGroupedCorpora
-from pimlico.utils.core import multiwith
+from pimlico.utils.core import multiwith, raise_from
 from pimlico.utils.pipes import qget
 from pimlico.utils.progress import get_progress_bar
 
