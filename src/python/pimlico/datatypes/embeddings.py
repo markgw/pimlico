@@ -410,7 +410,7 @@ class FastTextDocMapper(DocEmbeddingsMapper):
     datatype_name = "fasttext_doc_embeddings_mapper"
 
     def get_software_dependencies(self):
-        return super(FastTextEmbeddings, self).get_software_dependencies() + [PythonPackageOnPip("fasttext")]
+        return super(FastTextDocMapper, self).get_software_dependencies() + [PythonPackageOnPip("fasttext")]
 
     class Reader:
         @cached_property
