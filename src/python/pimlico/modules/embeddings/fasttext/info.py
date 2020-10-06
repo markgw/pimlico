@@ -12,7 +12,7 @@ also have sub-word representations. We therefore store a standard embeddings
 output, with the word vectors in, and also a special fastText embeddings output.
 
 """
-from pimlico.core.dependencies.python import PythonPackageOnPip, numpy_dependency
+from pimlico.core.dependencies.python import PythonPackageOnPip, numpy_dependency, fasttext_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import choose_from_list
 from pimlico.datatypes import GroupedCorpus, Embeddings
@@ -106,5 +106,5 @@ class ModuleInfo(BaseModuleInfo):
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [
-            PythonPackageOnPip("fasttext"), numpy_dependency,
+            fasttext_dependency, numpy_dependency,
         ]

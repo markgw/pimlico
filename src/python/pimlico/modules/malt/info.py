@@ -64,7 +64,8 @@ class ModuleInfo(DocumentMapModuleInfo):
                                    "->maltparser-1.9.2/lib/libsvm.jar"),
                     ("log4j.jar", "http://maltparser.org/dist/maltparser-1.9.2.tar.gz"
                                   "->maltparser-1.9.2/lib/log4j.jar"),
-                ]
+                ],
+                homepage_url="http://www.maltparser.org/",
             ),
         ]
 

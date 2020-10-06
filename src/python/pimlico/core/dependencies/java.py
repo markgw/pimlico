@@ -10,6 +10,8 @@ import sys
 import os
 from subprocess import check_output, STDOUT, CalledProcessError
 
+from pimlico.core.dependencies.licenses import BSD
+
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.dependencies.base import SoftwareDependency, InstallationError, Any
 from pimlico.core.external.java import call_java, DependencyCheckerError
@@ -293,7 +295,8 @@ def get_module_classpath(module):
 
 argparse4j_dependency = JavaJarsDependency(
     "argparse4j",
-    jar_urls=[("argparse4j.jar", "http://sourceforge.net/projects/argparse4j/files/latest/download?source=files")]
+    jar_urls=[("argparse4j.jar", "http://sourceforge.net/projects/argparse4j/files/latest/download?source=files")],
+    homepage_url="https://argparse4j.github.io/",
 )
 
 
@@ -304,13 +307,15 @@ class Py4JSoftwareDependency(JavaDependency):
 
     """
     def __init__(self):
-        super(Py4JSoftwareDependency, self).__init__("Py4J Java component", classes=["py4j.Gateway"])
+        super(Py4JSoftwareDependency, self).__init__("Py4J Java component", classes=["py4j.Gateway"],
+                                                     homepage_url="https://www.py4j.org/",
+                                                     license=BSD)
         self._extra_jars = []
 
     def dependencies(self):
         # Must have the Python component installed first
         from .python import PythonPackageOnPip
-        return super(Py4JSoftwareDependency, self).dependencies() + [PythonPackageOnPip("py4j")]
+        return super(Py4JSoftwareDependency, self).dependencies() + [py4j_dependency]
 
     def __get_jars(self):
         try:

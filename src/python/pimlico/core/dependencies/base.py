@@ -17,9 +17,19 @@ class SoftwareDependency(object):
     """
     Base class for all Pimlico module software dependencies.
 
+    Every dependency has a name and list of sub-dependencies.
+
+    A URL may be provided by the kwarg ``homepage_url``. This will be used in documentation
+    to link to the software's homepage.
+
+    A license may also be specified, for inclusion in the documentation. It should be
+    an instance of :class:`~pimlico.core.dependences.licenses.SoftwareLicense`. See the
+    literals in :mod:`pimlico.core.dependences.licenses` for many commonly used licenses.
+
     """
-    def __init__(self, name, url=None, dependencies=None):
-        self.url = url
+    def __init__(self, name, homepage_url=None, dependencies=None, license=None):
+        self.license = license
+        self.homepage_url = homepage_url
         self.name = name
         self._dependencies = dependencies or []
 

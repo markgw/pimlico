@@ -11,6 +11,8 @@ types can be converted to raw text using the :mod:`~pimlico.modules.corpora.form
 module.
 
 """
+from pimlico.core.dependencies.licenses import PSF
+
 from pimlico.core.dependencies.python import PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.core.modules.options import str_to_bool, choose_from_list
@@ -55,4 +57,7 @@ class ModuleInfo(BaseModuleInfo):
     module_supports_python2 = True
 
     def get_software_dependencies(self):
-        return super(ModuleInfo, self).get_software_dependencies() + [PythonPackageOnPip("contextlib2")]
+        return super(ModuleInfo, self).get_software_dependencies() + [
+            PythonPackageOnPip("contextlib2", homepage_url="https://contextlib2.readthedocs.io/en/stable/",
+                               license=PSF)
+        ]

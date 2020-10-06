@@ -1,6 +1,6 @@
 import os
 
-from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip
+from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip, fasttext_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.embeddings import Embeddings, FastTextEmbeddings
 
@@ -27,7 +27,7 @@ class ModuleInfo(BaseModuleInfo):
     module_supports_python2 = True
 
     def get_software_dependencies(self):
-        return super(ModuleInfo, self).get_software_dependencies() + [numpy_dependency, PythonPackageOnPip("fasttext")]
+        return super(ModuleInfo, self).get_software_dependencies() + [numpy_dependency, fasttext_dependency]
 
     def missing_module_data(self):
         missing = super(ModuleInfo, self).missing_module_data()

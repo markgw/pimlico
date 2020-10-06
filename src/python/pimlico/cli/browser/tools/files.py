@@ -7,9 +7,8 @@ try:
     import urwid
 except ImportError:
     print("Urwid is not installed: installing now")
-    from pimlico.core.dependencies.python import PythonPackageOnPip
-    urwid_dep = PythonPackageOnPip("urwid")
-    urwid_dep.install({})
+    from pimlico.core.dependencies.python import urwid_dependency
+    urwid_dependency.install({})
 
     try:
         import urwid

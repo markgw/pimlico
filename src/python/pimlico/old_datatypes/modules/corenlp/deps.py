@@ -1,6 +1,8 @@
 # This file is part of Pimlico
 # Copyright (C) 2016 Mark Granroth-Wilding
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+from pimlico.core.dependencies.licenses import GNU_GPL_V3
+
 from pimlico.core.dependencies.java import JavaJarsDependency
 from pimlico.core.dependencies.python import PythonPackageOnPip
 
@@ -62,7 +64,9 @@ corenlp_jar_dependency = JavaJarsDependency(
         ),
     ],
     # Check that installation has worked by trying to load the server class
-    classes=["edu.stanford.nlp.pipeline.StanfordCoreNLPServer"]
+    classes=["edu.stanford.nlp.pipeline.StanfordCoreNLPServer"],
+    homepage_url="https://stanfordnlp.github.io/CoreNLP/",
+    license=GNU_GPL_V3,
 )
 
 # A collection of dependencies for using CoreNLP

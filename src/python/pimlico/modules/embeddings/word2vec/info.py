@@ -13,7 +13,7 @@ implementation of word2vec on a Pimlico corpus.
 Does not support Python 2 since Gensim has dropped Python 2 support.
 
 """
-from pimlico.core.dependencies.python import PythonPackageOnPip
+from pimlico.core.dependencies.python import PythonPackageOnPip, gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes import GroupedCorpus, Embeddings
 from pimlico.datatypes.corpora.tokenized import TokenizedDocumentType
@@ -53,6 +53,4 @@ class ModuleInfo(BaseModuleInfo):
         super(ModuleInfo, self).__init__(module_name, pipeline, **kwargs)
 
     def get_software_dependencies(self):
-        return super(ModuleInfo, self).get_software_dependencies() + [
-            PythonPackageOnPip("gensim"),
-        ]
+        return super(ModuleInfo, self).get_software_dependencies() + [gensim_dependency]

@@ -76,7 +76,7 @@ class CandcParserDependency(SoftwareDependency):
 
     """
     def __init__(self):
-        super(CandcParserDependency, self).__init__("candc")
+        super(CandcParserDependency, self).__init__("candc", homepage_url="https://github.com/chrzyki/candc")
 
     def problems(self, local_config):
         binaries = [os.path.join(CANDC_BINARY_DIR, binary) for binary in ["soap_server", "soap_client"]]

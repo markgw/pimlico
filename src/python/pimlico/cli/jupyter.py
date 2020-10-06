@@ -7,6 +7,8 @@ import json
 import os
 import sys
 
+from pimlico.core.dependencies.licenses import BSD
+
 from pimlico import PIMLICO_ROOT
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.core.dependencies.python import PythonPackageOnPip
@@ -109,7 +111,7 @@ class JupyterCmd(PimlicoCLISubcommand):
         sys.exit(main())
 
 
-jupyter_dependency = PythonPackageOnPip("jupyter")
+jupyter_dependency = PythonPackageOnPip("jupyter", homepage_url="https://jupyter.org/", license=BSD)
 
 
 EXAMPLE_CODE = """\

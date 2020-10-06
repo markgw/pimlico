@@ -21,7 +21,7 @@ import os
 
 from backports import csv
 
-from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip
+from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip, fasttext_dependency
 from pimlico.datatypes import PimlicoDatatype
 from pimlico.datatypes.files import NamedFileCollection
 from pimlico.utils.core import cached_property
@@ -335,7 +335,7 @@ class FastTextEmbeddings(PimlicoDatatype):
     datatype_supports_python2 = True
 
     def get_software_dependencies(self):
-        return super(FastTextEmbeddings, self).get_software_dependencies() + [PythonPackageOnPip("fasttext")]
+        return super(FastTextEmbeddings, self).get_software_dependencies() + [fasttext_dependency]
 
     class Reader:
         def load_model(self):
@@ -410,7 +410,7 @@ class FastTextDocMapper(DocEmbeddingsMapper):
     datatype_name = "fasttext_doc_embeddings_mapper"
 
     def get_software_dependencies(self):
-        return super(FastTextDocMapper, self).get_software_dependencies() + [PythonPackageOnPip("fasttext")]
+        return super(FastTextDocMapper, self).get_software_dependencies() + [fasttext_dependency]
 
     class Reader:
         @cached_property

@@ -11,15 +11,16 @@ from builtins import object
 import os
 from traceback import format_exc
 
+from pimlico.core.dependencies.licenses import GNU_LGPL_V2
+
 from pimlico.datatypes.corpora import is_invalid_doc
 
 try:
     import urwid
 except ImportError:
     print("Urwid is not installed: installing now")
-    from pimlico.core.dependencies.python import PythonPackageOnPip
-    urwid_dep = PythonPackageOnPip("urwid")
-    urwid_dep.install({})
+    from pimlico.core.dependencies.python import urwid_dependency
+    urwid_dependency.install({})
 
     try:
         import urwid

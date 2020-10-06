@@ -13,6 +13,8 @@ import sys
 from past.builtins import reload
 from pkgutil import find_loader
 
+from pimlico.core.dependencies.licenses import GNU_LGPL_V2, BSD, APACHE_V2, MIT
+
 import pkg_resources
 from pkg_resources import parse_version, parse_requirements
 
@@ -195,25 +197,31 @@ class PythonPackageOnPip(PythonPackageDependency):
 # Some commonly used dependencies #
 ###################################
 
-numpy_dependency = PythonPackageOnPip("numpy", "Numpy")
-scipy_dependency = PythonPackageOnPip("scipy", "Scipy")
+urwid_dependency = PythonPackageOnPip("urwid", homepage_url="http://urwid.org/", license=GNU_LGPL_V2)
+numpy_dependency = PythonPackageOnPip("numpy", "Numpy", homepage_url="https://numpy.org/", license=BSD)
+scipy_dependency = PythonPackageOnPip("scipy", "Scipy", homepage_url="https://www.scipy.org/", license=BSD)
 theano_dependency = PythonPackageOnPip("theano", pip_package="Theano")
-tensorflow_dependency = PythonPackageOnPip("tensorflow")
+tensorflow_dependency = PythonPackageOnPip("tensorflow", homepage_url="https://www.tensorflow.org/", license=APACHE_V2)
 # We usually need h5py for reading/storing models
-h5py_dependency = PythonPackageOnPip("h5py", pip_package="h5py")
+h5py_dependency = PythonPackageOnPip("h5py", pip_package="h5py", homepage_url="https://www.h5py.org/", license=BSD)
 # This version of the Keras dependency assumes we're using the theano backend
-keras_theano_dependency = PythonPackageOnPip("keras", dependencies=[theano_dependency, h5py_dependency])
-keras_tensorflow_dependency = PythonPackageOnPip("keras", dependencies=[tensorflow_dependency, h5py_dependency])
+keras_theano_dependency = PythonPackageOnPip("keras", dependencies=[theano_dependency, h5py_dependency],
+                                             homepage_url="https://keras.io/", license=MIT)
+keras_tensorflow_dependency = PythonPackageOnPip("keras", dependencies=[tensorflow_dependency, h5py_dependency],
+                                                 homepage_url="https://keras.io/", license=MIT)
 # This version does not depend on any of the backend packages
 # This allows you to be ambivalent about which one is used, but means the package is not checked
-keras_dependency = PythonPackageOnPip("keras", dependencies=[h5py_dependency])
-pytorch_dependency = PythonPackageOnPip("torch", "PyTorch")
-pyro_dependency = PythonPackageOnPip("pyro", "Pyro", pip_package="pyro-ppl", dependencies=[pytorch_dependency])
+keras_dependency = PythonPackageOnPip("keras", dependencies=[h5py_dependency],
+                                      homepage_url="https://keras.io/", license=MIT)
+pytorch_dependency = PythonPackageOnPip("torch", "PyTorch", homepage_url="https://pytorch.org/")
+pyro_dependency = PythonPackageOnPip("pyro", "Pyro", pip_package="pyro-ppl", dependencies=[pytorch_dependency],
+                                     homepage_url="http://pyro.ai/", license=APACHE_V2)
 
 sklearn_dependency = PythonPackageOnPip(
-    "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency]
+    "sklearn", "Scikit-learn", pip_package="scikit-learn", dependencies=[numpy_dependency, scipy_dependency],
+    homepage_url="https://scikit-learn.org/stable/", license=BSD
 )
-pandas_dependency = PythonPackageOnPip("pandas")
+pandas_dependency = PythonPackageOnPip("pandas", homepage_url="https://pandas.pydata.org/", license=BSD)
 
 # Gensim relies on Requests, which needs urllib3>=1.23 to work,
 # but this isn't enforced in the dependencies
@@ -225,9 +233,11 @@ gensim_dependency = PythonPackageOnPip(
     # In 3.3.0 embedding storage was changed, so it's important we're on the right
     # side of that release
     min_version="3.3.0",
+    homepage_url="https://radimrehurek.com/gensim/", license=GNU_LGPL_V2,
 )
 
-spacy_dependency = PythonPackageOnPip("spacy")
+spacy_dependency = PythonPackageOnPip("spacy", homepage_url="https://spacy.io/", license=MIT)
+fasttext_dependency = PythonPackageOnPip("fasttext", homepage_url="https://fasttext.cc/", license=MIT)
 
 
 ### Special behaviour for bs4
@@ -253,7 +263,11 @@ class BeautifulSoupDependency(PythonPackageOnPip):
 
     """
     def __init__(self):
-        super(BeautifulSoupDependency, self).__init__("bs4", pip_package="beautifulsoup4", name="Beautiful Soup")
+        super(BeautifulSoupDependency, self).__init__(
+            "bs4", pip_package="beautifulsoup4", name="Beautiful Soup",
+            homepage_url="https://www.crummy.com/software/BeautifulSoup/bs4/doc/",
+            license=MIT,
+        )
 
     def import_package(self):
         return safe_import_bs4()
@@ -262,7 +276,7 @@ beautiful_soup_dependency = BeautifulSoupDependency()
 
 
 
-nltk_dependency = PythonPackageOnPip("nltk", "NLTK")
+nltk_dependency = PythonPackageOnPip("nltk", "NLTK", homepage_url="https://www.nltk.org/", license=APACHE_V2)
 
 
 class NLTKResource(SoftwareDependency):

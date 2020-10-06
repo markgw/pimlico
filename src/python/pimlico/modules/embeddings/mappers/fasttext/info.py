@@ -10,7 +10,7 @@ First train a fastText model using the fastText training module. Then
 use this module to produce a doc-embeddings mapper.
 
 """
-from pimlico.core.dependencies.python import PythonPackageOnPip, numpy_dependency
+from pimlico.core.dependencies.python import PythonPackageOnPip, numpy_dependency, fasttext_dependency
 from pimlico.core.modules.base import BaseModuleInfo
 from pimlico.datatypes.embeddings import FastTextEmbeddings, FastTextDocMapper
 
@@ -24,5 +24,5 @@ class ModuleInfo(BaseModuleInfo):
 
     def get_software_dependencies(self):
         return super(ModuleInfo, self).get_software_dependencies() + [
-            PythonPackageOnPip("fasttext"), numpy_dependency,
+            fasttext_dependency, numpy_dependency,
         ]

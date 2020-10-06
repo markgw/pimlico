@@ -3,6 +3,9 @@
 # Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 import os
+
+from pimlico.core.dependencies.licenses import APACHE_V2
+
 from pimlico import JAVA_BUILD_JAR_DIR
 
 from pimlico.core.dependencies.java import JavaDependency, py4j_dependency, JavaJarsDependency, argparse4j_dependency
@@ -29,4 +32,6 @@ opennlp_dependency = JavaJarsDependency(
 def py4j_wrapper_dependency(test_class_name):
     return JavaDependency("OpenNLP wrapper", jars=[os.path.join(JAVA_BUILD_JAR_DIR, "opennlp.jar")],
                           classes=[test_class_name],
-                          dependencies=[argparse4j_dependency, py4j_dependency, opennlp_dependency])
+                          dependencies=[argparse4j_dependency, py4j_dependency, opennlp_dependency],
+                          homepage_url="https://opennlp.apache.org/",
+                          license=APACHE_V2)
