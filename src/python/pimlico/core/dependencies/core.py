@@ -4,6 +4,7 @@
 """ Basic Pimlico core dependencies """
 
 from future.utils import PY2
+from pimlico.core.dependencies.licenses import MIT, BSD, PSF, BSD_2CLAUSE
 
 from pimlico.core.dependencies.python import PythonPackageOnPip
 
@@ -17,15 +18,15 @@ CORE_PIMLICO_DEPENDENCIES = [
     # Virtualenv must be installed so that we can install other packages in the local Pimlico environment
     # Note that, even within a running virtualenv, the virtualenv Python package might not be installed
     # In this case, it can be installed using Pip
-    PythonPackageOnPip("virtualenv"),
+    PythonPackageOnPip("virtualenv", homepage_url="https://virtualenv.pypa.io/en/latest/", license=MIT),
     # Several lightweight Python libraries that we use throughout the codebase
-    PythonPackageOnPip("colorama", "colorama"),
-    PythonPackageOnPip("termcolor", "termcolor"),
-    PythonPackageOnPip("tabulate", "tabulate"),
-    PythonPackageOnPip("progressbar", "Progressbar"),
+    PythonPackageOnPip("colorama", "colorama", homepage_url="https://github.com/tartley/colorama", license=BSD),
+    PythonPackageOnPip("termcolor", "termcolor", homepage_url="https://pypi.org/project/termcolor/", license=BSD),
+    PythonPackageOnPip("tabulate", "tabulate", homepage_url="https://github.com/astanin/python-tabulate", license=MIT),
+    PythonPackageOnPip("progressbar", "Progressbar", homepage_url="https://pypi.org/project/progressbar/", license=BSD),
     # Backport of CSV reading, so we can handle unicode in the same way on Py 2 and 3
-    PythonPackageOnPip("backports.csv"),
-    PythonPackageOnPip("tblib"),
+    PythonPackageOnPip("backports.csv", homepage_url="https://pypi.org/project/backports.csv/", license=PSF),
+    PythonPackageOnPip("tblib", homepage_url="https://pypi.org/project/tblib/", license=BSD_2CLAUSE),
 ]
 
 # Python 2-only dependencies

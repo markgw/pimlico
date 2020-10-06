@@ -112,11 +112,23 @@ and larger works may be distributed under different terms and without source cod
 )
 
 BSD = SoftwareLicense(
-    "BSD License",
+    "BSD License, 3-clause",
     url="https://opensource.org/licenses/BSD-3-Clause",
+)
+
+BSD_2CLAUSE = SoftwareLicense(
+    "BSD License, 2-clause",
+    url="https://opensource.org/licenses/BSD-2-Clause"
 )
 
 PSF = SoftwareLicense(
     "Python Software Foundation License",
     url="https://docs.python.org/3/license.html"
+)
+
+NOT_RELEVANT = SoftwareLicense(
+    "Not relevant for licensing",
+    description="This is simply a placeholder to denote that it is not relevant to say what the license of "
+                "the software in question is. For example, it might be part of some other licensed software, "
+                "whose license is already covered elsewhere."
 )

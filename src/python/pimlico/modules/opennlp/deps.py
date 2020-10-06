@@ -4,7 +4,7 @@
 
 import os
 
-from pimlico.core.dependencies.licenses import APACHE_V2
+from pimlico.core.dependencies.licenses import APACHE_V2, NOT_RELEVANT
 
 from pimlico import JAVA_BUILD_JAR_DIR
 
@@ -25,7 +25,9 @@ opennlp_dependency = JavaJarsDependency(
     ] + [
         # Not everything necessarily needs Guava, but we tend to use it a lot, so include in all OpenNLP dep sets
         ("guava.jar", "http://search.maven.org/remotecontent?filepath=com/google/guava/guava/23.0/guava-23.0.jar"),
-    ]
+    ],
+    homepage_url="https://opennlp.apache.org/",
+    license=APACHE_V2
 )
 
 
@@ -33,5 +35,4 @@ def py4j_wrapper_dependency(test_class_name):
     return JavaDependency("OpenNLP wrapper", jars=[os.path.join(JAVA_BUILD_JAR_DIR, "opennlp.jar")],
                           classes=[test_class_name],
                           dependencies=[argparse4j_dependency, py4j_dependency, opennlp_dependency],
-                          homepage_url="https://opennlp.apache.org/",
-                          license=APACHE_V2)
+                          license=NOT_RELEVANT)

@@ -119,6 +119,8 @@ class PythonPackageOnPip(PythonPackageDependency):
     Allows specification of a minimum version. If an earlier version is installed,
     it will be upgraded.
 
+    Name is the readable software name. Package is a the package that is imported in Python.
+
     """
     def __init__(self, package, name=None, pip_package=None, upgrade_only_if_needed=False, min_version=None, editable=False, **kwargs):
         """

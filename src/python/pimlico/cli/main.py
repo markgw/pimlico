@@ -21,7 +21,7 @@ from traceback import print_exc
 from pimlico import cfg
 
 from pimlico.cli.newmodule import NewModuleCmd
-from pimlico.cli.check import InstallCmd, DepsCmd
+from pimlico.cli.check import InstallCmd, DepsCmd, LicensesCmd
 from pimlico.cli.clean import CleanCmd
 from pimlico.cli.loaddump import DumpCmd, LoadCmd
 from pimlico.cli.locations import InputsCmd, OutputCmd, ListStoresCmd, MoveStoresCmd
@@ -136,7 +136,7 @@ SUBCOMMANDS = [
     StatusCmd, VariantsCmd, RunCmd, RecoverCmd, FixLengthCmd, BrowseCmd, ShellCLICmd, PythonShellCmd, ResetCmd, CleanCmd,
     ListStoresCmd, MoveStoresCmd, UnlockCmd,
     DumpCmd, LoadCmd, DepsCmd, InstallCmd, InputsCmd, OutputCmd, NewModuleCmd, VisualizeCmd, EmailCmd,
-    JupyterCmd, Tar2PimarcCmd,
+    JupyterCmd, Tar2PimarcCmd, LicensesCmd,
 ]
 
 

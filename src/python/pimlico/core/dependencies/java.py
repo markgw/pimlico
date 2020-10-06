@@ -10,7 +10,7 @@ import sys
 import os
 from subprocess import check_output, STDOUT, CalledProcessError
 
-from pimlico.core.dependencies.licenses import BSD
+from pimlico.core.dependencies.licenses import BSD, MIT
 
 from pimlico import JAVA_LIB_DIR, JAVA_BUILD_JAR_DIR
 from pimlico.core.dependencies.base import SoftwareDependency, InstallationError, Any
@@ -296,7 +296,7 @@ def get_module_classpath(module):
 argparse4j_dependency = JavaJarsDependency(
     "argparse4j",
     jar_urls=[("argparse4j.jar", "http://sourceforge.net/projects/argparse4j/files/latest/download?source=files")],
-    homepage_url="https://argparse4j.github.io/",
+    homepage_url="https://argparse4j.github.io/", license=MIT,
 )
 
 
@@ -315,7 +315,8 @@ class Py4JSoftwareDependency(JavaDependency):
     def dependencies(self):
         # Must have the Python component installed first
         from .python import PythonPackageOnPip
-        return super(Py4JSoftwareDependency, self).dependencies() + [py4j_dependency]
+        return super(Py4JSoftwareDependency, self).dependencies() + [
+            PythonPackageOnPip("py4j", name="Py4J Python component", homepage_url="https://www.py4j.org/", license=BSD)]
 
     def __get_jars(self):
         try:
