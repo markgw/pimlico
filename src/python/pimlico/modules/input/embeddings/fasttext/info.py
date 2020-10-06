@@ -1,8 +1,8 @@
 import os
 
-from pimlico.core.dependencies.python import numpy_dependency
+from pimlico.core.dependencies.python import numpy_dependency, PythonPackageOnPip
 from pimlico.core.modules.base import BaseModuleInfo
-from pimlico.datatypes.embeddings import Embeddings
+from pimlico.datatypes.embeddings import Embeddings, FastTextEmbeddings
 
 
 class ModuleInfo(BaseModuleInfo):
@@ -10,37 +10,24 @@ class ModuleInfo(BaseModuleInfo):
     Reads in embeddings from the `FastText <https://github.com/facebookresearch/fastText>`_ format, storing
     them in the format used internally in Pimlico for embeddings.
 
-    Can be used, for example, to read the
-    `pre-trained embeddings <https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md>`_
-    offered by Facebook AI.
-
-    Currently only reads the text format (``.vec``), not the binary format (``.bin``).
-
-    .. seealso::
-
-       :mod:`pimlico.modules.input.embeddings.fasttext_gensim`:
-          An alternative reader that uses Gensim's FastText format reading code and permits reading from the
-          binary format, which contains more information.
+    Loads the fastText ``.bin`` format using the fasttext library itself. Outputs
+    both a fixed set of embeddings in Pimlico's standard format and a special
+    fastText datatype that provides access to more features of the model.
 
     """
-    module_type_name = "fasttext_embedding_reader"
-    module_readable_name = "FastText embedding reader"
-    module_outputs = [("embeddings", Embeddings())]
+    module_type_name = "fasttext_bin_embedding_reader"
+    module_readable_name = "FastText embedding reader (bin)"
+    module_outputs = [("embeddings", Embeddings()), ("model", FastTextEmbeddings())]
     module_options = {
         "path": {
             "help": "Path to the FastText embedding file",
             "required": True,
         },
-        "limit": {
-            "help": "Limit to the first N words. Since the files are typically ordered from most to least frequent, "
-                    "this limits to the N most common words",
-            "type": int,
-        },
     }
     module_supports_python2 = True
 
     def get_software_dependencies(self):
-        return super(ModuleInfo, self).get_software_dependencies() + [numpy_dependency]
+        return super(ModuleInfo, self).get_software_dependencies() + [numpy_dependency, PythonPackageOnPip("fasttext")]
 
     def missing_module_data(self):
         missing = super(ModuleInfo, self).missing_module_data()
