@@ -75,3 +75,61 @@ class StringList(PimlicoDatatype):
             with io.open(os.path.join(self.data_dir, "data"), "w", encoding="utf-8") as f:
                 f.write(u"\n".join(l))
             self.task_complete("list")
+
+
+class IntValue(PimlicoDatatype):
+    """
+    Stores a single integer.
+
+    """
+    datatype_name = "int"
+    datatype_supports_python2 = True
+
+    class Reader(object):
+        class Setup(object):
+            def get_required_paths(self):
+                return ["data"]
+
+        def get_value(self):
+            with io.open(os.path.join(self.data_dir, "data"), "r") as f:
+                return int(f.read())
+
+        def __int__(self):
+            return self.get_value()
+
+    class Writer(object):
+        required_tasks = ["val"]
+
+        def write_value(self, val):
+            with io.open(os.path.join(self.data_dir, "data"), "w", encoding="utf-8") as f:
+                f.write(str(val))
+            self.task_complete("val")
+
+
+class FloatValue(PimlicoDatatype):
+    """
+    Stores a single float.
+
+    """
+    datatype_name = "float"
+    datatype_supports_python2 = True
+
+    class Reader(object):
+        class Setup(object):
+            def get_required_paths(self):
+                return ["data"]
+
+        def get_value(self):
+            with io.open(os.path.join(self.data_dir, "data"), "r") as f:
+                return float(f.read())
+
+        def __float__(self):
+            return self.get_value()
+
+    class Writer(object):
+        required_tasks = ["val"]
+
+        def write_value(self, val):
+            with io.open(os.path.join(self.data_dir, "data"), "w", encoding="utf-8") as f:
+                f.write(str(val))
+            self.task_complete("val")
