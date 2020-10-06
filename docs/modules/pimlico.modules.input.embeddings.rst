@@ -18,5 +18,6 @@ There are several formats in common usage and we provide readers for most of the
 
    pimlico.modules.input.embeddings.fasttext
    pimlico.modules.input.embeddings.fasttext_gensim
+   pimlico.modules.input.embeddings.fasttext_vec
    pimlico.modules.input.embeddings.glove
    pimlico.modules.input.embeddings.word2vec
