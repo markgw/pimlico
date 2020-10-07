@@ -618,9 +618,10 @@ class InputQueueFeeder(Thread):
                 if self.record_invalid:
                     if any(is_invalid_doc(doc) for doc in docs):
                         self.invalid_docs.put((archive, filename))
+
+                batch.append((archive, filename, docs))
                 if len(batch) < self.feeder_batch_size:
                     # Don't send this batch yet: get some more documents
-                    batch.append((archive, filename, docs))
                     continue
                 # If the queue is full, this will block until there's room to put the next one on
                 # It also blocks if the queue is closed/destroyed/something similar, so we need to check now and
