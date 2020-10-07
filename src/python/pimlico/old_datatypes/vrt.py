@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2020 Mark Granroth-Wilding
+# Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
+
 from pimlico.cli.browser.tools.formatter import DocumentBrowserFormatter
 from pimlico.old_datatypes.documents import DataPointType
 from pimlico.utils.core import cached_property

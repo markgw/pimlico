@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2020 Mark Granroth-Wilding
+# Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
+
 """
 I would prefer to implement this by getting a static LDA model for
 each time slice during pre-processing and then running super-fast LDA

@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2020 Mark Granroth-Wilding
+# Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
+
 """Tools for reading VRT files.
 
 See `VRT docs <https://www.kielipankki.fi/development/korp/corpus-input-format/#VRT_file_format>`_.

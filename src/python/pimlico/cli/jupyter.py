@@ -1,3 +1,7 @@
+# This file is part of Pimlico
+# Copyright (C) 2020 Mark Granroth-Wilding
+# Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
+
 """
 A command to start a Jupyter notebook for a given pipeline, providing access
 to its modules and their outputs.

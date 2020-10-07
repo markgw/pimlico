@@ -1,6 +1,6 @@
 # This file is part of Pimlico
-# Copyright (C) 2016 Mark Granroth-Wilding
-# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
+# Copyright (C) 2020 Mark Granroth-Wilding
+# Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
 
 """
 Runs the Malt dependency parser.
