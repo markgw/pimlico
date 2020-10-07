@@ -221,10 +221,9 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
 
                     # Set map processing going, using the generic function
-                    mapper = DocumentMapper(self, input_iter, processes=self.processes)
+                    mapper = DocumentMapper(self, input_iter, processes=self.processes, pbar=pbar)
                     for (archive, doc_name), next_output in mapper.map_documents():
                         docs_completed_now += 1
-                        pbar.update(docs_completed_now)
 
                         # Write the result to the output corpora
                         for result, writer in zip(next_output, writers):
@@ -287,7 +286,10 @@ def output_to_document(output, datatype):
 
 
 class DocumentMapper(object):
-    def __init__(self, executor, input_iter, processes=1, record_invalid=False):
+    def __init__(self, executor, input_iter, processes=1, record_invalid=False, pbar=None):
+        # If pbar is given, it will be updated every time a document is received
+        #  from worker processes
+        self.pbar = pbar
         self.record_invalid = record_invalid
         self.processes = processes
         self.input_iter = input_iter
@@ -338,6 +340,7 @@ class DocumentMapper(object):
             self.input_feeder.started.wait()
             # Check what document we're looking for next
             next_document = self.input_feeder.get_next_output_document()
+            num_docs_received = 0
 
             while next_document is not None:
                 # Wait for a document coming off the output queue
@@ -374,6 +377,9 @@ class DocumentMapper(object):
                 # We've got some result, but it might not be the one we're looking for
                 # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
                 result_buffer[(result.archive, result.filename)] = result.data
+                num_docs_received += 1
+                if self.pbar is not None:
+                    self.pbar.update(num_docs_received)
 
                 # Write out as many as we can of the docs that have been sent and whose output is available
                 #  while maintaining the order they were put in in
