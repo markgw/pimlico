@@ -11,12 +11,6 @@ from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.core.modules.base import satisfies_typecheck
 from pimlico.datatypes import GroupedCorpus
 from pimlico.datatypes.base import DataNotReadyError
-from pimlico.datatypes.corpora.data_points import RawDocumentType
-
-
-# This file is part of Pimlico
-# Copyright (C) 2016 Mark Granroth-Wilding
-# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 from pimlico.utils.pimarc import PimarcWriter
 
 

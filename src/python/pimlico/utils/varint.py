@@ -1,6 +1,6 @@
-# This file is part of Pimlico
-# Copyright (C) 2020 Mark Granroth-Wilding
-# Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
+# This file is not part of Pimlico, but largely copied
+# Copyright (C) 2016 Peter Ruibal
+# Licensed under the MIT License
 
 """Varint encoder/decoder
 
