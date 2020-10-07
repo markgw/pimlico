@@ -136,3 +136,6 @@ NOT_RELEVANT = SoftwareLicense(
                 "the software in question is. For example, it might be part of some other licensed software, "
                 "whose license is already covered elsewhere."
 )
+
+# Mark this license as the one we use for Pimlico itself, for easy reference
+pimlico_license = GNU_LGPL_V2

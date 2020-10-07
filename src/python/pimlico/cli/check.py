@@ -9,13 +9,8 @@ from pimlico.core.dependencies.core import CORE_PIMLICO_DEPENDENCIES
 from pimlico.cli.subcommands import PimlicoCLISubcommand
 from pimlico.core.config import get_dependencies
 from pimlico.core.dependencies.base import install_dependencies
-from pimlico.core.dependencies.licenses import NOT_RELEVANT
+from pimlico.core.dependencies.licenses import NOT_RELEVANT, pimlico_license
 from pimlico.utils.format import title_box
-
-
-# This file is part of Pimlico
-# Copyright (C) 2016 Mark Granroth-Wilding
-# Licensed under the GNU GPL v3.0 - http://www.gnu.org/licenses/gpl-3.0.en.html
 
 
 class InstallCmd(PimlicoCLISubcommand):
@@ -113,12 +108,18 @@ class LicensesCmd(PimlicoCLISubcommand):
             if dep.license is not NOT_RELEVANT:
                 licenses.setdefault(dep.license, []).append(dep)
 
+        pim_core_done = False
         for license, lic_deps in licenses.items():
             if license is None:
                 print(title_box("License unknown"))
                 print("Check the software's homepage for a license\n")
             else:
                 print(title_box(license.name))
+
+            if license is pimlico_license:
+                # We should also include Pimlico itself in the list
+                print("Pimlico core library")
+                pim_core_done = True
 
             for dep in lic_deps:
                 # If there's no license, show a link to the homepage if possible
@@ -128,3 +129,9 @@ class LicensesCmd(PimlicoCLISubcommand):
                     homepage = ""
                 print("{}{}".format(dep.name, homepage))
             print()
+
+        if not pim_core_done:
+            print(title_box(pimlico_license.name))
+            print("Pimlico core library")
+            print()
+
