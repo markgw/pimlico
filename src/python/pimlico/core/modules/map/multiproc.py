@@ -69,18 +69,20 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                 while not self.stopped.is_set():
                     try:
                         # Timeout and go round the loop again to check whether we're supposed to have stopped
-                        archive, filename, docs = qget(self.input_queue, timeout=0.05)
+                        # The queue feeds us multiple documents at a time: we don't know how many it will be
+                        inputs = qget(self.input_queue, timeout=0.05)
                     except Empty:
                         # Don't worry if the queue is empty: just keep waiting for more until we're shut down
                         pass
                     else:
-                        # Buffer input documents, so that we can process multiple at once if requested
-                        input_buffer.append(tuple([archive, filename] + docs))
-                        if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
-                            results = self.process_documents(input_buffer)
-                            for input_tuple, result in zip(input_buffer, results):
-                                self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
-                            input_buffer = []
+                        for archive, filename, docs in inputs:
+                            # Buffer input documents, so that we can process multiple at once if requested
+                            input_buffer.append(tuple([archive, filename] + docs))
+                            if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
+                                results = self.process_documents(input_buffer)
+                                for input_tuple, result in zip(input_buffer, results):
+                                    self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
+                                input_buffer = []
             finally:
                 try:
                     self.tear_down()

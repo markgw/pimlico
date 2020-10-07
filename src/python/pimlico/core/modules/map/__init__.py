@@ -523,6 +523,8 @@ class InputQueueFeeder(Thread):
         self.ended = threading.Event()
         self.exception_queue = Queue(1)
 
+        self.feeder_batch_size = 1
+
         self.record_invalid = record_invalid
         if record_invalid:
             # Accumulate a list of invalid docs that have been fed, just for information
@@ -600,6 +602,8 @@ class InputQueueFeeder(Thread):
 
     def run(self):
         try:
+            # Accumulate docs in a batch to send in one package to the processor
+            batch = []
             # Keep feeding inputs onto the queue as long as we've got more
             for i, (archive, filename, docs) in enumerate(self.iterator):
                 if self.cancelled.is_set():
@@ -608,12 +612,16 @@ class InputQueueFeeder(Thread):
                 if self.record_invalid:
                     if any(is_invalid_doc(doc) for doc in docs):
                         self.invalid_docs.put((archive, filename))
+                if len(batch) < self.feeder_batch_size:
+                    # Don't send this batch yet: get some more documents
+                    batch.append((archive, filename, docs))
+                    continue
                 # If the queue is full, this will block until there's room to put the next one on
                 # It also blocks if the queue is closed/destroyed/something similar, so we need to check now and
                 #  again that we've not been asked to give up
                 while True:
                     try:
-                        self.input_queue.put((archive, filename, docs), timeout=0.1)
+                        self.input_queue.put(batch, timeout=0.1)
                     except Full:
                         if self.cancelled.is_set():
                             return
@@ -621,9 +629,27 @@ class InputQueueFeeder(Thread):
                     else:
                         break
                 # Record that we've sent this one off, so we can write the results out in the right order
-                self._docs_processing.put((archive, filename))
+                for archive, filename, __ in batch:
+                    self._docs_processing.put((archive, filename))
                 # As soon as something's been fed, the output processor can get going
                 self.started.set()
+                # Start a new batch
+                batch = []
+
+            # We may still need to send off the final batch
+            if len(batch) > 0:
+                while True:
+                    try:
+                        self.input_queue.put(batch, timeout=0.1)
+                    except Full:
+                        if self.cancelled.is_set():
+                            return
+                    else:
+                        break
+                for archive, filename, __ in batch:
+                    self._docs_processing.put((archive, filename))
+                self.started.set()
+
             self.feeding_complete.set()
             if self.complete_callback is not None:
                 self.complete_callback()
@@ -720,10 +746,10 @@ class DocumentProcessorPool(object):
         # the queue just get bigger and bigger.
         # In this case, the worker has to wait a bit to send its output back
         self.output_queue = self.create_queue(10*processes)
-        # Limit the input queue to 2*processes: there's no point in filling
+        # Limit the input queue to 5*processes: there's no point in filling
         # it up with far more, just enough that the processes can be sure of
         # getting something when they're ready
-        self.input_queue = self.create_queue(2*processes)
+        self.input_queue = self.create_queue(5*processes)
         self.exception_queue = self.create_queue()
         self.processes = processes
         self._queues = [self.output_queue, self.input_queue, self.exception_queue]
