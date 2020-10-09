@@ -15,8 +15,6 @@ class PlotOutput(NamedFileCollection):
 
     Contains the dataset being plotted, a script to build the plot, and the output PDF.
 
-    Also supplies additional datatypes to point to the individual files.
-
     """
     datatype_supports_python2 = True
 
@@ -43,6 +41,18 @@ class PlotOutput(NamedFileCollection):
                               "{} was not created".format(pdf_path))
             else:
                 self.task_complete("write_plot.pdf")
+
+        @property
+        def data_path(self):
+            return self.get_absolute_path("data.csv")
+
+        @property
+        def code_path(self):
+            return self.get_absolute_path("plot.py")
+
+        @property
+        def plot_path(self):
+            return self.get_absolute_path("plot.pdf")
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             incomplete = self.incomplete_tasks
