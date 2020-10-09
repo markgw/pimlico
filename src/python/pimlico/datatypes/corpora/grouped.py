@@ -49,7 +49,11 @@ class GroupedCorpus(IterableCorpus):
                 if not super(GroupedCorpus.Reader.Setup, self).data_ready(base_dir):
                     return False
                 # Also check that we've got at least one archive in the data dir, unless the length of the corpus is 0
-                if self.read_metadata(base_dir)["length"] > 0 and not self._has_archives(self._get_data_dir(base_dir)):
+                metadata = self.read_metadata(base_dir)
+                if metadata["length"] > 0 and not self._has_archives(self._get_data_dir(base_dir)):
+                    return False
+                # Check whether the corpus is marked as being currently written to
+                if "writing" in metadata and metadata["writing"]:
                     return False
                 return True
 
@@ -336,6 +340,8 @@ class GroupedCorpus(IterableCorpus):
                 # This can take a long time on a large corpus
                 self.metadata["length"] = self._count_written_docs()
             self.doc_count = self.metadata["length"]
+            # Set a value in the metadata to indicate that we're still writing this corpus
+            self.metadata["writing"] = True
 
         def add_document(self, archive_name, doc_name, doc, metadata=None):
             """
@@ -441,6 +447,7 @@ class GroupedCorpus(IterableCorpus):
             if self.current_archive is not None:
                 self.current_archive.close()
             self.metadata["length"] = self.doc_count
+            del self.metadata["writing"]
             super(GroupedCorpus.Writer, self).__exit__(exc_type, exc_val, exc_tb)
 
         def _count_written_docs(self):
