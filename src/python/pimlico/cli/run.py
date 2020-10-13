@@ -52,7 +52,7 @@ class RunCmd(PimlicoCLISubcommand):
                             help="Perform a preliminary run of any modules that take multiple datasets into one of "
                                  "their inputs. This means that we will run the module even if not all the datasets "
                                  "are yet available (but at least one is) and mark it as preliminarily completed")
-        parser.add_argument("--exit-on-error", "-e", action="store_true",
+        parser.add_argument("--exit-on-error", action="store_true",
                             help="If an error is encountered while executing a module that causes the whole module "
                                  "execution to fail, output the error and exit. By default, Pimlico will send "
                                  "error output to a file (or print it in debug mode) and continue to execute the "
@@ -63,6 +63,9 @@ class RunCmd(PimlicoCLISubcommand):
                                  "fails and a summary at the end of everything), 'end' "
                                  "(send only the final summary). Email sending must be configured: "
                                  "see 'email' command to test")
+        parser.add_argument("--last-error", "-e", action="store_true",
+                            help="Don't execute, just output the error log from the last execution of the given "
+                                 "module(s)")
 
     def run_command(self, pipeline, opts):
         debug = opts.debug
@@ -145,6 +148,19 @@ class RunCmd(PimlicoCLISubcommand):
         log.info("Using pipeline %s" % pipeline_name)
         if pipeline.local_config_sources:
             log.info("Loaded local config from: %s" % ", ".join(pipeline.local_config_sources))
+
+        if opts.last_error:
+            # Just output the last error log for each module
+            for module_name in module_specs:
+                module = pipeline[module_name]
+                last_error_log = module.get_last_log_filename()
+                if last_error_log is None:
+                    log.info("No error logs found for module {}".format(module_name))
+                else:
+                    log.info("Outputting error log for {} from {}".format(module_name, last_error_log))
+                    with open(last_error_log, "r") as f:
+                        print(f.read())
+            sys.exit(0)
 
         # If email report has been requested, check now before we begin that email sending is configured
         if opts.email is not None:

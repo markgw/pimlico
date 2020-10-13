@@ -22,8 +22,10 @@ worrying about incurring the associated costs (and dependencies) every time a pi
 is loaded.
 
 """
+import re
 from builtins import zip
 import copy
+from operator import itemgetter
 
 from future.utils import raise_from
 from past.builtins import basestring
@@ -1195,6 +1197,30 @@ class BaseModuleInfo(object):
         """
         return os.path.exists(self.lock_path)
 
+    def get_log_filenames(self, name="error"):
+        """
+        Get a list of all the log filenames of the given prefix that exist in the module's
+        output dir. They will be ordered according to their numerical suffixes (i.e. the
+        order in which they were created).
+
+        Returns a list of (filename, num) tuples, where num is the numerical suffix as an int.
+
+        """
+        dir_name = self.get_module_output_dir(absolute=True)
+        if not os.path.exists(dir_name):
+            # No log files, as there's no output dir
+            return []
+        # Search for all filenames of the right form
+        pattern = re.compile(r"{}(\d\d\d).log".format(name))
+        found = []
+        for module_file in os.listdir(dir_name):
+            m = pattern.match(module_file)
+            if m is not None:
+                file_number = int(m.group(1))
+                found.append((module_file, file_number))
+        found.sort(key=itemgetter(1))
+        return found
+
     def get_new_log_filename(self, name="error"):
         """
         Returns an absolute path that can be used to output a log file for this module. This is used for
@@ -1207,13 +1233,25 @@ class BaseModuleInfo(object):
             os.makedirs(dir_name)
 
         # Search for a filename that doesn't already exist
-        pattern = "%s%03d.log"
-        module_files = os.listdir(dir_name)
-        file_number = 0
-        while pattern % (name, file_number) in module_files:
-            file_number += 1
-        return os.path.join(dir_name, pattern % (name, file_number))
+        old_files = self.get_log_filenames(name)
+        if len(old_files) == 0:
+            file_number = 0
+        else:
+            file_number = old_files[-1][1] + 1
+        filename = "{}{:03d}.log".format(name, file_number)
+        return os.path.join(dir_name, filename)
 
+    def get_last_log_filename(self, name="error"):
+        """
+        Get the most recent error log that was created by a call to get_new_log_filename().
+        Returns an absolute path, or None if no matching files are found.
+
+        """
+        old_files = self.get_log_filenames(name)
+        if len(old_files) == 0:
+            return None
+        else:
+            return os.path.join(self.get_module_output_dir(absolute=True), old_files[-1][0])
 
 def collect_unexecuted_dependencies(modules):
     """

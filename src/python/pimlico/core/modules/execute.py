@@ -346,6 +346,7 @@ def execute_modules(pipeline, modules, log, force_rerun=False, debug=False, exit
                         print(debug_mess, file=sys.stderr)
                     else:
                         log.error("Full debug info output to %s" % error_filename)
+                        log.error("Append '-e' to run command to view the full log")
 
                     # Only send email error report if this was an execution error, not a load error
                     if type(e) is ModuleExecutionError and email == "modend":
