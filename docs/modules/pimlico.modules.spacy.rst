@@ -19,4 +19,5 @@ module type following the same approach.
    :maxdepth: 2
    :titlesonly:
 
+   pimlico.modules.spacy.parse_text
    pimlico.modules.spacy.tokenize

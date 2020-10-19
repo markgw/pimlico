@@ -40,6 +40,8 @@ command line.
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`jupyter`    | Create and start a new Jupyter notebook for the pipeline                                     |
 +-------------------+----------------------------------------------------------------------------------------------+
+| :doc:`licenses`   | List information about licsenses of software dependencies                                    |
++-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`load`       | Load a module's output data from a tarball previously created by the dump command            |
 +-------------------+----------------------------------------------------------------------------------------------+
 | :doc:`movestores` | Move data between stores                                                                     |
@@ -101,3 +103,4 @@ command line.
    email
    jupyter
    tar2pimarc
+   licenses

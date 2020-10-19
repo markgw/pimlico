@@ -9,6 +9,7 @@ Submodules
    pimlico.core.dependencies.base
    pimlico.core.dependencies.core
    pimlico.core.dependencies.java
+   pimlico.core.dependencies.licenses
    pimlico.core.dependencies.python
    pimlico.core.dependencies.versions
 

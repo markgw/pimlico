@@ -14,7 +14,7 @@ Usage:
 
 ::
 
-    pimlico.sh [...] run [modules [modules ...]] [-h] [--force-rerun] [--all-deps] [--all] [--dry-run] [--step] [--preliminary] [--exit-on-error] [--email {modend,end}]
+    pimlico.sh [...] run [modules [modules ...]] [-h] [--force-rerun] [--all-deps] [--all] [--dry-run] [--step] [--preliminary] [--exit-on-error] [--email {modend,end}] [--last-error]
 
 
 Positional arguments
@@ -44,8 +44,10 @@ Options
 +---------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``--preliminary``, ``--pre``          | Perform a preliminary run of any modules that take multiple datasets into one of their inputs. This means that we will run the module even if not all the datasets are yet available (but at least one is) and mark it as preliminarily completed                                                                      |
 +---------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``--exit-on-error``, ``-e``           | If an error is encountered while executing a module that causes the whole module execution to fail, output the error and exit. By default, Pimlico will send error output to a file (or print it in debug mode) and continue to execute the next module that can be executed, if any                                   |
+| ``--exit-on-error``                   | If an error is encountered while executing a module that causes the whole module execution to fail, output the error and exit. By default, Pimlico will send error output to a file (or print it in debug mode) and continue to execute the next module that can be executed, if any                                   |
 +---------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``--email``                           | Send email notifications when processing is complete, including information about the outcome. Choose from: 'modend' (send notification after module execution if it fails and a summary at the end of everything), 'end' (send only the final summary). Email sending must be configured: see 'email' command to test |
++---------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``--last-error``, ``-e``              | Don't execute, just output the error log from the last execution of the given module(s)                                                                                                                                                                                                                                |
 +---------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 

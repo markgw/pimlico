@@ -2,35 +2,14 @@
 # Copyright (C) 2020 Mark Granroth-Wilding
 # Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
 
-from importlib import reload
-
-import pkg_resources
-import spacy
-from spacy import about
-from spacy.cli.download import get_json, get_compatibility, get_version, download_model
-
-from pimlico.core.modules.execute import ModuleExecutionError
 from pimlico.core.modules.map import skip_invalid
 from pimlico.core.modules.map.singleproc import single_process_executor_factory
+from ..utils import load_spacy_model
 
 
 def preprocess(executor):
     model = executor.info.options["model"]
-
-    try:
-        nlp = spacy.load(model)
-    except IOError:
-        # Couldn't load spacy model
-        if not executor.info.options["on_disk"]:
-            # If not loading from disk, we need to run the spacy download command
-            executor.log.info("Downloading the model '{}'".format(model))
-            if not download(model):
-                raise ModuleExecutionError("Model could not be downloaded")
-        else:
-            raise
-        # Now the model should be available
-        nlp = spacy.load(model)
-
+    nlp = load_spacy_model(model, executor.log, local=executor.info.options["on_disk"])
     executor.tokenizer = nlp.Defaults.create_tokenizer(nlp)
     executor.sentencizer = nlp.create_pipe("sentencizer")
 
@@ -49,25 +28,3 @@ def process_document(worker, archive, filename, doc):
 
 
 ModuleExecutor = single_process_executor_factory(process_document, preprocess_fn=preprocess)
-
-
-def download(model):
-    """
-    Replicates what spaCy does in its cmdline interface.
-
-    """
-    dl_tpl = "{m}-{v}/{m}-{v}.tar.gz#egg={m}=={v}"
-    shortcuts = get_json(about.__shortcuts__, "available shortcuts")
-    model_name = shortcuts.get(model, model)
-    compatibility = get_compatibility()
-    version = get_version(model_name, compatibility)
-    dl = download_model(dl_tpl.format(m=model_name, v=version))
-    # Returns 0 if download was successful
-    if dl != 0:
-        return False
-
-    # Refresh sys.path so we can import the installed package
-    import site
-    reload(site)
-    reload(pkg_resources)
-    return True
