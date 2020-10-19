@@ -12,7 +12,6 @@ from __future__ import absolute_import
 import sys
 
 from future import standard_library
-from future.utils import raise_from
 
 standard_library.install_aliases()
 from builtins import zip
@@ -24,6 +23,7 @@ from queue import Empty, Queue
 from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, DocumentMapProcessMixin, \
     DocumentMapModuleExecutor, WorkerStartupError, ExceptionWithTraceback
 from pimlico.utils.pipes import qget
+from pimlico.utils.core import raise_from
 
 
 class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
@@ -137,6 +137,8 @@ class ThreadingMapPool(DocumentProcessorPool):
                 # No error
                 pass
             else:
+                if isinstance(e, ExceptionWithTraceback):
+                    e = e.exception_with_traceback()
                 raise_from(WorkerStartupError("error in worker process: %s" % e, cause=e), e)
 
     def start_worker(self):
