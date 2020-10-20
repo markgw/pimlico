@@ -600,6 +600,12 @@ class PipelineConfig(object):
                             original_val_item = original_val_item.strip()
                             # If the input connection has more than just a module name, we only modify the module name
                             val_module_name, __, rest_of_val = original_val_item.partition(".")
+                            # Allow val_module_name to be preceded by a name in {}s
+                            if val_module_name.startswith("{") and "}" in val_module_name:
+                                val_alt_name = val_module_name[1:val_module_name.index("}")]
+                                val_module_name = val_module_name[val_module_name.index("}")+1:]
+                            else:
+                                val_alt_name = None
                             # If module name is unknown, this will be a problem, but leave the error handling till later
                             # For safety's sake, skip over anything that starts with *
                             if len(original_to_expanded_sections.get(val_module_name, [])) > 1 and \
@@ -615,6 +621,10 @@ class PipelineConfig(object):
                                 previous_module_alt_names = [
                                     mod[mod.index("[")+1:mod.index("]")] if "[" in mod else None for mod in previous_modules
                                 ]
+                                # If we gave an alt name to this value (i.e. it's in a list of alts), prepend that
+                                #  to the alt name coming from the previous modules
+                                if val_alt_name is not None:
+                                    previous_module_alt_names = ["{}_{}".format(val_alt_name, prev) for prev in previous_module_alt_names]
                                 new_items.append(previous_modules)
                                 # The different items might give us different alt names
                                 # In that case, we'll just use the first for every alt
@@ -1992,7 +2002,7 @@ def _expand_alt_names_list(val):
             return val
         if "," in val[open_bracket+1:close_bracket]:
             # Get the main module name by seaching backwards from the [ for non-module name strings
-            non_mod_chars = _non_mod_name_char.findall(val[:open_bracket])
+            non_mod_chars = list(_non_mod_name_char.finditer(val[:open_bracket]))
             if len(non_mod_chars) == 0:
                 mod_start = 0
             else:

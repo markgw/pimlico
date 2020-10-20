@@ -153,6 +153,7 @@ class AddAnnotationField(DynamicOutputDatatype):
     :param input_name: input to the module whose fields we extend
     :param add_fields: field or fields to add, string names
     """
+
     def __init__(self, input_name, add_fields):
         super(AddAnnotationField, self).__init__()
         # Make it easy to add just a single field, the most common case
@@ -196,3 +197,16 @@ class AddAnnotationField(DynamicOutputDatatype):
 
 
 AddAnnotationFields = AddAnnotationField
+
+
+# Predefine some sets of annotations that can be used as input requirements
+class DependencyParsedDocumentType(WordAnnotationsDocumentType):
+    """
+    WordAnnotationsDocumentType with fields word, pos, head, deprel for each token.
+
+    Convenience wrapper for use as an input requirement where parsed text is needed.
+
+    """
+    def __init__(self, *args, **kwargs):
+        kwargs["fields"] = ["word", "pos", "head", "deprel"]
+        super().__init__(*args, **kwargs)
