@@ -6,11 +6,10 @@
 Document types used to represent datatypes of individual documents in an IterableCorpus or subtype.
 
 """
-import traceback
+from builtins import object
 from collections import OrderedDict
 from traceback import format_exc
 
-from builtins import object
 from future.utils import with_metaclass, PY3
 
 __all__ = ["DataPointType", "RawDocumentType", "TextDocumentType", "RawTextDocumentType", "DataPointError",
@@ -591,6 +590,7 @@ class TextDocumentType(RawDocumentType):
 
     """
     data_point_type_supports_python2 = True
+    formatters = [("text", "pimlico.datatypes.corpora.formatters.text.TextDocumentFormatter")]
 
     class Document(object):
         keys = ["text"]
