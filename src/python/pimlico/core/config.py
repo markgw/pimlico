@@ -633,8 +633,15 @@ class PipelineConfig(object):
                                 # Previous module this one takes input from has not been expanded: leave unchanged
                                 # Or it starts with * or includes a ,
                                 new_items.append([original_val_item])
-                                # No alternative name associated with this (unless it's already given)
-                                new_item_alt_names.append([None])
+                                # If the input has its own alt name, we can use that one
+                                # This will get overridden if the user has specified a custom one
+                                if "[" in original_val_item and "]" in original_val_item:
+                                    new_item_alt_names.append([
+                                        original_val_item[original_val_item.index("[")+1:original_val_item.index("]")]
+                                    ])
+                                else:
+                                    # No alternative name associated with this (unless it's already given)
+                                    new_item_alt_names.append([None])
                         if len(new_items) == 1:
                             # Simplest case: no comma-separated list at all
                             new_alternatives = new_items[0]
