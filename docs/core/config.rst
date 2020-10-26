@@ -324,6 +324,45 @@ of ``my_module`` (``my_module[1]``, etc) and 3 corresponding versions of ``my_ne
 Where possible, names given to the alternative parameter values in the first module will be carried through
 to the next.
 
+
+Structure: headed sections
+--------------------------
+
+By default, a pipeline is ultimately just a list of modules. The ``status`` command will show a long
+list of all the modules. In some cases, this can get very long and difficult to navigate.
+
+You can add structure to your pipeline by adding section headings. This is done by starting comments with
+multiple ``#``s. In other words, the headings are part of the comments that come in between modules.
+
+Headings follow `Markdown-style <https://daringfireball.net/projects/markdown/syntax>`_ formatting (only the
+*atx*-style, not *Setext*). Since our comments begin with ``#``s, the first ``#`` does not denote a
+heading. Subsequet ``#``s produce further nested levels of headings.
+
+.. code-block:: ini
+
+   ## Data pre-processing
+   # In this section, we will pre-process the data.
+   # Note that the line with a ## at the start is a heading.
+   # These subsequent ones are not - they are just comments.
+
+   ### Pre-processing step 1
+   # This is a sub-section
+   [my_module]
+   type=module.type.path
+
+When you run the ``status`` command now, you will see the section headings collapsed
+by default. You can expand individual sections, or everything, using the command's
+options.
+
+Use ``--expand-all`` (``-xa``) to expand the full tree of section headings and show all
+modules. Use ``--expand`` (``-x``) with a section number (get this from the collapsed tree)
+to expand a given section. E.g. ``./pimlico.sh myconf.conf status -x 2.3.1``. You can
+given multiple sections by repeating the ``-x`` option.
+
+You can also expand a full subtree of a given section by ending the section number with a dot.
+``./pimlico.sh myconf.conf status -x 2.3.``.
+
+
 Module variables: passing information through the pipeline
 ----------------------------------------------------------
 

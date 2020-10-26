@@ -7,6 +7,7 @@ from builtins import map
 from builtins import zip
 
 import os
+from itertools import cycle
 from operator import itemgetter
 
 import colorama
@@ -44,6 +45,13 @@ class StatusCmd(PimlicoCLISubcommand):
                             help="Don't include terminal color characters, even if the terminal appears to support "
                                  "them. This can be useful if the automatic detection of color terminals doesn't work "
                                  "and the status command displays lots of horrible escape characters")
+        parser.add_argument("--no-sections", "--ns", action="store_true",
+                            help="Don't show section headings, but just a list of all the modules")
+        parser.add_argument("--expand-all", "--xa", action="store_true",
+                            help="Show section headings, expanding all")
+        parser.add_argument("--expand", "-x", nargs="*",
+                            help="Expand this section number. May be used multiple times. Give a section number "
+                                 "like '1.2.3'. To expand the full subtree, give '1.2.3.'")
 
     def run_command(self, pipeline, opts):
         # If the colour output has been disabled by a switch, use the standard env var to disable it
@@ -85,6 +93,7 @@ class StatusCmd(PimlicoCLISubcommand):
             if module_sel is None:
                 # Try deriving a schedule and output it, including basic status info for each module
                 available_module_names = pipeline.modules
+                showing_all_modules = True
                 if opts.all:
                     # Show all modules, not just those that can be executed
                     print("\nAll modules in pipeline with statuses:")
@@ -99,6 +108,7 @@ class StatusCmd(PimlicoCLISubcommand):
 
                     # If the --deps-of option is given, filter modules shown to only those that lead to the given one
                     if opts.deps_of is not None:
+                        showing_all_modules = False
                         dest_module = module_number_to_name(pipeline, opts.deps_of)
                         print("\nRestricting status view to dependencies of module '%s'" % dest_module)
                         # Check through the pipeline to find all dependent modules
@@ -119,6 +129,7 @@ class StatusCmd(PimlicoCLISubcommand):
                 # Allow the range of modules to be filtered
                 if first_module is not None:
                     # Start at the given module
+                    showing_all_modules = False
                     try:
                         first_mod_idx = module_names.index(first_module)
                     except ValueError:
@@ -128,6 +139,7 @@ class StatusCmd(PimlicoCLISubcommand):
 
                 if last_module is not None and last_module not in map(itemgetter(1), module_names):
                     # End at the given module
+                    showing_all_modules = False
                     try:
                         last_mod_idx = module_names.index(last_module)
                     except ValueError:
@@ -148,26 +160,30 @@ class StatusCmd(PimlicoCLISubcommand):
                         print("\n%s:" % status)
                         print("\n".join(status_lists[status]))
                 else:
-                    for bullet, module_name in zip(bullets, module_names):
-                        # Short summary for each module
-                        module = pipeline[module_name]
-                        print(colored(status_colored(module, " %s %s" % (bullet, module_name))))
-                        # Show the type of the module
-                        print("       type: %s" % module.module_type_name)
-                        # Check module status (has it been run?)
-                        print("       status: %s" % status_colored(module, module.status if module.module_executable else "not executable"))
-                        # Check status of each input datatypes
-                        for input_name in module.input_names:
-                            print("       input %s: %s" % (
-                                input_name,
-                                colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
-                            ))
-                        print("       outputs: %s" % ", ".join([
-                            colored(name, "green") if module.get_output_reader_setup(name).ready_to_read() else colored(name, "red")
-                            for name in module.output_names
-                        ]))
-                        if module.is_locked():
-                            print("       locked: ongoing execution")
+                    if not opts.no_sections or len(module_names) < 2:
+                        # Show with the structure of section headings
+                        mod_name_bullets = dict(zip(module_names, bullets))
+                        selected_subtree = pipeline.section_headings.subtree(module_names)
+                        # If we're showing only a selection of modules, expand the full section heading tree
+                        if showing_all_modules:
+                            # Only expand requested branches
+                            if opts.expand is None:
+                                expand = []
+                            else:
+                                # Use -1 to indicate expansion of the full subtree
+                                expand = [tuple([int(n) if len(n) else -1 for n in section.split(".")]) for section in opts.expand]
+                                # Also expand the headings above
+                                expand = [
+                                    sect_num[:i] for sect_num in expand for i in range(1, len(sect_num)+1)
+                                ]
+                        else:
+                            expand = "all"
+
+                        print_section_tree(selected_subtree, mod_name_bullets, pipeline, expand=expand)
+                    else:
+                        for bullet, module_name in zip(bullets, module_names):
+                            # Short summary for each module
+                            print_module_status(module_name, bullet, pipeline)
             else:
                 # Output more detailed status information for this module
                 to_output = [module_sel]
@@ -189,6 +205,60 @@ class StatusCmd(PimlicoCLISubcommand):
                         to_output.extend(more_outputs)
         finally:
             colorama.deinit()
+
+
+def print_section_tree(tree, mod_name_bullets, pipeline, depth=0, expand="all"):
+    # Work out whether there will be hidden content
+    title_suffix = ""
+    expand_all_subtree = expand != "all" and any(x[-1] == -1 and tree.number == x[:-1] for x in expand)
+    if expand_all_subtree or tree.name == "root" or expand == "all" or any(tree.number == x for x in expand):
+        expanding = True
+    else:
+        expanding = False
+        # If there's more that we're not expanding, indicate this
+        if len(tree.modules) or len(tree.subsections):
+            title_suffix = " -> ..."
+
+    if tree.name != "root":
+        # Don't show the root
+        # Work out an appropriate status color for the section
+        section_colors = [module_status_color(pipeline[mod]) for mod in tree.subtree_modules()]
+        # Apply consistent sorting
+        section_colors.sort()
+        print("\n{}{}".format(
+            mix_bg_colors("{} {}. {}".format("#"*depth, tree.number_str(), tree.name), section_colors),
+            title_suffix
+        ))
+
+    if expanding:
+        for module_name in tree.modules:
+            # Show the status of each module in the subtree
+            print_module_status(module_name, mod_name_bullets[module_name], pipeline)
+
+        for subtree in tree.subsections:
+            print_section_tree(subtree, mod_name_bullets, pipeline, depth=depth+1, expand="all" if expand_all_subtree else expand)
+
+
+def print_module_status(module_name, bullet, pipeline):
+    # Short summary for each module
+    module = pipeline[module_name]
+    print(colored(status_colored(module, " %s %s" % (bullet, module_name))))
+    # Show the type of the module
+    print("       type: %s" % module.module_type_name)
+    # Check module status (has it been run?)
+    print("       status: %s" % status_colored(module, module.status if module.module_executable else "not executable"))
+    # Check status of each input datatypes
+    for input_name in module.input_names:
+        print("       input %s: %s" % (
+            input_name,
+            colored("ready", "green") if module.input_ready(input_name) else colored("not ready", "red")
+        ))
+    print("       outputs: %s" % ", ".join([
+        colored(name, "green") if module.get_output_reader_setup(name).ready_to_read() else colored(name, "red")
+        for name in module.output_names
+    ]))
+    if module.is_locked():
+        print("       locked: ongoing execution")
 
 
 def module_status_color(module):
@@ -218,6 +288,38 @@ def status_colored(module, text=None):
     """
     text = text or module.module_name
     return colored(text, module_status_color(module))
+
+
+_mixing_color_order = ["green", "yellow", "cyan", "red"]
+_mixing_fg_colors = ["magenta", "blue", "green", "blue"]
+
+
+def mix_bg_colors(text, colors):
+    """
+    Format a string with mixed colors, by alternating by character.
+    """
+    if len(colors) == 0:
+        color_repeats = [None for __ in text]
+    else:
+        # Proportions for green, yellow, cyan, red
+        color_proportions = [
+            colors.count("green") / len(colors),
+            colors.count("yellow") / len(colors),
+            colors.count("cyan") / len(colors),
+            colors.count("red") / len(colors),
+        ]
+        if sum(color_proportions) == 0:
+            color_proportions[0] = 1.
+        color_repeats = sum(
+            ([(fg_col, bg_col)]*int(cp * len(text))
+                for (fg_col, bg_col, cp) in zip(_mixing_fg_colors, _mixing_color_order, color_proportions)),
+            []
+        )
+        # Just in case of rounding problems
+        while len(color_repeats) < len(text):
+            color_repeats.append(color_repeats[-1])
+    return "".join(colored(char, color=fg_color, on_color="on_{}".format(bg_color) if bg_color is not None else None)
+                   for (char, (fg_color, bg_color)) in zip(text, color_repeats))
 
 
 def module_status(module):

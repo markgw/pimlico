@@ -61,7 +61,7 @@ class PipelineConfig(object):
     """
     def __init__(self, name, pipeline_config, local_config,
                  filename=None, variant="main", available_variants=[], log=None, all_filenames=None,
-                 module_aliases={}, local_config_sources=None):
+                 module_aliases={}, local_config_sources=None, section_headings=None):
         if log is None:
             log = get_console_logger("Pimlico")
         self.log = log
@@ -116,6 +116,10 @@ class PipelineConfig(object):
                                   "anyway, but no code will be found there".format(path))
             # Add these paths for the python path, so later code will be able to import things from them
             sys.path.extend(additional_paths)
+
+        if section_headings is None:
+            section_headings = SectionHeadings("root", self.module_order, [])
+        self.section_headings = section_headings
 
         # Step mode is disabled by default: see method enable_step()
         self._stepper = None
@@ -345,13 +349,15 @@ class PipelineConfig(object):
         }
 
         # Perform pre-processing of config file to replace includes, etc
-        config_sections, available_variants, vars, all_filenames, section_docstrings = \
+        config_sections, available_variants, vars, all_filenames, section_docstrings, raw_section_headings = \
             preprocess_config_file(os.path.abspath(filename), variant=variant, initial_vars=special_vars)
         # If we were asked to load a particular variant, check it's in the list of available variants
         if variant != "main" and variant not in available_variants:
             raise PipelineConfigParseError("could not load pipeline variant '%s': it is not declared anywhere in the "
                                            "config file" % variant)
         config_section_dict = dict(config_sections)
+        # Keep a structure of section headings, which the names of the modules they contain
+        section_headings = SectionHeadings.from_raw(raw_section_headings)
 
         # Check for the special overall pipeline config section "pipeline"
         if "pipeline" not in config_section_dict:
@@ -434,6 +440,7 @@ class PipelineConfig(object):
             name, pipeline_config, local_config_data,
             filename=filename, variant=variant, available_variants=list(sorted(available_variants)),
             all_filenames=all_filenames, module_aliases=aliases, local_config_sources=used_config_sources,
+            section_headings=section_headings,
         )
 
         # Now we're ready to try loading each of the module infos in turn
@@ -870,6 +877,11 @@ class PipelineConfig(object):
                     expanded_to_original_sections[module_name] = module_name
                     expanded_sections[module_name] = None
                     expanded_param_settings[module_name] = []
+
+                # Update the section heading structure with the expanded module names
+                for orig_mod_name, expansions in original_to_expanded_sections.items():
+                    if len(expansions) > 1 or expansions[0] != orig_mod_name:
+                        section_headings.expand_module(orig_mod_name, expansions)
 
                 # Now we create a module info for every expanded module config
                 # Often this will just be one, but it could be many, if there are several options with alternatives
@@ -1777,7 +1789,7 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     """
     copies = OrderedDict()
     try:
-        config_sections, available_variants, vars, all_filenames, section_docstrings, abstract = \
+        config_sections, available_variants, vars, all_filenames, section_docstrings, abstract, section_headings = \
             _preprocess_config_file(filename, variant=variant, copies=copies, initial_vars=initial_vars)
     except IOError as e:
         raise PipelineConfigParseError("could not read config file %s: %s" % (filename, e))
@@ -1816,10 +1828,10 @@ def preprocess_config_file(filename, variant="main", initial_vars={}):
     if "vars" in section_docstrings:
         del [section_docstrings["vars"]]
 
-    return config_sections, available_variants, vars, all_filenames, section_docstrings
+    return config_sections, available_variants, vars, all_filenames, section_docstrings, section_headings
 
 
-def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}):
+def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}, section_headings_root=None):
     # Read in the file
     config_lines = []
     available_variants = set([])
@@ -1834,6 +1846,14 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
     abstract = False
 
     directive_re = re.compile(r"^%%\s*(?P<dir>\S+)(\s(?P<rest>.*))?$")
+
+    # Check for section headings as we read
+    # This structure contains tuples (head name, [<conf sections within>], [<subsections>])
+    if section_headings_root is None:
+        section_headings_root = ("root", [], [])
+    # Measure the depth of the rightmost branch
+    current_heading_level = __rightmost_branch_depth(section_headings_root)
+    current_heading_sectnames = __rightmost_branch_val_list(section_headings_root)
 
     with io.open(filename, "r", encoding="utf-8") as f:
         # ConfigParser can read directly from a file, but we need to pre-process the text
@@ -1881,12 +1901,14 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     # Run preprocessing over that file too, so we can have embedded includes, etc
                     try:
                         # Ignore abstract flag of included file: it's allowed to be abstract, since it's been included
-                        incl_config, incl_variants, incl_vars, incl_filenames, incl_section_docstrings, __ = \
+                        incl_config, incl_variants, incl_vars, incl_filenames, incl_section_docstrings, __, __ = \
                             _preprocess_config_file(include_filename, variant=variant, copies=copies,
-                                                    initial_vars=initial_vars)
+                                                    initial_vars=initial_vars,
+                                                    section_headings_root=section_headings_root)
                     except IOError as e:
                         raise PipelineConfigParseError("could not find included config file '%s': %s" %
                                                        (relative_filename, e))
+                    current_heading_level = __rightmost_branch_depth(section_headings_root)
                     all_filenames.extend(incl_filenames)
                     # Save this subconfig and incorporate it later
                     # Note what the current section is, so we include it in the right order
@@ -1915,7 +1937,29 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     # Take the recent comments to be a docstring for the section
                     section_docstrings[current_section] = u"\n".join(comment_memory)
                     comment_memory = []
+                    # Add this to the current headed section
+                    current_heading_sectnames.append(current_section)
                 elif line.startswith(u"#"):
+                    # Check whether there are multiple ##s and treat these as a heading
+                    if line.startswith(u"##"):
+                        heading_level = line.partition(" ")[0].count("#") - 1
+                        # Remove any #s from the end of the heading: these are allowed in Markdown
+                        heading_name = line.partition(" ")[2].strip("# ")
+                        # Can only go down one heading level, stay on the same or go up
+                        if heading_level > current_heading_level + 1:
+                            warnings.warn("malformed section headings: "
+                                          "jumped from section heading level {} to {}: "
+                                          "ignoring section heading '{}'"
+                                          .format(current_heading_level, heading_level, line))
+                        else:
+                            _parent_heading = section_headings_root
+                            # Go down the hierarchy to get the section list that we need to append to
+                            if heading_level > 1:
+                                for __ in range(heading_level-1):
+                                    _parent_heading = _parent_heading[2][-1]
+                            current_heading_sectnames = []
+                            _parent_heading[2].append((heading_name, current_heading_sectnames, []))
+                            current_heading_level = heading_level
                     # Don't need to filter out comments, because the config parser handles them, but grab any that
                     # were just before a section to use as a docstring
                     comment_memory.append(line.lstrip(u"#").strip(u" \n"))
@@ -1974,7 +2018,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
 
     # Don't include "main" variant in available variants
     available_variants.discard("main")
-    return config_sections, available_variants, vars, all_filenames, section_docstrings, abstract
+    return config_sections, available_variants, vars, all_filenames, section_docstrings, abstract, section_headings_root
 
 
 def _check_valid_alt_name(name):
@@ -2287,3 +2331,107 @@ def print_dependency_leaf_problems(dep, local_config):
                 "\n".join("  {}".format(line) for line in instructions.splitlines())
             ))
     return auto_installable
+
+
+def __rightmost_branch_depth(root):
+    if len(root[2]) == 0:
+        return 0
+    else:
+        return 1 + __rightmost_branch_depth(root[2][-1])
+
+def __rightmost_branch_val_list(root):
+    if len(root[2]) == 0:
+        return root[1]
+    else:
+        return __rightmost_branch_val_list(root[2][-1])
+
+
+class SectionHeadings(object):
+    def __init__(self, name, number, modules, subsections):
+        self.number = tuple(number)
+        self.name = name
+        self.modules = modules
+        self.subsections = subsections
+
+    def lookup_number(self, number):
+        if isinstance(number, basestring):
+            # Interpret as x.y.z
+            if len(number) == 0:
+                number = []
+            else:
+                number = [int(n) for n in number.split(".")]
+        if number == self.number:
+            return self
+        else:
+            # Look for a subtree with the right starting number
+            # Note that numbers could be missing
+            return next(subtree for subtree in self.subsections if subtree.number_matches_subtree(number))
+
+    def number_str(self):
+        return ".".join(str(n) for n in self.number)
+
+    def number_matches_subtree(self, number):
+        return all(x == y for (x, y) in zip(number, self.number))
+
+    def expand_module(self, old_name, new_names):
+        if old_name in self.modules:
+            ind = self.modules.index(old_name)
+            self.modules = self.modules[:ind] + list(new_names) + self.modules[ind+1:]
+            return True
+        else:
+            for subsect in self.subsections:
+                if subsect.expand_module(old_name, new_names):
+                    return True
+            return False
+
+    def subtree_modules(self):
+        return self.modules + sum((subtree.subtree_modules() for subtree in self.subsections), [])
+
+    def format(self, indent=4):
+        if len(self.subsections):
+            return [self.format_node()] + [
+                "{}{}".format(" "*indent, line)
+                for subsect in self.subsections
+                for line in subsect.format(indent=indent)
+            ]
+        else:
+            return [self.format_node()]
+
+    def format_node(self):
+        return "{}[{}]".format(self.name, ", ".join(mod for mod in self.modules))
+
+    def __str__(self):
+        return "\n".join(self.format())
+
+    def num_modules(self):
+        return len(self.modules) + sum((subsect.num_modules() for subsect in self.subsections), 0)
+
+    @staticmethod
+    def from_raw(raw_section_headings, number=None):
+        # Ignore certain named conf sections
+        name, module_names, raw_subsections = raw_section_headings
+        if "pipeline" in module_names:
+            module_names.remove("pipeline")
+        if "vars" in module_names:
+            module_names.remove("vars")
+
+        if number is None:
+            # Root node is unnumbered
+            number = []
+
+        subsections = [SectionHeadings.from_raw(subsection, number+[sub_num]) for sub_num, subsection in enumerate(raw_subsections)]
+
+        return SectionHeadings(name, number, module_names, subsections)
+
+    def subtree(self, module_names):
+        """
+        Get a section heading tree containing only those modules specified
+
+        :param module_names: modules to include
+        :return:
+        """
+        new_modules = [mod for mod in self.modules if mod in module_names]
+        new_subsections = [subsect.subtree(module_names) for subsect in self.subsections]
+        # Leave out any empty subtrees
+        new_subsections = [subsect for subsect in new_subsections if subsect.num_modules() > 0]
+        return SectionHeadings(self.name, self.number, new_modules, new_subsections)
