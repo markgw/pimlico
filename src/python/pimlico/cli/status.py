@@ -291,7 +291,7 @@ def status_colored(module, text=None):
 
 
 _mixing_color_order = ["green", "yellow", "cyan", "red"]
-_mixing_fg_colors = ["magenta", "blue", "green", "blue"]
+_mixing_fg_colors = ["magenta", "blue", "red", "blue"]
 
 
 def mix_bg_colors(text, colors):
