@@ -226,7 +226,7 @@ def print_section_tree(tree, mod_name_bullets, pipeline, depth=0, expand="all"):
         # Apply consistent sorting
         section_colors.sort()
         print("{}{}".format(
-            mix_bg_colors("{} {}. {}".format("#"*depth, tree.number_str(), tree.name), section_colors),
+            mix_bg_colors("{} {}. {} ".format("#"*depth, tree.number_str(), tree.name), section_colors),
             title_suffix
         ))
 

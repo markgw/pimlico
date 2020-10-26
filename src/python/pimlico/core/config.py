@@ -2424,7 +2424,8 @@ class SectionHeadings(object):
             # Root node is unnumbered
             number = []
 
-        subsections = [SectionHeadings.from_raw(subsection, number+[sub_num]) for sub_num, subsection in enumerate(raw_subsections)]
+        subsections = [SectionHeadings.from_raw(subsection, number+[sub_num])
+                       for sub_num, subsection in enumerate(raw_subsections, start=1)]
 
         return SectionHeadings(name, number, module_names, subsections)
 
