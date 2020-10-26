@@ -160,7 +160,7 @@ class StatusCmd(PimlicoCLISubcommand):
                         print("\n%s:" % status)
                         print("\n".join(status_lists[status]))
                 else:
-                    if not opts.no_sections or len(module_names) < 2:
+                    if not pipeline.has_sections or not opts.no_sections or len(module_names) < 2:
                         # Show with the structure of section headings
                         mod_name_bullets = dict(zip(module_names, bullets))
                         selected_subtree = pipeline.section_headings.subtree(module_names)
@@ -225,7 +225,7 @@ def print_section_tree(tree, mod_name_bullets, pipeline, depth=0, expand="all"):
         section_colors = [module_status_color(pipeline[mod]) for mod in tree.subtree_modules()]
         # Apply consistent sorting
         section_colors.sort()
-        print("\n{}{}".format(
+        print("{}{}".format(
             mix_bg_colors("{} {}. {}".format("#"*depth, tree.number_str(), tree.name), section_colors),
             title_suffix
         ))

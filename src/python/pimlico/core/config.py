@@ -118,8 +118,11 @@ class PipelineConfig(object):
             sys.path.extend(additional_paths)
 
         if section_headings is None:
-            section_headings = SectionHeadings("root", self.module_order, [])
+            section_headings = SectionHeadings("root", [], self.module_order, [])
         self.section_headings = section_headings
+        # Whether there is actually a structure of headings
+        # If it's really just a flat list, we won't try formatting headings later
+        self.has_sections = len(self.section_headings.subsections) > 0
 
         # Step mode is disabled by default: see method enable_step()
         self._stepper = None
@@ -2371,6 +2374,8 @@ class SectionHeadings(object):
         return ".".join(str(n) for n in self.number)
 
     def number_matches_subtree(self, number):
+        if len(number) == 0 or len(self.number) == 0:
+            return True
         return all(x == y for (x, y) in zip(number, self.number))
 
     def expand_module(self, old_name, new_names):
