@@ -5,8 +5,9 @@
 import os
 import warnings
 
-from pimlico.datatypes import NamedFileCollection
 from past.builtins import execfile
+
+from pimlico.datatypes import NamedFileCollection
 
 
 class PlotOutput(NamedFileCollection):
@@ -31,7 +32,7 @@ class PlotOutput(NamedFileCollection):
             cwd = os.getcwd()
             os.chdir(self.data_dir)
             # Execute the python script
-            execfile(self.get_absolute_path("plot.py"))
+            execfile(self.get_absolute_path("plot.py"), locals(), locals())
             # Change working dir back
             os.chdir(cwd)
             # Check that plot.pdf got created
