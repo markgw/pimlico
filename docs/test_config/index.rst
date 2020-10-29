@@ -55,6 +55,7 @@ Available pipelines
    input.glove.conf.rst
    input.fasttext.conf.rst
    spacy.tokenize.conf.rst
+   spacy.extract_nps.conf.rst
    spacy.parse_text.conf.rst
    utility.collect_files.conf.rst
    nltk.nist_tokenize.conf.rst
