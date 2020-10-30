@@ -126,8 +126,7 @@ class ModuleExecutor(BaseModuleExecutor):
                 glove_cmd.extend(["-seed", str(opts["seed"])])
             self.log.info("  Command: {}".format(" ".join(glove_cmd)))
             try:
-                with io.open(cooccur_file, "rb") as input_f, io.open(cooccur_shuf_file, "wb") as output_f:
-                    subprocess.check_call(glove_cmd, stdin=input_f, stdout=output_f)
+                subprocess.check_call(glove_cmd)
             except subprocess.CalledProcessError as e:
                 raise_from(ModuleExecutionError("call to GloVe's glove command failed: {}".format(e)), e)
             glove_output.file_written("vectors.txt")
