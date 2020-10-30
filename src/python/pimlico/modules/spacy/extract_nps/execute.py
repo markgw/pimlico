@@ -23,8 +23,12 @@ def process_document(worker, archive, filename, doc):
     # Apply tagger and parser to the raw text
     doc = worker.nlp(doc.text)
     # Now doc.noun_chunks contains the NP chunks from the parser
+    chunks = [[token.text.strip() for token in np] for np in doc.noun_chunks]
+    # Filter out space
+    chunks = [[token for token in np if len(token)] for np in chunks]
+    chunks = [np for np in chunks if len(np)]
     return {
-        "sentences": [[token.text for token in np] for np in doc.noun_chunks]
+        "sentences": chunks
     }
 
 
