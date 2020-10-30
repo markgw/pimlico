@@ -17,6 +17,7 @@ lib/faiss
 lib/word2vecf
 lib/europarl
 lib/mgiza
+lib/glove
 models/*
 !models/Makefile
 !models/README.md

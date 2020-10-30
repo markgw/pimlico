@@ -6,6 +6,7 @@ test-config-opennlp-pos.conf	pimlico.modules.opennlp.pos
 test-config-embeddings-normalize.conf	pimlico.modules.embeddings.normalize
 test-config-embeddings-word2vec.conf	pimlico.modules.embeddings.word2vec
 test-config-embeddings-store_word2vec.conf	pimlico.modules.embeddings.store_word2vec
+test-config-embeddings-glove.conf	pimlico.modules.embeddings.glove
 test-config-embeddings-store_tsv.conf	pimlico.modules.embeddings.store_tsv
 test-config-embeddings-fasttext.conf	pimlico.modules.embeddings.fasttext
 test-config-corpora-interleave.conf	pimlico.modules.corpora.interleave, pimlico.modules.corpora.format

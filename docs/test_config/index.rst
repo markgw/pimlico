@@ -25,6 +25,7 @@ Available pipelines
    embeddings.normalize.conf.rst
    embeddings.word2vec.conf.rst
    embeddings.store_word2vec.conf.rst
+   embeddings.glove.conf.rst
    embeddings.store_tsv.conf.rst
    embeddings.fasttext.conf.rst
    corpora.interleave.conf.rst
