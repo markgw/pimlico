@@ -601,6 +601,7 @@ class PipelineConfig(object):
                                                    input_val[altgroup_end+1:]
 
                     processed_alternatives = []
+                    processed_alternatives_without_names = []
                     # It's possible for the value to already have alternatives, in which case we include them all
                     for original_val in module_config[input_opt].split("|"):
                         # If there's a list of values here, we need to handle it carefully
@@ -678,24 +679,33 @@ class PipelineConfig(object):
                             new_alternatives = [",".join(item_alts) for item_alts in zip(*new_items)]
 
                         new_alts_with_names = []
+                        new_alts_without_names = []
                         for alt_num, new_alt in enumerate(new_alternatives):
                             if new_alt.startswith("{"):
                                 # This already has an alternative name: don't do anything
                                 new_alts_with_names.append(new_alt)
+                                new_alts_without_names.append(new_alt.partition("}")[2])
                             else:
+                                new_alts_without_names.append(new_alt)
                                 # Try to find a name from one of the items in the list
-                                try:
-                                    new_name = next((item_alt_names[alt_num]
-                                                for item_alt_names in new_item_alt_names
-                                                if len(item_alt_names) > alt_num
-                                                and item_alt_names[alt_num] is not None))
-                                except StopIteration:
+                                # If this is a list of different module outputs that supply different names,
+                                #  include them all. Just picking one is misleading
+                                new_names = [item_alt_names[alt_num]
+                                             for item_alt_names in new_item_alt_names
+                                             if len(item_alt_names) > alt_num
+                                             and item_alt_names[alt_num] is not None]
+                                if len(new_names) == 0:
                                     # No name found: just leave the value as it is, unnamed
                                     new_alts_with_names.append(new_alt)
                                 else:
+                                    new_name = "-".join(new_names)
                                     new_alts_with_names.append("{%s}%s" % (new_name, new_alt))
                         processed_alternatives.extend(new_alts_with_names)
-                    module_config[input_opt] = "|".join(processed_alternatives)
+                        processed_alternatives_without_names.extend(new_alts_without_names)
+                    if len(processed_alternatives) > 1:
+                        module_config[input_opt] = "|".join(processed_alternatives)
+                    else:
+                        module_config[input_opt] = processed_alternatives_without_names[0]
 
                 # Now look for any options with alternative values and expand them out into multiple module configs
                 expanded_module_configs = []
