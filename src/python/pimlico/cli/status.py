@@ -30,6 +30,8 @@ class StatusCmd(PimlicoCLISubcommand):
                                  "names or numbers")
         parser.add_argument("--all", "-a", action="store_true",
                             help="Show all modules defined in the pipeline, not just those that can be executed")
+        parser.add_argument("--alias", action="store_true",
+                            help="Include module aliases after modules in the output. By default, they are not shown")
         parser.add_argument("--short", "-s", action="store_true",
                             help="Use a brief format when showing the full pipeline's status. Only applies when "
                                  "module names are not specified. This is useful with very large pipelines, where "
@@ -64,6 +66,15 @@ class StatusCmd(PimlicoCLISubcommand):
             variants = ["main"] + pipeline.available_variants
             print("Available pipeline variants: %s" % ", ".join(variants))
             print("Showing status for '%s' variant" % pipeline.variant)
+
+            if opts.alias:
+                # Check what aliases the pipeline includes
+                aliases = {}
+                for alias_name, module_name in pipeline.module_aliases.items():
+                    aliases.setdefault(module_name, []).append(alias_name)
+            else:
+                # Don't show any aliases
+                aliases = None
 
             module_sel = opts.module_name
             first_module = last_module = None
@@ -179,11 +190,11 @@ class StatusCmd(PimlicoCLISubcommand):
                         else:
                             expand = "all"
 
-                        print_section_tree(selected_subtree, mod_name_bullets, pipeline, expand=expand)
+                        print_section_tree(selected_subtree, mod_name_bullets, pipeline, expand=expand, aliases=aliases)
                     else:
                         for bullet, module_name in zip(bullets, module_names):
                             # Short summary for each module
-                            print_module_status(module_name, bullet, pipeline)
+                            print_module_status(module_name, bullet, pipeline, aliases=aliases)
             else:
                 # Output more detailed status information for this module
                 to_output = [module_sel]
@@ -207,7 +218,7 @@ class StatusCmd(PimlicoCLISubcommand):
             colorama.deinit()
 
 
-def print_section_tree(tree, mod_name_bullets, pipeline, depth=0, expand="all"):
+def print_section_tree(tree, mod_name_bullets, pipeline, depth=0, expand="all", aliases=None):
     # Work out whether there will be hidden content
     title_suffix = ""
     expand_all_subtree = expand != "all" and any(x[-1] == -1 and tree.number == x[:-1] for x in expand)
@@ -233,13 +244,14 @@ def print_section_tree(tree, mod_name_bullets, pipeline, depth=0, expand="all"):
     if expanding:
         for module_name in tree.modules:
             # Show the status of each module in the subtree
-            print_module_status(module_name, mod_name_bullets[module_name], pipeline)
+            print_module_status(module_name, mod_name_bullets[module_name], pipeline, aliases=aliases)
 
         for subtree in tree.subsections:
-            print_section_tree(subtree, mod_name_bullets, pipeline, depth=depth+1, expand="all" if expand_all_subtree else expand)
+            print_section_tree(subtree, mod_name_bullets, pipeline, depth=depth+1,
+                               expand="all" if expand_all_subtree else expand, aliases=aliases)
 
 
-def print_module_status(module_name, bullet, pipeline):
+def print_module_status(module_name, bullet, pipeline, aliases=None):
     # Short summary for each module
     module = pipeline[module_name]
     print(colored(status_colored(module, " %s %s" % (bullet, module_name))))
@@ -259,6 +271,10 @@ def print_module_status(module_name, bullet, pipeline):
     ]))
     if module.is_locked():
         print("       locked: ongoing execution")
+    if aliases is not None and module_name in aliases:
+        # Show the alias as well
+        for alias in aliases[module_name]:
+            print(colored(status_colored(module, " * alias: %s" % (alias))))
 
 
 def module_status_color(module):
