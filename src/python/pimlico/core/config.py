@@ -373,18 +373,42 @@ class PipelineConfig(object):
             (key, var_substitute(val, vars)) for (key, val) in config_section_dict["pipeline"].items()
         ])
 
+        # Construct a mapping from the section names as written to expanded sections and the other way
+        original_to_expanded_sections = {}
+        expanded_to_original_sections = {}
+
         # Deal with the special "alias" modules, which are not separate module, but just define new names
         aliases = {}
+        aliases_to_remove = []
         for section, section_config in config_sections:
             if section_config.get("type", None) == "alias":
                 if "input" not in section_config:
                     raise PipelineConfigParseError("module alias '%s' must have an 'input' option specifying which "
                                                    "module it is an alias for" % section)
-                aliases[section] = section_config["input"]
+                alias_targets = section_config["input"]
+                # If there are alternative targets, exapnd the alias into multiple
+                if "|" in alias_targets:
+                    for alias_target in alias_targets.split("|"):
+                        if alias_target.startswith("{"):
+                            alias_alt_name = alias_target[1:alias_target.index("}")]
+                            alias_target = alias_target[alias_target.index("}")+1:]
+                        else:
+                            # Just use the target itself as the alt name
+                            # We have to get rid of the []s
+                            alias_alt_name = alias_target.replace("[", "_").replace("]", "")
+                        # Add an alias for each alternative
+                        alias_name = "{}[{}]".format(section, alias_alt_name)
+                        aliases[alias_name] = alias_target
+                        original_to_expanded_sections.setdefault(section, []).append(alias_name)
+                        expanded_to_original_sections[alias_name] = section
+                else:
+                    # No alternatives: just a simple alias
+                    aliases[section] = alias_targets
+                aliases_to_remove.append(section)
                 # Later, we'll check that the module referred to exists
         # Remove the aliases from the config sections, as we don't need to process them any more
         config_sections = [
-            (section, section_config) for section, section_config in config_sections if section not in aliases
+            (section, section_config) for section, section_config in config_sections if section not in aliases_to_remove
         ]
         module_order = [section for section, config in config_sections if section != "pipeline"]
 
@@ -449,9 +473,6 @@ class PipelineConfig(object):
         # Now we're ready to try loading each of the module infos in turn
         module_infos = {}
         loaded_modules = []
-        # Construct a mapping from the section names as written to expanded sections and the other way
-        original_to_expanded_sections = {}
-        expanded_to_original_sections = {}
         expanded_sections = {}  # This one stores None for non-expanded sections, or the original name if expanded
         expanded_param_settings = {}  # And the settings used in the expansions
 
@@ -875,14 +896,32 @@ class PipelineConfig(object):
                     for alias in aliases_to_expand:
                         del aliases[alias]
                         for alt_name in module_alt_names:
-                            exp_alias = "%s[%s]" % (alias, alt_name)
+                            # If the alias already has an alt name, add to it
+                            if "[" in alias:
+                                alias_base, __, alias_alt_name = alias.partition("[")
+                                alias_alt_name = alias_alt_name.rstrip("]")
+                                exp_alias = "{}[{}_{}]".format(alias_base, alias_alt_name, alt_name)
+
+                                if alias_base in original_to_expanded_sections and alias in original_to_expanded_sections[alias_base]:
+                                    # This alias_base[alias_alt_name] is now further expanded, so shouldn't
+                                    #  itself be included in the expansions
+                                    original_to_expanded_sections[alias_base].remove(alias)
+                                if alias in expanded_to_original_sections:
+                                    del expanded_to_original_sections[alias]
+
+                                # Keep a record of what expansions we've done
+                                original_to_expanded_sections.setdefault(alias_base, []).append(exp_alias)
+                                expanded_to_original_sections[exp_alias] = alias_base
+                                expanded_sections[exp_alias] = alias_base
+                            else:
+                                exp_alias = "%s[%s]" % (alias, alt_name)
+
+                                # Keep a record of what expansions we've done
+                                original_to_expanded_sections.setdefault(alias, []).append(exp_alias)
+                                expanded_to_original_sections[exp_alias] = alias
+                                expanded_sections[exp_alias] = alias
                             exp_module = "%s[%s]" % (module_name, alt_name)
                             aliases[exp_alias] = exp_module
-
-                            # Keep a record of what expansions we've done
-                            original_to_expanded_sections.setdefault(alias, []).append(exp_alias)
-                            expanded_to_original_sections[exp_alias] = alias
-                            expanded_sections[exp_alias] = alias
                 else:
                     # No alternatives
                     expanded_module_configs.append((module_name, module_config))
