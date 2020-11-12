@@ -1,7 +1,3 @@
-# This file is part of Pimlico
-# Copyright (C) 2020 Mark Granroth-Wilding
-# Licensed under the GNU LGPL v3.0 - https://www.gnu.org/licenses/lgpl-3.0.en.html
-
 # Template plotting script that will be copied into the output dir so that it's easy to customize the plot afterwards
 """
 This is a basic template for plotting a bar chart of the data in data.csv. It's been output by Pimlico's

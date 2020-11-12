@@ -4,48 +4,44 @@
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import zip
-from builtins import str
+from builtins import zip, str
 
 import os
+import csv
 from io import StringIO
 
 from pimlico.core.modules.base import BaseModuleExecutor
-import csv
-
-
-from pimlico.old_datatypes.plotting import PlotOutputWriter
 
 
 class ModuleExecutor(BaseModuleExecutor):
     def execute(self):
         # Get values and labels from the inputs
         self.log.info("Collecting data")
-        inputs = self.info.get_input("values")
+        inputs = self.info.get_input("results", always_list=True)
         labels = [result.label for result in inputs]
-        values = [result.result for result in inputs]
+        values = [result.value for result in inputs]
 
         self.log.info("Outputting data and plotting code")
-        with PlotOutputWriter(self.info.get_absolute_output_dir("plot")) as writer:
+        with self.info.get_output_writer("plot") as writer:
             # Prepare data to go to CSV file
-            io = StringIO()
-            csv_writer = csv.writer(io)
+            sio = StringIO()
+            csv_writer = csv.writer(sio)
             for label, value in zip(labels, values):
-                csv_writer.writerow([str(label), "%f" % value])
-            writer.data = io.getvalue()
+                csv_writer.writerow([str(label), str(value)])
+            writer.write_file("data.csv", sio.getvalue(), text=True)
 
             # Use a standard template plot python file
             with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "plot_template.py"), "r") as f:
                 plotting_code = f.read()
             # Remove the first line, which is a comment to explain what the file is
             plotting_code = "\n".join(plotting_code.splitlines()[1:])
-            writer.plotting_code = plotting_code
+            # Otherwise, the script stays exactly as it is
+            writer.write_file("plot.py", plotting_code, text=True)
 
-        # Written the plot code and data
-        # Now do the plotting
-        self.log.info("Running plotter")
-        plot_output = self.info.get_output("plot")
-        plot_output.plot()
+            # Written the plot code and data
+            # Now do the plotting
+            self.log.info("Running plotter")
+            writer.plot()
 
-        self.log.info("Plot output to %s" % plot_output.pdf_path)
-        self.log.info("Customize plot by editing %s and recompiling (python ploy.py)" % plot_output.script_path)
+            self.log.info("Plot output to {}".format(writer.plot_path))
+            self.log.info("Customize plot by editing {} and recompiling: python plot.py".format(writer.code_path))

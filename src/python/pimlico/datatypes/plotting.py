@@ -23,6 +23,21 @@ class PlotOutput(NamedFileCollection):
         super(PlotOutput, self).__init__(["plot.py", "data.csv", "plot.pdf"], *args, **kwargs)
 
     class Writer(object):
+        """
+        Writes out source data, a Python script for the plotting using Matplotlib and
+        a PDF of the resulting plot, if the script completes successfully.
+
+        This approach means that a plot is produced immediately, but can easily be tweaked
+        and customized for later use elsewhere by copying and editing the Python
+        plotting script.
+
+        Use ``writer.write_file("data.csv", text=True)`` to write the source data and
+        ``writer.write_file("plot.py", text=True)`` to write the plotting script, which should
+        output a file ``plot.pdf``. Then call ``writer.plot()`` to execute the
+        script. If this fails, at least the other files are there so the user can
+        correct the errors and use them if they want.
+
+        """
         def plot(self):
             """
             Runs the plotting script. Errors are not caught, so if there's a problem in the script they'll be raised.
