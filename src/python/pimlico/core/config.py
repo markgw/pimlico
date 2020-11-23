@@ -1913,25 +1913,27 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
             line = line.rstrip(u"\n")
             if line.startswith("%%"):
                 # Directive: process this now
-
-                dir_match = directive_re.match(line)
-                if dir_match is None:
-                    raise PipelineConfigParseError("invalid directive line: %s" % line)
-
-                # Don't strip whitespace from the remainder of the line, as it may be needed
-                # The first space after the directive is, however, ignored, seeing as it's needed to end the dir
-                directive = dir_match.groupdict()["dir"]
-                rest = dir_match.groupdict()["rest"] or ""
-                directive = directive.lower()
-
                 # Special notation for variants to make config files more concise/readable
-                if directive[0] == "(":
+                if line[2] == "(":
                     # Treat (x) as equivalent to variant:x
                     # Transform it to share processing with canonical version below
-                    if directive[-1] != ")":
+                    if ") " not in line:
                         raise PipelineConfigParseError("unmatched bracket in bracket notation for variant directive: "
                                                        "'%s' (in line: %s)" % (directive, line))
-                    directive = "variant:%s" % directive[1:-1]
+                    # Allow whitespace around the variant name to permit more readable formatting
+                    variant_name, __, rest = line.partition(") ")
+                    variant_name = variant_name[3:].strip()
+                    directive = "variant:{}".format(variant_name)
+                else:
+                    dir_match = directive_re.match(line)
+                    if dir_match is None:
+                        raise PipelineConfigParseError("invalid directive line: %s" % line)
+
+                    # Don't strip whitespace from the remainder of the line, as it may be needed
+                    # The first space after the directive is, however, ignored, seeing as it's needed to end the dir
+                    directive = dir_match.groupdict()["dir"]
+                    rest = dir_match.groupdict()["rest"] or ""
+                    directive = directive.lower()
 
                 if directive.lower() == "novariant":
                     # Include this line only if loading the main variant
