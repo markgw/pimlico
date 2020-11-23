@@ -1912,6 +1912,7 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
         for line in f:
             line = line.rstrip(u"\n")
             if line.startswith("%%"):
+                config_line = None
                 # Directive: process this now
                 # Special notation for variants to make config files more concise/readable
                 if line[2] == "(":
@@ -1938,12 +1939,12 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                 if directive.lower() == "novariant":
                     # Include this line only if loading the main variant
                     if variant == "main":
-                        config_lines.append(rest)
+                        config_line = rest
                 elif directive.lower().startswith("variant:"):
                     variant_conds = directive[8:].strip().split(",")
                     # Line conditional on a specific variant: include only if we're loading that variant
                     if variant in variant_conds:
-                        config_lines.append(rest)
+                        config_line = rest
                     # Keep a list of all available variants
                     available_variants.update(variant_conds)
                 elif directive.lower().startswith("variant"):
@@ -1985,26 +1986,32 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                     raise PipelineConfigParseError("unknown directive '%s' used in config file" % directive)
                 comment_memory = []
             else:
-                if line.startswith(u"["):
+                config_line = line
+
+            # If a directive produced a config line, or it was just a plain line, add it to the config file
+            if config_line is not None:
+                config_lines.append(config_line)
+
+                if config_line.startswith(u"["):
                     # Track what section we're in at any time
-                    current_section = line.strip(u"[] \n")
+                    current_section = config_line.strip(u"[] \n")
                     # Take the recent comments to be a docstring for the section
                     section_docstrings[current_section] = u"\n".join(comment_memory)
                     comment_memory = []
                     # Add this to the current headed section
                     current_heading_sectnames.append(current_section)
-                elif line.startswith(u"#"):
+                elif config_line.startswith(u"#"):
                     # Check whether there are multiple ##s and treat these as a heading
-                    if line.startswith(u"##"):
-                        heading_level = line.partition(" ")[0].count("#") - 1
+                    if config_line.startswith(u"##"):
+                        heading_level = config_line.partition(" ")[0].count("#") - 1
                         # Remove any #s from the end of the heading: these are allowed in Markdown
-                        heading_name = line.partition(" ")[2].strip("# ")
+                        heading_name = config_line.partition(" ")[2].strip("# ")
                         # Can only go down one heading level, stay on the same or go up
                         if heading_level > current_heading_level + 1:
                             warnings.warn("malformed section headings: "
                                           "jumped from section heading level {} to {}: "
                                           "ignoring section heading '{}'"
-                                          .format(current_heading_level, heading_level, line))
+                                          .format(current_heading_level, heading_level, config_line))
                         else:
                             _parent_heading = section_headings_root
                             # Go down the hierarchy to get the section list that we need to append to
@@ -2016,11 +2023,10 @@ def _preprocess_config_file(filename, variant="main", copies={}, initial_vars={}
                             current_heading_level = heading_level
                     # Don't need to filter out comments, because the config parser handles them, but grab any that
                     # were just before a section to use as a docstring
-                    comment_memory.append(line.lstrip(u"#").strip(u" \n"))
+                    comment_memory.append(config_line.lstrip(u"#").strip(u" \n"))
                 else:
                     # Reset the comment memory for anything other than comments
                     comment_memory = []
-                config_lines.append(line)
 
     # Parse the result as a config file
     config_parser = RawConfigParser()
