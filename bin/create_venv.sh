@@ -71,9 +71,14 @@ if [ -d "$VENV_DIR" ]; then
     exit 1
 fi
 
-# Run the Python script to create the venv
-$PYTHON_CMD $DIR/../lib/libutils/create_virtualenv.py $VENV_DIR
+# Check virtualenv exists
+if ! $PYTHON_CMD -m virtualenv --version; then
+    echo "ERROR: virtualenv must be installed in the local environment"
+    exit 1
+fi
 
+# Run the Python script to create the venv
+$PYTHON_CMD -m virtualenv $VENV_DIR
 
 if [ "$?" != "0" ]; then
     # Failed to set up virtualenv: don't carry on running
