@@ -63,22 +63,23 @@ class JavaDependency(SoftwareDependency):
             check_java()
         except DependencyError:
             probs.append("Java is not installed")
-        # If there's been a problem above with something on the classpath, don't try
-        # loading the classes, as you end up with confusing error messages saying a
-        # class can't be loaded when you've already said a library is missing
-        if not classpath_problem:
-            # Try loading each of the classes specified
-            classpath = ":".join(self.get_classpath_components())
-            for cls in self.classes:
-                try:
-                    check_java_dependency(cls, classpath=classpath)
-                except DependencyCheckerError:
-                    probs.append("unable to load Java dependency checker to check classes are loadable")
-                except DependencyError as e:
-                    # Usually, the first line is enough to tell what the error was (start of stack trace)
-                    error_output = e.stderr.partition("\n")[0].strip()
-                    extra_message = ". Loader output: %s" % error_output if error_output else ""
-                    probs.append("could not load Java class %s (classpath=%s)%s" % (cls, classpath, extra_message))
+        else:
+            # If there's been a problem above with something on the classpath, don't try
+            # loading the classes, as you end up with confusing error messages saying a
+            # class can't be loaded when you've already said a library is missing
+            if not classpath_problem:
+                # Try loading each of the classes specified
+                classpath = ":".join(self.get_classpath_components())
+                for cls in self.classes:
+                    try:
+                        check_java_dependency(cls, classpath=classpath)
+                    except DependencyCheckerError:
+                        probs.append("unable to load Java dependency checker to check classes are loadable")
+                    except DependencyError as e:
+                        # Usually, the first line is enough to tell what the error was (start of stack trace)
+                        error_output = e.stderr.partition("\n")[0].strip()
+                        extra_message = ". Loader output: %s" % error_output if error_output else ""
+                        probs.append("could not load Java class %s (classpath=%s)%s" % (cls, classpath, extra_message))
         return probs
 
     def installable(self):
@@ -260,6 +261,8 @@ def check_java():
     except CalledProcessError as e:
         # If there was an error running this, Java was not found
         raise DependencyError("java executable could not be run: %s" % e.output)
+    except FileNotFoundError as e:
+        raise DependencyError("java executable not found: {}".format(e))
 
 
 def get_classpath(deps, as_list=False):
