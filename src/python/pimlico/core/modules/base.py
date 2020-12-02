@@ -773,13 +773,19 @@ class BaseModuleInfo(object):
         If the requested input name is an optional input and it has not been supplied,
         returns None.
 
+        Similarly, if you run in preliminary mode, multiple inputs might produce None
+        for some of their inputs if the data is not ready.
+
         """
         input_setups = self.get_input_reader_setup(input_name=input_name, always_list=always_list)
         if input_setups is None:
             return None
         if type(input_setups) is list:
             readers = [
-                setup.get_reader(self.pipeline, self.module_name) for setup in input_setups if setup is not None
+                # Usually, the data must be ready to read before we get this far
+                # But, if running in preliminary mode, some inputs might not be ready and should return None
+                setup.get_reader(self.pipeline, self.module_name) if setup.ready_to_read() else None
+                for setup in input_setups if setup is not None
             ]
             if len(readers) == 0:
                 return None
