@@ -23,6 +23,7 @@ Submodules
    pimlico.datatypes.gensim
    pimlico.datatypes.keras
    pimlico.datatypes.plotting
+   pimlico.datatypes.results
    pimlico.datatypes.sklearn
 
 Module contents
