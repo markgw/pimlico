@@ -69,3 +69,10 @@ This example usage includes more options.
    input_model=module_a.some_output
    num_words=15
 
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-gensim-lda_top_words.conf`
+

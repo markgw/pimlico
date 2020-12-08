@@ -18,7 +18,9 @@ Available pipelines
    :titlesonly:
 
    gensim.lda_train.conf.rst
+   gensim.lda_coherence.conf.rst
    gensim.dtm_train.conf.rst
+   gensim.lda_top_words.conf.rst
    gensim.dtm_infer.conf.rst
    opennlp.tokenize.conf.rst
    opennlp.parse.conf.rst

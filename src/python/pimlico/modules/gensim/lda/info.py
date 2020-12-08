@@ -8,10 +8,6 @@ or `the multicore version <https://radimrehurek.com/gensim/models/ldamulticore.h
 
 Does not support Python 2, since Gensim has dropped Python 2 support.
 
-.. todo::
-
-   Add test pipeline and test
-
 """
 from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.core.modules.base import BaseModuleInfo

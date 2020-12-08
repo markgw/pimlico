@@ -1,6 +1,6 @@
 .. _test-config-gensim-lda_train.conf:
 
-dtm\_train
+lda\_train
 ~~~~~~~~~~
 
 
@@ -22,7 +22,7 @@ The complete config file for this test pipeline:
    # :doc:`the topic model training example </example_config/topic_modelling.train_tms>`.
    
    [pipeline]
-   name=dtm_train
+   name=lda_train
    release=latest
    
    # Load word IDs

@@ -48,6 +48,18 @@ Outputs
 | mean_coherence | :class:`numeric_result <pimlico.datatypes.results.NumericResult>` |
 +----------------+-------------------------------------------------------------------+
 
+
+Options
+=======
+
++-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
+| Name        | Description                                                                                                                                                                                                                                         | Type                                 |
++=============+=====================================================================================================================================================================================================================================================+======================================+
+| coherence   | Coherence measure to use, selecting from one of Gensim's pre-defined measures: 'u_mass', 'c_v', 'c_uci', 'c_npmi'. Default: 'u_mass'                                                                                                                | 'u_mass', 'c_v', 'c_uci' or 'c_npmi' |
++-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
+| window_size | Size of the window to be used for coherence measures using boolean sliding window as their probability estimator. For ‘u_mass’ this doesn’t matter. If None, the default window sizes are used which are: ‘c_v’ - 110, ‘c_uci’ - 10, ‘c_npmi’ - 10. | int                                  |
++-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
+
 Example config
 ==============
 
@@ -61,4 +73,23 @@ This is an example of how this module can be used in a pipeline config file.
    input_corpus=module_a.some_output
    input_vocab=module_a.some_output
    
+
+This example usage includes more options.
+
+.. code-block:: ini
+   
+   [my_topic_coherence_module]
+   type=pimlico.modules.gensim.coherence
+   input_topics_top_words=module_a.some_output
+   input_corpus=module_a.some_output
+   input_vocab=module_a.some_output
+   coherence=u_mass
+   window_size=0
+
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-gensim-lda_coherence.conf`
 

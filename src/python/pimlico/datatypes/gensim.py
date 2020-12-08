@@ -7,11 +7,13 @@ from __future__ import absolute_import, print_function
 from builtins import object
 import os
 
+from pimlico.utils.core import cached_property
+
 from pimlico.core.dependencies.python import gensim_dependency
 from pimlico.datatypes import PimlicoDatatype
 
 
-__all__ = ["GensimLdaModel"]
+__all__ = ["GensimLdaModel", "TopicsTopWords"]
 
 
 class GensimLdaModel(PimlicoDatatype):
@@ -98,3 +100,56 @@ class GensimLdaSeqModel(PimlicoDatatype):
             with open(os.path.join(self.data_dir, "slice_labels.txt"), "w") as f:
                 f.write("\n".join(labels))
             self.task_complete("slice_labels")
+
+
+class TopicsTopWords(PimlicoDatatype):
+    """
+    Stores a list of the top words for each topic of a topic model.
+
+    For some evaluations (like coherence), this is all the information that
+    is needed about a model. This datatype can be extracted from various
+    topic model types, so that they can all be evaluated using the same
+    evaluation modules.
+
+    """
+    datatype_name = "topics_top_words"
+
+    class Reader:
+        class Setup(object):
+            def get_required_paths(self):
+                return ["topics.tsv"]
+
+        @cached_property
+        def topics_words(self):
+            with open(os.path.join(self.data_dir, "topics.tsv"), "r") as f:
+                return [
+                    line.split("\t") for line in f.read().split("\n")
+                ]
+
+        def __getitem__(self, item):
+            return self.topics_words[item]
+
+        def __len__(self):
+            return len(self.topics_words)
+
+        @property
+        def num_topics(self):
+            return len(self)
+
+        def __iter__(self):
+            return iter(self.topics_words)
+
+    class Writer(object):
+        required_tasks = ["topics.tsv"]
+
+        def write_topics_words(self, topics_words):
+            """
+            :param topics_words: list of topic, where each topic is a list of words, with the top weighted word first
+            """
+            with open(os.path.join(self.data_dir, "topics.tsv"), "w") as f:
+                f.write("\n".join("\t".join(words) for words in topics_words))
+            self.task_complete("topics.tsv")
+
+    def run_browser(self, reader, opts):
+        for topic_num, words in enumerate(reader):
+            print("Topic {}: {}".format(topic_num, ", ".join(words)))

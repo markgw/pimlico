@@ -1,5 +1,7 @@
 test-config-gensim-lda_train.conf	pimlico.modules.gensim.lda
+test-config-gensim-lda_coherence.conf	pimlico.modules.gensim.coherence
 test-config-gensim-dtm_train.conf	pimlico.modules.gensim.ldaseq
+test-config-gensim-lda_top_words.conf	pimlico.modules.gensim.lda_top_words
 test-config-gensim-dtm_infer.conf	pimlico.modules.gensim.ldaseq_doc_topics
 test-config-opennlp-tokenize.conf	pimlico.modules.opennlp.tokenize
 test-config-opennlp-parse.conf	pimlico.modules.opennlp.parse
