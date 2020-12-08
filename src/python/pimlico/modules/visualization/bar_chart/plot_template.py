@@ -16,7 +16,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 bar_width = 0.5
-COLOURS = ['g', 'b', 'y', 'm', 'c', '#B1C7CA', '#90F0A0']
+COLOURS = [{colors}]
 
 # Read in the input data
 with open("data.csv", "r") as f:
@@ -28,8 +28,6 @@ bar_positions = [float(i) - 0.5*bar_width for i in range(len(values))]
 
 # Plot the data
 fig = plt.figure()
-# Change y-range
-#plt.ylim(0, 55)
 ax = fig.add_subplot(111)
 
 bars = ax.bar(bar_positions, values, bar_width)
@@ -45,6 +43,6 @@ for b, bar in enumerate(bars):
     bar.set_label(labels[b])
 
 handles, labels = ax.get_legend_handles_labels()
-lgd = ax.legend(handles, labels, loc=8, bbox_to_anchor=(0.5, -0.2), ncol=3)
+lgd = ax.legend(handles, labels, loc="upper left", bbox_to_anchor=(1, 1), ncol=3)
 
 plt.savefig("plot.pdf", bbox_extra_artists=(lgd,), bbox_inches='tight', transparent=True)
