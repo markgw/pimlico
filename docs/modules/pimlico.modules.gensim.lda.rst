@@ -14,10 +14,6 @@ or `the multicore version <https://radimrehurek.com/gensim/models/ldamulticore.h
 
 Does not support Python 2, since Gensim has dropped Python 2 support.
 
-.. todo::
-
-   Add test pipeline and test
-
 
 *This module does not support Python 2, so can only be used when Pimlico is being run under Python 3*
 
@@ -128,4 +124,11 @@ Example pipelines
 This module is used by the following :ref:`example pipelines <example-pipelines>`. They are examples of how the module can be used together with other modules in a larger pipeline.
 
  * :ref:`example-pipeline-train-tms-example`
+
+Test pipelines
+==============
+
+This module is used by the following :ref:`test pipelines <test-pipelines>`. They are a further source of examples of the module's usage.
+
+ * :ref:`test-config-gensim-lda_train.conf`
 

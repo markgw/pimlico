@@ -13,4 +13,5 @@ Modules for plotting and suchlike
    :maxdepth: 2
    :titlesonly:
 
+   pimlico.modules.visualization.bar_chart
    pimlico.modules.visualization.embeddings_plot

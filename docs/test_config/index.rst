@@ -17,6 +17,7 @@ Available pipelines
    :maxdepth: 2
    :titlesonly:
 
+   gensim.lda_train.conf.rst
    gensim.dtm_train.conf.rst
    gensim.dtm_infer.conf.rst
    opennlp.tokenize.conf.rst
@@ -62,6 +63,7 @@ Available pipelines
    nltk.nist_tokenize.conf.rst
    malt.parse.conf.rst
    visualization.embeddings_plot.conf.rst
+   visualization.bar_chart.conf.rst
    core.filter_map.conf.rst
 
 

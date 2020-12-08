@@ -1,3 +1,4 @@
+test-config-gensim-lda_train.conf	pimlico.modules.gensim.lda
 test-config-gensim-dtm_train.conf	pimlico.modules.gensim.ldaseq
 test-config-gensim-dtm_infer.conf	pimlico.modules.gensim.ldaseq_doc_topics
 test-config-opennlp-tokenize.conf	pimlico.modules.opennlp.tokenize
@@ -43,4 +44,5 @@ test-config-utility-collect_files.conf	pimlico.modules.utility.collect_files
 test-config-nltk-nist_tokenize.conf	pimlico.modules.nltk.nist_tokenize, pimlico.modules.nltk.nist_tokenize
 test-config-malt-parse.conf	pimlico.modules.malt
 test-config-visualization-embeddings_plot.conf	pimlico.modules.visualization.embeddings_plot
+test-config-visualization-bar_chart.conf	pimlico.modules.visualization.bar_chart
 test-config-core-filter_map.conf	pimlico.modules.corpora.store

@@ -13,7 +13,7 @@ Usage:
 
 ::
 
-    pimlico.sh [...] status [module_name] [-h] [--all] [--short] [--history] [--deps-of DEPS_OF] [--no-color] [--no-sections] [--expand-all] [--expand [EXPAND [EXPAND ...]]]
+    pimlico.sh [...] status [module_name] [-h] [--all] [--alias] [--short] [--history] [--deps-of DEPS_OF] [--no-color] [--no-sections] [--expand-all] [--expand [EXPAND [EXPAND ...]]]
 
 
 Positional arguments
@@ -32,6 +32,8 @@ Options
 | Option                      | Description                                                                                                                                                                                                                             |
 +=============================+=========================================================================================================================================================================================================================================+
 | ``--all``, ``-a``           | Show all modules defined in the pipeline, not just those that can be executed                                                                                                                                                           |
++-----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``--alias``                 | Include module aliases after modules in the output. By default, they are not shown                                                                                                                                                      |
 +-----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``--short``, ``-s``         | Use a brief format when showing the full pipeline's status. Only applies when module names are not specified. This is useful with very large pipelines, where you just want a compact overview of the status                            |
 +-----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

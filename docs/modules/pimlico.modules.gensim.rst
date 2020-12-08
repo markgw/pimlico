@@ -14,7 +14,9 @@ from `Gensim <https://radimrehurek.com/gensim/>`_.
    :maxdepth: 2
    :titlesonly:
 
+   pimlico.modules.gensim.coherence
    pimlico.modules.gensim.lda
    pimlico.modules.gensim.lda_doc_topics
+   pimlico.modules.gensim.lda_top_words
    pimlico.modules.gensim.ldaseq
    pimlico.modules.gensim.ldaseq_doc_topics
