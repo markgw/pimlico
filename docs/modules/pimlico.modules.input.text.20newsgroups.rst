@@ -1,5 +1,5 @@
-Package pimlico.modules.input.text.20newsgroups
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+20 Newsgroups
+~~~~~~~~~~~~~
 
 
 .. py:module:: pimlico.modules.input.text.20newsgroups
