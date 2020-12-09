@@ -25,7 +25,7 @@ class ModuleExecutor(BaseModuleExecutor):
         with self.info.get_output_writer("default") as default_writer:
             download_dir = os.path.join(default_writer.data_dir, "download")
 
-            self.log.info("Fetching {} dataset from Huggingface".format(dataset_name))
+            self.log.info("Fetching {} dataset from Huggingface to {}".format(dataset_name, download_dir))
             dataset = load_dataset(
                 dataset_name, name=dataset_config_name, split=dataset_split, cache_dir=download_dir,
                 download_mode="reuse_dataset_if_exists"
