@@ -389,12 +389,6 @@ class GroupedCorpus(IterableCorpus):
                 # For an empty result, signified by None, output an empty file
                 data = bytes()
 
-            # TODO In the future, remove this explicit type check
-            if not isinstance(data, bytes):
-                warnings.warn("document raw data should be provided as a bytes() object. Document type {} got "
-                              "a {} instead. This is probably a result of the Python 2-3 conversion".format(
-                    self.datatype.data_point_type.name, type(data).__name__,
-                ))
             try:
                 # This should already be a bytes object, but we do this here
                 # to make it more likely that old code works, while the above message is showing and
