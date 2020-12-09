@@ -364,8 +364,11 @@ class GroupedCorpus(IterableCorpus):
             except AttributeError:
                 # Instead of type-checking every document, we assume that if it has a raw_data attr, this
                 # is the right thing to use
+                # If it's a dict, we can instantiate a Document object to convert to raw bytes
+                if type(doc) is dict:
+                    data = self.datatype.data_point_type(**doc).raw_data
                 # If a bytes object is given, we assume that's the doc's raw data
-                if isinstance(doc, bytes):
+                elif type(doc) is bytes:
                     data = doc
                 elif not isinstance(doc, DataPointType.Document):
                     # If not, we kick up a fuss, as we've presumably been given something that's not a valid document
