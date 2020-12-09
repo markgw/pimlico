@@ -54,6 +54,7 @@ Available pipelines
    text.text_normalize.conf.rst
    text.char_tokenize.conf.rst
    input.europarl.conf.rst
+   input.huggingface.conf.rst
    input.raw_text_files.conf.rst
    input.xml.conf.rst
    input.glove.conf.rst

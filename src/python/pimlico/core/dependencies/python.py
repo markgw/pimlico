@@ -240,6 +240,9 @@ gensim_dependency = PythonPackageOnPip(
 
 spacy_dependency = PythonPackageOnPip("spacy", homepage_url="https://spacy.io/", license=MIT)
 fasttext_dependency = PythonPackageOnPip("fasttext", homepage_url="https://fasttext.cc/", license=MIT)
+huggingface_datasets_dependency = PythonPackageOnPip("datasets",
+                                                     homepage_url="https://github.com/huggingface/datasets",
+                                                     license=APACHE_V2)
 
 
 ### Special behaviour for bs4

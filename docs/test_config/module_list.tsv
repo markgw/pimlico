@@ -35,6 +35,7 @@ test-config-text-normalize.conf	pimlico.modules.text.normalize
 test-config-text-text_normalize.conf	pimlico.modules.text.text_normalize
 test-config-text-char_tokenize.conf	pimlico.modules.text.char_tokenize
 test-config-input-europarl.conf	pimlico.modules.corpora.store
+test-config-input-huggingface.conf	pimlico.modules.input.text.huggingface
 test-config-input-raw_text_files.conf	pimlico.modules.corpora.store
 test-config-input-xml.conf	
 test-config-input-glove.conf	pimlico.modules.input.embeddings.glove
