@@ -1,17 +1,13 @@
 import os
 from builtins import str
 
-from pimlico.utils.progress import get_progress_bar
-
-from pimlico.modules.corpora.group.info import IterableCorpusGrouper
-
-from pimlico.utils.core import multiwith
-
-from pimlico.core.modules.execute import ModuleExecutionError
+from datasets import load_dataset
 
 from pimlico.core.modules.base import BaseModuleExecutor
-
-from datasets import load_dataset
+from pimlico.core.modules.execute import ModuleExecutionError
+from pimlico.modules.corpora.group.info import IterableCorpusGrouper
+from pimlico.utils.core import multiwith
+from pimlico.utils.progress import get_progress_bar
 
 
 class ModuleExecutor(BaseModuleExecutor):
@@ -50,14 +46,23 @@ class ModuleExecutor(BaseModuleExecutor):
             all_writers = [default_writer] + writers
             grouper = IterableCorpusGrouper(1000, len(dataset))
 
+            if doc_name_column == "enum":
+                def _get_doc_name(row, doc_num):
+                    return str(doc_num)
+            else:
+                def _get_doc_name(row, doc_num):
+                    return row[doc_name_column]
+
             num_docs = len(dataset)
             self.log.info("Writing {:,} documents to Pimlico outputs".format(num_docs))
             pbar = get_progress_bar(num_docs, title="Writing")
             with multiwith(*writers):
                 for doc_num, row in pbar(enumerate(dataset)):
-                    doc_name = str(doc_num) if doc_name_column == "enum" else row[doc_name_column]
+                    doc_name = _get_doc_name(row, doc_num)
                     archive_name = grouper.next_document()
 
                     # The first column is always written to the default output
                     for col, writer in zip(columns, all_writers):
-                        writer.add_document(archive_name, doc_name, {"text": str(row[col])})
+                        # Encode text data as utf-8: then we can write this straight out as raw data
+                        raw_data = str(row[col]).encode("utf-8")
+                        writer.add_document(archive_name, doc_name, raw_data)
