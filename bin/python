@@ -91,7 +91,25 @@ if [ -n "$PROFILE" ]; then
 elif [ -n "$MEMPROFILE" ]; then
     # Similar, does memory profiling
     echo "Memory profiling"
+    if [ "$1" == "-m" ]; then
+        shift
+        # Try to convert to filename
+        script_name="$DIR/../src/python/${1//.//}.py"
+        # Replace arg 1
+        set -- $script_name "${@:2}"
+    fi
     $python -m memory_profiler "$@"
+elif [ -n "$FILPROFILE" ]; then
+    # Similar, does memory profiling
+    echo "Memory profiling with Fil"
+    if [ "$1" == "-m" ]; then
+        shift
+        # Try to convert to filename
+        script_name="$DIR/../src/python/${1//.//}.py"
+        # Replace arg 1
+        set -- $script_name "${@:2}"
+    fi
+    $python -m filprofiler run "$@"
 elif [ -n "$GDB" ]; then
     echo "Running Python from gdb"
     gdb -ex r --args $python "$@"
