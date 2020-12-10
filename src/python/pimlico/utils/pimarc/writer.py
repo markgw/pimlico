@@ -38,6 +38,19 @@ class PimarcWriter(object):
         self.archive_file = open(self.archive_filename, mode="ab" if self.append else "wb")
         self.index = PimarcIndexAppender(self.index_filename, mode="a" if self.append else "w")
 
+    @staticmethod
+    def delete(archive_filename):
+        """
+        Delete all files associated with the given archive. At the moment, this is
+        just the archive file itself and the associated index.
+
+        """
+        if os.path.exists(archive_filename):
+            os.remove(archive_filename)
+        index_filenam = "{}i".format(archive_filename)
+        if os.path.exists(index_filenam):
+            os.remove(index_filenam)
+
     def close(self):
         self.archive_file.close()
         self.index.close()
