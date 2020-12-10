@@ -1,6 +1,8 @@
 import os
 from builtins import str
 
+from pimlico.utils.progress import get_progress_bar
+
 from pimlico.modules.corpora.group.info import IterableCorpusGrouper
 
 from pimlico.utils.core import multiwith
@@ -48,9 +50,11 @@ class ModuleExecutor(BaseModuleExecutor):
             all_writers = [default_writer] + writers
             grouper = IterableCorpusGrouper(1000, len(dataset))
 
-            self.log.info("Writing to Pimlico outputs")
+            num_docs = len(dataset)
+            self.log.info("Writing {:,} documents to Pimlico outputs".format(num_docs))
+            pbar = get_progress_bar(num_docs, title="Writing")
             with multiwith(*writers):
-                for doc_num, row in enumerate(dataset):
+                for doc_num, row in pbar(enumerate(dataset)):
                     doc_name = str(doc_num) if doc_name_column == "enum" else row[doc_name_column]
                     archive_name = grouper.next_document()
 
