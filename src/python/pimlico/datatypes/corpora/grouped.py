@@ -430,13 +430,24 @@ class GroupedCorpus(IterableCorpus):
 
             # Append this document's data to the Pimarc
             self.current_archive.write_file(data, name=filename, metadata=metadata)
-            self.flush()
+            # We used to flush after every write, but it's very slow
+            # See note in flush() docstring
+            #self.flush()
 
             # Keep a count of how many we've added so we can write metadata
             self.doc_count += 1
 
         def flush(self):
-            """ Flush disk write of the archive currently being written. Called after adding a new file """
+            """
+            Flush disk write of the archive currently being written.
+
+            This used to be called after adding each new file, but slows down the writing
+            massively. Not doing this brings a risk that the written archives are very out
+            of date if a process gets forcibly stopped. However, document map processes are
+            better now than they used to be at recovering from this situation when restarting,
+            so I'm removing this flushing to speed things up.
+
+            """
             if self.current_archive is not None:
                 self.current_archive.flush()
 
