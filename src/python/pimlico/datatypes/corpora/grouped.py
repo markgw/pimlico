@@ -5,8 +5,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import warnings
-
 from future import standard_library
 
 from pimlico.utils.pimarc import PimarcReader, PimarcWriter
@@ -19,12 +17,10 @@ from builtins import next
 from builtins import object
 from builtins import bytes
 
-import pickle
 import gzip
-import json
 import os
 import zlib
-from io import StringIO, BytesIO, open
+from io import StringIO, BytesIO
 
 from pimlico.datatypes.base import DynamicOutputDatatype
 from pimlico.datatypes.corpora import IterableCorpus, DataPointType
@@ -339,6 +335,10 @@ class GroupedCorpus(IterableCorpus):
                 # Shouldn't rely on the metadata: count up docs in archive to get initial length
                 # This can take a long time on a large corpus
                 self.metadata["length"] = self._count_written_docs()
+            else:
+                # If we're not appending, we must first ensure any existing archives are deleted
+                self.delete_all_archives()
+
             self.doc_count = self.metadata["length"]
             # Set a value in the metadata to indicate that we're still writing this corpus
             self.metadata["writing"] = True
@@ -464,6 +464,18 @@ class GroupedCorpus(IterableCorpus):
                 with PimarcReader(archive_filename) as arc:
                     total_docs += len(arc)
             return total_docs
+
+        def delete_all_archives(self):
+            """
+            Check for any already written archives and delete them all to make a fresh
+            start at writing this corpus.
+
+            """
+            # Look for already written archives
+            archive_filenames = GroupedCorpus.Reader.Setup._get_archive_filenames(self.data_dir)
+            # Delete all files for each one
+            for archive_filename in archive_filenames:
+                PimarcWriter.delete(archive_filename)
 
 
 def exclude_invalid(doc_iter):

@@ -849,7 +849,7 @@ class PimlicoDatatype(with_metaclass(PimlicoDatatypeMeta, object)):
 
             # Extract kwargs that correspond to writer params
             self.params = {}
-            for key, default in self.writer_param_defaults.items():
+            for key, (default, help_text) in self.writer_param_defaults.items():
                 if key in kwargs:
                     self.params[key] = kwargs.pop(key)
                 else:
