@@ -74,6 +74,7 @@ Example pipelines
 This module is used by the following :ref:`example pipelines <example-pipelines>`. They are examples of how the module can be used together with other modules in a larger pipeline.
 
  * :ref:`example-pipeline-tokenize-example`
+ * :ref:`example-pipeline-tokenize-example2`
 
 Test pipelines
 ==============

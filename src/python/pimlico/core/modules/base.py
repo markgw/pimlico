@@ -220,9 +220,6 @@ class BaseModuleInfo(object):
         # Write the whole thing out to the file
         with open(os.path.join(output_dir, "metadata"), "w") as f:
             json.dump(metadata, f)
-            # Flush to ensure it gets updated immediately
-            f.flush()
-            os.fsync(f.fileno())
 
     def __get_status(self):
         # Check the metadata for current module status

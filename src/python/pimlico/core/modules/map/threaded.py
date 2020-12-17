@@ -88,11 +88,13 @@ class ThreadingMapThread(threading.Thread, DocumentMapProcessMixin):
     def terminate(self):
         self.shutdown()
 
-    def shutdown(self, timeout=3.):
+    def shutdown(self):
         # This may have been done by the pool, but it doesn't hurt to set it again
         self.stopped.set()
+
+    def wait_until_finished(self):
         # Now wait for the process to shut down
-        self.join(timeout=timeout)
+        self.join(timeout=3.)
         if self.is_alive():
             # Join timed out
             self.executor.log.warn("Multiprocessing document map worker process has taken a long time to shut down, "
@@ -176,6 +178,9 @@ class ThreadingMapModuleExecutor(DocumentMapModuleExecutor):
 
     def postprocess(self, error=False):
         self.pool.shutdown()
+
+    def wait_until_finished(self):
+        self.pool.wait_until_finished()
 
 
 def threading_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,

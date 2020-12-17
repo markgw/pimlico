@@ -31,3 +31,7 @@ import os
 # TODO Add this to the documentation
 # TODO Allow this to be set on the cmd line
 NON_INTERACTIVE_MODE = len(os.environ.get("PIM_NON_INT", "")) > 0
+
+# If this is set before the doc map module code is imported,
+# benchmarking will be carried out during execution
+BENCHMARK_DOC_MAP_MODULES = False

@@ -175,6 +175,9 @@ if __name__ == "__main__":
     parser.add_argument("--processes", "-p",
                         help="Set the number of processes to use for this run, where parallelization is available. "
                              "Overrides the local config setting. Equivalent to '-l processes=P'", type=int)
+    parser.add_argument("--benchmark-doc-map", "--bdm", action="store_true",
+                        help="Keep track of execution times when running a doc map module for the purposes "
+                             "of benchmarking. Stats are output to the terminal at the end of execution.")
     subparsers = parser.add_subparsers(help="Select a sub-command")
 
     # Add all subcommands that have been defined using the class interface
@@ -220,6 +223,10 @@ if __name__ == "__main__":
 
     if opts.non_interactive:
         cfg.NON_INTERACTIVE_MODE = True
+
+    if opts.benchmark_doc_map:
+        # Enable benchmarking
+        cfg.BENCHMARK_DOC_MAP_MODULES = True
 
     # Read in the pipeline config from the given file
     try:

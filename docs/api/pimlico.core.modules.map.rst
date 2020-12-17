@@ -6,6 +6,7 @@ Submodules
 
 .. toctree::
 
+   pimlico.core.modules.map.benchmark
    pimlico.core.modules.map.filter
    pimlico.core.modules.map.multiproc
    pimlico.core.modules.map.singleproc

@@ -26,6 +26,7 @@ from pimlico.datatypes.corpora.grouped import GroupedCorpus, AlignedGroupedCorpo
 from pimlico.utils.core import multiwith, raise_from
 from pimlico.utils.pipes import qget
 from pimlico.utils.progress import get_progress_bar
+from .benchmark import benchmarker
 
 
 class DocumentMapModuleInfo(BaseModuleInfo):
@@ -147,7 +148,10 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
         Always called after preprocess().
 
         """
-        raise NotImplementedError
+        raise NotImplementedError()
+
+    def wait_until_finished(self):
+        raise NotImplementedError()
 
     def retrieve_processing_status(self):
         # Check the metadata to see whether we've already partially completed this
@@ -221,29 +225,31 @@ class DocumentMapModuleExecutor(BaseModuleExecutor):
                     input_iter = iter(self.input_iterator.archive_iter(start_after=start_after))
 
                     # Set map processing going, using the generic function
-                    mapper = DocumentMapper(self, input_iter, processes=self.processes, pbar=pbar)
+                    benchmarker.start()
+                    mapper = DocumentMapper(self, input_iter, processes=self.processes, pbar=pbar, benchmarker=benchmarker)
                     for (archive, doc_name), next_output in mapper.map_documents():
                         docs_completed_now += 1
 
-                        # Write the result to the output corpora
-                        for result, writer in zip(next_output, writers):
-                            # If allowing skipping outputs, we don't try to write the output if None is returned
-                            if result is not None or not self.ALLOW_SKIP_OUTPUT:
-                                try:
-                                    writer.add_document(archive, doc_name, result)
-                                except DuplicateFilename:
-                                    # If the first doc we try writing is already in the archive, don't worry,
-                                    #  just skip it. This can happen if we dropped out of processing after writing,
-                                    #  but before storing the name of the last processed file.
-                                    # However, if it happens after the first one, it's more worrying: maybe a
-                                    #  problem with the input data
-                                    if not first_output:
-                                        raise
+                        with benchmarker.write_output_timer:
+                            # Write the result to the output corpora
+                            for result, writer in zip(next_output, writers):
+                                # If allowing skipping outputs, we don't try to write the output if None is returned
+                                if result is not None or not self.ALLOW_SKIP_OUTPUT:
+                                    try:
+                                        writer.add_document(archive, doc_name, result)
+                                    except DuplicateFilename:
+                                        # If the first doc we try writing is already in the archive, don't worry,
+                                        #  just skip it. This can happen if we dropped out of processing after writing,
+                                        #  but before storing the name of the last processed file.
+                                        # However, if it happens after the first one, it's more worrying: maybe a
+                                        #  problem with the input data
+                                        if not first_output:
+                                            raise
 
-                        # Update the module's metadata to say that we've completed this document
-                        self.update_processing_status(docs_completed_before+docs_completed_now, archive, doc_name)
-                        if first_output:
-                            first_output = False
+                            # Update the module's metadata to say that we've completed this document
+                            self.update_processing_status(docs_completed_before+docs_completed_now, archive, doc_name)
+                            if first_output:
+                                first_output = False
 
                     pbar.finish()
             complete = True
@@ -286,7 +292,7 @@ def output_to_document(output, datatype):
 
 
 class DocumentMapper(object):
-    def __init__(self, executor, input_iter, processes=1, record_invalid=False, pbar=None):
+    def __init__(self, executor, input_iter, processes=1, record_invalid=False, pbar=None, benchmarker=None):
         # If pbar is given, it will be updated every time a document is received
         #  from worker processes
         self.pbar = pbar
@@ -295,6 +301,7 @@ class DocumentMapper(object):
         self.input_iter = input_iter
         self.executor = executor
         self.input_feeder = None
+        self.benchmarker = benchmarker
 
     def map_documents(self):
         """
@@ -344,35 +351,36 @@ class DocumentMapper(object):
 
             while next_document is not None:
                 # Wait for a document coming off the output queue
-                while True:
-                    try:
-                        # Wait a little bit to see if there's a result available
-                        result = qget(executor.pool.output_queue, timeout=0.2)
-                    except Empty:
-                        # Timed out: check there's not been an error in one of the processes
+                with benchmarker.result_fetch_timer:
+                    while True:
                         try:
-                            error = executor.pool.exception_queue.get_nowait()
+                            # Wait a little bit to see if there's a result available
+                            result = qget(executor.pool.output_queue, timeout=0.2)
                         except Empty:
-                            # No error: just keep waiting
-                            pass
+                            # Timed out: check there's not been an error in one of the processes
+                            try:
+                                error = executor.pool.exception_queue.get_nowait()
+                            except Empty:
+                                # No error: just keep waiting
+                                pass
+                            else:
+                                # Got an error from a process: raise it
+                                # First empty the exception queue, in case there were multiple errors
+                                sleep(0.05)
+                                while not executor.pool.exception_queue.empty():
+                                    qget(executor.pool.exception_queue, timeout=0.1)
+                                if isinstance(error, ExceptionWithTraceback):
+                                    # Attach the original traceback to the original error
+                                    error = error.exception_with_traceback()
+                                # Sometimes, a traceback from within the process is included
+                                debugging = error.traceback if hasattr(error, "traceback") else None
+                                raise_from(ModuleExecutionError("error in worker process: %s" % str(error),
+                                                                cause=error, debugging_info=debugging), error)
+                        except:
+                            raise
                         else:
-                            # Got an error from a process: raise it
-                            # First empty the exception queue, in case there were multiple errors
-                            sleep(0.05)
-                            while not executor.pool.exception_queue.empty():
-                                qget(executor.pool.exception_queue, timeout=0.1)
-                            if isinstance(error, ExceptionWithTraceback):
-                                # Attach the original traceback to the original error
-                                error = error.exception_with_traceback()
-                            # Sometimes, a traceback from within the process is included
-                            debugging = error.traceback if hasattr(error, "traceback") else None
-                            raise_from(ModuleExecutionError("error in worker process: %s" % str(error),
-                                                            cause=error, debugging_info=debugging), error)
-                    except:
-                        raise
-                    else:
-                        # Got a result from a process
-                        break
+                            # Got a result from a process
+                            break
 
                 # We've got some result, but it might not be the one we're looking for
                 # Add it to a buffer, so we can potentially keep it and only output it when its turn comes up
@@ -406,16 +414,25 @@ class DocumentMapper(object):
                         [output_to_document(output, dt) for (output, dt) in zip(next_output, output_datatypes)]
                     )
                     # Provide the result(s) for writing, or passing on to some other process
-                    yield next_document, next_output
+                    # Note that this will block until the result is taken by whatever is using the generator
+                    #   In the meantime, the background processes may be processing and queueing results
+                    #   If processing is fast, the overall time may be dominated by this postprocessing
+                    with benchmarker.yield_result_timer:
+                        yield next_document, next_output
 
                     # Check what document we're waiting for now
-                    next_document = self.input_feeder.get_next_output_document()
+                    with benchmarker.get_next_doc_timer:
+                        next_document = self.input_feeder.get_next_output_document()
             complete = True
         finally:
             # Call the finishing-off routine, if one's been defined
             executor.postprocess(error=not complete)
+            if self.benchmarker is not None:
+                # Finish the benchmarker stats now, before the worker processes (if any) are closed
+                self.benchmarker.finish()
             if self.input_feeder is not None:
                 self.input_feeder.shutdown()
+            executor.wait_until_finished()
 
 
 def skip_invalid(fn):
@@ -529,7 +546,7 @@ class InputQueueFeeder(Thread):
         self.ended = threading.Event()
         self.exception_queue = Queue(1)
 
-        self.feeder_batch_size = 1
+        self.feeder_batch_size = 10
 
         self.record_invalid = record_invalid
         if record_invalid:
@@ -752,11 +769,11 @@ class DocumentProcessorPool(object):
         # up spending longer writing the output than processing the docs, so
         # the queue just get bigger and bigger.
         # In this case, the worker has to wait a bit to send its output back
-        self.output_queue = self.create_queue(10*processes)
-        # Limit the input queue to 5*processes: there's no point in filling
+        self.output_queue = self.create_queue(50*processes)
+        # Limit the input queue to 50*processes: there's no point in filling
         # it up with far more, just enough that the processes can be sure of
         # getting something when they're ready
-        self.input_queue = self.create_queue(5*processes)
+        self.input_queue = self.create_queue(50*processes)
         self.exception_queue = self.create_queue()
         self.processes = processes
         self._queues = [self.output_queue, self.input_queue, self.exception_queue]
@@ -775,6 +792,9 @@ class DocumentProcessorPool(object):
 
     def shutdown(self):
         # Subclasses should override this to shut down all workers
+        pass
+
+    def wait_until_finished(self):
         pass
 
     def empty_all_queues(self):

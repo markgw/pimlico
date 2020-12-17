@@ -30,6 +30,7 @@ from pimlico.core.modules.map import ProcessOutput, DocumentProcessorPool, Docum
     DocumentMapModuleExecutor, WorkerStartupError, WorkerShutdownError, ExceptionWithTraceback
 from pimlico.core.modules.map.threaded import ThreadingMapThread
 from pimlico.utils.pipes import qget
+from .benchmark import benchmarker
 
 
 class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin):
@@ -59,6 +60,7 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
     def run(self):
         # Tell the worker process to ignore SIGINT (KeyboardInterrupt) and let the pool deal with stopping things
         signal.signal(signal.SIGINT, signal.SIG_IGN)
+        bm, bm_callback = benchmarker.init_thread()
         try:
             # Run any startup routine that the subclass has defined
             self.set_up()
@@ -70,7 +72,8 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                     try:
                         # Timeout and go round the loop again to check whether we're supposed to have stopped
                         # The queue feeds us multiple documents at a time: we don't know how many it will be
-                        inputs = qget(self.input_queue, timeout=0.05)
+                        with bm.wait_for_input_timer:
+                            inputs = qget(self.input_queue, timeout=0.05)
                     except Empty:
                         # Don't worry if the queue is empty: just keep waiting for more until we're shut down
                         pass
@@ -79,9 +82,12 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
                             # Buffer input documents, so that we can process multiple at once if requested
                             input_buffer.append(tuple([archive, filename] + docs))
                             if len(input_buffer) >= self.docs_per_batch or self.no_more_inputs.is_set():
-                                results = self.process_documents(input_buffer)
-                                for input_tuple, result in zip(input_buffer, results):
-                                    self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
+                                with bm.process_doc_timer:
+                                    results = self.process_documents(input_buffer)
+
+                                with bm.queue_output_timer:
+                                    for input_tuple, result in zip(input_buffer, results):
+                                        self.output_queue.put(ProcessOutput(input_tuple[0], input_tuple[1], result))
                                 input_buffer = []
             finally:
                 try:
@@ -94,6 +100,7 @@ class MultiprocessingMapProcess(multiprocessing.Process, DocumentMapProcessMixin
             error = ExceptionWithTraceback(e, sys.exc_info()[2])
             self.exception_queue.put(error, block=True)
         finally:
+            bm_callback()
             # Even there was an error, set initialized so that the main process can wait on it
             self.initialized.set()
             self.ended.set()
@@ -162,6 +169,8 @@ class MultiprocessingMapPool(DocumentProcessorPool):
             worker.stopped.set()
         # Empty the pool's queues, so they don't cause threads not to shut down
         self.empty_all_queues()
+
+    def wait_until_finished(self):
         # Wait until all workers have got to the end of their execution
         for worker in self.workers:
             # Ideally, wait now until the process ends of its own accord
@@ -205,6 +214,9 @@ class MultiprocessingMapModuleExecutor(DocumentMapModuleExecutor):
 
     def postprocess(self, error=False):
         self.pool.shutdown()
+
+    def wait_until_finished(self):
+        self.pool.wait_until_finished()
 
 
 def multiprocessing_executor_factory(process_document_fn, preprocess_fn=None, postprocess_fn=None,

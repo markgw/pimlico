@@ -21,6 +21,7 @@ Available pipelines
    topic_modelling.train_tms.rst
    simple.custom_module.rst
    simple.tokenize.rst
+   simple.tokenize2.rst
 
 
 Running
