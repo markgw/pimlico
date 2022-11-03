@@ -209,5 +209,24 @@ class LoadCmd(PimlicoCLISubcommand):
                 # Extract the directory into the module output dir's super directory (i.e. the pipeline dir)
                 extraction_dir = os.path.dirname(module_output_dir)
                 to_extract = [tarinfo for tarinfo in tarball.getmembers() if tarinfo.name.startswith("%s/" % module_name)]
-                tarball.extractall(path=extraction_dir, members=to_extract)
+                def is_within_directory(directory, target):
+                    
+                    abs_directory = os.path.abspath(directory)
+                    abs_target = os.path.abspath(target)
+                
+                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    
+                    return prefix == abs_directory
+                
+                def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                
+                    for member in tar.getmembers():
+                        member_path = os.path.join(path, member.name)
+                        if not is_within_directory(path, member_path):
+                            raise Exception("Attempted Path Traversal in Tar File")
+                
+                    tar.extractall(path, members, numeric_owner=numeric_owner) 
+                    
+                
+                safe_extract(tarball, path=extraction_dir, members=to_extract)
                 print("Data loaded")
